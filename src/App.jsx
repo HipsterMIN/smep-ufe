@@ -2,6 +2,7 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import RichEditor from './components/RichEditor'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -28,6 +29,10 @@ function App() {
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
+
+      <hr />
+      <h2>TipTap 리치 에디터 예제 (테이블 지원)</h2>
+      <RichEditor />
     </>
   )
 }
