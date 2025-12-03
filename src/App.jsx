@@ -25,7 +25,7 @@ function App() {
           <FileUpload
             theme="dark"
             width="100%"
-            height="400px"
+            height="100px"
             // 실제 서버의 업로드 URL을 입력하세요.
             // 테스트를 위해선 'https://httpbin.org/post' 와 같은 테스트용 URL을 사용할 수 있습니다.
             uploadUrl="https://httpbin.org/post"

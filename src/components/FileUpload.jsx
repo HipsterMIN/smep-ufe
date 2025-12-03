@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import axios from 'axios';
 
 // RichEditor.jsx 스타일을 따라 자체 내장 아이콘 정의
@@ -56,16 +56,132 @@ export default function FileUpload({
   maxFiles = 10,
   onFilesUpdate,
   onUploadComplete,
+  // 레이아웃/UX 패턴 옵션
+  layoutMode = 'auto', // 'auto' | 'compact' | 'full'
+  autoExpandOnDrag = true,
+  useOverlayDrop = false,
+  summaryInline = true,
+  maxVisibleItems = 3,
+  // 풀 레이아웃에서도 상단 툴바(파일 선택/업로드 요약)를 표시할지
+  showTopBarInFull = true,
+  // 초소형 높이에서도 선택된 파일이 항상 보이도록, 컴팩트 모드 기본 목록을 "칩(Chip)" 한 줄로 표시
+  showInlineChips = true,
+  inlineMaxChips = 5,
+  // 자동 전환 임계치(가로/세로) 및 히스테리시스(출렁임 방지)
+  compactWidthThreshold = 420,
+  compactHeightThreshold = 140,
+  hysteresisPx = 40,
+  // ResizeObserver 과도 호출 방지
+  autoDebounceMs = 120,
+  // width/height props를 우선 신뢰할지 여부 (숫자 또는 px 값일 때)
+  respectPropSize = true,
 }) {
   const [files, setFiles] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
   const [isDark, setIsDark] = useState(theme === 'dark');
+  const containerRef = useRef(null);
+  const [effectiveLayout, setEffectiveLayout] = useState(layoutMode === 'compact' ? 'compact' : (layoutMode === 'full' ? 'full' : 'auto'));
+  // 자동 판단의 마지막 상태 기억(히스테리시스 적용용)
+  const lastAutoRef = useRef('full');
+  const debounceTimerRef = useRef(null);
+  const [expanded, setExpanded] = useState(false); // compact에서 드래그 진입 시 확장
+  const [overlay, setOverlay] = useState(false); // 전체화면 드롭 오버레이
+  const [showDetails, setShowDetails] = useState(false); // compact에서 상세 리스트 표시
 
   const containerStyle = useMemo(() => ({
     width,
     height,
   }), [width, height]);
+
+  // 전체 진행률(요약용)
+  const overallProgress = useMemo(() => {
+    if (!files.length) return 0;
+    const total = files.reduce((acc, f) => acc + (typeof f.progress === 'number' ? f.progress : 0), 0);
+    return Math.round(total / files.length);
+  }, [files]);
+
+  // 문자열 길이값을 px 숫자로 파싱(숫자면 그대로 반환). 실패 시 null
+  const parseSizeToPx = useCallback((v) => {
+    if (v == null) return null;
+    if (typeof v === 'number' && Number.isFinite(v)) return v;
+    if (typeof v === 'string') {
+      const m = v.trim().match(/^([0-9]+(?:\.[0-9]+)?)px$/i);
+      if (m) return parseFloat(m[1]);
+      const n = Number(v);
+      if (Number.isFinite(n)) return n;
+    }
+    return null;
+  }, []);
+
+  // auto 레이아웃: width/height에 따라 compact/full 결정(히스테리시스/디바운스 포함)
+  useEffect(() => {
+    if (layoutMode !== 'auto') {
+      setEffectiveLayout(layoutMode);
+      return;
+    }
+    const el = containerRef.current;
+    if (!el) return;
+
+    const decideNow = () => {
+      // 드래그 확장 중에는 자동 전환 잠시 보류(사용자 의도를 우선)
+      if (expanded) return;
+
+      // 컨테이너 실제 사이즈
+      const rect = el.getBoundingClientRect();
+      let w = rect.width;
+      let h = rect.height;
+
+      // 명시된 width/height prop이 숫자(px)면 그 값을 우선 고려(옵션)
+      if (respectPropSize) {
+        const wp = parseSizeToPx(width);
+        const hp = parseSizeToPx(height);
+        if (Number.isFinite(wp)) w = Math.min(w, wp);
+        if (Number.isFinite(hp)) h = Math.min(h, hp);
+      }
+
+      // 히스테리시스 적용: 진입/이탈 임계치 분리
+      const lastAuto = lastAutoRef.current;
+      let next = lastAuto;
+      const enterW = compactWidthThreshold; // compact로 진입
+      const enterH = compactHeightThreshold;
+      const exitW = compactWidthThreshold + hysteresisPx; // full로 복귀
+      const exitH = compactHeightThreshold + hysteresisPx;
+
+      if (lastAuto === 'full') {
+        if (w < enterW || h < enterH) next = 'compact';
+      } else {
+        if (w >= exitW && h >= exitH) next = 'full';
+      }
+
+      if (next !== lastAuto) {
+        lastAutoRef.current = next;
+        setEffectiveLayout(next);
+      } else if (effectiveLayout === 'auto') {
+        // 초기값 보정
+        setEffectiveLayout(next);
+      }
+    };
+
+    const decideDebounced = () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = setTimeout(decideNow, Math.max(0, autoDebounceMs));
+    };
+
+    // 초기 한 번 실행
+    decideNow();
+
+    const ro = new ResizeObserver(() => decideDebounced());
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+    };
+  }, [layoutMode, expanded, compactWidthThreshold, compactHeightThreshold, hysteresisPx, autoDebounceMs, respectPropSize, width, height, parseSizeToPx]);
+
 
   const validateFile = (file) => {
     if (allowedFileTypes && !allowedFileTypes.includes(file.type)) {
@@ -110,24 +226,64 @@ export default function FileUpload({
     }
   }, [files, maxFiles, allowedFileTypes, prohibitedFileTypes, maxFileSize, onFilesUpdate]);
 
+  // 전역 드래그 오버레이 (addFiles 초기화 이후에 정의하여 TDZ 회피)
+  useEffect(() => {
+    if (!useOverlayDrop) return;
+    const onDragEnter = (e) => {
+      const types = e?.dataTransfer?.types;
+      if (types && (types.includes?.('Files') || types.indexOf?.('Files') >= 0)) {
+        setOverlay(true);
+      }
+    };
+    const onDragOver = (e) => {
+      // 드래그 중 기본 동작 취소해 드롭 가능 상태 유지
+      e.preventDefault();
+    };
+    const onDrop = (e) => {
+      e.preventDefault();
+      setOverlay(false);
+      if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files);
+    };
+    const onDragLeave = (e) => {
+      // 문서 밖으로 나가면 닫기
+      if (!e.relatedTarget) setOverlay(false);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') setOverlay(false); };
+    document.addEventListener('dragenter', onDragEnter);
+    document.addEventListener('dragover', onDragOver);
+    document.addEventListener('drop', onDrop);
+    document.addEventListener('dragleave', onDragLeave);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('dragenter', onDragEnter);
+      document.removeEventListener('dragover', onDragOver);
+      document.removeEventListener('drop', onDrop);
+      document.removeEventListener('dragleave', onDragLeave);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [useOverlayDrop, addFiles]);
+
   const handleSelectClick = () => fileInputRef.current?.click();
   const handleFileSelect = (e) => addFiles(e.target.files);
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
-  }, []);
+    if (effectiveLayout === 'compact' && autoExpandOnDrag) setExpanded(true);
+  }, [effectiveLayout, autoExpandOnDrag]);
 
   const handleDragLeave = useCallback((e) => {
     e.preventDefault();
     setIsDragging(false);
-  }, []);
+    if (effectiveLayout === 'compact' && autoExpandOnDrag) setExpanded(false);
+  }, [effectiveLayout, autoExpandOnDrag]);
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setIsDragging(false);
     addFiles(e.dataTransfer.files);
-  }, [addFiles]);
+    if (effectiveLayout === 'compact' && autoExpandOnDrag) setExpanded(false);
+  }, [addFiles, effectiveLayout, autoExpandOnDrag]);
 
   const removeFile = (id) => {
     const updatedFiles = files.filter((f) => f.id !== id);
@@ -178,13 +334,13 @@ export default function FileUpload({
   const filesPending = files.some(f => f.status === 'pending');
 
   return (
-    <div className={`file-upload-wrap ${isDark ? 'dark' : 'light'} ${className}`} style={containerStyle}>
+    <div ref={containerRef} className={`file-upload-wrap ${isDark ? 'dark' : 'light'} ${className} ${effectiveLayout === 'compact' ? 'compact' : 'full'} ${files.length > 0 ? 'has-files' : ''}`} style={containerStyle}>
       <style>{`
         .file-upload-wrap { display: flex; flex-direction: column; border: 1px solid; border-radius: 8px; overflow: hidden; font-family: system-ui, sans-serif; }
         .file-upload-wrap.light { background-color: #f9f9f9; border-color: #ddd; color: #333; }
         .file-upload-wrap.dark { background-color: #2a2a2a; border-color: #444; color: #eee; }
         
-        .drop-zone { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; padding: 20px; border-bottom: 1px solid; transition: background-color 0.2s; }
+        .drop-zone { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; padding: 20px; border-bottom: 1px solid; transition: background-color 0.2s, height .2s ease, flex-basis .2s ease; min-height: 160px; }
         .file-upload-wrap.light .drop-zone { border-color: #ddd; }
         .file-upload-wrap.dark .drop-zone { border-color: #444; }
         .drop-zone.dragging { background-color: rgba(107, 156, 255, 0.1); }
@@ -192,7 +348,10 @@ export default function FileUpload({
         .drop-zone-text { font-weight: 500; }
         .drop-zone-subtext { font-size: 0.8rem; opacity: 0.7; margin-top: 8px; }
 
-        .file-list { flex-shrink: 0; max-height: 50%; overflow-y: auto; padding: 8px; }
+        /* 파일 리스트: Full 모드에서는 남은 공간을 전부 차지하며 스크롤, Compact 상세보기에서는 적당한 최대 높이 */
+        .file-list { padding: 8px; }
+        .file-upload-wrap.full .file-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+        .file-upload-wrap.compact .file-list { max-height: 220px; overflow-y: auto; }
         .file-item { display: flex; align-items: center; padding: 8px; border-radius: 4px; margin-bottom: 4px; font-size: 0.9rem; }
         .file-upload-wrap.light .file-item { background-color: #fff; }
         .file-upload-wrap.dark .file-item { background-color: #333; }
@@ -215,31 +374,100 @@ export default function FileUpload({
         .file-upload-wrap.light .remove-btn { color: #333; }
         .file-upload-wrap.dark .remove-btn { color: #eee; }
 
-        .upload-footer { padding: 12px; border-top: 1px solid; display: flex; justify-content: flex-end; align-items: center; }
+        .upload-footer { padding: 12px; border-top: 1px solid; display: flex; justify-content: flex-end; align-items: center; flex-shrink: 0; }
         .file-upload-wrap.light .upload-footer { border-color: #ddd; }
         .file-upload-wrap.dark .upload-footer { border-color: #444; }
         
         .upload-btn { background-color: #2196f3; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
         .upload-btn:hover { background-color: #1976d2; }
         .upload-btn:disabled { background-color: #9e9e9e; cursor: not-allowed; }
-      `}</style>
-      
-      <div
-        className={`drop-zone ${isDragging ? 'dragging' : ''}`}
-        onClick={handleSelectClick}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <input type="file" multiple ref={fileInputRef} onChange={handleFileSelect} style={{ display: 'none' }} />
-        <div className="drop-zone-icon"><Icon.Upload width={48} height={48} /></div>
-        <div className="drop-zone-text">파일을 드래그하거나 클릭하여 선택하세요.</div>
-        <div className="drop-zone-subtext">최대 {maxFiles}개, 파일당 {Math.round(maxFileSize / 1024 / 1024)}MB</div>
-      </div>
 
-      {files.length > 0 && (
+        /* 컴팩트 모드 */
+        .file-upload-wrap.compact .drop-zone { min-height: 56px; padding: 12px; }
+        .file-upload-wrap.compact .drop-zone .drop-zone-icon svg { width: 20px; height: 20px; }
+        .file-upload-wrap.compact .drop-zone .drop-zone-text { font-size: 0.9rem; }
+        .file-upload-wrap.compact .drop-zone .drop-zone-subtext { font-size: 0.75rem; }
+        .file-upload-wrap.compact .drop-zone:not(.expanded) { height: 0; min-height: 0; padding: 0; border-bottom: 0; overflow: hidden; }
+        .file-upload-wrap.compact .drop-zone.expanded { height: 160px; padding: 20px; border-bottom: 1px solid rgba(127,127,127,0.25); }
+
+        /* Full 모드에서 파일이 하나라도 있으면 드롭존 높이를 줄여 리스트 공간 확보 */
+        .file-upload-wrap.full.has-files .drop-zone { flex: 0 0 120px; min-height: 120px; }
+
+        .toolbar-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid; }
+        .file-upload-wrap.light .toolbar-row { border-color: #ddd; }
+        .file-upload-wrap.dark .toolbar-row { border-color: #444; }
+        .btn { background: #2196f3; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+        .btn.secondary { background: transparent; color: inherit; border: 1px solid; }
+        .file-upload-wrap.light .btn.secondary { border-color: #ccc; }
+        .file-upload-wrap.dark .btn.secondary { border-color: #555; }
+        .summary { margin-left: auto; font-size: 0.85rem; opacity: .9; }
+
+        .drop-overlay { position: fixed; inset: 0; background: rgba(33, 150, 243, 0.12); border: 2px dashed rgba(33, 150, 243, 0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; color: inherit; font-size: 1rem; }
+
+        /* 초소형 높이에서도 파일이 보이도록: 컴팩트 모드 기본 상태에서 칩(Chip) 한 줄 목록 */
+        .inline-file-chips { display: block; padding: 6px 12px; border-bottom: 1px solid; overflow-x: auto; white-space: nowrap; gap: 6px; }
+        .file-upload-wrap.light .inline-file-chips { border-color: #ddd; }
+        .file-upload-wrap.dark .inline-file-chips { border-color: #444; }
+        .inline-file-chips .chip { display: inline-flex; align-items: center; max-width: 200px; padding: 4px 8px; border-radius: 12px; font-size: 12px; line-height: 1; margin-right: 6px; vertical-align: middle; }
+        .file-upload-wrap.light .inline-file-chips .chip { background: #ffffff; color: #333; border: 1px solid #ddd; }
+        .file-upload-wrap.dark .inline-file-chips .chip { background: #3a3a3a; color: #eee; border: 1px solid #555; }
+        .inline-file-chips .chip .name { display: inline-block; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .inline-file-chips .chip .remove { background: none; border: 0; color: inherit; opacity: .7; cursor: pointer; margin-left: 6px; padding: 0; line-height: 0; }
+        .inline-file-chips .chip .remove:hover { opacity: 1; }
+      `}</style>
+
+      {/* 항상 존재하는 숨김 파일 입력(툴바/드롭존 어디서든 트리거) */}
+      <input type="file" multiple ref={fileInputRef} onChange={handleFileSelect} style={{ display: 'none' }} />
+
+      {/* 상단 툴바: 컴팩트에서는 항상, 풀 레이아웃에서도 옵션으로 표시 */}
+      {(effectiveLayout === 'compact' || showTopBarInFull) && (
+        <div className="toolbar-row">
+          <button className="btn" onClick={handleSelectClick} title="파일 선택">파일 선택</button>
+          {effectiveLayout === 'compact' && (
+            <button className="btn secondary" onClick={() => setShowDetails(v => !v)}>{showDetails ? '숨기기' : '상세보기'}</button>
+          )}
+          <button className="btn" onClick={handleUpload} disabled={!filesPending} title={filesPending ? '추가된 파일 업로드' : '업로드할 파일이 없습니다'}>
+            {filesPending ? '전체 업로드' : '업로드 완료'}
+          </button>
+          {summaryInline && (
+            <span className="summary">{files.length}개 • {overallProgress}%</span>
+          )}
+        </div>
+      )}
+
+      {/* 드롭존 */}
+      {(effectiveLayout === 'full' || expanded) && (
+        <div
+          className={`drop-zone ${isDragging ? 'dragging' : ''} ${expanded ? 'expanded' : ''}`}
+          onClick={handleSelectClick}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <div className="drop-zone-icon"><Icon.Upload width={effectiveLayout === 'compact' ? 24 : 48} height={effectiveLayout === 'compact' ? 24 : 48} /></div>
+          <div className="drop-zone-text">파일을 드래그하거나 클릭하여 선택하세요.</div>
+          <div className="drop-zone-subtext">최대 {maxFiles}개, 파일당 {Math.round(maxFileSize / 1024 / 1024)}MB</div>
+        </div>
+      )}
+
+      {/* 컴팩트 기본 보기: 파일이 선택되어 있고 상세보기 모드가 아닐 때 한 줄 칩 목록을 항상 표시 */}
+      {(effectiveLayout === 'compact' && showInlineChips && files.length > 0 && !showDetails) && (
+        <div className="inline-file-chips" role="list" aria-label="선택된 파일">
+          {files.slice(0, Math.max(1, inlineMaxChips)).map(({ id, file }) => (
+            <span key={id} className="chip" role="listitem" title={file.name}>
+              <span className="name">{file.name}</span>
+              <button className="remove" aria-label={`${file.name} 제거`} onClick={() => removeFile(id)}>×</button>
+            </span>
+          ))}
+          {files.length > inlineMaxChips && (
+            <span className="chip more" aria-label={`추가 파일 ${files.length - inlineMaxChips}개 더 있음`}>+{files.length - inlineMaxChips}</span>
+          )}
+        </div>
+      )}
+
+      {(files.length > 0) && (effectiveLayout === 'full' || showDetails) && (
         <div className="file-list">
-          {files.map(({ id, file, progress, status, error }) => (
+          {(effectiveLayout === 'full' ? files : files.slice(0, Math.max(1, maxVisibleItems))).map(({ id, file, progress, status, error }) => (
             <div key={id} className="file-item">
               <div className="file-icon"><Icon.File /></div>
               <div className="file-details">
@@ -261,14 +489,23 @@ export default function FileUpload({
               </button>
             </div>
           ))}
+          {effectiveLayout !== 'full' && files.length > maxVisibleItems && (
+            <div className="file-item" style={{ justifyContent: 'center', opacity: .8 }}>+ {files.length - maxVisibleItems} 더 보기</div>
+          )}
         </div>
       )}
 
-      {files.length > 0 && (
+      {(files.length > 0) && (effectiveLayout === 'full' || showDetails) && (
         <div className="upload-footer">
           <button className="upload-btn" onClick={handleUpload} disabled={!filesPending}>
             {filesPending ? '전체 업로드' : '업로드 완료'}
           </button>
+        </div>
+      )}
+
+      {useOverlayDrop && overlay && (
+        <div className="drop-overlay" onDragOver={(e)=>e.preventDefault()} onDrop={(e)=>{ e.preventDefault(); setOverlay(false); if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files); }}>
+          여기에 파일을 드롭하세요
         </div>
       )}
     </div>
