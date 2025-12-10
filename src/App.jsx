@@ -2,6 +2,7 @@ import React from 'react';
 import FileUpload from './components/FileUpload';
 import './App.css';
 import RichEditor from "./components/RichEditor.jsx";
+import SvarGridExample from "./SvarGridExample.jsx"; // SvarGridExample 임포트
 
 // 공통 콜백 함수
 const handleUploadComplete = (results) => {
@@ -92,6 +93,11 @@ function App() {
 
           <h2>TipTap 리치 에디터 예제</h2>
           <RichEditor />
+
+          <hr style={{ margin: '40px 0' }} />
+
+          {/* Svar Grid 예제 추가 */}
+          <SvarGridExample />
       </main>
     </div>
   );
