@@ -3,6 +3,7 @@ import FileUpload from './components/FileUpload';
 import './App.css';
 import RichEditor from "./components/RichEditor.jsx";
 import SvarGridExample from "./SvarGridExample.jsx"; // SvarGridExample 임포트
+import Counter from './components/Counter.jsx'; // Counter 컴포넌트 임포트
 
 // 공통 콜백 함수
 const handleUploadComplete = (results) => {
@@ -51,6 +52,12 @@ function App() {
       `}</style>
 
       <main className="component-container">
+        {/* Zustand Counter 예제 추가 */}
+        <section>
+          <h2>Zustand Counter Example</h2>
+          <Counter />
+        </section>
+
         {/* --- 유형 1: 버튼 + 목록 + 제출 --- */}
         <section>
           <h2>Type 1: Trigger + List + Submit</h2>
