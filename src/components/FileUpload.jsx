@@ -3,6 +3,7 @@ import React, {
   createContext, useContext, useLayoutEffect
 } from 'react';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 // --- 아이콘 (변경 없음) ---
 const Icon = {
@@ -40,20 +41,33 @@ function FileUpload({
 }) {
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
+  
+  // Try to use AuthContext if available (optional - wrapped in try/catch for backward compatibility)
+  let authToken = null;
+  try {
+    const auth = useAuth();
+    authToken = auth?.getToken?.();
+  } catch {
+    // AuthProvider not available - use env token as fallback
+  }
 
   const uploadFile = useCallback(async (fileObject) => {
-    if (!uploadUrl) {
-      console.error("FileUpload: 'uploadUrl' prop이 지정되지 않았습니다.");
-      return { success: false, file: fileObject.file.name, error: { message: "Upload URL not configured" } };
-    }
-    
+    // Resolve upload URL: prop -> env -> fallback
+    const resolvedUploadUrl = uploadUrl || import.meta.env.VITE_UPLOAD_URL || 'https://httpbin.org/post';
+
     const formData = new FormData();
     formData.append('file', fileObject.file);
 
     setFiles(prev => prev.map(f => f.id === fileObject.id ? { ...f, status: 'uploading' } : f));
 
+    // Build headers with auth token (priority: runtime auth > env token)
+    const headers = {};
+    const tokenToUse = authToken || import.meta.env.VITE_UPLOAD_TOKEN;
+    if (tokenToUse) headers.Authorization = `Bearer ${tokenToUse}`;
+
     try {
-      const response = await axios.post(uploadUrl, formData, {
+      const response = await axios.post(resolvedUploadUrl, formData, {
+        headers,
         onUploadProgress: (progressEvent) => {
           const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
           setFiles(prev => prev.map(f => f.id === fileObject.id ? { ...f, progress } : f));
@@ -65,7 +79,7 @@ function FileUpload({
       setFiles(prev => prev.map(f => f.id === fileObject.id ? { ...f, status: 'error', error: '업로드 실패' } : f));
       return { success: false, file: fileObject.file.name, error };
     }
-  }, [uploadUrl]);
+  }, [uploadUrl, authToken]);
 
   const addFiles = useCallback((newFiles) => {
     const filesToAdd = Array.from(newFiles);
@@ -159,6 +173,10 @@ const Dropzone = ({ children, className = '' }) => {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      role="button"
+      tabIndex={0}
+      aria-label="파일 업로드 드롭존"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); /* cannot open dialog from here; rely on Trigger */ } }}
     >
       {children}
     </div>
@@ -168,7 +186,12 @@ const Dropzone = ({ children, className = '' }) => {
 const Trigger = ({ children, className = '' }) => {
   const { openFileDialog } = useContext(FileUploadContext);
   return (
-    <button type="button" className={`file-upload__trigger ${className}`} onClick={openFileDialog}>
+    <button
+      type="button"
+      className={`file-upload__trigger ${className}`}
+      onClick={openFileDialog}
+      aria-label="파일 선택"
+    >
       {children}
     </button>
   );

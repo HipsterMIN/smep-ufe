@@ -2,8 +2,9 @@ import React from 'react';
 import FileUpload from './components/FileUpload';
 import './App.css';
 import RichEditor from "./components/RichEditor.jsx";
-import SvarGridExample from "./SvarGridExample.jsx"; // SvarGridExample 임포트
-import Counter from './components/Counter.jsx'; // Counter 컴포넌트 임포트
+import SvarGridExample from "./SvarGridExample.jsx";
+import Counter from './components/Counter.jsx';
+import { AuthProvider } from './context/AuthContext';
 
 // 공통 콜백 함수
 const handleUploadComplete = (results) => {
@@ -16,8 +17,9 @@ const handleUploadComplete = (results) => {
 
 function App() {
   return (
-    <div className="App">
-      <style>{`
+    <AuthProvider>
+      <div className="App">
+        <style>{`
         /* --- 글로벌 스타일 --- */
         .file-upload__dropzone { border: 2px dashed #ccc; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: all .2s; }
         .file-upload__dropzone:hover, .file-upload__dropzone.dragging { border-color: #2196f3; background-color: rgba(33, 150, 243, .1); }
@@ -61,7 +63,7 @@ function App() {
         {/* --- 유형 1: 버튼 + 목록 + 제출 --- */}
         <section>
           <h2>Type 1: Trigger + List + Submit</h2>
-          <FileUpload uploadUrl="https://httpbin.org/post" onUploadComplete={handleUploadComplete}>
+          <FileUpload onUploadComplete={handleUploadComplete}>
             <div className="type-1-container">
               <div className="type-1-header">
                 <h3>선택된 파일</h3>
@@ -76,7 +78,7 @@ function App() {
         {/* --- 유형 2: 드롭존 + 목록 + 제출 --- */}
         <section>
           <h2>Type 2: Dropzone + List + Submit</h2>
-          <FileUpload uploadUrl="https://httpbin.org/post" onUploadComplete={handleUploadComplete}>
+          <FileUpload onUploadComplete={handleUploadComplete}>
             <div className="type-2-container">
               <FileUpload.Dropzone>
                 <p>여기에 파일을 드래그하거나, <FileUpload.Trigger>클릭하여 선택</FileUpload.Trigger>하세요.</p>
@@ -90,7 +92,7 @@ function App() {
         {/* --- 유형 3: 버튼 + 자동 업로드 --- */}
         <section>
           <h2>Type 3: Trigger with Auto-Upload</h2>
-          <FileUpload uploadUrl="https://httpbin.org/post" autoUpload={true} onUploadComplete={handleUploadComplete}>
+          <FileUpload autoUpload={true} onUploadComplete={handleUploadComplete}>
             <div className="type-3-container">
               <FileUpload.Trigger>파일 선택 (즉시 업로드)</FileUpload.Trigger>
               <FileUpload.List />
@@ -107,6 +109,7 @@ function App() {
           <SvarGridExample />
       </main>
     </div>
+    </AuthProvider>
   );
 }
 
