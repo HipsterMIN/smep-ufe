@@ -1,0 +1,5 @@
+/* layout */
+#krds-header .header-container .logo {width: 20.7rem;}
+#krds-header .header-container .logo a {background-image: url(../src/assets/common/logo.svg);}
+
+#krds-footer .f-logo {background-image: url(../src/assets/common/logo.svg); width: 28.7rem;}

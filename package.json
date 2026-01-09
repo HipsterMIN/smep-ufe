@@ -13,6 +13,8 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
+    "@krds-ui/core": "file:./packages/core",
+    "@krds-ui/icon": "file:./packages/icon",
     "@svar-ui/react-grid": "^2.3.2",
     "@tiptap/extension-image": "^2.8.0",
     "@tiptap/extension-link": "^2.8.0",
@@ -31,6 +33,7 @@
     "prettier": "^3.3.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^7.12.0",
     "zustand": "^4.5.4"
   },
   "devDependencies": {
