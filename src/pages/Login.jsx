@@ -1,10 +1,16 @@
 import Breadcrumb from "../components/ui/Breadcrumb";
 import React from "react";
+import {useNavigate} from "react-router-dom";
 
 const UI_USR_R_002 = () => {
   const breadcrumbItems = [
     { label: "로그인", link: "#" },
   ];
+
+    const navigate = useNavigate();
+    const handleClick = () => {
+
+    };
 
   return (
       <>
@@ -13,7 +19,7 @@ const UI_USR_R_002 = () => {
               <div className="page-title-wrap" data-type="responsive">
                   <h2 className="h-tit">로그인 방식을 선택해주세요.</h2>
               </div>
-              <button type="button" className="krds-btn xsmall">
+              <button type="button" className="krds-btn xsmall" onClick={handleClick('2288105280')}>
                   유큐브 로그인
                   <i className="svg-icon ico-angle right"></i>
               </button>
