@@ -26,7 +26,7 @@ const AiSmartSearch = () => {
 
   const breadcrumbItems = [
     { label: "신청·발급", link: "#" },
-    { label: "AI 스마트 통합 검색", link: "#" },
+    { label: "AI 스마트검색", link: "#" },
   ];
 
   return (
@@ -37,7 +37,7 @@ const AiSmartSearch = () => {
             <div className="totalsearch-wrap">
               <Breadcrumb items={breadcrumbItems}/>
               <div className="page-title-wrap" data-type="responsive">
-                <h2 className="h-tit ac">AI 스마트 통합검색</h2>
+                <h2 className="h-tit ac">AI 스마트검색</h2>
               </div>
 
               <div className="onsearch-input-box">
@@ -47,7 +47,7 @@ const AiSmartSearch = () => {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                   />
-                  <button type="button"><i className="svg-icon ico-cal-move"></i></button>
+                  {/*<button type="button"><i className="svg-icon ico-cal-move"></i></button>*/}
                 </div>
                 <button type="button" className="onsearch-submit">
                   <span className="sr-only">통합검색</span>

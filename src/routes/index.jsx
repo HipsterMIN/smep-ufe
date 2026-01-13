@@ -5,8 +5,9 @@ import { autoPublishingRoutes } from './autoRoutes.jsx';
 // 실제 운영용 페이지들 (src/pages)
 import MainPage from '../pages/MainPage.jsx';
 import AiSmartSearch from '../pages/AiSmartSearch.jsx';
+import Login from '../pages/Login.jsx';
 import UI_USR_L_010 from '../pages/UI_USR_L_010.jsx';
-import UI_USR_L_011 from '../pages/UI_USR_L_011.jsx';
+import UI_USR_R_011 from '../pages/UI_USR_R_011.jsx';
 import UI_USR_R_480 from '../pages/UI_USR_R_480.jsx';
 import UI_USR_L_510 from '../pages/UI_USR_L_510.jsx';
 
@@ -29,9 +30,10 @@ const router = createBrowserRouter(
       element: <SubpageLayout />,
       children: [
         { path: 'UI_USR_L_010', element: <UI_USR_L_010 /> },
-        { path: 'UI_USR_L_011', element: <UI_USR_L_011 /> },
+        { path: 'UI_USR_R_011', element: <UI_USR_R_011 /> },
         { path: 'UI_USR_R_480', element: <UI_USR_R_480 /> },
         { path: 'UI_USR_L_510', element: <UI_USR_L_510 /> },
+        { path: 'login', element: <Login /> },
       ]
     },
 

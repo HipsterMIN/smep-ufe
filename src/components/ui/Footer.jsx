@@ -9,10 +9,15 @@ export default function Header() {
       { /*foot-quick */}
       <div className="foot-quick">
         <div className="inner">
-          <button type="button" className="link open-modal" title="소속기관(지청 및 위원회) 레이어" data-target="popFootLink">소속기관(지청 및 위원회)</button>
-          <button type="button" className="link open-modal" title="업무별 누리집 레이어" data-target="popFootLink">업무별 누리집</button>
-          <button type="button" className="link open-modal" title="산하기관 및 관련단체 레이어" data-target="popFootLink">산하기관 및 관련단체</button>
-          <button type="button" className="link open-modal" title="정부기관 레이어" data-target="popFootLink">정부기관</button>
+          <button type="button" className="link open-modal" title="개인정보처리방침 레이어" data-target="popFootLink">개인정보처리방침
+          </button>
+          <button type="button" className="link open-modal" title="이메일주소 무단수집거부안내 레이어" data-target="popFootLink">이메일주소 무단수집거부안내
+          </button>
+          <button type="button" className="link open-modal" title="저작권 정책 레이어" data-target="popFootLink">저작권 정책</button>
+          <button type="button" className="link open-modal" title="웹접근성 정책 레이어" data-target="popFootLink">웹접근성 정책
+          </button>
+          <button type="button" className="link open-modal" title="이용약관 레이어" data-target="popFootLink">이용약관
+          </button>
         </div>
       </div>
       { /*foot-quick */}
@@ -41,13 +46,13 @@ export default function Header() {
 
         <div className="f-btm">
           <div className="f-btm-text">
-            <div className="f-menu">
+           {/* <div className="f-menu">
               <a href="#" className="krds-btn small text">개인정보처리방침</a>
               <a href="#" className="krds-btn small text">이용약관</a>
               <a href="#" className="krds-btn small text">보안센터</a>
               <a href="#" className="krds-btn small text">웹 접근성 품질인증 마크 획득</a>
               <a href="#" className="krds-btn small text">정책명</a>
-            </div>
+            </div>*/}
             <p className="f-copy">copyright ⓒ 중소벤처기업부. All rights reserved.</p>
           </div>
         </div>

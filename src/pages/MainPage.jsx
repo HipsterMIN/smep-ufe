@@ -43,7 +43,7 @@ const MainPage = () => {
               <h2 className="main-total-tit">중소기업을 위한 모든 것<span>중소기업 통합플랫폼</span></h2>
               <div className="main-totalbox">
                 <div className="main-totalbox-left">
-                  <h3>중소기업에 딱 맞는 정보를 검색<span>AI 통합검색</span></h3>
+                  <h3>중소기업에 딱 맞는 정보를 검색<span>AI 스마트검색</span></h3>
                   <div className="main-totalbox-input">
                     <input 
                       type="text" 
@@ -61,12 +61,12 @@ const MainPage = () => {
                     </button>
                   </div>
 
-                  {/*로그인 전 상태   
+                  {/*로그인 전 상태*/}
                   <p><span>로그인</span> 후, 나에게 맞는 추천 검색어를 받아보세요</p> 
-                  */}
+
 
                   {/*로그인 후 */}
-                  <div className="main-totalbox-word">
+                  {/*<div className="main-totalbox-word">
                     <h3>AI 추천검색어</h3>
                     <ul>
                       <li><button type="button" className="word-bu">소상공인지원</button></li>
@@ -76,7 +76,7 @@ const MainPage = () => {
                       <li><button type="button" className="word-bu">AP소재정보</button></li>
                       <li><button type="button" className="word-bu">맞춤서비스</button></li>
                     </ul>
-                  </div>
+                  </div>*/}
                 </div>
                 <div className="main-totalbox-right">
                   <h3>인기검색어</h3>
