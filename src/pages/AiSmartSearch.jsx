@@ -78,9 +78,15 @@ const AiSmartSearchContent = () => {
   };
 
   const handleSearch = () => {
-    if (query.trim()) {
-      setSearchParams({ q: query });
-      startSearch(query);
+    const trimmedQuery = query.trim();
+    if (trimmedQuery) {
+      if (searchParams.get('q') === trimmedQuery) {
+        // 동일한 검색어인 경우 useEffect가 실행되지 않으므로 직접 실행
+        startSearch(trimmedQuery);
+      } else {
+        // 검색어가 다르면 URL 파라미터를 업데이트하고 useEffect에서 처리하도록 함
+        setSearchParams({ q: trimmedQuery });
+      }
     }
   };
 
@@ -306,9 +312,22 @@ const AiSmartSearchContent = () => {
 
               <div className="on-contentbox">
                 {isRealLoading && !streamingSummary && !summary && (
-                  <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <div className="on-ai-loading">
+                    <div className="icon-wrap">
+                      <i className="svg-icon ico-ai lg"></i>
+                    </div>
+                    <h3 className="on-p2 mb-2">AI 스마트 검색 중입니다</h3>
+                    <p className="on-p3">귀하의 기업에 꼭 맞는 지원사업을 인공지능이 분석하고 있습니다.</p>
+                  </div>
                 )}
-                {(streamingSummary || summary) && (
+                {isSummaryLoading && !streamingSummary && !summary ? (
+                  <p className="guide-txt sm">
+                    <i className="svg-icon ico-ai lg on-pulse"></i>
+                    <span className="on-p2">
+                      AI가 검색 결과를 분석하고 있습니다...
+                    </span>
+                  </p>
+                ) : (streamingSummary || summary) && (
                   <p className="guide-txt sm">
                     <i className="svg-icon ico-ai lg"></i>
                     <span className="on-p2">
@@ -375,11 +394,29 @@ const AiSmartSearchContent = () => {
 
               <ul className="krds-structured-list type-full">
                 {isRealLoading && programs.length === 0 ? (
-                  <li className="structured-item">
-                    <div className="in ac py-12">
-                      <p className="text-neutral-600">검색 중입니다...</p>
-                    </div>
-                  </li>
+                  Array.from({ length: 3 }).map((_, idx) => (
+                    <li key={`skeleton-${idx}`} className="structured-item">
+                      <div className="in">
+                        <div className="card-top">
+                          <div className="krds-badge-wrap">
+                            <span className="on-skeleton badge"></span>
+                            <span className="on-skeleton badge"></span>
+                          </div>
+                        </div>
+                        <div className="card-body">
+                          <div className="c-text">
+                            <div className="on-skeleton title"></div>
+                            <div className="on-skeleton text"></div>
+                            <div className="on-skeleton text" style={{ width: '70%' }}></div>
+                          </div>
+                          <div className="c-btn column">
+                            <div className="on-skeleton button"></div>
+                            <div className="on-skeleton button"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  ))
                 ) : programs.length > 0 ? (
                   programs.map((program) => {
                     const days = calculateDaysRemaining(program.endDate);
@@ -450,7 +487,7 @@ const AiSmartSearchContent = () => {
                   </li>
                 )}
               </ul>
-              <Pagination /> 
+              {/* <Pagination /> */}
 
             </div>
           </div>
