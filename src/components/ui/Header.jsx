@@ -6,7 +6,6 @@ import {useAuthStore} from "./useAuthStore.jsx";
 import { FloatingChatbot } from "../ai/FloatingChatbot";
 import {useNavigate} from "react-router-dom";
 import { ProgramChatProvider } from "@cube-i-ax/sdk/smes/program";
-import { FloatingChatbot } from "../ai/FloatingChatbot.jsx";
 
 
 // 관리자 - 상단 메뉴
