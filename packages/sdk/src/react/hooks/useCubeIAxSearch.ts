@@ -155,12 +155,19 @@ export function useCubeIAxSearch(
       if (!query.trim() && !hasFilters) return null;
 
       const client = getClient();
+
+      // Abort any in-flight request before starting a new one
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
       setError(null);
       setIsLoading(true);
       setStreamingContent('');
 
       // Create abort controller for this request
-      abortControllerRef.current = new AbortController();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
 
       try {
         // Merge default metadata with search-specific metadata
@@ -181,7 +188,7 @@ export function useCubeIAxSearch(
           agent: searchOptions?.agent ?? options.agent,
           groupByField: searchOptions?.groupByField ?? options.groupByField,
           groupResultsBy: searchOptions?.groupResultsBy ?? options.groupResultsBy,
-          signal: abortControllerRef.current?.signal,
+          signal: controller.signal,
         };
 
         let fullContent = '';
@@ -212,8 +219,11 @@ export function useCubeIAxSearch(
             options.onComplete?.(res);
           },
           onError: (err) => {
-            setError(err);
-            options.onError?.(err);
+            // Only set error if this is still the active request
+            if (!controller.signal.aborted) {
+              setError(err);
+              options.onError?.(err);
+            }
           },
           onEvent: (event) => {
             options.onEvent?.(event);
@@ -221,7 +231,7 @@ export function useCubeIAxSearch(
         } : undefined);
 
         // For non-streaming, set results here
-        if (!shouldStream) {
+        if (!shouldStream && !controller.signal.aborted) {
           setResults(response.results);
           setTotal(response.total);
           setContent(response.content);
@@ -230,14 +240,20 @@ export function useCubeIAxSearch(
 
         return response;
       } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        options.onError?.(error);
+        // Only handle error if this request wasn't aborted
+        if (!controller.signal.aborted) {
+          const error = err instanceof Error ? err : new Error(String(err));
+          setError(error);
+          options.onError?.(error);
+        }
         return null;
       } finally {
-        setIsLoading(false);
-        setStreamingContent('');
-        abortControllerRef.current = null;
+        // Only clear loading state if this is still the current request
+        if (abortControllerRef.current === controller) {
+          setIsLoading(false);
+          setStreamingContent('');
+          abortControllerRef.current = null;
+        }
       }
     },
     [getClient, options]
