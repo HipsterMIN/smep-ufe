@@ -119,14 +119,29 @@ const Pbanc = () => {
         </div>
         <div className="search-top-box">
           <div className="sch-form-wrap" ref={schFormWrapRef}>
-            <select className="krds-form-select">
+            <select
+                className="krds-form-select"
+                value={searchType}
+                onChange={(e) => setSearchType(e.target.value)}
+            >
               <option value="">전체</option>
-              <option value="">항목</option>
-              <option value="">항목</option>
+              <option value="pbancnm">공고명</option>
+              <option value="flfmtinst">기관명</option>
             </select>
             <div className="sch-input">
-              <input type="text" className="krds-input" placeholder="공고명·사업명·기관명으로 검색하세요" title="검색어 입력"/>
-              <button type="button" className="krds-btn medium icon ico-search">
+              <input
+                  type="text"
+                  className="krds-input"
+                  placeholder="공고명·기관명으로 검색하세요"
+                  title="검색어 입력"
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+              />
+              <button
+                  type="button"
+                  className="krds-btn medium icon ico-search"
+                    onClick={() => search(1)}
+              >
                 <span className="sr-only">검색</span>
                 <i className="svg-icon ico-sch"></i>
               </button>
