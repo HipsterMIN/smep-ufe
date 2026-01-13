@@ -11,6 +11,8 @@ import UI_USR_R_011 from '../pages/UI_USR_R_011.jsx';
 import UI_USR_L_030 from '../pages/UI_USR_L_030.jsx';
 import UI_USR_L_040 from '../pages/UI_USR_L_040.jsx';
 import UI_USR_R_031 from '../pages/UI_USR_R_031.jsx';
+import Pbanc from "../pages/Pbanc.jsx";
+import PbancView from "../pages/PbancView.jsx";
 import UI_USR_R_480 from '../pages/UI_USR_R_480.jsx';
 import UI_USR_L_510 from '../pages/UI_USR_L_510.jsx';
 
@@ -37,6 +39,8 @@ const router = createBrowserRouter(
         { path: 'UI_USR_L_030', element: <UI_USR_L_030 /> },
         { path: 'UI_USR_R_031', element: <UI_USR_R_031 /> },
         { path: 'UI_USR_L_040', element: <UI_USR_L_040 /> },
+        { path: 'pbanc', element: <Pbanc /> },
+        { path: 'pbanc/:id', element: <PbancView /> },
         { path: 'UI_USR_R_480', element: <UI_USR_R_480 /> },
         { path: 'UI_USR_L_510', element: <UI_USR_L_510 /> },
         { path: 'login', element: <Login /> },
