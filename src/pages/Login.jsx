@@ -1,8 +1,10 @@
 import Breadcrumb from "../components/ui/Breadcrumb";
 import React from "react";
 import {api as apiClient} from "../lib/apiClient.js";
+import {useAuthStore} from "../components/ui/useAuthStore.jsx";
 
 const UI_USR_R_002 = () => {
+  const { login } = useAuthStore();
   const breadcrumbItems = [
     { label: "로그인", link: "#" },
   ];
@@ -15,7 +17,7 @@ const UI_USR_R_002 = () => {
 
       const response = await apiClient.post(`/api/v1/account/scenario-login`, body);
       console.log(response);
-
+      login(brno, response.cmpNm, response.companySize);
   };
 
   return (

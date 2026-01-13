@@ -6,8 +6,10 @@ export const useAuthStore = create(
         (set) => ({
             isLogin: false,
             bizno: null,
-            login: () => set({ isLogin: true }),
-            logout: () => set({ isLogin: false, bizno: null }),
+            cmpNm: null,
+            companySize: null,
+            login: (bizno, cmpNm, companySize) => set({ isLogin: true, bizno: bizno, cmpNm: cmpNm, companySize: companySize}),
+            logout: () => set({ isLogin: false, bizno: null, cmpNm: null, companySize: null }),
             setBizno: (bizno) => set({ bizno, isLogin: true }),
         }),
         {

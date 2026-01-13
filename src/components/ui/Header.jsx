@@ -4,12 +4,13 @@ import aiIcon from "../../assets/main/icon-ai.png";
 import arrowIcon from "../../assets/main/icon-arrow.svg";
 import {useAuthStore} from "./useAuthStore.jsx";
 import { FloatingChatbot } from "../ai/FloatingChatbot";
+import {useNavigate} from "react-router-dom";
 
 
 // 관리자 - 상단 메뉴
 export default function Header() {
   const [openIndex, setOpenIndex] = useState(null);
-  const { isLogin, login, logout, bizno } = useAuthStore();
+  const { isLogin, logout } = useAuthStore();
 
   const menuItems = [
     { id: 1, label: "메뉴1" },
@@ -20,7 +21,11 @@ export default function Header() {
     setOpenIndex(openIndex === index ? null : index);
   };
 
-  console.log("BIZNO ::: " + bizno);
+
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate('/service/login'); // 로그인 페이지로 이동
+  };
 
   return (
     <>
@@ -86,7 +91,7 @@ export default function Header() {
                     </>
                 ) : (
                     <>
-                      <a href="#" className="btn-navi login" onClick={(e) => { e.preventDefault(); login(); }}>로그인</a>
+                      <a href="#" className="btn-navi login" onClick={(e) => { handleClick();}}>로그인</a>
                       <button type="button" className="btn-navi join">회원가입</button>
                     </>
                 )}
