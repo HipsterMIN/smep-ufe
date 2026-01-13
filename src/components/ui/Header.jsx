@@ -3,6 +3,7 @@ import aiText from "../../assets/main/icon-aiText.png";
 import aiIcon from "../../assets/main/icon-ai.png";
 import arrowIcon from "../../assets/main/icon-arrow.svg";
 import {useAuthStore} from "./useAuthStore.jsx";
+import { FloatingChatbot } from "../ai/FloatingChatbot";
 
 
 // 관리자 - 상단 메뉴
@@ -289,9 +290,7 @@ export default function Header() {
       { /*메인메뉴 : 모바일 */}
     </header>
     <div className="quickbox">
-      <ProgramChatProvider>
-        <FloatingChatbot />
-      </ProgramChatProvider>
+      <FloatingChatbot />
       <button type="button" className="quickbox-top">
         <img src={arrowIcon} alt="" />
         <span className="sr-only">상단으로</span>
