@@ -22,7 +22,7 @@
 .main-totalbox-input { display: flex; justify-content: center; gap: 16px; }
 .main-totalbox-input input { width: calc(100% - 200px); border-radius: 35px; border: 3px solid #0841A2; background: #FFF; line-height: 65px; text-indent: 30px; font-size: 22px; }
 .main-totalbox-input button { background: #1C267B; border-radius: 50%; width: 70px; height: 70px; display: flex; justify-content: center; align-items: anchor-center; transition: all 0.3s ease; transform: scale(1); }
-.main-totalbox-input button::before { content: ""; mask-image: url(/styles/img/component/icon/ico_sch.svg); background: #fff; width: 30px; height: 30px; mask-size: contain; }
+.main-totalbox-input button::before { content: ""; mask-image: url(./img/component/icon/ico_sch.svg); background: #fff; width: 30px; height: 30px; mask-size: contain; }
 .main-totalbox-input button:hover { transform: scale(1.2); }
 .main-totalbox-left p { font-size: 20px; color: #fff; margin-top: 30px; }
 .main-totalbox-left p span { border-bottom: 1px solid #fff; display: inline-block; padding-right: 2px; line-height: 105%; }
@@ -41,7 +41,7 @@
 .main-totalbox-right ul li .mtr-rank { flex: 0 0 30px; display: flex; text-align: right; justify-content: flex-end; align-items: center; }
 .main-totalbox-right ul li .mtr-rank svg { width: 18px; }
 .main-totalbox-right ul li .mtr-rank span { display: block; width: 20px; }
-.main-totalbox-right ul li .mtr-rank .mtr-rank-icon { mask-image: url(/styles/img/component/icon/ico_arrow_dropdown.svg); background: #fff; width: 20px; height: 20px; mask-size: contain; }
+.main-totalbox-right ul li .mtr-rank .mtr-rank-icon { mask-image: url(./img/component/icon/ico_arrow_dropdown.svg); background: #fff; width: 20px; height: 20px; mask-size: contain; }
 .main-totalbox-right ul li.up .mtr-rank-icon { background: #ff0000; transform: rotate(180deg); }
 .main-totalbox-right ul li.down .mtr-rank-icon { background: #5395ff; }
 .main-totallistbox { margin-top: 60px; }
