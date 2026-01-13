@@ -15,11 +15,11 @@ const basename = base.endsWith('/') ? base.slice(0, -1) : base;
 const router = createBrowserRouter(
   [
     // 루트 접근 시 퍼블리싱 메인으로 리다이렉트
-    { path: '/', element: <Navigate to="/publishing" replace /> },
+    { path: '/', element: <Navigate to="publishing" replace /> },
 
     // 퍼블리싱 레이아웃 및 하위 페이지
     {
-      path: '/publishing',
+      path: 'publishing',
       element: <SubpageLayout />,
       children: [
         { index: true, element: <PublishingList /> },
@@ -31,8 +31,8 @@ const router = createBrowserRouter(
     },
 
     // 레이아웃 없이 직접 매핑되는 퍼블리싱 화면들
-    { path: '/publishing/main', element: <MainPage /> },
-    { path: '/publishing/UI_USR_R_005', element: <UI_USR_R_005 /> },
+    { path: 'publishing/main', element: <MainPage /> },
+    { path: 'publishing/UI_USR_R_005', element: <UI_USR_R_005 /> },
 
     // 404
     { path: '*', element: <div>페이지를 찾을 수 없습니다. (404)</div> },
