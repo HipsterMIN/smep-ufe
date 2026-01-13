@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import aiText from "../../assets/main/icon-aiText.png";
+import aiIcon from "../../assets/main/icon-ai.png";
+import arrowIcon from "../../assets/main/icon-arrow.svg";
 
 
 // 관리자 - 상단 메뉴
@@ -276,11 +279,11 @@ export default function Header() {
     </header>
     <div className="quickbox">
       <button type="button" className="quickbox-ai">
-        <img className="quickbox-ai-txt" src="../src/assets/main/icon-aiText.png" alt="민원사항이 있을 땐 AI 컨설턴트" />
-        <img className="quickbox-ai-icon" src="../src/assets/main/icon-ai.png" alt="" />
+        <img className="quickbox-ai-txt" src={aiText} alt="민원사항이 있을 땐 AI 컨설턴트" />
+        <img className="quickbox-ai-icon" src={aiIcon} alt="" />
       </button>
       <button type="button" className="quickbox-top">
-        <img src="../src/assets/main/icon-arrow.svg" alt="" />
+        <img src={arrowIcon} alt="" />
         <span className="sr-only">상단으로</span>
       </button>
     </div>

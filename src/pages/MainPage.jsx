@@ -19,10 +19,10 @@ const MainPage = () => {
   const handleSearch = () => {
     if (searchQuery.trim()) {
       // 검색어를 query 파라미터로 전달하며 이동
-      navigate(`/publishing/ai-smart-search?q=${encodeURIComponent(searchQuery)}`);
+      navigate(`/ai-smart-search?q=${encodeURIComponent(searchQuery)}`);
     } else {
       // 검색어 없을 경우 그냥 이동하거나 알림
-      navigate(`/publishing/ai-smart-search`);
+      navigate(`/ai-smart-search`);
     }
   };
 
