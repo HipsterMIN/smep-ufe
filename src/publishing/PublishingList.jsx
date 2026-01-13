@@ -4,14 +4,14 @@ import { Link } from 'react-router-dom';
 const PublishingList = () => {
   const publishingPages = [
     {
-      fileName: 'UI_USR_L_010',
-      screenName: '지원사업 공고 목록',
-      path: '/publishing/UI_USR_L_010'
+      fileName: 'MainPage',
+      screenName: '메인 페이지',
+      path: '/publishing/main' 
     },
     {
-      fileName: 'UI_USR_L_011',
-      screenName: '지원사업 공고 상세',
-      path: '/publishing/UI_USR_L_011'
+      fileName: 'UI_USR_R_002',
+      screenName: '로그인',
+      path: '/publishing/UI_USR_R_002'
     },
     {
       fileName: 'UI_USR_R_005',
@@ -19,9 +19,39 @@ const PublishingList = () => {
       path: '/publishing/UI_USR_R_005'
     },
     {
-      fileName: 'MainPage',
-      screenName: '메인 페이지',
-      path: '/publishing/main' 
+      fileName: 'UI_USR_L_010',
+      screenName: '지원사업 공고 목록',
+      path: '/publishing/UI_USR_L_010'
+    },
+    {
+      fileName: 'UI_USR_R_011',
+      screenName: '지원사업 공고 상세',
+      path: '/publishing/UI_USR_R_011'
+    },
+    {
+      fileName: 'UI_USR_L_020',
+      screenName: '사업공고 목록',
+      path: '/publishing/UI_USR_L_020'
+    },
+    {
+      fileName: 'UI_USR_R_021',
+      screenName: '사업공고 상세',
+      path: '/publishing/UI_USR_R_021'
+    },
+    {
+      fileName: 'UI_USR_L_030',
+      screenName: '정책금융안내 목록',
+      path: '/publishing/UI_USR_L_030'
+    },
+    {
+      fileName: 'UI_USR_R_031',
+      screenName: '정책금융안내 상세',
+      path: '/publishing/UI_USR_R_031'
+    },
+    {
+      fileName: 'UI_USR_L_040',
+      screenName: '증명서 발급 목록',
+      path: '/publishing/UI_USR_L_040'
     },
     {
       fileName: 'UI_USR_R_480',

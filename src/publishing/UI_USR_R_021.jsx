@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import SideNavigation from "../components/ui/SideNavigation";
 import Breadcrumb from "../components/ui/Breadcrumb";
 
-const UI_USR_L_011 = () => {
+const UI_USR_R_021 = () => {
   const shadowTextRef = useRef(null);
 
   const handleToggleTextShadow = () => {
@@ -17,17 +17,18 @@ const UI_USR_L_011 = () => {
       },
       {
         depth2: "중소벤처기업부 지원사업공고",
+        
+      },
+      {
+        depth2: "사업공고",
         active: true,
         depth3: [
           {
-            label: "지원사업 공고",
+            label: "사업공고",
             link: "/",
             active: true,
           },
         ],
-      },
-      {
-        depth2: "사업공고",
       },
       {
         depth2: "정책금융",
@@ -40,8 +41,8 @@ const UI_USR_L_011 = () => {
 
   const breadcrumbItems = [
     { label: "신청·발급", link: "#" },
-    { label: "중소벤처기업부 지원사업공고", link: "#" },
-    { label: "지원사업 공고", link: "#" },
+    { label: "사업공고", link: "#" },
+    { label: "사업공고", link: "#" },
   ];
 
   return (
@@ -53,8 +54,8 @@ const UI_USR_L_011 = () => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
           <div className="page-title-wrap" data-type="responsive">
-            <p className="on-p1 on-colorblue">지원사업공고</p>
-            <h2 className="h-tit2">지원사업 공고</h2>
+            <p className="on-p1 on-colorblue">사업공고</p>
+            <h2 className="h-tit2">2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</h2>
           </div>
           <ul className="onboard-summary">
             <li>
@@ -219,4 +220,4 @@ const UI_USR_L_011 = () => {
   );
 };
 
-export default UI_USR_L_011;
+export default UI_USR_R_021;
