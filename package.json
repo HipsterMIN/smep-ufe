@@ -22,7 +22,7 @@
     "lint:fix": "eslint src --fix"
   },
   "dependencies": {
-    "@cube-i-ax/sdk": "file:./packages/sdk",
+    "@cube-i-ax/sdk": "file:packages/sdk",
     "@krds-ui/core": "file:./packages/core",
     "@krds-ui/icon": "file:./packages/icon",
     "@svar-ui/react-grid": "^2.3.2",
