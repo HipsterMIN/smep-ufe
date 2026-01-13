@@ -101,8 +101,8 @@ export default function Header() {
                           <li><a href="/main-dev/ai-smart-search">AI 스마트 통합 검색</a></li>
                           <li><a href="/main-dev/service/UI_USR_L_010">중소벤처기업부 지원사업공고</a></li>
                           <li><a href="">사업공고</a></li>
-                          <li><a href="#">정책금융</a></li>
-                          <li><a href="#">증명서 발급</a></li>
+                          <li><a href="/main-dev/service/UI_USR_L_030">정책금융</a></li>
+                          <li><a href="/main-dev/service/UI_USR_L_040">증명서 발급</a></li>
                         </ul>
                       </div>
                     </div>
