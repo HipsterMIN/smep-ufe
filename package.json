@@ -21,6 +21,7 @@
     "lint:fix": "eslint src --fix"
   },
   "dependencies": {
+    "@cube-i-ax/sdk": "file:../cubeflow-sdk-v1.0.0",
     "@krds-ui/core": "file:./packages/core",
     "@krds-ui/icon": "file:./packages/icon",
     "@svar-ui/react-grid": "^2.3.2",
@@ -38,10 +39,13 @@
     "@tiptap/react": "^2.8.0",
     "@tiptap/starter-kit": "^2.8.0",
     "axios": "^1.13.2",
+    "lucide-react": "^0.562.0",
     "prettier": "^3.3.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.12.0",
+    "remark-gfm": "^4.0.1",
     "zustand": "^4.5.4"
   },
   "devDependencies": {
