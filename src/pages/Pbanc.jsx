@@ -72,6 +72,12 @@ const Pbanc = () => {
     setPage(pageParam);
   }
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      search(1);
+    }
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
     search(1);
@@ -136,6 +142,7 @@ const Pbanc = () => {
                   title="검색어 입력"
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
+                  onKeyDown={handleKeyDown}
               />
               <button
                   type="button"
