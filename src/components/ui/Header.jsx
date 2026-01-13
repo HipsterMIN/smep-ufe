@@ -289,10 +289,9 @@ export default function Header() {
       { /*메인메뉴 : 모바일 */}
     </header>
     <div className="quickbox">
-      <button type="button" className="quickbox-ai">
-        <img className="quickbox-ai-txt" src={aiText} alt="민원사항이 있을 땐 AI 컨설턴트" />
-        <img className="quickbox-ai-icon" src={aiIcon} alt="" />
-      </button>
+      <ProgramChatProvider>
+        <FloatingChatbot />
+      </ProgramChatProvider>
       <button type="button" className="quickbox-top">
         <img src={arrowIcon} alt="" />
         <span className="sr-only">상단으로</span>
