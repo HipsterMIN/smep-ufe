@@ -21,7 +21,17 @@ const PublishingList = () => {
     {
       fileName: 'MainPage',
       screenName: '메인 페이지',
-      path: '/publishing/main'
+      path: '/publishing/main' 
+    },
+    {
+      fileName: 'UI_USR_R_480',
+      screenName: '나의 대시보드',
+      path: '/publishing/UI_USR_R_480'
+    },
+    {
+      fileName: 'UI_USR_L_510',
+      screenName: '증명서 발급 조회',
+      path: '/publishing/UI_USR_L_510'
     }
   ];
 

@@ -6,6 +6,14 @@ import Breadcrumb from "../components/ui/Breadcrumb";
 import Pagination from "../components/ui/Pagination"; 
 
 const MainPage = () => {
+  const searchOptionModalRef = useRef(null);
+
+  const handleOpenSearchOptionModal = () => {
+    searchOptionModalRef.current.classList.add('on');
+  }
+  const handleCloseSearchOptionModal = () => {
+    searchOptionModalRef.current.classList.remove('on');
+  }
 
   const breadcrumbItems = [
     { label: "신청·발급", link: "#" },
@@ -32,14 +40,14 @@ const MainPage = () => {
                   <span className="sr-only">통합검색</span>
                   <i className="svg-icon ico-sch"></i>
                 </button>
-                <button type="button" className="krds-btn large text"><i className="svg-icon ico-sch-plus"></i>
+                <button type="button" className="krds-btn large text" onClick={handleOpenSearchOptionModal}><i className="svg-icon ico-sch-plus"></i>
                   상세검색
                   <span className="sr-only">툴팁 열기</span>
                 </button>
-                <div className="on-tooltipbox">
-                  <div className="on-tooltiobox-header">
+                <div className="on-tooltipbox" ref={searchOptionModalRef}>
+                  <div className="on-tooltipbox-header">
                     <h3>상세검색</h3>
-                    <button type="button" className="krds-btn medium text"><i className="svg-icon ico-modal-close"></i>
+                    <button type="button" className="krds-btn medium text" onClick={handleCloseSearchOptionModal}><i className="svg-icon ico-modal-close"></i>
                       <span className="sr-only">상세검색 툴팁 닫기</span>
                     </button>
                   </div>
@@ -48,75 +56,75 @@ const MainPage = () => {
                       <div className="on-searchoption-checklists">
                         <h4>지역</h4>
                         <div className="krds-check-area">
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_1" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_1">전체</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_2" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_2">서울</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_3" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_3">부산</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_4" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_4">대구</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_5" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_5">인천</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_6" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_6">광주</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_7" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_7">대전</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_8" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_8">울산</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_9" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_9">세종</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_10" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_10">경기</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_11" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_11">강원</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_12" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_12">충북</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_13" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_13">충남</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_14" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_14">전북</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_15" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_15">전남</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_16" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_16">경북</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_17" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_17">경남</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_18" name="chk1"/>
                             <label className="krds-form-chip-outline" for="chk1_18">제주</label>
                           </div>
@@ -125,92 +133,76 @@ const MainPage = () => {
                        <div className="on-searchoption-checklists">
                         <h4>지역</h4>
                         <div className="krds-check-area">
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_1" name="chk2"/>
                             <label className="krds-form-chip-outline" for="chk2_1">기술개발</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_2" name="chk2"/>
                             <label className="krds-form-chip-outline" for="chk2_2">자금지원</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_3" name="chk2"/>
                             <label className="krds-form-chip-outline" for="chk2_3">판로개척</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_4" name="chk2"/>
                             <label className="krds-form-chip-outline" for="chk2_4">창업지원</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_5" name="chk2"/>
                             <label className="krds-form-chip-outline" for="chk2_5">시설·설비</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_6" name="chk2"/>
                             <label className="krds-form-chip-outline" for="chk2_6">인력양성</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_7" name="chk2"/>
                             <label className="krds-form-chip-outline" for="chk2_7">경영지원</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_8" name="chk2"/>
                             <label className="krds-form-chip-outline" for="chk2_8">해외진출</label>
                           </div>
-                          <div className="krds-form-chip">
+                          <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_9" name="chk2"/>
                             <label className="krds-form-chip-outline" for="chk2_9">기타</label>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="on-searchoption">
+                    <div className="on-searchoption flexrow">
                       <div className="on-searchoption-selectlists">
                         <div>
                           <h4>기업규모</h4>
-                          <div className="search-top-box">
-                            <div className="sch-form-wrap">
-                              <select className="krds-form-select">
-                                <option value="">소상공인</option>
-                              </select>
-                            </div>
-                          </div>
+                          <select class="krds-form-select small">
+                            <option value="">전체</option>
+                          </select>
                         </div>
                       </div>
                       <div className="on-searchoption-selectlists">
                         <div>
                           <h4>지원유형</h4>
-                          <div className="search-top-box">
-                            <div className="sch-form-wrap">
-                              <select className="krds-form-select">
-                                <option value="">전체</option>
-                              </select>
-                            </div>
-                          </div>
+                          <select class="krds-form-select small">
+                            <option value="">전체</option>
+                          </select>
                         </div>
                       </div>
                       <div className="on-searchoption-selectlists">
                         <div>
                           <h4>접수유형</h4>
-                          <div className="search-top-box">
-                            <div className="sch-form-wrap">
-                              <select className="krds-form-select">
-                                <option value="">전체</option>
-                              </select>
-                            </div>
-                          </div>
+                          <select class="krds-form-select small">
+                            <option value="">전체</option>
+                          </select>
                         </div>
                       </div>
                       <div className="on-searchoption-selectlists">
                         <div>
                           <h4>신청현황</h4>
-                          <div className="search-top-box">
-                            <div className="sch-form-wrap">
-                              <select className="krds-form-select">
-                                <option value="">신청가능만</option>
-                              </select>
-                            </div>
-                          </div>
+                          <select class="krds-form-select small">
+                            <option value="">전체</option>
+                          </select>
                         </div>
                       </div>
                     </div>
@@ -264,7 +256,6 @@ const MainPage = () => {
                   </li>
                 </ul>
               </div>
-              {/* s */}
               <ul className="krds-structured-list type-full">
                   <li className="structured-item">
                     <div className="in">
@@ -288,7 +279,83 @@ const MainPage = () => {
                           </p>
                           <p className="on-list-btm">
                             <span> 
-                              <i className="svg-icon ico-ai"></i>
+                              <i className="svg-icon ico-checkbox on-bgcolorblue"></i>
+                              <strong className="on-colorblue">접수중</strong>
+                            </span>
+                            <span>
+                              2025.10.24 ~ 2025.11.19
+                            </span>
+                            <span>
+                               <i className="svg-icon ico-building"></i>
+                               중소벤처기업진흥공단
+                            </span>
+                          </p>
+                        </a>
+                        <div className="c-btn column">
+                          <button className="krds-btn tertiary"><i className="svg-icon ico-like"></i> 관심</button>
+                          <Link to="/" className="krds-btn secondary">바로보기</Link>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                  <li className="structured-item">
+                    <div className="in">
+                      <div className="card-top">
+                          <div class="krds-badge-wrap">
+                            <span className="krds-badge bg-light-primary">기술</span>
+                            <span class="krds-badge bg-primary number">D-234</span>
+                          </div>
+                      </div>
+                      <div className="card-body">
+                        <a href="#" className="c-text">
+                          <p className="c-tit visited sml no-icon"><span className="span">산모·신생아 건강관리 지원사업</span></p>
+                          <p className="c-txt">
+                            시흥산업진흥원은 시뮬레이션 프로그램 참여기업(사업장, 부설연구소 및 공장 등 시흥스마트허브 입주기업) 대상 신뢰성 및 기술력 확보를 위해 시험ㆍ분석ㆍ인증 및 지식재산권을 지원하고자「2025년 공정혁신시뮬레이션 기업지원」 참여기업을 다음과 같이 재공고하오니 많은 참여 바랍니다.
+                          </p>
+                          <p className="on-list-btm">
+                            <span> 
+                              <strong className="on-colorred">마감임박</strong>
+                            </span>
+                            <span>
+                              2025.10.24 ~ 2025.11.19
+                            </span>
+                            <span>
+                               <i className="svg-icon ico-building"></i>
+                               중소벤처기업진흥공단
+                            </span>
+                          </p>
+                        </a>
+                        <div className="c-btn column">
+                          <button className="krds-btn tertiary"><i className="svg-icon ico-like"></i> 관심</button>
+                          <Link to="/" className="krds-btn secondary">바로보기</Link>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                  <li className="structured-item">
+                    <div className="in">
+                      <div className="card-top">
+                          <div class="krds-badge-wrap">
+                            <span className="krds-badge bg-light-primary">기술</span>
+                            <span class="krds-badge bg-primary number">D-234</span>
+                          </div>
+                      </div>
+                      <div className="card-body">
+                        <a href="#" className="c-text">
+                          <p className="c-tit visited sml no-icon"><span className="span">산모·신생아 건강관리 지원사업</span></p>
+                          <p className="c-txt">
+                            시흥산업진흥원은 시뮬레이션 프로그램 참여기업(사업장, 부설연구소 및 공장 등 시흥스마트허브 입주기업) 대상 신뢰성 및 기술력 확보를 위해 시험ㆍ분석ㆍ인증 및 지식재산권을 지원하고자「2025년 공정혁신시뮬레이션 기업지원」 참여기업을 다음과 같이 재공고하오니 많은 참여 바랍니다.
+                          </p>
+                          <p className="on-list-btm">
+                            <span> 
+                              <strong className="on-colorgray">마감</strong>
+                            </span>
+                            <span>
+                              2025.10.24 ~ 2025.11.19
+                            </span>
+                            <span>
+                               <i className="svg-icon ico-building"></i>
+                               중소벤처기업진흥공단
                             </span>
                           </p>
                         </a>
@@ -300,7 +367,6 @@ const MainPage = () => {
                     </div>
                   </li>
                 </ul>
-              {/* e */}
               <Pagination /> 
 
             </div>
