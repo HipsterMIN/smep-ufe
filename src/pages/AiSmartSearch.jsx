@@ -125,7 +125,7 @@ const AiSmartSearchContent = () => {
                     onKeyDown={handleKeyDown}
                     placeholder="검색어를 입력하세요"
                   />
-                  <button type="button" onClick={() => setQuery("")}><i className="svg-icon ico-cal-move"></i></button>
+                  {/*<button type="button" onClick={() => setQuery("")}><i className="svg-icon ico-cal-move"></i></button>*/}
                 </div>
                 <button type="button" className="onsearch-submit" onClick={handleSearch}>
                   <span className="sr-only">통합검색</span>
@@ -435,7 +435,7 @@ const AiSmartSearchContent = () => {
                             </div>
                             <div className="c-btn column">
                               <button className="krds-btn tertiary"><i className="svg-icon ico-like"></i> 관심</button>
-                              <Link to={`/service/UI_USR_L_011?id=${program.id}`} className="krds-btn secondary">바로보기</Link>
+                              <Link to={`/service/pbanc/${program.id}`} className="krds-btn secondary">바로보기</Link>
                             </div>
                           </div>
                         </div>

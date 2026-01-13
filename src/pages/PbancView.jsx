@@ -162,13 +162,15 @@ const Pbanc = () => {
               <dd>
                 <ul className="list">
                   <li>{item?.aplymthcn}</li>
-                  {/*<li>
-                    <button type="button" className="krds-btn xsmall">
-                      온라인 신청 바로가기
-                      <i className="svg-icon ico-angle right"></i>
-                    </button>
-                  </li>
-                  <li>오프라인 신청</li>*/}
+                  {item?.bizaplyurl && (
+                      <li>
+                        <button type="button" className="krds-btn xsmall" onClick={() => window.open(item?.bizaplyurl, '_blank')}>
+                          온라인 신청 바로가기
+                          <i className="svg-icon ico-angle right"></i>
+                        </button>
+                      </li>
+                  )}
+                  {/*<li>오프라인 신청</li>*/}
                 </ul>
               </dd>
               <dt>문의처</dt>
