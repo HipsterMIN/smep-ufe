@@ -1,9 +1,7 @@
-import React from "react";
+import { useNavigate } from 'react-router-dom';
 import SideNavigation from "../components/ui/SideNavigation";
 import Breadcrumb from "../components/ui/Breadcrumb";
-import SearchFormBox from "../components/ui/SearchFormBox";
-import SearchListTop from "../components/ui/SearchListTop";
-import Table from "../components/ui/Table";
+import CON_UI_USR_L_010 from "../assets/common/CON_UI_USR_L_010.png";
 
 const UI_USR_L_010 = () => {
   const navigationData = {
@@ -13,11 +11,11 @@ const UI_USR_L_010 = () => {
         depth2: "AI 스마트 통합 검색",
       },
       {
-        depth2: "중소벤처기업부 지원사업공고",
+        depth2: "중소벤처기업부 지원사업 소개",
         active: true,
         depth3: [
           {
-            label: "지원사업 공고",
+            label: "지원사업",
             link: "/",
             active: true,
           },
@@ -37,26 +35,28 @@ const UI_USR_L_010 = () => {
 
   const breadcrumbItems = [
     { label: "신청·발급", link: "#" },
-    { label: "중소벤처기업부 지원사업공고", link: "#" },
-    { label: "지원사업 공고", link: "#" },
+    { label: "중소벤처기업부 지원사업 소개", link: "#" },
   ];
 
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate('/service/UI_USR_R_011'); // 지원사업 상세 이미지 페이지 링크
+  };
+
   return (
-    <>
-      <SideNavigation
-        pageTitle={navigationData.depth1Title}
-        depth={navigationData.depth}
-      />
-      <div className="contents">
-        <Breadcrumb items={breadcrumbItems} />
-        <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">지원사업 공고</h2>
+      <>
+        <SideNavigation
+            pageTitle={navigationData.depth1Title}
+            depth={navigationData.depth}
+        />
+        <div className="contents">
+          <Breadcrumb items={breadcrumbItems} />
+          <div className="page-title-wrap" data-type="responsive">
+            <h2 className="h-tit">중소벤처기업부 지원사업 소개</h2>
+          </div>
+          <img src={CON_UI_USR_L_010} alt="컨텐츠 이미지" onClick={handleClick} />
         </div>
-        <SearchFormBox />
-        <SearchListTop />
-        <Table />
-      </div> 
-    </>
+      </>
   );
 };
 
