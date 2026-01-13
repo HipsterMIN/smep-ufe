@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import aiText from "../../assets/main/icon-aiText.png";
 import aiIcon from "../../assets/main/icon-ai.png";
 import arrowIcon from "../../assets/main/icon-arrow.svg";
+import {useAuthStore} from "./useAuthStore.jsx";
 
 
 // 관리자 - 상단 메뉴
 export default function Header() {
   const [openIndex, setOpenIndex] = useState(null);
+  const { isLogin, login, logout, bizno } = useAuthStore();
 
   const menuItems = [
     { id: 1, label: "메뉴1" },
@@ -16,6 +18,8 @@ export default function Header() {
   const handleToggle = (index) => {
     setOpenIndex(openIndex === index ? null : index);
   };
+
+  console.log("BIZNO ::: " + bizno);
 
   return (
     <>
@@ -47,37 +51,44 @@ export default function Header() {
               </h2>
               <div className="header-actions">
                 <button type="button" className="btn-navi sch open-modal" data-target="popTotalSch">통합검색</button>
-                <button type="button" className="btn-navi logout">로그아웃</button>
-                <a href="#" className="btn-navi login">로그인</a>
-                <button type="button" className="btn-navi join">회원가입</button>
-                <div className="krds-drop-wrap my-drop">
-                  <button type="button" className="btn-navi my drop-btn active">마이 비즈니스</button>
-                  <div className="drop-menu" >
-                    <div className="drop-in">
-                      <div className="drop-top">
-                        <p className="my-name">홍길동님</p>
-                        <dl className="my-time">
-                          <dt>로그아웃까지 남은 시간</dt>
-                          <dd>
-                            <span className="time">12:00</span>
-                            <button type="button" className="krds-btn small text h-auto">시간 연장</button>
-                          </dd>
-                        </dl>
+                {isLogin ? (
+                    <>
+                      <button type="button" className="btn-navi logout" onClick={logout}>로그아웃</button>
+                      <div className="krds-drop-wrap my-drop">
+                        <button type="button" className="btn-navi my drop-btn active">마이 비즈니스</button>
+                        <div className="drop-menu" >
+                          <div className="drop-in">
+                            <div className="drop-top">
+                              <p className="my-name">홍길동님</p>
+                              <dl className="my-time">
+                                <dt>로그아웃까지 남은 시간</dt>
+                                <dd>
+                                  <span className="time">12:00</span>
+                                  <button type="button" className="krds-btn small text h-auto">시간 연장</button>
+                                </dd>
+                              </dl>
+                            </div>
+                            <ul className="drop-list">
+                              <li><a href="#" className="item-link">나의 GOV 홈<span className="sr-only"></span></a></li>
+                              <li><a href="#" className="item-link">나의 신청내역<span className="sr-only"></span></a></li>
+                              <li><a href="#" className="item-link">나의 생활정보<span className="sr-only"></span></a></li>
+                              <li><a href="#" className="item-link">나의 정보관리<span className="sr-only"></span></a></li>
+                            </ul>
+                            <div className="drop-bottom">
+                              <button type="button" className="krds-btn medium text" onClick={logout}>
+                                <i className="svg-icon ico-logout"></i> 로그아웃
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <ul className="drop-list">
-                        <li><a href="#" className="item-link">나의 GOV 홈<span className="sr-only"></span></a></li>
-                        <li><a href="#" className="item-link">나의 신청내역<span className="sr-only"></span></a></li>
-                        <li><a href="#" className="item-link">나의 생활정보<span className="sr-only"></span></a></li>
-                        <li><a href="#" className="item-link">나의 정보관리<span className="sr-only"></span></a></li>
-                      </ul>
-                      <div className="drop-bottom">
-                        <button type="button" className="krds-btn medium text">
-                          <i className="svg-icon ico-logout"></i> 로그아웃
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                    </>
+                ) : (
+                    <>
+                      <a href="#" className="btn-navi login" onClick={(e) => { e.preventDefault(); login(); }}>로그인</a>
+                      <button type="button" className="btn-navi join">회원가입</button>
+                    </>
+                )}
                 <button type="button" className="btn-navi all" aria-controls="mobile-nav">전체메뉴</button>
               </div>
             </div>
