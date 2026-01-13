@@ -237,8 +237,8 @@ const Pbanc = () => {
                     </Link>
                   </td>
                   <td className="ac"><span>{formatToYYMMDD(item.aplybgngday)} ~ {formatToYYMMDD(item.aplyddlnday)}</span></td>
-                  <td className="ac"><span>{item.mngdeptnm}</span></td>
-                  <td className="ac"><span>{item.flfmtinst}</span></td>
+                  <td className="ac"><span className="onellipsis-1" >{item.mngdeptnm}</span></td>
+                  <td className="ac"><span className="onellipsis-1" >{item.flfmtinst}</span></td>
                   <td className="ac"><span>0</span></td>
                 </tr>
             ))}
