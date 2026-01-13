@@ -3,6 +3,8 @@ import aiText from "../../assets/main/icon-aiText.png";
 import aiIcon from "../../assets/main/icon-ai.png";
 import arrowIcon from "../../assets/main/icon-arrow.svg";
 import {useAuthStore} from "./useAuthStore.jsx";
+import { ProgramChatProvider } from "@cube-i-ax/sdk/smes/program";
+import { FloatingChatbot } from "../ai/FloatingChatbot.jsx";
 
 
 // 관리자 - 상단 메뉴
