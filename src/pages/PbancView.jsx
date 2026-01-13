@@ -145,10 +145,10 @@ const Pbanc = () => {
               <dd>{item?.sprtfld}</dd>
               <dt>소관부처·지자체</dt>
               <dd>{item?.mngdeptnm}</dd>
-              <dt>사업수행기관</dt>
+              <dt>사업개요</dt>
               <dd>
                 <div className="onshadow-text" ref={shadowTextRef}>
-                  {item?.flfmtinst}
+                  {item?.bizotln}
                 </div>
                 <button type="button" className="krds-btn tertiary xsmall ontoggle-textshadow"
                         onClick={handleToggleTextShadow}>
