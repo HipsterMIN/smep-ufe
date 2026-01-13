@@ -5,12 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build:local": "vite build --mode localhost",
+    "build:dev": "vite build --mode development",
+    "build:prod": "vite build --mode production",
+    "build": "vite build --mode development",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "format": "prettier --write \"src/**/*.{js,jsx,css,json}\"",
+    "lint:fix": "eslint src --fix"
   },
   "dependencies": {
     "@krds-ui/core": "file:./packages/core",
