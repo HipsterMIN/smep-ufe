@@ -1,8 +1,8 @@
 import SideNavigation from "../components/ui/SideNavigation";
 import Breadcrumb from "../components/ui/Breadcrumb";
-import CON_UI_USR_L_010 from "../assets/common/CON_UI_USR_L_010.png";
+import CON_UI_USR_L_040 from "../assets/common/CON_UI_USR_L_040.png";
 
-const UI_USR_L_010 = () => {
+const UI_USR_L_040 = () => {
   const navigationData = {
     depth1Title: "신청·발급",
     depth: [
@@ -11,7 +11,6 @@ const UI_USR_L_010 = () => {
       },
       {
         depth2: "중소벤처기업부 지원사업 소개",
-        active: true,
       },
       {
         depth2: "사업공고",
@@ -20,14 +19,23 @@ const UI_USR_L_010 = () => {
         depth2: "정책금융",
       },
       {
-        depth2: "증명서 발급",
+        depth2: "증명서발급",
+        active: true,
+        depth3: [
+          {
+            label: "증명서 발급",
+            link: "/",
+            active: true,
+          },
+        ],
       },
     ],
   };
 
   const breadcrumbItems = [
     { label: "신청·발급", link: "#" },
-    { label: "중소벤처기업부 지원사업 소개", link: "#" },
+    { label: "증명서 발급", link: "#" },
+    { label: "증명서 발급", link: "#" },
   ];
 
   return (
@@ -38,13 +46,10 @@ const UI_USR_L_010 = () => {
       />
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
-        <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">중소벤처기업부 지원사업 소개</h2>
-        </div>
-        <img src={CON_UI_USR_L_010} alt="컨텐츠 이미지" />
+        <img src={CON_UI_USR_L_040} alt="컨텐츠 이미지" />
       </div> 
     </>
   );
 };
 
-export default UI_USR_L_010;
+export default UI_USR_L_040;
