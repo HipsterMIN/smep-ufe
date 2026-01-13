@@ -9,6 +9,7 @@ import {
   useProgramSearch,
   calculateDaysRemaining,
 } from "@cube-i-ax/sdk/smes/program";
+import { CubeIAxProvider } from "@cube-i-ax/sdk/react";
 
 const SAMPLE_COMPANY_PROFILE = {
   region: "서울",
@@ -27,21 +28,59 @@ const AiSmartSearchContent = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get('q') || "");
   const searchOptionModalRef = useRef(null);
+  
+  // 타임아웃 상태 관리
+  const [isTimeout, setIsTimeout] = useState(false);
+  const timeoutRef = useRef(null);
+  const SEARCH_TIMEOUT_MS = 15000; // 15초 타임아웃
 
   const { programs, total, isLoading, error, summary, streamingSummary, isSummaryLoading, search } = useProgramSearch();
+
+  // 데이터 수신 시 타임아웃 해제
+  useEffect(() => {
+    if (programs.length > 0 || summary || streamingSummary) {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      setIsTimeout(false);
+    }
+  }, [programs, summary, streamingSummary]);
+
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     const q = searchParams.get('q');
     if (q) {
       setQuery(q);
-      search(q);
+      startSearch(q);
     }
-  }, [searchParams, search]);
+  }, [searchParams]); // search는 의존성에서 제외 (무한 루프 방지)
+
+  const startSearch = (searchQuery) => {
+    setIsTimeout(false);
+    
+    // 기존 타이머 제거
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    // 새 타이머 설정
+    timeoutRef.current = setTimeout(() => {
+      // 로딩 중이고 데이터가 없을 때만 타임아웃 처리
+      setIsTimeout(true);
+    }, SEARCH_TIMEOUT_MS);
+
+    search(searchQuery);
+  };
 
   const handleSearch = () => {
     if (query.trim()) {
       setSearchParams({ q: query });
-      search(query);
+      startSearch(query);
     }
   };
 
@@ -63,6 +102,9 @@ const AiSmartSearchContent = () => {
     { label: "AI 스마트검색", link: "#" },
   ];
 
+  // 로딩 상태 판단 (SDK 로딩이면서 타임아웃이 아닐 때)
+  const isRealLoading = isLoading && !isTimeout;
+
   return (
     <div id="wrap" >
         <Header />
@@ -81,6 +123,7 @@ const AiSmartSearchContent = () => {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
+                    placeholder="검색어를 입력하세요"
                   />
                   <button type="button" onClick={() => setQuery("")}><i className="svg-icon ico-cal-move"></i></button>
                 </div>
@@ -256,13 +299,13 @@ const AiSmartSearchContent = () => {
                     </div>
                   </div>
                   <div className="on-tooltipbox-footer">
-                    <button className="krds-btn medium primary">검색하기</button>
+                    <button className="krds-btn medium primary" onClick={handleSearch}>검색하기</button>
                   </div>
                 </div>
               </div>
 
               <div className="on-contentbox">
-                {isLoading && !streamingSummary && !summary && (
+                {isRealLoading && !streamingSummary && !summary && (
                   <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
                 )}
                 {(streamingSummary || summary) && (
@@ -318,8 +361,20 @@ const AiSmartSearchContent = () => {
                 </div>
               )}
 
+              {isTimeout && (
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-orange-700 mb-6 text-center">
+                  <p className="mb-2">검색 응답 시간이 초과되었습니다.</p>
+                  <button 
+                    onClick={handleSearch}
+                    className="px-4 py-2 bg-orange-100 hover:bg-orange-200 rounded text-sm font-medium transition-colors"
+                  >
+                    다시 시도하기
+                  </button>
+                </div>
+              )}
+
               <ul className="krds-structured-list type-full">
-                {isLoading && programs.length === 0 ? (
+                {isRealLoading && programs.length === 0 ? (
                   <li className="structured-item">
                     <div className="in ac py-12">
                       <p className="text-neutral-600">검색 중입니다...</p>
@@ -332,7 +387,7 @@ const AiSmartSearchContent = () => {
                     let ddayText = days !== null ? (days === 0 ? "D-Day" : (days > 0 ? `D-${days}` : "마감")) : "상시";
                     
                     if (days !== null && days <= 7 && days >= 0) {
-                      ddayClass = "krds-badge bg-primary number"; // 원래 예시에는 별도 색상이 없었으나 필요시 변경
+                      ddayClass = "krds-badge bg-primary number"; 
                     }
 
                     return (
@@ -387,7 +442,7 @@ const AiSmartSearchContent = () => {
                       </li>
                     );
                   })
-                ) : !isLoading && (
+                ) : !isRealLoading && !isTimeout && (
                   <li className="structured-item">
                     <div className="in ac py-12">
                       <p className="text-neutral-600">검색 결과가 없습니다.</p>
@@ -407,9 +462,14 @@ const AiSmartSearchContent = () => {
 
 const AiSmartSearch = () => {
   return (
-    <ProgramSearchProvider profile={SAMPLE_COMPANY_PROFILE} stream topK={20}>
-      <AiSmartSearchContent />
-    </ProgramSearchProvider>
+    <CubeIAxProvider
+      apiKey={import.meta.env.VITE_CUBE_IAX_API_KEY}
+      baseUrl={import.meta.env.VITE_CUBE_IAX_API_URL}
+    >
+      <ProgramSearchProvider profile={SAMPLE_COMPANY_PROFILE} stream topK={20}>
+        <AiSmartSearchContent />
+      </ProgramSearchProvider>
+    </CubeIAxProvider>
   );
 }
 
