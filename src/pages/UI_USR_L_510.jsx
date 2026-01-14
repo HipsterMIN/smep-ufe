@@ -23,6 +23,14 @@ const UI_USR_L_510 = () => {
 		return `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`;
 	};
 
+	const formatBrno = (brno) => {
+		if (!brno) return '';
+		return brno
+			.replace(/[^0-9]/g, '')
+			.replace(/^(\d{0,3})(\d{0,2})(\d{0,5})$/g, '$1-$2-$3')
+			.replace(/(-{1,2})$/g, '');
+	};
+
 	// 24시간 경과 체크 함수
 	const isExpired = (aplyDt) => {
 		if (!aplyDt) return true;
@@ -170,7 +178,7 @@ const UI_USR_L_510 = () => {
 						<colgroup>
 							<col style={{width: "5%"}}/>
 							<col/>
-							<col style={{width: "100px"}}/>
+							<col style={{width: "150px"}}/>
 							<col/>
 							<col/>
 							<col style={{width: "100px"}}/>
@@ -207,7 +215,7 @@ const UI_USR_L_510 = () => {
 									<td>
 										<span>{item.prdocTtl}</span>
 									</td>
-									<td className="ac"><span>{item.brno}</span></td>
+									<td className="ac"><span>{formatBrno(item.brno)}</span></td>
 									<td className="ac"><span>{formatDateTime(item.aplyDt)}</span></td>
 									<td className="ac"><span>{formatDate(item.vldEndYmd)}</span></td>
 									<td className="ac"><span>{item.prdocIssuPrgrsStNm}</span></td>

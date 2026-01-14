@@ -27,6 +27,9 @@ export default function Header() {
   const handleClick = () => {
     navigate('/service/login'); // 로그인 페이지로 이동
   };
+  const handleClickMypage = () => {
+    navigate('/service/UI_USR_L_510'); // 증명서 발급 이력 페이지 링크이동.
+  };
 
   return (
     <>
@@ -52,7 +55,7 @@ export default function Header() {
           <div className="inner">
             <div className="header-branding">
               <h2 className="logo sample">
-                <a href="/">
+                <a href="/main-dev/">
                   <span className="sr-only">중소기업통합플랫폼</span>
                 </a>
               </h2>
@@ -62,7 +65,7 @@ export default function Header() {
                     <>
                       <button type="button" className="btn-navi logout" onClick={logout}>로그아웃</button>
                       <div className="krds-drop-wrap my-drop">
-                        <button type="button" className="btn-navi my drop-btn active">마이 비즈니스</button>
+                        <button type="button" className="btn-navi my drop-btn active" onClick={() => handleClickMypage()}>마이 비즈니스</button>
                         <div className="drop-menu" >
                           <div className="drop-in">
                             <div className="drop-top">
