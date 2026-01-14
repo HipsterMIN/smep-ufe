@@ -299,7 +299,11 @@ export default function Header() {
     </header>
     <div className="quickbox">
       <FloatingChatbot onSelectProgram={(program) => navigate(`/service/pbanc/${program.id}`)} />
-      <button type="button" className="quickbox-top">
+      <button 
+        type="button" 
+        className="quickbox-top"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
         <img src={arrowIcon} alt="" />
         <span className="sr-only">상단으로</span>
       </button>
