@@ -18,10 +18,24 @@ const Pbanc = () => {
     depth1Title: "신청·발급",
     depth: [
       {
-        depth2: "AI 스마트 통합 검색",
+        depth2: "AI 스마트 검색",
+        active: true,
+        depth3: [
+          {
+            label: "AI 스마트 검색",
+            link: "/main-dev/ai-smart-search",
+          },
+        ],
       },
       {
         depth2: "중소벤처기업부 지원사업공고",
+        active: true,
+        depth3: [
+          {
+            label: "지원사업",
+            link: "/main-dev/service/UI_USR_L_010",
+          },
+        ],
 
       },
       {
@@ -30,16 +44,30 @@ const Pbanc = () => {
         depth3: [
           {
             label: "사업공고",
-            link: "/",
+            link: "/main-dev/service/pbanc",
             active: true,
           },
         ],
       },
       {
         depth2: "정책금융",
+        active: true,
+        depth3: [
+          {
+            label: "정책금융안내",
+            link: "/main-dev/service/UI_USR_L_030",
+          },
+        ],
       },
       {
         depth2: "증명서 발급",
+        active: true,
+        depth3: [
+          {
+            label: "증명서 발급",
+            link: "/main-dev/service/UI_USR_L_040",
+          },
+        ],
       },
     ],
   };
@@ -68,6 +96,7 @@ const Pbanc = () => {
     };
     const response = await axios(config);*/
     const response = await apiClient.get(`/api/v1/pbanc?page=${pageParam}&searchText=${searchText}&searchType=${searchType}`);
+    console.log(response);
     setItems(response);
     setPage(pageParam);
   }
@@ -258,10 +287,10 @@ const Pbanc = () => {
                       <span>{item.pbancnm}</span>
                     </Link>
                   </td>
-                  <td className="ac"><span>{formatToYYMMDD(item.aplybgngday)} ~ {formatToYYMMDD(item.aplyddlnday)}</span></td>
+                  <td className="ac"><span>{item.aplybgngday ?  formatToYYMMDD(item.aplybgngday)+" ~ " : "" }{!item.aplyddlnday ? ("예산소진시") : formatToYYMMDD(item.aplyddlnday)}</span></td>
                   <td className="ac"><span className="onellipsis-1" >{item.mngdeptnm}</span></td>
                   <td className="ac"><span className="onellipsis-1" >{item.flfmtinst}</span></td>
-                  <td className="ac"><span>0</span></td>
+                  <td className="ac"><span>28</span></td>
                 </tr>
             ))}
             </tbody>

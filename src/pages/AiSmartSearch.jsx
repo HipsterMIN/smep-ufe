@@ -44,6 +44,7 @@ const AiSmartSearchContent = () => {
         timeoutRef.current = null;
       }
       setIsTimeout(false);
+      console.log(programs);
     }
   }, [programs, summary, streamingSummary]);
 
@@ -437,28 +438,28 @@ const AiSmartSearchContent = () => {
                               </div>
                           </div>
                           <div className="card-body">
-                            <div className="c-text">
+                            <a href="#" className="c-text">
                               <p className="c-tit visited sml no-icon"><span className="span">{program.title}</span></p>
                               <p className="c-txt">
-                                {program.summary}
+                                {program.bizOutline}
                               </p>
                               {program.aiAnalysis && (
-                                <p className="guide-txt sm">
-                                  <i className="svg-icon ico-ai"></i>
-                                  <span className="on-p3">
+                                  <p className="guide-txt sm">
+                                    <i className="svg-icon ico-ai"></i>
+                                    <span className="on-p3">
                                     {program.aiAnalysis}
                                   </span>
-                                </p>
+                                  </p>
                               )}
                               <p className="on-list-btm">
                                 <span> 
                                   {days !== null && days >= 0 ? (
-                                    <>
-                                      <i className="svg-icon ico-checkbox on-bgcolorblue"></i>
-                                      <strong className="on-colorblue">접수중</strong>
-                                    </>
+                                      <>
+                                        <i className="svg-icon ico-checkbox on-bgcolorblue"></i>
+                                        <strong className="on-colorblue">접수중</strong>
+                                      </>
                                   ) : (
-                                    <strong className="on-colorgray">마감</strong>
+                                      <strong className="on-colorgray">마감</strong>
                                   )}
                                 </span>
                                 <span>
@@ -466,10 +467,10 @@ const AiSmartSearchContent = () => {
                                 </span>
                                 <span>
                                   <i className="svg-icon ico-building"></i>
-                                  {program.organization}
+                                  {program.agency}
                                 </span>
                               </p>
-                            </div>
+                            </a>
                             <div className="c-btn column">
                               <button className="krds-btn tertiary"><i className="svg-icon ico-like"></i> 관심</button>
                               <Link to={`/service/pbanc/${program.id}`} className="krds-btn secondary">바로보기</Link>
