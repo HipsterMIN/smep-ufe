@@ -19,6 +19,7 @@ import {
  * Unescape markdown syntax that might be escaped by the backend
  */
 function unescapeMarkdown(text) {
+  if (!text) return "";
   return text
       .replace(/\\\*\\\*/g, '**')
       .replace(/\\\*/g, '*')
@@ -26,7 +27,8 @@ function unescapeMarkdown(text) {
       .replace(/\\`/g, '`')
       .replace(/\\\[/g, '[')
       .replace(/\\\]/g, ']')
-      .replace(/\\#/g, '#');
+      .replace(/\\#/g, '#')
+      .replace(/\\n/g, '\n');
 }
 
 const STATUS_STYLES = {
@@ -40,6 +42,7 @@ const STATUS_STYLES = {
 export function FloatingChatbot({ onSelectProgram }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const { clear } = useProgramChat();
   const messagesAreaRef = useRef(null);
 
   const scrollToBottom = useCallback((behavior = "smooth") => {
@@ -54,30 +57,33 @@ export function FloatingChatbot({ onSelectProgram }) {
 
   if (!isOpen) {
     return (
-        <button
-            type="button"
-            className="quickbox-ai"
-            onClick={() => setIsOpen(true)}
-        >
-          <img
-              className="quickbox-ai-txt"
-              src={aiText}
-              alt="민원사항이 있을 땐 AI 컨설턴트"
-          />
-          <img className="quickbox-ai-icon" src={aiIcon} alt="" />
-        </button>
+        <div className="quickbox-ai group">
+          <button
+              type="button"
+              className="ai-chatbot-open-btn"
+              onClick={() => setIsOpen(true)}
+          >
+            <img src={aiIcon} alt="AI 컨설턴트" className="ai-chatbot-open-icon" />
+          </button>
+          <div className="ai-chatbot-tooltip">
+            💡 AI 컨설턴트와 상담하기
+            <div className="tooltip-arrow" />
+          </div>
+        </div>
     );
   }
 
   return (
       <div
-          className={`ai-chatbot-container ${isMinimized ? "minimized" : "expanded"}`}
+          className={`ai-chatbot-container ${
+              isMinimized ? "minimized" : "expanded"
+          } z-50`}
       >
         {/* Header */}
         <div className="ai-chatbot-header">
           <div className="ai-header-left">
             <div className="ai-icon-box">
-              <Sparkles className="w-6 h-6" />
+              <img src={aiIcon} alt="" className="ai-header-icon" />
             </div>
             <div className="ai-header-title">
               <h3>AI 지원사업 컨설턴트</h3>
@@ -88,26 +94,30 @@ export function FloatingChatbot({ onSelectProgram }) {
             <button
                 onClick={() => setIsMinimized(!isMinimized)}
                 className="ai-header-btn"
+                title={isMinimized ? "펼치기" : "접기"}
             >
               <ChevronDown
                   className={`w-5 h-5 transition-transform ${isMinimized ? "rotate-180" : ""}`}
               />
             </button>
-            <button onClick={() => setIsOpen(false)} className="ai-header-btn">
+            <button
+                onClick={() => {
+                  clear();
+                  setIsOpen(false);
+                }}
+                className="ai-header-btn"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        <ProgramChat.Root>
-          <ChatbotContent
-              isMinimized={isMinimized}
-              messagesAreaRef={messagesAreaRef}
-              scrollToBottom={scrollToBottom}
-              renderProgramCard={renderProgramCard}
-              onSelectProgram={onSelectProgram}
-          />
-        </ProgramChat.Root>
+        <ChatbotContent
+            isMinimized={isMinimized}
+            messagesAreaRef={messagesAreaRef}
+            scrollToBottom={scrollToBottom}
+            renderProgramCard={renderProgramCard}
+        />
       </div>
   );
 
@@ -126,43 +136,50 @@ export function FloatingChatbot({ onSelectProgram }) {
           <button
               onClick={() => {
                 if (onSelectProgram) onSelectProgram(program);
+                setIsMinimized(true);
               }}
               className="ai-card-btn group"
           >
             <div className="ai-card-content">
               <div className="ai-card-badges">
-                <span className="ai-badge field">{program.supportField}</span>
+                <span className="ai-badge field">
+                  {program.supportField}
+                </span>
                 <span className={`ai-badge status ${statusStyle.badge}`}>
-                {statusStyle.label}
-              </span>
+                  {statusStyle.label}
+                </span>
               </div>
-              <h4 className="ai-card-title">{program.title}</h4>
+              <h4 className="ai-card-title group-hover:text-blue-600">
+                {program.title}
+              </h4>
               <div className="ai-card-agency">
                 <Building2 className="w-3.5 h-3.5" />
-                <span className="line-clamp-1">{program.agency}</span>
+                <span>{program.agency}</span>
               </div>
               <div className="ai-card-footer">
                 <div className="ai-card-tags">
                   {program.companySizes?.slice(0, 2).map((size, index) => (
                       <span key={index} className="ai-tag check">
-                    ✓ {size}
-                  </span>
+                        ✓ {size}
+                      </span>
                   ))}
                   {program.companySizes?.length > 2 && (
                       <span className="ai-tag more">
-                    +{program.companySizes.length - 2}
-                  </span>
+                        +{program.companySizes.length - 2}
+                      </span>
                   )}
                 </div>
                 <div className="ai-card-period">
                   <div className="ai-period-text">
-                    <Calendar className="w-4 h-4 text-neutral-500" />
+                    <Calendar className="w-4 h-4" />
                     <span>{program.applyPeriod}</span>
                   </div>
                   {daysRemaining !== null &&
                       daysRemaining >= 0 &&
                       daysRemaining <= 14 && (
-                          <span className="ai-dday">D-{daysRemaining}</span>
+                          <span className="ai-dday">
+                            D-{daysRemaining}
+                          </span>
                       )}
                 </div>
               </div>
@@ -172,7 +189,7 @@ export function FloatingChatbot({ onSelectProgram }) {
               <div className="ai-match-reason">
                 <p>
                   <Sparkles className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-blue-600" />
-                  <span className="font-medium">{program.matchReason}</span>
+                  <span>{program.matchReason}</span>
                 </p>
               </div>
           )}
@@ -201,29 +218,30 @@ function ChatbotContent({
                         }) {
   const { messages, streamingContent } = useProgramChat();
 
-  // Scroll to bottom when messages or streaming content changes
-  useEffect(() => {
-    // During streaming, use "auto" for better performance and less jumping
-    // For new messages, use "smooth"
-    const behavior = streamingContent ? "auto" : "smooth";
-    scrollToBottom(behavior);
-  }, [messages.length, streamingContent, scrollToBottom]);
-
   return (
       <div className={`ai-chatbot-body ${isMinimized ? "hidden" : ""}`}>
         {/* Messages */}
         <ProgramChat.Messages
-            className="ai-messages-area"
+            className="ai-messages-area bg-neutral-50"
             ref={messagesAreaRef}
             renderEmpty={() => <QuickQuestions />}
             renderMessage={(msg) => (
-                <MessageBubble content={msg.content} isUser={msg.role === "user"} />
+                <MessageBubble 
+                    content={msg.content} 
+                    isUser={msg.role === "user"} 
+                    onScroll={() => scrollToBottom("smooth")}
+                />
             )}
-            renderStreaming={(content) => (
-                <MessageBubble content={content} isUser={false} isStreaming />
+            renderStreaming={(content, programs) => (
+                <MessageBubble 
+                    content={content} 
+                    isUser={false} 
+                    isStreaming 
+                    onScroll={() => scrollToBottom("auto")}
+                />
             )}
-            renderPrograms={(programs) => (
-                <div className="space-y-3 ml-2">
+            renderPrograms={(programs, messageId) => (
+                <div className="ai-programs-list" key={`programs-${messageId}`}>
                   {programs.map(renderProgramCard)}
                 </div>
             )}
@@ -260,7 +278,11 @@ function ChatbotContent({
   );
 }
 
-function MessageBubble({ content, isUser, isStreaming }) {
+function MessageBubble({ content, isUser, isStreaming, onScroll }) {
+  useEffect(() => {
+    onScroll?.();
+  }, [content, onScroll]);
+
   return (
       <div className={`ai-message-row ${isUser ? "user" : "bot"}`}>
         <div className={`ai-message-bubble ${isUser ? "user" : "bot"}`}>
@@ -310,16 +332,14 @@ function QuickQuestions() {
   };
 
   return (
-      <>
-        <div className="ai-message-row bot">
-          <div className="ai-message-bubble bot">
-            <p>
-              안녕하세요! 정부지원사업 검색을 도와드리는 AI 컨설턴트입니다. 어떤 지원사업을 찾고 계신가요?
-            </p>
-          </div>
+      <div className="ai-quick-questions">
+        <div className="ai-welcome-box">
+          <p className="ai-welcome-text">
+            안녕하세요! 정부지원사업 검색을 도와드리는 AI 컨설턴트입니다. 어떤 지원사업을 찾고 계신가요?
+          </p>
         </div>
 
-        <div className="ai-quick-questions">
+        <div className="ai-quick-container">
           <div className="ai-quick-header">
             <div className="ai-quick-dot"></div>
             <p className="ai-quick-title">추천 질문을 선택하거나 직접 입력해보세요</p>
@@ -362,13 +382,13 @@ function QuickQuestions() {
             </button>
           </div>
 
-          <div className="ai-welcome-box">
+          <div className="ai-welcome-box secondary">
             <p className="ai-welcome-text">
               <Sparkles className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
               <span>궁금하신 내용을 자유롭게 질문해주세요. AI가 맞춤형 지원사업을 찾아드립니다.</span>
             </p>
           </div>
         </div>
-      </>
+      </div>
   );
 }

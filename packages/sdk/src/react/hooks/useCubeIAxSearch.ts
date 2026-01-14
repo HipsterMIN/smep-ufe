@@ -60,6 +60,8 @@ export interface UseCubeIAxSearchReturn {
   content: string | undefined;
   /** Streaming content (updates during streaming) */
   streamingContent: string;
+  /** The last search query executed */
+  lastQuery: string | null;
   /** Execute a search */
   search: (query: string, options?: Partial<SearchRequest>) => Promise<SearchResponse | null>;
   /** Clear search results */
@@ -125,6 +127,7 @@ export function useCubeIAxSearch(
   const [total, setTotal] = useState(0);
   const [content, setContent] = useState<string | undefined>(undefined);
   const [streamingContent, setStreamingContent] = useState('');
+  const [lastQuery, setLastQuery] = useState<string | null>(null);
 
   const clientRef = useRef<CubeIAxClient | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -164,6 +167,7 @@ export function useCubeIAxSearch(
       setError(null);
       setIsLoading(true);
       setStreamingContent('');
+      setLastQuery(query);
 
       // Create abort controller for this request
       const controller = new AbortController();
@@ -282,6 +286,7 @@ export function useCubeIAxSearch(
     total,
     content,
     streamingContent,
+    lastQuery,
     search,
     clearResults,
     abort,

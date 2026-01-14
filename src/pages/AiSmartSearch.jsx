@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import Header from "../components/ui/Header.jsx";
 import Footer from "../components/ui/Footer.jsx";
 import Breadcrumb from "../components/ui/Breadcrumb";
@@ -9,44 +9,74 @@ import {
   useProgramSearch,
   calculateDaysRemaining,
 } from "@cube-i-ax/sdk/smes/program";
-import { CubeIAxProvider } from "@cube-i-ax/sdk/react";
-
-const SAMPLE_COMPANY_PROFILE = {
-  region: "서울",
-  companySize: "소기업",
-  isSme: true,
-  isVenture: true,
-  isStartup: true,
-  isYouth: true,
-  hasInnobiz: false,
-  hasMainbiz: false,
-  hasResearchDept: true,
-  registeredPatents: 3,
-};
+import useSearchStore from "../store/useSearchStore";
 
 const AiSmartSearchContent = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [query, setQuery] = useState(searchParams.get('q') || "");
+  const location = useLocation();
+  const [query, setQuery] = useState("");
   const searchOptionModalRef = useRef(null);
   
+  // Zustand Store
+  const { 
+    programs: storedPrograms, 
+    total: storedTotal, 
+    summary: storedSummary, 
+    lastQuery: storedLastQuery,
+    setSearchResults 
+  } = useSearchStore();
+
   // 타임아웃 상태 관리
   const [isTimeout, setIsTimeout] = useState(false);
   const timeoutRef = useRef(null);
   const SEARCH_TIMEOUT_MS = 15000; // 15초 타임아웃
 
-  const { programs, total, isLoading, error, summary, streamingSummary, isSummaryLoading, search } = useProgramSearch();
+  const { 
+    programs: sdkPrograms, 
+    total: sdkTotal, 
+    isLoading, 
+    error, 
+    summary: sdkSummary, 
+    streamingSummary, 
+    isSummaryLoading, 
+    lastQuery: sdkLastQuery, 
+    search 
+  } = useProgramSearch();
+
+  // SDK 결과를 Store에 동기화
+  useEffect(() => {
+    if (!isLoading && sdkLastQuery && (sdkPrograms.length > 0 || sdkSummary)) {
+      setSearchResults({
+        programs: sdkPrograms,
+        total: sdkTotal,
+        summary: sdkSummary,
+        lastQuery: sdkLastQuery
+      });
+    }
+  }, [sdkPrograms, sdkTotal, sdkSummary, sdkLastQuery, isLoading, setSearchResults]);
+
+  // 화면에 표시할 데이터 결정 (SDK 데이터가 우선, 없으면 Store 데이터)
+  // URL q 파라미터 또는 location state q를 확인
+  const qFromUrl = searchParams.get('q');
+  const qFromState = location.state?.q;
+  const currentQuery = qFromUrl || qFromState;
+
+  const isMatchingStoredQuery = currentQuery && currentQuery === storedLastQuery;
+  
+  const displayPrograms = (isLoading || !isMatchingStoredQuery) ? sdkPrograms : (sdkPrograms.length > 0 ? sdkPrograms : storedPrograms);
+  const displayTotal = (isLoading || !isMatchingStoredQuery) ? sdkTotal : (sdkTotal > 0 ? sdkTotal : storedTotal);
+  const displaySummary = (isLoading || !isMatchingStoredQuery) ? sdkSummary : (sdkSummary || storedSummary);
 
   // 데이터 수신 시 타임아웃 해제
   useEffect(() => {
-    if (programs.length > 0 || summary || streamingSummary) {
+    if (sdkPrograms.length > 0 || sdkSummary || streamingSummary) {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
       setIsTimeout(false);
-      console.log(programs);
     }
-  }, [programs, summary, streamingSummary]);
+  }, [sdkPrograms, sdkSummary, streamingSummary]);
 
   // 컴포넌트 언마운트 시 타이머 정리
   useEffect(() => {
@@ -55,13 +85,22 @@ const AiSmartSearchContent = () => {
     };
   }, []);
 
+  // 검색 실행 로직
   useEffect(() => {
-    const q = searchParams.get('q');
+    const q = qFromUrl || qFromState;
     if (q) {
       setQuery(q);
-      startSearch(q);
+      // 이미 같은 쿼리로 검색된 결과가 있다면(SDK 또는 Store) 재검색하지 않음
+      if (q !== sdkLastQuery && q !== storedLastQuery) {
+        startSearch(q);
+      }
+      
+      // URL에 q가 있으면 제거 (사용자 요청: URL에 쿼리 스트링 안 나오게 하기)
+      if (qFromUrl) {
+        setSearchParams({}, { replace: true });
+      }
     }
-  }, [searchParams]); // search는 의존성에서 제외 (무한 루프 방지)
+  }, [qFromUrl, qFromState, sdkLastQuery, storedLastQuery, setSearchParams]); 
 
   const startSearch = (searchQuery) => {
     setIsTimeout(false);
@@ -81,12 +120,11 @@ const AiSmartSearchContent = () => {
   const handleSearch = () => {
     const trimmedQuery = query.trim();
     if (trimmedQuery) {
-      if (searchParams.get('q') === trimmedQuery) {
-        // 동일한 검색어인 경우 useEffect가 실행되지 않으므로 직접 실행
-        startSearch(trimmedQuery);
-      } else {
-        // 검색어가 다르면 URL 파라미터를 업데이트하고 useEffect에서 처리하도록 함
-        setSearchParams({ q: trimmedQuery });
+      // 검색 실행
+      startSearch(trimmedQuery);
+      // URL 파라미터가 있다면 제거하여 깨끗한 URL 유지
+      if (searchParams.get('q')) {
+        setSearchParams({}, { replace: true });
       }
     }
   };
@@ -312,7 +350,7 @@ const AiSmartSearchContent = () => {
               </div>
 
               <div className="on-contentbox">
-                {isRealLoading && !streamingSummary && !summary && (
+                {isRealLoading && !streamingSummary && !displaySummary && (
                   <div className="on-ai-loading">
                     <div className="icon-wrap">
                       <i className="svg-icon ico-ai lg"></i>
@@ -321,18 +359,18 @@ const AiSmartSearchContent = () => {
                     <p className="on-p3">귀하의 기업에 꼭 맞는 지원사업을 인공지능이 분석하고 있습니다.</p>
                   </div>
                 )}
-                {isSummaryLoading && !streamingSummary && !summary ? (
+                {isSummaryLoading && !streamingSummary && !displaySummary ? (
                   <p className="guide-txt sm">
                     <i className="svg-icon ico-ai lg on-pulse"></i>
                     <span className="on-p2">
                       AI가 검색 결과를 분석하고 있습니다...
                     </span>
                   </p>
-                ) : (streamingSummary || summary) && (
+                ) : (streamingSummary || displaySummary) && (
                   <p className="guide-txt sm">
                     <i className="svg-icon ico-ai lg"></i>
                     <span className="on-p2">
-                      {streamingSummary || summary}
+                      {streamingSummary || displaySummary}
                     </span>
                   </p>
                 )}
@@ -349,7 +387,7 @@ const AiSmartSearchContent = () => {
 
               <div className="search-list-top">
                 <ul className="sch-info" aria-live="polite">
-                  <li>검색 결과 <span className="point">{total}</span>개</li>
+                  <li>검색 결과 <span className="point">{displayTotal}</span>개</li>
                 </ul>
                 <ul className="sch-sort">
                   <li>
@@ -394,7 +432,7 @@ const AiSmartSearchContent = () => {
               )}
 
               <ul className="krds-structured-list type-full">
-                {isRealLoading && programs.length === 0 ? (
+                {isRealLoading && displayPrograms.length === 0 ? (
                   Array.from({ length: 3 }).map((_, idx) => (
                     <li key={`skeleton-${idx}`} className="structured-item">
                       <div className="in">
@@ -418,8 +456,8 @@ const AiSmartSearchContent = () => {
                       </div>
                     </li>
                   ))
-                ) : programs.length > 0 ? (
-                  programs.map((program) => {
+                ) : displayPrograms.length > 0 ? (
+                  displayPrograms.map((program) => {
                     const days = calculateDaysRemaining(program.endDate);
                     let ddayClass = "krds-badge bg-primary number";
                     let ddayText = days !== null ? (days === 0 ? "D-Day" : (days > 0 ? `D-${days}` : "마감")) : "상시";
@@ -498,16 +536,24 @@ const AiSmartSearchContent = () => {
   );
 };
 
+const SAMPLE_COMPANY_PROFILE = {
+  region: "서울",
+  companySize: "소기업",
+  isSme: true,
+  isVenture: true,
+  isStartup: true,
+  isYouth: true,
+  hasInnobiz: false,
+  hasMainbiz: false,
+  hasResearchDept: true,
+  registeredPatents: 3,
+};
+
 const AiSmartSearch = () => {
   return (
-    <CubeIAxProvider
-      apiKey={import.meta.env.VITE_CUBE_IAX_API_KEY}
-      baseUrl={import.meta.env.VITE_CUBE_IAX_API_URL}
-    >
-      <ProgramSearchProvider profile={SAMPLE_COMPANY_PROFILE} stream topK={20}>
-        <AiSmartSearchContent />
-      </ProgramSearchProvider>
-    </CubeIAxProvider>
+    <ProgramSearchProvider profile={SAMPLE_COMPANY_PROFILE} stream topK={20}>
+      <AiSmartSearchContent />
+    </ProgramSearchProvider>
   );
 }
 
