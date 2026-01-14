@@ -8,7 +8,7 @@ const API_CONTEXT = (import.meta.env.VITE_API_CONTEXT || '').replace(/^\/?/, '/'
 const APP_BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
 
 // 모든 API 호출은 /main-dev/api/... 또는 /main/api/... 형태로 시작하도록 구성
-export const apiBaseUrl = `${APP_BASE}/api${API_CONTEXT}`.replace(/\/$/, '')
+export const apiBaseUrl = `${APP_BASE}${API_CONTEXT}`.replace(/\/$/, '')
 
 function buildUrl(path) {
   if (!path) return apiBaseUrl

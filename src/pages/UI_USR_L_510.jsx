@@ -87,7 +87,7 @@ const UI_USR_L_510 = () => {
 				});
 
 				const response = await apiClient.get(
-					`/v1/certificate/issuances?${params.toString()}`
+					`/api/v1/certificate/issuances?${params.toString()}`
 				);
 
 				const data = response.data;
