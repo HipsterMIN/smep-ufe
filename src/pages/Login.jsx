@@ -15,7 +15,7 @@ const UI_USR_R_002 = () => {
           "brno" : brno
       };
 
-      const response = await apiClient.post(`/api/v1/account/scenario-login`, body);
+      const response = await apiClient.post(`/v1/account/scenario-login`, body);
       console.log(response);
       login(brno, response.cmpNm, response.companySize);
   };

@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
         target: apiHost,
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(new RegExp(`^${apiPrefix}`), ''),
+        rewrite: (path) => path.replace(new RegExp(`^${base.replace(/\/$/, '')}`), ''),
         configure: (proxy) => {
           proxy.on('proxyReq', (_proxyReq) => {})
         },

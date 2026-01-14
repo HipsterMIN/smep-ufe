@@ -69,7 +69,7 @@ const Pbanc = () => {
       },
     };
     const response = await axios(config);*/
-    const response = await apiClient.get(`/api/v1/pbanc/${id}`);
+    const response = await apiClient.get(`/v1/pbanc/${id}`);
     setItem(response);
   };
 
