@@ -81,12 +81,20 @@ const UI_USR_L_510 = () => {
 		const fetchData = async () => {
 			setLoading(true);
 			try {
-				const response = await apiClient.get(`/api/v1/certificate/issuances`);
+				const params = new URLSearchParams({
+					page: currentPage + 1,
+					size: 10
+				});
 
-				setIssuanceList(response.data.content);
-				setTotalElements(response.data.totalElements);
-				setTotalPages(response.data.totalPages);
-				setCurrentPage(pageParam);
+				const response = await apiClient.get(
+					`/api/v1/certificate/issuances?${params.toString()}`
+				);
+
+				const data = response.data;
+
+				setIssuanceList(data.content);
+				setTotalElements(data.totalElements);
+				setTotalPages(data.totalPages);
 			} catch (error) {
 				console.error('조회 실패:', error);
 			} finally {
