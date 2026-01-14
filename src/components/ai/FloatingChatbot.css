@@ -25,7 +25,8 @@
   height: 64px; /* h-16 */
 }
 
-.ai-chatbot-container.hidden {
+.ai-chatbot-container.hidden,
+.ai-chatbot-body.hidden {
   display: none;
 }
 
@@ -101,17 +102,37 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow: clip; /* clip prevents programmatic scrolling that scrollIntoView might cause on 'hidden' */
   background-color: #f9fafb; /* neutral-50 */
+  position: relative;
 }
 
 .ai-messages-area {
   flex: 1;
   overflow-y: auto;
+  min-height: 0; /* Important for flex-grow to work correctly with overflow */
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* Ensure the scrollbar is always visible when content overflows */
+.ai-messages-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ai-messages-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ai-messages-area::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.ai-messages-area::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 
 /* Message Bubble */

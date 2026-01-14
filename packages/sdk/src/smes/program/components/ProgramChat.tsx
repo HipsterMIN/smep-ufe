@@ -27,6 +27,7 @@ import {
   type KeyboardEvent,
   useState,
   useCallback,
+  forwardRef,
 } from "react";
 import {
   ProgramChatProvider,
@@ -51,17 +52,17 @@ export interface ProgramChatRootProps {
  * ProgramChat.Root - Provider wrapper
  */
 export function ProgramChatRoot({
-  children,
-  maxResponseLength = 150,
-  includeCitations = false,
-}: ProgramChatRootProps) {
+                                  children,
+                                  maxResponseLength = 150,
+                                  includeCitations = false,
+                                }: ProgramChatRootProps) {
   return (
-    <ProgramChatProvider
-      maxResponseLength={maxResponseLength}
-      includeCitations={includeCitations}
-    >
-      {children}
-    </ProgramChatProvider>
+      <ProgramChatProvider
+          maxResponseLength={maxResponseLength}
+          includeCitations={includeCitations}
+      >
+        {children}
+      </ProgramChatProvider>
   );
 }
 
@@ -82,6 +83,8 @@ export interface ProgramChatMessagesProps {
   renderEmpty?: () => ReactNode;
   /** 루트 className */
   className?: string;
+  /** 추가적인 하위 요소 (예: 스크롤용 div) */
+  children?: ReactNode;
 }
 
 /**
@@ -89,44 +92,57 @@ export interface ProgramChatMessagesProps {
  *
  * 스트리밍 로직을 내부에서 처리하고, render props로 스타일만 위임
  */
-export function ProgramChatMessages({
-  renderMessage,
-  renderStreaming,
-  renderPrograms,
-  renderTyping,
-  renderEmpty,
-  className,
-}: ProgramChatMessagesProps) {
-  const { messages, isTyping, streamingContent, pendingPrograms } = useProgramChat();
+export const ProgramChatMessages = forwardRef<HTMLDivElement, ProgramChatMessagesProps>((
+    {
+      renderMessage,
+      renderStreaming,
+      renderPrograms,
+      renderTyping,
+      renderEmpty,
+      className,
+      children,
+    },
+    ref
+) => {
+  const { messages, isTyping, streamingContent, pendingPrograms } =
+      useProgramChat();
 
   const hasStreamingContent = streamingContent && streamingContent.length > 0;
   const isEmpty = messages.length === 0 && !hasStreamingContent && !isTyping;
 
   return (
-    <div className={className}>
-      {/* 빈 상태 */}
-      {isEmpty && renderEmpty?.()}
+      <div className={className} ref={ref}>
+        {/* 빈 상태 */}
+        {isEmpty && renderEmpty?.()}
 
-      {/* 완료된 메시지들 */}
-      {messages.map((msg) => (
-        <div key={msg.id}>
-          {renderMessage(msg)}
-          {/* 메시지에 포함된 프로그램 목록 */}
-          {msg.programs && msg.programs.length > 0 && renderPrograms?.(msg.programs, msg.id)}
-        </div>
-      ))}
+        {/* 완료된 메시지들 */}
+        {messages.map((msg) => (
+            <div key={msg.id}>
+              {renderMessage(msg)}
+              {/* 메시지에 포함된 프로그램 목록 */}
+              {msg.programs &&
+                  msg.programs.length > 0 &&
+                  renderPrograms?.(msg.programs, msg.id)}
+            </div>
+        ))}
 
-      {/* 스트리밍 중인 응답 */}
-      {hasStreamingContent && renderStreaming?.(streamingContent, pendingPrograms)}
+        {/* 스트리밍 중인 응답 */}
+        {hasStreamingContent &&
+            renderStreaming?.(streamingContent, pendingPrograms)}
 
-      {/* 먼저 도착한 프로그램 (스트리밍 중) */}
-      {hasStreamingContent && pendingPrograms.length > 0 && renderPrograms?.(pendingPrograms, "streaming")}
+        {/* 먼저 도착한 프로그램 (스트리밍 중) */}
+        {hasStreamingContent &&
+            pendingPrograms.length > 0 &&
+            renderPrograms?.(pendingPrograms, "streaming")}
 
-      {/* 타이핑 인디케이터 (스트리밍 시작 전) */}
-      {isTyping && !hasStreamingContent && renderTyping?.()}
-    </div>
+        {/* 타이핑 인디케이터 (스트리밍 시작 전) */}
+        {isTyping && !hasStreamingContent && renderTyping?.()}
+
+        {/* 추가 하위 요소 (e.g. scroll ref) */}
+        {children}
+      </div>
   );
-}
+});
 
 // ============================================
 // Input Component
@@ -160,11 +176,11 @@ export interface ProgramChatInputProps {
  * Enter 키 전송, 로딩 중 비활성화 등 로직을 내부에서 처리
  */
 export function ProgramChatInput({
-  renderInput,
-  renderSend,
-  placeholder = "메시지를 입력하세요...",
-  className,
-}: ProgramChatInputProps) {
+                                   renderInput,
+                                   renderSend,
+                                   placeholder = "메시지를 입력하세요...",
+                                   className,
+                                 }: ProgramChatInputProps) {
   const { send, isTyping } = useProgramChat();
   const [inputValue, setInputValue] = useState("");
 
@@ -175,13 +191,13 @@ export function ProgramChatInput({
   }, [inputValue, isTyping, send]);
 
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleSend();
-      }
-    },
-    [handleSend]
+      (e: KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          handleSend();
+        }
+      },
+      [handleSend]
   );
 
   const inputProps: InputRenderProps = {
@@ -198,10 +214,10 @@ export function ProgramChatInput({
   };
 
   return (
-    <div className={className}>
-      {renderInput(inputProps)}
-      {renderSend(sendProps)}
-    </div>
+      <div className={className}>
+        {renderInput(inputProps)}
+        {renderSend(sendProps)}
+      </div>
   );
 }
 
