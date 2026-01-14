@@ -1,28 +1,106 @@
+/* Floating Action Button (FAB) */
+.ai-chatbot-open-btn {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #2563eb, #4338ca);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-chatbot-open-btn:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.6);
+}
+
+.ai-chatbot-open-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.ai-header-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.ai-chatbot-tooltip {
+  position: absolute;
+  bottom: 80px;
+  right: 0;
+  background-color: #171717;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  z-index: 60;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.quickbox-ai:hover .ai-chatbot-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tooltip-arrow {
+  position: absolute;
+  bottom: -6px;
+  right: 24px;
+  width: 12px;
+  height: 12px;
+  background-color: #171717;
+  transform: rotate(45deg);
+}
+
 /* AI Chatbot Container */
 .ai-chatbot-container {
   position: fixed;
-  bottom: 96px; /* bottom-24 */
-  right: 24px;  /* right-6 */
-  z-index: 9999; /* z-50 */
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
   background-color: white;
-  border-radius: 16px; /* rounded-2xl */
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
-  border: 2px solid #e5e5e5; /* border-neutral-200 */
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  font-family: 'Pretendard', sans-serif;
-  transition: all 0.3s ease;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left; /* Ensure left alignment regardless of parent */
 }
 
 .ai-chatbot-container.expanded {
-  width: 400px;
-  height: 600px;
+  width: 500px;
+  height: 750px;
+  max-width: 90vw;
+  max-height: 85vh;
+  bottom: 24px;
+  right: 24px;
 }
 
 .ai-chatbot-container.minimized {
   width: 384px; /* w-96 */
-  height: 64px; /* h-16 */
+  height: 72px; /* Increased height from 64px to 72px */
+  bottom: 24px;
+  right: 24px;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
 }
 
 .ai-chatbot-container.hidden,
@@ -34,11 +112,17 @@
 .ai-chatbot-header {
   background: linear-gradient(to right, #2563eb, #4338ca); /* from-blue-600 to-indigo-700 */
   color: white;
-  padding: 16px;
+  padding: 12px 16px; /* Reduced vertical padding from 16px to 12px */
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
+  height: 100%; /* Fill container height in minimized state */
+}
+
+.ai-chatbot-container.expanded .ai-chatbot-header {
+  height: auto; /* Let it grow naturally in expanded mode */
+  padding: 16px; /* Original padding for expanded mode */
 }
 
 .ai-header-left {
@@ -59,11 +143,19 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+.ai-header-title {
+  flex: 1;
+  min-width: 0;
+}
+
 .ai-header-title h3 {
   font-weight: 700;
   font-size: 16px;
   margin: 0;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ai-header-title p {
@@ -86,10 +178,11 @@
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s;
-  background: transparent;
-  border: none;
+  background: transparent !important;
+  border: 0 !important;
   color: white;
   cursor: pointer;
+  padding: 0;
 }
 
 .ai-header-btn:hover {
@@ -262,9 +355,18 @@
 }
 
 /* Program Card */
+.ai-programs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+  margin-left: 8px;
+  width: calc(100% - 16px);
+}
+
 .ai-program-card {
   position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
 }
 
 .ai-recommend-badge {
@@ -423,14 +525,22 @@
 
 /* Quick Questions */
 .ai-quick-questions {
-  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 10px;
+}
+
+.ai-quick-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .ai-quick-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
 }
 
 .ai-quick-dot {
@@ -527,19 +637,94 @@
 }
 
 .ai-welcome-box {
-  margin-top: 16px;
-  padding: 12px;
+  padding: 16px;
+  background-color: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.ai-welcome-box.secondary {
   background: linear-gradient(to right, #eff6ff, #eef2ff);
   border: 1px solid #bfdbfe;
-  border-radius: 8px;
+  padding: 12px;
 }
 
 .ai-welcome-text {
-  font-size: 12px;
-  color: #1e40af;
+  font-size: 14px;
+  color: #374151;
   display: flex;
   align-items: flex-start;
   gap: 8px;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.ai-welcome-box.secondary .ai-welcome-text {
+  font-size: 12px;
+  color: #1e40af;
+}
+
+.markdown-content {
+  text-align: left;
+}
+
+/* Quickbox layout fix (Moved from onCommon.css to avoid global impact) */
+.quickbox {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  z-index: 9998 !important; /* Just below the expanded chatbot z-index 9999 */
+  display: flex !important;
+  flex-direction: column-reverse !important;
+  gap: 16px !important;
+  align-items: center !important;
+  top: auto !important;
+  left: auto !important;
+  margin: 0 !important;
+}
+
+.quickbox-ai {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+}
+
+.ai-chatbot-tooltip {
+  animation: gravityMove 2s infinite ease-in-out !important;
+}
+
+@keyframes gravityMove {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.quickbox-top {
+  width: 60px !important;
+  height: 60px !important;
+  border: 1px solid #DDD !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background: #fff !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+.quickbox-top:hover {
+  transform: scale(1.1) !important;
+  background: #328CDF !important;
+  border: 1px solid #5a5a5a !important;
+}
+
+.quickbox-top img {
+  width: 24px !important;
+  height: 24px !important;
 }
