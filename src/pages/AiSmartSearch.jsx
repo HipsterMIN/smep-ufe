@@ -5,24 +5,9 @@ import Footer from "../components/ui/Footer.jsx";
 import Breadcrumb from "../components/ui/Breadcrumb";
 import Pagination from "../components/ui/Pagination"; 
 import {
-  ProgramSearchProvider,
   useProgramSearch,
   calculateDaysRemaining,
 } from "@cube-i-ax/sdk/smes/program";
-import { CubeIAxProvider } from "@cube-i-ax/sdk/react";
-
-const SAMPLE_COMPANY_PROFILE = {
-  region: "서울",
-  companySize: "소기업",
-  isSme: true,
-  isVenture: true,
-  isStartup: true,
-  isYouth: true,
-  hasInnobiz: false,
-  hasMainbiz: false,
-  hasResearchDept: true,
-  registeredPatents: 3,
-};
 
 const AiSmartSearchContent = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -34,7 +19,7 @@ const AiSmartSearchContent = () => {
   const timeoutRef = useRef(null);
   const SEARCH_TIMEOUT_MS = 15000; // 15초 타임아웃
 
-  const { programs, total, isLoading, error, summary, streamingSummary, isSummaryLoading, search } = useProgramSearch();
+  const { programs, total, isLoading, error, summary, streamingSummary, isSummaryLoading, lastQuery, search } = useProgramSearch();
 
   // 데이터 수신 시 타임아웃 해제
   useEffect(() => {
@@ -59,9 +44,12 @@ const AiSmartSearchContent = () => {
     const q = searchParams.get('q');
     if (q) {
       setQuery(q);
-      startSearch(q);
+      // 이미 같은 쿼리로 검색된 결과가 있다면 재검색하지 않음
+      if (q !== lastQuery) {
+        startSearch(q);
+      }
     }
-  }, [searchParams]); // search는 의존성에서 제외 (무한 루프 방지)
+  }, [searchParams, lastQuery]); // lastQuery 추가
 
   const startSearch = (searchQuery) => {
     setIsTimeout(false);
@@ -500,14 +488,7 @@ const AiSmartSearchContent = () => {
 
 const AiSmartSearch = () => {
   return (
-    <CubeIAxProvider
-      apiKey={import.meta.env.VITE_CUBE_IAX_API_KEY}
-      baseUrl={import.meta.env.VITE_CUBE_IAX_API_URL}
-    >
-      <ProgramSearchProvider profile={SAMPLE_COMPANY_PROFILE} stream topK={20}>
-        <AiSmartSearchContent />
-      </ProgramSearchProvider>
-    </CubeIAxProvider>
+    <AiSmartSearchContent />
   );
 }
 

@@ -119,6 +119,8 @@ export interface ProgramSearchContextValue {
   streamingSummary: string;
   /** 요약 로딩 중 */
   isSummaryLoading: boolean;
+  /** 마지막으로 실행된 검색어 */
+  lastQuery: string | null;
   /** 검색 실행 */
   search: (query: string, filters?: SearchFilters) => void;
 }
@@ -385,6 +387,7 @@ function useProgramSearchInternal(): ProgramSearchContextValue {
     summary,
     streamingSummary,
     isSummaryLoading: sdk.isLoading && sdk.results.length > 0,
+    lastQuery: sdk.lastQuery,
     search: (query: string, filters?: SearchFilters) => {
       currentFiltersRef.current = filters;
       const backendFilters = buildBackendFilters(filters);
