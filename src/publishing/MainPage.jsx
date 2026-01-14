@@ -1,8 +1,35 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/ui/Header.jsx";
 import Footer from "../components/ui/Footer.jsx";
+import mainIcon01 from "../assets/main/mainIcon_01.svg";
+import mainIcon02 from "../assets/main/mainIcon_02.svg";
+import mainIcon03 from "../assets/main/mainIcon_03.svg";
+import mainIcon04 from "../assets/main/mainIcon_04.svg";
+import mainIcon05 from "../assets/main/mainIcon_05.svg";
+import mainIcon06 from "../assets/main/mainIcon_06.svg";
+import mainNews from "../assets/main/mainNews.png";
+import mainCer from "../assets/main/mainCer.png";
+import mainNotice from "../assets/main/mainNotice.png";
 
 const MainPage = () => {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      // 검색어를 state로 전달하며 이동
+      navigate(`/publishing/ai-smart-search`, { state: { q: searchQuery.trim() } });
+    } else {
+      navigate(`/publishing/ai-smart-search`);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   return (
     <div id="wrap">
@@ -17,7 +44,20 @@ const MainPage = () => {
                 <div className="main-totalbox-left">
                   <h3>중소기업에 딱 맞는 정보를 검색<span>AI 통합검색</span></h3>
                   <div className="main-totalbox-input">
-                    <input type="text" placeholder='기업 조건에 맞는 지원사업 공고를 찾아줘'/> <button type="button" className="main-totalbox-button" ><span className="sr-only">선택됨</span></button>
+                    <input 
+                      type="text" 
+                      placeholder='기업 조건에 맞는 지원사업 공고를 찾아줘'
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                    /> 
+                    <button 
+                      type="button" 
+                      className="main-totalbox-button" 
+                      onClick={handleSearch}
+                    >
+                      <span className="sr-only">선택됨</span>
+                    </button>
                   </div>
 
                   {/*로그인 전 상태   
@@ -53,32 +93,32 @@ const MainPage = () => {
                   <h3>통합플랫폼 주요 메뉴<span>많이 찾는 메뉴로 바로 이동합니다.</span></h3>
                   <ul>
                     <li><button type="button" className="mtlist-bu">
-                        <span className="main-totalbox-img"><img src="../src/assets/main/mainIcon_01.svg" alt="" /></span>
+                        <span className="main-totalbox-img"><img src={mainIcon01} alt="" /></span>
                         <span className="main-totalbox-tit">사업공고</span>
                         <span className="main-totalbox-txt">지원사업<br/>조회,신청</span>
                       </button></li>
                       <li><button type="button" className="mtlist-bu">
-                        <span className="main-totalbox-img"><img src="../src/assets/main/mainIcon_02.svg" alt="" /></span>
+                        <span className="main-totalbox-img"><img src={mainIcon02} alt="" /></span>
                         <span className="main-totalbox-tit">사업공고 캘린더</span>
                         <span className="main-totalbox-txt">일자별<br/>사업공고 조회</span>
                       </button></li>
                       <li><button type="button" className="mtlist-bu">
-                        <span className="main-totalbox-img"><img src="../src/assets/main/mainIcon_03.svg" alt="" /></span>
+                        <span className="main-totalbox-img"><img src={mainIcon03} alt="" /></span>
                         <span className="main-totalbox-tit">증명서 발급</span>
                         <span className="main-totalbox-txt">각종 증명서<br/>발급 및 출력</span>
                       </button></li>
                       <li><button type="button" className="mtlist-bu">
-                        <span className="main-totalbox-img"><img src="../src/assets/main/mainIcon_04.svg" alt="" /></span>
+                        <span className="main-totalbox-img"><img src={mainIcon04} alt="" /></span>
                         <span className="main-totalbox-tit">정책금융</span>
                         <span className="main-totalbox-txt">금융정책상품<br/>안내</span>
                       </button></li>
                       <li><button type="button" className="mtlist-bu">
-                        <span className="main-totalbox-img"><img src="../src/assets/main/mainIcon_05.svg" alt="" /></span>
+                        <span className="main-totalbox-img"><img src={mainIcon05} alt="" /></span>
                         <span className="main-totalbox-tit">행사정보</span>
                         <span className="main-totalbox-txt">각종<br/>행사정보 안내</span>
                       </button></li>
                       <li><button type="button" className="mtlist-bu">
-                        <span className="main-totalbox-img"><img src="../src/assets/main/mainIcon_06.svg" alt="" /></span>
+                        <span className="main-totalbox-img"><img src={mainIcon06} alt="" /></span>
                         <span className="main-totalbox-tit">입법·행정예고/고시</span>
                         <span className="main-totalbox-txt">법령,정책, 제도 등<br/>안내</span>
                       </button></li>
@@ -89,17 +129,17 @@ const MainPage = () => {
           </div>
           <div className="main-newsebox">
             <div className="inner">
-              <img src="../src/assets/main/mainNews.png" alt="" />
+              <img src={mainNews} alt="" />
             </div>
           </div>
           <div className="main-quickbox">
             <div className="inner">
-              <img src="../src/assets/main/mainCer.png" alt="" />
+              <img src={mainCer} alt="" />
             </div>
           </div>
           <div className="main-noticebox">
             <div className="inner">
-              <img src="../src/assets/main/mainNotice.png" alt="" />
+              <img src={mainNotice} alt="" />
             </div>
           </div>
           { /*컨텐츠 영역 */}
