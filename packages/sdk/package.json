@@ -1,0 +1,104 @@
+{
+  "name": "@cube-i-ax/sdk",
+  "version": "1.0.0",
+  "description": "JavaScript/React SDK for Cube-I-AX AI Search and Chatbot API",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.mjs",
+      "require": "./dist/core/index.js"
+    },
+    "./api": {
+      "types": "./dist/api/index.d.ts",
+      "import": "./dist/api/index.mjs",
+      "require": "./dist/api/index.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.mjs",
+      "require": "./dist/react.js"
+    },
+    "./smes": {
+      "types": "./dist/smes/index.d.ts",
+      "import": "./dist/smes/index.mjs",
+      "require": "./dist/smes/index.js"
+    },
+    "./smes/program": {
+      "types": "./dist/smes/program/index.d.ts",
+      "import": "./dist/smes/program/index.mjs",
+      "require": "./dist/smes/program/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./styles": "./dist/styles.css"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts src/react.ts src/core/index.ts src/api/index.ts src/smes/index.ts src/smes/program/index.ts --format cjs,esm --dts --clean --external react",
+    "dev": "tsup src/index.ts src/react.ts src/core/index.ts src/api/index.ts src/smes/index.ts src/smes/program/index.ts --format cjs,esm --watch --dts --external react",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "docs": "typedoc",
+    "docs:html": "typedoc --options typedoc-html.json"
+  },
+  "keywords": [
+    "cube-i-ax",
+    "ai",
+    "chatbot",
+    "search",
+    "sse",
+    "streaming",
+    "react"
+  ],
+  "author": "Cube-I-AX",
+  "license": "Apache License 2.0",
+  "peerDependencies": {
+    "lucide-react": ">=0.300.0",
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0",
+    "react-markdown": ">=9.0.0",
+    "remark-gfm": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": false
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "lucide-react": {
+      "optional": true
+    },
+    "react-markdown": {
+      "optional": true
+    },
+    "remark-gfm": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.27",
+    "@types/react-dom": "^18.3.7",
+    "lucide-react": "^0.460.0",
+    "react": "^18.2.0",
+    "react-markdown": "^9.0.0",
+    "remark-gfm": "^4.0.0",
+    "tsup": "^8.5.1",
+    "typedoc": "^0.28.15",
+    "typedoc-plugin-markdown": "^4.9.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "tipaplatform": "file:../.."
+  }
+}

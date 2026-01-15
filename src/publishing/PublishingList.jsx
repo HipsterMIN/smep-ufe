@@ -1,69 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { autoPublishingRoutes } from '../routes/autoRoutes.jsx';
 
 const PublishingList = () => {
-  const publishingPages = [
-    {
-      fileName: 'MainPage',
-      screenName: '메인 페이지',
-      path: '/publishing/main' 
-    },
-    {
-      fileName: 'UI_USR_R_002',
-      screenName: '로그인',
-      path: '/publishing/UI_USR_R_002'
-    },
-    {
-      fileName: 'UI_USR_R_005',
-      screenName: 'AI 스마트 통합 검색',
-      path: '/publishing/UI_USR_R_005'
-    },
-    {
-      fileName: 'UI_USR_L_010',
-      screenName: '지원사업 공고 목록',
-      path: '/publishing/UI_USR_L_010'
-    },
-    {
-      fileName: 'UI_USR_R_011',
-      screenName: '지원사업 공고 상세',
-      path: '/publishing/UI_USR_R_011'
-    },
-    {
-      fileName: 'UI_USR_L_020',
-      screenName: '사업공고 목록',
-      path: '/publishing/UI_USR_L_020'
-    },
-    {
-      fileName: 'UI_USR_R_021',
-      screenName: '사업공고 상세',
-      path: '/publishing/UI_USR_R_021'
-    },
-    {
-      fileName: 'UI_USR_L_030',
-      screenName: '정책금융안내 목록',
-      path: '/publishing/UI_USR_L_030'
-    },
-    {
-      fileName: 'UI_USR_R_031',
-      screenName: '정책금융안내 상세',
-      path: '/publishing/UI_USR_R_031'
-    },
-    {
-      fileName: 'UI_USR_L_040',
-      screenName: '증명서 발급 목록',
-      path: '/publishing/UI_USR_L_040'
-    },
-    {
-      fileName: 'UI_USR_R_480',
-      screenName: '나의 대시보드',
-      path: '/publishing/UI_USR_R_480'
-    },
-    {
-      fileName: 'UI_USR_L_510',
-      screenName: '증명서 발급 조회',
-      path: '/publishing/UI_USR_L_510'
-    }
-  ];
+  // autoPublishingRoutes를 사용하여 목록을 동적으로 생성합니다.
+  const publishingPages = autoPublishingRoutes.map(route => ({
+    fileName: route.name,
+    screenName: route.name, // 파일명을 기본 화면명으로 사용 (필요 시 매핑 테이블 추가 가능)
+    path: `/publishing/${route.path}`
+  }));
 
   return (
     <div style={{ padding: '40px', width: '100%', margin: '0 auto' }}>

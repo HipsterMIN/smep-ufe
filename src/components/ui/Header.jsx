@@ -1,9 +1,16 @@
 import React, { useState } from "react";
+import aiText from "../../assets/main/icon-aiText.png";
+import aiIcon from "../../assets/main/icon-ai.png";
+import arrowIcon from "../../assets/main/icon-arrow.svg";
+import {useAuthStore} from "./useAuthStore.jsx";
+import { FloatingChatbot } from "../ai/FloatingChatbot";
+import {useNavigate} from "react-router-dom";
 
 
 // 관리자 - 상단 메뉴
 export default function Header() {
   const [openIndex, setOpenIndex] = useState(null);
+  const { isLogin, logout } = useAuthStore();
 
   const menuItems = [
     { id: 1, label: "메뉴1" },
@@ -12,6 +19,15 @@ export default function Header() {
   ];
   const handleToggle = (index) => {
     setOpenIndex(openIndex === index ? null : index);
+  };
+
+
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate('/service/login'); // 로그인 페이지로 이동
+  };
+  const handleClickMypage = () => {
+    navigate('/service/UI_USR_L_510'); // 증명서 발급 이력 페이지 링크이동.
   };
 
   return (
@@ -38,43 +54,50 @@ export default function Header() {
           <div className="inner">
             <div className="header-branding">
               <h2 className="logo sample">
-                <a href="#">
+                <a href="/main-dev/">
                   <span className="sr-only">중소기업통합플랫폼</span>
                 </a>
               </h2>
               <div className="header-actions">
                 <button type="button" className="btn-navi sch open-modal" data-target="popTotalSch">통합검색</button>
-                <button type="button" className="btn-navi logout">로그아웃</button>
-                <a href="#" className="btn-navi login">로그인</a>
-                <button type="button" className="btn-navi join">회원가입</button>
-                <div className="krds-drop-wrap my-drop">
-                  <button type="button" className="btn-navi my drop-btn active">마이 비즈니스</button>
-                  <div className="drop-menu" >
-                    <div className="drop-in">
-                      <div className="drop-top">
-                        <p className="my-name">홍길동님</p>
-                        <dl className="my-time">
-                          <dt>로그아웃까지 남은 시간</dt>
-                          <dd>
-                            <span className="time">12:00</span>
-                            <button type="button" className="krds-btn small text h-auto">시간 연장</button>
-                          </dd>
-                        </dl>
+                {isLogin ? (
+                    <>
+                      <button type="button" className="btn-navi logout" onClick={logout}>로그아웃</button>
+                      <div className="krds-drop-wrap my-drop">
+                        <button type="button" className="btn-navi my drop-btn active" onClick={() => handleClickMypage()}>마이 비즈니스</button>
+                        <div className="drop-menu" >
+                          <div className="drop-in">
+                            <div className="drop-top">
+                              <p className="my-name">홍길동님</p>
+                              <dl className="my-time">
+                                <dt>로그아웃까지 남은 시간</dt>
+                                <dd>
+                                  <span className="time">12:00</span>
+                                  <button type="button" className="krds-btn small text h-auto">시간 연장</button>
+                                </dd>
+                              </dl>
+                            </div>
+                            <ul className="drop-list">
+                              <li><a href="#" className="item-link">나의 GOV 홈<span className="sr-only"></span></a></li>
+                              <li><a href="#" className="item-link">나의 신청내역<span className="sr-only"></span></a></li>
+                              <li><a href="#" className="item-link">나의 생활정보<span className="sr-only"></span></a></li>
+                              <li><a href="#" className="item-link">나의 정보관리<span className="sr-only"></span></a></li>
+                            </ul>
+                            <div className="drop-bottom">
+                              <button type="button" className="krds-btn medium text" onClick={logout}>
+                                <i className="svg-icon ico-logout"></i> 로그아웃
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <ul className="drop-list">
-                        <li><a href="#" className="item-link">나의 GOV 홈<span className="sr-only"></span></a></li>
-                        <li><a href="#" className="item-link">나의 신청내역<span className="sr-only"></span></a></li>
-                        <li><a href="#" className="item-link">나의 생활정보<span className="sr-only"></span></a></li>
-                        <li><a href="#" className="item-link">나의 정보관리<span className="sr-only"></span></a></li>
-                      </ul>
-                      <div className="drop-bottom">
-                        <button type="button" className="krds-btn medium text">
-                          <i className="svg-icon ico-logout"></i> 로그아웃
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                    </>
+                ) : (
+                    <>
+                      <a href="#" className="btn-navi login" onClick={(e) => { handleClick();}}>로그인</a>
+                      <button type="button" className="btn-navi join">회원가입</button>
+                    </>
+                )}
                 <button type="button" className="btn-navi all" aria-controls="mobile-nav">전체메뉴</button>
               </div>
             </div>
@@ -95,11 +118,11 @@ export default function Header() {
                       <div className="gnb-sub-content">
                         <h2 className="sub-title"><span>사업공고 및 정책금융 증명서 발급정보를 제공합니다.</span></h2>
                         <ul>
-                          <li><a href="#">AI 스마트 통합 검색</a></li>
-                          <li><a href="#">중소벤처기업부 지원사업공고</a></li>
-                          <li><a href="#">사업공고</a></li>
-                          <li><a href="#">정책금융</a></li>
-                          <li><a href="#">증명서 발급</a></li>
+                          <li><a href="/main-dev/ai-smart-search">AI 스마트 통합 검색</a></li>
+                          <li><a href="/main-dev/service/UI_USR_L_010">중소벤처기업부 지원사업공고</a></li>
+                          <li><a href="/main-dev/service/pbanc">사업공고</a></li>
+                          <li><a href="/main-dev/service/UI_USR_L_030">정책금융</a></li>
+                          <li><a href="/main-dev/service/UI_USR_L_040">증명서 발급</a></li>
                         </ul>
                       </div>
                     </div>
@@ -275,12 +298,13 @@ export default function Header() {
       { /*메인메뉴 : 모바일 */}
     </header>
     <div className="quickbox">
-      <button type="button" className="quickbox-ai">
-        <img className="quickbox-ai-txt" src="../src/assets/main/icon-aiText.png" alt="민원사항이 있을 땐 AI 컨설턴트" />
-        <img className="quickbox-ai-icon" src="../src/assets/main/icon-ai.png" alt="" />
-      </button>
-      <button type="button" className="quickbox-top">
-        <img src="../src/assets/main/icon-arrow.svg" alt="" />
+      <FloatingChatbot onSelectProgram={(program) => navigate(`/service/pbanc/${program.id}`)} />
+      <button 
+        type="button" 
+        className="quickbox-top"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        <img src={arrowIcon} alt="" />
         <span className="sr-only">상단으로</span>
       </button>
     </div>
