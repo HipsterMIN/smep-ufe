@@ -140,30 +140,10 @@ const UI_USR_L_010 = () => {
 								<td className="ac"><span>2026.11.13</span></td>
 								<td className="ac"><span>발급 성공</span></td>
 								<td className="ac">
-                  <select class="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
+                  <select className="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
                 </td>
 								<td className="ac">
-                  <button type="button" class="krds-btn small">출력</button>
-                </td>
-							</tr>
-							<tr>
-								<th scope="row" className="ac">
-									<span>123</span>
-								</th>
-								<td>
-						 			<a className="onellipsis-1" href="#">
-										<span>미래성과공유기업확미래성과공유기업확미래성과공유기업확미래성과공유기업확</span>
-									</a>
-								</td>
-								<td className="ac"><span>1002030000</span></td>
-								<td className="ac"><span>2025.11.14 09:11:04</span></td>
-								<td className="ac"><span>2026.11.13</span></td>
-								<td className="ac"><span>발급 성공</span></td>
-								<td className="ac">
-                  <select class="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
-                </td>
-								<td className="ac">
-                  <button type="button" class="krds-btn small" disabled>출력불가</button>
+                  <button type="button" className="krds-btn small">출력</button>
                 </td>
 							</tr>
 							<tr>
@@ -180,30 +160,10 @@ const UI_USR_L_010 = () => {
 								<td className="ac"><span>2026.11.13</span></td>
 								<td className="ac"><span>발급 성공</span></td>
 								<td className="ac">
-                  <select class="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
+                  <select className="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
                 </td>
 								<td className="ac">
-                  <button type="button" class="krds-btn small" disabled>출력불가</button>
-                </td>
-							</tr>
-							<tr>
-								<th scope="row" className="ac">
-									<span>123</span>
-								</th>
-								<td>
-						 			<a className="onellipsis-1" href="#">
-										<span>미래성과공유기업확미래성과공유기업확미래성과공유기업확미래성과공유기업확</span>
-									</a>
-								</td>
-								<td className="ac"><span>1002030000</span></td>
-								<td className="ac"><span>2025.11.14 09:11:04</span></td>
-								<td className="ac"><span>2026.11.13</span></td>
-								<td className="ac"><span>발급 성공</span></td>
-								<td className="ac">
-                  <select class="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
-                </td>
-								<td className="ac">
-                  <button type="button" class="krds-btn small" disabled>출력불가</button>
+                  <button type="button" className="krds-btn small" disabled>출력불가</button>
                 </td>
 							</tr>
 							<tr>
@@ -220,30 +180,10 @@ const UI_USR_L_010 = () => {
 								<td className="ac"><span>2026.11.13</span></td>
 								<td className="ac"><span>발급 성공</span></td>
 								<td className="ac">
-                  <select class="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
+                  <select className="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
                 </td>
 								<td className="ac">
-                  <button type="button" class="krds-btn small" disabled>출력불가</button>
-                </td>
-							</tr>
-							<tr>
-								<th scope="row" className="ac">
-									<span>123</span>
-								</th>
-								<td>
-						 			<a className="onellipsis-1" href="#">
-										<span>미래성과공유기업확미래성과공유기업확미래성과공유기업확미래성과공유기업확</span>
-									</a>
-								</td>
-								<td className="ac"><span>1002030000</span></td>
-								<td className="ac"><span>2025.11.14 09:11:04</span></td>
-								<td className="ac"><span>2026.11.13</span></td>
-								<td className="ac"><span>발급 성공</span></td>
-								<td className="ac">
-                  <select class="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
-                </td>
-								<td className="ac">
-                  <button type="button" class="krds-btn small" disabled>출력불가</button>
+                  <button type="button" className="krds-btn small" disabled>출력불가</button>
                 </td>
 							</tr>
 							<tr>
@@ -260,30 +200,10 @@ const UI_USR_L_010 = () => {
 								<td className="ac"><span>2026.11.13</span></td>
 								<td className="ac"><span>발급 성공</span></td>
 								<td className="ac">
-                  <select class="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
+                  <select className="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
                 </td>
 								<td className="ac">
-                  <button type="button" class="krds-btn small" disabled>출력불가</button>
-                </td>
-							</tr>
-							<tr>
-								<th scope="row" className="ac">
-									<span>123</span>
-								</th>
-								<td>
-						 			<a className="onellipsis-1" href="#">
-										<span>미래성과공유기업확미래성과공유기업확미래성과공유기업확미래성과공유기업확</span>
-									</a>
-								</td>
-								<td className="ac"><span>1002030000</span></td>
-								<td className="ac"><span>2025.11.14 09:11:04</span></td>
-								<td className="ac"><span>2026.11.13</span></td>
-								<td className="ac"><span>발급 성공</span></td>
-								<td className="ac">
-                  <select class="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
-                </td>
-								<td className="ac">
-                  <button type="button" class="krds-btn small" disabled>출력불가</button>
+                  <button type="button" className="krds-btn small" disabled>출력불가</button>
                 </td>
 							</tr>
 							<tr>
@@ -300,30 +220,10 @@ const UI_USR_L_010 = () => {
 								<td className="ac"><span>2026.11.13</span></td>
 								<td className="ac"><span>발급 성공</span></td>
 								<td className="ac">
-                  <select class="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
+                  <select className="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
                 </td>
 								<td className="ac">
-                  <button type="button" class="krds-btn small" disabled>출력불가</button>
-                </td>
-							</tr>
-							<tr>
-								<th scope="row" className="ac">
-									<span>123</span>
-								</th>
-								<td>
-						 			<a className="onellipsis-1" href="#">
-										<span>미래성과공유기업확미래성과공유기업확미래성과공유기업확미래성과공유기업확</span>
-									</a>
-								</td>
-								<td className="ac"><span>1002030000</span></td>
-								<td className="ac"><span>2025.11.14 09:11:04</span></td>
-								<td className="ac"><span>2026.11.13</span></td>
-								<td className="ac"><span>발급 성공</span></td>
-								<td className="ac">
-                  <select class="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
-                </td>
-								<td className="ac">
-                  <button type="button" class="krds-btn small" disabled>출력불가</button>
+                  <button type="button" className="krds-btn small" disabled>출력불가</button>
                 </td>
 							</tr>
 							<tr>
@@ -340,10 +240,110 @@ const UI_USR_L_010 = () => {
 								<td className="ac"><span>2026.11.13</span></td>
 								<td className="ac"><span>발급 성공</span></td>
 								<td className="ac">
-                  <select class="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
+                  <select className="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
                 </td>
 								<td className="ac">
-                  <button type="button" class="krds-btn small" disabled>출력불가</button>
+                  <button type="button" className="krds-btn small" disabled>출력불가</button>
+                </td>
+							</tr>
+							<tr>
+								<th scope="row" className="ac">
+									<span>123</span>
+								</th>
+								<td>
+						 			<a className="onellipsis-1" href="#">
+										<span>미래성과공유기업확미래성과공유기업확미래성과공유기업확미래성과공유기업확</span>
+									</a>
+								</td>
+								<td className="ac"><span>1002030000</span></td>
+								<td className="ac"><span>2025.11.14 09:11:04</span></td>
+								<td className="ac"><span>2026.11.13</span></td>
+								<td className="ac"><span>발급 성공</span></td>
+								<td className="ac">
+                  <select className="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
+                </td>
+								<td className="ac">
+                  <button type="button" className="krds-btn small" disabled>출력불가</button>
+                </td>
+							</tr>
+							<tr>
+								<th scope="row" className="ac">
+									<span>123</span>
+								</th>
+								<td>
+						 			<a className="onellipsis-1" href="#">
+										<span>미래성과공유기업확미래성과공유기업확미래성과공유기업확미래성과공유기업확</span>
+									</a>
+								</td>
+								<td className="ac"><span>1002030000</span></td>
+								<td className="ac"><span>2025.11.14 09:11:04</span></td>
+								<td className="ac"><span>2026.11.13</span></td>
+								<td className="ac"><span>발급 성공</span></td>
+								<td className="ac">
+                  <select className="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
+                </td>
+								<td className="ac">
+                  <button type="button" className="krds-btn small" disabled>출력불가</button>
+                </td>
+							</tr>
+							<tr>
+								<th scope="row" className="ac">
+									<span>123</span>
+								</th>
+								<td>
+						 			<a className="onellipsis-1" href="#">
+										<span>미래성과공유기업확미래성과공유기업확미래성과공유기업확미래성과공유기업확</span>
+									</a>
+								</td>
+								<td className="ac"><span>1002030000</span></td>
+								<td className="ac"><span>2025.11.14 09:11:04</span></td>
+								<td className="ac"><span>2026.11.13</span></td>
+								<td className="ac"><span>발급 성공</span></td>
+								<td className="ac">
+                  <select className="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
+                </td>
+								<td className="ac">
+                  <button type="button" className="krds-btn small" disabled>출력불가</button>
+                </td>
+							</tr>
+							<tr>
+								<th scope="row" className="ac">
+									<span>123</span>
+								</th>
+								<td>
+						 			<a className="onellipsis-1" href="#">
+										<span>미래성과공유기업확미래성과공유기업확미래성과공유기업확미래성과공유기업확</span>
+									</a>
+								</td>
+								<td className="ac"><span>1002030000</span></td>
+								<td className="ac"><span>2025.11.14 09:11:04</span></td>
+								<td className="ac"><span>2026.11.13</span></td>
+								<td className="ac"><span>발급 성공</span></td>
+								<td className="ac">
+                  <select className="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
+                </td>
+								<td className="ac">
+                  <button type="button" className="krds-btn small" disabled>출력불가</button>
+                </td>
+							</tr>
+							<tr>
+								<th scope="row" className="ac">
+									<span>123</span>
+								</th>
+								<td>
+						 			<a className="onellipsis-1" href="#">
+										<span>미래성과공유기업확미래성과공유기업확미래성과공유기업확미래성과공유기업확</span>
+									</a>
+								</td>
+								<td className="ac"><span>1002030000</span></td>
+								<td className="ac"><span>2025.11.14 09:11:04</span></td>
+								<td className="ac"><span>2026.11.13</span></td>
+								<td className="ac"><span>발급 성공</span></td>
+								<td className="ac">
+                  <select className="krds-form-select small"><option value="">한국어</option><option value="">항목</option><option value="">항목</option></select>
+                </td>
+								<td className="ac">
+                  <button type="button" className="krds-btn small" disabled>출력불가</button>
                 </td>
 							</tr>
 						</tbody>
