@@ -1781,3 +1781,30 @@
   animation: ai-pulse 2s ease-in-out infinite;
 }
 
+/* 2026- 01-15 김혜연 start */
+.krds-modal.no-bottom-btn .modal-conts {
+  margin-bottom: 40px;
+}
+.on-guide-box {
+  display: flex; 
+  align-items: center; 
+  text-align: center; 
+  padding: 54px; 
+  background: var(--blue-color3); 
+  min-height: 360px; 
+  color: var(--krds-light-color-text-primary);
+}
+
+@media (max-width: 767px) {
+  .step-imgguide .step-imgguide-title {
+    font-size: 13px;
+  }
+  .step-box .step-imgguide:not(.type-divide) {
+    flex-direction: column;
+    gap: 50px;
+  }
+  .step-imgguide .step-imgguide-item:not(:first-of-type)::before {
+    transform: rotate(90deg) translateX(-50%); top: -10px; left: calc(50% - 16px);
+  }
+}
+/* 2026- 01-15 김혜연 start */
