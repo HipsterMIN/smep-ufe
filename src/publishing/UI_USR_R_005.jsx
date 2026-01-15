@@ -176,7 +176,7 @@ const MainPage = () => {
                       <div className="on-searchoption-selectlists">
                         <div>
                           <h4>기업규모</h4>
-                          <select class="krds-form-select small">
+                          <select className="krds-form-select small">
                             <option value="">전체</option>
                           </select>
                         </div>
@@ -184,7 +184,7 @@ const MainPage = () => {
                       <div className="on-searchoption-selectlists">
                         <div>
                           <h4>지원유형</h4>
-                          <select class="krds-form-select small">
+                          <select className="krds-form-select small">
                             <option value="">전체</option>
                           </select>
                         </div>
@@ -192,7 +192,7 @@ const MainPage = () => {
                       <div className="on-searchoption-selectlists">
                         <div>
                           <h4>접수유형</h4>
-                          <select class="krds-form-select small">
+                          <select className="krds-form-select small">
                             <option value="">전체</option>
                           </select>
                         </div>
@@ -200,7 +200,7 @@ const MainPage = () => {
                       <div className="on-searchoption-selectlists">
                         <div>
                           <h4>신청현황</h4>
-                          <select class="krds-form-select small">
+                          <select className="krds-form-select small">
                             <option value="">전체</option>
                           </select>
                         </div>
@@ -260,9 +260,9 @@ const MainPage = () => {
                   <li className="structured-item">
                     <div className="in">
                       <div className="card-top">
-                          <div class="krds-badge-wrap">
+                          <div className="krds-badge-wrap">
                             <span className="krds-badge bg-light-primary">기술</span>
-                            <span class="krds-badge bg-primary number">D-234</span>
+                            <span className="krds-badge bg-primary number">D-234</span>
                           </div>
                       </div>
                       <div className="card-body">
@@ -301,9 +301,9 @@ const MainPage = () => {
                   <li className="structured-item">
                     <div className="in">
                       <div className="card-top">
-                          <div class="krds-badge-wrap">
+                          <div className="krds-badge-wrap">
                             <span className="krds-badge bg-light-primary">기술</span>
-                            <span class="krds-badge bg-primary number">D-234</span>
+                            <span className="krds-badge bg-primary number">D-234</span>
                           </div>
                       </div>
                       <div className="card-body">
@@ -335,9 +335,9 @@ const MainPage = () => {
                   <li className="structured-item">
                     <div className="in">
                       <div className="card-top">
-                          <div class="krds-badge-wrap">
+                          <div className="krds-badge-wrap">
                             <span className="krds-badge bg-light-primary">기술</span>
-                            <span class="krds-badge bg-primary number">D-234</span>
+                            <span className="krds-badge bg-primary number">D-234</span>
                           </div>
                       </div>
                       <div className="card-body">

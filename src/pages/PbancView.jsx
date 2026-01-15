@@ -2,7 +2,6 @@ import React, {useEffect, useRef, useState} from "react";
 import SideNavigation from "../components/ui/SideNavigation";
 import Breadcrumb from "../components/ui/Breadcrumb";
 import SearchListTop from "../components/ui/SearchListTop";
-import Table from "../components/ui/Table";
 import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 import {api as apiClient} from "../lib/apiClient.js";
