@@ -59,7 +59,7 @@ const UI_USR_R_041 = () => {
         </div>
 
         <div className="detail-list-wrap">
-          <div class="on-detail-list">
+          <div className="on-detail-list">
             <dl>
               <dt className="w-200">서비스 명</dt>
               <dd>
@@ -132,7 +132,7 @@ const UI_USR_R_041 = () => {
             <dl>
               <dt className="w-200">절차 및 방법</dt>
               <dd>
-                <ul class="krds-info-list decimal" role="list">
+                <ul className="krds-info-list decimal" role="list">
                   <li role="listitem">벤처확인종합관리시스템(<a className="on-linktxt2" href="http://smes.go.kr/venturein" target="_blank" title="새 창 열림">www.smes.go.kr/venturein</a>)에 접속하여 회원가입</li>
                   <li role="listitem">확인유형 선택 후 신청서 작성 및 서류제출</li>
                   <li role="listitem">전문평가기관의 서류검토 및 현장 실제조사</li>
