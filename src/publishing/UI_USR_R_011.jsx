@@ -166,7 +166,7 @@ const UI_USR_R_011 = () => {
 
           <div className="page-title-wrap has-badge-type" data-type="responsive">
             <h3 className="h-tit3">진행중인 사업공고</h3>
-            <span class="krds-badge bg-primary number">2건</span>
+            <span className="krds-badge bg-primary number">2건</span>
           </div>
 
           {/* table [S] */}

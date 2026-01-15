@@ -444,6 +444,7 @@
   font-size: 17px;
   color: #383838;
 }
+.on-strong {}
 .krds-structured-list .on-p3 {
   color: #1e2124;
 }
@@ -466,6 +467,7 @@
   font-weight: 700;
 }
 /* util */
+.on-fit-width {max-width: fit-content !important;}
 .krds-btn.krds-btn-shadow {
   box-shadow: 0 0 2px 0 var(--color-alpha-shadow2, rgba(0, 0, 0, 0.08)), 0 var(--shadow-y-3, 8px) var(--shadow-blur-3, 16px) 0 var(--color-alpha-shadow3, rgba(0, 0, 0, 0.12));
 }
@@ -484,9 +486,9 @@
   overflow: hidden;
   word-break: auto-phrase;
 }
-.onellipsis-2 {
+.onellipsis-3 {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 3 !important;
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: auto-phrase;
@@ -497,6 +499,17 @@
 .svg-icon.lg {
   width: 32px;
   height: 32px;
+}
+.svg-icon.ico-help-gray {
+   -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: contain;
+  background-image: url(./img/component/icon/ico_help_gray.svg);
+  mask-image: url(./img/component/icon/ico_help_gray.svg);
+  background-size: cover;
 }
 .svg-icon.ico-building {
   -webkit-mask-repeat: no-repeat;
@@ -539,6 +552,18 @@
   background-image: url(./img/component/icon/ico_excel.svg);
   mask-image: url(./img/component/icon/ico_excel.svg);
   background-size: cover;
+}
+.svg-icon.ico-hot {
+  width: 18px;
+  height: 24px;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: contain;
+  background-image: url(./img/component/icon/ico_hot.svg);
+  mask-image: url(./img/component/icon/ico_hot.svg);
 }
 .svg-icon.ico-ai {
   -webkit-mask-repeat: no-repeat;
@@ -712,6 +737,12 @@
 .page-title-wrap + .krds-table-wrap {
   margin-top: 24px;
 }
+/* krds-tab-area  */
+.krds-tab-area {gap: 0px;}
+.tab + .tab-conts-wrap {margin-top: 40px;}
+
+/* conts-desc */
+.conts-desc {color: #666; margin-top: 24px; margin-bottom: 48px; width: 100%;}
 
 /* page-title */
 .page-title-wrap.has-badge-type {display: flex; flex-wrap: wrap; gap: 12px; align-items: center;} 
@@ -734,6 +765,17 @@
   font-size: 24px;
   font-weight: 700;
 }
+
+/* onhotbox */ 
+.onhotbox {
+  margin-top: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.onhot-title {display: flex; align-items: center; gap: 4px;} 
+.onhot-title button {display: flex;}
+.onhot-title p{display: flex;  gap: 4px; color: #1E2124; font-size: 19px; font-weight: 700;}
 /* search-top-box */
 .search-top-box {
   min-width: auto;
@@ -786,23 +828,27 @@
   align-items: center;
   justify-content: flex-start;
   flex-direction: row;
-  gap: 24px;
+  gap: 12px;
   width: 100%;
   max-width: 26.5rem;
-}
-.search-top-box .sch-filter-box .filter-form > div:nth-child(4) {
-  max-width: fit-content;
-}
-.search-top-box .sch-filter-box .filter-form > div:nth-child(4) .krds-input {
-  width: 37rem;
 }
 .search-top-box .sch-filter-box .filter-form .label {
   font-weight: var(--krds-font-weight-bold);
   white-space: nowrap;
   min-width: 6.3rem;
 }
+.search-top-box .sch-filter-box .krds-btn.text {
+  font-weight: 700;
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+.krds-btn.text .svg-icon{
+  margin-bottom: 0;
+}
 .search-top-box .sch-filter-box .filter-form .krds-form-select {
   width: 100%;
+  min-width: 190px;
 }
 .search-top-box .filter-chip {
   display: flex;
@@ -1400,9 +1446,15 @@
   gap: 16px;
   margin-bottom: 48px;
 }
+
+/* krds-tooltip-popover */
+.krds-tooltip-popover,
+.krds-tooltip-popover::before {background-color: #58616A;}
+
 /* on-list-btm */
 .on-list-btm {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 16px;
 }
@@ -1411,7 +1463,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-weight: 500;
+  font-weight: 400;
 }
 .on-list-btm > span:before {
   content: "";
@@ -1462,7 +1514,7 @@
   .c-tit.no-icon::after {
   display: none;
 }
-.krds-structured-list .card-btn .krds-btn {display: flex;}
+.krds-structured-list .card-btn .krds-btn {display: flex; padding: 0;}
 .totalsearch-wrap .krds-structured-list .card-body .c-text .c-tit.sml {
   font-size: 19px;
 }
@@ -1682,6 +1734,14 @@
 	.txt-box.outline .check-list > li {font-size: var(--krds-mobile-font-size-body-large);}
 	.step-imgguide {padding: 16px;}
 	.step-imgguide .step-imgguide-img {width: 80px; height: 80px;}
+
+  .on-list-btm {
+    gap: 8px 16px;
+    font-size: 15px;
+  }
+  .krds-structured-list .card-btm {
+    flex-wrap: wrap;
+  }
 }
 
 /* AI Loading & Skeleton UI */

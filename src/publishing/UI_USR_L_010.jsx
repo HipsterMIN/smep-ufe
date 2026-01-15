@@ -211,7 +211,7 @@ const UI_USR_L_010 = () => {
                         </a>
                       </div>
                       <div className="card-btn">
-                        <button type="button" className="krds-btn medium text" title="다문화가족 자녀 언어발달지원서비스" onClick={() => handleToggleLike(index)}> <i className={`svg-icon ico-like on-bgcolorgray ${likedItems[index] ? 'on' : ''}`}></i></button>
+                        <button type="button" className="krds-btn text" title="다문화가족 자녀 언어발달지원서비스" onClick={() => handleToggleLike(index)}> <i className={`svg-icon ico-like on-bgcolorgray ${likedItems[index] ? 'on' : ''}`}></i></button>
                       </div>
                     </li>
                   ))}

@@ -136,7 +136,7 @@ const UI_USR_R_021 = () => {
                   2026년 스마트 제조혁신 지원사업 사업설명회 추가 개최 안내.png
                 </p>
                 <div className="btn-wrap">
-                  <a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열기"><i className="svg-icon ico-sch-plus"></i> 바로보기 </a>
+                  <a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열림"><i className="svg-icon ico-sch-plus"></i> 바로보기 </a>
                   <button type="button" className="krds-btn medium text on-colorblue"><i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드 </button>
                 </div>
               </li>
@@ -151,7 +151,7 @@ const UI_USR_R_021 = () => {
                   2026년 스마트 제조혁신 지원사업 사업설명회 추가 개최 안내.png
                 </p>
                 <div className="btn-wrap">
-                  <a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열기"><i className="svg-icon ico-sch-plus"></i> 바로보기 </a>
+                  <a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열림"><i className="svg-icon ico-sch-plus"></i> 바로보기 </a>
                   <button type="button" className="krds-btn medium text on-colorblue"><i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드 </button>
                 </div>
               </li>
@@ -161,7 +161,7 @@ const UI_USR_R_021 = () => {
                   2026년 스마트 제조혁신 지원사업 사업설명회 추가 개최 안내.png
                 </p>
                 <div className="btn-wrap">
-                  <a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열기"><i className="svg-icon ico-sch-plus"></i> 바로보기 </a>
+                  <a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열림"><i className="svg-icon ico-sch-plus"></i> 바로보기 </a>
                   <button type="button" className="krds-btn medium text on-colorblue"><i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드 </button>
                 </div>
               </li>
