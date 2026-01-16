@@ -1,7 +1,7 @@
 import Breadcrumb from "../components/ui/Breadcrumb";
 import React from "react";
 import {api as apiClient} from "../lib/apiClient.js";
-import {useAuthStore} from "../components/ui/useAuthStore.jsx";
+import {useAuthStore} from "../store/useAuthStore.jsx";
 import {useNavigate} from "react-router-dom";
 
 const UI_USR_R_002 = () => {

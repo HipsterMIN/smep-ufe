@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import aiText from "../../assets/main/icon-aiText.png";
 import aiIcon from "../../assets/main/icon-ai.png";
 import arrowIcon from "../../assets/main/icon-arrow.svg";
-import {useAuthStore} from "./useAuthStore.jsx";
+import {useAuthStore} from "../../store/useAuthStore.jsx";
 import { FloatingChatbot } from "../ai/FloatingChatbot";
 import {useNavigate} from "react-router-dom";
 
