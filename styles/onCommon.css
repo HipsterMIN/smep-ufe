@@ -1867,4 +1867,214 @@
     transform: rotate(90deg) translateX(-50%); top: -10px; left: calc(50% - 16px);
   }
 }
-/* 2026- 01-15 김혜연 start */
+
+
+/* 2026- 01-16 김혜연 start */
+/* util class (컨텐츠 간 간격 적용 시)*/
+.mt-12 {margin-top: 12px;}
+.mt-24 {margin-top: 24px;}
+.mt-40 {margin-top: 40px;}
+.mt-48 {margin-top: 48px;}
+.mb-0 {margin-bottom: 0;}
+
+.krds-table-wrap .krds-badge.ml {
+  margin-left: 8px;
+  margin-right: 0;
+}
+.page-title-wrap.side-conts .h-tit {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.page-title-wrap.side-conts {
+  margin-bottom: 24px;
+}
+.page-title-wrap.side-conts .h-tit {
+  margin-bottom: 0;
+}
+.txt-box.small {
+  padding:  var(--krds-pc-padding-card-small) var(--krds-pc-padding-card-small);
+  font-size: var(--krds-pc-font-size-body-large);
+}
+.krds-structured-list.small > li {
+  padding: var(--krds-pc-padding-card-xsmall);
+  gap: 0;
+}
+.krds-structured-list.small > li:hover {
+  border-color: var(--krds-color-light-primary-50); 
+}
+.krds-structured-list.small .card-body {
+  gap: 10px;
+}
+.krds-structured-list.small .c-info-group {
+  font-size: 15px;
+}
+
+.def-list-wrap .def-list .def-list-group {
+  width: 100%;
+  display: flex;
+}
+.def-list-wrap .def-list dt {
+  width: 18rem;
+  margin-right: var(--krds-gap-7);
+  font-weight: var(--krds-font-weight-bold);
+  color: #131416;
+}
+.def-list-wrap .def-list-group dd {
+  flex: 1;
+}
+
+.on-announcement .ac {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+.on-announcement .announcement-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  font-weight: 700;
+  color: #052B57;
+}
+.on-announcement .announcement-info {
+  margin: 20px 0;
+  display: flex;
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+}
+.on-announcement .announcement-item {
+  flex-basis: calc(100% / 3);
+  text-align: center;
+}
+.on-announcement .announcement-item ~ .announcement-item {
+  border-left: 1px solid #CBCEF2;
+} 
+.on-announcement .announcement-title i {
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
+}
+.on-announcement .announcement-title .ico-building {
+  background: url(./img/component/icon/ico_building_blue.svg) no-repeat 50%;
+  background-size: 100% auto;
+}
+
+.on-announcement .announcement-text  {
+  margin-top: 8px;
+  font-size: 19px;
+  color: #464C53;
+}
+.on-announcement .krds-btn .ico-information {
+  background-image: none;
+}
+
+.on-form-row {
+  border: 1px solid var(--krds-light-color-divider-gray-light); 
+  border-width: 1px 0 1px 0;
+}
+.on-form-row .form-row-item {
+  display: flex;
+  padding: 16px;
+}
+.on-form-row .form-row-label { 
+  width: 164px;
+}
+.on-form-row .form-row-label label {
+  font-size: var(--krds-pc-font-size-heading-xsmall);
+  font-weight: 700;
+  color: #1E2124;
+}
+.on-form-row .form-row-content {
+  flex: 1;
+}
+.on-form-row .form-row-content .w-272 {
+  width: 272px;
+}
+
+.onboard-btm-btngroup.btn-single {
+  justify-content: flex-end;
+}
+.onboard-btm-btngroup.bt-0 {
+  border-top: 0;
+  padding-top: 0;
+}
+
+
+
+/* icon */
+.svg-icon.ico-information {
+ -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: contain;
+  background-image: url(./img/component/icon/ico_information.svg);
+  mask-image: url(./img/component/icon/ico_information.svg);
+}
+.svg-icon.ico-search-custom {
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: contain;
+  background-image: url(./img/component/icon/ico_search_custom.svg);
+  mask-image: url(./img/component/icon/ico_search_custom.svg);
+  background-size: cover;
+}
+.svg-icon.ico-coin {
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: contain;
+  background-image: url(./img/component/icon/ico_coin.svg);
+  mask-image: url(./img/component/icon/ico_coin.svg);
+  background-size: cover;
+}
+.svg-icon.ico-graph {
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: contain;
+  background-image: url(./img/component/icon/ico_graph.svg);
+  mask-image: url(./img/component/icon/ico_graph.svg);
+  background-size: cover;
+}
+
+/* 기존 on-required 지우기 */
+.on-required {width: 6px; height: 6px; margin-left: 2px; background: url(./img/component/icon/ico_required.svg) no-repeat center; background-size: 100% auto;}
+
+@media (max-width: 767px) {
+  .page-title-wrap .h-tit {
+    font-size: var(--krds-mobile-font-size-heading-xlarge);
+  }
+  .page-title-wrap .h-tit .krds-badge-wrap {
+      margin-top: var(--krds-mobile-gap-layout-title-body-large);
+  }
+  .page-title-wrap.side-conts .h-tit {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .def-list-wrap .def-list .def-list-group  {
+    flex-direction: column;
+    gap: var(--krds-gap-4) 0;
+  }
+
+  .on-form-row .form-row-item {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .on-form-row .form-row-content .form-wrapper {
+    width: 100%;
+  }
+}
+/* 2026- 01-16 김혜연 end */
