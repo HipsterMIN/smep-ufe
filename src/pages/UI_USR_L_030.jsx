@@ -15,7 +15,7 @@ const UI_USR_L_030 = () => {
         depth3: [
           {
             label: "AI 스마트 검색",
-            link: "/main-dev/ai-smart-search",
+            link: "/ai-smart-search",
           },
         ],
       },
@@ -25,7 +25,7 @@ const UI_USR_L_030 = () => {
         depth3: [
           {
             label: "지원사업",
-            link: "/main-dev/service/UI_USR_L_010",
+            link: "/service/UI_USR_L_010",
           },
         ],
 
@@ -36,7 +36,7 @@ const UI_USR_L_030 = () => {
         depth3: [
           {
             label: "사업공고",
-            link: "/main-dev/service/pbanc",
+            link: "/service/pbanc",
           },
         ],
       },
@@ -46,7 +46,7 @@ const UI_USR_L_030 = () => {
         depth3: [
           {
             label: "정책금융안내",
-            link: "/main-dev/service/UI_USR_L_030",
+            link: "/service/UI_USR_L_030",
             active: true,
           },
         ],
@@ -57,7 +57,7 @@ const UI_USR_L_030 = () => {
         depth3: [
           {
             label: "증명서 발급",
-            link: "/main-dev/service/UI_USR_L_040",
+            link: "/service/UI_USR_L_040",
           },
         ],
       },
