@@ -141,12 +141,8 @@ const UI_USR_L_020 = () => {
 			</div>
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
-            <li>
-                <button type="button" className="krds-btn medium text">
-                  <i className="svg-icon ico-excel"></i> 다운로드
-                </button>
-            </li>
-          </ul>
+						<li>검색 결과 <span className="point">24</span>개</li>
+					</ul>
           <ul className="sch-sort">
             <li>
             <strong className="sort-label"><label for="sort">정렬기준</label></strong>
