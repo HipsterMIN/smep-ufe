@@ -10,7 +10,7 @@ export default [
   },
   js.configs.recommended,
   {
-    files: ['src/*.{js,jsx}'],
+    files: ['src/**/*.{js,jsx}'],
     plugins: {
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
