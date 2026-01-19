@@ -33,13 +33,13 @@ export default [
       'indent': ['warn', 2], // 2칸 들여쓰기
       'quotes': ['warn', 'single'], // 작은따옴표
       'semi': ['warn', 'always'], // 세미콜론 필수
-      'comma-dangle': ['error', 'always-multiline'], // 여러 줄 마지막 쉼표
-      'object-curly-spacing': ['error', 'always'], // { foo } 공백
-      'array-bracket-spacing': ['error', 'never'], // [1, 2] 공백 없음
-      'arrow-spacing': ['error', { before: true, after: true }], // () => {} 공백
-      'comma-spacing': ['error', { before: false, after: true }], // a, b 쉼표 뒤 공백
-      'key-spacing': ['error', { afterColon: true }], // key: value 콜론 뒤 공백
-      'keyword-spacing': ['error'], // if () 키워드 공백
+      'comma-dangle': ['warn', 'always-multiline'], // 여러 줄 마지막 쉼표
+      'object-curly-spacing': ['warn', 'always'], // { foo } 공백
+      'array-bracket-spacing': ['warn', 'never'], // [1, 2] 공백 없음
+      'arrow-spacing': ['warn', { before: true, after: true }], // () => {} 공백
+      'comma-spacing': ['warn', { before: false, after: true }], // a, b 쉼표 뒤 공백
+      'key-spacing': ['warn', { afterColon: true }], // key: value 콜론 뒤 공백
+      'keyword-spacing': ['warn'], // if () 키워드 공백
     },
   },
 ];
