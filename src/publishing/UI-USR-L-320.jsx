@@ -11,8 +11,8 @@ const UI_USR_L_320 = () => {
     const [activeTabIndex, setActiveTabIndex] = useState(0);
   
      const handleTabChange = (index) => {
-    setActiveTabIndex(index);
-  };
+      setActiveTabIndex(index);
+    };
 
   const navigationData = {
     depth1Title: "신청·발급",
@@ -94,7 +94,7 @@ const UI_USR_L_320 = () => {
           <Accordion.Item>
             <Accordion.Header>
               <div className="accordion-title">
-                <span class="krds-badge bg-light-primary">경영혁신 마일리지 제도</span>
+                <span className="krds-badge bg-light-primary">경영혁신 마일리지 제도</span>
                 <p className="onellipsis-1">마일리지를 활용하여 사업신청을 했지만 지원대상이 되지 못하면(탈락하면) 사용한 마일리지는 어떻게 되나요?</p>
               </div>
             </Accordion.Header>
@@ -111,7 +111,7 @@ const UI_USR_L_320 = () => {
           <Accordion.Item >
             <Accordion.Header>
                <div className="accordion-title">
-                <span class="krds-badge bg-light-primary">경영혁신 마일리지 제도</span>
+                <span className="krds-badge bg-light-primary">경영혁신 마일리지 제도</span>
                 <p className="onellipsis-1">마일리지를 활용하여 사업신청을 했지만 지원대상이 되지 못하면(탈락하면) 사용한 마일리지는 어떻게 되나요?</p>
               </div>
             </Accordion.Header>
@@ -128,7 +128,7 @@ const UI_USR_L_320 = () => {
           <Accordion.Item >
             <Accordion.Header>
                <div className="accordion-title">
-                <span class="krds-badge bg-light-primary">경영혁신 마일리지 제도</span>
+                <span className="krds-badge bg-light-primary">경영혁신 마일리지 제도</span>
                 <p className="onellipsis-1">마일리지를 활용하여 사업신청을 했지만 지원대상이 되지 못하면(탈락하면) 사용한 마일리지는 어떻게 되나요?</p>
               </div>
             </Accordion.Header>

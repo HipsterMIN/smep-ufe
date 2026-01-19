@@ -89,16 +89,16 @@ const UI_USR_L_050 = () => {
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper">
-                  <div class="textarea-wrap">
+                  <div className="textarea-wrap">
                     <textarea 
-                      class="krds-input"
+                      className="krds-input"
                       id="textarea_01" 
                       placeholder="문의내용을 입력해주세요."
                       required
                       rows={8}
                       />
-                      <p class="textarea-count">
-                        <span class="count-now">0</span><span class="count-total">/100</span>
+                      <p className="textarea-count">
+                        <span className="count-now">0</span><span className="count-total">/100</span>
                       </p>
                   </div>
                 </div>
