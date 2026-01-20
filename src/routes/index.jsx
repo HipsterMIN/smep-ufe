@@ -10,14 +10,16 @@ import UI_USR_L_010 from '../pages/UI_USR_L_010.jsx';
 import UI_USR_R_011 from '../pages/UI_USR_R_011.jsx';
 import UI_USR_L_030 from '../pages/UI_USR_L_030.jsx';
 import UI_USR_L_040 from '../pages/UI_USR_L_040.jsx';
+import UI_USR_R_041 from '../pages/UI_USR_R_041.jsx';
 import UI_USR_R_031 from '../pages/UI_USR_R_031.jsx';
-import Pbanc from "../pages/Pbanc.jsx";
-import PbancView from "../pages/PbancView.jsx";
+import Pbanc from '../pages/Pbanc.jsx';
+import PbancView from '../pages/PbancView.jsx';
 import UI_USR_R_480 from '../pages/UI_USR_R_480.jsx';
 import UI_USR_L_510 from '../pages/UI_USR_L_510.jsx';
 
 // 퍼블리싱 목록 페이지
 import PublishingList from '../publishing/PublishingList.jsx';
+
 
 // Vite의 BASE_URL과 라우터 basename을 일치시킵니다. (예: '/', '/admin/')
 const base = import.meta.env.BASE_URL || '/';
@@ -61,7 +63,7 @@ const router = createBrowserRouter(
     // 404
     { path: '*', element: <div>페이지를 찾을 수 없습니다. (404)</div> },
   ],
-  { basename }
+  { basename },
 );
 
 export default router;
