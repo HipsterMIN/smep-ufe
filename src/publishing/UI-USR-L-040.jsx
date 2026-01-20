@@ -135,7 +135,7 @@ const UI_USR_L_040 = () => {
           </ul>
           <ul className="sch-sort">
              <li>
-              <strong className="sort-label"><label for="sort1">목록 표시 개수</label></strong>
+              <strong className="sort-label"><label htmlFor="sort1">목록 표시 개수</label></strong>
               <div>
                 <select className="krds-form-select-sort" id="sort1">
                   <option>전체</option>
@@ -173,12 +173,12 @@ const UI_USR_L_040 = () => {
 								</th>
 								<td className="ac">
 						 			<div className="title-box">
-									  <span className="krds-badge bg-light-primary ml">전자증명</span>
+									  <span className="krds-badge bg-light-primary">전자증명</span>
 									</div>
 								</td>
 								<td className="ac"><span>(사)벤처기업협회</span></td>
 								<td className="ac"><span>중소벤처기업부 벤처혁신정책과</span></td>
-								<td className="ac"><a href="#" className="krds-btn small">발급</a></td>
+								<td className="ac"><a href="#" className="krds-btn small primary">발급</a></td>
 							</tr>
 						</tbody>
 			    </table>

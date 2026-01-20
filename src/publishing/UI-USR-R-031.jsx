@@ -120,7 +120,7 @@ const UI_USR_R_031 = () => {
                 <i className="svg-icon ico-faq"></i>   
                 문의하기
               </Link>
-              <Link to="#" className="krds-btn large krds-btn-shadow">
+              <Link to="#" className="krds-btn primary large krds-btn-shadow">
                 신청하기
               </Link>
             </div>
