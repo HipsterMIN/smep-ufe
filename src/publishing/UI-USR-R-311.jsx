@@ -144,12 +144,12 @@ const UI_USR_R_311 = () => {
 
 		{/* 하단 버튼 */} 
 		  <div className="onboard-btm-btngroup bt-0">
-            <div>
-              <button type="button" className="krds-btn tertiary xlarge">
-                목록
-              </button>
-            </div>
-          </div>
+        <div>
+          <button type="button" className="krds-btn tertiary xlarge">
+            목록
+          </button>
+        </div>
+      </div>
 
       </div> 
     </>

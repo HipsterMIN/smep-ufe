@@ -2452,6 +2452,11 @@ textarea.krds-input::placeholder {
     font-weight: 700;
     color: #131416;
 }
+.conts-wrap .sec-tit.side-conts {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .conts-wrap .conts-desc {
   margin: 0;
 }
@@ -2538,29 +2543,58 @@ textarea.krds-input::placeholder {
   border-top: var(--krds-light-border-width-variable-regular) solid var(--krds-light-color-divider-gray);
   border-bottom: var(--krds-light-border-width-variable-regular) solid var(--krds-light-color-divider-gray);
 }
-
 .on-subtitle-box.pre {
   padding-top: 20px;
 }
 .on-subtitle-box.pre .subtitle-boxcon {
-  height: 217px;
+  height: 104px;
   margin-top: 0;
 }
+.on-subtitle-box.pre .subtitle-boxtit {
+  padding-top: 0;
+}
 .code-pre {
-  /* 너비 제한 */
   width: 100%;
   max-width: 100%; 
-  /*  넘치는 콘텐츠 처리 (스크롤바 생성) */
   overflow-x: auto; 
-  /*  줄바꿈 설정 (선택사항) */
   white-space: pre-wrap;
-  /* white-space: pre; 가로 스크롤을 원할 때 (이미지 스타일) */
   box-sizing: border-box;
-  color: #1E2124;
-  font-size: 17px;
 }
+
 .krds-table-wrap .tbl.data tbody .br-1 {
   border-right: 1px solid var(--krds-table--data-tbody-color-divider);
+}
+.krds-table-wrap .tbl.word-break td {
+  word-break: break-word;
+}
+
+.search-top-box.no-details {
+  padding: 40px;
+}
+.search-top-box .form-row-box {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.search-top-box .form-row-box ~ .form-row-box {
+  margin-top: 16px; 
+}
+.search-top-box .form-row-box.gap-12 {
+  gap: 12px;
+}
+.search-top-box  .form-row-box .label {
+  font-weight: 700;
+}
+.search-top-box .form-row-box .select-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.search-top-box  .form-row-box .krds-form-select {
+  width: 208px;
+}
+.search-top-box .sch-input.w-476 {
+  width: 476px;
 }
 
 /* util */
@@ -2600,6 +2634,14 @@ textarea.krds-input::placeholder {
     height: 48px;
     font-size: 16px;
     padding: 0 8px;
+  }
+
+  .code-pre {
+    white-space: pre-wrap; /* 박스 너비에 맞춰 자동 줄바꿈 */
+    word-break: break-all; /* 긴 단어나 URL도 강제로 줄바꿈 */
+  }
+  .filter-check-box .krds-check-area {
+    flex-wrap: wrap;
   }
 }
 /* 01-20 김혜연 end */
