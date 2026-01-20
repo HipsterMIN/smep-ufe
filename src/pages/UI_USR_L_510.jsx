@@ -136,8 +136,7 @@ const UI_USR_L_510 = () => {
 						모바일에서는 PDF파일 다운로드 방식만 지원되므로, 인쇄를 원하실 경우 PC로 접속하여 증명서 출력을 진행해 주시기 바랍니다.<br/><br/>
 						발급된 전자증명서는 정부전자문서지갑에서 확인이 가능합니다.<br/>
 						· 개인사업자회원: 전자증명서를 발급한 담당자의 개인 정부전자문서지갑에서 확인<br/>
-						· 법인사업자회원: 법인사업자용 정부전자문서지갑(<a className="on-linktxt2" href="https://dpaper.kr/" target="_blank"
-													  title="새 창 열림">dpaper.kr</a>)에서 확인
+						· 법인사업자회원: 법인사업자용 정부전자문서지갑(<a className="on-linktxt2" href="https://dpaper.kr/" target="_blank" title="새 창 열림">dpaper.kr</a>)에서 확인
 					</p>
 				</div>
 
