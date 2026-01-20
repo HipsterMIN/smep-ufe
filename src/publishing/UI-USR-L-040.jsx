@@ -135,7 +135,7 @@ const UI_USR_L_040 = () => {
           </ul>
           <ul className="sch-sort">
              <li>
-              <strong className="sort-label"><label for="sort1">목록 표시 개수</label></strong>
+              <strong className="sort-label"><label htmlFor="sort1">목록 표시 개수</label></strong>
               <div>
                 <select className="krds-form-select-sort" id="sort1">
                   <option>전체</option>
