@@ -39,12 +39,13 @@ const router = createBrowserRouter(
         { path: 'UI_USR_L_030', element: <UI_USR_L_030 /> },
         { path: 'UI_USR_R_031', element: <UI_USR_R_031 /> },
         { path: 'UI_USR_L_040', element: <UI_USR_L_040 /> },
+        { path: 'certificate/detail/:prdocCd', element: <UI_USR_R_041 /> },
         { path: 'pbanc', element: <Pbanc /> },
         { path: 'pbanc/:id', element: <PbancView /> },
         { path: 'UI_USR_R_480', element: <UI_USR_R_480 /> },
         { path: 'UI_USR_L_510', element: <UI_USR_L_510 /> },
         { path: 'login', element: <Login /> },
-      ]
+      ],
     },
 
     // 퍼블리싱 전용 라우트 (smep-afe 방식)
