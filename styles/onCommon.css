@@ -2352,3 +2352,193 @@ textarea.krds-input::placeholder {
   background: url(./img/component/icon/ico_required.svg) no-repeat center; 
   background-size: 100% auto;
 }
+
+
+
+
+/* 01-20 김혜연 start */
+.mt-16 {
+  margin-top: 16px;
+}
+.helper-box.refer {
+  padding: var(--krds-padding-6);
+  border: 1px solid #cdd1d5;
+  border-radius: 12px;
+  background-color: #F4F5F6;
+}
+.helper-box.refer .helper-tit {
+  font-size: var(--krds-pc-font-size-heading-xsmall);
+  font-weight: 700;
+  color: #1E2124;
+}
+.helper-box.refer .helper-desc-wrap {
+  margin-top: var(--krds-gap-2);
+  font-size: var(--krds-pc-font-size-body-small);
+  color: var(--helper-refer-color-desc);
+}
+
+.krds-structured-list.type-full .card-body .c-date  {
+  flex-basis: 100%;
+}
+.krds-structured-list.type-full .card-body .no-dash li:not(:last-child)::after {
+  display: none;
+}
+
+.conts-wrap .sec-tit {
+    margin-bottom: 16px;
+    font-size: 19px;
+}
+.conts-wrap .conts-desc {
+  margin: 0;
+}
+.conts-wrap .sub-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #464C53;
+}
+.conts-wrap .sub-title {
+  margin-bottom: 16px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #464C53;
+}
+.txt-caution {
+  color:#DE3412;
+  font-weight: 400;
+}
+
+/* 상단 검색 */
+.search-top-box.no-details .sch-filter-box {
+  padding:var(--krds-padding-10);
+  display: block;
+}
+.search-top-box.no-details .sch-filter-box .filter-form .label {
+  flex-shrink: 0;
+  min-width: 0;
+}
+.search-top-box.no-details .sch-filter-box .filter-form > div {
+  width: auto;
+  max-width: none;
+}
+.search-top-box.no-details .filter-chip {
+  padding-bottom: 24px;
+  border-bottom: 1px solid #d6e0eb;
+}
+.search-top-box.no-details .form-box {
+  display: flex;
+  align-items: center;
+  padding-top: 24px;
+  gap: 12px;
+}
+.search-top-box.no-details .form-box .input-box {
+  flex: 1;
+}
+.search-top-box.no-details .form-box .krds-input::placeholder {
+  font-size: 15px;
+}
+
+.filter-chip.align-center {
+  align-items: center;
+}
+.search-top-box .filter-chip.align-center dt {
+  padding-top: 0;
+}
+.search-top-box .filter-chip.align-center dd {
+  align-items: center;
+}
+.filter-check-box .krds-check-area {
+  gap: 4px;
+}
+.filter-check-box .krds-check-area  ~ .krds-check-area {
+  margin-top: 8px;
+}
+.krds-form-chip.round input[type=radio] ~ label,
+.krds-form-chip.round input[type=checkbox] ~ label {
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 24px;
+  border: 1px solid #CDD1D5;
+  font-size: 13px;
+}
+.krds-form-chip.round input[type=radio] ~ label::before,
+.krds-form-chip.round input[type=checkbox] ~ label::before {
+  display: none;
+}
+.krds-form-chip.round input[type=radio]:checked ~ label,
+.krds-form-chip.round input[type=checkbox]:checked ~ label {
+  background: #fff;
+  border: 1px solid #004edf;
+}
+
+.def-list-wrap.border {
+  border-top: var(--krds-light-border-width-variable-regular) solid var(--krds-light-color-divider-gray);
+  border-bottom: var(--krds-light-border-width-variable-regular) solid var(--krds-light-color-divider-gray);
+}
+
+.on-subtitle-box.pre {
+  padding-top: 20px;
+}
+.on-subtitle-box.pre .subtitle-boxcon {
+  height: 217px;
+  margin-top: 0;
+}
+.code-pre {
+  /* 너비 제한 */
+  width: 100%;
+  max-width: 100%; 
+  /*  넘치는 콘텐츠 처리 (스크롤바 생성) */
+  overflow-x: auto; 
+  /*  줄바꿈 설정 (선택사항) */
+  white-space: pre-wrap;
+  /* white-space: pre; 가로 스크롤을 원할 때 (이미지 스타일) */
+  box-sizing: border-box;
+  color: #1E2124;
+  font-size: 17px;
+}
+.krds-table-wrap .tbl.data tbody .br-1 {
+  border-right: 1px solid var(--krds-table--data-tbody-color-divider);
+}
+
+/* util */
+.mt-64 {
+  margin-top: 64px;
+}
+@media (max-width: 767px) {
+  .post-nav-list {
+    padding: 0;
+  }
+  .post-nav-list .post-nav-link {
+    gap: 12px;
+    font-size: 15px;
+    padding-left: 16px;
+  }
+  .post-nav-list .svg-icon {
+    display: none;
+  }
+  .post-nav-list .post-nav-item.next {
+    border-top: 1px solid var(--krds-light-color-divider-gray-light);
+  }
+  .post-nav-list .post-nav-item.next .post-nav-title {
+    order: 0;
+    padding: 0;
+  }
+  .post-nav-list .post-nav-item.prev .post-nav-title {
+    padding-left: 0;
+  }
+
+  .on-announcement .announcement-item ~ .announcement-item {
+    border-left: 0;
+  }
+  .on-announcement .announcement-info {
+    gap: 30px;
+  }
+  .on-announcement .ac {
+    gap: 8px;
+  }
+  .on-announcement .krds-btn.large {
+    height: 48px;
+    font-size: 16px;
+    padding: 0 8px;
+  }
+}
+/* 01-20 김혜연 end */
