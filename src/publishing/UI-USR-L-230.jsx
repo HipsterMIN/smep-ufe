@@ -117,71 +117,82 @@ const UI_USR_L_230 = () => {
             </div>
         </div>
 
-          <div className="search-list-top mt-40">
-            <ul className="sch-info" aria-live="polite">
-              <li>검색 결과 <span className="point">24</span>건</li>
-            </ul>
-            <ul className="sch-sort">
-              <li>
-                <strong className="sort-label"><label for="sort">정렬기준</label></strong>
-                <div className="w-sort-btn">
-                  <button type="button" className="active">최신순<span className="sr-only">선택됨</span></button>
-                  <button type="button">과거순</button>
-                </div>
-                <div className="m-sort-btn">
-                  <select className="krds-form-select-sort" id="sort">
-                    <option>최신순</option>
-                    <option>과거순 </option>
-                  </select>
-                </div>
-              </li>
-            </ul>
-            </div>
+        <div className="search-list-top mt-40">
+          <ul className="sch-info" aria-live="polite">
+            <li>검색 결과 <span className="point">24</span>건</li>
+          </ul>
+          <ul className="sch-sort">
+            <li>
+              <strong className="sort-label"><label for="sort">정렬기준</label></strong>
+              <div className="w-sort-btn">
+                <button type="button" className="active">최신순<span className="sr-only">선택됨</span></button>
+                <button type="button">과거순</button>
+              </div>
+              <div className="m-sort-btn">
+                <select className="krds-form-select-sort" id="sort">
+                  <option>최신순</option>
+                  <option>과거순 </option>
+                </select>
+              </div>
+            </li>
+          </ul>
+          </div>
 
-          {/* table [S] */}
-				 <div className="krds-table-wrap">
-					<table className="tbl col data">
-            <caption>API Q&A 정보. 순번, 문의구분, 제목, 작성자, 처리상태, 등록일 정보가 제공됨.</caption>
-						<colgroup>
-							<col style={{width: "7.4%"}} />
-							<col style={{width: "14%"}} />
-							<col />
-							<col style={{width: "16.8%"}} />
-							<col style={{width: "16.8%"}} />
-							<col style={{width: "13 %"}} />
-						</colgroup>
-						<thead>
-							<tr>
-								<th scope="col" className="ac">순번</th>
-								<th scope="col" className="ac">문의구분</th>
-								<th scope="col" className="ac">제목</th>
-								<th scope="col" className="ac">작성자</th>
-								<th scope="col" className="ac">처리상태</th>
-								<th scope="col" className="ac">등록일</th>
-				            </tr> 
-						</thead>
-						<tbody>
-              {Array.from({ length: 10 }).map((_, index) => (
-							<tr>
-								<th scope="row" className="ac">
-									<span>15</span>
-								</th>
-								<td className="ac"><span>인증키 관련</span></td>
-								<td>
-										<a className="onellipsis-1" href="#">
-										  <span>미래성과공유기업확미래성과공유기업확미래성과공유기업확미래성과공유기업확</span>
-									  </a>
-								</td>
-								<td className="ac"><span>홍*동</span></td>
-								<td className="ac"><span>접수</span></td>
-								<td className="ac"><span>2025-08-14</span></td>
-							</tr>
-              ))}
-						  </tbody>
-			        </table>
+        {/* table [S] */}
+        <div className="krds-table-wrap">
+        <table className="tbl col data">
+          <caption>API Q&A 정보. 순번, 문의구분, 제목, 작성자, 처리상태, 등록일 정보가 제공됨.</caption>
+          <colgroup>
+            <col style={{width: "7.4%"}} />
+            <col style={{width: "14%"}} />
+            <col />
+            <col style={{width: "16.8%"}} />
+            <col style={{width: "16.8%"}} />
+            <col style={{width: "13%"}} />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col" className="ac">순번</th>
+              <th scope="col" className="ac">문의구분</th>
+              <th scope="col" className="ac">제목</th>
+              <th scope="col" className="ac">작성자</th>
+              <th scope="col" className="ac">처리상태</th>
+              <th scope="col" className="ac">등록일</th>
+                  </tr> 
+          </thead>
+          <tbody>
+            {Array.from({ length: 10 }).map((_, index) => (
+            <tr>
+              <th scope="row" className="ac">
+                <span>15</span>
+              </th>
+              <td className="ac"><span>인증키 관련</span></td>
+              <td>
+                  <a className="onellipsis-1" href="#">
+                    <span>수출유망중소기업지정증_test</span>
+                    <i className="svg-icon ico-lock"></i>
+                  </a>
+              </td>
+              <td className="ac"><span>홍*동</span></td>
+              <td className="ac"><span>접수</span></td>
+              <td className="ac"><span>2025-08-14</span></td>
+            </tr>
+            ))}
+            </tbody>
+            </table>
+          </div>
+          {/* table [E] */}
+
+          <Pagination /> 
+
+          {/* bottom btn */}
+          <div className="onboard-btm-btngroup bt-0 btn-single">
+            <div> 
+              <button type="button" className="krds-btn primary xlarge">
+                등록
+              </button>
             </div>
-            {/* table [E] */}
-        <Pagination /> 
+          </div>
       </div> 
     </>
   );

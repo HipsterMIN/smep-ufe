@@ -230,7 +230,7 @@ const UI_USR_R_213 = () => {
             </button>
           </div>
           <div> 
-            <button type="button" className="krds-btn xlarge">
+            <button type="button" className="krds-btn primary xlarge">
               신청하기
                 <i className="svg-icon ico-angle right"></i>
             </button>
