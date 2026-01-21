@@ -291,13 +291,13 @@ const UI_USR_L_040 = () => {
                     <td className="ac">
                       <div className="title-box"><span>{item.prdocTtl}</span>
                         {item.elpblYn === 'Y' && (
-                          <span className="krds-badge bg-light-primary ml">전자증명</span>
+                          <span className="krds-badge bg-light-primary">전자증명</span>
                         )}
                       </div>
                     </td>
                     <td className="ac"><span>{shortenInstName(item.issuInstNm)}</span></td>
                     <td className="ac"><span>{shortenInstName(item.jrsdInstNm)}</span></td>
-                    <td className="ac"><a className="krds-btn small" onClick={() => goToDetail(item.prdocCd)}>발급</a>
+                    <td className="ac"><a className="krds-btn small primary" onClick={() => goToDetail(item.prdocCd)}>발급</a>
                     </td>
                   </tr>
                 ))
