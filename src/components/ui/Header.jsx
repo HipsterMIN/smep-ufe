@@ -1,66 +1,92 @@
-import React, { useState } from "react";
-import aiText from "../../assets/main/icon-aiText.png";
-import aiIcon from "../../assets/main/icon-ai.png";
-import arrowIcon from "../../assets/main/icon-arrow.svg";
-import {useAuthStore} from "../../store/useAuthStore.jsx";
-import { FloatingChatbot } from "../ai/FloatingChatbot";
-import {useNavigate} from "react-router-dom";
+import React, { useState, useMemo, useEffect } from 'react';
+import arrowIcon from '../../assets/main/icon-arrow.svg';
+import { useAuthStore } from '../../store/useAuthStore.jsx';
+import { FloatingChatbot } from '../ai/FloatingChatbot';
+import { useNavigate } from 'react-router-dom';
+import { useMenuStore } from '../../store/useMenuStore';
+import { buildFullPath } from '../../utils/menuUtils';
 
+// BASE URL 상수
+const BASE_URL = import.meta.env.VITE_BASE || '/';
 
 // 관리자 - 상단 메뉴
 export default function Header() {
   const [openIndex, setOpenIndex] = useState(null);
   const { isLogin, logout } = useAuthStore();
+  const { menuTree, flatMenuMap, fetchMenuData } = useMenuStore();
 
-  const menuItems = [
-    { id: 1, label: "메뉴1" },
-    { id: 2, label: "메뉴2" },
-    { id: 3, label: "메뉴3" },
-  ];
-  const handleToggle = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
+  // 메뉴 데이터 로드
+  useEffect(() => {
+    if (!menuTree) {
+      fetchMenuData();
+    }
+  }, [menuTree, fetchMenuData]);
+
+  // 동적 메뉴 구성: depth 1에서 upendMenuExpsrYn === 'Y'인 메뉴만 필터링
+  const dynamicMenus = useMemo(() => {
+    if (!menuTree || !menuTree.children) return [];
+
+    const basePath = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+
+    return menuTree.children
+      .filter(menu => menu.depth === 1 && menu.upendMenuExpsrYn === 'Y')
+      .sort((a, b) => a.sortSeq - b.sortSeq)
+      .map(menu => ({
+        ...menu,
+        fullPath: basePath + buildFullPath(menu, flatMenuMap),
+        children: (menu.children || [])
+          .filter(child => child.lfsdMenuExpsrYn === 'Y')
+          .sort((a, b) => a.sortSeq - b.sortSeq)
+          .map(child => ({
+            ...child,
+            fullPath: basePath + buildFullPath(child, flatMenuMap),
+          })),
+      }));
+  }, [menuTree, flatMenuMap]);
+
+  const handleToggle = (menuId) => {
+    setOpenIndex(openIndex === menuId ? null : menuId);
   };
-
 
   const navigate = useNavigate();
   const handleClick = () => {
-    navigate('/service/login'); // 로그인 페이지로 이동
+    navigate('/service/login');
   };
   const handleClickMypage = () => {
-    navigate('/service/UI_USR_L_510'); // 증명서 발급 이력 페이지 링크이동.
+    navigate('/service/UI_USR_L_510');
   };
 
   return (
     <>
-    <div id="krds-skip-link">
-      <a href="#breadcrumb">본문 바로가기</a>
-    </div>
-    { /*본문 바로가기 영역  */}
-    <div id="krds-masthead">
-      <div className="toggle-wrap">
-        <div className="toggle-head">
-          <div className="inner">
-            <span className="nuri-txt">이 누리집은 대한민국 공식 전자정부 누리집입니다.</span>
+      <div id="krds-skip-link">
+        <a href="#breadcrumb">본문 바로가기</a>
+      </div>
+      { /*본문 바로가기 영역  */}
+      <div id="krds-masthead">
+        <div className="toggle-wrap">
+          <div className="toggle-head">
+            <div className="inner">
+              <span className="nuri-txt">이 누리집은 대한민국 공식 전자정부 누리집입니다.</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    { /*헤더 영역 */}
-    <header id="krds-header">
-      { /*헤더 컨텐츠 영역  */}
-      <div className="header-in">
-        { /*헤더 상단 기타메뉴 */}
-        <div className="header-container">
-          <div className="inner">
-            <div className="header-branding">
-              <h2 className="logo sample">
-                <a href="/main-dev/">
-                  <span className="sr-only">중소기업통합플랫폼</span>
-                </a>
-              </h2>
-              <div className="header-actions">
-                <button type="button" className="btn-navi sch open-modal" data-target="popTotalSch">통합검색</button>
-                {isLogin ? (
+      { /*헤더 영역 */}
+      <header id="krds-header">
+        { /*헤더 컨텐츠 영역  */}
+        <div className="header-in">
+          { /*헤더 상단 기타메뉴 */}
+          <div className="header-container">
+            <div className="inner">
+              <div className="header-branding">
+                <h2 className="logo sample">
+                  <a href="/main-dev/">
+                    <span className="sr-only">중소기업통합플랫폼</span>
+                  </a>
+                </h2>
+                <div className="header-actions">
+                  <button type="button" className="btn-navi sch open-modal" data-target="popTotalSch">통합검색</button>
+                  {isLogin ? (
                     <>
                       <button type="button" className="btn-navi logout" onClick={logout}>로그아웃</button>
                       <div className="krds-drop-wrap my-drop">
@@ -92,222 +118,157 @@ export default function Header() {
                         </div>
                       </div>
                     </>
-                ) : (
+                  ) : (
                     <>
                       <a href="#" className="btn-navi login" onClick={(e) => { handleClick();}}>로그인</a>
                       <button type="button" className="btn-navi join">회원가입</button>
                     </>
-                )}
-                <button type="button" className="btn-navi all" aria-controls="mobile-nav">전체메뉴</button>
+                  )}
+                  <button type="button" className="btn-navi all" aria-controls="mobile-nav">전체메뉴</button>
+                </div>
               </div>
             </div>
           </div>
+          { /*헤더 상단 기타메뉴 */}
+
+          { /*메인메뉴 : 데스크탑 */}
+          <nav className="krds-main-menu">
+            <div className="inner">
+              <ul className="gnb-menu" aria-label="메인 메뉴">
+                {dynamicMenus.map((menu) => (
+                  <li key={menu.menuId}>
+                    <button
+                      type="button"
+                      className={`gnb-main-trigger ${openIndex === menu.menuId ? 'active' : ''}`}
+                      onClick={() => handleToggle(menu.menuId)}
+                    >
+                      {menu.menuNm}
+                    </button>
+                    {/* gnb-toggle-wrap */}
+                    <div className={`gnb-toggle-wrap ${openIndex === menu.menuId ? 'is-open' : ''}`}>
+                      <div className="gnb-main-list">
+                        <div className="gnb-sub-list single-list between">
+                          <div className="gnb-sub-content">
+                            <h2 className="sub-title"><span>{menu.menuNm} 관련 서비스를 제공합니다.</span></h2>
+                            <ul>
+                              {menu.children.map((subMenu) => (
+                                <li key={subMenu.menuId}>
+                                  <a href={subMenu.fullPath}>{subMenu.menuNm}</a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    { /*gnb-toggle-wrap */}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </nav>
+
+          { /*메인메뉴 : 데스크탑 */}
         </div>
-        { /*헤더 상단 기타메뉴 */}
+        { /*헤더 컨텐츠 영역  */}
 
-        { /*메인메뉴 : 데스크탑 */}
-        <nav className="krds-main-menu">
-          <div className="inner">
-            <ul className="gnb-menu" aria-label="메인 메뉴">
-              <li>
-                <button type="button" className={`gnb-main-trigger ${openIndex === "menu1" ? "active" : ""}`} onClick={() => handleToggle("menu1")}>신청·발급</button>
-                {/* gnb-toggle-wrap */}
-                <div className={`gnb-toggle-wrap ${openIndex === "menu1" ? "is-open" : ""}`}>
-                  <div className="gnb-main-list">
-                    <div className="gnb-sub-list single-list between">
-                      <div className="gnb-sub-content">
-                        <h2 className="sub-title"><span>사업공고 및 정책금융 증명서 발급정보를 제공합니다.</span></h2>
-                        <ul>
-                          <li><a href="/main-dev/ai-smart-search">AI 스마트 통합 검색</a></li>
-                          <li><a href="/main-dev/service/UI_USR_L_010">중소벤처기업부 지원사업공고</a></li>
-                          <li><a href="/main-dev/service/pbanc">사업공고</a></li>
-                          <li><a href="/main-dev/service/UI_USR_L_030">정책금융</a></li>
-                          <li><a href="/main-dev/service/UI_USR_L_040">증명서 발급</a></li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                { /*gnb-toggle-wrap */}
-              </li>
-
-              <li>
-                <button type="button" className={`gnb-main-trigger ${openIndex === "menu2" ? "active" : ""}`} onClick={() => handleToggle("menu2")}>정책정보</button>
-                {/* gnb-toggle-wrap */}
-                <div className={`gnb-toggle-wrap ${openIndex === "menu2" ? "is-open" : ""}`}>
-                  <div className="gnb-main-list">
-                    <div className="gnb-sub-list single-list between">
-                      <div className="gnb-sub-content">
-                        <h2 className="sub-title"><span>정책 리포트 및 품목·인증·규제정보를 제공합니다.</span></h2>
-                        <ul>
-                          <li><a href="#">정책리포트</a></li>
-                          <li><a href="#">품목·인증·규제</a></li>
-                          <li><a href="#">더많은서비스</a></li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                { /*gnb-toggle-wrap */}
-              </li>
-
-              <li>
-                <button type="button" className={`gnb-main-trigger ${openIndex === "menu3" ? "active" : ""}`} onClick={() => handleToggle("menu3")}>데이터 개방</button>
-                {/* gnb-toggle-wrap */}
-                <div className={`gnb-toggle-wrap ${openIndex === "menu3" ? "is-open" : ""}`}>
-                  <div className="gnb-main-list">
-                    <div className="gnb-sub-list single-list between">
-                      <div className="gnb-sub-content">
-                        <h2 className="sub-title"><span>API 안내 및 인증키 신청 서비스를 제공합니다.</span></h2>
-                        <ul>
-                          <li><a href="#">정책정보 개방</a></li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                { /*gnb-toggle-wrap */}
-              </li>
-
-              <li>
-                <button type="button" className={`gnb-main-trigger ${openIndex === "menu4" ? "active" : ""}`} onClick={() => handleToggle("menu4")}>고객지원</button>
-                {/* gnb-toggle-wrap */}
-                <div className={`gnb-toggle-wrap ${openIndex === "menu4" ? "is-open" : ""}`}>
-                  <div className="gnb-main-list">
-                    <div className="gnb-sub-list single-list between">
-                      <div className="gnb-sub-content">
-                        <h2 className="sub-title"><span>고객센터 및 이용안내 정보를 제공합니다.</span></h2>
-                        <ul>
-                          <li><a href="#">고객센터</a></li>
-                          <li><a href="#">이용안내</a></li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                { /*gnb-toggle-wrap */}
-              </li>
-
-            </ul>
-          </div>
-        </nav>
-
-        { /*메인메뉴 : 데스크탑 */}
-      </div>
-      { /*헤더 컨텐츠 영역  */}
-
-      { /*메인메뉴 : 모바일 */}
-      <div id="mobile-nav" className="krds-main-menu-mobile" >
-        <div className="gnb-wrap">
-          {/* gnb-header */}
-          <div className="gnb-header">
-            {/* gnb-login */}
-            <div className="gnb-login">
-              <span className="user">홍길동님</span>
+        { /*메인메뉴 : 모바일 */}
+        <div id="mobile-nav" className="krds-main-menu-mobile" >
+          <div className="gnb-wrap">
+            {/* gnb-header */}
+            <div className="gnb-header">
+              {/* gnb-login */}
+              <div className="gnb-login">
+                <span className="user">홍길동님</span>
                 <button type="button" className="krds-btn large text"><i className="svg-icon ico-logout"></i> 로그아웃</button>
-              <button type="button" className="krds-btn large text"><i className="svg-icon ico-log"></i> 로그인을 해주세요</button>
-            </div>
-            { /*gnb-login */}
-            {/* gnb-service-menu */}
-            <div className="gnb-service-menu">
-              <a href="#" className="link">메뉴명</a>
-              <a href="#" className="link">메뉴명</a>
-              <a href="#" className="link">메뉴명</a>
-              <a href="#" className="link">메뉴명</a>
-            </div>
-            {/* gnb-service-menu */}
-            {/* 검색 */}
-            <div className="sch-input">
-              <input type="text" className="krds-input" placeholder="찾고자 하는 메뉴명을 입력해 주세요" title="찾고자 하는 메뉴명 입력"></input>
-              <button type="button" className="krds-btn medium icon ico-search">
-                <span className="sr-only">검색</span>
-                <i className="svg-icon ico-sch"></i>
-              </button>
-            </div>
-            { /*검색 */}
-          </div>
-          { /*gnb-header */}
-
-          {/* gnb-body */}
-          <div className="gnb-body">
-            {/* gnb-menu */}
-            <div className="gnb-menu">
-              <div className="menu-wrap">
-                <ul role="tablist">
-                  <li role="none">
-                    <a href="#mGnb-anchor1" className="gnb-main-trigger active" >신청·발급</a>
-                  </li>
-                  <li role="none">
-                    <a href="#mGnb-anchor2" className="gnb-main-trigger" >정책정보</a>
-                  </li>
-                  <li role="none">
-                    <a href="#mGnb-anchor3" className="gnb-main-trigger" >데이터 개방</a>
-                  </li>
-                  <li role="none">
-                    <a href="#mGnb-anchor4" className="gnb-main-trigger" >고객지원</a>
-                  </li>
-                </ul>
+                <button type="button" className="krds-btn large text"><i className="svg-icon ico-log"></i> 로그인을 해주세요</button>
               </div>
-              <div className="submenu-wrap">
-                <div className="gnb-sub-list" id="mGnb-anchor1" role="tabpanel" aria-labelledby="tab-0">
-                  <h2 className="sub-title">신청·발급</h2>
-                  <ul>
-                    <li><a href="#" className="gnb-sub-trigger">AI 스마트 통합 검색</a></li>
-                    <li><a href="#" className="gnb-sub-trigger">중소벤처기업부 지원사업공고</a></li>
-                    <li><a href="#" className="gnb-sub-trigger">사업공고</a></li>
-                    <li><a href="#" className="gnb-sub-trigger">정책금융</a></li>
-                    <li><a href="#" className="gnb-sub-trigger">증명서 발급</a></li>
+              { /*gnb-login */}
+              {/* gnb-service-menu */}
+              <div className="gnb-service-menu">
+                <a href="#" className="link">메뉴명</a>
+                <a href="#" className="link">메뉴명</a>
+                <a href="#" className="link">메뉴명</a>
+                <a href="#" className="link">메뉴명</a>
+              </div>
+              {/* gnb-service-menu */}
+              {/* 검색 */}
+              <div className="sch-input">
+                <input type="text" className="krds-input" placeholder="찾고자 하는 메뉴명을 입력해 주세요" title="찾고자 하는 메뉴명 입력"></input>
+                <button type="button" className="krds-btn medium icon ico-search">
+                  <span className="sr-only">검색</span>
+                  <i className="svg-icon ico-sch"></i>
+                </button>
+              </div>
+              { /*검색 */}
+            </div>
+            { /*gnb-header */}
+
+            {/* gnb-body */}
+            <div className="gnb-body">
+              {/* gnb-menu */}
+              <div className="gnb-menu">
+                <div className="menu-wrap">
+                  <ul role="tablist">
+                    {dynamicMenus.map((menu, index) => (
+                      <li role="none" key={menu.menuId}>
+                        <a
+                          href={`#mGnb-anchor${index + 1}`}
+                          className={`gnb-main-trigger ${index === 0 ? 'active' : ''}`}
+                        >
+                          {menu.menuNm}
+                        </a>
+                      </li>
+                    ))}
                   </ul>
                 </div>
-                <div className="gnb-sub-list" id="mGnb-anchor2" role="tabpanel" aria-labelledby="tab-1">
-                  <h2 className="sub-title">정책정보</h2>
-                  <ul>
-                    <li><a href="#" className="gnb-sub-trigger">정책리포트</a></li>
-                    <li><a href="#" className="gnb-sub-trigger">품목·인증·규제</a></li>
-                    <li><a href="#" className="gnb-sub-trigger">더많은서비스</a></li>
-                  </ul>
-                </div>
-                <div className="gnb-sub-list" id="mGnb-anchor3" role="tabpanel" aria-labelledby="tab-2">
-                  <h2 className="sub-title">데이터 개방</h2>
-                  <ul>
-                    <li><a href="#" className="gnb-sub-trigger">정책정보 개방</a></li>
-                  </ul>
-                </div>
-                <div className="gnb-sub-list" id="mGnb-anchor4" role="tabpanel" aria-labelledby="tab-3">
-                  <h2 className="sub-title">고객지원</h2>
-                  <ul>
-                    <li><a href="#" className="gnb-sub-trigger">고객센터</a></li>
-                    <li><a href="#" className="gnb-sub-trigger">이용안내</a></li>
-                  </ul>
+                <div className="submenu-wrap">
+                  {dynamicMenus.map((menu, index) => (
+                    <div
+                      className="gnb-sub-list"
+                      id={`mGnb-anchor${index + 1}`}
+                      role="tabpanel"
+                      aria-labelledby={`tab-${index}`}
+                      key={menu.menuId}
+                    >
+                      <h2 className="sub-title">{menu.menuNm}</h2>
+                      <ul>
+                        {menu.children.map((subMenu) => (
+                          <li key={subMenu.menuId}>
+                            <a href={subMenu.fullPath} className="gnb-sub-trigger">{subMenu.menuNm}</a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
               </div>
+              { /*gnb-menu */}
             </div>
-            { /*gnb-menu */}
-          </div>
-          { /*gnb-body */}
+            { /*gnb-body */}
 
-          {/* gnb-close */}
-          <button type="button" className="krds-btn medium icon" id="close-nav">
-            <span className="sr-only">전체메뉴 닫기</span>
-            <i className="svg-icon ico-popup-close"></i>
-          </button>
-          { /*gnb-close */}
+            {/* gnb-close */}
+            <button type="button" className="krds-btn medium icon" id="close-nav">
+              <span className="sr-only">전체메뉴 닫기</span>
+              <i className="svg-icon ico-popup-close"></i>
+            </button>
+            { /*gnb-close */}
+          </div>
         </div>
-      </div>
 
-      { /*메인메뉴 : 모바일 */}
-    </header>
-    <div className="quickbox">
-      <FloatingChatbot onSelectProgram={(program) => navigate(`/service/pbanc/${program.id}`)} />
-      <button 
-        type="button" 
-        className="quickbox-top"
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      >
-        <img src={arrowIcon} alt="" />
-        <span className="sr-only">상단으로</span>
-      </button>
-    </div>
+        { /*메인메뉴 : 모바일 */}
+      </header>
+      <div className="quickbox">
+        <FloatingChatbot onSelectProgram={(program) => navigate(`/service/pbanc/${program.id}`)} />
+        <button
+          type="button"
+          className="quickbox-top"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
+          <img src={arrowIcon} alt="" />
+          <span className="sr-only">상단으로</span>
+        </button>
+      </div>
     </>
   );
 }

@@ -8,7 +8,7 @@ import { api as apiClient } from '../lib/apiClient.js';
 import { useUserMenu } from '../context/UserMenuContext';
 
 const Pbanc = () => {
-  const { currentMenu, breadcrumbItems } = useUserMenu();
+  const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
@@ -62,11 +62,15 @@ const Pbanc = () => {
     return `${yy}-${mm}-${dd}`;
   }
 
+  // ✅ 사이드바 데이터 계산
+  const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
+  const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+
   return (
     <>
       <SideNavigation
-        pageTitle={currentMenu.depth1Title}
-        depth={currentMenu.depth}
+        pageTitle={depth1Menu?.menuNm || ''}
+        menuItems={sidebarData}
       />
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />

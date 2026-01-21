@@ -100,7 +100,7 @@ const UI_USR_L_040 = () => {
 
   // 상세페이지 핸들러
   const goToDetail = (prdocCd) => {
-    navigate(`/service/certificate/detail/${prdocCd}`);
+    navigate(`${prdocCd}`);
   };
 
   const navigationData = {

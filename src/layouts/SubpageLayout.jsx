@@ -5,17 +5,15 @@ import { UserMenuProvider } from '../context/UserMenuContext.jsx';
 
 const SubpageLayout = () => {
   return (
-    <UserMenuProvider>
-      <div id="wrap">
-        <Header />
-        <div id="container">
-          <div className="inner in-between">
-            <Outlet />
-          </div>
+    <div id="wrap">
+      <Header />
+      <div id="container">
+        <div className="inner in-between">
+          <Outlet />
         </div>
-        <Footer />
       </div>
-    </UserMenuProvider>
+      <Footer />
+    </div>
   );
 };
 

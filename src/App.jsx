@@ -1,9 +1,9 @@
 import React from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import router from './routes/index.jsx';
-import { CubeIAxProvider } from "@cube-i-ax/sdk/react";
-import { ProgramChatProvider } from "@cube-i-ax/sdk/smes/program";
+import AppRouter from './routes/index.jsx';
+import { CubeIAxProvider } from '@cube-i-ax/sdk/react';
+import { ProgramChatProvider } from '@cube-i-ax/sdk/smes/program';
 
 // KRDS 스타일과 컴포넌트 불러오기
 import '../styles/output.css';
@@ -18,7 +18,9 @@ function App() {
         baseUrl={import.meta.env.VITE_CUBE_IAX_API_URL}
       >
         <ProgramChatProvider>
-          <RouterProvider router={router} />
+          {/* <RouterProvider router={AppRouter} />*/}
+
+          <AppRouter />
         </ProgramChatProvider>
       </CubeIAxProvider>
     </AuthProvider>
