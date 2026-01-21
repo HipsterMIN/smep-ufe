@@ -1,69 +1,65 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import SubpageLayout from '../layouts/SubpageLayout.jsx';
-import { autoPublishingRoutes } from './autoRoutes.jsx';
+import { useState, useEffect } from 'react';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { staticRoutes } from './staticRoutes.jsx';
+import { generateDynamicRoutes } from './dynamicRoutes.jsx';
+import { useMenuStore } from '../store/useMenuStore';
 
-// 실제 운영용 페이지들 (src/pages)
-import MainPage from '../pages/MainPage.jsx';
-import AiSmartSearch from '../pages/AiSmartSearch.jsx';
-import Login from '../pages/Login.jsx';
-import UI_USR_L_010 from '../pages/UI_USR_L_010.jsx';
-import UI_USR_R_011 from '../pages/UI_USR_R_011.jsx';
-import UI_USR_L_030 from '../pages/UI_USR_L_030.jsx';
-import UI_USR_L_040 from '../pages/UI_USR_L_040.jsx';
-import UI_USR_R_041 from '../pages/UI_USR_R_041.jsx';
-import UI_USR_R_031 from '../pages/UI_USR_R_031.jsx';
-import Pbanc from '../pages/Pbanc.jsx';
-import PbancView from '../pages/PbancView.jsx';
-import UI_USR_R_480 from '../pages/UI_USR_R_480.jsx';
-import UI_USR_L_510 from '../pages/UI_USR_L_510.jsx';
+/**
+ * Router 생성 함수
+ */
+const createAppRouter = (menuTree, flatMenuMap) => {
+  const dynamicRoutes = generateDynamicRoutes(menuTree, flatMenuMap);
+  const allRoutes = [
+    ...dynamicRoutes,
+    ...staticRoutes,
+  ];
 
-// 퍼블리싱 목록 페이지
-import PublishingList from '../publishing/PublishingList.jsx';
+  console.log('동적 라우트:', dynamicRoutes);
+  console.log('정적 라우트:', staticRoutes); 
+
+  console.log(`총 ${allRoutes.length}개 라우트 생성 (동적: ${dynamicRoutes.length}, 정적: ${staticRoutes.length})`);
+
+  const base = import.meta.env.BASE_URL || '/';
+  const basename = base.endsWith('/') ? base.slice(0, -1) : base;
+
+  return createBrowserRouter(allRoutes, { basename });
+};
 
 
-// Vite의 BASE_URL과 라우터 basename을 일치시킵니다. (예: '/', '/admin/')
-const base = import.meta.env.BASE_URL || '/';
-const basename = base.endsWith('/') ? base.slice(0, -1) : base;
+/**
+ * AppRouter - 메뉴 로드 및 router 생성을 담당하는 컴포넌트
+ */
+function AppRouter() {
+  const { menuTree, flatMenuMap, fetchMenuData, isLoading } = useMenuStore();
+  const [routerInstance, setRouterInstance] = useState(null);
 
-const router = createBrowserRouter(
-  [
-    // 실제 서비스 라우트
-    { path: '/', element: <MainPage /> },
-    { path: '/ai-smart-search', element: <AiSmartSearch /> },
-    
-    // 서브페이지 레이아웃이 필요한 실제 서비스 페이지들
-    {
-      path: '/service',
-      element: <SubpageLayout />,
-      children: [
-        { path: 'UI_USR_L_010', element: <UI_USR_L_010 /> },
-        { path: 'UI_USR_R_011', element: <UI_USR_R_011 /> },
-        { path: 'UI_USR_L_030', element: <UI_USR_L_030 /> },
-        { path: 'UI_USR_R_031', element: <UI_USR_R_031 /> },
-        { path: 'UI_USR_L_040', element: <UI_USR_L_040 /> },
-        { path: 'certificate/detail/:prdocCd', element: <UI_USR_R_041 /> },
-        { path: 'pbanc', element: <Pbanc /> },
-        { path: 'pbanc/:id', element: <PbancView /> },
-        { path: 'UI_USR_R_480', element: <UI_USR_R_480 /> },
-        { path: 'UI_USR_L_510', element: <UI_USR_L_510 /> },
-        { path: 'login', element: <Login /> },
-      ],
-    },
+  useEffect(() => {
+    if (!menuTree) {
+      fetchMenuData();
+    }
+  }, [menuTree, fetchMenuData]);
 
-    // 퍼블리싱 전용 라우트 (smep-afe 방식)
-    {
-      path: '/publishing',
-      element: <SubpageLayout />,
-      children: [
-        { index: true, element: <PublishingList /> },
-        ...autoPublishingRoutes,
-      ],
-    },
+  useEffect(() => {
+    if (menuTree && flatMenuMap) {
+      const router = createAppRouter(menuTree, flatMenuMap);
+      setRouterInstance(router);
+    }
+  }, [menuTree, flatMenuMap]);
 
-    // 404
-    { path: '*', element: <div>페이지를 찾을 수 없습니다. (404)</div> },
-  ],
-  { basename },
-);
+  if (isLoading || !routerInstance) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+      }}>
+        <div>라우터 초기화 중...</div>
+      </div>
+    );
+  }
 
-export default router;
+  return <RouterProvider router={routerInstance} />;
+}
+
+export default AppRouter;
