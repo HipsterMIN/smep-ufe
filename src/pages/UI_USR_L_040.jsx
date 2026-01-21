@@ -257,17 +257,15 @@ const UI_USR_L_040 = () => {
           <table className="tbl col data">
             <caption>증명 확인서 목록. 번호, 증명(확인)서, 발급기관, 소관기관 정보가 제공됨.</caption>
             <colgroup>
-              <col style={{ width: '5%' }}/>
-              <col style={{ width: '5%' }}/>
+              <col style={{ width: '7.4%%' }}/>
               <col/>
-              <col style={{ width: '25%' }}/>
-              <col style={{ width: '25%' }}/>
-              <col style={{ width: '10%' }}/>
+              <col style={{ width: '26%' }}/>
+              <col style={{ width: '26% ' }}/>
+              <col style={{ width: '118px' }}/>
             </colgroup>
             <thead>
               <tr>
                 <th scope="col" className="ac">번호</th>
-                <th scope="col" className="ac"></th>
                 <th scope="col" className="ac">증명(확인)서</th>
                 <th scope="col" className="ac">발급기관</th>
                 <th scope="col" className="ac">소관기관</th>
@@ -277,11 +275,11 @@ const UI_USR_L_040 = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="ac">로딩 중...</td>
+                  <td colSpan="5" className="ac">로딩 중...</td>
                 </tr>
               ) : certificateList.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="ac">조회된 데이터가 없습니다.</td>
+                  <td colSpan="5" className="ac">조회된 데이터가 없습니다.</td>
                 </tr>
               ) : (
                 certificateList.map((item, index) => (
@@ -289,12 +287,14 @@ const UI_USR_L_040 = () => {
                     <th scope="row" className="ac">
                       <span>{currentPage * pageSize + index + 1}</span>
                     </th>
+
                     <td className="ac">
-                      {item.elpblYn === 'Y' && (
-                        <span className="krds-badge bg-light-primary ml">전자증명</span>
-                      )}
+                      <div className="title-box"><span>{item.prdocTtl}</span>
+                        {item.elpblYn === 'Y' && (
+                          <span className="krds-badge bg-light-primary ml">전자증명</span>
+                        )}
+                      </div>
                     </td>
-                    <td className="ac"><span>{item.prdocTtl}</span></td>
                     <td className="ac"><span>{shortenInstName(item.issuInstNm)}</span></td>
                     <td className="ac"><span>{shortenInstName(item.jrsdInstNm)}</span></td>
                     <td className="ac"><a className="krds-btn small" onClick={() => goToDetail(item.prdocCd)}>발급</a>
