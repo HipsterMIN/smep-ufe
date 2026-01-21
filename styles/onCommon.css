@@ -2196,7 +2196,7 @@ textarea.krds-input::placeholder {
   background-size: 100% auto;
 }
 
-/* 01-20 김혜연 start */
+/* --------------------------------------01-21 김혜연 start-------------------------------------- */
 .helper-box.refer {
   padding: var(--krds-padding-6);
   border: 1px solid #cdd1d5;
@@ -2267,6 +2267,14 @@ textarea.krds-input::placeholder {
   font-weight: 700;
   color: #464C53;
 }
+.modal-dialog .conts-wrap ~ .conts-wrap {
+  margin-top: 24px;
+}
+.modal-dialog .conts-wrap .sec-tit {
+  font-size: var(--krds-pc-font-size-heading-small);
+  margin-bottom: 16px;
+}
+         
 .txt-caution {
   color:#DE3412;
   font-weight: 400;
@@ -2390,9 +2398,296 @@ textarea.krds-input::placeholder {
   width: 208px;
 }
 .search-top-box .sch-input.w-476 {
-  width: 476px;
+  max-width: 476px;
+  width: 100%;
+}
+.krds-table-wrap .tbl .ico-lock {
+  width: 14px;
+  height: 14px;
+  margin-left: 10px;
 }
 
+.on-form-register .txt-caution {
+  margin-bottom: 20px;
+}
+.info-list-point .ico-checkbox { 
+  position: relative;
+  top: 5px;
+  flex-shrink: 0;
+  width: 14px;
+  height: 12px;
+  margin-right: 10px;
+  background-image: none;
+  background-color:var(--krds-color-light-primary-60);
+}
+.info-list-point > li {
+  display: flex;
+  color: var(--krds-color-light-primary-60);
+  line-height: 1.5;
+}
+
+.txt-box.bg-white {
+  --bg-white-color-background: var(--krds-light-color-surface-white-subtle);
+  --bg-white-color-background-gray: var(--krds-light-color-surface-gray-subtler);
+  --bg-white-color-border: var(--krds-light-color-divider-gray-light);
+  --bg-white-color-text: var(--krds-light-color-text-subtle);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: var(--krds-gap-7);
+  background-color: var(--bg-white-color-background);
+}
+.txt-box.bg-white .box-tit1 {
+  font-size: 24px;
+}
+.txt-box.bg-white .box-tit2 {
+  font-size: 19px;
+}
+.txt-box.bg-white .box-cnt {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.txt-box.bg-white .box-cnt.gap-24 {
+  gap: 24px;
+}
+.txt-box.bg-white .box-cnt.gap-40 {
+  gap: 40px;
+}
+.txt-box.bg-white .form-group-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--krds-gap-9);
+}
+.txt-box.bg-white .box-sec {
+  display: flex;
+  align-items: normal;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: var(--krds-gap-7);
+}
+.txt-box.bg-white .txt-caution {font-size: 14px;}
+
+.form-group .form-tit,
+.form-group .form-label {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  color:#1E2124;
+}
+.form-area .required-msg {
+  font-size: 13px;
+  color:#D63D4A;
+  text-align: right;
+  margin-bottom: 8px;
+}
+
+.form-info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.form-info-group .form-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.form-info-group .form-info dt {
+  display: flex;
+  align-items: center;
+  min-width: 60px;
+  font-size: 15px;
+}
+
+.form-info-group .form-info dd {
+  font-size: 15px;
+  color: #6D7882;
+  word-break: break-word;
+}
+
+.krds-form-select[disabled],
+.krds-input[disabled],
+.krds-input[readonly] {
+  color: var(--krds-light-color-text-disabled-on);
+  background-color: var(--krds-light-color-input-surface-disabled)!important;
+  opacity: 1;
+}
+
+.guide-txt.small {
+  font-size: 17px;
+  padding: 16px 24px;
+}
+
+.service-guide {
+  padding: 70px 36px 42px;
+  background: url("../styles/img/sub/img_service_guide.jpg")no-repeat 50%;
+  background-size: cover;
+}
+
+.service-guide .guide-top {
+  padding-left: 44px;
+}
+.service-guide .guide-top .guide-top-sub {
+  font-size: 15px;
+  font-weight: 700;
+  color: #6D7882;
+}
+.service-guide .guide-top .guide-top-title {
+  margin-top: 28px;
+  font-size: 36px;
+  font-weight: 700;
+  color: #464C53;
+  line-height: 1.4;
+}
+.service-guide .guide-top .guide-top-title em {
+  font-size: 44px;
+  letter-spacing: var(--krds-letter-spacing-wide);
+}
+.service-guide .guide-top .guide-top-title .tel-01 {
+  color: #66A6E7;
+}
+.service-guide .guide-top .guide-top-title .tel-02 {
+  color: #705D9B;
+}
+.service-guide .guide-top .guide-top-title .tel-03 {
+  color: #F6AA55;
+}
+.service-guide .guide-top .guide-top-title .tel-04 {
+  color: #D84362;
+}
+.service-guide .guide-cont-list {
+  margin-top: 52px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+.service-guide .guide-cont-list li {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 30px;
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid #D6E0EB;
+  cursor: pointer;
+}
+.service-guide .guide-cont-list li:hover {
+  border-color: #3358EE;
+}
+.service-guide .guide-cont-list .title {
+  white-space: nowrap;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #464C53;
+}
+.service-guide .guide-cont-list .info {
+  margin-top: 20px;
+  color: #464C53;
+  line-height: 1.5;
+  text-align: center;
+}
+.service-guide .guide-cont-list .detail-info {
+  margin-top: 28px;
+  padding: 20px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F4F5F6;
+  border-radius: 8px;
+  font-size: 19px;
+  font-weight: 700;
+}
+.service-guide .guide-cont-list .kakao-link {
+  display: flex;
+  align-items: center;
+}
+.service-guide .detail-info i {
+  margin-right: 12px;
+  width: 32px;
+  height: 32px;
+}
+.service-guide .detail-info .ico-kakao {
+  background: url(./img/component/icon/ico_kakao.svg) no-repeat 50%;
+  background-size: 100% auto;
+}
+.service-guide .detail-info .ico-link {
+  width: 24px;
+  height: 24px;
+}
+.service-guide .detail-info .ico-tel-fill {
+  background-image: none;
+  background-color: #7657BD;
+}
+.service-guide .detail-info .ico-tel-fill.pink {
+  background-image: none;
+  background-color: #DF657E;
+}
+
+/* row table */
+.krds-table-wrap .tbl.tbl-row {
+  border-top: var(--krds-table--data-border-width) solid var(--krds-table--data-thead-border);
+}
+.krds-table-wrap .tbl.tbl-row tbody th {
+    padding: 12px 16px;
+    background-color: var(--krds-table--data-thead-surface);
+    border-bottom: var(--krds-table--data-border-width) solid var(--krds-table--data-thead-border);
+    font-weight: var(--krds-font-weight-bold);
+    font-size: var(--krds-table--data-thead-pc-font-size);
+    color: var(--krds-table--data-thead-color-text);
+} 
+.table-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.form-confirm .krds-check-area,
+.form-confirm .on-form-row {
+  margin-top: 20px;
+}
+.form-confirm .txt-caution {
+  font-size: 15px;
+  margin-top: 8px;
+}
+.conts-wrap .sec-tit {
+    margin-bottom: var(--krds-pc-gap-layout-title-body-large);
+    font-size: var(--krds-pc-font-size-heading-medium);
+}
+.search-list-top.flex-end {
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+
+.svg-icon.ico-tel-fill {
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: contain;
+  -webkit-mask-image: url(./img/component/icon/ico_tel_fill.svg);
+  mask-image: url(./img/component/icon/ico_tel_fill.svg);
+}
+.svg-icon.ico-lock {
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: contain;
+  -webkit-mask-image: url(./img/component/icon/ico_lock.svg);
+  mask-image: url(./img/component/icon/ico_lock.svg);
+}
+
+/* util */
+.bold {
+  font-weight: 700;
+}
+.txt-point {
+  color:var(--krds-color-light-primary-60)
+}
 
 /* media query */
 /* tablet */
@@ -2411,7 +2706,7 @@ textarea.krds-input::placeholder {
   #container .in-between .krds-side-navigation {
     display: none;
   }
-}
+
 @media (max-width: 767px) {
   #krds-header .header-container .logo {
     width: 180px;
@@ -2649,7 +2944,8 @@ textarea.krds-input::placeholder {
     gap: 30px;
   }
   .on-announcement .ac {
-    gap: 8px;
+    gap: 12px;
+    flex-direction: column;
   }
   .on-announcement .krds-btn.large {
     height: 48px;
@@ -2664,4 +2960,86 @@ textarea.krds-input::placeholder {
   .filter-check-box .krds-check-area {
     flex-wrap: wrap;
   }
+  .search-top-box .sch-input.w-476 {
+    width: 100%;
+  }
+  .search-top-box .form-row-box {
+    flex-direction: column;
+  }
+  
+  .txt-box.bg-white .form-group-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .txt-box.bg-white .box-cnt {
+    gap: 16px;
+  }
+  .on-form-row .form-row-content .w-220,
+  .on-form-row .form-row-content .w-272 {
+    width: 100%;
+  }
+  .txt-box.small .krds-check-area {
+    flex-wrap: wrap;
+  }
+
+  .on-detail-list dl dt,
+  .on-detail-list dl dd {
+    font-size: 15px;
+    padding: var(--krds-padding-3) var(--krds-padding-4);
+  }
+  .on-detail-list dl .w-200 {width: 22%;}
+  .txt-box {
+    padding: var(--krds-mobile-padding-card-large);
+  }
+  .txt-box.bg-white {
+    gap: var(--krds-gap-5);
+  }
+  .txt-box.bg-white .box-sec {
+    gap: var(--krds-gap-4);
+  }
+  .txt-box.bg-white .box-tit1 {
+    font-size: var(--krds-mobile-font-size-heading-medium);
+  }
+  .txt-box.bg-white .box-tit2 {
+    font-size: var(--krds-mobile-font-size-heading-small);
+  }
+  .conts-wrap .sec-tit {
+    font-size: var(--krds-mobile-font-size-heading-small);
+  }
+
+  .service-guide .guide-cont-list {
+    flex-direction: column;
+    margin-top: 40px;
+  }
+  .service-guide .guide-cont-list li {
+    padding: var(--krds-mobile-padding-card-small);
+  }
+  .service-guide {
+    padding: 30px 20px 30px;
+  }
+  .service-guide .guide-top {
+    padding-left: 0;
+  }
+  .service-guide .guide-top .guide-top-title {
+    font-size: 30px;
+    margin-top: 12px;
+  }
+  .service-guide .guide-top .guide-top-title br {
+    display: none;
+  }
+  .service-guide .guide-top .guide-top-title em {
+    font-size: 38px;
+  }
+  .service-guide .guide-cont-list .title {
+    font-size: 20px;
+  }
+  .service-guide .guide-cont-list .info {
+    font-size: 14px;
+    margin-top: 10px;
+  }
+  .service-guide .guide-cont-list .detail-info {
+    font-size: 16px;
+  }
+}
+/* --------------------------------------01-21 김혜연 end-------------------------------------- */
 }
