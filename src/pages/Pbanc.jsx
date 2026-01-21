@@ -23,7 +23,7 @@ const Pbanc = () => {
 
   const search = async (pageParam) => {
     const response = await apiClient.get(`/api/v1/pbanc?page=${pageParam}&searchText=${searchText}&searchType=${searchType}`);
-    setItems(response);
+    setItems(response.data);
     setPage(pageParam);
   };
 
