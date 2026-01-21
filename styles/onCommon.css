@@ -814,6 +814,7 @@
   margin-top: 24px;
 }
 .krds-table-wrap .tbl td a:not(.krds-btn) {display: block;}
+.krds-table-wrap .tbl td a[class ^= "onellipsis-"] { display: -webkit-box;}
 /* krds-tab-area  */
 
 .krds-tab-area {gap: 0px;}
@@ -1668,6 +1669,7 @@
 .on-detail-list dl dd {/* flex-basis: 82.2%; */ flex: 1; color: #464C53;} 
 .on-detail-list dl dd .bold {font-weight: 700;}
 .on-detail-list dl .w-100 {width: 100px;}
+.on-detail-list dl .w-150 {width: 150px;}
 .on-detail-list dl .w-200 {width: 18.8%;}
 .on-linktxt2.primary {color: #256EF4;}
 
@@ -2102,6 +2104,8 @@
 .gap12{gap: 12px !important;}
 .gap24{gap: 24px !important;}
 
+.flexsize-fix {flex: 0 0 auto}
+
 .krds-table-wrap .krds-badge.ml {
   margin-left: 8px;
   margin-right: 0;
@@ -2148,6 +2152,7 @@
 .def-list-wrap .def-list-group dd {
   flex: 1;
 }
+.def-list-wrap .on-detail-list dt {margin-right: 0; width: 150px;}
 
 /* gallery 타입 리스트 */
 .ongallery-thumnb {    width: 100%;
