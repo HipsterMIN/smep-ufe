@@ -56,8 +56,8 @@ const UI_USR_R_213 = () => {
 
         <div className="conts-wrap mt-40">
           <h3 className="sec-tit">이노비즈확인서 API</h3>
-          <div class="def-list-wrap border">
-            <dl class="def-list">
+          <div className="def-list-wrap border">
+            <dl className="def-list">
               <dt>URL</dt>
               <dd>https://www.smes.go.kr/api/certificates/증명서코드</dd>
               <dt>설명</dt>

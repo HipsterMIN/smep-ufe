@@ -130,20 +130,20 @@ const UI_USR_R_211 = () => {
                 </div>
               </dd>
             </dl>
-            <div class="form-box">
-              <label class="label sr-only" htmlFor="appl-sch-sel4">샘플 파라미터</label>
-              <div class="input-box">
-                <input type="text" class="krds-input medium" placeholder="&dataType=rss&hashtags=서울,부산,대구,인천,광주,대전,울산,세종,경기,강원,충북,충남,전북,전남,경북,경남,제주" title="생성된 샘플 파라미터" id="appl-sch-sel4" />
+            <div className="form-box">
+              <label className="label sr-only" htmlFor="appl-sch-sel4">샘플 파라미터</label>
+              <div className="input-box">
+                <input type="text" className="krds-input medium" placeholder="&dataType=rss&hashtags=서울,부산,대구,인천,광주,대전,울산,세종,경기,강원,충북,충남,전북,전남,경북,경남,제주" title="생성된 샘플 파라미터" id="appl-sch-sel4" />
               </div>
-              <button type="button" class="krds-btn medium primary">샘플 파라미터 생성</button>
+              <button type="button" className="krds-btn medium primary">샘플 파라미터 생성</button>
             </div>
         </div>
       </div>
 
         <div className="conts-wrap mt-64">
           <h3 className="sec-tit">지원사업정보 API</h3>
-          <div class="def-list-wrap border">
-            <dl class="def-list">
+          <div className="def-list-wrap border">
+            <dl className="def-list">
               <dt>URL</dt>
               <dd>https://www.bizinfo.go.kr/uss/rss/bizinfoApi.do</dd>
               <dt>설명</dt>
