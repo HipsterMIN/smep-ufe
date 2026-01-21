@@ -20,7 +20,7 @@ const UI_USR_L_040 = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [topCertificateList, setTopCertificateList] = useState([]);
   const [certificateList, setCertificateList] = useState([]);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
 
   // 입력용 (화면 표시용)
   const [searchType, setSearchType] = useState('');
