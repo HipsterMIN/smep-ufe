@@ -349,6 +349,8 @@ export function UserMenuProvider({ children }) {
         : null;
     }
 
+    console.log('🧭 Breadcrumb Items:', items); // ✅ 디버그용 로그
+
     return items;
   }, [currentMenu, flatMenuMap]);
 

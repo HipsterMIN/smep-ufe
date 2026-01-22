@@ -1,5 +1,5 @@
-// store/useMenuStore.js
 import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 import { api as apiClient } from '../lib/apiClient.js';
 
 /**
@@ -12,15 +12,19 @@ import { api as apiClient } from '../lib/apiClient.js';
  * - 메뉴 데이터 로딩 상태 및 에러 핸들링
  * - 전체 앱에서 메뉴 데이터 접근 가능
  */
-
-export const useMenuStore = create((set, get) => ({
+const menuStoreImpl  = (set, get) => ({
   // 상태
-  menuTree: null,
+  menuTree: null, // 메뉴 트리 데이터
   flatMenuMap: {}, // menuId를 key로 하는 flat map (빠른 조회용)
-  isLoading: false,
-  error: null,
+  isLoading: false, // 로딩 상태
+  error: null, // 에러
 
-  // 메뉴 트리를 평탄화하여 menuId 맵 생성
+  /**
+   * 메뉴 트리를 평탄화하여 menuId 맵 생성
+   * before : { menuId: 'M1', children: [ { menuId: 'M2', children: [] } ] }
+   * after  : { 'M1': { ... }, 'M2': { ... } }
+   * @param {Object} menuData - 메뉴 트리 데이터 { menuId: 'M1', children: [ { menuId: 'M2', children: [] } ] }
+   */
   _buildFlatMap: (menuData) => {
     const flatMap = {};
     const buildFlatMap = (node) => {
@@ -33,16 +37,22 @@ export const useMenuStore = create((set, get) => ({
     return flatMap;
   },
 
-  // 메뉴 데이터 비동기 로드
+  /**
+   * 메뉴 데이터 API 호출 및 상태 업데이트
+   */
   fetchMenuData: async () => {
+    // 로딩 상태 설정
     set({ isLoading: true, error: null });
 
     try {
+      // API 호출로 메뉴 데이터 가져오기
       const response = await apiClient.get('/api/v1/menu');
       const menuData = response.data || response || mockMenuData; // TODO : mockMenuData 제거예정
 
+      // 메뉴 데이터를 평탄화된 맵으로 변환
       const flatMap = get()._buildFlatMap(menuData);
 
+      // 상태 업데이트
       set({
         menuTree: menuData,
         flatMenuMap: flatMap,
@@ -76,7 +86,12 @@ export const useMenuStore = create((set, get) => ({
   resetMenu: () => {
     set({ menuTree: null, flatMenuMap: {}, error: null });
   },
-}));
+});
+
+// devtools 적용 : 브라우저 개발자 도구에서 상태 추적 가능(redux devtools 등)
+export const useMenuStore = create(
+  devtools(menuStoreImpl, { name: 'MenuStore' }),
+);
 
 // 모의 메뉴 데이터 (테스트용) TODO : 삭제예정
 export const mockMenuData = {

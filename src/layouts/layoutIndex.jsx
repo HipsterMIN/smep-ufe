@@ -1,4 +1,3 @@
-// layouts/layoutIndex.jsx
 import { UserMenuProvider } from '../context/UserMenuContext.jsx';
 import SubpageLayout from './SubpageLayout.jsx';
 import { Outlet } from 'react-router-dom';
