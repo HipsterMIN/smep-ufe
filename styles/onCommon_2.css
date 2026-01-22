@@ -1,0 +1,322 @@
+/* datepicker */
+.ondatepicker {
+    display: flex;
+    align-items: center;
+}
+.ondatepicker .ondatepicker-wrapper {
+    position: relative;
+}
+.ondatepicker .ondatepicker-input {
+    cursor: pointer;
+}
+.ondatepicker .ondatepicker-input::placeholder {
+    color: var(--krds-light-color-text-disabled);
+}
+.ondatepicker .ondatepicker-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 16px;
+    width: 20px;
+    height: 20px;
+}
+.ondatepicker-small .ondatepicker-input {
+    height: var(--krds-size-height-6);
+    font-size: var(--krds-pc-font-size-label-small);
+}
+.ondatepicker .react-datepicker__tab-loop {
+    position: absolute;
+}
+/* 달력 커스텀 style */
+.ondatepicker .react-datepicker {
+  font-size: 13px !important; 
+  font-family: 'Pretendard'; 
+  border: 1px solid #dbdbdb !important;
+  border-radius: 12px !important; 
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08); 
+  overflow: hidden;
+}
+/* 헤더  */
+.ondatepicker .react-datepicker__header {
+  background-color: #fff !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+  padding: 15px 0 !important;
+}
+/* 현재 연월 텍스트 */
+.ondatepicker .react-datepicker__current-month {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #333;
+  margin-bottom: 10px !important;
+}
+/* 요일 칸 */
+.ondatepicker .react-datepicker__day-name {
+  width: 28px !important; /* 칸 너비 확대 */
+  line-height: 28px !important;
+  margin: 3px !important;
+  color: #999 !important;
+  font-weight: 500;
+}
+/* 날짜 칸 */
+.ondatepicker .react-datepicker__day {
+  width: 28px !important; 
+  line-height: 28px !important;
+  margin: 3px !important;
+  font-size: 12px;
+  border-radius: 50% !important; 
+  transition: background-color 0.2s;
+}
+/* 오늘 날짜 표시 */
+.ondatepicker .react-datepicker__day--today {
+  font-weight: 700 !important;
+  color: var(--krds-light-color-button-primary-fill) !important; 
+  background: none !important;
+  border: 1px solid var(--krds-light-color-button-primary-fill) !important;
+}
+/* 선택된 날짜 */
+.ondatepicker .react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: var(--krds-light-color-button-primary-fill) !important; 
+  color: #fff !important;
+  font-weight: 700;
+}
+.ondatepicker .react-datepicker__day:hover {
+  background-color: #f0f7ff !important;
+}
+.ondatepicker .react-datepicker-popper[data-placement^=bottom] .react-datepicker__triangle {
+    fill: #fff;
+    stroke: #dbdbdb;
+}
+/* 화살표 버튼 위치 및 크기 */
+.react-datepicker__navigation {
+  top: 18px !important;
+}
+
+.react-datepicker__navigation--previous {
+  left: 10px !important;
+}
+
+.react-datepicker__navigation--next {
+  right: 10px !important;
+}
+
+.datepicker-group  {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.datepicker-group .ondatepicker {
+    gap: 12px;
+}
+.datepicker-group .react-datepicker-wrapper {
+    width: 206px;
+}
+.search-top-box .form-row-box {
+    flex-wrap: wrap;
+}
+.search-top-box .form-row-box .input-group-box {
+    flex: 1;
+}
+.input-group-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.input-group-box .sch-input {
+    flex:1;
+}
+.krds-table-wrap .krds-btn {
+    width: auto;
+}
+.krds-table-wrap .krds-btn ~ .krds-btn {
+    margin-left: 10px;
+}
+.on-form-register .on-form-option  {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    margin-bottom: 16px;
+}
+.on-form-register .on-form-option .txt-caution{
+    margin-bottom: 0;
+}
+.on-form-register .on-form-option .krds-btn {
+    margin-left: auto;
+}
+.on-form-row .form-row-label {
+    display: flex;
+    align-items: center;
+}
+.on-form-row .form-row-label.flex-start {
+    align-items: flex-start;
+}
+.on-form-row .select-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.on-form-row .form-row-content .w-184 {
+    width: 184px;
+}
+.search-top-box .form-row-box .krds-form-select.w-164 {
+    width: 164px;
+}
+.on-form-row dd ~ dt {
+    margin-left: 10px;
+}
+.on-form-register .txt-caution {
+    font-size: 15px;
+}
+
+.krds-table-wrap .tbl .no-data {
+    border-top: var(--krds-table--data-border-width) solid var(--krds-table--data-tbody-color-divider);
+}
+
+.on-search-summary .summary-list {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+.on-search-summary .summary-item {
+    flex: 1;
+}
+.on-search-summary .summary-title {
+    padding: 8px 0;
+    text-align: center;
+    font-weight: 700;
+    background: #F4F5F6;
+    border-radius: 8px 8px 0 0;
+}
+.on-search-summary .summary-result {
+    padding: 18px 0;
+    border-radius: 0 0 8px 8px;
+    border: 1px solid #E6E8EA;
+    border-top: 0;
+    font-weight: 700;
+    color: #464C53;
+    text-align: center;
+}
+.on-search-summary .summary-result strong {
+    font-size: 40px;
+    color: #1E2124;
+    line-height: 1.5;
+}
+
+.form-hint {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: var(--krds-pc-font-size-body-xsmall);
+    color: var(--krds-color-light-gray-70);
+    gap: var(--krds-gap-2);
+    margin-top: 8px;
+}
+.form-hint.point {
+    color: #D63D4A;
+}
+
+.certify-conts .krds-info-list {
+    margin-top: 24px;
+}
+.certify-cont-box {
+    display: flex;
+    justify-content: center;
+    padding: 50px 20px;
+    border-radius: 12px;
+    border: 1px solid #D9D9D9;
+}
+.certify-cont-box .certify-cont-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+.certify-cont-box .certify-cont-item ~ .certify-cont-item {
+    border-left: 1px dashed #CDD1D5;
+}
+.certify-cont-box .certify-cont-title {
+    margin-bottom: 58px;
+    text-align: center; 
+    font-size: var(--krds-pc-font-size-heading-medium);
+    font-weight: 700;
+}
+.certify-cont-box .certify-cont-img {
+    width: 228px;
+    height: 228px;
+    background: url("./img/sub/img_certify.svg") no-repeat 50%;
+    background-size: 100% auto;
+}
+.certify-cont-box .certify-cont-img.phone {
+    background-image: url("./img/sub/img_certify_phone.svg");
+    background-size: 102px 168px;
+}
+.certify-cont-box .certify-cont-img.ipin {
+    background-image: url("./img/sub/img_certify_ipin.svg");
+    background-size: 224px 134px;
+}
+
+.certify-cont-box .krds-btn {
+    margin-top: 50px;
+    min-width: 200px;
+}
+
+/* 반응형*/
+@media (max-width: 1800px) {
+ 
+}
+@media (max-width: 1024px) {
+}
+@media (max-width: 767px) {
+  .txt-box.outline .check-list > li {
+      font-size: var(--krds-mobile-font-size-body-medium);
+  }
+  .search-list-top.flex-end {
+      align-items: center;
+  }
+  .datepicker-group {
+      flex-wrap: wrap;
+  }
+  .search-top-box.no-details {
+      padding: 30px;
+  }
+  .search-top-box .form-row-box {
+      align-items: flex-start;
+  }
+  .on-form-row dd ~ dt {
+      margin-left: 0;
+  }
+  .on-search-summary .summary-list {
+    gap: 8px;
+  }
+.on-search-summary .svg-icon {
+    width: 16px;
+    height: 16px;
+  }
+  .on-search-summary .summary-result strong {
+    font-size: 30px;
+  }
+  .search-top-box .form-row-box .krds-form-select,
+  .datepicker-group .react-datepicker-wrapper {
+    width: 184px;
+  }
+  .certify-cont-box {
+    flex-direction: column;
+    gap: 40px;
+    padding: 30px 0;
+  }
+  .certify-cont-box .certify-cont-item ~ .certify-cont-item {
+    padding-top: 40px;
+    border-top: 1px dashed #CDD1D5;
+    border-left: 0;
+    }
+  .certify-cont-box .krds-btn {
+      margin-top: 30px;
+  }
+  .certify-cont-box .certify-cont-img {
+      width: 200px;
+      height: 200px;
+  }
+  .certify-cont-box .certify-cont-title {
+      margin-bottom: 30px;
+  }
+}

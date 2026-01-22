@@ -8,6 +8,7 @@ import { ProgramChatProvider } from '@cube-i-ax/sdk/smes/program';
 // KRDS 스타일과 컴포넌트 불러오기
 import '../styles/output.css';
 import '../styles/onCommon.css';
+import '../styles/onCommon_2.css';
 // import '@krds-ui/core/dist/style.css';
 
 function App() {
