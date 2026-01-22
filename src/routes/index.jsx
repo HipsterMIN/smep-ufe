@@ -8,20 +8,25 @@ import { useMenuStore } from '../store/useMenuStore';
  * Router 생성 함수
  */
 const createAppRouter = (menuTree, flatMenuMap) => {
+  // 동적 라우트 생성
   const dynamicRoutes = generateDynamicRoutes(menuTree, flatMenuMap);
+  // 모든 라우트 병합
   const allRoutes = [
-    ...dynamicRoutes,
-    ...staticRoutes,
+    ...dynamicRoutes, // 동적 라우트
+    ...staticRoutes, // 정적 라우트
   ];
 
+  // 개발용 라우트 정보 출력
   console.log('동적 라우트:', dynamicRoutes);
   console.log('정적 라우트:', staticRoutes); 
-
   console.log(`총 ${allRoutes.length}개 라우트 생성 (동적: ${dynamicRoutes.length}, 정적: ${staticRoutes.length})`);
 
-  const base = import.meta.env.BASE_URL || '/';
-  const basename = base.endsWith('/') ? base.slice(0, -1) : base;
+  // BASE_URL 설정
+  const base = import.meta.env.BASE_URL || '/'; // 기본값 '/'
+  // 끝에 '/'가 있으면 제거
+  const basename = base.endsWith('/') ? base.slice(0, -1) : base; // '/app/' -> '/app'
 
+  // 브라우저 라우터 생성
   return createBrowserRouter(allRoutes, { basename });
 };
 
@@ -33,19 +38,29 @@ function AppRouter() {
   const { menuTree, flatMenuMap, fetchMenuData, isLoading } = useMenuStore();
   const [routerInstance, setRouterInstance] = useState(null);
 
+  /**
+   * menuTree, fetchMenuData 의존성으로 메뉴 데이터 fetch
+   */
   useEffect(() => {
+    // 메뉴 트리가 없을 때만 데이터 fetch
     if (!menuTree) {
+      // 메뉴 데이터 가져오기
       fetchMenuData();
     }
   }, [menuTree, fetchMenuData]);
 
+  /**
+   * menuTree, flatMenuMap 의존성으로 라우터 생성
+   */
   useEffect(() => {
+    // 메뉴 트리와 flatMenuMap이 준비되면 라우터 생성
     if (menuTree && flatMenuMap) {
       const router = createAppRouter(menuTree, flatMenuMap);
       setRouterInstance(router);
     }
   }, [menuTree, flatMenuMap]);
 
+  // 로딩 중이거나 라우터 인스턴스가 없으면 로딩 화면 표시 TODO 임의 스타일링이므로 디자인 개선
   if (isLoading || !routerInstance) {
     return (
       <div style={{
