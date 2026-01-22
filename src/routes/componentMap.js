@@ -35,6 +35,9 @@ const UI_USR_R_011 = lazy(() => import('../pages/UI_USR_R_011.jsx'));
 const UI_USR_R_031 = lazy(() => import('../pages/UI_USR_R_031.jsx'));
 const UI_USR_R_480 = lazy(() => import('../pages/UI_USR_R_480.jsx'));
 const UI_USR_L_510 = lazy(() => import('../pages/UI_USR_L_510.jsx'));
+const UI_USR_R_060 = lazy(() => import('../pages/UI_USR_R_060.jsx'));
+const UI_USR_L_050 = lazy(() => import('../pages/UI_USR_L_050.jsx'));
+
 
 // 컴포넌트 매핑
 export const componentMap = {
@@ -95,16 +98,28 @@ export const componentMap = {
   },
 
   // 발급 진위 확인
-  // 'M_PIIO_00079': {
-  //   component: UI_USR_L_050, // TODO: 컴포넌트 생성 필요
-  //   layout: SubpageLayout,
-  // },
+  'M_PIIO_00079': {
+    component: UI_USR_L_050,
+    layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: null,
+        component: null,
+      },
+    ],
+  },
 
   // 기타증명서
-  // 'M_PIIO_00080': {
-  //   component: UI_USR_L_060, // TODO: 컴포넌트 생성 필요
-  //   layout: SubpageLayout,
-  // },
+  'M_PIIO_00080': {
+    component: UI_USR_R_060,
+    layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: null,
+        component: null,
+      },
+    ],
+  },
 
   // ========== 마이비즈니스 (M_PIIO_00068) ==========
 

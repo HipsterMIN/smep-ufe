@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
@@ -7,9 +7,12 @@ import Popup from '../components/ui/Popup';
 import { api as apiClient } from '../lib/apiClient.js';
 import { shortenInstName  } from '../utils/stringUtils';
 import { useNavigate } from 'react-router-dom';
+import { useUserMenu } from '../context/UserMenuContext.jsx';
 
 const UI_USR_L_040 = () => {
   const navigate = useNavigate();
+
+  const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   // 증명서 발급 안내 팝업 동작
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -29,6 +32,10 @@ const UI_USR_L_040 = () => {
   // 전송용 (API 파라미터용)
   const [appliedSearchType, setAppliedSearchType] = useState('');
   const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
+
+  // ✅ 사이드바 데이터 계산
+  const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
+  const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
 
   useEffect(() => {
     const fetchData = async () => {
@@ -103,46 +110,11 @@ const UI_USR_L_040 = () => {
     navigate(`${prdocCd}`);
   };
 
-  const navigationData = {
-    depth1Title: '신청·발급',
-    depth: [
-      {
-        depth2: 'AI 스마트 통합 검색',
-      },
-      {
-        depth2: '중소벤처기업부 지원사업 소개',
-      },
-      {
-        depth2: '사업공고',
-      },
-      {
-        depth2: '정책금융',
-      },
-      {
-        depth2: '증명서발급',
-        active: true,
-        depth3: [
-          {
-            label: '증명서 발급',
-            link: '/service/UI_USR_L_040',
-            active: true,
-          },
-        ],
-      },
-    ],
-  };
-
-  const breadcrumbItems = [
-    { label: '신청·발급', link: '#' },
-    { label: '증명서 발급', link: '#' },
-    { label: '증명서 발급', link: '#' },
-  ];
-
   return (
     <>
       <SideNavigation
-        pageTitle={navigationData.depth1Title}
-        depth={navigationData.depth}
+        pageTitle={depth1Menu?.menuNm || ''}
+        menuItems={sidebarData}
       />
       <div className="contents">
         <Breadcrumb items={breadcrumbItems}/>
