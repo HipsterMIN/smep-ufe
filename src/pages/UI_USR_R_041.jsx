@@ -73,7 +73,7 @@ const UI_USR_R_041 = () => {
   }, [prdocCd]);
 
   const goBack = () => {
-    navigate('/service/UI_USR_L_040');
+    navigate('../');
   };
 
   if (loading) return <div>로딩 중...</div>;
