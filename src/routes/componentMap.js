@@ -101,24 +101,12 @@ export const componentMap = {
   'M_PIIO_00079': {
     component: UI_USR_L_050,
     layout: SubpageLayoutWithMenu,
-    children: [
-      {
-        path: null,
-        component: null,
-      },
-    ],
   },
 
   // 기타증명서
   'M_PIIO_00080': {
     component: UI_USR_R_060,
     layout: SubpageLayoutWithMenu,
-    children: [
-      {
-        path: null,
-        component: null,
-      },
-    ],
   },
 
   // ========== 마이비즈니스 (M_PIIO_00068) ==========

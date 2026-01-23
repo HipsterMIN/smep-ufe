@@ -348,9 +348,6 @@ export function UserMenuProvider({ children }) {
         ? flatMenuMap[currentNode.upMenuId]
         : null;
     }
-
-    console.log('🧭 Breadcrumb Items:', items); // ✅ 디버그용 로그
-
     return items;
   }, [currentMenu, flatMenuMap]);
 
