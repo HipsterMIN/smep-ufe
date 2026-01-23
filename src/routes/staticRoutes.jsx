@@ -3,7 +3,7 @@ import MainPage from '../pages/MainPage.jsx';
 import Login from '../pages/Login.jsx';
 import PublishingList from '../publishing/PublishingList.jsx';
 import SubpageLayout from '../layouts/SubpageLayout.jsx';
-import { autoPublishingRoutes } from './autoRoutes.jsx';
+import { autoPublishingRoutesWithLayout, autoPublishingRoutesWithoutLayout } from './autoRoutes.jsx';
 import { MenuProviderOnly } from '../layouts/layoutIndex.jsx';
 
 /**
@@ -41,13 +41,22 @@ export const staticRoutes = [
         ],
   },
 
-  // 퍼블리싱 전용 라우트 (smep-afe 방식)
+  // 퍼블리싱 전용 라우트 - SubpageLayout 적용
   {
-    path: '/publishing',
+    path: 'publishing',
     element: <SubpageLayout />,
     children: [
       { index: true, element: <PublishingList /> },
-      ...autoPublishingRoutes,
+      ...autoPublishingRoutesWithLayout,
+    ],
+  },
+
+  // 퍼블리싱 전용 라우트 - SubpageLayout 미적용 (자체 레이아웃 포함)
+  {
+    path: 'publishing',
+    element: <MenuProviderOnly />,
+    children: [
+      ...autoPublishingRoutesWithoutLayout,
     ],
   },
 
