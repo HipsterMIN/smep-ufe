@@ -45,9 +45,12 @@ const menuStoreImpl  = (set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      // API 호출로 메뉴 데이터 가져오기
       const response = await apiClient.get('/api/v1/menu');
-      const menuData = response.data || response || mockMenuData; // TODO : mockMenuData 제거예정
+      const menuData = response.data || response;
+
+      if (!menuData) {
+        throw new Error('응답 데이터가 비어있습니다.');
+      }
 
       // 메뉴 데이터를 평탄화된 맵으로 변환
       const flatMap = get()._buildFlatMap(menuData);
@@ -61,16 +64,22 @@ const menuStoreImpl  = (set, get) => ({
 
       return menuData;
     } catch (error) {
-      console.error('메뉴 데이터 로드 실패, 목데이터 사용:', error);
+      // 개발 환경이거나 API 호출 실패 시 목데이터 사용
+      const isDev = import.meta.env.MODE === 'development';
+      
+      if (isDev) {
+        console.warn('메뉴 데이터 API 호출 실패, 개발 환경이므로 목데이터를 사용합니다:', error.message);
+      } else {
+        console.error('메뉴 데이터 로드 실패:', error.message);
+      }
 
-      // TODO : 목데이터 제거예정
       const flatMap = get()._buildFlatMap(mockMenuData);
 
       set({
         menuTree: mockMenuData,
         flatMenuMap: flatMap,
         isLoading: false,
-        error: error.message,
+        error: isDev ? null : error.message, // 개발환경에서는 에러 상태로 처리하지 않음
       });
 
       return mockMenuData;

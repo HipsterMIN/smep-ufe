@@ -26,7 +26,7 @@ const Pbanc = () => {
         depth3: [
           {
             label: 'AI 스마트 검색',
-            link: '/main-dev/ai-smart-search',
+            link: '/req/ai/ai-smart-search',
           },
         ],
       },

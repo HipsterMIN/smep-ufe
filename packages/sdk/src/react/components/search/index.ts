@@ -1,5 +1,6 @@
-export { SearchRoot, useSearchContext } from './SearchContext';
-export type { SearchRootProps, SearchContextValue } from './SearchContext';
+// Provider
+export { SearchRoot as SearchProvider, useSearchContext } from './SearchContext';
+export type { SearchRootProps as SearchProviderProps, SearchContextValue } from './SearchContext';
 
 export { SearchInput } from './SearchInput';
 export type { SearchInputProps, SearchInputRenderProps } from './SearchInput';

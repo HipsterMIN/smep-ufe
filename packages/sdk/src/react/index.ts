@@ -4,7 +4,29 @@
  * This module contains React-specific functionality for the SDK.
  */
 
-// Provider
+// ============================================
+// Hooks (범용)
+// ============================================
+export { useCubeIAxChat, useCubeIAxSearch, useChat, useSearch, useStreamingMessage } from './hooks';
+export type {
+  UseCubeIAxChatOptions,
+  UseCubeIAxChatReturn,
+  UseCubeIAxSearchOptions,
+  UseCubeIAxSearchReturn,
+  UseChatOptions,
+  UseChatReturn,
+  UseSearchOptions,
+  UseSearchReturn,
+  UseStreamingMessageOptions,
+  UseStreamingMessageReturn,
+  StreamingMessageState,
+  StatusEvent,
+  SearchCacheState,
+} from './hooks';
+
+// ============================================
+// Providers (범용)
+// ============================================
 export {
   CubeIAxProvider,
   useCubeIAxContext,
@@ -15,28 +37,21 @@ export type {
   CubeIAxContextValue,
 } from './provider';
 
-// React hooks
-export { useCubeIAxChat, useCubeIAxSearch } from './hooks';
-export type {
-  UseCubeIAxChatOptions,
-  UseCubeIAxChatReturn,
-  UseCubeIAxSearchOptions,
-  UseCubeIAxSearchReturn,
-  Message,
-} from './hooks';
-
+// ============================================
 // Headless Components
+// ============================================
 export {
   // Chat
-  ChatRoot,
+  ChatProvider,
   useChatContext,
   ChatMessages,
   ChatMessage,
   ChatInput,
   ChatTypingIndicator,
+  ChatStatus,
   ChatActions,
   // Search
-  SearchRoot,
+  SearchProvider,
   useSearchContext,
   SearchInput,
   SearchResults,
@@ -46,7 +61,7 @@ export {
 
 export type {
   // Chat
-  ChatRootProps,
+  ChatProviderProps,
   ChatContextValue,
   ChatMessagesProps,
   ChatMessageProps,
@@ -55,10 +70,12 @@ export type {
   ChatInputRenderProps,
   ChatTypingIndicatorProps,
   ChatTypingIndicatorRenderProps,
+  ChatStatusProps,
+  ChatStatusRenderProps,
   ChatActionsProps,
   ChatActionsRenderProps,
   // Search
-  SearchRootProps,
+  SearchProviderProps,
   SearchContextValue,
   SearchInputProps,
   SearchInputRenderProps,
@@ -71,12 +88,28 @@ export type {
 
 // Re-export core types and api for convenience
 export { CubeIAxClient } from '../api/client';
-export { getSourceField } from '../core/types';
+export {
+  DEFAULT_TOP_K,
+  DEFAULT_GROUP_BY_FIELD,
+  MIN_TOKENS,
+  MAX_TOKENS,
+  DEFAULT_TOKENS,
+} from '../api/client';
+// 에러 타입 (에러 분류용)
+export {
+  TimeoutError,
+  AbortedError,
+  ApiError,
+  StreamParseError,
+} from '../api/client';
+export { Domain, getSourceField } from '../core/types';
 export type {
+  DomainType,
   CubeIAxConfig,
   UserProfile,
   ChatRequest,
   ChatResponse,
+  Message,
   SearchRequest,
   SearchResponse,
   SearchResult,
@@ -85,4 +118,9 @@ export type {
   StreamEventType,
   StreamCallbacks,
   SearchStreamCallbacks,
+  QueryAnalysis,
+  ItemDetail,
+  GetDocumentRequest,
+  DocumentSection,
+  DocumentResponse,
 } from '../core/types';

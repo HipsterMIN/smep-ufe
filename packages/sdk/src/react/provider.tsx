@@ -35,7 +35,7 @@ export interface CubeIAxProviderProps extends CubeIAxConfig {
  *   return (
  *     <CubeIAxProvider
  *       apiKey={process.env.REACT_APP_CUBE_IAX_API_KEY}
- *       baseUrl="https://api.cube-i-ax.io/v1"
+ *       baseUrl={process.env.REACT_APP_CUBE_IAX_API_URL}
  *     >
  *       <ChatPage />
  *       <SearchPage />
@@ -45,25 +45,25 @@ export interface CubeIAxProviderProps extends CubeIAxConfig {
  * ```
  */
 export function CubeIAxProvider({
-  children,
-  apiKey,
-  baseUrl,
-  timeout,
-  agent,
-}: CubeIAxProviderProps) {
-  const config: CubeIAxConfig = useMemo(
-    () => ({ apiKey, baseUrl, timeout, agent }),
-    [apiKey, baseUrl, timeout, agent]
-  );
-
-  const client = useMemo(() => new CubeIAxClient(config), [config]);
-
-  const value = useMemo(() => ({ client, config }), [client, config]);
+                                  children,
+                                  apiKey,
+                                  baseUrl,
+                                  timeout,
+                                  agent,
+                                  debug,
+                                }: CubeIAxProviderProps) {
+  // 단일 useMemo로 통합하여 메모이제이션 체인 단순화
+  // props가 변경될 때만 client와 value가 함께 재생성됨
+  const value = useMemo(() => {
+    const config: CubeIAxConfig = { apiKey, baseUrl, timeout, agent, debug };
+    const client = new CubeIAxClient(config);
+    return { client, config };
+  }, [apiKey, baseUrl, timeout, agent, debug]);
 
   return (
-    <CubeIAxContext.Provider value={value}>
-      {children}
-    </CubeIAxContext.Provider>
+      <CubeIAxContext.Provider value={value}>
+        {children}
+      </CubeIAxContext.Provider>
   );
 }
 

@@ -26,7 +26,7 @@ import {
   type ReactNode,
 } from "react";
 import {
-  ChatRoot,
+  ChatProvider as ChatRoot,
   useChatContext as useSDKChatContext,
   type Source,
 } from "../../../react";

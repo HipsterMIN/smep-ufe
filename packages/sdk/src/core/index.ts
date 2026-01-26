@@ -8,12 +8,17 @@
 // Utility functions
 export { getSourceField } from './types';
 
+// Constants
+export { Domain } from './types';
+
 // Types
+export type { DomainType } from './types';
 export type {
   CubeIAxConfig,
   UserProfile,
   ChatRequest,
   ChatResponse,
+  Message,
   SearchRequest,
   SearchResponse,
   SearchResult,
@@ -22,4 +27,9 @@ export type {
   StreamEventType,
   StreamCallbacks,
   SearchStreamCallbacks,
+  QueryAnalysis,
+  ItemDetail,
+  GetDocumentRequest,
+  DocumentSection,
+  DocumentResponse,
 } from './types';
