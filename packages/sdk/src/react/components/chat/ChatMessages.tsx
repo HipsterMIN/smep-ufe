@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useChatContext } from './ChatContext';
-import type { Message } from '../../hooks';
+import type { Message } from '../../../core';
 
 /**
  * Props passed to message render function

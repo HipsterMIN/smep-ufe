@@ -17,11 +17,12 @@ const MainPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = () => {
-    if (searchQuery.trim()) {
-      // 검색어를 state로 전달하며 이동 (URL에 노출되지 않음)
-      navigate(`/ai-smart-search`, { state: { q: searchQuery.trim() } });
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery) {
+      // 검색어를 state로 전달하며 이동 (URL 파라미터 사용 안 함)
+      navigate(`/req/ai/ai-smart-search`, { state: { q: trimmedQuery } });
     } else {
-      navigate(`/ai-smart-search`);
+      navigate(`/req/ai/ai-smart-search`);
     }
   };
 

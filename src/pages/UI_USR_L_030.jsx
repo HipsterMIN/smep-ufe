@@ -15,7 +15,7 @@ const UI_USR_L_030 = () => {
         depth3: [
           {
             label: "AI 스마트 검색",
-            link: "/ai-smart-search",
+            link: "/req/ai/ai-smart-search",
           },
         ],
       },

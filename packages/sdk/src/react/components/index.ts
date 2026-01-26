@@ -1,16 +1,19 @@
+// ============================================
 // Chat Headless Components
+// ============================================
 export {
-  ChatRoot,
+  ChatProvider,
   useChatContext,
   ChatMessages,
   ChatMessage,
   ChatInput,
   ChatTypingIndicator,
+  ChatStatus,
   ChatActions,
 } from './chat';
 
 export type {
-  ChatRootProps,
+  ChatProviderProps,
   ChatContextValue,
   ChatMessagesProps,
   ChatMessageProps,
@@ -19,13 +22,17 @@ export type {
   ChatInputRenderProps,
   ChatTypingIndicatorProps,
   ChatTypingIndicatorRenderProps,
+  ChatStatusProps,
+  ChatStatusRenderProps,
   ChatActionsProps,
   ChatActionsRenderProps,
 } from './chat';
 
+// ============================================
 // Search Headless Components
+// ============================================
 export {
-  SearchRoot,
+  SearchProvider,
   useSearchContext,
   SearchInput,
   SearchResults,
@@ -34,7 +41,7 @@ export {
 } from './search';
 
 export type {
-  SearchRootProps,
+  SearchProviderProps,
   SearchContextValue,
   SearchInputProps,
   SearchInputRenderProps,

@@ -5,8 +5,13 @@ import { useChatContext } from './ChatContext';
  * Props passed to actions render function
  */
 export interface ChatActionsRenderProps {
-  /** Clear all messages and reset session */
-  clear: () => void;
+  /**
+   * Clear messages
+   * @param options.keepSession - If true, keeps the session (default: false = resets session too)
+   */
+  clear: (options?: { keepSession?: boolean }) => void;
+  /** Start a new chat (resets both messages and session) */
+  startNewChat: () => void;
   /** Abort the current request */
   abort: () => void;
   /** Whether a request is in progress */
@@ -45,12 +50,13 @@ export interface ChatActionsProps {
  * ```
  */
 export function ChatActions({ children }: ChatActionsProps) {
-  const { clearMessages, abort, isLoading, sessionId, messages } = useChatContext();
+  const { clearMessages, startNewChat, abort, isLoading, sessionId, messages } = useChatContext();
 
   return (
     <>
       {children({
         clear: clearMessages,
+        startNewChat,
         abort,
         isLoading,
         sessionId,

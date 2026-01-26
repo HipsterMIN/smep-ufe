@@ -1,49 +1,49 @@
 import { createContext, useContext, type ReactNode } from 'react';
-import { useCubeIAxSearch, type UseCubeIAxSearchOptions, type UseCubeIAxSearchReturn } from '../../hooks';
+import { useSearch, type UseSearchOptions, type UseSearchReturn } from '../../hooks';
 
 /**
  * Search context value - exposes all search state and actions
  */
-export type SearchContextValue = UseCubeIAxSearchReturn;
+export type SearchContextValue = UseSearchReturn;
 
 const SearchContext = createContext<SearchContextValue | null>(null);
 
 /**
  * Hook to access search context
- * Must be used within SearchRoot
+ * Must be used within SearchProvider
  */
 export function useSearchContext(): SearchContextValue {
   const context = useContext(SearchContext);
   if (!context) {
-    throw new Error('useSearchContext must be used within SearchRoot');
+    throw new Error('useSearchContext must be used within SearchProvider');
   }
   return context;
 }
 
 /**
- * Props for SearchRoot component
+ * Props for SearchProvider component
  */
-export interface SearchRootProps extends UseCubeIAxSearchOptions {
+export interface SearchRootProps extends UseSearchOptions {
   children: ReactNode;
 }
 
 /**
- * SearchRoot - Headless search container that provides context
+ * SearchProvider - Headless search container that provides context
  *
  * @example
  * ```tsx
- * <SearchRoot topK={10} stream onSources={handleSources}>
+ * <SearchProvider topK={10} stream onSources={handleSources}>
  *   <SearchInput>
  *     {({ search }) => <input onChange={(e) => search(e.target.value)} />}
  *   </SearchInput>
  *   <SearchResults>
  *     {(result) => <MyResult {...result} />}
  *   </SearchResults>
- * </SearchRoot>
+ * </SearchProvider>
  * ```
  */
 export function SearchRoot({ children, ...options }: SearchRootProps) {
-  const search = useCubeIAxSearch(options);
+  const search = useSearch(options);
 
   return (
     <SearchContext.Provider value={search}>

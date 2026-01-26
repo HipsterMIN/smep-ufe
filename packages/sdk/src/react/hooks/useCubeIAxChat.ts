@@ -9,39 +9,128 @@ import type {
   StreamEvent,
   Source,
   UserProfile,
+  ItemDetail,
+  QueryAnalysis,
+  DomainType,
+  Message,
 } from '../../core/types';
 
-export interface Message {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  sources?: Source[];
-  timestamp: Date;
+// Re-export Message from core for backward compatibility
+export type { Message } from '../../core/types';
+
+/** Status event data */
+export interface StatusEvent {
+  /** Status message (e.g., "검색 중...", "분석 중...") */
+  message: string;
+  /** Status stage (e.g., "searching", "analyzing") */
+  stage?: string;
+}
+
+/**
+ * Persistence options for saving chat state to storage
+ */
+export interface ChatPersistenceOptions {
+  /**
+   * Storage key (used as-is, no prefix added)
+   * @example 'my-app-chat' → localStorage key: 'my-app-chat'
+   */
+  key: string;
+  /**
+   * Storage type
+   * @default 'localStorage'
+   */
+  storage?: 'localStorage' | 'sessionStorage';
+  /**
+   * Whether to persist session ID
+   * @default true
+   */
+  persistSession?: boolean;
+  /**
+   * Whether to persist messages
+   * @default true
+   */
+  persistMessages?: boolean;
+}
+
+/** Persisted chat state structure */
+interface PersistedChatState {
+  sessionId?: string;
+  messages?: Message[];
+  timestamp: number;
 }
 
 export interface UseCubeIAxChatOptions {
   /** Initial session ID */
   sessionId?: string;
+  /** Initial messages to restore conversation history */
+  initialMessages?: Message[];
   /** User profile for personalized recommendations */
   profile?: UserProfile;
   /** Default metadata to send with every message */
   defaultMetadata?: Record<string, unknown>;
+  /** Default filters to apply to every search (e.g., apply_end_date, region) */
+  defaultFilters?: Record<string, unknown>;
+  /** Domain for routing (e.g., 'support_program', 'law') */
+  domain?: DomainType;
+  /** Maximum number of search results (default: 20) */
+  topK?: number;
   /** Maximum response length in characters (e.g., 150 for compact chat widget) */
   maxResponseLength?: number;
+  /** Maximum tokens for LLM response (default: 1024, range: 100-2048) */
+  maxTokens?: number;
   /** Whether to include citation markers [1], [2] in response (default: true) */
   includeCitations?: boolean;
   /** Callback when session is established */
   onSession?: (sessionId: string) => void;
+  /** Callback when status message is received (e.g., "검색 중...", "분석 중...") */
+  onStatus?: (message: string, stage?: string) => void;
   /** Callback when sources are received (before answer completes) */
   onSources?: (sources: Source[]) => void;
   /** Callback when streaming content is received */
   onContent?: (content: string) => void;
+  /** Callback when citations are received */
+  onCitations?: (citations: Array<{ index: number; source_id: string; text: string }>) => void;
+  /** Callback when clarification questions are received */
+  onClarification?: (message: string, suggestions: string[]) => void;
+  /** Callback when follow-up suggestions are received */
+  onFollowup?: (suggestions: string[], message?: string) => void;
+  /** Callback when query is rewritten */
+  onRewrite?: (rewrittenQuery: string) => void;
+  /** Callback when query analysis is received */
+  onAnalysis?: (analysis: QueryAnalysis) => void;
+  /** Callback when item details are received (for collapsible UI) */
+  onItemDetails?: (items: ItemDetail[]) => void;
+  /** Callback when context is updated (documents for next request, focus program) */
+  onContext?: (documents: string[], focus?: { group_id: string; title: string }) => void;
   /** Callback when stream is complete */
   onComplete?: (response: ChatResponse) => void;
   /** Callback when error occurs */
   onError?: (error: Error) => void;
   /** Callback for raw SSE events */
   onEvent?: (event: StreamEvent) => void;
+  /** Callback when SSE event JSON parsing fails (for debugging) */
+  onParseError?: (rawData: string, error: Error) => void;
+  /**
+   * Enable persistence to localStorage/sessionStorage.
+   * When enabled, sessionId and messages are automatically saved and restored.
+   *
+   * @example
+   * ```tsx
+   * // Basic usage - persist to localStorage with custom key
+   * useCubeIAxChat({ persist: { key: 'my-chat-session' } });
+   *
+   * // With all options
+   * useCubeIAxChat({
+   *   persist: {
+   *     key: 'consultant-chat',
+   *     storage: 'sessionStorage',
+   *     persistSession: true,
+   *     persistMessages: true,
+   *   }
+   * });
+   * ```
+   */
+  persist?: ChatPersistenceOptions;
 }
 
 export interface UseCubeIAxChatReturn {
@@ -57,12 +146,49 @@ export interface UseCubeIAxChatReturn {
   pendingSources: Source[];
   /** Current session ID */
   sessionId: string | undefined;
+  /** Current status (e.g., "검색 중...", "분석 중...") */
+  status: StatusEvent | null;
+  /** Clarification message if any */
+  clarificationMessage: string;
+  /** Clarification suggestions if any */
+  clarificationQuestions: string[];
+  /** Follow-up suggestions if any */
+  followupSuggestions: string[];
+  /** Rewritten query if any */
+  rewrittenQuery: string | null;
+  /** Query analysis if any */
+  queryAnalysis: QueryAnalysis | null;
+  /** Item details for collapsible UI */
+  itemDetails: ItemDetail[];
+  /** Context: document IDs for next request */
+  contextDocuments: string[] | null;
+  /** Context: focus program info */
+  contextFocus: { group_id: string; title: string } | null;
   /** Send a message */
-  sendMessage: (message: string, metadata?: Record<string, unknown>) => Promise<void>;
-  /** Clear all messages */
-  clearMessages: () => void;
+  sendMessage: (message: string, options?: {
+    metadata?: Record<string, unknown>;
+    filters?: Record<string, unknown>;
+    /**
+     * Document IDs (group_id) for context-based responses.
+     * When user asks about specific documents, pass their IDs here.
+     * @example ["BIZ-2024-001", "BIZ-2024-002"]
+     */
+    documentContext?: string[];
+  }) => Promise<void>;
+  /**
+   * Clear all messages
+   * @param options.keepSession - If true, keeps the session (default: false = resets session too)
+   */
+  clearMessages: (options?: { keepSession?: boolean }) => void;
+  /** Start a new chat (alias for clearMessages(), resets both messages and session) */
+  startNewChat: () => void;
   /** Abort the current request */
   abort: () => void;
+  /**
+   * Clear persisted storage (only available when persist option is enabled)
+   * Removes both sessionId and messages from storage
+   */
+  clearStorage: () => void;
 }
 
 /**
@@ -92,8 +218,8 @@ export interface UseCubeIAxChatReturn {
  * ```
  */
 export function useCubeIAxChat(
-  configOrOptions?: CubeIAxConfig | UseCubeIAxChatOptions,
-  optionsParam?: UseCubeIAxChatOptions
+    configOrOptions?: CubeIAxConfig | UseCubeIAxChatOptions,
+    optionsParam?: UseCubeIAxChatOptions
 ): UseCubeIAxChatReturn {
   // Support both signatures:
   // 1. useCubeIAxChat(config, options) - explicit config
@@ -111,164 +237,426 @@ export function useCubeIAxChat(
     // Use Provider context
     if (!contextValue) {
       throw new Error(
-        'useCubeIAxChat: Either pass config as first argument or wrap your app with CubeIAxProvider'
+          'useCubeIAxChat: Either pass config as first argument or wrap your app with CubeIAxProvider'
       );
     }
     config = contextValue.config;
     options = (configOrOptions as UseCubeIAxChatOptions) || {};
   }
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  // ============================================
+  // Persistence helpers
+  // ============================================
+  const persistConfig = options.persist;
+  const storageType = persistConfig?.storage ?? 'localStorage';
+  const persistSession = persistConfig?.persistSession ?? true;
+  const persistMessages = persistConfig?.persistMessages ?? true;
+
+  const getStorage = useCallback((): Storage | null => {
+    if (typeof window === 'undefined') return null;
+    if (!persistConfig?.key) return null;
+    try {
+      return storageType === 'sessionStorage' ? window.sessionStorage : window.localStorage;
+    } catch {
+      return null;
+    }
+  }, [persistConfig?.key, storageType]);
+
+  const loadPersistedState = useCallback((): PersistedChatState | null => {
+    const storage = getStorage();
+    if (!storage || !persistConfig?.key) return null;
+    try {
+      const data = storage.getItem(persistConfig.key);
+      if (!data) return null;
+      const parsed = JSON.parse(data) as PersistedChatState;
+      // Restore Date objects for message timestamps
+      if (parsed.messages) {
+        parsed.messages = parsed.messages.map(msg => ({
+          ...msg,
+          timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+        }));
+      }
+      return parsed;
+    } catch {
+      return null;
+    }
+  }, [getStorage, persistConfig?.key]);
+
+  const savePersistedState = useCallback((state: Partial<PersistedChatState>) => {
+    const storage = getStorage();
+    if (!storage || !persistConfig?.key) return;
+    try {
+      const existing = loadPersistedState() || { timestamp: Date.now() };
+      const updated: PersistedChatState = {
+        ...existing,
+        ...state,
+        timestamp: Date.now(),
+      };
+      storage.setItem(persistConfig.key, JSON.stringify(updated));
+    } catch {
+      // Ignore storage errors (quota exceeded, etc.)
+    }
+  }, [getStorage, persistConfig?.key, loadPersistedState]);
+
+  const clearPersistedState = useCallback(() => {
+    const storage = getStorage();
+    if (!storage || !persistConfig?.key) return;
+    try {
+      storage.removeItem(persistConfig.key);
+    } catch {
+      // Ignore errors
+    }
+  }, [getStorage, persistConfig?.key]);
+
+  // Load initial state from persistence (only on mount)
+  const persistedState = useRef<PersistedChatState | null>(null);
+  if (persistConfig?.key && persistedState.current === null) {
+    persistedState.current = loadPersistedState() || { timestamp: 0 };
+  }
+
+  // Determine initial values (props > persisted > defaults)
+  const initialSessionId = options.sessionId ??
+      ((persistSession && persistedState.current?.sessionId) || undefined);
+  const initialMessages = options.initialMessages ??
+      ((persistMessages && persistedState.current?.messages) || []);
+
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [streamingContent, setStreamingContent] = useState('');
   const [pendingSources, setPendingSources] = useState<Source[]>([]);
-  const [sessionId, setSessionId] = useState<string | undefined>(options.sessionId);
+  const [sessionId, setSessionId] = useState<string | undefined>(initialSessionId);
+  const [status, setStatus] = useState<StatusEvent | null>(null);
+  const [clarificationMessage, setClarificationMessage] = useState<string>('');
+  const [clarificationQuestions, setClarificationQuestions] = useState<string[]>([]);
+  const [followupSuggestions, setFollowupSuggestions] = useState<string[]>([]);
+  const [rewrittenQuery, setRewrittenQuery] = useState<string | null>(null);
+  const [queryAnalysis, setQueryAnalysis] = useState<QueryAnalysis | null>(null);
+  const [itemDetails, setItemDetails] = useState<ItemDetail[]>([]);
+  const [contextDocuments, setContextDocuments] = useState<string[] | null>(null);
+  const [contextFocus, setContextFocus] = useState<{ group_id: string; title: string } | null>(null);
 
   const clientRef = useRef<CubeIAxClient | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  // abort 후 콜백 방지용 플래그 (AbortController.signal 외에 추가 보호)
+  const abortedRef = useRef(false);
+  // sessionId를 ref로 관리하여 sendMessage 의존성에서 제외 (불필요한 함수 재생성 방지)
+  const sessionIdRef = useRef<string | undefined>(initialSessionId);
+  // earlySources를 ref로 관리하여 onComplete에서 stale 값 참조 방지
+  const earlySourcesRef = useRef<Source[]>([]);
+  // config를 ref로 관리하여 getClient 의존성 안정화
+  const configRef = useRef<CubeIAxConfig>(config);
+  // 초기 마운트 완료 플래그 (persistence 저장 시 초기 로드와 구분)
+  const isMountedRef = useRef(false);
+
+  // configRef 동기화 (config 값 변경 시 client 재생성)
+  useEffect(() => {
+    const prevConfig = configRef.current;
+    if (
+        prevConfig.apiKey !== config.apiKey ||
+        prevConfig.baseUrl !== config.baseUrl ||
+        prevConfig.timeout !== config.timeout ||
+        prevConfig.agent !== config.agent ||
+        prevConfig.debug !== config.debug
+    ) {
+      configRef.current = config;
+      clientRef.current = null; // config 변경 시 client 재생성 트리거
+    }
+  }, [config.apiKey, config.baseUrl, config.timeout, config.agent, config.debug]);
+
+  // sessionIdRef 동기화 + persistence 저장
+  useEffect(() => {
+    sessionIdRef.current = sessionId;
+    // 초기 마운트 후에만 저장 (초기 로드 값 재저장 방지)
+    if (isMountedRef.current && persistSession && persistConfig?.key) {
+      savePersistedState({ sessionId });
+    }
+  }, [sessionId, persistSession, persistConfig?.key, savePersistedState]);
+
+  // messages persistence 저장
+  useEffect(() => {
+    // 초기 마운트 후에만 저장 (초기 로드 값 재저장 방지)
+    if (isMountedRef.current && persistMessages && persistConfig?.key) {
+      savePersistedState({ messages });
+    }
+  }, [messages, persistMessages, persistConfig?.key, savePersistedState]);
+
+  // 마운트 완료 표시
+  useEffect(() => {
+    isMountedRef.current = true;
+  }, []);
 
   // Cleanup: abort any in-flight request when component unmounts
   useEffect(() => {
     return () => {
+      abortedRef.current = true;
       abortControllerRef.current?.abort();
     };
   }, []);
 
   // Get or create client instance (use Provider's client if available)
   const getClient = useCallback(() => {
+    // Provider 사용 시 Provider의 client 반환
     if (contextValue?.client) {
       return contextValue.client;
     }
+    // 직접 config 사용 시 clientRef 사용
     if (!clientRef.current) {
-      clientRef.current = new CubeIAxClient(config);
+      clientRef.current = new CubeIAxClient(configRef.current);
     }
     return clientRef.current;
-  }, [config, contextValue]);
+  }, [contextValue?.client]); // contextValue.client만 의존 (config는 ref로 관리)
 
   // Generate unique message ID
   const generateId = () => `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
+  // Reset streaming-related state (extracted to avoid duplication)
+  const resetStreamingState = useCallback(() => {
+    setStreamingContent('');
+    setPendingSources([]);
+    setStatus(null);
+    setClarificationMessage('');
+    setClarificationQuestions([]);
+    setFollowupSuggestions([]);
+    setRewrittenQuery(null);
+    setQueryAnalysis(null);
+    setItemDetails([]);
+    setError(null);
+  }, []);
+
   // Send a message
   const sendMessage = useCallback(
-    async (message: string, metadata?: Record<string, unknown>) => {
-      if (!message.trim()) return;
+      async (message: string, sendOptions?: { metadata?: Record<string, unknown>; filters?: Record<string, unknown>; documentContext?: string[] }) => {
+        if (!message.trim()) return;
 
-      const client = getClient();
-      setError(null);
-      setStreamingContent('');
-      setPendingSources([]);
-      setIsLoading(true);
+        const client = getClient();
+        // 이전 요청이 있으면 abort (race condition 방지)
+        // 순서 중요: 먼저 플래그 설정 → abort → 새 요청용 플래그 리셋
+        abortedRef.current = true; // 이전 콜백 차단
+        abortControllerRef.current?.abort();
+        abortedRef.current = false; // 새 요청 시작 시 플래그 리셋
+        resetStreamingState();
+        setIsLoading(true);
 
-      // Add user message
-      const userMessage: Message = {
-        id: generateId(),
-        role: 'user',
-        content: message,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, userMessage]);
-
-      // Create assistant message placeholder
-      const assistantMessageId = generateId();
-
-      try {
-        abortControllerRef.current = new AbortController();
-
-        // Merge default metadata with message-specific metadata
-        const mergedMetadata = {
-          ...options.defaultMetadata,
-          ...metadata,
+        // Add user message
+        const userMessage: Message = {
+          id: generateId(),
+          role: 'user',
+          content: message,
+          timestamp: new Date(),
         };
+        setMessages((prev) => [...prev, userMessage]);
 
-        const request: ChatRequest = {
-          message,
-          sessionId,
-          stream: true,
-          profile: options.profile,
-          metadata: Object.keys(mergedMetadata).length > 0 ? mergedMetadata : undefined,
-          maxResponseLength: options.maxResponseLength,
-          includeCitations: options.includeCitations,
-          signal: abortControllerRef.current.signal,
-        };
+        // Create assistant message placeholder
+        const assistantMessageId = generateId();
 
-        let fullContent = '';
+        try {
+          abortControllerRef.current = new AbortController();
 
-        let earlySources: Source[] = [];
+          // Merge default metadata with message-specific metadata
+          const mergedMetadata = {
+            ...options.defaultMetadata,
+            ...sendOptions?.metadata,
+          };
 
-        await client.chat(request, {
-          onSession: (newSessionId) => {
-            setSessionId(newSessionId);
-            options.onSession?.(newSessionId);
-          },
-          onSources: (sources) => {
-            // Sources arrive before answer - update pending sources for UI
-            earlySources = sources;
-            flushSync(() => {
-              setPendingSources(sources);
-            });
-            options.onSources?.(sources);
-          },
-          onContent: (content) => {
-            fullContent += content;
-            // Force synchronous render for real-time streaming UI
-            flushSync(() => {
-              setStreamingContent(fullContent);
-            });
-            options.onContent?.(content);
-          },
-          onComplete: (res) => {
-            // Update session ID if provided
-            if (res.sessionId) {
-              setSessionId(res.sessionId);
-            }
+          // Merge default filters with message-specific filters
+          const mergedFilters = {
+            ...options.defaultFilters,
+            ...sendOptions?.filters,
+          };
 
-            // Add final assistant message (use early sources if available)
-            const assistantMessage: Message = {
-              id: assistantMessageId,
-              role: 'assistant',
-              content: res.content || fullContent,
-              sources: res.sources || earlySources,
-              timestamp: new Date(),
-            };
-            setMessages((prev) => [...prev, assistantMessage]);
+          const request: ChatRequest = {
+            message,
+            sessionId: sessionIdRef.current,
+            stream: true,
+            profile: options.profile,
+            metadata: Object.keys(mergedMetadata).length > 0 ? mergedMetadata : undefined,
+            filters: Object.keys(mergedFilters).length > 0 ? mergedFilters : undefined,
+            documentContext: sendOptions?.documentContext,  // Document IDs for context-based responses
+            domain: options.domain,
+            topK: options.topK,
+            maxResponseLength: options.maxResponseLength,
+            maxTokens: options.maxTokens,
+            includeCitations: options.includeCitations,
+            signal: abortControllerRef.current.signal,
+          };
+
+          let fullContent = '';
+
+          // ref 초기화 (새 요청 시작)
+          earlySourcesRef.current = [];
+
+          await client.chat(request, {
+            onSession: (newSessionId) => {
+              if (abortedRef.current) return;
+              setSessionId(newSessionId);
+              options.onSession?.(newSessionId);
+            },
+            onStatus: (statusMessage, stage) => {
+              if (abortedRef.current) return;
+              flushSync(() => {
+                setStatus({ message: statusMessage, stage });
+              });
+              options.onStatus?.(statusMessage, stage);
+            },
+            onSources: (sources) => {
+              if (abortedRef.current) return;
+              // Sources arrive before answer - update pending sources for UI
+              earlySourcesRef.current = sources;
+              flushSync(() => {
+                setPendingSources(sources);
+              });
+              options.onSources?.(sources);
+            },
+            onContent: (content) => {
+              if (abortedRef.current) return;
+              fullContent += content;
+              // Force synchronous render for real-time streaming UI
+              flushSync(() => {
+                setStreamingContent(fullContent);
+              });
+              options.onContent?.(content);
+            },
+            onClarification: (message, suggestions) => {
+              if (abortedRef.current) return;
+              setClarificationMessage(message);
+              setClarificationQuestions(suggestions);
+              options.onClarification?.(message, suggestions);
+            },
+            onFollowup: (suggestions, message) => {
+              if (abortedRef.current) return;
+              setFollowupSuggestions(suggestions);
+              // followup에 message가 있으면 채팅 응답으로 표시
+              if (message) {
+                fullContent = message;
+                flushSync(() => {
+                  setStreamingContent(message);
+                });
+              }
+              options.onFollowup?.(suggestions, message);
+            },
+            onRewrite: (query) => {
+              if (abortedRef.current) return;
+              setRewrittenQuery(query);
+              options.onRewrite?.(query);
+            },
+            onAnalysis: (analysis) => {
+              if (abortedRef.current) return;
+              setQueryAnalysis(analysis);
+              options.onAnalysis?.(analysis);
+            },
+            onItemDetails: (items) => {
+              if (abortedRef.current) return;
+              setItemDetails(items);
+              options.onItemDetails?.(items);
+            },
+            onContext: (documents, focus) => {
+              if (abortedRef.current) return;
+              setContextDocuments(documents);
+              if (focus) setContextFocus(focus);
+              options.onContext?.(documents, focus);
+            },
+            onComplete: (res) => {
+              if (abortedRef.current) return;
+              // Update session ID if provided
+              if (res.sessionId) {
+                setSessionId(res.sessionId);
+              }
+
+              // Add final assistant message (use early sources if available)
+              // 중요: res.sources가 빈 배열[]이면 truthy라서 fallback이 안됨
+              // 따라서 length 체크 필요
+              const assistantMessage: Message = {
+                id: assistantMessageId,
+                role: 'assistant',
+                content: res.content || fullContent,
+                sources: res.sources?.length ? res.sources : earlySourcesRef.current,
+                timestamp: new Date(),
+              };
+
+              // 모든 상태를 flushSync로 동기 업데이트 (깜빡임 방지)
+              flushSync(() => {
+                setMessages((prev) => [...prev, assistantMessage]);
+                setStreamingContent('');
+                setPendingSources([]);
+                setStatus(null);
+                setIsLoading(false);
+              });
+
+              options.onComplete?.(res);
+            },
+            onError: (err) => {
+              if (abortedRef.current) return;
+              // 에러 발생 시 모든 스트리밍 상태 정리
+              flushSync(() => {
+                setError(err);
+                setStreamingContent('');
+                setPendingSources([]);
+                setStatus(null);
+                setIsLoading(false);
+              });
+              options.onError?.(err);
+            },
+            onCitations: options.onCitations,
+            onEvent: options.onEvent,
+            onParseError: options.onParseError,
+          });
+        } catch (err) {
+          // abort된 요청의 에러는 무시
+          if (abortedRef.current) return;
+          const error = err instanceof Error ? err : new Error(String(err));
+          flushSync(() => {
+            setError(error);
             setStreamingContent('');
             setPendingSources([]);
-            options.onComplete?.(res);
-          },
-          onError: (err) => {
-            setError(err);
-            options.onError?.(err);
-          },
-          onEvent: options.onEvent,
-        });
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        options.onError?.(error);
-      } finally {
-        setIsLoading(false);
-        abortControllerRef.current = null;
-      }
-    },
-    [getClient, sessionId, options]
+            setStatus(null);
+            setIsLoading(false);
+          });
+          options.onError?.(error);
+        } finally {
+          abortControllerRef.current = null;
+        }
+      },
+      [getClient, options, resetStreamingState]
   );
 
   // Clear all messages
-  const clearMessages = useCallback(() => {
+  const clearMessages = useCallback((clearOptions?: { keepSession?: boolean }) => {
     setMessages([]);
-    setStreamingContent('');
-    setPendingSources([]);
-    setError(null);
-    setSessionId(undefined);
-  }, []);
+    resetStreamingState();
+    if (!clearOptions?.keepSession) {
+      setSessionId(undefined);
+      // 세션 초기화 시 storage도 함께 정리
+      clearPersistedState();
+    } else if (persistMessages && persistConfig?.key) {
+      // keepSession이지만 메시지는 지우므로 메시지만 storage에서 제거
+      savePersistedState({ messages: [] });
+    }
+  }, [resetStreamingState, clearPersistedState, persistMessages, persistConfig?.key, savePersistedState]);
+
+  // Start a new chat (alias for clearMessages)
+  const startNewChat = useCallback(() => {
+    clearMessages();
+  }, [clearMessages]);
 
   // Abort current request
   const abort = useCallback(() => {
+    abortedRef.current = true;
     abortControllerRef.current?.abort();
-    setIsLoading(false);
-    setStreamingContent('');
-    setPendingSources([]);
+    // 모든 스트리밍 관련 상태 초기화 (flushSync로 동기 업데이트)
+    flushSync(() => {
+      setIsLoading(false);
+      setStreamingContent('');
+      setPendingSources([]);
+      setStatus(null);
+      setClarificationMessage('');
+      setClarificationQuestions([]);
+      setFollowupSuggestions([]);
+      setRewrittenQuery(null);
+      setQueryAnalysis(null);
+      setItemDetails([]);
+      setError(null);
+    });
   }, []);
 
   return {
@@ -278,9 +666,20 @@ export function useCubeIAxChat(
     streamingContent,
     pendingSources,
     sessionId,
+    status,
+    clarificationMessage,
+    clarificationQuestions,
+    followupSuggestions,
+    rewrittenQuery,
+    queryAnalysis,
+    itemDetails,
+    contextDocuments,
+    contextFocus,
     sendMessage,
     clearMessages,
+    startNewChat,
     abort,
+    clearStorage: clearPersistedState,
   };
 }
 

@@ -12,7 +12,7 @@ import {
   type ReactNode,
 } from "react";
 import {
-  SearchRoot,
+  SearchProvider as SearchRoot,
   useSearchContext as useSDKSearchContext,
   type Source,
 } from "../../../react";
@@ -119,8 +119,6 @@ export interface ProgramSearchContextValue {
   streamingSummary: string;
   /** 요약 로딩 중 */
   isSummaryLoading: boolean;
-  /** 마지막으로 실행된 검색어 */
-  lastQuery: string | null;
   /** 검색 실행 */
   search: (query: string, filters?: SearchFilters) => void;
 }
@@ -207,15 +205,15 @@ function buildBackendFilters(filters?: SearchFilters): Record<string, unknown> |
     backendFilters.regions = { $contains_any: filters.regions };
   }
 
-  // 기업규모 → company_sizes ($contains_any, 중소기업 확장)
-  if (filters.companySizes && filters.companySizes.length > 0) {
-    // 중소기업 선택 시 소기업도 포함 (실제 데이터에는 중기업 없음)
-    const expanded = new Set(filters.companySizes);
-    if (expanded.has("중소기업")) {
-      expanded.add("소기업");
+    // 기업규모 → company_sizes ($contains_any, 중소기업 확장)
+    if (filters.companySizes && filters.companySizes.length > 0) {
+      // 중소기업 선택 시 소기업도 포함 (실제 데이터에는 중기업 없음)
+      const expanded = new Set<CompanySize>(filters.companySizes);
+      if (expanded.has("중소기업" as CompanySize)) {
+        expanded.add("소기업" as CompanySize);
+      }
+      backendFilters.company_sizes = { $contains_any: Array.from(expanded) };
     }
-    backendFilters.company_sizes = { $contains_any: Array.from(expanded) };
-  }
 
   // 지원분야 → support_field
   if (filters.supportFields && filters.supportFields.length > 0) {
@@ -283,7 +281,7 @@ function buildBackendProfile(profile?: CompanyProfile): Record<string, unknown> 
   if (profile.isVenture !== undefined) backendProfile.is_venture = profile.isVenture;
   if (profile.isStartup !== undefined) backendProfile.is_startup = profile.isStartup;
   if (profile.isWomenOwned !== undefined) backendProfile.is_women_owned = profile.isWomenOwned;
-  if (profile.isSocialEnterprise !== undefined) backendProfile.is_social_enterprise = profile.isSocialEnterprise;
+  if (profile.isSocialEnterpriseTarget !== undefined) backendProfile.is_social_enterprise = profile.isSocialEnterpriseTarget;
   if (profile.isExporter !== undefined) backendProfile.is_exporter = profile.isExporter;
   if (profile.isYouth !== undefined) backendProfile.is_youth = profile.isYouth;
   if (profile.isDisabledOwned !== undefined) backendProfile.is_disabled_owned = profile.isDisabledOwned;
@@ -387,7 +385,6 @@ function useProgramSearchInternal(): ProgramSearchContextValue {
     summary,
     streamingSummary,
     isSummaryLoading: sdk.isLoading && sdk.results.length > 0,
-    lastQuery: sdk.lastQuery,
     search: (query: string, filters?: SearchFilters) => {
       currentFiltersRef.current = filters;
       const backendFilters = buildBackendFilters(filters);

@@ -1,10 +1,10 @@
 import { createContext, useContext, type ReactNode } from 'react';
-import { useCubeIAxChat, type UseCubeIAxChatOptions, type UseCubeIAxChatReturn } from '../../hooks';
+import { useChat, type UseChatOptions, type UseChatReturn } from '../../hooks';
 
 /**
  * Chat context value - exposes all chat state and actions
  */
-export type ChatContextValue = UseCubeIAxChatReturn;
+export type ChatContextValue = UseChatReturn;
 
 const ChatContext = createContext<ChatContextValue | null>(null);
 
@@ -21,29 +21,29 @@ export function useChatContext(): ChatContextValue {
 }
 
 /**
- * Props for ChatRoot component
+ * Props for ChatProvider component
  */
-export interface ChatRootProps extends UseCubeIAxChatOptions {
+export interface ChatRootProps extends UseChatOptions {
   children: ReactNode;
 }
 
 /**
- * ChatRoot - Headless chat container that provides context
+ * ChatProvider - Headless chat container that provides context
  *
  * @example
  * ```tsx
- * <ChatRoot profile={{ region: 'Seoul' }} onComplete={handleComplete}>
+ * <ChatProvider profile={{ region: 'Seoul' }} onComplete={handleComplete}>
  *   <ChatMessages>
  *     {(message) => <MyMessage {...message} />}
  *   </ChatMessages>
  *   <ChatInput>
  *     {({ send }) => <input onSubmit={send} />}
  *   </ChatInput>
- * </ChatRoot>
+ * </ChatProvider>
  * ```
  */
 export function ChatRoot({ children, ...options }: ChatRootProps) {
-  const chat = useCubeIAxChat(options);
+  const chat = useChat(options);
 
   return (
     <ChatContext.Provider value={chat}>

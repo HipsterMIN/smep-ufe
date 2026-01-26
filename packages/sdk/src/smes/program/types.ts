@@ -5,7 +5,7 @@
  * @see labs/analysis/smes/02_implementation.xlsx
  */
 
-import type { Source } from "../../core";
+import type { Source, ItemDetail } from "../../core";
 
 // ============================================
 // 상태/분류 타입
@@ -28,75 +28,73 @@ export type ApplicationStatus = "접수중" | "마감임박" | "마감" | "상�
  * @see 03_unified_schema.xlsx - DEADLINE_TYPE
  */
 export type DeadlineType =
-  | "상시"
-  | "예산소진시"
-  | "기간지정"
-  | "선착순"
-  | "미정";
+    | "상시"
+    | "예산소진시"
+    | "기간지정"
+    | "선착순"
+    | "미정";
 
 /**
  * 지원분야 (support_field 필드) - 8개 카테고리
  */
 export type SupportField =
-  | "기술개발"
-  | "자금지원"
-  | "판로개척"
-  | "창업지원"
-  | "시설·설비"
-  | "인력양성"
-  | "경영지원"
-  | "해외진출"
-  | "기타";
+    | "기술개발"
+    | "자금지원"
+    | "판로개척"
+    | "창업지원"
+    | "시설·설비"
+    | "인력양성"
+    | "경영지원"
+    | "해외진출"
+    | "기타";
 
 /**
- * 기업규모 (company_sizes 필드) - 6개
+ * 기업규모 (company_sizes 필드) - 4개
  * @see 03_unified_schema.xlsx - SIZE
  */
 export type CompanySize =
-  | "소상공인"
-  | "소기업"
-  | "중기업"
-  | "중소기업"
-  | "중견기업"
-  | "대기업";
+    | "소상공인"
+    | "중소기업"
+    | "중견기업"
+    | "대기업";
 
 /**
  * 지원유형 (support_types 필드) - 9개
  * @see 03_unified_schema.xlsx - SUPPORT_TYPE
  */
 export type SupportType =
-  | "자금"
-  | "R&D"
-  | "교육"
-  | "컨설팅"
-  | "마케팅"
-  | "수출"
-  | "시설"
-  | "인증"
-  | "고용";
+    | "자금"
+    | "R&D"
+    | "교육"
+    | "컨설팅"
+    | "마케팅"
+    | "수출"
+    | "시설"
+    | "인증"
+    | "고용";
 
 /**
  * 지역 (regions 필드) - 17개 시도 + 전국
  */
 export type Region =
-  | "서울"
-  | "경기"
-  | "인천"
-  | "부산"
-  | "대구"
-  | "광주"
-  | "대전"
-  | "울산"
-  | "세종"
-  | "강원"
-  | "충북"
-  | "충남"
-  | "전북"
-  | "전남"
-  | "경북"
-  | "경남"
-  | "제주"
-  | "전국";
+    | "서울"
+    | "경기"
+    | "인천"
+    | "부산"
+    | "대구"
+    | "광주"
+    | "대전"
+    | "울산"
+    | "세종"
+    | "강원"
+    | "충북"
+    | "충남"
+    | "전북"
+    | "전남"
+    | "경북"
+    | "경남"
+    | "제주"
+    | "전국";
 
 // ============================================
 // 지원사업 인터페이스 (2차 데이터레이크)
@@ -115,6 +113,9 @@ export interface SupportProgram {
 
   /** 고유 ID (PK) */
   id: string;
+
+  /** VectorStore ID (문서 상세 조회용) */
+  vsId?: string;
 
   /** 신청 시작일 (YYYYMMDD) */
   startDate: number | null;
@@ -179,7 +180,7 @@ export interface SupportProgram {
   isSmeTarget: boolean;
 
   /** 사회적기업 대상 */
-  isSocialEnterprise: boolean;
+  isSocialEnterpriseTarget: boolean;
 
   /** 여성기업 대상 */
   isWomenTarget: boolean;
@@ -321,11 +322,30 @@ export interface SupportProgram {
   maxYears: number | null;
 
   // ─────────────────────────────────────────
+  // 지원금액 정보 (UI 카드 표시)
+  // ─────────────────────────────────────────
+
+  /** 최대 지원금액 (원 단위) */
+  maxSupportAmount: number | null;
+
+  /** 지원금액 범위 (총액/연간/건별/과제당/업체당) */
+  supportAmountScope: string | null;
+
+  /** 지원방식 (보조금/융자/세제/현물) */
+  supportMethod: string | null;
+
+  /** 지원비율 (%, 0-100) */
+  supportRate: number | null;
+
+  // ─────────────────────────────────────────
   // 기본 정보 (UI 표시)
   // ─────────────────────────────────────────
 
   /** 공고명 */
   title: string;
+
+  /** 소관부처 */
+  ministry: string;
 
   /** 관리부서/수행기관 */
   agency: string;
@@ -469,7 +489,7 @@ export interface SupportProgramSource extends Source {
   // Boolean 필드 - BIZ_TYPE
   is_startup_target?: boolean;
   is_sme_target?: boolean;
-  is_social_enterprise?: boolean;
+  is_social_enterprise_target?: boolean;
 
   // Boolean 필드 - OWNER
   is_women_target?: boolean;
@@ -521,7 +541,14 @@ export interface SupportProgramSource extends Source {
   min_years?: number | null;
   max_years?: number | null;
 
+  // 지원금액 정보
+  max_support_amount?: number | null;
+  support_amount_scope?: string | null;
+  support_method?: string | null;
+  support_rate?: number | null;
+
   // 기본 정보
+  ministry?: string;
   agency?: string;
   executor?: string;
   support_field?: string;
@@ -603,7 +630,7 @@ export interface CompanyProfile {
   /** 중소기업 여부 → is_sme_target */
   isSme?: boolean;
 
-  /** 소기업 여부 → company_sizes (bool_eq) */
+  /** 소기업 여부 → 중소기업에 포함됨 (소기업/중기업은 중소기업으로 통합) */
   isSmallBusiness?: boolean;
 
   /** 벤처기업 여부 → is_venture_target */
@@ -615,8 +642,8 @@ export interface CompanyProfile {
   /** 여성기업 여부 → is_women_target */
   isWomenOwned?: boolean;
 
-  /** 사회적기업 여부 → is_social_enterprise */
-  isSocialEnterprise?: boolean;
+  /** 사회적기업 여부 → is_social_enterprise_target */
+  isSocialEnterpriseTarget?: boolean;
 
   /** 수출기업 여부 → is_exporter_target */
   isExporter?: boolean;
@@ -765,4 +792,63 @@ export interface ProgramChatMessage {
   citations?: Citation[];
   /** 생성 시간 */
   timestamp: Date;
+}
+
+// ============================================
+// 대화 아이템 타입 (UI 표시용)
+// ============================================
+
+/**
+ * SMES 대화 아이템
+ *
+ * 사용자 질문과 AI 응답을 하나의 대화 단위로 묶은 타입입니다.
+ * 대화 히스토리 UI, 브레드크럼 네비게이션 등에 사용됩니다.
+ *
+ * @example
+ * ```typescript
+ * const conversations = transformMessagesToConversations(messages);
+ * conversations.map(conv => (
+ *   <ConversationBlock key={conv.id} conversation={conv} />
+ * ));
+ * ```
+ */
+export interface SMESConversation {
+  /** 대화 ID (assistant 메시지 ID 사용) */
+  id: string;
+
+  /** 대화 깊이 (1부터 시작) */
+  level: number;
+
+  /** 사용자 질문 원문 */
+  query: string;
+
+  /** 질문 요약 (브레드크럼 표시용, 20자 이내) */
+  summary: string;
+
+  /** 검색 결과 수 */
+  resultCount?: number;
+
+  /** 부모 대화 ID (대화 트리 구조) */
+  parentId?: string;
+
+  /** 생성 시간 */
+  timestamp: Date;
+
+  /** 검색된 지원사업 목록 */
+  programs: SupportProgram[];
+
+  /** AI 응답 텍스트 */
+  aiResponse?: string;
+
+  /** 항목 상세 (펼치기/접기 UI용) */
+  itemDetails?: ItemDetail[];
+
+  /** 후속 질문 추천 */
+  followupSuggestions?: string[];
+
+  /** 명확화 메시지 (메인 질문) */
+  clarificationMessage?: string;
+
+  /** 명확화 제안 질문 (클릭 가능) */
+  clarificationQuestions?: string[];
 }

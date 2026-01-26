@@ -1,6 +1,7 @@
 // routes/staticRoutes.jsx
 import MainPage from '../pages/MainPage.jsx';
 import Login from '../pages/Login.jsx';
+import AiChat from '../pages/AiChat.jsx';
 import PublishingList from '../publishing/PublishingList.jsx';
 import SubpageLayout from '../layouts/SubpageLayout.jsx';
 import { autoPublishingRoutesWithLayout, autoPublishingRoutesWithoutLayout } from './autoRoutes.jsx';
@@ -37,6 +38,10 @@ export const staticRoutes = [
           {
             path: '/service/login', // 로그인 페이지
             element: <Login/>,
+          },
+          {
+            path: '/service/ai-chat', // AI 상담 페이지
+            element: <AiChat/>,
           },
         ],
   },
