@@ -115,6 +115,7 @@ export const mockMenuData = {
     {
       'menuId': 'M_PIIO_00064',
       'menuNm': '신청·발급',
+      'menuExplain': '지원사업 신청, 정책자금 상담, 증명서 발급까지 기업에 필요한 업무를 한 번에 해결합니다.',
       'intgSysSeCd': 'PIIO',
       'mbrTypeCd': 'USR',
       'upMenuId': 'M_PIIO_00063',
@@ -368,6 +369,7 @@ export const mockMenuData = {
     {
       'menuId': 'M_PIIO_00065',
       'menuNm': '정책정보',
+      'menuExplain': '최신 정책 리포트와 규제 정보를 한곳에서 쉽게 찾아볼 수 있습니다.',
       'intgSysSeCd': 'PIIO',
       'mbrTypeCd': 'USR',
       'upMenuId': 'M_PIIO_00063',
@@ -657,6 +659,7 @@ export const mockMenuData = {
     {
       'menuId': 'M_PIIO_00066',
       'menuNm': '데이터 개방',
+      'menuExplain': '정책 통계와 실시간 데이터를 투명하게 확인하고 활용할 수 있습니다.',
       'intgSysSeCd': 'PIIO',
       'mbrTypeCd': 'USR',
       'upMenuId': 'M_PIIO_00063',
@@ -754,6 +757,7 @@ export const mockMenuData = {
     {
       'menuId': 'M_PIIO_00067',
       'menuNm': '고객지원',
+      'menuExplain': '서비스 이용 안내와 민원 상담을 통합하여 신속하게 도와드립니다.',
       'intgSysSeCd': 'PIIO',
       'mbrTypeCd': 'USR',
       'upMenuId': 'M_PIIO_00063',
