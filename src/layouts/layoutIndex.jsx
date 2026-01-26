@@ -6,7 +6,7 @@ import { Outlet } from 'react-router-dom';
 export const SubpageLayoutWithMenu = ({ children }) => (
   <UserMenuProvider>
     <SubpageLayout>
-      {children}
+      {children || <Outlet />}  {/* ✅ children 우선, 없으면 Outlet */}
     </SubpageLayout>
   </UserMenuProvider>
 );
