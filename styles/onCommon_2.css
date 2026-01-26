@@ -172,7 +172,7 @@
     width: 184px;
 }
 .search-top-box .form-row-box .krds-form-select.w-164 {
-    width: 164px;
+    min-width: 164px;
 }
 .on-form-row dd ~ dt {
     margin-left: 10px;
@@ -180,7 +180,48 @@
 .on-form-register .txt-caution {
     font-size: 15px;
 }
-
+.on-form-row .form-wrapper.row-small{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.on-form-row .form-row-content .w-120 {
+    width: 120px;
+}
+.on-form-row .form-row-content .w-140 {
+    width: 140px
+}
+.on-form-row .form-row-content .w-150 {
+    width: 150px
+}
+.on-form-row .form-row-content .w-460 {
+    width: 460px;
+}
+.on-form-row .form-wrapper ~ .form-wrapper {
+    margin-top: 8px;
+}
+.on-form-row .text-value {
+    font-weight: 700;
+    color: #464C53;
+}
+.on-form-register .form-title {
+    margin-bottom: 8px;
+}
+.conts-wrap .on-form-register ~ .info-list-point  {
+    margin-top: 16px;
+}
+.conts-wrap .sec-tit3 {
+    margin-bottom: var(--krds-pc-gap-layout-title-body-small);
+    font-size: var(--krds-pc-font-size-heading-small);
+}
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    gap:  var(--krds-pc-gap-layout-title-body-medium);
+}
+.flex-between.center {
+    align-items: center;
+}
 .krds-table-wrap .tbl .no-data {
     border-top: var(--krds-table--data-border-width) solid var(--krds-table--data-tbody-color-divider);
 }
@@ -589,6 +630,43 @@
 .bg-guide.bg-gray .bg-guide-sub {
     margin-top: 36px;
 }
+.guide-txt .guide-txt-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #256EF4;
+  border-radius: 50%;
+}
+.guide-txt .ico-checkbox {
+  width: 14px;
+  height: 13px;
+  background-image: none;
+  background-color: #256EF4;
+}
+.on-boxlist.img-formatlist .on-boxlist-in > div {
+  align-items: flex-start;
+}
+.on-boxlist.img-formatlist .on-boxlist-in img {
+  width: 120px;
+}
+.on-boxlist.img-formatlist .on-boxlist-in .h-tit3 {
+  margin-bottom: 8px;
+}
+.on-boxlist.img-formatlist .on-boxlist-in .sub-text {
+  color: #6D7882;
+}
+.on-boxlist.img-formatlist .on-boxlist-in .desc {
+  margin-top: 34px;
+  color: #464C53;
+  line-height: 1.5;
+}
+.on-boxlist.img-formatlist .side-btn  {
+  display: flex;
+  gap: 16px;
+}
 /* 반응형*/
 @media (max-width: 1800px) {
 }
@@ -646,5 +724,17 @@
   }
   .certify-cont-box .certify-cont-title {
       margin-bottom: 30px;
+  }
+  .on-form-row .form-row-content .w-120 {
+      width: 100%;
+  }
+  .on-form-row .form-row-content .w-140 {
+      width: 100%;
+  }
+  .on-form-row .form-row-content .w-150 {
+      width: 100%;
+  }
+  .on-form-row .form-row-content .w-460 {
+      width: 100%;
   }
 }
