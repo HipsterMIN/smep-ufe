@@ -68,11 +68,11 @@ export default function Header() {
   const handleOpenMobGnb = () => {
     mobGnbRef.current?.classList.add('is-open', 'is-backdrop');
     document.body.classList.add('is-gnb-mobile');
-  }
+  };
   const handleCloseMobGnb = () => {
     mobGnbRef.current?.classList.remove('is-open', 'is-backdrop');
     document.body.classList.remove('is-gnb-mobile');
-  }
+  };
 
   const handleMobileTabClick = (e, index) => {
     e.preventDefault();
@@ -82,7 +82,7 @@ export default function Header() {
     if (targetElement) {
       targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-  }
+  };
 
   return (
     <>
@@ -113,7 +113,7 @@ export default function Header() {
                   </a>
                 </h2>
                 <div className="header-actions">
-                  <button type="button" className="btn-navi sch open-modal" data-target="popTotalSch">통합검색</button>
+                  {/* <button type="button" className="btn-navi sch open-modal" data-target="popTotalSch">통합검색</button> */}
                   {isLogin ? (
                     <>
                       <button type="button" className="btn-navi logout" onClick={logout}>로그아웃</button>
@@ -272,13 +272,13 @@ export default function Header() {
                         {menu.children.map((subMenu) => (
                           <li key={subMenu.menuId}>
                             <a href={subMenu.fullPath} className="gnb-sub-trigger">{subMenu.menuNm}</a>
-                             <ul className='subMenuLists'>
-                                {(subMenu.children || []).map((depth3Menu) => (
-                                  <li key={depth3Menu.menuId}>
-                                    <a href={depth3Menu.fullPath}>{depth3Menu.menuNm}</a>
-                                  </li>
-                                ))}
-                              </ul>
+                            <ul className='subMenuLists'>
+                              {(subMenu.children || []).map((depth3Menu) => (
+                                <li key={depth3Menu.menuId}>
+                                  <a href={depth3Menu.fullPath}>{depth3Menu.menuNm}</a>
+                                </li>
+                              ))}
+                            </ul>
                           </li>
                         ))}
                       </ul>

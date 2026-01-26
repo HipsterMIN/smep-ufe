@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
-import SearchListTop from '../components/ui/SearchListTop';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import { api as apiClient } from '../lib/apiClient.js';
+import { useUserMenu } from '../context/UserMenuContext.jsx';
 
 const Pbanc = () => {
+  const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+
   const { id } = useParams();
   const [item, setItem] = useState(null);
   const navigate = useNavigate();
@@ -134,11 +135,15 @@ const Pbanc = () => {
     return `${yyyy}.${mm}.${dd}`;
   }
 
+  // ✅ 사이드바 데이터 계산
+  const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
+  const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+
   return (
     <>
       <SideNavigation
-        pageTitle={navigationData.depth1Title}
-        depth={navigationData.depth}
+        pageTitle={depth1Menu?.menuNm || ''}
+        menuItems={sidebarData}
       />
       <div className="contents">
         <Breadcrumb items={breadcrumbItems}/>
