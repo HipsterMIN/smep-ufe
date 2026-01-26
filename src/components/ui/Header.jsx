@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import arrowIcon from '../../assets/main/icon-arrow.svg';
 import { useAuthStore } from '../../store/useAuthStore.jsx';
 import { FloatingChatbot } from '../ai/FloatingChatbot';
@@ -12,9 +12,11 @@ const BASE_URL = import.meta.env.VITE_BASE || '/';
 // 관리자 - 상단 메뉴
 export default function Header() {
   const [openIndex, setOpenIndex] = useState(null);
+  const [activeMobileTab, setActiveMobileTab] = useState(0);
   const { isLogin, logout } = useAuthStore();
   const { menuTree, flatMenuMap, fetchMenuData } = useMenuStore();
-
+  const mobGnbRef = useRef(null);
+  
   // 메뉴 데이터 로드
   useEffect(() => {
     if (!menuTree) {
@@ -40,6 +42,13 @@ export default function Header() {
           .map(child => ({
             ...child,
             fullPath: basePath + buildFullPath(child, flatMenuMap),
+            children: (child.children || [])
+              .filter(grandChild => grandChild.lfsdMenuExpsrYn === 'Y')
+              .sort((a, b) => a.sortSeq - b.sortSeq)
+              .map(grandChild => ({
+                ...grandChild,
+                fullPath: basePath + buildFullPath(grandChild, flatMenuMap),
+              })),
           })),
       }));
   }, [menuTree, flatMenuMap]);
@@ -55,6 +64,25 @@ export default function Header() {
   const handleClickMypage = () => {
     navigate('/service/UI_USR_L_510');
   };
+
+  const handleOpenMobGnb = () => {
+    mobGnbRef.current?.classList.add('is-open', 'is-backdrop');
+    document.body.classList.add('is-gnb-mobile');
+  }
+  const handleCloseMobGnb = () => {
+    mobGnbRef.current?.classList.remove('is-open', 'is-backdrop');
+    document.body.classList.remove('is-gnb-mobile');
+  }
+
+  const handleMobileTabClick = (e, index) => {
+    e.preventDefault();
+    setActiveMobileTab(index);
+    const targetId = `mGnb-anchor${index + 1}`;
+    const targetElement = document.getElementById(targetId);
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
 
   return (
     <>
@@ -124,7 +152,7 @@ export default function Header() {
                       <button type="button" className="btn-navi join">회원가입</button>
                     </>
                   )}
-                  <button type="button" className="btn-navi all" aria-controls="mobile-nav">전체메뉴</button>
+                  <button type="button" onClick={handleOpenMobGnb} className="btn-navi all" aria-controls="mobile-nav">전체메뉴</button>
                 </div>
               </div>
             </div>
@@ -149,14 +177,29 @@ export default function Header() {
                       <div className="gnb-main-list">
                         <div className="gnb-sub-list single-list between">
                           <div className="gnb-sub-content">
-                            <h2 className="sub-title"><span>{menu.menuNm} 관련 서비스를 제공합니다.</span></h2>
-                            <ul>
-                              {menu.children.map((subMenu) => (
-                                <li key={subMenu.menuId}>
-                                  <a href={subMenu.fullPath}>{subMenu.menuNm}</a>
-                                </li>
-                              ))}
-                            </ul>
+                            <h2 className="sub-title">
+                              <span className="on-p4">{menu.menuNm}</span>
+                              <span>{menu.menuExplain}</span>
+                            </h2>
+                            <div>
+                              <ul>
+                                {menu.children.map((subMenu) => (
+                                  <li key={subMenu.menuId}>
+                                    <a href={subMenu.fullPath}>
+                                      {subMenu.menuNm}
+                                      <i className="svg-icon ico-angle right sm"></i>
+                                    </a>
+                                    <ul className='subMenuLists'>
+                                      {(subMenu.children || []).map((depth3Menu) => (
+                                        <li key={depth3Menu.menuId}>
+                                          <a href={depth3Menu.fullPath}>{depth3Menu.menuNm}</a>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -173,7 +216,7 @@ export default function Header() {
         { /*헤더 컨텐츠 영역  */}
 
         { /*메인메뉴 : 모바일 */}
-        <div id="mobile-nav" className="krds-main-menu-mobile" >
+        <div id="mobile-nav" className="krds-main-menu-mobile" ref={mobGnbRef}> 
           <div className="gnb-wrap">
             {/* gnb-header */}
             <div className="gnb-header">
@@ -184,14 +227,6 @@ export default function Header() {
                 <button type="button" className="krds-btn large text"><i className="svg-icon ico-log"></i> 로그인을 해주세요</button>
               </div>
               { /*gnb-login */}
-              {/* gnb-service-menu */}
-              <div className="gnb-service-menu">
-                <a href="#" className="link">메뉴명</a>
-                <a href="#" className="link">메뉴명</a>
-                <a href="#" className="link">메뉴명</a>
-                <a href="#" className="link">메뉴명</a>
-              </div>
-              {/* gnb-service-menu */}
               {/* 검색 */}
               <div className="sch-input">
                 <input type="text" className="krds-input" placeholder="찾고자 하는 메뉴명을 입력해 주세요" title="찾고자 하는 메뉴명 입력"></input>
@@ -214,7 +249,8 @@ export default function Header() {
                       <li role="none" key={menu.menuId}>
                         <a
                           href={`#mGnb-anchor${index + 1}`}
-                          className={`gnb-main-trigger ${index === 0 ? 'active' : ''}`}
+                          className={`gnb-main-trigger ${activeMobileTab === index ? 'active' : ''}`}
+                          onClick={(e) => handleMobileTabClick(e, index)}
                         >
                           {menu.menuNm}
                         </a>
@@ -236,6 +272,13 @@ export default function Header() {
                         {menu.children.map((subMenu) => (
                           <li key={subMenu.menuId}>
                             <a href={subMenu.fullPath} className="gnb-sub-trigger">{subMenu.menuNm}</a>
+                             <ul className='subMenuLists'>
+                                {(subMenu.children || []).map((depth3Menu) => (
+                                  <li key={depth3Menu.menuId}>
+                                    <a href={depth3Menu.fullPath}>{depth3Menu.menuNm}</a>
+                                  </li>
+                                ))}
+                              </ul>
                           </li>
                         ))}
                       </ul>
@@ -248,7 +291,7 @@ export default function Header() {
             { /*gnb-body */}
 
             {/* gnb-close */}
-            <button type="button" className="krds-btn medium icon" id="close-nav">
+            <button type="button" className="krds-btn medium icon" id="close-nav" onClick={handleCloseMobGnb}>
               <span className="sr-only">전체메뉴 닫기</span>
               <i className="svg-icon ico-popup-close"></i>
             </button>
