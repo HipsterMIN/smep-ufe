@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useMemo, useCallback } fro
 import { useLocation } from 'react-router-dom';
 import { useMenuStore } from '../store/useMenuStore';
 import { buildFullPath } from '../utils/menuUtils';
+import { componentMap } from '../routes/componentMap';
 
 /**
  * =============================================================================
@@ -128,6 +129,21 @@ export function UserMenuProvider({ children }) {
   }, []);
 
   /**
+   * 동적 라우트 패턴 매칭
+   */
+  const matchDynamicRoute = useCallback((pattern, pathname) => {
+    const patternParts = pattern.split('/').filter(Boolean);
+    const pathParts = pathname.split('/').filter(Boolean);
+
+    if (patternParts.length !== pathParts.length) return false;
+
+    return patternParts.every((part, i) => {
+      if (part.startsWith(':')) return true;
+      return part === pathParts[i];
+    });
+  }, []);
+
+  /**
    * ---------------------------------------------------------------------------
    * findMenuByPath: URL 경로로 메뉴 찾기
    * ---------------------------------------------------------------------------
@@ -161,7 +177,7 @@ export function UserMenuProvider({ children }) {
     // menuTree나 flatMenuMap이 없으면 null
     if (!menuTree || !flatMenuMap) return null;
 
-    // flatMenuMap을 순회하며 경로가 일치하는 노드 찾기
+    // 1. flatMenuMap을 순회하며 경로가 일치하는 노드 찾기 (완전일치)
     for (const menuId in flatMenuMap) {
       const node = flatMenuMap[menuId];
       const nodePath = buildFullPath(node, flatMenuMap);
@@ -171,8 +187,25 @@ export function UserMenuProvider({ children }) {
       }
     }
 
+    // 2. 동적 라우트 패턴 매칭
+    for (const menuId in flatMenuMap) {
+      const node = flatMenuMap[menuId];
+      const nodePath = buildFullPath(node, flatMenuMap);
+      const componentConfig = componentMap[menuId];
+
+      if (componentConfig?.children) {
+        for (const child of componentConfig.children) {
+          const childPath = `${nodePath}/${child.path}`;
+
+          if (matchDynamicRoute(childPath, pathname)) {
+            return node;
+          }
+        }
+      }
+    }
+
     return null;
-  }, [menuTree, flatMenuMap]);
+  }, [menuTree, flatMenuMap, matchDynamicRoute]);
 
   /**
    * ---------------------------------------------------------------------------
@@ -393,6 +426,7 @@ export function UserMenuProvider({ children }) {
    * const sideMenus = getSideNavigationData();
    */
   const getSideNavigationData = useCallback((menuId) => {
+
     const targetMenu = menuId ? flatMenuMap[menuId] : currentMenu;
     if (!targetMenu || !flatMenuMap) return [];
 
@@ -603,24 +637,7 @@ export function UserMenuProvider({ children }) {
 
     // ===== 액션 =====
     refreshMenu: fetchMenuData,  // 메뉴 재조회 함수
-  }), [
-    menuTree,
-    flatMenuMap,
-    currentMenu,
-    findMenuById,
-    findMenuByPath,
-    getMenuByName,
-    getAllMenus,
-    getPageMenus,
-    getFullPath,
-    getBreadcrumbItems,
-    getSideNavigationData,
-    getHeaderMenus,
-    flattenMenu,
-    isLoading,
-    error,
-    fetchMenuData,
-  ]);
+  }), [menuTree, flatMenuMap, currentMenu, findMenuById, findMenuByPath, getMenuByName, getAllMenus, getPageMenus, getFullPath, getBreadcrumbItems, getSideNavigationData, getDepth1Parent, getHeaderMenus, flattenMenu, isLoading, error, fetchMenuData]);
 
   // 로딩 중 화면
   if (isLoading) {
