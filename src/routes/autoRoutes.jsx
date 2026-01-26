@@ -3,6 +3,9 @@ import React, {lazy, Suspense} from 'react';
 // src/publishing 하위의 모든 .jsx 파일을 가져옵니다.
 const modules = import.meta.glob('../publishing/*.jsx');
 
+// SubpageLayout을 적용하지 않을 페이지 목록
+const NO_LAYOUT_PAGES = ['MainPage', 'AiSmartSearch', 'AiChat'];
+
 export const autoPublishingRoutes = Object.keys(modules).map((path) => {
     // 1. 파일 경로에서 순수 파일명 추출 및 확장자 제거, 앞뒤 공백 제거
     const fileName = path.split('/').pop().replace('.jsx', '').trim();
@@ -23,9 +26,12 @@ export const autoPublishingRoutes = Object.keys(modules).map((path) => {
         .replace(/^-|-$/g, '')             // 시작과 끝의 - 제거
         .toUpperCase();
 
+    const noLayout = NO_LAYOUT_PAGES.includes(fileName);
+
     return {
         path: safePath,
         name: fileName,
+        noLayout, // 레이아웃 미적용 여부 플래그
         element: (
             <Suspense fallback={<div>Loading...</div>}>
                 <PageComponent/>
@@ -33,3 +39,9 @@ export const autoPublishingRoutes = Object.keys(modules).map((path) => {
         ),
     };
 }).filter(Boolean);
+
+// SubpageLayout이 필요한 라우트만 필터링
+export const autoPublishingRoutesWithLayout = autoPublishingRoutes.filter(route => !route.noLayout);
+
+// SubpageLayout이 필요 없는 라우트만 필터링 (MenuProviderOnly 사용)
+export const autoPublishingRoutesWithoutLayout = autoPublishingRoutes.filter(route => route.noLayout);
