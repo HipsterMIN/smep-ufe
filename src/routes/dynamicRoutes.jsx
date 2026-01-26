@@ -65,7 +65,6 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
   // T 타입: 실제 컴포넌트 매핑
   if (menuNode.scrnTypeCd === 'T') {
     const componentConfig = componentMap[menuNode.menuId];
-    console.log('🔍', menuNode.menuId, fullPath, '컴포넌트:', componentConfig); // ✅ 추가
     if (componentConfig) {
       const { component: Component, layout: Layout, children } = componentConfig;
 
