@@ -75,9 +75,6 @@ const Pbanc = () => {
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
 
-  console.log(sidebarData);
-  console.log(depth1Menu);
-
   return (
     <>
       <SideNavigation
