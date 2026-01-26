@@ -87,7 +87,7 @@ const UI_USR_R_440 = () => {
             </tbody>
           </table>
         </div>
-{/* 
+
         <div className="conts-wrap certify-conts mt-64">
           <h3 className="sec-tit">회원 탈퇴 시 회원 정보 보관 안내</h3>
           <p className="conts-desc" >회원가입 시 입력하신 회원정보는 “개인정보처리방침”에 따라 아래와 같이 일정기간 저장함을 안내합니다.</p>
@@ -95,11 +95,11 @@ const UI_USR_R_440 = () => {
           <table className="tbl col data">
             <caption>회원 정보 보관 안내 표. 보유기간, 수집동의, 법적근거, 비고 정보가 제공됨. </caption>
             <colgroup>
-              <col style={{width: "16%"}} />
-              <col style={{width: "16%"}}/>
-              <col style={{width: "16%"}}/>
-              <col style={{width: "16%"}}/>
-              <col  />
+              <col style={{width: "15.8%"}} />
+              <col style={{width: "15.8%"}}/>
+              <col style={{width: "22.6%"}}/>
+              <col style={{width: "22.6%"}}/>
+              <col />
             </colgroup>
              <thead>
                 <tr>
@@ -108,20 +108,32 @@ const UI_USR_R_440 = () => {
                   <th scope="col" className="ac">수집동의</th>
                   <th scope="col" className="ac">법적근거</th>
                   <th scope="col" className="ac">비고</th>
-                  </tr>
+                </tr>
               </thead>
             <tbody>
               <tr>
-                <th scope="row" className="ac"><span>회원정보</span></th>
-                <td className="ac"><span>즉시 파기</span></td>
-                <td className="ac" colSpan={4}><span>정보주체의 동의</span></td>
-                <td className="ac" colSpan={4}><span>개인정보보호법 제3장정보통신망 이용촉진 및 정보보호 등에 관한 법률 제27조</span></td>
-                <td className="ac" colSpan={4}><span>GET 방식으로 호출시 url encoding 필요</span></td>
+                <th scope="row" className="ac bg"><span>회원정보</span></th>
+                <td className="ac br-1"><span>즉시 파기</span></td>
+                <td className="ac" rowSpan={4}><span>정보주체의 동의</span></td>
+                <td className="ac" rowSpan={4}><span>개인정보보호법 제3장 정보통신망 이용촉진 및 정보보호 등에 관한 법률 제27조</span></td>
+                <td className="ac" rowSpan={4}><span>보유기간이 도달하면 즉시 파기</span></td>
+              </tr>
+              <tr>
+                <th scope="row" className="ac bg"><span>지원사업신청이력</span></th>
+                <td className="ac br-1"><span>5년</span></td>
+              </tr>
+               <tr>
+                <th scope="row" className="ac bg"><span>증명서 발급 이력</span></th>
+                <td className="ac br-1"><span>180일</span></td>
+              </tr>
+               <tr>
+                <th scope="row" className="ac bg"><span>전자민원신청이력</span></th>
+                <td className="ac br-1"><span>180일</span></td>
               </tr>
             </tbody>
           </table>
           </div>
-        </div> */}
+        </div>
 
         <div className="conts-wrap mt-64 certify-conts">
           <h3 className="sec-tit">기업 인증 </h3>
