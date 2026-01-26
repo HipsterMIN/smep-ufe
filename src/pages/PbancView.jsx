@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
-import SearchListTop from '../components/ui/SearchListTop';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import { api as apiClient } from '../lib/apiClient.js';
+import { useUserMenu } from '../context/UserMenuContext.jsx';
 
 const Pbanc = () => {
+  const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+
   const { id } = useParams();
   const [item, setItem] = useState(null);
   const navigate = useNavigate();
@@ -16,70 +17,6 @@ const Pbanc = () => {
   const handleToggleTextShadow = () => {
     shadowTextRef.current.classList.toggle('on');
   };
-
-  const navigationData = {
-    depth1Title: '신청·발급',
-    depth: [
-      {
-        depth2: 'AI 스마트 검색',
-        active: true,
-        depth3: [
-          {
-            label: 'AI 스마트 검색',
-            link: '/main-dev/ai-smart-search',
-          },
-        ],
-      },
-      {
-        depth2: '중소벤처기업부 지원사업공고',
-        active: true,
-        depth3: [
-          {
-            label: '지원사업',
-            link: '/main-dev/service/UI_USR_L_010',
-          },
-        ],
-
-      },
-      {
-        depth2: '사업공고',
-        active: true,
-        depth3: [
-          {
-            label: '사업공고',
-            link: '/main-dev/service/pbanc',
-            active: true,
-          },
-        ],
-      },
-      {
-        depth2: '정책금융',
-        active: true,
-        depth3: [
-          {
-            label: '정책금융안내',
-            link: '/main-dev/service/UI_USR_L_030',
-          },
-        ],
-      },
-      {
-        depth2: '증명서 발급',
-        active: true,
-        depth3: [
-          {
-            label: '증명서 발급',
-            link: '/main-dev/service/UI_USR_L_040',
-          },
-        ],
-      },
-    ],
-  };
-
-  const breadcrumbItems = [
-    { label: '신청·발급', link: '#' },
-    { label: '사업공고', link: '#' },
-    { label: '사업공고', link: '#' },
-  ];
 
   const schFormWrapRef = useRef(null);
 
@@ -134,11 +71,18 @@ const Pbanc = () => {
     return `${yyyy}.${mm}.${dd}`;
   }
 
+  // ✅ 사이드바 데이터 계산
+  const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
+  const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+
+  console.log(sidebarData);
+  console.log(depth1Menu);
+
   return (
     <>
       <SideNavigation
-        pageTitle={navigationData.depth1Title}
-        depth={navigationData.depth}
+        pageTitle={depth1Menu?.menuNm || ''}
+        menuItems={sidebarData}
       />
       <div className="contents">
         <Breadcrumb items={breadcrumbItems}/>
