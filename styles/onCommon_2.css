@@ -730,11 +730,183 @@
   display: flex;
   gap: 16px;
 }
+.txt-box.bg-white.gap-16 {
+    gap: var(--krds-gap-5);
+}
+.form-group.row-sm {
+    flex-direction: row;
+    gap: var(--krds-gap-7);
+}
+.form-group.row-sm .form-tit {
+    width:120px;
+}
+.form-group.row-sm .form-label {
+    font-weight: 700;
+}
+.form-group.row-sm  .form-conts .w-260 {
+    width: 260px;
+}
+.form-group.row-sm .form-wrapper {
+    display: flex;
+    gap: var(--krds-gap-4);
+}
+.on-detail-list .info-conts {
+    display: flex;
+    align-items: center;
+    gap: var(--krds-gap-6);
+}
+.on-detail-list .info-conts .info-btns {
+  margin-left: auto;
+}
+.on-detail-list .info-conts .info-btns  .krds-btn ~ .krds-btn {
+  margin-left: 8px;
+}
+.on-detail-list.small dl dt,
+.on-detail-list.small dl dd {
+    padding: 6px 16px;
+}
+.on-detail-list.small dl dt {
+    font-size: 15px;
+}
+
+.guide-text {
+
+}
+.guide-text-box .guide-text {
+    margin-top: 24px;
+    font-size: 19px;
+    line-height: 1.5;
+}
+.guide-text-box .guide-text strong {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0B50D0;
+}
+.guide-text-box .guide-text p {
+    margin-top: 18px;
+    font-size: 19px;
+    color: #464C53;
+}
+.guide-text {
+    
+}
+/* modal */
+.krds-modal .modal-dialog.modal-sm {
+    max-width: 560px;
+}
+.krds-modal .modal-dialog.modal-sm .modal-conts {
+    padding-top: 0;
+    margin-top: -24px;
+}
+.confirm-guide .sub-title {
+    font-size: 15px;
+    font-weight: 700;
+}
+.confirm-guide .main-title {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 10px;
+    font-size: 24px;
+    font-weight: 700;
+}
+.confirm-guide .ico-confirm {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    margin-right: 4px;
+    background: no-repeat 50%;
+    background-size: 100% auto;
+}
+.confirm-guide .ico-confirm {
+    background-image: url(../src/assets/sub/ico_confirm_success.svg);
+}
+.confirm-guide .ico-fail {
+    background-image: url(../src/assets/sub/ico_confirm_fail.svg);
+}
+.confirm-guide .sub-desc {
+    margin-top: 16px;
+}
+
+.purpose-selection {
+    margin-top: 24px;
+    display: flex;
+    gap: 16px;
+}
+.purpose-selection .btn-purpose {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    flex:1;
+    height: 128px;
+    padding: 0 8px;
+    border-radius: var(--radius-medium2, 6px);
+    border: 1px solid var(--color-button-tertiary-border, #58616A);
+} 
+.purpose-selection .btn-purpose:hover {
+    background: var(--Sub-Gra-Light, linear-gradient(106deg, #FCF9FF 10.51%, #E3E8FA 150.93%));
+    border-color: #0B50D0;
+}
+.purpose-selection .btn-purpose i {
+    width: 48px;
+    height: 48px;
+    background: no-repeat 50%;
+    background-size: 100% auto;
+}
+.purpose-selection .btn-purpose i.ico-public {
+    background-image: url(../src/assets/sub/ico_public.svg);
+}
+.purpose-selection .btn-purpose i.ico-other{
+    background-image: url(../src/assets/sub/ico_other.svg);
+}
+.purpose-selection .btn-purpose span {
+    margin-top: 6px;
+    font-size: 19px;
+    font-weight: 700;
+}
+
+/* 메인 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+.main-totalbox-left h3 .totalbox-txt {
+    font-size: 20px;
+    font-weight: 400;
+    color: #e9e9e9;
+}
+.main-section {
+    padding: 60px 0 62px;
+}
+.main-section .section-tit {
+    font-size: 24px;
+}
+.main-section .section-inner {
+    padding: 0 50px;
+}
+.main-section .section-tit .sub-text {
+    margin-left: 8px;
+    font-size: 15px;
+    font-weight: 400;
+    color: #464C53;
+}
+.totallist-swiper .swiper {
+    padding-top: 40px;
+}
+.main-totallistbox .swiper-nav-wrap {
+    display: none;
+    justify-content: flex-end;
+    margin-top: 12px;
+    gap: 6px;
+}
+.swiper-nav-wrap .swiper-navigation-icon {
+    display: none;
+}
+.swiper-nav-wrap [class^=swiper-button-] {
+    width: 30px;
+    height: 30px;
+}
+.swiper-nav-wrap [class^=swiper-button-]::after {
+    width: 16px;
+    height: 16px;
+}
 /* 반응형*/
-@media (max-width: 1800px) {
-}
-@media (max-width: 1024px) {
-}
 @media (max-width: 767px) {
   .txt-box.outline .check-list > li {
       font-size: var(--krds-mobile-font-size-body-medium);
@@ -800,4 +972,103 @@
   .on-form-row .form-row-content .w-460 {
       width: 100%;
   }
+  .txt-box.bg-white .box-sub {
+    font-size: 15px;
+  }
+  .on-detail-list .info-conts {
+    flex-wrap: wrap;
+  }
+  .form-group.row-sm .form-tit {
+    width: 70px;
+  }
+  .form-group.row-sm .form-conts .w-260 {
+    width: 100%;
+  }
+  .form-group.row-sm,
+  .form-group.row-sm .form-wrapper {
+    gap: var(--krds-gap-2);
+  }
+  .on-detail-list .info-conts {
+    gap: var(--krds-gap-4);
+  }
+  .on-detail-list .info-conts .info-btns {
+    margin-left: 0;
+  }
+  .confirm-guide .main-title {
+    font-size: 22px;
+  }
+
+  /* ~~~~~~~~~~~~~~~~~~~메인~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+  .main-totallayout {
+    height: auto;
+    background-size: 100% auto;
+    background-image: url(/main-dev/src/assets/main/mainBg_mo.png);
+  }
+  .main-total-p {
+    font-size: 17px;
+  }
+  .main-total-tit {
+    font-size: 32px;
+    margin: 14px 0 30px;
+  }
+  .main-totalbox-right {
+    display: none;
+  }
+  .main-totalbox-left {
+    width: 100%;
+    margin: 30px 0;
+    padding: 0 16px;
+  }
+  .main-totalbox-input .boxinner {
+    height: 50px;
+  }
+  .main-totalbox-input select {
+    display: none;
+  }
+  .main-totalbox-input input {
+    padding: 0 20px;
+    font-size: 14px;
+  }
+  .main-totalbox-input button {
+    width: 50px;
+    height: 50px;
+  }
+  .main-totalbox-input button::before {
+    width: 24px;
+    height: 24px;
+  }
+  .main-totalbox-left h3 {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  .main-totalbox-left h3 .totalbox-txt {
+    display: none;
+  }
+  .main-totalbox-left h3 .totalbox-tit {
+    padding-left: 0;
+  } 
+  .main-section {
+    padding: 30px 0 18px;
+  }
+  .main-section .section-inner {
+    padding: 0;
+  }
+  .main-section .section-tit .sub-text {
+    display: none;
+  }
+  .totallist-swiper .swiper {
+    padding-top: 24px;
+    margin-right: -16px;
+    padding-right: 16px;
+  }
+  .main-totalbox-tit {
+    font-size: 15px;
+  }
+  .main-totalbox-sub {
+    font-size: 13px;
+    color: #6D7882;
+  }
+  .main-totallistbox .swiper-nav-wrap {
+    display: flex;
+    }
 }
