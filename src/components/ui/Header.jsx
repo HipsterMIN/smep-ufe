@@ -164,11 +164,14 @@ export default function Header() {
             <div className="inner">
               <ul className="gnb-menu" aria-label="메인 메뉴">
                 {dynamicMenus.map((menu) => (
-                  <li key={menu.menuId}>
+                  <li 
+                    key={menu.menuId}
+                    onMouseEnter={() => setOpenIndex(menu.menuId)}
+                    onMouseLeave={() => setOpenIndex(null)}
+                  >
                     <button
                       type="button"
                       className={`gnb-main-trigger ${openIndex === menu.menuId ? 'active' : ''}`}
-                      onClick={() => handleToggle(menu.menuId)}
                     >
                       {menu.menuNm}
                     </button>
