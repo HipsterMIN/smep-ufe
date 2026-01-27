@@ -5,7 +5,7 @@ import AiChat from '../pages/AiChat.jsx';
 import PublishingList from '../publishing/PublishingList.jsx';
 import SubpageLayout from '../layouts/SubpageLayout.jsx';
 import { autoPublishingRoutesWithLayout, autoPublishingRoutesWithoutLayout } from './autoRoutes.jsx';
-import { MenuProviderOnly } from '../layouts/layoutIndex.jsx';
+import { MenuProviderOnly, SubpageLayoutWithMenu } from '../layouts/layoutIndex.jsx';
 
 /**
  * =============================================================================
@@ -19,7 +19,14 @@ import { MenuProviderOnly } from '../layouts/layoutIndex.jsx';
  */
 
 export const staticRoutes = [
-  // 메인 페이지
+
+  //=============================================================================
+  // 업무 페이지 라우트
+  //=============================================================================
+
+  /*
+    MenuProviderOnly 적용 route
+  */
   {
     element: <MenuProviderOnly />,
     children: [
@@ -30,9 +37,29 @@ export const staticRoutes = [
     ],
   },
 
-  // subpageLayout을 사용하는 단일 페이지
+  /*
+    SubpageLayout 적용 route (without menu)
+   */
+  // {
+  //   element: <SubpageLayout />,
+  //   children:
+  //       [
+  //         {
+  //           path: '/service/login', // 로그인 페이지
+  //           element: <Login/>,
+  //         },
+  //         {
+  //           path: '/service/ai-chat', // AI 상담 페이지
+  //           element: <AiChat/>,
+  //         },
+  //       ],
+  // },
+
+  /*
+    SubpageLayoutWithMenu 적용 route
+   */
   {
-    element: <SubpageLayout />,
+    element: <SubpageLayoutWithMenu />,
     children:
         [
           {
@@ -46,17 +73,21 @@ export const staticRoutes = [
         ],
   },
 
-  // 퍼블리싱 전용 라우트 - SubpageLayout 적용
+  //=============================================================================
+  // 퍼블리싱 관련 라우트
+  //=============================================================================
+
+  // 퍼블리싱 전용 라우트 - SubpageLayoutWIthMenu 적용
   {
     path: 'publishing',
-    element: <SubpageLayout />,
+    element: <SubpageLayoutWithMenu />,
     children: [
       { index: true, element: <PublishingList /> },
       ...autoPublishingRoutesWithLayout,
     ],
   },
 
-  // 퍼블리싱 전용 라우트 - SubpageLayout 미적용 (자체 레이아웃 포함)
+  // 퍼블리싱 전용 라우트 - SubpageLayout 미적용 (MenuProviderOnly)
   {
     path: 'publishing',
     element: <MenuProviderOnly />,

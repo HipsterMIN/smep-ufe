@@ -5,6 +5,7 @@ import { FloatingChatbot } from '../ai/FloatingChatbot';
 import { useNavigate } from 'react-router-dom';
 import { useMenuStore } from '../../store/useMenuStore';
 import { buildFullPath } from '../../utils/menuUtils';
+import { useUserMenu } from '../../context/UserMenuContext.jsx';
 
 // BASE URL 상수
 const BASE_URL = import.meta.env.VITE_BASE || '/';
@@ -16,6 +17,7 @@ export default function Header() {
   const { isLogin, logout } = useAuthStore();
   const { menuTree, flatMenuMap, fetchMenuData } = useMenuStore();
   const mobGnbRef = useRef(null);
+  const { getFullPath } = useUserMenu();
   
   // 메뉴 데이터 로드
   useEffect(() => {
@@ -62,7 +64,7 @@ export default function Header() {
     navigate('/service/login');
   };
   const handleClickMypage = () => {
-    navigate('/service/UI_USR_L_510');
+    navigate(getFullPath('M_PIIO_00113')); // 증명서 발급 메뉴로 이동
   };
 
   const handleOpenMobGnb = () => {
