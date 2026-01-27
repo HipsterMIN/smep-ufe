@@ -81,7 +81,16 @@ const SideNavigation = ({ pageTitle, menuItems = [] }) => {
                   {/* //lnb-submenu */}
                 </>
               ) : (
-                item.link ? (
+                !item.children?.length && item.scrnTypeCd !== 'T' ? (
+                  <button
+                    type="button"
+                    className="lnb-btn"
+                    role="menuitem"
+                    onClick={item.onClick}
+                  >
+                    {item.menuNm}
+                  </button>
+                ) : (
                   <NavLink
                     to={item.link}
                     className={({ isActive }) =>
@@ -91,15 +100,6 @@ const SideNavigation = ({ pageTitle, menuItems = [] }) => {
                   >
                     {item.menuNm}
                   </NavLink>
-                ) : (
-                  <button
-                    type="button"
-                    className="lnb-btn"
-                    role="menuitem"
-                    onClick={item.onClick}
-                  >
-                    {item.menuNm}
-                  </button>
                 )
               )}
             </li>
