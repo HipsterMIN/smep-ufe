@@ -26,6 +26,7 @@ import type {
   DeadlineType,
   CompanyProfile,
 } from "../types";
+import type { DomainType, SearchRequest } from "../../../core/types";
 
 // ============================================
 // Types
@@ -65,8 +66,14 @@ export interface SearchFilters {
   /** 마감임박만 (D-7 이내) */
   deadlineSoon?: boolean;
 
-  /** 마감공고 포함 (기본 OFF = 마감 안 된 것만) */
+  /** 지난 공고 포함 (기본 OFF = 마감 안 된 것만) */
+  includePast?: boolean;
+
+  /** 마감공고 포함 (호환용) */
   includeExpired?: boolean;
+
+  /** 지역 필터 정확히 매칭 ($exact) */
+  exactRegions?: boolean;
 }
 
 /**
@@ -120,7 +127,7 @@ export interface ProgramSearchContextValue {
   /** 요약 로딩 중 */
   isSummaryLoading: boolean;
   /** 검색 실행 */
-  search: (query: string, filters?: SearchFilters) => void;
+  search: (query: string, filters?: SearchFilters, options?: Partial<SearchRequest>) => void;
 }
 
 // ============================================
@@ -199,10 +206,14 @@ function buildBackendFilters(filters?: SearchFilters): Record<string, unknown> |
   if (!filters) return undefined;
 
   const backendFilters: Record<string, unknown> = {};
+  const includePast = filters.includePast ?? filters.includeExpired ?? false;
+  const exactRegions = filters.exactRegions !== false;
 
   // 지역 → regions ($contains_any, 전국 자동포함)
   if (filters.regions && filters.regions.length > 0) {
-    backendFilters.regions = { $contains_any: filters.regions };
+    backendFilters.regions = {
+      [exactRegions ? "$exact" : "$contains_any"]: filters.regions,
+    };
   }
 
     // 기업규모 → company_sizes ($contains_any, 중소기업 확장)
@@ -240,22 +251,12 @@ function buildBackendFilters(filters?: SearchFilters): Record<string, unknown> |
     // 마감임박: 오늘 ~ 7일 이내
     const weekLaterTs = todayTs + daysToSeconds(7);
     backendFilters.apply_end_date = { $gte: todayTs, $lte: weekLaterTs };
-  } else if (!filters.includeExpired) {
+  } else if (!includePast) {
     // 기본: 마감 안 된 것만 (apply_end_date_ts >= 오늘 OR 상시=FAR_FUTURE)
     // 상시/미정은 FAR_FUTURE (4102444800 = 2100-01-01)로 저장됨
     backendFilters.apply_end_date = { $gte: todayTs };
   }
-  // includeExpired=true인 경우: 날짜 필터 없음 (전체)
-
-  // ─────────────────────────────────────────
-  // is_active 필터 (soft-deleted 공고: M/D 상태)
-  // 서버 기본값은 is_active=true (활성 공고만)
-  // ─────────────────────────────────────────
-  if (filters.includeExpired) {
-    // 마감포함: is_active 필터 해제 (M, D 상태 공고도 표시)
-    backendFilters.is_active = null;
-  }
-  // 기본: 서버에서 is_active=true로 필터 (명시적 설정 불필요)
+  // includePast=true인 경우: 날짜 필터 없음 (전체)
 
   return Object.keys(backendFilters).length > 0 ? backendFilters : undefined;
 }
@@ -385,12 +386,12 @@ function useProgramSearchInternal(): ProgramSearchContextValue {
     summary,
     streamingSummary,
     isSummaryLoading: sdk.isLoading && sdk.results.length > 0,
-    search: (query: string, filters?: SearchFilters) => {
+    search: (query: string, filters?: SearchFilters, options?: Partial<SearchRequest>) => {
       currentFiltersRef.current = filters;
       const backendFilters = buildBackendFilters(filters);
       // 빈 쿼리로 필터만 적용 시 기본 검색어 사용
       const effectiveQuery = query.trim() || "지원사업";
-      sdk.search(effectiveQuery, { filters: backendFilters });
+      sdk.search(effectiveQuery, { ...options, filters: backendFilters });
     },
   };
 }
@@ -405,12 +406,15 @@ export interface ProgramSearchProviderProps {
   stream?: boolean;
   /** 검색 결과 수 */
   topK?: number;
+  /** 리랭커 결과 수 */
+  rerankerTopK?: number;
   /** 기업 프로필 (맞춤 검색용) */
   profile?: CompanyProfile;
+  /** 도메인 라우팅 */
+  domain?: DomainType;
+  /** 그룹핑 필드 */
+  groupByField?: string | null;
 }
-
-/** SMES 지원사업 검색 Agent */
-const SMES_PROGRAM_AGENT = "sme-support-program-agent";
 
 /**
  * 지원사업 검색 Provider
@@ -419,13 +423,23 @@ export function ProgramSearchProvider({
   children,
   stream = true,
   topK = 20,
+  rerankerTopK = 10,
   profile,
+  domain = "support_program",
+  groupByField = "group_id",
 }: ProgramSearchProviderProps) {
   // CompanyProfile → 백엔드 프로필 형식으로 변환
   const backendProfile = buildBackendProfile(profile);
 
   return (
-    <SearchRoot stream={stream} topK={topK} profile={backendProfile} agent={SMES_PROGRAM_AGENT}>
+    <SearchRoot
+      stream={stream}
+      topK={topK}
+      rerankerTopK={rerankerTopK}
+      profile={backendProfile}
+      domain={domain}
+      groupByField={groupByField}
+    >
       <ProgramSearchContextBridge>{children}</ProgramSearchContextBridge>
     </SearchRoot>
   );
