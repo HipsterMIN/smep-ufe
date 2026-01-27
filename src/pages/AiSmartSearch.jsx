@@ -1,4 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Link, useLocation } from 'react-router-dom';
 import Header from '../components/ui/Header.jsx';
 import Footer from '../components/ui/Footer.jsx';
@@ -9,6 +11,7 @@ import {
   ProgramSearchProvider,
   useProgramSearch,
   calculateDaysRemaining,
+  formatAIResponse,
 } from '@cube-i-ax/sdk/smes/program';
 import useSearchStore from '../store/useSearchStore';
 
@@ -78,6 +81,11 @@ const AiSmartSearchContent = () => {
   const displaySummary = (isLoading || !isMatchingStoredQuery) ? sdkSummary : (sdkSummary || storedSummary);
   const totalSearchDisplayTotal = totalSearchTotal || totalSearchResults.length;
   const totalDisplayResults = totalSearchResults.slice(0, totalVisibleCount);
+  const summaryMarkdown = useMemo(() => {
+    const rawSummary = streamingSummary || displaySummary || '';
+    if (!rawSummary) return '';
+    return formatAIResponse(rawSummary, { stripTags: true });
+  }, [streamingSummary, displaySummary]);
 
   // 데이터 수신 시 타임아웃 해제
   useEffect(() => {
@@ -221,7 +229,8 @@ const AiSmartSearchContent = () => {
     
     // 현재는 window.open을 사용하므로 state 전달을 위해 임시로 localStorage 사용 (이전 issue에서 localStorage 지양 요청이 있었으나 탭 이동간 데이터 공유를 위해 최소한으로 사용)
     sessionStorage.setItem('ai_chat_selected_programs', JSON.stringify(targetPrograms));
-    window.open('/service/ai-chat', '_blank');
+    const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+    window.open(`${baseUrl}/service/ai-chat`, '_blank');
   };
 
   const handleToggleSelect = (id) => {
@@ -573,8 +582,14 @@ const AiSmartSearchContent = () => {
                     ) : (
                       <>
                         <p className="on-p2">종합 판단</p>
-                        <div className="on-p3" style={{ whiteSpace: 'pre-wrap' }}>
-                          {streamingSummary || displaySummary || '분석 결과가 없습니다.'}
+                        <div className="on-p3 on-ai-summary-markdown">
+                          {summaryMarkdown ? (
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {summaryMarkdown}
+                            </ReactMarkdown>
+                          ) : (
+                            '분석 결과가 없습니다.'
+                          )}
                         </div>
                         {/* 퍼블리싱 파일에 있던 샘플 리스트 구조는 필요 시 SDK 데이터에서 추출하여 바인딩 가능하나, 현재는 요약문 위주로 표시 */}
                         <button className="krds-btn gradient full medium mt-22" onClick={handleConsultSelected}>
