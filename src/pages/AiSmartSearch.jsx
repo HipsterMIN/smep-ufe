@@ -12,8 +12,16 @@ import {
   useProgramSearch,
   calculateDaysRemaining,
   formatAIResponse,
+  REGION_OPTIONS,
+  COMPANY_SIZE_OPTIONS,
+  SUPPORT_FIELD_OPTIONS,
+  SUPPORT_TYPE_OPTIONS,
+  DEADLINE_TYPE_OPTIONS,
+  DEFAULT_SEARCH_FILTERS,
+  countSelectedFilters,
 } from '@cube-i-ax/sdk/smes/program';
 import useSearchStore from '../store/useSearchStore';
+import { useAuthStore } from '../store/useAuthStore.jsx';
 
 const AiSmartSearchContent = () => {
   const location = useLocation();
@@ -23,6 +31,8 @@ const AiSmartSearchContent = () => {
   const totalRevealTimerRef = useRef(null);
   const TOTAL_SEARCH_ENDPOINT = '/api/v1/search/total';
   const TOTAL_REVEAL_INTERVAL_MS = 140;
+  const [filters, setFilters] = useState(DEFAULT_SEARCH_FILTERS);
+  const lastExecutedQueryRef = useRef('');
   
   // Zustand Store
   const { 
@@ -125,7 +135,7 @@ const AiSmartSearchContent = () => {
       // 이미 같은 쿼리로 검색된 결과가 있다면(SDK 또는 Store) 재검색하지 않음
       if (q !== sdkLastQuery && q !== storedLastQuery) {
         setVisibleCount(PAGE_SIZE);
-        startSearch(q);
+        startSearch(q, filters);
         
         // 초기 진입 시 검색어가 있으면 패널이 열리도록 함
         if (aiSmartSearchRef.current) {
@@ -138,8 +148,12 @@ const AiSmartSearchContent = () => {
     }
   }, [qFromState, sdkLastQuery, storedLastQuery, lastTotalQuery]); 
 
-  const startSearch = (searchQuery) => {
+  const startSearch = (searchQuery, activeFilters = filters) => {
     setIsTimeout(false);
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery) {
+      lastExecutedQueryRef.current = trimmedQuery;
+    }
     
     // 기존 타이머 제거
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -150,7 +164,16 @@ const AiSmartSearchContent = () => {
       setIsTimeout(true);
     }, SEARCH_TIMEOUT_MS);
 
-    search(searchQuery);
+    const sdkFilters = {
+      regions: activeFilters.regions,
+      companySizes: activeFilters.companySizes,
+      supportFields: activeFilters.supportFields,
+      supportTypes: activeFilters.supportTypes,
+      deadlineTypes: activeFilters.deadlineTypes,
+      includePast: activeFilters.includePast,
+      exactRegions: true,
+    };
+    search(trimmedQuery, sdkFilters, { metadata: { summaryMode: true } });
   };
 
   const startTotalSearch = async (searchQuery) => {
@@ -193,7 +216,7 @@ const AiSmartSearchContent = () => {
       // 검색 시 visibleCount 초기화
       setVisibleCount(PAGE_SIZE);
       // 검색 실행
-      startSearch(trimmedQuery);
+      startSearch(trimmedQuery, filters);
       startTotalSearch(trimmedQuery);
       
       // 검색 시작 시 패널이 열리도록 클래스 추가 (로딩 인디케이터가 보일 수 있도록)
@@ -215,6 +238,43 @@ const AiSmartSearchContent = () => {
   const handleCloseSearchOptionModal = () => {
     searchOptionModalRef.current.classList.remove('on');
   };
+  const handleApplyFilters = () => {
+    handleSearch();
+    handleCloseSearchOptionModal();
+  };
+  const handleResetFilters = () => {
+    setFilters(DEFAULT_SEARCH_FILTERS);
+  };
+  const handleToggleFilterValue = (key, value) => {
+    setFilters(prev => {
+      const current = prev[key];
+      const exists = current.includes(value);
+      return {
+        ...prev,
+        [key]: exists ? current.filter(item => item !== value) : [...current, value],
+      };
+    });
+  };
+  const handleIncludePastChange = (value) => {
+    setFilters(prev => ({
+      ...prev,
+      includePast: value,
+    }));
+  };
+  const selectedFilterCount = countSelectedFilters(filters);
+  const selectedFilterLabels = useMemo(() => {
+    const labels = [
+      ...filters.regions,
+      ...filters.companySizes,
+      ...filters.supportFields,
+      ...filters.supportTypes,
+      ...filters.deadlineTypes,
+    ];
+    if (filters.includePast) {
+      labels.push('지난공고 포함');
+    }
+    return labels;
+  }, [filters]);
 
   const handleAiChat = (programIds) => {
     // 선택된 공고가 있으면 해당 공고 정보를 state로 전달
@@ -228,7 +288,7 @@ const AiSmartSearchContent = () => {
     //  탭 전환 시 데이터 유지 방식은 프로젝트 설정을 따름)
     
     // 현재는 window.open을 사용하므로 state 전달을 위해 임시로 localStorage 사용 (이전 issue에서 localStorage 지양 요청이 있었으나 탭 이동간 데이터 공유를 위해 최소한으로 사용)
-    const currentQuery = sdkLastQuery || storedLastQuery || query;
+    const currentQuery = lastExecutedQueryRef.current || query.trim() || sdkLastQuery || '';
     const summaryPayload = streamingSummary || displaySummary || '';
     const compactPrograms = targetPrograms.map((program) => ({
       id: program.id,
@@ -433,162 +493,136 @@ const AiSmartSearchContent = () => {
                     <div className="on-searchoption-checklists">
                       <h4>지역</h4>
                       <div className="krds-check-area">
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_1" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_1">전체</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_2" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_2">서울</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_3" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_3">부산</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_4" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_4">대구</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_5" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_5">인천</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_6" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_6">광주</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_7" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_7">대전</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_8" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_8">울산</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_9" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_9">세종</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_10" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_10">경기</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_11" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_11">강원</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_12" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_12">충북</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_13" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_13">충남</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_14" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_14">전북</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_15" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_15">전남</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_16" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_16">경북</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_17" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_17">경남</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk1_18" name="chk1"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk1_18">제주</label>
-                        </div>
+                        {REGION_OPTIONS.map((region) => {
+                          const id = `filter_region_${region}`;
+                          return (
+                            <div className="krds-form-chip small" key={region}>
+                              <input
+                                type="checkbox"
+                                className="checkbox"
+                                id={id}
+                                checked={filters.regions.includes(region)}
+                                onChange={() => handleToggleFilterValue('regions', region)}
+                              />
+                              <label className="krds-form-chip-outline" htmlFor={id}>{region}</label>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="on-searchoption-checklists">
+                      <h4>기업규모</h4>
+                      <div className="krds-check-area">
+                        {COMPANY_SIZE_OPTIONS.map((size) => {
+                          const id = `filter_company_${size}`;
+                          return (
+                            <div className="krds-form-chip small" key={size}>
+                              <input
+                                type="checkbox"
+                                className="checkbox"
+                                id={id}
+                                checked={filters.companySizes.includes(size)}
+                                onChange={() => handleToggleFilterValue('companySizes', size)}
+                              />
+                              <label className="krds-form-chip-outline" htmlFor={id}>{size}</label>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                     <div className="on-searchoption-checklists">
                       <h4>지원분야</h4>
                       <div className="krds-check-area">
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk2_1" name="chk2"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk2_1">기술개발</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk2_2" name="chk2"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk2_2">자금지원</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk2_3" name="chk2"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk2_3">판로개척</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk2_4" name="chk2"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk2_4">창업지원</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk2_5" name="chk2"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk2_5">시설·설비</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk2_6" name="chk2"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk2_6">인력양성</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk2_7" name="chk2"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk2_7">경영지원</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk2_8" name="chk2"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk2_8">해외진출</label>
-                        </div>
-                        <div className="krds-form-chip small">
-                          <input type="checkbox" className="checkbox" id="chk2_9" name="chk2"/>
-                          <label className="krds-form-chip-outline" htmlFor="chk2_9">기타</label>
-                        </div>
+                        {SUPPORT_FIELD_OPTIONS.map((field) => {
+                          const id = `filter_support_field_${field}`;
+                          return (
+                            <div className="krds-form-chip small" key={field}>
+                              <input
+                                type="checkbox"
+                                className="checkbox"
+                                id={id}
+                                checked={filters.supportFields.includes(field)}
+                                onChange={() => handleToggleFilterValue('supportFields', field)}
+                              />
+                              <label className="krds-form-chip-outline" htmlFor={id}>{field}</label>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  </div>
-                  <div className="on-searchoption flexrow">
-                    <div className="on-searchoption-selectlists">
-                      <div>
-                        <h4>기업규모</h4>
-                        <select className="krds-form-select small">
-                          <option value="">전체</option>
-                        </select>
+                    <div className="on-searchoption-checklists">
+                      <h4>지원유형</h4>
+                      <div className="krds-check-area">
+                        {SUPPORT_TYPE_OPTIONS.map((type) => {
+                          const id = `filter_support_type_${type}`;
+                          return (
+                            <div className="krds-form-chip small" key={type}>
+                              <input
+                                type="checkbox"
+                                className="checkbox"
+                                id={id}
+                                checked={filters.supportTypes.includes(type)}
+                                onChange={() => handleToggleFilterValue('supportTypes', type)}
+                              />
+                              <label className="krds-form-chip-outline" htmlFor={id}>{type}</label>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                    <div className="on-searchoption-selectlists">
-                      <div>
-                        <h4>지원유형</h4>
-                        <select className="krds-form-select small">
-                          <option value="">전체</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="on-searchoption-selectlists">
-                      <div>
-                        <h4>접수유형</h4>
-                        <select className="krds-form-select small">
-                          <option value="">전체</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="on-searchoption-selectlists">
-                      <div>
-                        <h4>신청현황</h4>
-                        <select className="krds-form-select small">
-                          <option value="">전체</option>
-                        </select>
+                    <div className="on-searchoption-checklists">
+                      <h4>마감유형</h4>
+                      <div className="krds-check-area">
+                        {DEADLINE_TYPE_OPTIONS.map((type) => {
+                          const id = `filter_deadline_${type}`;
+                          return (
+                            <div className="krds-form-chip small" key={type}>
+                              <input
+                                type="checkbox"
+                                className="checkbox"
+                                id={id}
+                                checked={filters.deadlineTypes.includes(type)}
+                                onChange={() => handleToggleFilterValue('deadlineTypes', type)}
+                              />
+                              <label className="krds-form-chip-outline" htmlFor={id}>{type}</label>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
                 </div>
                 <div className="on-tooltipbox-footer">
-                  <button className="krds-btn medium primary" onClick={handleSearch}>검색하기</button>
+                  <div className="krds-form-toggle-switch medium">
+                    <input
+                      type="checkbox"
+                      id="include_past_toggle"
+                      checked={filters.includePast}
+                      onChange={(e) => handleIncludePastChange(e.target.checked)}
+                    />
+                    <label htmlFor="include_past_toggle">
+                      <span className="switch-toggle"><i></i></span>
+                      지난 공고 포함
+                      <span className="on-toggle-desc">(마감된 공고도 검색)</span>
+                    </label>
+                  </div>
+                  <div className="on-tooltipbox-footer-meta">
+                    <button className="krds-btn medium text" onClick={handleResetFilters}>전체 해제</button>
+                    {selectedFilterCount > 0 && (
+                      <span className="on-tooltipbox-footer-count">{selectedFilterCount}개 선택됨</span>
+                    )}
+                    <button className="krds-btn medium primary" onClick={handleApplyFilters}>적용하기</button>
+                  </div>
                 </div>
               </div>
             </div>
+            {selectedFilterLabels.length > 0 && (
+              <div className="on-search-filter-tags">
+                {selectedFilterLabels.map((label, idx) => (
+                  <span key={`${label}-${idx}`} className="on-search-filter-tag">{label}</span>
+                ))}
+              </div>
+            )}
             <p className="on-p3 ac">
               <button type="button" onClick={handleOpenSearchOptionModal} className="on-linktxt">상세검색</button>을 변경하시면 검색 카테고리를 필터링하여 정보를 조정할 수 있습니다
             </p>
@@ -922,8 +956,10 @@ const SAMPLE_COMPANY_PROFILE = {
 };
 
 const AiSmartSearch = () => {
+  const { companyProfile } = useAuthStore();
+  const effectiveProfile = companyProfile || SAMPLE_COMPANY_PROFILE;
   return (
-    <ProgramSearchProvider profile={SAMPLE_COMPANY_PROFILE} stream topK={20}>
+    <ProgramSearchProvider profile={effectiveProfile} stream topK={20}>
       <AiSmartSearchContent />
     </ProgramSearchProvider>
   );

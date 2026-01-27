@@ -3,9 +3,17 @@ import { Link, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useChatContext } from '@cube-i-ax/sdk/react';
-import { calculateDaysRemaining, formatAIResponse } from '@cube-i-ax/sdk/smes/program';
+import {
+  calculateDaysRemaining,
+  formatAIResponse,
+  REGION_OPTIONS,
+  COMPANY_SIZE_OPTIONS,
+  SUPPORT_FIELD_OPTIONS,
+  SUPPORT_TYPE_OPTIONS,
+  DEADLINE_TYPE_OPTIONS,
+  convertFiltersToQuery,
+} from '@cube-i-ax/sdk/smes/program';
 import Logo from '../../styles/img/ai_chat_logo.svg';
-import LngImg from '../../styles/img/lnb_img.png';
 
 const AiChat = () => {
   const [selectedPrograms, setSelectedPrograms] = useState([]);
@@ -16,6 +24,15 @@ const AiChat = () => {
   const [showList, setShowList] = useState(false);
   const [notice, setNotice] = useState('');
   const [payloadReady, setPayloadReady] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [filters, setFilters] = useState({
+    regions: [],
+    companySizes: [],
+    supportFields: [],
+    supportTypes: [],
+    deadlineTypes: [],
+    includePast: false,
+  });
   const location = useLocation();
   const initialSentRef = useRef(false);
   const encodedPayload = useMemo(() => {
@@ -67,9 +84,26 @@ const AiChat = () => {
     }
   }, [encodedPayload]);
 
+  useEffect(() => {
+    const updateSidebar = () => {
+      if (window.innerWidth < 1200) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+    updateSidebar();
+    window.addEventListener('resize', updateSidebar);
+    return () => window.removeEventListener('resize', updateSidebar);
+  }, []);
+
   const programIds = useMemo(
     () => selectedPrograms.map((program) => program.id).filter(Boolean),
     [selectedPrograms]
+  );
+  const filtersQuery = useMemo(
+    () => convertFiltersToQuery(filters, { exactRegions: true }),
+    [filters]
   );
 
   const lastUserMessage = useMemo(() => {
@@ -99,8 +133,8 @@ const AiChat = () => {
     if (initialSentRef.current) return;
     if (!initialQuery || messages.length > 0 || programIds.length === 0) return;
     initialSentRef.current = true;
-    sendMessage(initialQuery, { documentContext: programIds });
-  }, [payloadReady, initialQuery, messages.length, programIds, sendMessage]);
+    sendMessage(initialQuery, { documentContext: programIds, filters: filtersQuery });
+  }, [payloadReady, initialQuery, messages.length, programIds, filtersQuery, sendMessage]);
 
   const handleToggle = (type) => {
     setStatus((prev) => (prev === type ? null : type));
@@ -113,7 +147,7 @@ const AiChat = () => {
   const handleSendMessage = (message) => {
     const trimmed = message.trim();
     if (!trimmed) return;
-    sendMessage(trimmed, { documentContext: programIds });
+    sendMessage(trimmed, { documentContext: programIds, filters: filtersQuery });
     setInput('');
   };
 
@@ -122,6 +156,21 @@ const AiChat = () => {
       e.preventDefault();
       handleSendMessage(input);
     }
+  };
+  const handleToggleFilter = (key, value) => {
+    setFilters((prev) => {
+      const current = prev[key];
+      const next = current.includes(value)
+        ? current.filter((item) => item !== value)
+        : [...current, value];
+      return { ...prev, [key]: next };
+    });
+  };
+  const handleRefineSearch = () => {
+    const message = input.trim() || initialQuery;
+    if (!message) return;
+    sendMessage(message, { documentContext: programIds, filters: filtersQuery });
+    setInput('');
   };
 
   const openInNewTab = (path) => {
@@ -163,17 +212,117 @@ const AiChat = () => {
             {notice}
           </div>
         )}
+        {isSidebarOpen && <button type="button" className="ai-sidebar-overlay" onClick={() => setIsSidebarOpen(false)} />}
+        <button
+          type="button"
+          className="ai-sidebar-toggle"
+          onClick={() => setIsSidebarOpen((prev) => !prev)}
+        >
+          상세검색
+        </button>
         {/* sidebar */}
-        <div className="ai-sidebar">
+        <div className={`ai-sidebar ${isSidebarOpen ? 'is-open' : ''}`}>
           <div className="sidebar-logo">
             <Link to="#" className="sidebar-logo-link">
               <img src={Logo} alt="logo" />
             </Link>
           </div>
           <div className="sidebar-filter hide-scrollbar">
-            <img src={LngImg} alt="" />
+            <div className="sidebar-filter-panel">
+              <h3>상세검색</h3>
+              <div className="filter-group">
+                <h4>지원분야</h4>
+                <div className="filter-options">
+                  {SUPPORT_FIELD_OPTIONS.map((field) => (
+                    <label
+                      key={field}
+                      className={`filter-option ${filters.supportFields.includes(field) ? 'is-active' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={filters.supportFields.includes(field)}
+                        onChange={() => handleToggleFilter('supportFields', field)}
+                      />
+                      <span>{field}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="filter-group">
+                <h4>지원유형</h4>
+                <div className="filter-options">
+                  {SUPPORT_TYPE_OPTIONS.map((type) => (
+                    <label
+                      key={type}
+                      className={`filter-option ${filters.supportTypes.includes(type) ? 'is-active' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={filters.supportTypes.includes(type)}
+                        onChange={() => handleToggleFilter('supportTypes', type)}
+                      />
+                      <span>{type}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="filter-group">
+                <h4>기업규모</h4>
+                <div className="filter-options">
+                  {COMPANY_SIZE_OPTIONS.map((size) => (
+                    <label
+                      key={size}
+                      className={`filter-option ${filters.companySizes.includes(size) ? 'is-active' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={filters.companySizes.includes(size)}
+                        onChange={() => handleToggleFilter('companySizes', size)}
+                      />
+                      <span>{size}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="filter-group">
+                <h4>지역</h4>
+                <div className="filter-options">
+                  {REGION_OPTIONS.map((region) => (
+                    <label
+                      key={region}
+                      className={`filter-option ${filters.regions.includes(region) ? 'is-active' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={filters.regions.includes(region)}
+                        onChange={() => handleToggleFilter('regions', region)}
+                      />
+                      <span>{region}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="filter-group">
+                <h4>마감유형</h4>
+                <div className="filter-options">
+                  {DEADLINE_TYPE_OPTIONS.map((type) => (
+                    <label
+                      key={type}
+                      className={`filter-option ${filters.deadlineTypes.includes(type) ? 'is-active' : ''}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={filters.deadlineTypes.includes(type)}
+                        onChange={() => handleToggleFilter('deadlineTypes', type)}
+                      />
+                      <span>{type}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-          <button type="button" className="krds-btn primary medium">결과 내 재검색하기</button>
+          <button type="button" className="krds-btn primary medium" onClick={handleRefineSearch}>결과 내 재검색하기</button>
         </div>
 
         {/* container */}
