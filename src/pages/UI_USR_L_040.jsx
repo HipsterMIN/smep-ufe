@@ -49,11 +49,7 @@ const UI_USR_L_040 = () => {
         // 전송용 state 사용
         if (appliedSearchKeyword && appliedSearchKeyword.trim()) {
           params.append('searchKeyword', appliedSearchKeyword);
-
-          // searchType이 있을 때만 추가 (빈 문자열이면 안 보냄)
-          if (appliedSearchType) {
-            params.append('searchType', appliedSearchType);
-          }
+          params.append('searchType', appliedSearchType);
         }
 
         const response = await apiClient.get(

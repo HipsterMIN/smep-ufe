@@ -91,6 +91,12 @@ export const componentMap = {
   'M_PIIO_00077': {
     component: UI_USR_L_030,
     layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: ':plcyFnncNo',
+        component: UI_USR_R_031,
+      },
+    ],
   },
 
   // 증명서 발급
