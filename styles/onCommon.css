@@ -1822,7 +1822,7 @@
 .on-smartsearch-left > div h3 { display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; gap: 20px; border-bottom: 1px solid #D6E0EB; margin-bottom: 20px; }
 .on-smartsearch-left > div h3 .title { display: flex; align-items: center; background: linear-gradient(286deg, #705DEB -1.35%, #5C8EE7 100.25%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 24px; gap: 10px; font-weight: 700; }
 .on-smartsearch-left > div > div p { color: #1E2124; }
-.on-smartsearch-right { padding-left: 30px; border-left: 1px solid #D6E0EB; }
+.on-smartsearch-right { padding-left: 30px; border-left: 1px solid #D6E0EB; flex: 1 1 0; min-width: 0; }
 .ai-type { background: #EBF1FE; border-radius: 10px; overflow: hidden; padding: 25px 20px; height: 670px; display: flex; flex-direction: column; }
 .ai-type .krds-structured-list {height: 100%; overflow-y: auto; margin-bottom: 16px;}
 .ai-type .structured-item { padding: 0; border: none; border-radius: 0px; background: none; border-bottom: 1px solid #D6E0EB; padding-bottom: 16px; margin-bottom: 16px;}

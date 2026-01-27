@@ -21,9 +21,9 @@ const MainPage = () => {
   const handleSearch = () => {
     if (searchQuery.trim()) {
       // 검색어를 state로 전달하며 이동 (URL에 노출되지 않음)
-      navigate('/ai-smart-search', { state: { q: searchQuery.trim() } });
+      navigate('/req/ai/ai-smart-search', { state: { q: searchQuery.trim() } });
     } else {
-      navigate('/ai-smart-search');
+      navigate('/req/ai/ai-smart-search');
     }
   };
 
