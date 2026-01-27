@@ -12,11 +12,12 @@ import { buildFullPath } from '../utils/menuUtils.js';
 /**
  * M 타입 노드의 첫 번째 T 타입 자식 찾기 (redirect용)
  * DFS로 탐색하여 가장 먼저 만나는 T 타입 노드 반환
+ * Side Navigation에서 사용되는 메뉴 노드 기준
  *
  * @param {Object} menuNode - 메뉴 노드
  * @returns {Object|null} 첫 번째 T 타입 노드 또는 null
  */
-export const findFirstTComponent = (menuNode) => {
+export const findFirstTComponentBySide = (menuNode) => {
   if (!menuNode.children || menuNode.children.length === 0) {
     return null;
   }
@@ -25,8 +26,8 @@ export const findFirstTComponent = (menuNode) => {
   const queue = [...menuNode.children];
   while (queue.length > 0) {
     const node = queue.shift();
-    // T 타입 발견
-    if (node.scrnTypeCd === 'T') {
+    // T 타입 발견 ( lfsdMenuExpsrYn 체크 )
+    if (node.scrnTypeCd === 'T' && node.lfsdMenuExpsrYn === 'Y') {
       return node;
     }
 
@@ -142,7 +143,7 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
     }
   } else if (menuNode.scrnTypeCd === 'M') {
     // M 타입: 메뉴 그룹 (실제 페이지 없음, 첫 자식으로 redirect)
-    const firstTNode = findFirstTComponent(menuNode);
+    const firstTNode = findFirstTComponentBySide(menuNode);
     if (firstTNode) {
       const targetPath = buildFullPath(firstTNode, flatMenuMap);
       routeConfig.element = <Navigate to={targetPath} replace />;
