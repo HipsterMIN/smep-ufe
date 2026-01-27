@@ -248,7 +248,7 @@ src/
 │
 ├── pages/
 │   ├── Pbanc.jsx             ⭐ 실제 페이지 컴포넌트들
-│   ├── UI_USR_L_010.jsx
+│   ├── SprtBiz.jsx
 │   └── ...
 │
 └── utils/

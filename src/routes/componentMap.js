@@ -27,11 +27,11 @@ import { MenuProviderOnly, SubpageLayoutWithMenu } from '../layouts/layoutIndex.
 // Lazy import (필요할 때 로드)
 const Pbanc = lazy(() => import('../pages/Pbanc.jsx'));
 const PbancView = lazy(() => import('../pages/PbancView.jsx'));
-const UI_USR_L_010 = lazy(() => import('../pages/UI_USR_L_010.jsx'));
+const SprtBiz = lazy(() => import('../pages/SprtBiz.jsx'));
+const SprtBizView = lazy(() => import('../pages/SprtBizView.jsx'));
 const UI_USR_L_030 = lazy(() => import('../pages/UI_USR_L_030.jsx'));
 const UI_USR_L_040 = lazy(() => import('../pages/UI_USR_L_040.jsx'));
 const UI_USR_R_041 = lazy(() => import('../pages/UI_USR_R_041.jsx'));
-const UI_USR_R_011 = lazy(() => import('../pages/UI_USR_R_011.jsx'));
 const UI_USR_R_031 = lazy(() => import('../pages/UI_USR_R_031.jsx'));
 const UI_USR_R_480 = lazy(() => import('../pages/UI_USR_R_480.jsx'));
 const UI_USR_L_510 = lazy(() => import('../pages/UI_USR_L_510.jsx'));
@@ -51,8 +51,16 @@ export const componentMap = {
 
   // 지원사업
   'M_PIIO_00075': {
-    component: UI_USR_L_010,
+    component: SprtBiz,
     layout: SubpageLayoutWithMenu,
+    // ✅ 자식 라우트 정의
+    children: [
+      {
+        path: ':id',  // / req/suprt/suprt/123
+        component: SprtBizView,
+        // layout 상속 (부모와 동일)
+      },
+    ],
   },
 
   // 사업공고
