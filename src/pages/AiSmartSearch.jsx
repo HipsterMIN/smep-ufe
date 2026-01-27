@@ -229,6 +229,15 @@ const AiSmartSearchContent = () => {
     
     // 현재는 window.open을 사용하므로 state 전달을 위해 임시로 localStorage 사용 (이전 issue에서 localStorage 지양 요청이 있었으나 탭 이동간 데이터 공유를 위해 최소한으로 사용)
     sessionStorage.setItem('ai_chat_selected_programs', JSON.stringify(targetPrograms));
+    const currentQuery = sdkLastQuery || storedLastQuery || query;
+    if (currentQuery) {
+      sessionStorage.setItem('ai_chat_query', currentQuery);
+    }
+    const summaryPayload = streamingSummary || displaySummary || '';
+    if (summaryPayload) {
+      sessionStorage.setItem('ai_chat_summary', summaryPayload);
+    }
+    sessionStorage.setItem('ai_chat_total', String(displayTotal || targetPrograms.length));
     const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
     window.open(`${baseUrl}/service/ai-chat`, '_blank');
   };
