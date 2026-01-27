@@ -32,7 +32,7 @@
   max-width: 1520px;
 }
 .main-total-p {
-  color: #666;
+  color: #333;
   font-size: 24px;
   text-align: center;
   padding-top: 60px;
@@ -40,16 +40,17 @@
 .main-total-tit {
   color: #1e2124;
   font-size: 44px;
-  font-weight: 600;
+  font-weight: 500;
   text-align: center;
-  margin-bottom: 50px;
+  margin-top: 12px;
+  margin-bottom: 58px;
 }
 .main-total-tit span {
   color: #004edf;
+  font-weight: 700;
   padding-left: 20px;
 }
 .main-totalbox {
-  height: 304px;
   background: linear-gradient(286deg, #7742d9, #328cdf, #7742d9);
   backdrop-filter: blur(15px);
   border-radius: 20px;
@@ -69,9 +70,10 @@
   }
 }
 .main-totalbox-left {
-  width: calc(100% - 440px);
+  width: 70.6%;
   text-align: center;
   margin: 50px 0px 30px;
+  padding: 0 4.6% 0 6.4%;
 }
 .main-totalbox-left h3 {
   font-size: 20px;
@@ -81,13 +83,13 @@
   justify-content: center;
   margin-bottom: 24px;
 }
-.main-totalbox-left h3 span {
+.main-totalbox-left h3 .totalbox-tit {
   font-size: 28px;
   font-weight: 700;
   padding-left: 10px;
   display: inline-block;
 }
-.main-totalbox-left h3 span::after {
+.main-totalbox-left h3 .totalbox-tit::after {
   content: "";
   position: absolute;
   width: 12px;
@@ -101,14 +103,41 @@
   justify-content: center;
   gap: 16px;
 }
-.main-totalbox-input input {
-  width: calc(100% - 200px);
-  border-radius: 35px;
+.main-totalbox-input .boxinner {
   border: 3px solid #0841a2;
+  border-radius: 35px;
   background: #fff;
-  line-height: 65px;
-  text-indent: 30px;
-  font-size: 22px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 860px;
+  overflow: hidden;
+  height: 70px;
+  flex: 1;
+}
+.main-totalbox-input select {
+  background-image: url(/main-dev/styles/img/component/icon/ico_angle.svg);
+  background-repeat: no-repeat;
+  background-position: right center;
+  padding: 0 26px 0 30px;
+  color: #666;
+  font-size: 20px;
+  font-weight: 600;
+  height: 100%;
+  border-radius: 35px;
+  width: 188px;
+  border: none;
+}
+.main-totalbox-input input {
+    height: 100%;
+    border-radius: 35px;
+    padding-left: 15px;
+    padding-right: 30px;
+    font-size: 20px;
+    font-weight: 500;
+    color: #464c53;
+    width: 100%;
+    border: none;
 }
 .main-totalbox-input button {
   background: #1c267b;
@@ -120,6 +149,7 @@
   align-items: anchor-center;
   transition: all 0.3s ease;
   transform: scale(1);
+  box-shadow: 0 10px 20px 0 rgba(6, 42, 134, 0.30);
 }
 .main-totalbox-input button::before {
   content: "";
@@ -146,7 +176,7 @@
 .main-totalbox-word {
   display: flex;
   gap: 30px;
-  margin: 20px 0px 0px 90px;
+  margin: 20px 0px 0px 0;
 }
 .main-totalbox-word h3 {
   color: #fff;
@@ -156,6 +186,7 @@
 }
 .main-totalbox-word ul {
   display: flex;
+  flex-wrap:wrap;
   gap: 8px;
 }
 .main-totalbox-word ul li .word-bu {
@@ -171,16 +202,16 @@
 .main-totalbox-right {
   flex: 1;
   margin: 40px 0px;
+  padding: 0 4.6% 0 3.2%;
   border-left: 1px dashed rgba(255, 255, 255, 0.4);
   letter-spacing: -1px;
 }
 .main-totalbox-right h3 {
   color: #fff;
   font-size: 20px;
-  margin: 0px 70px;
 }
 .main-totalbox-right ul {
-  margin: 10px 50px 0px 50px;
+  margin: 10px 0 0px 0;
 }
 .main-totalbox-right ul li .mtr-bu {
   height: 38px;
@@ -234,9 +265,6 @@
 .main-totalbox-right ul li.down .mtr-rank-icon {
   background: #5395ff;
 }
-.main-totallistbox {
-  margin-top: 60px;
-}
 .main-totallistbox .inner > h3 {
   font-size: 24px;
   color: #1e2124;
@@ -261,6 +289,10 @@
 .main-totallistbox .inner > ul > li:first-child .main-totalbox-img img {
   width: 33px;
 }
+.mtlist {
+  display: flex;
+  justify-content: center;
+}
 .mtlist-bu {
   min-width: 150px;
   display: flex;
@@ -283,7 +315,7 @@
   margin: 16px 0px 8px;
   font-size: 20px;
   color: #333;
-  font-weight: 500;
+  font-weight: 700;
 }
 .main-totalbox-txt {
   font-size: 15px;

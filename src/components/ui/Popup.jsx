@@ -8,7 +8,8 @@ const Popup = ({
     size, // "large"(default) || "small" || "medium"
     children, 
     footer, 
-    noBottomBtn = false 
+    noBottomBtn = false,
+    noCloseBtn = false, //상단 닫기 버튼 여부
 }) => {
   const popupRef = useRef(null);
   const previousFocus = useRef(null);
@@ -77,14 +78,18 @@ const Popup = ({
             </div>
           )}
 
-          <button 
-            type="button" 
-            className="btn-close close-modal" 
-            onClick={onClose}
-          >
-            <span className="sr-only">닫기</span>
-            <i className="svg-icon ico-del"></i>
-          </button>
+          {!noCloseBtn && 
+            (
+              <button 
+              type="button" 
+              className="btn-close close-modal" 
+              onClick={onClose}
+              >
+                <span className="sr-only">닫기</span>
+                <i className="svg-icon ico-del"></i>
+              </button>
+            )
+          }
         </div>
       </div>
       
