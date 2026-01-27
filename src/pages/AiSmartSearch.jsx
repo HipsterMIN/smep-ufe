@@ -228,26 +228,45 @@ const AiSmartSearchContent = () => {
     //  탭 전환 시 데이터 유지 방식은 프로젝트 설정을 따름)
     
     // 현재는 window.open을 사용하므로 state 전달을 위해 임시로 localStorage 사용 (이전 issue에서 localStorage 지양 요청이 있었으나 탭 이동간 데이터 공유를 위해 최소한으로 사용)
-    sessionStorage.setItem('ai_chat_selected_programs', JSON.stringify(targetPrograms));
     const currentQuery = sdkLastQuery || storedLastQuery || query;
-    if (currentQuery) {
-      sessionStorage.setItem('ai_chat_query', currentQuery);
-    }
     const summaryPayload = streamingSummary || displaySummary || '';
-    if (summaryPayload) {
-      sessionStorage.setItem('ai_chat_summary', summaryPayload);
-    }
-    sessionStorage.setItem('ai_chat_total', String(displayTotal || targetPrograms.length));
+    const compactPrograms = targetPrograms.map((program) => ({
+      id: program.id,
+      title: program.title,
+      agency: program.agency,
+      supportField: program.supportField,
+      startDate: program.startDate,
+      endDate: program.endDate,
+      tags: program.tags,
+    }));
+
+    const payload = {
+      programs: compactPrograms,
+      query: currentQuery || '',
+      summary: summaryPayload || '',
+      total: displayTotal || compactPrograms.length,
+    };
+    const encodedPayload = encodeURIComponent(
+      btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
+    );
     const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+    const screenWidth = window.screen?.availWidth || 1200;
+    const screenHeight = window.screen?.availHeight || 900;
     const popup = window.open(
-      `${baseUrl}/service/ai-chat`,
+      `${baseUrl}/service/ai-chat?payload=${encodedPayload}`,
       'ai-consultant',
-      'popup=yes,width=1200,height=900,top=80,left=120'
+      `popup=yes,width=${screenWidth},height=${screenHeight},top=0,left=0`
     );
     if (popup) {
+      try {
+        popup.moveTo(0, 0);
+        popup.resizeTo(screenWidth, screenHeight);
+      } catch (e) {
+        // Ignore browser restrictions on resize/move.
+      }
       popup.focus();
     } else {
-      window.location.href = `${baseUrl}/service/ai-chat`;
+      window.location.href = `${baseUrl}/service/ai-chat?payload=${encodedPayload}`;
     }
   };
 
@@ -605,6 +624,8 @@ const AiSmartSearchContent = () => {
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                               {summaryMarkdown}
                             </ReactMarkdown>
+                          ) : isRealLoading ? (
+                            'AI가 요약을 생성 중입니다...'
                           ) : (
                             '분석 결과가 없습니다.'
                           )}

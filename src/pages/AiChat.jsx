@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useChatContext } from '@cube-i-ax/sdk/react';
@@ -15,7 +15,13 @@ const AiChat = () => {
   const [status, setStatus] = useState(null);
   const [showList, setShowList] = useState(false);
   const [notice, setNotice] = useState('');
+  const [payloadReady, setPayloadReady] = useState(false);
+  const location = useLocation();
   const initialSentRef = useRef(false);
+  const encodedPayload = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('payload');
+  }, [location.search]);
 
   const {
     messages,
@@ -24,29 +30,42 @@ const AiChat = () => {
     followupSuggestions,
     setDocumentContext,
     sendMessage,
+    clearMessages,
   } = useChatContext();
 
+  const applyPayload = (payload) => {
+    setSelectedPrograms(payload.programs || []);
+    setInitialQuery(payload.query || '');
+    setInitialSummary(payload.summary || '');
+    clearMessages?.();
+    initialSentRef.current = false;
+    setPayloadReady(true);
+  };
+
   useEffect(() => {
-    const stored = sessionStorage.getItem('ai_chat_selected_programs');
-    const storedQuery = sessionStorage.getItem('ai_chat_query');
-    const storedSummary = sessionStorage.getItem('ai_chat_summary');
+    setPayloadReady(false);
+    setSelectedPrograms([]);
+    setInitialQuery('');
+    setInitialSummary('');
+    setDocumentContext(null);
+    clearMessages?.();
+    initialSentRef.current = false;
 
-    if (stored) {
-      try {
-        setSelectedPrograms(JSON.parse(stored));
-      } catch (e) {
-        console.error('Failed to parse selected programs', e);
-      }
+    if (!encodedPayload) {
+      setNotice('공고 정보를 불러오지 못했습니다. 다시 시도해 주세요.');
+      return;
     }
 
-    if (storedQuery) {
-      setInitialQuery(storedQuery);
+    try {
+      const decoded = decodeURIComponent(encodedPayload);
+      const json = decodeURIComponent(escape(atob(decoded)));
+      const parsed = JSON.parse(json);
+      applyPayload(parsed);
+    } catch (e) {
+      console.error('Failed to decode payload', e);
+      setNotice('공고 정보를 불러오지 못했습니다. 다시 시도해 주세요.');
     }
-
-    if (storedSummary) {
-      setInitialSummary(storedSummary);
-    }
-  }, []);
+  }, [encodedPayload]);
 
   const programIds = useMemo(
     () => selectedPrograms.map((program) => program.id).filter(Boolean),
@@ -62,23 +81,26 @@ const AiChat = () => {
   }, [messages]);
 
   const displayContent = useMemo(() => {
+    if (!payloadReady) return '';
     const rawContent = streamingContent || lastAssistantMessage?.content || initialSummary;
     if (!rawContent) return '';
     return formatAIResponse(rawContent, { stripTags: true });
-  }, [streamingContent, lastAssistantMessage, initialSummary]);
+  }, [payloadReady, streamingContent, lastAssistantMessage, initialSummary]);
 
   useEffect(() => {
+    if (!payloadReady) return;
     if (programIds.length > 0) {
       setDocumentContext(programIds);
     }
-  }, [programIds, setDocumentContext]);
+  }, [payloadReady, programIds, setDocumentContext]);
 
   useEffect(() => {
+    if (!payloadReady) return;
     if (initialSentRef.current) return;
     if (!initialQuery || messages.length > 0 || programIds.length === 0) return;
     initialSentRef.current = true;
     sendMessage(initialQuery, { documentContext: programIds });
-  }, [initialQuery, messages.length, programIds, sendMessage]);
+  }, [payloadReady, initialQuery, messages.length, programIds, sendMessage]);
 
   const handleToggle = (type) => {
     setStatus((prev) => (prev === type ? null : type));
@@ -164,21 +186,23 @@ const AiChat = () => {
                 <div className="answer-box">
                   <div className="answer-title ai-summary-title">
                     <span className="ai-summary-badge">AI 요약</span>
-                    <p>{initialQuery || 'AI 요약'}</p>
+                    <p>{payloadReady ? (initialQuery || 'AI 요약') : 'AI 요약'}</p>
                   </div>
                   <div className="answer-conts-inner">
                     <div className="answer-content">
-                      {displayContent ? (
+                      {payloadReady && displayContent ? (
                         <div className="content-desc ai-chat-markdown">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {displayContent}
                           </ReactMarkdown>
                         </div>
+                      ) : !payloadReady ? (
+                        <p className="content-desc">데이터를 불러오는 중입니다...</p>
                       ) : (
-                        <p className="content-desc">{isLoading ? 'AI가 분석 중입니다.' : '응답을 기다리고 있습니다.'}</p>
+                        <p className="content-desc">{isLoading ? 'AI가 응답을 생성 중입니다...' : '응답을 기다리고 있습니다.'}</p>
                       )}
                     </div>
-                    {followupSuggestions.length > 0 && (
+                    {payloadReady && followupSuggestions.length > 0 && (
                       <div className="recommend-question">
                         <h3 className="gradient-text">추가 질문하기</h3>
                         <ul className="question-list">
@@ -210,7 +234,7 @@ const AiChat = () => {
                   </div>
                 </div>
 
-                <div className="announcement-cont" style={{ minHeight: '580px' }}>
+                <div className="announcement-cont">
                   <div className="ai-type">
                     <div className="on-ai-type-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', backgroundColor: '#052B57', padding: '10px 16px', borderRadius: '8px' }}>
                       <span style={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}>지원공고 {selectedPrograms.length}건</span>
