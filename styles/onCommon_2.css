@@ -348,7 +348,7 @@
 .ai-chat-wrap .ai-container {
     position: relative;
     margin-left: 18%; 
-    padding: 26px 26px 156px 26px;
+    padding: 26px 26px 220px 26px;
 }
 
 .ai-chat-wrap .ai-sidebar {
@@ -390,6 +390,7 @@
     align-items: flex-start;
     gap: 46px;
     margin-top: 0;
+    min-height: calc(100vh - 220px);
 }
 .ai-container .answer-box {
     width: 60%;
@@ -402,7 +403,7 @@
     background-color: #EBF1FE;
     border-radius: 10px;
     max-height: calc(100vh - 120px);
-    overflow: hidden;
+    overflow-y: auto;
 }
 .ai-container .question-wrap .krds-structured-list {
     margin-left: 13%;
@@ -599,6 +600,7 @@
 .answer-wrap .ai-type .krds-structured-list {
     flex: 1;
     overflow-y: auto;
+    min-height: 0;
 }
 .answer-wrap .ai-type .krds-structured-list.is-active {
     overflow-y: auto;
@@ -607,6 +609,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
 }
 /* ai-search */
 .ai-chat-wrap .ai-bottom-search {
