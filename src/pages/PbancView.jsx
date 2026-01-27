@@ -4,6 +4,7 @@ import Breadcrumb from '../components/ui/Breadcrumb';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api as apiClient } from '../lib/apiClient.js';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
+import reportImage from '../assets/temp/ReportView.png';
 
 const Pbanc = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -12,16 +13,10 @@ const Pbanc = () => {
   const [item, setItem] = useState(null);
   const navigate = useNavigate();
 
-  const shadowTextRef = useRef(null);
+  const shadowTextRef = useRef('null');
 
   const handleToggleTextShadow = () => {
     shadowTextRef.current.classList.toggle('on');
-  };
-
-  const schFormWrapRef = useRef(null);
-
-  const handleToggleFilter = () => {
-    schFormWrapRef.current.classList.toggle('on');
   };
 
   const detail = async () => {
@@ -120,20 +115,25 @@ const Pbanc = () => {
               </div>
               <button type="button" className="krds-btn tertiary xsmall ontoggle-textshadow"
                 onClick={handleToggleTextShadow}>
-                  전체보기
+                전체보기
                 <i className="svg-icon ico-angle"></i>
               </button>
             </dd>
-            <dt>신청기간</dt>
-            <dd>{item?.aplyprd}</dd>
+            <dt>지원대상</dt>
+            <dd>{item?.sprttrgt}</dd>
+            <dt>제출서류</dt>
+            <dd>{item?.sbmsndcmnt}</dd>
+            <dt>신청 제외 대상</dt>
+            <dd>{item?.aplyexcltrgt}</dd>
             <dt>사업신청 방법</dt>
             <dd>
               <ul className="list">
                 <li>{item?.aplymthcn}</li>
                 {item?.bizaplyurl && (
                   <li>
-                    <button type="button" className="krds-btn xsmall" onClick={() => window.open(item?.bizaplyurl, '_blank')}>
-                          온라인 신청 바로가기
+                    <button type="button" className="krds-btn xsmall"
+                      onClick={() => window.open(item?.bizaplyurl, '_blank')}>
+                        온라인 신청 바로가기
                       <i className="svg-icon ico-angle right"></i>
                     </button>
                   </li>
@@ -147,15 +147,16 @@ const Pbanc = () => {
         </div>
         <div style={{
           width: '100%',
-          height: '800px',
-          background: 'rgba(0,0,0,0.5)',
+          textAlign: 'center',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#fff',
           marginBottom: '48px',
         }}>
-            PDF VIEWER
+          <img style={{
+            width: '100%',
+          }}
+          src={reportImage} alt="문서뷰어 영역"/>
         </div>
 
         {/*<div className="onbox-group-areawrap">
