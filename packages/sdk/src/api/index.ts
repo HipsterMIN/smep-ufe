@@ -10,6 +10,7 @@ export { CubeIAxClient, CubeIAxClient as default } from './client';
 // API 기본값 상수 (사용자 설정 시 참조용)
 export {
   DEFAULT_TOP_K,
+  DEFAULT_RERANKER_TOP_K,
   DEFAULT_GROUP_BY_FIELD,
   MIN_TOKENS,
   MAX_TOKENS,

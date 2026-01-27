@@ -239,7 +239,16 @@ const AiSmartSearchContent = () => {
     }
     sessionStorage.setItem('ai_chat_total', String(displayTotal || targetPrograms.length));
     const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
-    window.open(`${baseUrl}/service/ai-chat`, '_blank');
+    const popup = window.open(
+      `${baseUrl}/service/ai-chat`,
+      'ai-consultant',
+      'popup=yes,width=1200,height=900,top=80,left=120'
+    );
+    if (popup) {
+      popup.focus();
+    } else {
+      window.location.href = `${baseUrl}/service/ai-chat`;
+    }
   };
 
   const handleToggleSelect = (id) => {
@@ -670,7 +679,7 @@ const AiSmartSearchContent = () => {
                               </button>
                             </div>
                             <div className="card-body">
-                              <Link to={`/service/pbanc/${program.id}`} className="c-text">
+                              <Link to={`/req/pbanc/pbanc/${program.id}`} className="c-text">
                                 <p className="c-tit visited sml no-icon"><span className="span">{program.title}</span></p>
                                 <p className="on-list-btm">
                                   <span>
@@ -798,7 +807,7 @@ const AiSmartSearchContent = () => {
                   const programEndDate = program.endDate || program.endDt || program.recvEndDate;
                   const programId = program.id || program.pbancId || program.uid || null;
                   const programKey = programId || programTitle || idx;
-                  const programLink = programId ? `/service/pbanc/${programId}` : '#';
+                  const programLink = programId ? `/req/pbanc/pbanc/${programId}` : '#';
                   const days = calculateDaysRemaining(programEndDate);
                   let ddayClass = 'krds-badge bg-primary number';
                   let ddayText = days !== null ? (days === 0 ? 'D-Day' : (days > 0 ? `D-${days}` : '마감')) : '상시';

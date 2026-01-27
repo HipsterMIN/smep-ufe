@@ -320,6 +320,22 @@
 }
 
 /* aichat */
+.ai-chat-wrap {
+    min-height: 100vh;
+    background: #F7F9FC;
+}
+.ai-chat-toast {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    z-index: 9999;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #0B50D0;
+    color: #fff;
+    font-size: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
 .ai-chat-wrap .ai-sidebar {
     position: fixed;
     top: 0;
@@ -373,7 +389,7 @@
     display: flex;
     align-items: flex-start;
     gap: 46px;
-    margin-top: 40px;
+    margin-top: 0;
 }
 .ai-container .answer-box {
     width: 60%;
@@ -385,6 +401,8 @@
     padding: 24px 20px;
     background-color: #EBF1FE;
     border-radius: 10px;
+    max-height: calc(100vh - 120px);
+    overflow: hidden;
 }
 .ai-container .question-wrap .krds-structured-list {
     margin-left: 13%;
@@ -492,6 +510,10 @@
     align-items: center;
     margin-top: 25px;
 }
+.answer-wrap .option-btn-box .btn-smile,
+.answer-wrap .option-btn-box .btn-sad {
+    display: none;
+}
 .answer-wrap .option-btn-box .option-btn {
     width: 24px;
     height: 24px;
@@ -543,18 +565,56 @@
 .answer-wrap .answer-content .point {
     color:#0B50D0;
 }
+.answer-wrap .answer-title.ai-summary-title {
+    gap: 10px;
+    align-items: center;
+}
+.answer-wrap .ai-summary-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 8px;
+    background: #4E66F7;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+}
+.ai-chat-markdown { line-height: 1.6; }
+.ai-chat-markdown p { margin: 0 0 10px; }
+.ai-chat-markdown ul,
+.ai-chat-markdown ol { margin: 6px 0 12px 20px; }
+.ai-chat-markdown li { margin: 4px 0; }
+.answer-wrap .recommend-question .question-item .question-text {
+    border: 0;
+    background: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
 .answer-wrap .ai-type .krds-structured-list {
-    overflow-y: hidden;
+    flex: 1;
+    overflow-y: auto;
 }
 .answer-wrap .ai-type .krds-structured-list.is-active {
     overflow-y: auto;
+}
+.answer-wrap .ai-type {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 /* ai-search */
 .ai-chat-wrap .ai-bottom-search {
     position: fixed;
     bottom: 0;
     padding-bottom: 30px;
-    width: 50%;
+    left: 18%;
+    width: 60%;
 }
 .ai-chat-wrap .ai-bottom-search::before {
     content: '';

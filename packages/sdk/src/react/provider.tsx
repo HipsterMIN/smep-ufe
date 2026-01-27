@@ -45,13 +45,13 @@ export interface CubeIAxProviderProps extends CubeIAxConfig {
  * ```
  */
 export function CubeIAxProvider({
-                                  children,
-                                  apiKey,
-                                  baseUrl,
-                                  timeout,
-                                  agent,
-                                  debug,
-                                }: CubeIAxProviderProps) {
+  children,
+  apiKey,
+  baseUrl,
+  timeout,
+  agent,
+  debug,
+}: CubeIAxProviderProps) {
   // 단일 useMemo로 통합하여 메모이제이션 체인 단순화
   // props가 변경될 때만 client와 value가 함께 재생성됨
   const value = useMemo(() => {
@@ -61,9 +61,9 @@ export function CubeIAxProvider({
   }, [apiKey, baseUrl, timeout, agent, debug]);
 
   return (
-      <CubeIAxContext.Provider value={value}>
-        {children}
-      </CubeIAxContext.Provider>
+    <CubeIAxContext.Provider value={value}>
+      {children}
+    </CubeIAxContext.Provider>
   );
 }
 
