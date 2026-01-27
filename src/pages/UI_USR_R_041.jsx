@@ -6,6 +6,7 @@ import { api as apiClient } from '../lib/apiClient.js';
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import Popup from '../components/ui/Popup';
+import { useUserMenu } from '../context/UserMenuContext.jsx';
 
 const UI_USR_R_041 = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -55,6 +56,7 @@ const UI_USR_R_041 = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { getFullPath } = useUserMenu();
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -74,6 +76,10 @@ const UI_USR_R_041 = () => {
 
   const goBack = () => {
     navigate('../');
+  };
+
+  const handleClickPrint = () => {
+    navigate(getFullPath('M_PIIO_00113')); // 증명서 발급 메뉴로 이동
   };
 
   if (loading) return <div>로딩 중...</div>;
@@ -116,8 +122,21 @@ const UI_USR_R_041 = () => {
         isOpen={isPopupOpen}
         onClose={() => setIsPopupOpen(false)}
         title="중소기업(소상공인) 확인서발급"
+        closeLeftAction={
+          <>
+            <button
+              type="button"
+              className="krds-btn text small"
+              //onClick={handleShare}
+            >
+              <i className="svg-icon ico-share"></i>
+              공유
+            </button>
+          </>
+        }
         footer={
           <>
+            <button type="button" className="krds-btn primary md" onClick={() => handleClickPrint()}>발급</button>
             <button type="button" className="krds-btn tertiary md" onClick={() => setIsPopupOpen(false)}>닫기</button>
           </>
         }
