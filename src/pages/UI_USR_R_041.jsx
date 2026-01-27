@@ -40,7 +40,7 @@ const UI_USR_R_041 = () => {
   }, [prdocCd]);
 
   const goBack = () => {
-    navigate('../');
+    navigate(-1);
   };
 
   const handleClickPrint = () => {

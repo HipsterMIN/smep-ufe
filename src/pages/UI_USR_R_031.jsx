@@ -62,7 +62,7 @@ const UI_USR_R_031 = () => {
   }
 
   const goBack = () => {
-    navigate('../');
+    navigate(-1);
   };
 
   return (
