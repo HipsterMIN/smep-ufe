@@ -1,13 +1,17 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Link, useLocation } from 'react-router-dom';
 import Header from '../components/ui/Header.jsx';
 import Footer from '../components/ui/Footer.jsx';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import Pagination from '../components/ui/Pagination'; 
+import { api as apiClient } from '../lib/apiClient.js';
 import {
   ProgramSearchProvider,
   useProgramSearch,
   calculateDaysRemaining,
+  formatAIResponse,
 } from '@cube-i-ax/sdk/smes/program';
 import useSearchStore from '../store/useSearchStore';
 
@@ -15,6 +19,10 @@ const AiSmartSearchContent = () => {
   const location = useLocation();
   const [query, setQuery] = useState('');
   const searchOptionModalRef = useRef(null);
+  const totalSearchAbortRef = useRef(null);
+  const totalRevealTimerRef = useRef(null);
+  const TOTAL_SEARCH_ENDPOINT = '/api/v1/search/total';
+  const TOTAL_REVEAL_INTERVAL_MS = 140;
   
   // Zustand Store
   const { 
@@ -24,6 +32,13 @@ const AiSmartSearchContent = () => {
     lastQuery: storedLastQuery,
     setSearchResults, 
   } = useSearchStore();
+
+  const [totalSearchResults, setTotalSearchResults] = useState([]);
+  const [totalSearchTotal, setTotalSearchTotal] = useState(0);
+  const [totalSearchLoading, setTotalSearchLoading] = useState(false);
+  const [totalSearchError, setTotalSearchError] = useState(null);
+  const [totalVisibleCount, setTotalVisibleCount] = useState(0);
+  const [lastTotalQuery, setLastTotalQuery] = useState('');
 
   // 타임아웃 상태 관리
   const [isTimeout, setIsTimeout] = useState(false);
@@ -64,6 +79,13 @@ const AiSmartSearchContent = () => {
   const displayPrograms = (isLoading || !isMatchingStoredQuery) ? sdkPrograms : (sdkPrograms.length > 0 ? sdkPrograms : storedPrograms);
   const displayTotal = (isLoading || !isMatchingStoredQuery) ? sdkTotal : (sdkTotal > 0 ? sdkTotal : storedTotal);
   const displaySummary = (isLoading || !isMatchingStoredQuery) ? sdkSummary : (sdkSummary || storedSummary);
+  const totalSearchDisplayTotal = totalSearchTotal || totalSearchResults.length;
+  const totalDisplayResults = totalSearchResults.slice(0, totalVisibleCount);
+  const summaryMarkdown = useMemo(() => {
+    const rawSummary = streamingSummary || displaySummary || '';
+    if (!rawSummary) return '';
+    return formatAIResponse(rawSummary, { stripTags: true });
+  }, [streamingSummary, displaySummary]);
 
   // 데이터 수신 시 타임아웃 해제
   useEffect(() => {
@@ -83,6 +105,18 @@ const AiSmartSearchContent = () => {
     };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (totalSearchAbortRef.current) {
+        totalSearchAbortRef.current.abort();
+      }
+      if (totalRevealTimerRef.current) {
+        clearInterval(totalRevealTimerRef.current);
+        totalRevealTimerRef.current = null;
+      }
+    };
+  }, []);
+
   // 검색 실행 로직
   useEffect(() => {
     const q = qFromState;
@@ -92,9 +126,17 @@ const AiSmartSearchContent = () => {
       if (q !== sdkLastQuery && q !== storedLastQuery) {
         setVisibleCount(PAGE_SIZE);
         startSearch(q);
+        
+        // 초기 진입 시 검색어가 있으면 패널이 열리도록 함
+        if (aiSmartSearchRef.current) {
+          aiSmartSearchRef.current.classList.add('on');
+        }
+      }
+      if (q !== lastTotalQuery) {
+        startTotalSearch(q);
       }
     }
-  }, [qFromState, sdkLastQuery, storedLastQuery]); 
+  }, [qFromState, sdkLastQuery, storedLastQuery, lastTotalQuery]); 
 
   const startSearch = (searchQuery) => {
     setIsTimeout(false);
@@ -111,6 +153,40 @@ const AiSmartSearchContent = () => {
     search(searchQuery);
   };
 
+  const startTotalSearch = async (searchQuery) => {
+    const trimmedQuery = searchQuery.trim();
+    if (!trimmedQuery) return;
+
+    if (totalSearchAbortRef.current) {
+      totalSearchAbortRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    totalSearchAbortRef.current = controller;
+
+    setTotalSearchLoading(true);
+    setTotalSearchError(null);
+    setLastTotalQuery(trimmedQuery);
+
+    try {
+      const params = new URLSearchParams({ q: trimmedQuery });
+      const response = await apiClient.get(`${TOTAL_SEARCH_ENDPOINT}?${params.toString()}`, {
+        signal: controller.signal,
+      });
+      const list = response?.data || response?.items || response?.results || [];
+      const total = response?.total ?? response?.totalCount ?? list.length;
+      setTotalSearchResults(list);
+      setTotalSearchTotal(total);
+    } catch (err) {
+      if (err?.name === 'AbortError') return;
+      setTotalSearchResults([]);
+      setTotalSearchTotal(0);
+      setTotalSearchError(err);
+    } finally {
+      setTotalSearchLoading(false);
+    }
+  };
+
   const handleSearch = () => {
     const trimmedQuery = query.trim();
     if (trimmedQuery) {
@@ -118,6 +194,12 @@ const AiSmartSearchContent = () => {
       setVisibleCount(PAGE_SIZE);
       // 검색 실행
       startSearch(trimmedQuery);
+      startTotalSearch(trimmedQuery);
+      
+      // 검색 시작 시 패널이 열리도록 클래스 추가 (로딩 인디케이터가 보일 수 있도록)
+      if (aiSmartSearchRef.current) {
+        aiSmartSearchRef.current.classList.add('on');
+      }
     }
   };
 
@@ -134,11 +216,98 @@ const AiSmartSearchContent = () => {
     searchOptionModalRef.current.classList.remove('on');
   };
 
-  const handleAiChat = () => {
-    window.open('/service/ai-chat', '_blank');
+  const handleAiChat = (programIds) => {
+    // 선택된 공고가 있으면 해당 공고 정보를 state로 전달
+    const targetIds = Array.isArray(programIds) ? programIds : [programIds];
+    const targetPrograms = displayPrograms.filter(p => targetIds.includes(p.id));
+    
+    // AI 상담 페이지를 새 탭으로 열면서 선택된 공고 정보를 전달
+    // (참고: window.open으로 state를 전달하기 어려우므로, 실제 프로젝트에서는 
+    //  localStorage나 별도의 공유 저장소를 사용하거나, URL 파라미터를 활용해야 할 수 있음.
+    //  여기서는 사용자의 요청에 따라 state를 활용하는 방향으로 UI를 구성하되, 
+    //  탭 전환 시 데이터 유지 방식은 프로젝트 설정을 따름)
+    
+    // 현재는 window.open을 사용하므로 state 전달을 위해 임시로 localStorage 사용 (이전 issue에서 localStorage 지양 요청이 있었으나 탭 이동간 데이터 공유를 위해 최소한으로 사용)
+    sessionStorage.setItem('ai_chat_selected_programs', JSON.stringify(targetPrograms));
+    const currentQuery = sdkLastQuery || storedLastQuery || query;
+    if (currentQuery) {
+      sessionStorage.setItem('ai_chat_query', currentQuery);
+    }
+    const summaryPayload = streamingSummary || displaySummary || '';
+    if (summaryPayload) {
+      sessionStorage.setItem('ai_chat_summary', summaryPayload);
+    }
+    sessionStorage.setItem('ai_chat_total', String(displayTotal || targetPrograms.length));
+    const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+    window.open(`${baseUrl}/service/ai-chat`, '_blank');
   };
 
+  const handleToggleSelect = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.size === displayPrograms.length && displayPrograms.length > 0) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(displayPrograms.map(p => p.id)));
+    }
+  };
+
+  const handleConsultSelected = () => {
+    const ids = Array.from(selectedIds);
+    // 선택된 공고가 없으면 검색된 모든 공고를 대상으로 함
+    const targetIds = ids.length > 0 ? ids : displayPrograms.map(p => p.id);
+    
+    if (targetIds.length === 0) {
+      alert('검색된 공고가 없습니다.');
+      return;
+    }
+    handleAiChat(targetIds);
+  };
+
+  useEffect(() => {
+    if (totalRevealTimerRef.current) {
+      clearInterval(totalRevealTimerRef.current);
+      totalRevealTimerRef.current = null;
+    }
+
+    if (totalSearchLoading || totalSearchResults.length === 0) {
+      setTotalVisibleCount(0);
+      return;
+    }
+
+    setTotalVisibleCount(0);
+    totalRevealTimerRef.current = setInterval(() => {
+      setTotalVisibleCount(prev => {
+        const next = prev + 1;
+        if (next >= totalSearchResults.length) {
+          clearInterval(totalRevealTimerRef.current);
+          totalRevealTimerRef.current = null;
+          return totalSearchResults.length;
+        }
+        return next;
+      });
+    }, TOTAL_REVEAL_INTERVAL_MS);
+
+    return () => {
+      if (totalRevealTimerRef.current) {
+        clearInterval(totalRevealTimerRef.current);
+        totalRevealTimerRef.current = null;
+      }
+    };
+  }, [totalSearchResults, totalSearchLoading]);
+
   const [visibleCount, setVisibleCount] = useState(4);
+  const [selectedIds, setSelectedIds] = useState(new Set());
   const PAGE_SIZE = 4;
   const MAX_VISIBLE_COUNT = 10;
 
@@ -165,6 +334,32 @@ const AiSmartSearchContent = () => {
 
   // 로딩 상태 판단 (SDK 로딩이면서 타임아웃이 아닐 때)
   const isRealLoading = isLoading && !isTimeout;
+
+  // 로딩 오버레이 컴포넌트
+  const LoadingOverlay = () => (
+    <div style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 100,
+      borderRadius: '15px'
+    }}>
+      <div className="on-ai-loading" style={{ padding: 0 }}>
+        <div className="icon-wrap">
+          <i className="svg-icon ico-ai lg"></i>
+        </div>
+        <h3 className="on-p2 mb-2">AI 스마트 검색 중입니다</h3>
+        <p className="on-p3">귀하의 기업에 꼭 맞는 지원사업을 인공지능이 분석하고 있습니다.</p>
+      </div>
+    </div>
+  );
 
   return (
     <div id="wrap" >
@@ -371,6 +566,7 @@ const AiSmartSearchContent = () => {
             </p>
 
             <div className={`on-smartsearch ${ (streamingSummary || displaySummary || isRealLoading) ? 'on' : ''}`} ref={aiSmartSearchRef}>
+              {isRealLoading && <LoadingOverlay />}
               <div className="on-smartsearch-left">
                 <div>
                   <h3>
@@ -395,11 +591,17 @@ const AiSmartSearchContent = () => {
                     ) : (
                       <>
                         <p className="on-p2">종합 판단</p>
-                        <div className="on-p3" style={{ whiteSpace: 'pre-wrap' }}>
-                          {streamingSummary || displaySummary || '분석 결과가 없습니다.'}
+                        <div className="on-p3 on-ai-summary-markdown">
+                          {summaryMarkdown ? (
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {summaryMarkdown}
+                            </ReactMarkdown>
+                          ) : (
+                            '분석 결과가 없습니다.'
+                          )}
                         </div>
                         {/* 퍼블리싱 파일에 있던 샘플 리스트 구조는 필요 시 SDK 데이터에서 추출하여 바인딩 가능하나, 현재는 요약문 위주로 표시 */}
-                        <button className="krds-btn gradient full medium mt-22">
+                        <button className="krds-btn gradient full medium mt-22" onClick={handleConsultSelected}>
                             AI에게 더 자세히 물어보기
                           <i className="svg-icon ico-angle right"></i>
                         </button>
@@ -410,19 +612,59 @@ const AiSmartSearchContent = () => {
               </div>
               <div className="on-smartsearch-right">
                 <div className="ai-type" style={{ height: '100%' }}>
+                  <div className="on-ai-type-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', backgroundColor: '#052B57', padding: '10px 16px', borderRadius: '8px' }}>
+                    <div className="krds-check-area" style={{ flex: '1' }}>
+                      <div className="krds-form-check">
+                        <input 
+                          type="checkbox" 
+                          className="checkbox"
+                          id="chk_all_programs"
+                          checked={selectedIds.size === displayPrograms.length && displayPrograms.length > 0} 
+                          onChange={handleSelectAll}
+                        />
+                        <label className="krds-form-check-label" htmlFor="chk_all_programs" style={{ color: '#fff', fontSize: '15px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                          {selectedIds.size > 0 ? `지원공고 ${selectedIds.size}건 선택됨` : `지원공고 ${displayPrograms.length}건`}
+                        </label>
+                      </div>
+                    </div>
+                    <button 
+                      className="krds-btn white small" 
+                      onClick={handleConsultSelected}
+                      style={{ fontSize: '13px', padding: '4px 12px', height: 'auto', borderRadius: '4px', flexShrink: 0, marginLeft: '12px' }}
+                    >
+                      AI 컨설턴트
+                    </button>
+                  </div>
                   <ul className="krds-structured-list type-full">
                     {displayPrograms.slice(0, visibleCount).map((program) => {
                       const days = calculateDaysRemaining(program.endDate);
                       const ddayText = days !== null ? (days === 0 ? 'D-Day' : (days > 0 ? `D-${days}` : '마감')) : '상시';
+                      const isSelected = selectedIds.has(program.id);
                       return (
                         <li key={program.id} className="structured-item">
                           <div className="in">
                             <div className="card-top">
-                              <div className="krds-badge-wrap">
-                                <span className="krds-badge bg-white">{program.supportField}</span>
-                                <span className="krds-badge bg-primary number">{ddayText}</span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div className="krds-check-area">
+                                  <div className="krds-form-check">
+                                    <input 
+                                      type="checkbox" 
+                                      className="checkbox"
+                                      id={`chk_${program.id}`}
+                                      checked={isSelected}
+                                      onChange={() => handleToggleSelect(program.id)}
+                                    />
+                                    <label className="krds-form-check-label" htmlFor={`chk_${program.id}`}>
+                                      <span className="sr-only">선택</span>
+                                    </label>
+                                  </div>
+                                </div>
+                                <div className="krds-badge-wrap">
+                                  <span className="krds-badge bg-white">{program.supportField}</span>
+                                  <span className="krds-badge bg-primary number">{ddayText}</span>
+                                </div>
                               </div>
-                              <button className="on-qna-ai on-colorblue2" type="button" onClick={handleAiChat}>
+                              <button className="on-qna-ai on-colorblue2" type="button" onClick={() => handleAiChat(program.id)}>
                                 <i className="svg-icon ico-ai2 xs"></i>
                                     AI 상담
                               </button>
@@ -485,7 +727,7 @@ const AiSmartSearchContent = () => {
 
             <div className="search-list-top">
               <ul className="sch-info" aria-live="polite">
-                <li>검색 결과 <span className="point">{displayTotal}</span>개</li>
+                <li>검색 결과 <span className="point">{totalSearchDisplayTotal}</span>개</li>
               </ul>
               <ul className="sch-sort">
                 <li>
@@ -504,6 +746,12 @@ const AiSmartSearchContent = () => {
               </div>
             )}
 
+            {totalSearchError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-6">
+                통합검색 중 오류가 발생했습니다: {totalSearchError.message}
+              </div>
+            )}
+
             {isTimeout && (
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-orange-700 mb-6 text-center">
                 <p className="mb-2">검색 응답 시간이 초과되었습니다.</p>
@@ -517,7 +765,7 @@ const AiSmartSearchContent = () => {
             )}
 
             <ul className="krds-structured-list type-full">
-              {isRealLoading && displayPrograms.length === 0 ? (
+              {totalSearchLoading && totalSearchResults.length === 0 ? (
                 Array.from({ length: 3 }).map((_, idx) => (
                   <li key={`skeleton-${idx}`} className="structured-item">
                     <div className="in">
@@ -541,9 +789,17 @@ const AiSmartSearchContent = () => {
                     </div>
                   </li>
                 ))
-              ) : displayPrograms.length > 0 ? (
-                displayPrograms.map((program) => {
-                  const days = calculateDaysRemaining(program.endDate);
+              ) : totalSearchResults.length > 0 ? (
+                totalDisplayResults.map((program, idx) => {
+                  const programTitle = program.title || program.pbancNm || program.name || '';
+                  const programBizOutline = program.bizOutline || program.summary || program.description || '';
+                  const programAgency = program.agency || program.orgName || program.institutionName || '';
+                  const programStartDate = program.startDate || program.startDt || program.recvStartDate;
+                  const programEndDate = program.endDate || program.endDt || program.recvEndDate;
+                  const programId = program.id || program.pbancId || program.uid || null;
+                  const programKey = programId || programTitle || idx;
+                  const programLink = programId ? `/service/pbanc/${programId}` : '#';
+                  const days = calculateDaysRemaining(programEndDate);
                   let ddayClass = 'krds-badge bg-primary number';
                   let ddayText = days !== null ? (days === 0 ? 'D-Day' : (days > 0 ? `D-${days}` : '마감')) : '상시';
                     
@@ -552,7 +808,7 @@ const AiSmartSearchContent = () => {
                   }
 
                   return (
-                    <li key={program.id} className="structured-item">
+                    <li key={programKey} className="structured-item">
                       <div className="in">
                         <div className="card-top">
                           <div className="krds-badge-wrap">
@@ -562,9 +818,9 @@ const AiSmartSearchContent = () => {
                         </div>
                         <div className="card-body">
                           <a href="#" className="c-text">
-                            <p className="c-tit visited sml no-icon"><span className="span">{program.title}</span></p>
+                            <p className="c-tit visited sml no-icon"><span className="span">{programTitle}</span></p>
                             <p className="c-txt" style={{ whiteSpace: 'pre-wrap' }}>
-                              {program.bizOutline}
+                              {programBizOutline}
                             </p>
                             {program.aiAnalysis && (
                               <p className="guide-txt sm">
@@ -586,25 +842,25 @@ const AiSmartSearchContent = () => {
                                 )}
                               </span>
                               <span>
-                                {program.startDate} ~ {program.endDate || '상시접수'}
+                                {programStartDate} ~ {programEndDate || '상시접수'}
                               </span>
                               <span>
                                 <i className="svg-icon ico-building"></i>
-                                {program.agency}
+                                {programAgency}
                               </span>
                             </p>
                           </a>
                           <div className="c-btn column">
                             <button className="krds-btn tertiary"><i className="svg-icon ico-like"></i> 관심</button>
-                            <button className="krds-btn tertiary medium" onClick={handleAiChat}><i className="svg-icon ico-faq"></i> AI상담</button>
-                            <Link to={`/service/pbanc/${program.id}`} className="krds-btn secondary">바로보기</Link>
+                            <button className="krds-btn tertiary medium" onClick={() => handleAiChat(programId)} disabled={!programId}><i className="svg-icon ico-faq"></i> AI상담</button>
+                            <Link to={programLink} className="krds-btn secondary">바로보기</Link>
                           </div>
                         </div>
                       </div>
                     </li>
                   );
                 })
-              ) : !isRealLoading && !isTimeout && (
+              ) : !totalSearchLoading && !isTimeout && (
                 <li className="structured-item">
                   <div className="in ac py-12">
                     <p className="text-neutral-600">검색 결과가 없습니다.</p>
