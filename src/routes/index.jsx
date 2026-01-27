@@ -23,8 +23,8 @@ const createAppRouter = (menuTree, flatMenuMap) => {
 
   // BASE_URL 설정
   const base = import.meta.env.BASE_URL || '/'; // 기본값 '/'
-  // 끝에 '/'가 있으면 제거
-  const basename = base.endsWith('/') ? base.slice(0, -1) : base; // '/app/' -> '/app'
+  // ✅ 끝에 '/'가 없으면 추가 (슬래시 보장)
+  const basename = base.endsWith('/') ? base : `${base}/`;
 
   // 브라우저 라우터 생성
   return createBrowserRouter(allRoutes, { basename });
