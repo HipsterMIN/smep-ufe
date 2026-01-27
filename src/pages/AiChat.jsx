@@ -1,14 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '../../styles/img/ai_chat_logo.svg';
 import LngImg from '../../styles/img/lnb_img.png';
 
 
 const AiChat = () => {
+  const [selectedPrograms, setSelectedPrograms] = useState([]);
+  
+  useEffect(() => {
+    const stored = sessionStorage.getItem('ai_chat_selected_programs');
+    if (stored) {
+      try {
+        setSelectedPrograms(JSON.parse(stored));
+      } catch (e) {
+        console.error('Failed to parse selected programs', e);
+      }
+    }
+  }, []);
+
   // 'smile', 'sad',  null (선택 없음)
   const [status, setStatus] = useState(null);
   // 리스트 더보기
   const [showList, setShowList] = useState(false);
+
+  // 현재 상담의 메인 프로그램 (첫 번째 선택된 프로그램 또는 전체 상담 시 첫 번째)
+  const mainProgram = selectedPrograms[0];
 
   const handleToggle = (type) => {
     // 이미 클릭된 걸 다시 누르면 선택 해제, 아니면 해당 타입으로 변경
@@ -52,36 +68,76 @@ const AiChat = () => {
                 </div>
                 {/* 질문 case */}
                 <ul className="krds-structured-list type-full small">
-                  <li className="structured-item">
-                    <div className="in">
-                      <div className="card-top">
-                        <div className="krds-badge-wrap">
-                          <span className="krds-badge bg-light-primary">기술</span>
-                          <span className="krds-badge bg-primary number">D-234</span>
+                  {selectedPrograms.length > 0 ? (
+                    selectedPrograms.map((program) => (
+                      <li key={program.id} className="structured-item">
+                        <div className="in">
+                          <div className="card-top">
+                            <div className="krds-badge-wrap">
+                              <span className="krds-badge bg-light-primary">{program.supportField}</span>
+                              <span className="krds-badge bg-primary number">D-Day</span>
+                            </div>
+                          </div>
+                          <div className="card-body">
+                            <a href="#" className="c-text">
+                              <p className="c-tit visited sml no-icon"><span className="span">{program.title}</span></p>
+                              <p className="on-list-btm">
+                                <span>
+                                  <i className="svg-icon ico-building"></i>
+                                  {program.agency}
+                                </span>
+                                <span>
+                                  {program.startDate} ~ {program.endDate || '상시접수'}
+                                </span>
+                              </p>
+                              <div className="krds-tag-wrap">
+                                {program.tags?.slice(0, 3).map((tag, i) => (
+                                  <span key={i} className={`krds-btn-tag ${i === 0 ? 'point' : ''}`}>#{tag}</span>
+                                ))}
+                                {!program.tags && (
+                                  <>
+                                    <span className="krds-btn-tag point">#지원사업</span>
+                                    <span className="krds-btn-tag">#중소기업</span>
+                                  </>
+                                )}
+                              </div>
+                            </a>
+                          </div>
+                        </div>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="structured-item">
+                      <div className="in">
+                        <div className="card-top">
+                          <div className="krds-badge-wrap">
+                            <span className="krds-badge bg-light-primary">기술</span>
+                            <span className="krds-badge bg-primary number">D-234</span>
+                          </div>
+                        </div>
+                        <div className="card-body">
+                          <a href="#" className="c-text">
+                            <p className="c-tit visited sml no-icon"><span className="span">산모·신생아 건강관리 지원사업</span></p>
+                            <p className="on-list-btm">
+                              <span>
+                                <i className="svg-icon ico-building"></i>
+                                 중소벤처기업진흥공단
+                              </span>
+                              <span>
+                                2025.10.24 ~ 2025.11.19
+                              </span>
+                            </p>
+                            <div className="krds-tag-wrap">
+                              <span className="krds-btn-tag point">#최대 5천만원</span>
+                              <span className="krds-btn-tag">#벤처기업</span>
+                              <span className="krds-btn-tag">#청년기업</span>
+                              <span className="krds-btn-tag">#창업기업</span>
+                            </div>
+                          </a>
                         </div>
                       </div>
-                      <div className="card-body">
-                        <a href="#" className="c-text">
-                          <p className="c-tit visited sml no-icon"><span className="span">산모·신생아 건강관리 지원사업</span></p>
-                          <p className="on-list-btm">
-                            <span>
-                              <i className="svg-icon ico-building"></i>
-                               중소벤처기업진흥공단
-                            </span>
-                            <span>
-                              2025.10.24 ~ 2025.11.19
-                            </span>
-                          </p>
-                          <div className="krds-tag-wrap">
-                            <span className="krds-btn-tag point">#최대 5천만원</span>
-                            <span className="krds-btn-tag">#벤처기업</span>
-                            <span className="krds-btn-tag">#청년기업</span>
-                            <span className="krds-btn-tag">#창업기업</span>
-                          </div>
-                        </a>
-                      </div>
-                    </div>
-                  </li>
+                    </li>
+                  )}
                 </ul>
               </div>
 
@@ -91,50 +147,50 @@ const AiChat = () => {
                 <div className="answer-box">
                   <div className="answer-title">
                     <i className="ico-answer"></i>
-                    <p>충북형 K-푸드 브랜드 강화를 위한 찾아가는 컨설팅 지원사업</p>
+                    <p>{mainProgram ? mainProgram.title : 'AI 상담 중입니다.'}</p>
                   </div>
                   <div className="answer-conts-inner">
                     <div className="answer-guide-box">
-                      <p>사용자는 "충북형 K-푸드 브랜드 강화를 위한 찾아가는 컨설팅 지원사업"에 대한 정보를 찾고 있습니다.</p>
+                      <p>사용자는 "{mainProgram ? mainProgram.title : '선택된 지원사업'}"에 대한 정보를 찾고 있습니다.</p>
                     </div>
                     <div className="answer-content">
                       <strong className="content-title">종합 판단</strong>
                       <p className="content-desc" style={{ whiteSpace: 'pre-wrap' }}>
-                        검색 결과, 해당 지원사업에 대한 공고문서가 발견되었습니다. 이 사업은 충청북도 내 건강기능식품 및 식품기업의 브랜드 강화를 목적으로 충청북도가 지원하는 컨설팅 지원사업입니다.
+                        {mainProgram ? (mainProgram.aiAnalysis || '검색 결과, 해당 지원사업에 대한 공고문서가 발견되었습니다.') : '검색 결과, 해당 지원사업에 대한 공고문서가 발견되었습니다.'}
                       </p>
-                      <strong className="content-title">개별 공고 안내</strong>
-                      <ul className="content-list">
-                        <li>
-                          <strong>충북형 K-푸드 브랜드 강화를 위한 찾아가는 컨설팅 지원사업</strong>
-                          <p className="content-desc" style={{ whiteSpace: 'pre-wrap' }}>충북 소재 식품 관련 기업을 대상으로 컨설팅을 통해 브랜드 강화 및 경쟁력 제고를 지원하는 사업입니다. <em className="point">해당 공고는 식품 관련 기업에 적합할 수 있습니다.</em></p>
-                        </li>
-                        <li>
-                          <strong>2025년 장애인기업 공공판로 컨설팅 지원사업</strong>
-                          <p className="content-desc" style={{ whiteSpace: 'pre-wrap' }}>장애인기업의 공공조달시장 진출을 지원하기 위한 컨설팅 사업으로, 공공입찰, MAS, 이음장터, 벤처나라 등 다양한 경로를 통해 판로를 확대하는 것을 목표로 합니다. 장애인기업 확인서를 발급받은 기업에 적합합니다.</p>
-                        </li>
-                        <li>
-                          <strong>2025년 전문 코디네이터 기술애로 해결지원사업</strong>
-                          <p className="content-desc" style={{ whiteSpace: 'pre-wrap' }}>식품기업의 기술적 애로사항을 해결하기 위해 전문 코디네이터와 기업지원자문단을 활용한 지원 사업입니다. <em className="point">식품기업 중 기술적 애로를 겪고 있는 기업에 적합할 수 있습니다.</em></p>
-                        </li>
-                      </ul>
+                      {selectedPrograms.length > 1 && (
+                        <>
+                          <strong className="content-title">개별 공고 안내</strong>
+                          <ul className="content-list">
+                            {selectedPrograms.map((program) => (
+                              <li key={program.id}>
+                                <strong>{program.title}</strong>
+                                <p className="content-desc" style={{ whiteSpace: 'pre-wrap' }}>{program.bizOutline}</p>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
                     </div>
                     {/* link text */}
-                    <div className="helper-box refer">
-                      <p className="link-text">
-                      충북형 K-푸드 브랜드 강화를 위한 찾아가는 컨설팅 지원사업 수혜기업모집 공고
-                        <button type="button" className="link-btn">
-                          <span className="sr-only">링크 이동</span>
-                          <i className="svg-icon ico-link"></i>
-                        </button>
-                      </p>
-                    </div>
+                    {mainProgram && (
+                      <div className="helper-box refer">
+                        <p className="link-text">
+                          {mainProgram.title}
+                          <Link to={`/service/pbanc/${mainProgram.id}`} className="link-btn" target="_blank">
+                            <span className="sr-only">링크 이동</span>
+                            <i className="svg-icon ico-link"></i>
+                          </Link>
+                        </p>
+                      </div>
+                    )}
                     {/* 추천 질문 */}
                     <div className="recommend-question">
                       <h3 className="gradient-text">다음과 같은 질문을 해보세요</h3>
                       <ul className="question-list">
                         <li className="question-item">
                           <span>Q</span>
-                          <p className="question-text">충북형 K-푸드 브랜드 강화를 위한 찾아가는 컨설팅 지원사업 신청 자격은?</p>
+                          <p className="question-text">{mainProgram ? `${mainProgram.title.slice(0, 30)}... 신청 자격은?` : '지원사업 신청 자격은?'}</p>
                         </li>
                         <li className="question-item">
                           <span>Q</span>
@@ -142,7 +198,7 @@ const AiChat = () => {
                         </li>
                         <li className="question-item">
                           <span>Q</span>
-                          <p className="question-text">컨설팅 내용은 뭐야?</p>
+                          <p className="question-text">지원 혜택은 무엇인가요?</p>
                         </li>
                       </ul>
                     </div>
@@ -159,149 +215,48 @@ const AiChat = () => {
                   </div>{/* answer-conts-inner */}
                 </div> {/* answer-box */}
 
-                {/* 오른쪽 추천 공고 */}
-                <div className="announcement-cont" style={{ minHeight: '580px' }}>
-                  <div className="ai-type">
-                    <ul className={`krds-structured-list type-full ${showList ? 'is-active' : '' }`}>
-                      <li className="structured-item">
+              {/* 오른쪽 추천 공고 */}
+              <div className="announcement-cont" style={{ minHeight: '580px' }}>
+                <div className="ai-type">
+                  <div className="on-ai-type-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', backgroundColor: '#052B57', padding: '10px 16px', borderRadius: '8px' }}>
+                    <span style={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}>추천 지원공고</span>
+                  </div>
+                  <ul className={`krds-structured-list type-full ${showList ? 'is-active' : ''}`}>
+                    {selectedPrograms.map((program) => (
+                      <li key={program.id} className="structured-item">
                         <div className="in">
                           <div className="card-top">
                             <div className="krds-badge-wrap">
-                              <span className="krds-badge bg-white">기술</span>
-                              <span className="krds-badge bg-primary number">D-234</span>
+                              <span className="krds-badge bg-white">{program.supportField}</span>
+                              <span className="krds-badge bg-primary number">D-Day</span>
                             </div>
-                            <button className="on-qna-ai on-colorblue2" type="button">
-                              <i className="svg-icon ico-ai2 xs"></i>
-                                이 공고 AI에게 질문하기
-                            </button>
                           </div>
                           <div className="card-body">
-                            <a href="#" className="c-text">
-                              <p className="c-tit visited sml no-icon"><span className="span">산모·신생아 건강관리 지원사업</span></p>
+                            <Link to={`/service/pbanc/${program.id}`} className="c-text">
+                              <p className="c-tit visited sml no-icon"><span className="span">{program.title}</span></p>
                               <p className="on-list-btm">
                                 <span>
                                   <i className="svg-icon ico-building"></i>
-                                  중소벤처기업진흥공단
+                                  {program.agency}
                                 </span>
                                 <span>
-                                  2025.10.24 ~ 2025.11.19
+                                  {program.startDate} ~ {program.endDate || '상시접수'}
                                 </span>
                               </p>
-                              <div className="card-btm noborder pt-0">
-                                <span className="tag emphasis">최대 5천만원</span>
-                                <span className="tag">창업기업</span>
-                                <span className="tag">창업기업</span>
-                              </div>
-                            </a>
+                            </Link>
                           </div>
                         </div>
                       </li>
-                      <li className="structured-item">
-                        <div className="in">
-                          <div className="card-top">
-                            <div className="krds-badge-wrap">
-                              <span className="krds-badge bg-white">기술</span>
-                              <span className="krds-badge bg-primary number">D-234</span>
-                            </div>
-                            <button className="on-qna-ai on-colorblue2" type="button">
-                              <i className="svg-icon ico-ai2 xs"></i>
-                                이 공고 AI에게 질문하기
-                            </button>
-                          </div>
-                          <div className="card-body">
-                            <a href="#" className="c-text">
-                              <p className="c-tit visited sml no-icon"><span className="span">산모·신생아 건강관리 지원사업</span></p>
-                              <p className="on-list-btm">
-                                <span>
-                                  <i className="svg-icon ico-building"></i>
-                                  중소벤처기업진흥공단
-                                </span>
-                                <span>
-                                  2025.10.24 ~ 2025.11.19
-                                </span>
-                              </p>
-                              <div className="card-btm noborder pt-0">
-                                <span className="tag emphasis">최대 5천만원</span>
-                                <span className="tag">창업기업</span>
-                                <span className="tag">창업기업</span>
-                              </div>
-                            </a>
-                          </div>
-                        </div>
-                      </li>
-                      <li className="structured-item">
-                        <div className="in">
-                          <div className="card-top">
-                            <div className="krds-badge-wrap">
-                              <span className="krds-badge bg-white">기술</span>
-                              <span className="krds-badge bg-primary number">D-234</span>
-                            </div>
-                            <button className="on-qna-ai on-colorblue2" type="button">
-                              <i className="svg-icon ico-ai2 xs"></i>
-                                이 공고 AI에게 질문하기
-                            </button>
-                          </div>
-                          <div className="card-body">
-                            <a href="#" className="c-text">
-                              <p className="c-tit visited sml no-icon"><span className="span">산모·신생아 건강관리 지원사업</span></p>
-                              <p className="on-list-btm">
-                                <span>
-                                  <i className="svg-icon ico-building"></i>
-                                  중소벤처기업진흥공단
-                                </span>
-                                <span>
-                                  2025.10.24 ~ 2025.11.19
-                                </span>
-                              </p>
-                              <div className="card-btm noborder pt-0">
-                                <span className="tag emphasis">최대 5천만원</span>
-                                <span className="tag">창업기업</span>
-                                <span className="tag">창업기업</span>
-                              </div>
-                            </a>
-                          </div>
-                        </div>
-                      </li>
-                      <li className="structured-item">
-                        <div className="in">
-                          <div className="card-top">
-                            <div className="krds-badge-wrap">
-                              <span className="krds-badge bg-white">기술</span>
-                              <span className="krds-badge bg-primary number">D-234</span>
-                            </div>
-                            <button className="on-qna-ai on-colorblue2" type="button">
-                              <i className="svg-icon ico-ai2 xs"></i>
-                                이 공고 AI에게 질문하기
-                            </button>
-                          </div>
-                          <div className="card-body">
-                            <a href="#" className="c-text">
-                              <p className="c-tit visited sml no-icon"><span className="span">산모·신생아 건강관리 지원사업</span></p>
-                              <p className="on-list-btm">
-                                <span>
-                                  <i className="svg-icon ico-building"></i>
-                                  중소벤처기업진흥공단
-                                </span>
-                                <span>
-                                  2025.10.24 ~ 2025.11.19
-                                </span>
-                              </p>
-                              <div className="card-btm noborder pt-0">
-                                <span className="tag emphasis">최대 5천만원</span>
-                                <span className="tag">창업기업</span>
-                                <span className="tag">창업기업</span>
-                              </div>
-                            </a>
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
+                    ))}
+                  </ul>
+                  {selectedPrograms.length > 4 && (
                     <button className="krds-btn white full medium" onClick={showMoreList}>
                       더보기
                       <i className="svg-icon ico-angle down"></i>
                     </button>
-                  </div>
+                  )}
                 </div>
+              </div>
               </div> {/* //answer-wrap */}
             </div> {/* //chat-box */}
           </div> {/* chat-section */}
