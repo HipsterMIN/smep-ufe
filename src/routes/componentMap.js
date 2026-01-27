@@ -22,7 +22,7 @@ import SubpageLayout from '../layouts/SubpageLayout.jsx';
 
 //즉시 import (페이지 로드 시 바로 필요한 것들)
 import AiSmartSearch from '../pages/AiSmartSearch.jsx';
-import { SubpageLayoutWithMenu } from '../layouts/layoutIndex.jsx';
+import { MenuProviderOnly, SubpageLayoutWithMenu } from '../layouts/layoutIndex.jsx';
 
 // Lazy import (필요할 때 로드)
 const Pbanc = lazy(() => import('../pages/Pbanc.jsx'));
@@ -46,7 +46,7 @@ export const componentMap = {
   // AI 스마트 검색
   'M_PIIO_00074': {
     component: AiSmartSearch,
-    layout: null,
+    layout: MenuProviderOnly,
   },
 
   // 지원사업
