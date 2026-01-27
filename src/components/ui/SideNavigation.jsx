@@ -1,11 +1,31 @@
 // src/components/ui/SideNavigation.jsx
 
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useSidebarStore } from '../../store/useSidebarStore';
 
 const SideNavigation = ({ pageTitle, menuItems = [] }) => {
-  const { openMenus, toggleMenu } = useSidebarStore();
+  const { openMenus, toggleMenu, setOpenMenu } = useSidebarStore();
+  const location = useLocation(); // ✅ 현재 URL
+
+  // ✅ 페이지 진입 시 현재 URL에 해당하는 depth2 메뉴 자동 열기
+  useEffect(() => {
+    menuItems.forEach((item, index) => {
+      const hasChildren = item.children && item.children.length > 0;
+
+      if (hasChildren) {
+        // 자식 메뉴 중에 현재 페이지가 있는지 확인
+        const isCurrentPage = item.children.some(
+          child => child.link === location.pathname,
+        );
+
+        // 있으면 해당 메뉴 열기
+        if (isCurrentPage && !openMenus[index]) {
+          setOpenMenu(index, true);
+        }
+      }
+    });
+  }, [menuItems, location.pathname]); // openMenus, setOpenMenu 의존성 제거 (무한루프 방지)
 
   return (
     <nav className="krds-side-navigation">
