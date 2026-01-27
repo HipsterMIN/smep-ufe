@@ -447,20 +447,24 @@ export function UserMenuProvider({ children }) {
     if (!depth1Node || !depth1Node.children) return [];
 
     // depth1의 children(depth2)을 변환
-    return depth1Node.children.map(depth2Node => ({
-      menuId: depth2Node.menuId,
-      menuNm: depth2Node.menuNm,
-      link: buildFullPath(depth2Node, flatMenuMap),
-      scrnTypeCd: depth2Node.scrnTypeCd,
-      children: depth2Node.children
-        ? depth2Node.children.map(depth3Node => ({
-          menuId: depth3Node.menuId,
-          menuNm: depth3Node.menuNm,
-          link: buildFullPath(depth3Node, flatMenuMap),
-          scrnTypeCd: depth3Node.scrnTypeCd,
-        }))
-        : [],
-    }));
+    return depth1Node.children
+      .filter(depth2Node => depth2Node.lfsdMenuExpsrYn === 'Y')  // ✅ depth2 필터링
+      .map(depth2Node => ({
+        menuId: depth2Node.menuId,
+        menuNm: depth2Node.menuNm,
+        link: buildFullPath(depth2Node, flatMenuMap),
+        scrnTypeCd: depth2Node.scrnTypeCd,
+        children: depth2Node.children
+          ? depth2Node.children
+            .filter(depth3Node => depth3Node.lfsdMenuExpsrYn === 'Y')  // ✅ depth3 필터링
+            .map(depth3Node => ({
+              menuId: depth3Node.menuId,
+              menuNm: depth3Node.menuNm,
+              link: buildFullPath(depth3Node, flatMenuMap),
+              scrnTypeCd: depth3Node.scrnTypeCd,
+            }))
+          : [],
+      }));
   }, [currentMenu, flatMenuMap]);
 
   /**
