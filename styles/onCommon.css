@@ -372,6 +372,9 @@
     transform: translateY(0);
   }
 }
+.krds-main-menu .gnb-toggle-wrap {
+  box-shadow: 0 0 2px 0 var(--color-alpha-shadow2, rgba(0, 0, 0, 0.08)), 0 var(--shadow-y-3, 8px) var(--shadow-blur-3, 16px) 0 var(--color-alpha-shadow3, rgba(0, 0, 0, 0.12));
+}
 .krds-main-menu .gnb-toggle-wrap .gnb-main-list {
   max-width: 1428px;
   padding-left: var(--krds-contents-padding-x);
