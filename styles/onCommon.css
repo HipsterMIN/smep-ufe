@@ -102,56 +102,47 @@
   display: flex;
   justify-content: center;
   gap: 16px;
-}
-.main-totalbox-input .boxinner {
   border: 3px solid #0841a2;
-  border-radius: 35px;
+  border-radius: 41px;
   background: #fff;
-  display: flex;
-  align-items: center;
   width: 100%;
-  max-width: 860px;
-  overflow: hidden;
-  height: 70px;
-  flex: 1;
+  max-width: 1100px;
+  height: 82px;
+  margin: 0 auto;
+  transition: border-color 0.2s;
 }
-.main-totalbox-input select {
-  background-image: url(/main-dev/styles/img/component/icon/ico_angle.svg);
-  background-repeat: no-repeat;
-  background-position: right center;
-  padding: 0 26px 0 30px;
-  color: #666;
-  font-size: 20px;
-  font-weight: 600;
-  height: 100%;
-  border-radius: 35px;
-  width: 188px;
-  border: none;
+.main-totalbox-input:focus-within {
+  border-color: #7742d9;
 }
 .main-totalbox-input input {
-    height: 100%;
-    border-radius: 35px;
-    padding-left: 15px;
-    padding-right: 30px;
-    font-size: 20px;
-    font-weight: 500;
-    color: #464c53;
-    width: 100%;
-    border: none;
+  height: 100%;
+  border-radius: 35px;
+  padding-left: 30px;
+  padding-right: 15px;
+  font-size: 24px;
+  font-weight: 500;
+  color: #1e2124;
+  width: 100%;
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
 }
-.main-totalbox-input button {
+.main-totalbox-input .main-totalbox-button {
   background: #1c267b;
   border-radius: 50%;
   width: 70px;
   height: 70px;
+  flex: 0 0 70px;
   display: flex;
   justify-content: center;
-  align-items: anchor-center;
+  align-items: center;
   transition: all 0.3s ease;
   transform: scale(1);
   box-shadow: 0 10px 20px 0 rgba(6, 42, 134, 0.30);
+  margin: 3px;
 }
-.main-totalbox-input button::before {
+.main-totalbox-input .main-totalbox-button::before {
   content: "";
   mask-image: url(./img/component/icon/ico_sch.svg);
   background: #fff;
@@ -159,8 +150,19 @@
   height: 30px;
   mask-size: contain;
 }
-.main-totalbox-input button:hover {
-  transform: scale(1.2);
+.main-totalbox-input .main-totalbox-button:hover {
+  transform: scale(1.1);
+}
+.main-totalbox-left .main-totalbox-input {
+  width: 100%;
+}
+.main-totalbox-left .main-totalbox-input input {
+  flex: 1 1 auto;
+}
+@media (min-width: 1024px) {
+  .main-totalbox-left .main-totalbox-input input {
+    min-width: 620px;
+  }
 }
 .main-totalbox-left p {
   font-size: 20px;
