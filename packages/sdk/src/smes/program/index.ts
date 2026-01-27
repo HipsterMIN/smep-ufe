@@ -129,6 +129,7 @@ export {
   countSelectedFilters,
   DEFAULT_SEARCH_FILTERS,
   type SearchFilters,
+  type FilterConversionOptions,
 } from "./filters";
 
 // ─────────────────────────────────────────
@@ -151,21 +152,19 @@ export {
 } from "./mappers";
 
 // ─────────────────────────────────────────
-// Presentation Layer (Hooks/Components)
+// SMES 전용 훅 (검색/채팅)
 // ─────────────────────────────────────────
 export {
-  ProgramChatProvider,
-  useProgramChat,
   ProgramSearchProvider,
   useProgramSearch,
-  type ProgramChatContextValue,
+  ProgramChatProvider,
+  useProgramChat,
+  DEFAULT_FILTER_STATE,
+  type FilterState,
   type ProgramSearchContextValue,
   type ProgramSearchProviderProps,
-  type FilterState,
-  DEFAULT_FILTER_STATE,
+  type ProgramChatContextValue,
 } from "./hooks";
-
-export { ProgramChat } from "./components/ProgramChat";
 
 // ─────────────────────────────────────────
 // Re-export from core layer (도메인 라우팅)

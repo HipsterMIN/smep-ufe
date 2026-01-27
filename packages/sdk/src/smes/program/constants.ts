@@ -126,12 +126,12 @@ export const DEADLINE_TYPE_OPTIONS: readonly DeadlineType[] = [
  * 배지 variant 타입 (UI Badge 컴포넌트와 호환)
  */
 export type BadgeVariant =
-    | "default"
-    | "secondary"
-    | "destructive"
-    | "outline"
-    | "success"
-    | "warning";
+  | "default"
+  | "secondary"
+  | "destructive"
+  | "outline"
+  | "success"
+  | "warning";
 
 /**
  * 마감유형별 배지 variant 매핑
@@ -282,9 +282,9 @@ export function calculateDaysRemaining(endDate: number | null): number | null {
  * 신청 가능 여부 확인
  */
 export function isApplicationOpen(
-    startDate: number | null,
-    endDate: number | null,
-    deadlineType: DeadlineType
+  startDate: number | null,
+  endDate: number | null,
+  deadlineType: DeadlineType
 ): boolean {
   // 상시 접수는 항상 가능
   if (deadlineType === "상시") return true;
@@ -294,7 +294,7 @@ export function isApplicationOpen(
 
   const today = new Date();
   const todayNum = parseInt(
-      `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, "0")}${String(today.getDate()).padStart(2, "0")}`
+    `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, "0")}${String(today.getDate()).padStart(2, "0")}`
   );
 
   // 시작일 체크
@@ -323,9 +323,9 @@ export function isApplicationOpen(
  * ```
  */
 export function getApplicationStatus(
-    startDate: number | null,
-    endDate: number | null,
-    deadlineType: DeadlineType
+  startDate: number | null,
+  endDate: number | null,
+  deadlineType: DeadlineType
 ): ApplicationStatus {
   // 상시 접수
   if (deadlineType === "상시") return "상시";
@@ -335,7 +335,7 @@ export function getApplicationStatus(
 
   const today = new Date();
   const todayNum = parseInt(
-      `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, "0")}${String(today.getDate()).padStart(2, "0")}`
+    `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, "0")}${String(today.getDate()).padStart(2, "0")}`
   );
 
   // 접수예정 (시작일 전)
@@ -463,26 +463,26 @@ export function convertKoreanToMarkdown(text: string): string {
  * ```
  */
 export function stripAIResponseTags(
-    text: string,
-    customTags: string[] = ["followup"]
+  text: string,
+  customTags: string[] = ["followup"]
 ): string {
   let cleaned = text;
 
   for (const tag of customTags) {
     // 1. 완전한 <tag>...</tag> 블록 제거
     cleaned = cleaned.replace(
-        new RegExp(`<${tag}>[\\s\\S]*?</${tag}>`, "gi"),
-        ""
+      new RegExp(`<${tag}>[\\s\\S]*?</${tag}>`, "gi"),
+      ""
     );
     // 2. 불완전한 <tag>... 제거 (닫는 태그 없는 경우 - 스트리밍 중)
     cleaned = cleaned.replace(
-        new RegExp(`<${tag}>[\\s\\S]*$`, "gi"),
-        ""
+      new RegExp(`<${tag}>[\\s\\S]*$`, "gi"),
+      ""
     );
     // 3. 고아 닫는 태그 제거
     cleaned = cleaned.replace(
-        new RegExp(`</${tag}>`, "gi"),
-        ""
+      new RegExp(`</${tag}>`, "gi"),
+      ""
     );
   }
 
@@ -513,8 +513,8 @@ export function stripAIResponseTags(
  * ```
  */
 export function formatAIResponse(
-    text: string,
-    options: { stripTags?: boolean } = {}
+  text: string,
+  options: { stripTags?: boolean } = {}
 ): string {
   if (!text) return "";
 
@@ -523,32 +523,62 @@ export function formatAIResponse(
 
   // 1. 마커 앞에 줄바꿈 추가 (Markdown은 \n\n이 필요)
   result = result
-      .replace(/■/g, '\n\n■')   // 모든 ■ 앞에 줄바꿈
-      .replace(/○/g, '\n\n○')   // 모든 ○ 앞에 줄바꿈 (단일→이중)
-      .replace(/※/g, '\n\n※')   // 모든 ※ 앞에 줄바꿈
-      .replace(/^\n+/, '');      // 문자열 시작의 줄바꿈 제거
+    .replace(/■/g, '\n\n■')   // 모든 ■ 앞에 줄바꿈
+    .replace(/○/g, '\n\n○')   // 모든 ○ 앞에 줄바꿈 (단일→이중)
+    .replace(/※/g, '\n\n※')   // 모든 ※ 앞에 줄바꿈
+    .replace(/^\n+/, '');      // 문자열 시작의 줄바꿈 제거
 
   // 2. ■ 헤더: 뒤에 내용이 같은 줄에 있으면 다음 줄로 이동
   // "■ 사업 개요: 내용" → "■ 사업 개요:\n\n내용"
   result = result.replace(
-      /(■[^:\n]+:)\s*([^\n])/g,
-      '$1\n\n$2'
+    /(■[^:\n]+:)\s*([^\n])/g,
+    '$1\n\n$2'
   );
 
   // 3. URL을 클릭 가능한 링크로 변환
   // "설명: https://example.com" → "설명: [바로가기](https://example.com)"
-  // 단, 이미 마크다운 링크 형식이면 건너뜀
+  // LLM이 "**url**입니다" 형태로 출력하는 경우: **도 함께 제거
+  // 단, 이미 마크다운 링크 형식 ](url) 이면 건너뜀
   result = result.replace(
-      /(?<!\]\()(?<!\[)(https?:\/\/[^\s\)]+)/g,
-      '[바로가기]($1)'
+    /(?<!\]\()\*{0,2}(https?:\/\/[^\s\)\*]+)\*{0,2}/g,
+    '[바로가기]($1)'
   );
 
-  // 4. 연속 줄바꿈 정리 (4개 이상 → 2개)
+  // 4. 불완전한 마크다운 정리 (열린 ** 또는 * 닫기)
+  // "**바로가기 내용" → "바로가기 내용" (짝이 안 맞으면 제거)
+  result = fixIncompleteMarkdown(result);
+
+  // 5. 연속 줄바꿈 정리 (4개 이상 → 2개)
   result = result
-      .replace(/\n{4,}/g, '\n\n')
-      .trim();
+    .replace(/\n{4,}/g, '\n\n')
+    .trim();
 
   return result;
+}
+
+/**
+ * 불완전한 마크다운 마커 정리
+ * - 짝이 맞지 않는 ** 또는 * 제거
+ */
+function fixIncompleteMarkdown(text: string): string {
+  // ** (bold) 처리: 짝수개가 아니면 홀수번째 ** 제거
+  const boldMatches = text.match(/\*\*/g);
+  if (boldMatches && boldMatches.length % 2 !== 0) {
+    // 첫 번째 짝 없는 ** 제거
+    text = text.replace(/\*\*/, '');
+  }
+
+  // * (italic) 처리: **가 아닌 단독 * 중 짝이 안 맞으면 제거
+  // 먼저 **를 임시 치환
+  const placeholder = '\x00BOLD\x00';
+  let temp = text.replace(/\*\*/g, placeholder);
+  const italicMatches = temp.match(/\*/g);
+  if (italicMatches && italicMatches.length % 2 !== 0) {
+    temp = temp.replace(/\*/, '');
+  }
+  text = temp.replace(new RegExp(placeholder, 'g'), '**');
+
+  return text;
 }
 
 // ============================================
@@ -559,11 +589,11 @@ export function formatAIResponse(
  * 마감 긴급도 레벨
  */
 export type UrgencyLevel =
-    | "always_open" // 상시/미정
-    | "critical"    // D-7 이내
-    | "urgent"      // D-14 이내
-    | "caution"     // D-30 이내
-    | "normal";     // 그 외
+  | "always_open" // 상시/미정
+  | "critical"    // D-7 이내
+  | "urgent"      // D-14 이내
+  | "caution"     // D-30 이내
+  | "normal";     // 그 외
 
 /**
  * 남은 일수로 마감 긴급도 레벨 결정
@@ -598,8 +628,8 @@ export function getDeadlineUrgency(daysLeft: number | null): UrgencyLevel {
  * UI 프레임워크에서 색상, 배경색 등을 결정할 때 참고합니다.
  */
 export const URGENCY_STYLE_HINTS: Record<
-    UrgencyLevel,
-    { color: string; severity: "critical" | "high" | "medium" | "low" }
+  UrgencyLevel,
+  { color: string; severity: "critical" | "high" | "medium" | "low" }
 > = {
   always_open: { color: "green", severity: "low" },
   critical: { color: "red", severity: "critical" },
@@ -763,8 +793,8 @@ export function createDefaultFilterOptions(): FilterOptionsMap {
  * ```
  */
 export function buildSMEsFilters(
-    activeFilters: string[],
-    options: BuildFiltersOptions = {}
+  activeFilters: string[],
+  options: BuildFiltersOptions = {}
 ): Record<string, unknown> | undefined {
   const { includeClosedPrograms = false, baseDate = new Date() } = options;
   const filters: Record<string, unknown> = {};
@@ -836,8 +866,8 @@ export function buildSMEsFilters(
  * ```
  */
 export function buildCategoryFilter(
-    category: FilterCategory,
-    values: string[]
+  category: FilterCategory,
+  values: string[]
 ): Record<string, unknown> | undefined {
   if (values.length === 0) return undefined;
 
@@ -907,8 +937,8 @@ export const FRIENDLY_STATUS_MESSAGES: Record<string, string> = {
  * ```
  */
 export function toFriendlyStatusMessage(
-    message: string | undefined,
-    fallback: string
+  message: string | undefined,
+  fallback: string
 ): string {
   if (!message) return fallback;
 

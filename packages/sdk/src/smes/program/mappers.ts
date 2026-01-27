@@ -80,8 +80,8 @@ export function hasRealDeadline(deadlineType: DeadlineType): boolean {
  * 2차 데이터레이크 스키마 기반으로 snake_case → camelCase 변환
  */
 export function mapSourceToProgram(
-    source: Source | SupportProgramSource,
-    index: number
+  source: Source | SupportProgramSource,
+  index: number
 ): SupportProgram {
   // 타입 안전한 필드 접근 헬퍼
   const get = <T = string>(key: string) => getSourceField<T>(source, key);
@@ -107,13 +107,13 @@ export function mapSourceToProgram(
     const num = typeof val === "number" ? val : parseFloat(val);
     return isNaN(num) ? null : num;
   };
-
+  
   // Unix timestamp → YYYYMMDD 변환
   const tsToYYYYMMDD = (ts: number): number => {
     const date = new Date(ts * 1000);
     return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
   };
-
+  
   // 날짜 필드: YYYYMMDD 우선, 없으면 _ts에서 변환
   const getDate = (key: string): number | null => {
     const val = getNum(key);
@@ -130,26 +130,26 @@ export function mapSourceToProgram(
   const groupId = get("group_id");
   const sourceId = get("id");
   const docId =
-      groupId ||
-      sourceId ||
-      source.documentId ||
-      get("file_id") ||
-      get("program_id");
+    groupId ||
+    sourceId ||
+    source.documentId ||
+    get("file_id") ||
+    get("program_id");
 
   // 마감유형 결정 (상수 배열로 유효성 검증)
   const deadlineTypeRaw = get("deadline_type") || DEFAULT_VALUES.deadlineType;
   const deadlineType = (
-      (DEADLINE_TYPE_OPTIONS as readonly string[]).includes(deadlineTypeRaw)
-          ? deadlineTypeRaw
-          : DEFAULT_VALUES.deadlineType
+    (DEADLINE_TYPE_OPTIONS as readonly string[]).includes(deadlineTypeRaw)
+      ? deadlineTypeRaw
+      : DEFAULT_VALUES.deadlineType
   ) as DeadlineType;
 
   // 지원분야 결정 (상수 배열로 유효성 검증)
   const supportFieldRaw = get("support_field") || DEFAULT_VALUES.supportField;
   const supportField = (
-      (SUPPORT_FIELD_OPTIONS as readonly string[]).includes(supportFieldRaw)
-          ? supportFieldRaw
-          : DEFAULT_VALUES.supportField
+    (SUPPORT_FIELD_OPTIONS as readonly string[]).includes(supportFieldRaw)
+      ? supportFieldRaw
+      : DEFAULT_VALUES.supportField
   ) as SupportField;
 
   // 상태 결정
@@ -167,14 +167,14 @@ export function mapSourceToProgram(
 
     // 정규화 배열 필드 (유효한 값만 필터링)
     regions: getArray("regions").filter((r) =>
-        (REGION_OPTIONS as readonly string[]).includes(r)
+      (REGION_OPTIONS as readonly string[]).includes(r)
     ) as Region[],
     companySizes: getArray("company_sizes").filter((s) =>
-        (COMPANY_SIZE_OPTIONS as readonly string[]).includes(s)
+      (COMPANY_SIZE_OPTIONS as readonly string[]).includes(s)
     ) as CompanySize[],
     industries: getArray("industries"),
     supportTypes: getArray("support_types").filter((t) =>
-        (SUPPORT_TYPE_OPTIONS as readonly string[]).includes(t)
+      (SUPPORT_TYPE_OPTIONS as readonly string[]).includes(t)
     ) as SupportType[],
     certifications: getArray("certifications"),
     excludedConditions: getArray("excluded_conditions"),
@@ -293,10 +293,10 @@ export function mapSourceToProgram(
     relevanceScore: getNum("relevanceScore") ?? getNum("relevance_score") ?? getNum("score") ?? undefined,
     // aiRecommended: 명시적 값 또는 matchReason/score가 있으면 true
     aiRecommended:
-        getBool("ai_recommended") ||
-        getBool("aiRecommended") ||
-        !!(get("matchReason") || get("match_reason")) ||
-        (getNum("relevanceScore") ?? getNum("relevance_score") ?? getNum("score")) !== null,
+      getBool("ai_recommended") ||
+      getBool("aiRecommended") ||
+      !!(get("matchReason") || get("match_reason")) ||
+      (getNum("relevanceScore") ?? getNum("relevance_score") ?? getNum("score")) !== null,
   };
 }
 
@@ -304,8 +304,8 @@ export function mapSourceToProgram(
  * 여러 Source를 SupportProgram 배열로 변환 (중복 제거)
  */
 export function mapSourcesToPrograms(
-    sources: (Source | SupportProgramSource)[] | undefined,
-    maxResults?: number
+  sources: (Source | SupportProgramSource)[] | undefined,
+  maxResults?: number
 ): SupportProgram[] {
   if (!sources || sources.length === 0) {
     return [];
@@ -408,8 +408,8 @@ export function formatProgramForTable(program: SupportProgram): ProgramTableRow 
 
   // 남은 일수 계산
   const daysLeft = program.endDate
-      ? calculateDaysRemaining(program.endDate)
-      : 999;
+    ? calculateDaysRemaining(program.endDate)
+    : 999;
 
   // 마감일 표시: 날짜가 있으면 날짜, 없으면 마감유형
   let deadline: string = program.deadlineType || "상시";
@@ -431,9 +431,9 @@ export function formatProgramForTable(program: SupportProgram): ProgramTableRow 
 
   // 접수상태 계산
   const applicationStatus = getApplicationStatus(
-      program.startDate,
-      program.endDate,
-      program.deadlineType
+    program.startDate,
+    program.endDate,
+    program.deadlineType
   );
 
   // 접수기간 표시: 원본 데이터가 있으면 사용, 없으면 날짜에서 계산
@@ -526,8 +526,8 @@ export interface TransformMessagesOptions {
  * ```
  */
 export function transformMessagesToConversations(
-    messages: Message[],
-    options: TransformMessagesOptions = {}
+  messages: Message[],
+  options: TransformMessagesOptions = {}
 ): SMESConversation[] {
   const {
     itemDetails = [],
@@ -561,12 +561,12 @@ export function transformMessagesToConversations(
     let aiResponse = msg.content;
     if (!aiResponse && programs.length > 0) {
       aiResponse = formatMissingContent
-          ? formatMissingContent(query, programs.length)
-          : `"${query}"에 대한 검색 결과, 총 ${programs.length}개의 지원사업을 찾았습니다.`;
+        ? formatMissingContent(query, programs.length)
+        : `"${query}"에 대한 검색 결과, 총 ${programs.length}개의 지원사업을 찾았습니다.`;
     } else if (!aiResponse) {
       aiResponse = formatMissingContent
-          ? formatMissingContent(query, 0)
-          : `"${query}"에 대한 검색 결과가 없습니다.`;
+        ? formatMissingContent(query, 0)
+        : `"${query}"에 대한 검색 결과가 없습니다.`;
     }
 
     // 마지막 assistant 메시지인지 확인
@@ -574,9 +574,9 @@ export function transformMessagesToConversations(
 
     // 질문 요약 생성
     const summary =
-        query.length > summaryMaxLength
-            ? query.substring(0, summaryMaxLength) + "..."
-            : query;
+      query.length > summaryMaxLength
+        ? query.substring(0, summaryMaxLength) + "..."
+        : query;
 
     result.push({
       id: msg.id,
@@ -591,11 +591,11 @@ export function transformMessagesToConversations(
       // 마지막 메시지에만 현재 SDK 상태 연결
       itemDetails: isLastAssistant && itemDetails.length > 0 ? itemDetails : undefined,
       followupSuggestions:
-          isLastAssistant && followupSuggestions.length > 0 ? followupSuggestions : undefined,
+        isLastAssistant && followupSuggestions.length > 0 ? followupSuggestions : undefined,
       clarificationMessage:
-          isLastAssistant && clarificationMessage ? clarificationMessage : undefined,
+        isLastAssistant && clarificationMessage ? clarificationMessage : undefined,
       clarificationQuestions:
-          isLastAssistant && clarificationQuestions.length > 0 ? clarificationQuestions : undefined,
+        isLastAssistant && clarificationQuestions.length > 0 ? clarificationQuestions : undefined,
     });
   }
 
@@ -622,8 +622,8 @@ export function transformMessagesToConversations(
  * ```
  */
 export function buildConversationBreadcrumb<T extends { id: string; parentId?: string }>(
-    currentId: string | undefined,
-    conversations: T[]
+  currentId: string | undefined,
+  conversations: T[]
 ): T[] {
   const path: T[] = [];
   let id: string | undefined = currentId;

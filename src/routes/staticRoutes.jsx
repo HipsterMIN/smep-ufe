@@ -34,6 +34,10 @@ export const staticRoutes = [
         path: '/',
         element: <MainPage />,
       },
+      {
+        path: '/service/ai-chat', // AI 상담 페이지 (full layout)
+        element: <AiChat/>,
+      },
     ],
   },
 
@@ -65,10 +69,6 @@ export const staticRoutes = [
           {
             path: '/service/login', // 로그인 페이지
             element: <Login/>,
-          },
-          {
-            path: '/service/ai-chat', // AI 상담 페이지
-            element: <AiChat/>,
           },
         ],
   },

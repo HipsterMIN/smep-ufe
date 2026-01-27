@@ -18,6 +18,8 @@ import type { StatusEvent } from './useCubeIAxChat';
 export interface UseCubeIAxSearchOptions {
   /** Default topK value (default: 20) */
   topK?: number;
+  /** Maximum number of results after reranking (default: same as topK) */
+  rerankerTopK?: number;
   /** User profile for personalized search results */
   profile?: UserProfile;
   /** Default metadata to send with every search */
@@ -152,8 +154,8 @@ export interface UseCubeIAxSearchReturn {
  * ```
  */
 export function useCubeIAxSearch(
-    configOrOptions?: CubeIAxConfig | UseCubeIAxSearchOptions,
-    optionsParam?: UseCubeIAxSearchOptions
+  configOrOptions?: CubeIAxConfig | UseCubeIAxSearchOptions,
+  optionsParam?: UseCubeIAxSearchOptions
 ): UseCubeIAxSearchReturn {
   // Support both signatures:
   // 1. useCubeIAxSearch(config, options) - explicit config
@@ -171,7 +173,7 @@ export function useCubeIAxSearch(
     // Use Provider context
     if (!contextValue) {
       throw new Error(
-          'useCubeIAxSearch: Either pass config as first argument or wrap your app with CubeIAxProvider'
+        'useCubeIAxSearch: Either pass config as first argument or wrap your app with CubeIAxProvider'
       );
     }
     config = contextValue.config;
@@ -206,11 +208,11 @@ export function useCubeIAxSearch(
   useEffect(() => {
     const prevConfig = configRef.current;
     if (
-        prevConfig.apiKey !== config.apiKey ||
-        prevConfig.baseUrl !== config.baseUrl ||
-        prevConfig.timeout !== config.timeout ||
-        prevConfig.agent !== config.agent ||
-        prevConfig.debug !== config.debug
+      prevConfig.apiKey !== config.apiKey ||
+      prevConfig.baseUrl !== config.baseUrl ||
+      prevConfig.timeout !== config.timeout ||
+      prevConfig.agent !== config.agent ||
+      prevConfig.debug !== config.debug
     ) {
       configRef.current = config;
       clientRef.current = null; // config 변경 시 client 재생성 트리거
@@ -253,178 +255,191 @@ export function useCubeIAxSearch(
 
   // Execute search
   const search = useCallback(
-      async (query: string, searchOptions?: Partial<SearchRequest>): Promise<SearchResponse | null> => {
-        // Allow empty query if filters are provided (filter-only search)
-        const hasFilters = searchOptions?.filters && Object.keys(searchOptions.filters).length > 0;
-        if (!query.trim() && !hasFilters) return null;
+    async (query: string, searchOptions?: Partial<SearchRequest>): Promise<SearchResponse | null> => {
+      // Allow empty query if filters are provided (filter-only search)
+      const hasFilters = searchOptions?.filters && Object.keys(searchOptions.filters).length > 0;
+      if (!query.trim() && !hasFilters) return null;
 
-        const client = getClient();
-        // 이전 요청이 있으면 abort (race condition 방지)
-        // 순서 중요: 먼저 플래그 설정 → abort → 새 요청용 플래그 리셋
-        abortedRef.current = true; // 이전 콜백 차단
-        abortControllerRef.current?.abort();
-        abortedRef.current = false; // 새 요청 시작 시 플래그 리셋
-        resetStreamingState();
-        setIsLoading(true);
+      const client = getClient();
+      // 이전 요청이 있으면 abort (race condition 방지)
+      // 순서 중요: 먼저 플래그 설정 → abort → 새 요청용 플래그 리셋
+      abortedRef.current = true; // 이전 콜백 차단
+      abortControllerRef.current?.abort();
+      abortedRef.current = false; // 새 요청 시작 시 플래그 리셋
+      resetStreamingState();
+      setIsLoading(true);
 
-        // Create abort controller for this request
-        abortControllerRef.current = new AbortController();
+      // Create abort controller for this request
+      abortControllerRef.current = new AbortController();
 
-        try {
-          // Merge default metadata with search-specific metadata
-          const mergedMetadata = {
-            ...options.defaultMetadata,
-            ...searchOptions?.metadata,
-          };
+      try {
+        // Merge default metadata with search-specific metadata
+        const mergedMetadata = {
+          ...options.defaultMetadata,
+          ...searchOptions?.metadata,
+        };
 
-          // Merge default filters with search-specific filters
-          const mergedFilters = {
-            ...options.defaultFilters,
-            ...searchOptions?.filters,
-          };
+        // Merge default filters with search-specific filters
+        const mergedFilters = {
+          ...options.defaultFilters,
+          ...searchOptions?.filters,
+        };
 
-          const shouldStream = searchOptions?.stream ?? options.stream ?? true;
+        const shouldStream = searchOptions?.stream ?? options.stream ?? true;
 
-          const request: SearchRequest = {
-            query,
-            topK: searchOptions?.topK ?? options.topK ?? DEFAULT_TOP_K,
-            profile: searchOptions?.profile ?? options.profile,
-            metadata: Object.keys(mergedMetadata).length > 0 ? mergedMetadata : undefined,
-            filters: Object.keys(mergedFilters).length > 0 ? mergedFilters : undefined,
-            stream: shouldStream,
-            domain: options.domain,
-            agent: searchOptions?.agent ?? options.agent,
-            groupByField: searchOptions?.groupByField ?? options.groupByField,
-            groupResultsBy: searchOptions?.groupResultsBy ?? options.groupResultsBy,
-            signal: abortControllerRef.current?.signal,
-          };
+        // documentContext: 명시적으로 전달되면 사용, 아니면 이전 검색 결과의 context 유지
+        // 이를 통해 후속 질문 시 이전 검색 결과 참조 가능
+        // 예: "IT 지원사업" 검색 후 "재난안전제품 인증 자격이?" 질문 시 이전 결과에서 해당 공고 찾기
+        const documentContextToUse = searchOptions?.documentContext ?? contextDocuments ?? undefined;
 
-          let fullContent = '';
+        const request: SearchRequest = {
+          query,
+          topK: searchOptions?.topK ?? options.topK ?? DEFAULT_TOP_K,
+          rerankerTopK: searchOptions?.rerankerTopK ?? options.rerankerTopK,
+          profile: searchOptions?.profile ?? options.profile,
+          metadata: Object.keys(mergedMetadata).length > 0 ? mergedMetadata : undefined,
+          filters: Object.keys(mergedFilters).length > 0 ? mergedFilters : undefined,
+          documentContext: documentContextToUse && documentContextToUse.length > 0 ? documentContextToUse : undefined,
+          stream: shouldStream,
+          domain: options.domain,
+          agent: searchOptions?.agent ?? options.agent,
+          groupByField: searchOptions?.groupByField ?? options.groupByField,
+          groupResultsBy: searchOptions?.groupResultsBy ?? options.groupResultsBy,
+          signal: abortControllerRef.current?.signal,
+        };
 
-          const response = await client.search(request, shouldStream ? {
-            onSession: (sid) => {
-              if (abortedRef.current) return;
-              setSessionId(sid);
-              options.onSession?.(sid);
-            },
-            onStatus: (statusMessage, stage) => {
-              if (abortedRef.current) return;
-              flushSync(() => {
-                setStatus({ message: statusMessage, stage });
-              });
-              options.onStatus?.(statusMessage, stage);
-            },
-            onSources: (sourceResults) => {
-              if (abortedRef.current) return;
-              // Sources arrive early - update UI immediately
-              // Use flushSync to force synchronous render (bypass React 18 automatic batching)
-              flushSync(() => {
-                setResults(sourceResults);
-                setTotal(sourceResults.length);
-              });
-              options.onSources?.(sourceResults);
-            },
-            onContent: (chunk) => {
-              if (abortedRef.current) return;
-              fullContent += chunk;
-              // Force synchronous render for real-time streaming UI
-              flushSync(() => {
-                setStreamingContent(fullContent);
-              });
-              options.onContent?.(chunk);
-            },
-            onCitations: (citations) => {
-              if (abortedRef.current) return;
-              options.onCitations?.(citations);
-            },
-            onClarification: (message, suggestions) => {
-              if (abortedRef.current) return;
-              setClarificationMessage(message);
-              setClarificationQuestions(suggestions);
-              options.onClarification?.(message, suggestions);
-            },
-            onFollowup: (suggestions, message) => {
-              if (abortedRef.current) return;
-              setFollowupSuggestions(suggestions);
-              options.onFollowup?.(suggestions, message);
-            },
-            onRewrite: (query) => {
-              if (abortedRef.current) return;
-              setRewrittenQuery(query);
-              options.onRewrite?.(query);
-            },
-            onAnalysis: (analysis) => {
-              if (abortedRef.current) return;
-              setQueryAnalysis(analysis);
-              options.onAnalysis?.(analysis);
-            },
-            onItemDetails: (items) => {
-              if (abortedRef.current) return;
-              setItemDetails(items);
-              options.onItemDetails?.(items);
-            },
-            onContext: (documents, focus) => {
-              if (abortedRef.current) return;
-              setContextDocuments(documents);
-              if (focus) setContextFocus(focus);
-              options.onContext?.(documents, focus);
-            },
-            onComplete: (res) => {
-              if (abortedRef.current) return;
-              // Final response with LLM analysis
-              flushSync(() => {
-                setResults(res.results);
-                setTotal(res.total);
-                setContent(res.content);
-                setStreamingContent('');
-                setStatus(null);
-                setIsLoading(false);
-              });
-              options.onComplete?.(res);
-            },
-            onError: (err) => {
-              if (abortedRef.current) return;
-              // 에러 발생 시 모든 스트리밍 상태 정리
-              flushSync(() => {
-                setError(err);
-                setStreamingContent('');
-                setStatus(null);
-                setIsLoading(false);
-              });
-              options.onError?.(err);
-            },
-            onEvent: (event) => {
-              options.onEvent?.(event);
-            },
-            onParseError: options.onParseError,
-          } : undefined);
+        let fullContent = '';
 
-          // For non-streaming, set results here
-          if (!shouldStream) {
-            setResults(response.results);
-            setTotal(response.total);
-            setContent(response.content);
-            options.onComplete?.(response);
-          }
+        const response = await client.search(request, shouldStream ? {
+          onSession: (sid) => {
+            if (abortedRef.current) return;
+            setSessionId(sid);
+            options.onSession?.(sid);
+          },
+          onStatus: (statusMessage, stage) => {
+            if (abortedRef.current) return;
+            flushSync(() => {
+              setStatus({ message: statusMessage, stage });
+            });
+            options.onStatus?.(statusMessage, stage);
+          },
+          onSources: (sourceResults) => {
+            if (abortedRef.current) return;
+            // Sources arrive early - update UI immediately
+            // Use flushSync to force synchronous render (bypass React 18 automatic batching)
+            flushSync(() => {
+              setResults(sourceResults);
+              setTotal(sourceResults.length);
+            });
+            options.onSources?.(sourceResults);
+          },
+          onContent: (chunk) => {
+            if (abortedRef.current) return;
+            fullContent += chunk;
+            // Force synchronous render for real-time streaming UI
+            flushSync(() => {
+              setStreamingContent(fullContent);
+            });
+            options.onContent?.(chunk);
+          },
+          onCitations: (citations) => {
+            if (abortedRef.current) return;
+            options.onCitations?.(citations);
+          },
+          onClarification: (message, suggestions) => {
+            if (abortedRef.current) return;
+            setClarificationMessage(message || '');
+            // Ensure suggestions is always an array
+            const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
+            setClarificationQuestions(safeSuggestions);
+            options.onClarification?.(message, safeSuggestions);
+          },
+          onFollowup: (suggestions, message) => {
+            if (abortedRef.current) return;
+            // Ensure suggestions is always an array
+            const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
+            setFollowupSuggestions(safeSuggestions);
+            options.onFollowup?.(safeSuggestions, message);
+          },
+          onRewrite: (query) => {
+            if (abortedRef.current) return;
+            setRewrittenQuery(query);
+            options.onRewrite?.(query);
+          },
+          onAnalysis: (analysis) => {
+            if (abortedRef.current) return;
+            setQueryAnalysis(analysis);
+            options.onAnalysis?.(analysis);
+          },
+          onItemDetails: (items) => {
+            if (abortedRef.current) return;
+            // Ensure items is always an array (defensive against malformed backend response)
+            const safeItems = Array.isArray(items) ? items : [];
+            setItemDetails(safeItems);
+            options.onItemDetails?.(safeItems);
+          },
+          onContext: (documents, focus) => {
+            if (abortedRef.current) return;
+            setContextDocuments(documents);
+            if (focus) setContextFocus(focus);
+            options.onContext?.(documents, focus);
+          },
+          onComplete: (res) => {
+            if (abortedRef.current) return;
+            // Final response with LLM analysis
+            flushSync(() => {
+              setResults(res.results);
+              setTotal(res.total);
+              setContent(res.content);
+              setStreamingContent('');
+              setStatus(null);
+              setIsLoading(false);
+            });
+            options.onComplete?.(res);
+          },
+          onError: (err) => {
+            if (abortedRef.current) return;
+            // 에러 발생 시 모든 스트리밍 상태 정리
+            flushSync(() => {
+              setError(err);
+              setStreamingContent('');
+              setStatus(null);
+              setIsLoading(false);
+            });
+            options.onError?.(err);
+          },
+          onEvent: (event) => {
+            options.onEvent?.(event);
+          },
+          onParseError: options.onParseError,
+        } : undefined);
 
-          return response;
-        } catch (err) {
-          // abort된 요청의 에러는 무시
-          if (abortedRef.current) return null;
-          const error = err instanceof Error ? err : new Error(String(err));
-          flushSync(() => {
-            setError(error);
-            setStreamingContent('');
-            setStatus(null);
-            setIsLoading(false);
-          });
-          options.onError?.(error);
-          return null;
-        } finally {
-          abortControllerRef.current = null;
+        // For non-streaming, set results here
+        if (!shouldStream) {
+          setResults(response.results);
+          setTotal(response.total);
+          setContent(response.content);
+          options.onComplete?.(response);
         }
-      },
-      [getClient, options, resetStreamingState]
+
+        return response;
+      } catch (err) {
+        // abort된 요청의 에러는 무시
+        if (abortedRef.current) return null;
+        const error = err instanceof Error ? err : new Error(String(err));
+        flushSync(() => {
+          setError(error);
+          setStreamingContent('');
+          setStatus(null);
+          setIsLoading(false);
+        });
+        options.onError?.(error);
+        return null;
+      } finally {
+        abortControllerRef.current = null;
+      }
+    },
+    [getClient, options, resetStreamingState, contextDocuments]
   );
 
   // Clear results

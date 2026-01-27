@@ -18,7 +18,7 @@ function App() {
         apiKey={import.meta.env.VITE_CUBE_IAX_API_KEY}
         baseUrl={import.meta.env.VITE_CUBE_IAX_API_URL}
       >
-        <ProgramChatProvider>
+        <ProgramChatProvider maxResponseLength={800}>
           {/* <RouterProvider router={AppRouter} />*/}
 
           <AppRouter />

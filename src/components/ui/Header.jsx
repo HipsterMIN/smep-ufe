@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import arrowIcon from '../../assets/main/icon-arrow.svg';
 import { useAuthStore } from '../../store/useAuthStore.jsx';
-import { FloatingChatbot } from '../ai/FloatingChatbot';
 import { useNavigate } from 'react-router-dom';
 import { useMenuStore } from '../../store/useMenuStore';
 import { buildFullPath } from '../../utils/menuUtils';
@@ -307,7 +306,6 @@ export default function Header() {
         { /*메인메뉴 : 모바일 */}
       </header>
       <div className="quickbox">
-        <FloatingChatbot onSelectProgram={(program) => navigate(`/service/pbanc/${program.id}`)} />
         <button
           type="button"
           className="quickbox-top"

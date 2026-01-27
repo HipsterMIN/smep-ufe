@@ -16,7 +16,8 @@ import type {
 const DEFAULT_TIMEOUT = 60000;
 
 // API defaults (exported for consistency across layers)
-export const DEFAULT_TOP_K = 20;
+export const DEFAULT_TOP_K = 50;
+export const DEFAULT_RERANKER_TOP_K = 10;
 export const DEFAULT_GROUP_BY_FIELD = 'group_id';
 
 // Token limits for LLM response
@@ -232,6 +233,7 @@ export class CubeIAxClient {
           document_context: request.documentContext,  // group_ids for fast filtering
           stream: false,
           top_k: request.topK ?? DEFAULT_TOP_K,
+          reranker_top_k: request.rerankerTopK ?? DEFAULT_RERANKER_TOP_K,
           max_response_length: request.maxResponseLength,
           include_citations: request.includeCitations,
           group_by_field: request.groupByField === undefined ? DEFAULT_GROUP_BY_FIELD : request.groupByField,
@@ -268,8 +270,8 @@ export class CubeIAxClient {
    * Send a chat message with SSE streaming
    */
   private async chatStream(
-      request: ChatRequest,
-      callbacks: StreamCallbacks
+    request: ChatRequest,
+    callbacks: StreamCallbacks
   ): Promise<ChatResponse> {
     const { signal, cleanup, isTimeout } = this.createAbortSignal(request.signal);
     const agent = request.agent ?? this.agent;
@@ -279,7 +281,8 @@ export class CubeIAxClient {
       sessionId: request.sessionId,
       topK: request.topK,
       domain: request.domain,
-      documentContext: request.documentContext,  // Debug: show document_context being sent
+      documentContext: request.documentContext,
+      profile: request.profile,
     });
 
     try {
@@ -295,6 +298,7 @@ export class CubeIAxClient {
           document_context: request.documentContext,  // group_ids for fast filtering
           stream: true,
           top_k: request.topK ?? DEFAULT_TOP_K,
+          reranker_top_k: request.rerankerTopK ?? DEFAULT_RERANKER_TOP_K,
           max_response_length: request.maxResponseLength,
           include_citations: request.includeCitations,
           group_by_field: request.groupByField === undefined ? DEFAULT_GROUP_BY_FIELD : request.groupByField,
@@ -340,8 +344,8 @@ export class CubeIAxClient {
    * Process SSE stream and invoke callbacks
    */
   private async processSSEStream(
-      body: ReadableStream<Uint8Array>,
-      callbacks: StreamCallbacks
+    body: ReadableStream<Uint8Array>,
+    callbacks: StreamCallbacks
   ): Promise<ChatResponse> {
     const reader = body.getReader();
     const decoder = new TextDecoder();
@@ -464,8 +468,8 @@ export class CubeIAxClient {
                   callbacks.onAnalysis?.({
                     intent: event.intent,
                     confidence: typeof event.confidence === 'string'
-                        ? parseFloat(event.confidence)
-                        : (event.confidence ?? 0),
+                      ? parseFloat(event.confidence)
+                      : (event.confidence ?? 0),
                     queryType: event.query_type || 'unknown',
                   });
                 }
@@ -589,12 +593,13 @@ export class CubeIAxClient {
         body: JSON.stringify({
           query: request.query,
           top_k: request.topK ?? DEFAULT_TOP_K,
+          reranker_top_k: request.rerankerTopK ?? DEFAULT_RERANKER_TOP_K,
           profile: request.profile,
           metadata: request.metadata,
           filters: request.filters,
           document_context: request.documentContext,  // group_ids for fast filtering
           stream: false,
-          group_by_field: request.groupByField,
+          group_by_field: request.groupByField ?? DEFAULT_GROUP_BY_FIELD,
           group_results_by: request.groupResultsBy,
           ...(request.domain && { domain: request.domain }),
           ...(agent && { agent }),
@@ -632,8 +637,8 @@ export class CubeIAxClient {
    * Search documents with SSE streaming
    */
   private async searchStream(
-      request: SearchRequest,
-      callbacks: SearchStreamCallbacks
+    request: SearchRequest,
+    callbacks: SearchStreamCallbacks
   ): Promise<SearchResponse> {
     const { signal, cleanup, isTimeout } = this.createAbortSignal(request.signal);
     const agent = request.agent ?? this.agent;
@@ -651,12 +656,13 @@ export class CubeIAxClient {
         body: JSON.stringify({
           query: request.query,
           top_k: request.topK ?? DEFAULT_TOP_K,
+          reranker_top_k: request.rerankerTopK ?? DEFAULT_RERANKER_TOP_K,
           profile: request.profile,
           metadata: request.metadata,
           filters: request.filters,
           document_context: request.documentContext,  // group_ids for fast filtering
           stream: true,
-          group_by_field: request.groupByField,
+          group_by_field: request.groupByField ?? DEFAULT_GROUP_BY_FIELD,
           group_results_by: request.groupResultsBy,
           ...(request.domain && { domain: request.domain }),
           ...(agent && { agent }),
@@ -699,9 +705,9 @@ export class CubeIAxClient {
    * Process SSE stream for search and invoke callbacks
    */
   private async processSearchSSEStream(
-      body: ReadableStream<Uint8Array>,
-      query: string,
-      callbacks: SearchStreamCallbacks
+    body: ReadableStream<Uint8Array>,
+    query: string,
+    callbacks: SearchStreamCallbacks
   ): Promise<SearchResponse> {
     const reader = body.getReader();
     const decoder = new TextDecoder();
@@ -807,7 +813,7 @@ export class CubeIAxClient {
                 break;
               }
 
-                // === Chat과 동일한 이벤트 핸들러 (Search에서도 지원) ===
+              // === Chat과 동일한 이벤트 핸들러 (Search에서도 지원) ===
               case 'status':
                 callbacks.onStatus?.(event.content || event.message || '', event.status || event.stage);
                 break;
@@ -845,8 +851,8 @@ export class CubeIAxClient {
                   callbacks.onAnalysis?.({
                     intent: event.intent,
                     confidence: typeof event.confidence === 'string'
-                        ? parseFloat(event.confidence)
-                        : (event.confidence ?? 0),
+                      ? parseFloat(event.confidence)
+                      : (event.confidence ?? 0),
                     queryType: event.query_type || 'unknown',
                   });
                 }

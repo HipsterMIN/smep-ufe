@@ -75,6 +75,8 @@ export interface ChatRequest {
   stream?: boolean;
   /** Maximum number of search results (default: 20, sent to backend) */
   topK?: number;
+  /** Maximum number of results after reranking (default: same as topK) */
+  rerankerTopK?: number;
   /** Maximum response length in characters (e.g., 150 for chat widget) */
   maxResponseLength?: number;
   /** Whether to include citation markers [1], [2] in response (default: true) */
@@ -197,8 +199,8 @@ export interface Source {
  * ```
  */
 export function getSourceField<T = string>(
-    source: Source,
-    key: string
+  source: Source,
+  key: string
 ): T | undefined {
   const value = (source as Record<string, unknown>)[key];
   if (value !== undefined) return value as T;
@@ -216,6 +218,8 @@ export interface SearchRequest {
   query: string;
   /** Maximum number of results (default: 20) */
   topK?: number;
+  /** Maximum number of results after reranking (default: same as topK) */
+  rerankerTopK?: number;
   /** User profile for personalized search results */
   profile?: UserProfile;
   /** Additional metadata for filtering */
@@ -304,20 +308,20 @@ export interface SearchResult {
  * SSE stream event types
  */
 export type StreamEventType =
-    | 'session'        // 세션 ID
-    | 'status'         // 상태 메시지 (검색 중, 분석 중 등)
-    | 'sources'        // 검색 결과 (sources-first 패턴)
-    | 'token'          // 스트리밍 텍스트
-    | 'citations'      // 인용 정보
-    | 'clarification'  // 명확화 요청
-    | 'followup'       // 후속 질문 제안
-    | 'analysis'       // 분석 결과
-    | 'item_details'   // 항목 상세 (펼치기/접기 UI용)
-    | 'context'        // 문맥 정보 (documents, focus)
-    | 'search_result'  // 검색 모드 최종 결과
-    | 'rewrite'        // 쿼리 재작성
-    | 'end'            // 완료
-    | 'error';         // 에러         // 에러         // 에러
+  | 'session'        // 세션 ID
+  | 'status'         // 상태 메시지 (검색 중, 분석 중 등)
+  | 'sources'        // 검색 결과 (sources-first 패턴)
+  | 'token'          // 스트리밍 텍스트
+  | 'citations'      // 인용 정보
+  | 'clarification'  // 명확화 요청
+  | 'followup'       // 후속 질문 제안
+  | 'analysis'       // 분석 결과
+  | 'item_details'   // 항목 상세 (펼치기/접기 UI용)
+  | 'context'        // 문맥 정보 (documents, focus)
+  | 'search_result'  // 검색 모드 최종 결과
+  | 'rewrite'        // 쿼리 재작성
+  | 'end'            // 완료
+  | 'error';         // 에러         // 에러         // 에러
 
 /**
  * Item detail for collapsible UI rendering

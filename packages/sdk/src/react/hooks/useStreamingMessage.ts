@@ -150,8 +150,8 @@ export function useStreamingMessage(options: UseStreamingMessageOptions): UseStr
 
     // Check if the response is already displayed in conversations
     const isResponseInConversations = lastAssistantMessage
-        ? conversationIds.includes(lastAssistantMessage.id)
-        : false;
+      ? conversationIds.includes(lastAssistantMessage.id)
+      : false;
 
     // Clear cache when response is displayed in conversations
     if (isResponseInConversations) {
@@ -162,14 +162,14 @@ export function useStreamingMessage(options: UseStreamingMessageOptions): UseStr
     // pendingQuery: last user message that hasn't been answered OR answer not in conversations yet
     // Keep showing pending query until the response appears in conversations
     const pendingQuery = lastUserMessage && (!hasAssistantResponse || !isResponseInConversations)
-        ? lastUserMessage.content
-        : null;
+      ? lastUserMessage.content
+      : null;
 
     // isPending: we're loading OR there's an unanswered question OR response not yet displayed in conversations
     // This prevents flicker when isLoading becomes false but conversations haven't updated yet
     const isPending = isLoading ||
-        (lastUserMessage !== null && !hasAssistantResponse) ||
-        (hasAssistantResponse && !isResponseInConversations);
+      (lastUserMessage !== null && !hasAssistantResponse) ||
+      (hasAssistantResponse && !isResponseInConversations);
 
     // Use current streaming content, or cached content if streaming is done but not yet in conversations
     const effectiveContent = streamingContent || (isPending ? cachedContentRef.current : null);

@@ -74,6 +74,8 @@ export interface UseCubeIAxChatOptions {
   domain?: DomainType;
   /** Maximum number of search results (default: 20) */
   topK?: number;
+  /** Maximum number of results after reranking (default: same as topK) */
+  rerankerTopK?: number;
   /** Maximum response length in characters (e.g., 150 for compact chat widget) */
   maxResponseLength?: number;
   /** Maximum tokens for LLM response (default: 1024, range: 100-2048) */
@@ -164,6 +166,19 @@ export interface UseCubeIAxChatReturn {
   contextDocuments: string[] | null;
   /** Context: focus program info */
   contextFocus: { group_id: string; title: string } | null;
+  /**
+   * Set document context manually.
+   * - When user clicks a specific document: pass that document's group_id
+   * - When returning to search results: pass all result group_ids
+   * - When starting new topic: pass null to clear context
+   * @example
+   * // User clicks a specific document
+   * setDocumentContext(['BIZ-2024-001']);
+   *
+   * // Clear context for new topic
+   * setDocumentContext(null);
+   */
+  setDocumentContext: (documents: string[] | null) => void;
   /** Send a message */
   sendMessage: (message: string, options?: {
     metadata?: Record<string, unknown>;
@@ -218,8 +233,8 @@ export interface UseCubeIAxChatReturn {
  * ```
  */
 export function useCubeIAxChat(
-    configOrOptions?: CubeIAxConfig | UseCubeIAxChatOptions,
-    optionsParam?: UseCubeIAxChatOptions
+  configOrOptions?: CubeIAxConfig | UseCubeIAxChatOptions,
+  optionsParam?: UseCubeIAxChatOptions
 ): UseCubeIAxChatReturn {
   // Support both signatures:
   // 1. useCubeIAxChat(config, options) - explicit config
@@ -237,7 +252,7 @@ export function useCubeIAxChat(
     // Use Provider context
     if (!contextValue) {
       throw new Error(
-          'useCubeIAxChat: Either pass config as first argument or wrap your app with CubeIAxProvider'
+        'useCubeIAxChat: Either pass config as first argument or wrap your app with CubeIAxProvider'
       );
     }
     config = contextValue.config;
@@ -316,9 +331,9 @@ export function useCubeIAxChat(
 
   // Determine initial values (props > persisted > defaults)
   const initialSessionId = options.sessionId ??
-      ((persistSession && persistedState.current?.sessionId) || undefined);
+    ((persistSession && persistedState.current?.sessionId) || undefined);
   const initialMessages = options.initialMessages ??
-      ((persistMessages && persistedState.current?.messages) || []);
+    ((persistMessages && persistedState.current?.messages) || []);
 
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
@@ -344,6 +359,8 @@ export function useCubeIAxChat(
   const sessionIdRef = useRef<string | undefined>(initialSessionId);
   // earlySources를 ref로 관리하여 onComplete에서 stale 값 참조 방지
   const earlySourcesRef = useRef<Source[]>([]);
+  // contextDocuments를 ref로 관리하여 sendMessage에서 최신 값 참조
+  const contextDocumentsRef = useRef<string[] | null>(null);
   // config를 ref로 관리하여 getClient 의존성 안정화
   const configRef = useRef<CubeIAxConfig>(config);
   // 초기 마운트 완료 플래그 (persistence 저장 시 초기 로드와 구분)
@@ -353,11 +370,11 @@ export function useCubeIAxChat(
   useEffect(() => {
     const prevConfig = configRef.current;
     if (
-        prevConfig.apiKey !== config.apiKey ||
-        prevConfig.baseUrl !== config.baseUrl ||
-        prevConfig.timeout !== config.timeout ||
-        prevConfig.agent !== config.agent ||
-        prevConfig.debug !== config.debug
+      prevConfig.apiKey !== config.apiKey ||
+      prevConfig.baseUrl !== config.baseUrl ||
+      prevConfig.timeout !== config.timeout ||
+      prevConfig.agent !== config.agent ||
+      prevConfig.debug !== config.debug
     ) {
       configRef.current = config;
       clientRef.current = null; // config 변경 시 client 재생성 트리거
@@ -385,6 +402,11 @@ export function useCubeIAxChat(
   useEffect(() => {
     isMountedRef.current = true;
   }, []);
+
+  // contextDocumentsRef 동기화 (sendMessage에서 최신 값 참조용)
+  useEffect(() => {
+    contextDocumentsRef.current = contextDocuments;
+  }, [contextDocuments]);
 
   // Cleanup: abort any in-flight request when component unmounts
   useEffect(() => {
@@ -426,198 +448,227 @@ export function useCubeIAxChat(
 
   // Send a message
   const sendMessage = useCallback(
-      async (message: string, sendOptions?: { metadata?: Record<string, unknown>; filters?: Record<string, unknown>; documentContext?: string[] }) => {
-        if (!message.trim()) return;
+    async (message: string, sendOptions?: { metadata?: Record<string, unknown>; filters?: Record<string, unknown>; documentContext?: string[] }) => {
+      if (!message.trim()) return;
 
-        const client = getClient();
-        // 이전 요청이 있으면 abort (race condition 방지)
-        // 순서 중요: 먼저 플래그 설정 → abort → 새 요청용 플래그 리셋
-        abortedRef.current = true; // 이전 콜백 차단
-        abortControllerRef.current?.abort();
-        abortedRef.current = false; // 새 요청 시작 시 플래그 리셋
-        resetStreamingState();
-        setIsLoading(true);
+      // 로딩 상태를 먼저 설정 (UI 응답성 향상)
+      setIsLoading(true);
 
-        // Add user message
-        const userMessage: Message = {
-          id: generateId(),
-          role: 'user',
-          content: message,
-          timestamp: new Date(),
+      let client: CubeIAxClient;
+      try {
+        client = getClient();
+      } catch (err) {
+        setIsLoading(false);
+        const error = err instanceof Error ? err : new Error(String(err));
+        setError(error);
+        options.onError?.(error);
+        return;
+      }
+
+      // 이전 요청이 있으면 abort (race condition 방지)
+      // 순서 중요: 먼저 플래그 설정 → abort → 새 요청용 플래그 리셋
+      abortedRef.current = true; // 이전 콜백 차단
+      abortControllerRef.current?.abort();
+      abortedRef.current = false; // 새 요청 시작 시 플래그 리셋
+      resetStreamingState();
+
+      // Add user message
+      const userMessage: Message = {
+        id: generateId(),
+        role: 'user',
+        content: message,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, userMessage]);
+
+      // Create assistant message placeholder
+      const assistantMessageId = generateId();
+
+      try {
+        abortControllerRef.current = new AbortController();
+
+        // Merge default metadata with message-specific metadata
+        const mergedMetadata = {
+          ...options.defaultMetadata,
+          ...sendOptions?.metadata,
         };
-        setMessages((prev) => [...prev, userMessage]);
 
-        // Create assistant message placeholder
-        const assistantMessageId = generateId();
+        // Merge default filters with message-specific filters
+        const mergedFilters = {
+          ...options.defaultFilters,
+          ...sendOptions?.filters,
+        };
 
-        try {
-          abortControllerRef.current = new AbortController();
+        const request: ChatRequest = {
+          message,
+          sessionId: sessionIdRef.current,
+          stream: true,
+          profile: options.profile,
+          metadata: Object.keys(mergedMetadata).length > 0 ? mergedMetadata : undefined,
+          filters: Object.keys(mergedFilters).length > 0 ? mergedFilters : undefined,
+          // ★ Document context 우선순위: 명시적 전달 > 자동 추적된 컨텍스트
+          // SDK가 검색 결과를 자동으로 컨텍스트로 유지하여 후속 질문에서 활용
+          documentContext: sendOptions?.documentContext ?? contextDocumentsRef.current ?? undefined,
+          domain: options.domain,
+          topK: options.topK,
+          rerankerTopK: options.rerankerTopK,
+          maxResponseLength: options.maxResponseLength,
+          maxTokens: options.maxTokens,
+          includeCitations: options.includeCitations,
+          signal: abortControllerRef.current.signal,
+        };
 
-          // Merge default metadata with message-specific metadata
-          const mergedMetadata = {
-            ...options.defaultMetadata,
-            ...sendOptions?.metadata,
-          };
+        let fullContent = '';
 
-          // Merge default filters with message-specific filters
-          const mergedFilters = {
-            ...options.defaultFilters,
-            ...sendOptions?.filters,
-          };
+        // ref 초기화 (새 요청 시작)
+        earlySourcesRef.current = [];
 
-          const request: ChatRequest = {
-            message,
-            sessionId: sessionIdRef.current,
-            stream: true,
-            profile: options.profile,
-            metadata: Object.keys(mergedMetadata).length > 0 ? mergedMetadata : undefined,
-            filters: Object.keys(mergedFilters).length > 0 ? mergedFilters : undefined,
-            documentContext: sendOptions?.documentContext,  // Document IDs for context-based responses
-            domain: options.domain,
-            topK: options.topK,
-            maxResponseLength: options.maxResponseLength,
-            maxTokens: options.maxTokens,
-            includeCitations: options.includeCitations,
-            signal: abortControllerRef.current.signal,
-          };
-
-          let fullContent = '';
-
-          // ref 초기화 (새 요청 시작)
-          earlySourcesRef.current = [];
-
-          await client.chat(request, {
-            onSession: (newSessionId) => {
-              if (abortedRef.current) return;
-              setSessionId(newSessionId);
-              options.onSession?.(newSessionId);
-            },
-            onStatus: (statusMessage, stage) => {
-              if (abortedRef.current) return;
+        await client.chat(request, {
+          onSession: (newSessionId) => {
+            if (abortedRef.current) return;
+            setSessionId(newSessionId);
+            options.onSession?.(newSessionId);
+          },
+          onStatus: (statusMessage, stage) => {
+            if (abortedRef.current) return;
+            flushSync(() => {
+              setStatus({ message: statusMessage, stage });
+            });
+            options.onStatus?.(statusMessage, stage);
+          },
+          onSources: (sources) => {
+            if (abortedRef.current) return;
+            // Sources arrive before answer - update pending sources for UI
+            earlySourcesRef.current = sources;
+            flushSync(() => {
+              setPendingSources(sources);
+            });
+            // ★ 검색 결과를 컨텍스트로 자동 설정
+            // sources의 group_id를 추출하여 다음 요청의 documentContext로 사용
+            const groupIds = sources
+              .map(s => s.group_id || s.documentId)
+              .filter((id): id is string => !!id);
+            if (groupIds.length > 0) {
+              setContextDocuments(groupIds);
+            }
+            options.onSources?.(sources);
+          },
+          onContent: (content) => {
+            if (abortedRef.current) return;
+            fullContent += content;
+            // Force synchronous render for real-time streaming UI
+            flushSync(() => {
+              setStreamingContent(fullContent);
+            });
+            options.onContent?.(content);
+          },
+          onClarification: (message, suggestions) => {
+            if (abortedRef.current) return;
+            setClarificationMessage(message || '');
+            // Ensure suggestions is always an array
+            const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
+            setClarificationQuestions(safeSuggestions);
+            options.onClarification?.(message, safeSuggestions);
+          },
+          onFollowup: (suggestions, message) => {
+            if (abortedRef.current) return;
+            // Ensure suggestions is always an array
+            const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
+            setFollowupSuggestions(safeSuggestions);
+            // followup에 message가 있으면 채팅 응답으로 표시
+            if (message) {
+              fullContent = message;
               flushSync(() => {
-                setStatus({ message: statusMessage, stage });
+                setStreamingContent(message);
               });
-              options.onStatus?.(statusMessage, stage);
-            },
-            onSources: (sources) => {
-              if (abortedRef.current) return;
-              // Sources arrive before answer - update pending sources for UI
-              earlySourcesRef.current = sources;
-              flushSync(() => {
-                setPendingSources(sources);
-              });
-              options.onSources?.(sources);
-            },
-            onContent: (content) => {
-              if (abortedRef.current) return;
-              fullContent += content;
-              // Force synchronous render for real-time streaming UI
-              flushSync(() => {
-                setStreamingContent(fullContent);
-              });
-              options.onContent?.(content);
-            },
-            onClarification: (message, suggestions) => {
-              if (abortedRef.current) return;
-              setClarificationMessage(message);
-              setClarificationQuestions(suggestions);
-              options.onClarification?.(message, suggestions);
-            },
-            onFollowup: (suggestions, message) => {
-              if (abortedRef.current) return;
-              setFollowupSuggestions(suggestions);
-              // followup에 message가 있으면 채팅 응답으로 표시
-              if (message) {
-                fullContent = message;
-                flushSync(() => {
-                  setStreamingContent(message);
-                });
-              }
-              options.onFollowup?.(suggestions, message);
-            },
-            onRewrite: (query) => {
-              if (abortedRef.current) return;
-              setRewrittenQuery(query);
-              options.onRewrite?.(query);
-            },
-            onAnalysis: (analysis) => {
-              if (abortedRef.current) return;
-              setQueryAnalysis(analysis);
-              options.onAnalysis?.(analysis);
-            },
-            onItemDetails: (items) => {
-              if (abortedRef.current) return;
-              setItemDetails(items);
-              options.onItemDetails?.(items);
-            },
-            onContext: (documents, focus) => {
-              if (abortedRef.current) return;
-              setContextDocuments(documents);
-              if (focus) setContextFocus(focus);
-              options.onContext?.(documents, focus);
-            },
-            onComplete: (res) => {
-              if (abortedRef.current) return;
-              // Update session ID if provided
-              if (res.sessionId) {
-                setSessionId(res.sessionId);
-              }
+            }
+            options.onFollowup?.(safeSuggestions, message);
+          },
+          onRewrite: (query) => {
+            if (abortedRef.current) return;
+            setRewrittenQuery(query);
+            options.onRewrite?.(query);
+          },
+          onAnalysis: (analysis) => {
+            if (abortedRef.current) return;
+            setQueryAnalysis(analysis);
+            options.onAnalysis?.(analysis);
+          },
+          onItemDetails: (items) => {
+            if (abortedRef.current) return;
+            // Ensure items is always an array (defensive against malformed backend response)
+            const safeItems = Array.isArray(items) ? items : [];
+            setItemDetails(safeItems);
+            options.onItemDetails?.(safeItems);
+          },
+          onContext: (documents, focus) => {
+            if (abortedRef.current) return;
+            setContextDocuments(documents);
+            if (focus) setContextFocus(focus);
+            options.onContext?.(documents, focus);
+          },
+          onComplete: (res) => {
+            if (abortedRef.current) return;
+            // Update session ID if provided
+            if (res.sessionId) {
+              setSessionId(res.sessionId);
+            }
 
-              // Add final assistant message (use early sources if available)
-              // 중요: res.sources가 빈 배열[]이면 truthy라서 fallback이 안됨
-              // 따라서 length 체크 필요
-              const assistantMessage: Message = {
-                id: assistantMessageId,
-                role: 'assistant',
-                content: res.content || fullContent,
-                sources: res.sources?.length ? res.sources : earlySourcesRef.current,
-                timestamp: new Date(),
-              };
+            // Add final assistant message (use early sources if available)
+            // 중요: res.sources가 빈 배열[]이면 truthy라서 fallback이 안됨
+            // 따라서 length 체크 필요
+            const assistantMessage: Message = {
+              id: assistantMessageId,
+              role: 'assistant',
+              content: res.content || fullContent,
+              sources: res.sources?.length ? res.sources : earlySourcesRef.current,
+              timestamp: new Date(),
+            };
 
-              // 모든 상태를 flushSync로 동기 업데이트 (깜빡임 방지)
-              flushSync(() => {
-                setMessages((prev) => [...prev, assistantMessage]);
-                setStreamingContent('');
-                setPendingSources([]);
-                setStatus(null);
-                setIsLoading(false);
-              });
+            // 모든 상태를 flushSync로 동기 업데이트 (깜빡임 방지)
+            flushSync(() => {
+              setMessages((prev) => [...prev, assistantMessage]);
+              setStreamingContent('');
+              setPendingSources([]);
+              setStatus(null);
+              setIsLoading(false);
+            });
 
-              options.onComplete?.(res);
-            },
-            onError: (err) => {
-              if (abortedRef.current) return;
-              // 에러 발생 시 모든 스트리밍 상태 정리
-              flushSync(() => {
-                setError(err);
-                setStreamingContent('');
-                setPendingSources([]);
-                setStatus(null);
-                setIsLoading(false);
-              });
-              options.onError?.(err);
-            },
-            onCitations: options.onCitations,
-            onEvent: options.onEvent,
-            onParseError: options.onParseError,
-          });
-        } catch (err) {
-          // abort된 요청의 에러는 무시
-          if (abortedRef.current) return;
-          const error = err instanceof Error ? err : new Error(String(err));
-          flushSync(() => {
-            setError(error);
-            setStreamingContent('');
-            setPendingSources([]);
-            setStatus(null);
-            setIsLoading(false);
-          });
-          options.onError?.(error);
-        } finally {
-          abortControllerRef.current = null;
-        }
-      },
-      [getClient, options, resetStreamingState]
+            options.onComplete?.(res);
+          },
+          onError: (err) => {
+            if (abortedRef.current) return;
+            // 에러 발생 시 모든 스트리밍 상태 정리
+            flushSync(() => {
+              setError(err);
+              setStreamingContent('');
+              setPendingSources([]);
+              setStatus(null);
+              setIsLoading(false);
+            });
+            options.onError?.(err);
+          },
+          onCitations: options.onCitations,
+          onEvent: options.onEvent,
+          onParseError: options.onParseError,
+        });
+      } catch (err) {
+        // abort된 요청의 에러는 무시
+        if (abortedRef.current) return;
+        const error = err instanceof Error ? err : new Error(String(err));
+        flushSync(() => {
+          setError(error);
+          setStreamingContent('');
+          setPendingSources([]);
+          setStatus(null);
+          setIsLoading(false);
+        });
+        options.onError?.(error);
+      } finally {
+        abortControllerRef.current = null;
+      }
+    },
+    [getClient, options, resetStreamingState]
   );
 
   // Clear all messages
@@ -675,6 +726,7 @@ export function useCubeIAxChat(
     itemDetails,
     contextDocuments,
     contextFocus,
+    setDocumentContext: setContextDocuments,
     sendMessage,
     clearMessages,
     startNewChat,
