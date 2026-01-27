@@ -32,6 +32,7 @@ const AiSmartSearchContent = () => {
   const TOTAL_SEARCH_ENDPOINT = '/api/v1/search/total';
   const TOTAL_REVEAL_INTERVAL_MS = 140;
   const [filters, setFilters] = useState(DEFAULT_SEARCH_FILTERS);
+  const lastExecutedQueryRef = useRef('');
   
   // Zustand Store
   const { 
@@ -149,6 +150,10 @@ const AiSmartSearchContent = () => {
 
   const startSearch = (searchQuery, activeFilters = filters) => {
     setIsTimeout(false);
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery) {
+      lastExecutedQueryRef.current = trimmedQuery;
+    }
     
     // 기존 타이머 제거
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -168,7 +173,7 @@ const AiSmartSearchContent = () => {
       includePast: activeFilters.includePast,
       exactRegions: true,
     };
-    search(searchQuery, sdkFilters, { metadata: { summaryMode: true } });
+    search(trimmedQuery, sdkFilters, { metadata: { summaryMode: true } });
   };
 
   const startTotalSearch = async (searchQuery) => {
@@ -283,7 +288,7 @@ const AiSmartSearchContent = () => {
     //  탭 전환 시 데이터 유지 방식은 프로젝트 설정을 따름)
     
     // 현재는 window.open을 사용하므로 state 전달을 위해 임시로 localStorage 사용 (이전 issue에서 localStorage 지양 요청이 있었으나 탭 이동간 데이터 공유를 위해 최소한으로 사용)
-    const currentQuery = sdkLastQuery || storedLastQuery || query;
+    const currentQuery = lastExecutedQueryRef.current || query.trim() || sdkLastQuery || '';
     const summaryPayload = streamingSummary || displaySummary || '';
     const compactPrograms = targetPrograms.map((program) => ({
       id: program.id,
