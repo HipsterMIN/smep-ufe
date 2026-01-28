@@ -304,16 +304,16 @@ const UI_USR_L_030 = () => {
                       <i className="svg-icon ico-sch"></i>
                     </button>
                   </div>
-                  {/*<button*/}
-                  {/*  type="button"*/}
-                  {/*  className="krds-btn medium text"*/}
-                  {/*  onClick={handleToggleFilter}*/}
-                  {/*>*/}
-                  {/*  <i className="svg-icon ico-sch-plus"></i>*/}
-                  {/*    상세검색*/}
-                  {/*  <span className="onfilter-open sr-only">열기</span>*/}
-                  {/*  <span className="onfilter-close sr-only">닫기</span>*/}
-                  {/*</button>*/}
+                  <button
+                    type="button"
+                    className="krds-btn medium text"
+                    onClick={handleToggleFilter}
+                  >
+                    <i className="svg-icon ico-sch-plus"></i>
+                      상세검색
+                    <span className="onfilter-open sr-only">열기</span>
+                    <span className="onfilter-close sr-only">닫기</span>
+                  </button>
                 </div>
 
                 {/* 상세 필터 영역 */}
@@ -379,9 +379,9 @@ const UI_USR_L_030 = () => {
                         <option value="FS04">중견기업</option>
                         <option value="FS05">계열대기업</option>
                       </select>
-                      <button type="button" className="krds-btn medium text">
+                      {/*<button type="button" className="krds-btn medium text">
                         업종선택 <i className="svg-icon ico-go"></i>
-                      </button>
+                      </button>*/}
                     </div>
 
                     {/* 4. 접수상황 */}
@@ -444,7 +444,7 @@ const UI_USR_L_030 = () => {
                   </div>
 
                   {/*TODO ::: 필터 기능 구현*/}
-                  <dl className="filter-chip">
+                  {/*<dl className="filter-chip">
                     <dt>선택된 필터 <span className="num">2</span></dt>
                     <dd>
                       <button type="button" className="krds-btn xlarge icon border">
@@ -466,7 +466,7 @@ const UI_USR_L_030 = () => {
                         </span>
                       </div>
                     </dd>
-                  </dl>
+                  </dl>*/}
                 </div>
               </div>
 
