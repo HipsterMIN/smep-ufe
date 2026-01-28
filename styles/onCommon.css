@@ -2946,6 +2946,7 @@ textarea.krds-input::placeholder {
 .login-form-area .sns-login-btns .sns-login-tit {
   flex: 1;
   text-align: center;
+  transition: all .4s ease;
 }
 .login-form-area .sns-login-btns i {
   flex-shrink: 0;
@@ -2982,6 +2983,19 @@ textarea.krds-input::placeholder {
   padding: 0 30px;
   background-color: #F4F5F6;
   border-radius: 8px;
+  transition: all .4s ease;
+}
+.login-form-area .other-login-btns button:hover {
+  border: 1px solid #256EF4;
+  background: linear-gradient(106deg, #FCF9FF 10.51%, #E3E8FA 150.93%);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.05), 0 4px 8px 0 rgba(0, 0, 0, 0.08);
+}
+.login-form-area .other-login-btns button:hover .ico-angle {
+  background-image: none;
+  background-color: #256EF4;
+}
+.login-form-area .other-login-btns button:hover .btn-title {
+  color: #0B50D0;
 }
 .login-form-area .other-login-btns .btn-icon {
   width: 36px;
