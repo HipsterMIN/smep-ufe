@@ -25,6 +25,8 @@ const UI_USR_R_212 = lazy(() => import('@pages/data-open/UI-USR-R-212.jsx'));
 const UI_USR_R_213 = lazy(() => import('@pages/data-open/UI-USR-R-213.jsx'));
 const UI_USR_R_214 = lazy(() => import('@pages/data-open/UI-USR-R-214.jsx'));
 const UI_USR_R_215 = lazy(() => import('@pages/data-open/UI-USR-R-215.jsx'));
+const UI_USR_R_232 = lazy(() => import('@pages/data-open/UI-USR-R-232.jsx'));
+const UI_USR_W_231 = lazy(() => import('@pages/data-open/UI-USR-W-231.jsx'));
 
 
 /**
@@ -195,6 +197,10 @@ export const componentMap = {
   'M_PIIO_00098': {
     component: UI_USR_L_230,
     layout: SubpageLayoutWithMenu,
+    children: [
+      { path: 'create', component: UI_USR_W_231 }, // API Q&A 등록
+      { path: ':id', component: UI_USR_R_232 }, // API Q&A 상세
+    ],
   },
 
   // ========== 마이비즈니스 (M_PIIO_00068) ==========
