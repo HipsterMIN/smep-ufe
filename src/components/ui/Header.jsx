@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import arrowIcon from '../../assets/main/icon-arrow.svg';
-import { useAuthStore } from '../../store/useAuthStore.jsx';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 import { useNavigate } from 'react-router-dom';
-import { useMenuStore } from '../../store/useMenuStore';
-import { buildFullPath } from '../../utils/menuUtils';
-import { useUserMenu } from '../../context/UserMenuContext.jsx';
+import { useMenuStore } from '@store/useMenuStore.js';
+import { buildFullPath } from '@utils/menuUtils.js';
+import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 // BASE URL 상수
 const BASE_URL = import.meta.env.VITE_BASE || '/';
@@ -17,6 +17,7 @@ export default function Header() {
   const { menuTree, flatMenuMap, fetchMenuData } = useMenuStore();
   const mobGnbRef = useRef(null);
   const { getFullPath } = useUserMenu();
+  const hoverTimeoutRef = useRef(null);
   
   // 메뉴 데이터 로드
   useEffect(() => {
@@ -54,8 +55,15 @@ export default function Header() {
       }));
   }, [menuTree, flatMenuMap]);
 
-  const handleToggle = (menuId) => {
-    setOpenIndex(openIndex === menuId ? null : menuId);
+  const handleMouseEnter = (menuId) => {
+    clearTimeout(hoverTimeoutRef.current);
+    setOpenIndex(menuId);
+  };
+
+  const handleMouseLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setOpenIndex(null);
+    }, 230); // 딜레이 조절 가능
   };
 
   const navigate = useNavigate();
@@ -167,8 +175,8 @@ export default function Header() {
                 {dynamicMenus.map((menu) => (
                   <li 
                     key={menu.menuId}
-                    onMouseEnter={() => setOpenIndex(menu.menuId)}
-                    onMouseLeave={() => setOpenIndex(null)}
+                    onMouseEnter={() => handleMouseEnter(menu.menuId)}
+                    onMouseLeave={handleMouseLeave}
                   >
                     <button
                       type="button"

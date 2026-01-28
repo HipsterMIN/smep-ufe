@@ -1,46 +1,88 @@
-// routes/componentMap.js
 import { lazy } from 'react';
-import SubpageLayout from '../layouts/SubpageLayout.jsx';
+
+// 즉시 import (페이지 로드 시 바로 필요한 것들)
+import AiSmartSearch from '@pages/AiSmartSearch.jsx';
+import { MenuProviderOnly, SubpageLayoutWithMenu } from '@layouts/layoutIndex.jsx';
+
+// Lazy import (필요할 때 로드)
+const Pbanc = lazy(() => import('@pages/Pbanc.jsx'));
+const PbancView = lazy(() => import('@pages/PbancView.jsx'));
+const SprtBiz = lazy(() => import('@pages/SprtBiz.jsx'));
+const SprtBizView = lazy(() => import('@pages/SprtBizView.jsx'));
+const UI_USR_L_030 = lazy(() => import('@pages/UI_USR_L_030.jsx'));
+const UI_USR_L_040 = lazy(() => import('@pages/UI_USR_L_040.jsx'));
+const UI_USR_R_041 = lazy(() => import('@pages/UI_USR_R_041.jsx'));
+const UI_USR_R_031 = lazy(() => import('@pages/UI_USR_R_031.jsx'));
+const UI_USR_R_480 = lazy(() => import('@pages/UI_USR_R_480.jsx'));
+const UI_USR_L_510 = lazy(() => import('@pages/UI_USR_L_510.jsx'));
+const UI_USR_R_060 = lazy(() => import('@pages/UI_USR_R_060.jsx'));
+const UI_USR_L_050 = lazy(() => import('@pages/UI_USR_L_050.jsx'));
+const UI_USR_L_210 = lazy(() => import('@pages/data-open/UI-USR-L-210.jsx'));
+const UI_USR_L_220 = lazy(() => import('@pages/data-open/UI-USR-L-220.jsx'));
+const UI_USR_L_230 = lazy(() => import('@pages/data-open/UI-USR-L-230.jsx'));
+
 
 /**
  * =============================================================================
  * Component Map - menuId와 실제 컴포넌트 매핑
  * =============================================================================
  *
- * 구조:
+ * @description
+ * 메뉴 ID(menuId)를 기반으로 동적 라우팅을 위한 컴포넌트 매핑 테이블
+ * - 각 메뉴에 대응하는 컴포넌트와 레이아웃을 정의
+ * - 중첩 라우팅(children) 지원
+ *
+ * @structure
  * {
- *   menuId: {
- *     component: React Component,
- *     layout: Layout Component (기본값: SubpageLayout)
+ *   'MENU_ID': {
+ *     component: ReactComponent,        // 렌더링할 컴포넌트
+ *     layout: LayoutComponent,          // 적용할 레이아웃 (옵션)
+ *     children: [                       // 자식 라우트 (옵션)
+ *       {
+ *         path: 'relative-path',        // 상대 경로 (:id, :slug 등 동적 파라미터 가능)
+ *         component: ChildComponent,    // 자식 컴포넌트
+ *         layout: ChildLayout,          // 자식 레이아웃 (현재는 부모 상속, TODO : 구현예정)
+ *       }
+ *     ]
  *   }
  * }
  *
- * 주의:
- * - menuId는 백엔드 메뉴 데이터의 menuId와 정확히 일치해야 함
- * - scrnTypeCd가 'T'인 노드만 등록
+ * @example
+ * // 기본 사용 (단일 페이지)
+ * 'M_PIIO_00096': {
+ *   component: ApiGuide,
+ *   layout: SubpageLayoutWithMenu,
+ * }
+ *
+ * @example
+ * // 중첩 라우팅 (목록 + 상세)
+ * 'M_PIIO_00075': {
+ *   component: SprtBizList,              // /req/suprt/suprt
+ *   layout: SubpageLayoutWithMenu,
+ *   children: [
+ *     {
+ *       path: ':id',                      // /req/suprt/suprt/123
+ *       component: SprtBizDetail,
+ *     }
+ *   ]
+ * }
+ *
+ * @example
+ * // 복잡한 중첩 라우팅
+ * 'M_PIIO_00076': {
+ *   component: PbancList,
+ *   layout: SubpageLayoutWithMenu,
+ *   children: [
+ *     { path: ':id', component: PbancView },           // 상세
+ *     { path: ':id/edit', component: PbancEdit },      // 수정
+ *     { path: 'create', component: PbancCreate },      // 생성
+ *   ]
+ * }
  */
-
-//즉시 import (페이지 로드 시 바로 필요한 것들)
-import AiSmartSearch from '../pages/AiSmartSearch.jsx';
-import { MenuProviderOnly, SubpageLayoutWithMenu } from '../layouts/layoutIndex.jsx';
-
-// Lazy import (필요할 때 로드)
-const Pbanc = lazy(() => import('../pages/Pbanc.jsx'));
-const PbancView = lazy(() => import('../pages/PbancView.jsx'));
-const SprtBiz = lazy(() => import('../pages/SprtBiz.jsx'));
-const SprtBizView = lazy(() => import('../pages/SprtBizView.jsx'));
-const UI_USR_L_030 = lazy(() => import('../pages/UI_USR_L_030.jsx'));
-const UI_USR_L_040 = lazy(() => import('../pages/UI_USR_L_040.jsx'));
-const UI_USR_R_041 = lazy(() => import('../pages/UI_USR_R_041.jsx'));
-const UI_USR_R_031 = lazy(() => import('../pages/UI_USR_R_031.jsx'));
-const UI_USR_R_480 = lazy(() => import('../pages/UI_USR_R_480.jsx'));
-const UI_USR_L_510 = lazy(() => import('../pages/UI_USR_L_510.jsx'));
-const UI_USR_R_060 = lazy(() => import('../pages/UI_USR_R_060.jsx'));
-const UI_USR_L_050 = lazy(() => import('../pages/UI_USR_L_050.jsx'));
-
 
 // 컴포넌트 매핑
 export const componentMap = {
+
   // ========== 신청·발급 (M_PIIO_00064) ==========
 
   // AI 스마트 검색
@@ -53,7 +95,7 @@ export const componentMap = {
   'M_PIIO_00075': {
     component: SprtBiz,
     layout: SubpageLayoutWithMenu,
-    // ✅ 자식 라우트 정의
+    // 자식 라우트 정의
     children: [
       {
         path: ':id',  // / req/suprt/suprt/123
@@ -67,21 +109,21 @@ export const componentMap = {
   'M_PIIO_00076': {
     component: Pbanc,
     layout: SubpageLayoutWithMenu,
-    // ✅ 자식 라우트 정의
+    // 자식 라우트 정의
     children: [
       {
-        path: ':id',  // / req/pbanc/pbanc/123
+        path: ':id',  // /req/pbanc/pbanc/123
         component: PbancView,
         // layout 상속 (부모와 동일)
       },
     /* example 추가 라우트
       {
         path: ':id/edit',   // /req/pbanc/pbanc/123/edit
-        component: lazy(() => import('../pages/PbancEdit.jsx')),
+        component: lazy(() => import('@pages/PbancEdit.jsx')),
       },
       {
         path: 'create',     // /req/pbanc/pbanc/create
-        component: lazy(() => import('../pages/PbancCreate.jsx')),
+        component: lazy(() => import('@pages/PbancCreate.jsx')),
       },
      */
     ],
@@ -105,7 +147,7 @@ export const componentMap = {
     layout: SubpageLayoutWithMenu,
     children: [
       {
-        path: ':prdocCd',  // ✅ 상세 페이지 라우트 추가 /req/crtf/UI_USR_L_040/ABC123
+        path: ':prdocCd',  // 상세 페이지 라우트 추가 /req/crtf/UI_USR_L_040/ABC123
         component: UI_USR_R_041,
       },
     ],
@@ -123,6 +165,26 @@ export const componentMap = {
     layout: SubpageLayoutWithMenu,
   },
 
+  // ========== 데이터 개방 (M_PIIO_00066) ==========
+
+  // API 안내
+  'M_PIIO_00096': {
+    component: UI_USR_L_210,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 인증키 신청,
+  'M_PIIO_00097': {
+    component: UI_USR_L_220,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // API Q&A
+  'M_PIIO_00098': {
+    component: UI_USR_L_230,
+    layout: SubpageLayoutWithMenu,
+  },
+
   // ========== 마이비즈니스 (M_PIIO_00068) ==========
 
   // AI맞춤추천공고
@@ -137,10 +199,6 @@ export const componentMap = {
     layout: SubpageLayoutWithMenu,
   },
 
-  // TODO: 나머지 메뉴는 컴포넌트 생성 후 추가
-  // 'M_PIIO_00114': { component: UI_USR_L_520, layout: SubpageLayout }, // 지원사업 신청 현황
-  // 'M_PIIO_00115': { component: UI_USR_R_410, layout: SubpageLayout }, // 회원정보변경
-  // ... (계속 추가)
 };
 
 /**
