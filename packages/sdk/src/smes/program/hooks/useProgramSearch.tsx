@@ -277,21 +277,21 @@ function buildBackendProfile(profile?: CompanyProfile): Record<string, unknown> 
   if (profile.industry) backendProfile.industry = profile.industry;
 
   // 기업 유형 (Boolean)
-  if (profile.isSme !== undefined) backendProfile.is_sme = profile.isSme;
-  if (profile.isSmallBusiness !== undefined) backendProfile.is_small_business = profile.isSmallBusiness;
-  if (profile.isVenture !== undefined) backendProfile.is_venture = profile.isVenture;
-  if (profile.isStartup !== undefined) backendProfile.is_startup = profile.isStartup;
-  if (profile.isWomenOwned !== undefined) backendProfile.is_women_owned = profile.isWomenOwned;
-  if (profile.isSocialEnterpriseTarget !== undefined) backendProfile.is_social_enterprise = profile.isSocialEnterpriseTarget;
-  if (profile.isExporter !== undefined) backendProfile.is_exporter = profile.isExporter;
-  if (profile.isYouth !== undefined) backendProfile.is_youth = profile.isYouth;
-  if (profile.isDisabledOwned !== undefined) backendProfile.is_disabled_owned = profile.isDisabledOwned;
-  if (profile.isVeteran !== undefined) backendProfile.is_veteran = profile.isVeteran;
-  if (profile.isSenior !== undefined) backendProfile.is_senior = profile.isSenior;
+  if (profile.isSme !== undefined) backendProfile.is_sme_target = profile.isSme;
+  if (profile.isSmallBusiness !== undefined) backendProfile.is_small_business_target = profile.isSmallBusiness;
+  if (profile.isVenture !== undefined) backendProfile.is_venture_target = profile.isVenture;
+  if (profile.isStartup !== undefined) backendProfile.is_startup_target = profile.isStartup;
+  if (profile.isWomenOwned !== undefined) backendProfile.is_women_target = profile.isWomenOwned;
+  if (profile.isSocialEnterpriseTarget !== undefined) backendProfile.is_social_enterprise_target = profile.isSocialEnterpriseTarget;
+  if (profile.isExporter !== undefined) backendProfile.is_exporter_target = profile.isExporter;
+  if (profile.isYouth !== undefined) backendProfile.is_youth_target = profile.isYouth;
+  if (profile.isDisabledOwned !== undefined) backendProfile.is_disabled_target = profile.isDisabledOwned;
+  if (profile.isVeteran !== undefined) backendProfile.is_veteran_target = profile.isVeteran;
+  if (profile.isSenior !== undefined) backendProfile.is_senior_target = profile.isSenior;
 
   // 인증 보유 (Boolean)
-  if (profile.hasInnobiz !== undefined) backendProfile.has_innobiz = profile.hasInnobiz;
-  if (profile.hasMainbiz !== undefined) backendProfile.has_mainbiz = profile.hasMainbiz;
+  if (profile.hasInnobiz !== undefined) backendProfile.is_innobiz_target = profile.hasInnobiz;
+  if (profile.hasMainbiz !== undefined) backendProfile.is_mainbiz_target = profile.hasMainbiz;
   if (profile.hasResearchDept !== undefined) backendProfile.has_research_dept = profile.hasResearchDept;
   if (profile.hasIso !== undefined) backendProfile.has_iso = profile.hasIso;
 

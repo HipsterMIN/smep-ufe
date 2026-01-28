@@ -31,7 +31,18 @@ import {
   type Source,
 } from "../../../react";
 import { mapSourcesToPrograms } from "../mappers";
-import type { SupportProgram, ProgramChatMessage, Citation } from "../types";
+import {
+  calculateDaysRemaining,
+  formatAIResponse,
+  REGION_OPTIONS,
+  COMPANY_SIZE_OPTIONS,
+  SUPPORT_FIELD_OPTIONS,
+  SUPPORT_TYPE_OPTIONS,
+  DEADLINE_TYPE_OPTIONS,
+} from '../constants';
+import { convertFiltersToQuery, DEFAULT_SEARCH_FILTERS } from '../filters';
+import type { SupportProgram, ProgramChatMessage, Citation, CompanyProfile } from "../types";
+import type { DomainType } from "../../../core/types";
 
 /** 지원사업 도메인 식별자 */
 const BIZINFO_DOMAIN = "bizinfo";
@@ -51,10 +62,18 @@ export interface ProgramChatContextValue {
   streamingContent: string | null;
   /** 먼저 도착한 sources (스트리밍 UI용) */
   pendingPrograms: SupportProgram[];
+  /** 추천 후속 질문 */
+  followupSuggestions: string[];
   /** 에러 */
   error: Error | null;
+  /** 컨텍스트 설정 */
+  setDocumentContext: (documentIds: string[] | null) => void;
   /** 메시지 전송 */
-  send: (message: string) => void;
+  send: (message: string, options?: {
+    metadata?: Record<string, unknown>;
+    filters?: Record<string, unknown>;
+    documentContext?: string[];
+  }) => void;
   /** 대화 초기화 */
   clear: () => void;
   /** 응답 중단 */
@@ -140,7 +159,9 @@ function useProgramChatInternal(): ProgramChatContextValue {
     isTyping: sdk.isLoading,
     streamingContent: sdk.streamingContent || null,
     pendingPrograms,
+    followupSuggestions: sdk.followupSuggestions,
     error: sdk.error,
+    setDocumentContext: sdk.setDocumentContext,
     send: sdk.sendMessage,
     clear: sdk.clearMessages,
     abort: sdk.abort,
@@ -157,6 +178,20 @@ interface ProgramChatProviderProps {
   maxResponseLength?: number;
   /** 인용 포함 여부 */
   includeCitations?: boolean;
+  /** 기업 프로필 (맞춤 검색용) */
+  profile?: CompanyProfile;
+  /** 도메인 라우팅 */
+  domain?: DomainType;
+  /** 최대 토큰 */
+  maxTokens?: number;
+  /** 검색 결과 수 */
+  topK?: number;
+  /** 리랭커 결과 수 */
+  rerankerTopK?: number;
+  /** 그룹핑 필드 */
+  groupByField?: string;
+  /** 스트리밍 여부 */
+  stream?: boolean;
 }
 
 /**
@@ -169,11 +204,25 @@ export function ProgramChatProvider({
   children,
   maxResponseLength = 150,
   includeCitations = false,
+  profile,
+  domain = "support_program",
+  maxTokens = 1024,
+  topK = 50,
+  rerankerTopK = 10,
+  groupByField = "group_id",
+  stream = true,
 }: ProgramChatProviderProps) {
   return (
     <ChatRoot
       maxResponseLength={maxResponseLength}
       includeCitations={includeCitations}
+      profile={profile as any}
+      domain={domain}
+      maxTokens={maxTokens}
+      topK={topK}
+      rerankerTopK={rerankerTopK}
+      groupByField={groupByField}
+      stream={stream}
     >
       <ProgramChatContextBridge>{children}</ProgramChatContextBridge>
     </ChatRoot>
