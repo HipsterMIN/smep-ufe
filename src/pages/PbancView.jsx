@@ -289,7 +289,7 @@ const Pbanc = () => {
             </button>
           </div>
           <div>
-            <button type="button" className="krds-btn secondary xlarge">
+            <button type="button" className="krds-btn secondary xlarge" onClick={() => {window.scrollTo(0, 0);navigate('/req/ai/ai-smart-search');}}>
               <i className="svg-icon ico-faq"></i>
                 AI 상세 상담
             </button>

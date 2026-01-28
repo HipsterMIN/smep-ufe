@@ -17,6 +17,14 @@ const UI_USR_R_480 = lazy(() => import('@pages/UI_USR_R_480.jsx'));
 const UI_USR_L_510 = lazy(() => import('@pages/UI_USR_L_510.jsx'));
 const UI_USR_R_060 = lazy(() => import('@pages/UI_USR_R_060.jsx'));
 const UI_USR_L_050 = lazy(() => import('@pages/UI_USR_L_050.jsx'));
+const UI_USR_L_070 = lazy(() => import('@pages/policy-info/UI_USR_L_070.jsx'));
+const UI_USR_R_091 = lazy(() => import('@pages/policy-info/UI_USR_R_091.jsx'));
+const UI_USR_L_190 = lazy(() => import('@pages/policy-info/UI_USR_L_190.jsx'));
+const UI_USR_R_191 = lazy(() => import('@pages/policy-info/UI_USR_R_191.jsx'));
+const UI_USR_W_130 = lazy(() => import('@pages/policy-info/UI_USR_W_130.jsx'));
+const UI_USR_R_131 = lazy(() => import('@pages/policy-info/UI_USR_R_131.jsx'));
+const UI_USR_L_140 = lazy(() => import('@pages/policy-info/UI_USR_L_140.jsx'));
+const UI_USR_L_170 = lazy(() => import('@pages/policy-info/UI_USR_L_170.jsx'));
 const UI_USR_L_210 = lazy(() => import('@pages/data-open/UI-USR-L-210.jsx'));
 const UI_USR_L_220 = lazy(() => import('@pages/data-open/UI-USR-L-220.jsx'));
 const UI_USR_L_230 = lazy(() => import('@pages/data-open/UI-USR-L-230.jsx'));
@@ -25,8 +33,7 @@ const UI_USR_R_212 = lazy(() => import('@pages/data-open/UI-USR-R-212.jsx'));
 const UI_USR_R_213 = lazy(() => import('@pages/data-open/UI-USR-R-213.jsx'));
 const UI_USR_R_214 = lazy(() => import('@pages/data-open/UI-USR-R-214.jsx'));
 const UI_USR_R_215 = lazy(() => import('@pages/data-open/UI-USR-R-215.jsx'));
-const UI_USR_L_070 = lazy(() => import('@pages/policy-info/UI_USR_L_070.jsx'));
-const UI_USR_R_091 = lazy(() => import('@pages/policy-info/UI_USR_R_091.jsx'));
+
 
 
 /**
@@ -184,6 +191,72 @@ export const componentMap = {
         component: UI_USR_R_091,
       },
     ],
+  },
+
+  // 행사정보
+  'M_PIIO_00085': {
+    component: UI_USR_L_190,
+    layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: ':id',
+        component: UI_USR_R_191,
+      },
+    ],
+  },
+
+  // 월간중기누리
+  'M_PIIO_00086': {
+    component: UI_USR_L_190, //퍼블없음 게시판관리로 해야돼서 없는듯
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 입법행정예고/고시
+  'M_PIIO_00087': {
+    component: UI_USR_L_190, //퍼블없음 게시판관리로 해야돼서 없는듯
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 품목별 법정의무 인증제도
+  'M_PIIO_00088': {
+    component: UI_USR_L_190, //퍼블없음 게시판관리로 해야돼서 없는듯
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 중소벤처기업부 법정민원신청
+  'M_PIIO_00089': {
+    component: UI_USR_W_130,
+    layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: ':id',
+        component: UI_USR_R_131,
+      },
+    ],
+  },
+
+  // 소재부품장비·뿌리기술·전문연구사업자 조회
+  'M_PIIO_00090': {
+    component: UI_USR_L_140,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 주택특별공급 사업공고
+  'M_PIIO_00091': {
+    component: UI_USR_L_190, //퍼블없음 게시판관리로 해야돼서 없는듯
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 기업업무용 서식
+  'M_PIIO_00093': {
+    component: UI_USR_L_170, //퍼블없음 게시판관리로 해야돼서 없는듯
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 입주기업 모집공고
+  'M_PIIO_00094': {
+    component: UI_USR_L_190, //퍼블없음 게시판관리로 해야돼서 없는듯
+    layout: SubpageLayoutWithMenu,
   },
 
   // ========== 데이터 개방 (M_PIIO_00066) ==========
