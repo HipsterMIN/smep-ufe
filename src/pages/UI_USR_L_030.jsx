@@ -568,8 +568,7 @@ const UI_USR_L_030 = () => {
                                 </strong>
                               </span>
                               <span>
-                                {/*<strong>{item.bizFlfmtInstNm}</strong>*/}
-                                <strong>중소벤처기업부</strong>
+                                <strong>{item.bizFlfmtInstNm || '중소벤처기업부'}</strong>
                               </span>
                               <span style={{
                                 overflow: 'hidden',
