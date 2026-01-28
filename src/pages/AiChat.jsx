@@ -12,6 +12,7 @@ import {
   SUPPORT_TYPE_OPTIONS,
   DEADLINE_TYPE_OPTIONS,
   convertFiltersToQuery,
+  DEFAULT_SEARCH_FILTERS,
 } from '@cube-i-ax/sdk/smes/program';
 import Logo from '../../styles/img/ai_chat_logo.svg';
 
@@ -26,14 +27,14 @@ const AiChat = () => {
   const [payloadReady, setPayloadReady] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
-  const [filters, setFilters] = useState({
-    regions: [],
-    companySizes: [],
-    supportFields: [],
-    supportTypes: [],
-    deadlineTypes: [],
-    includePast: false,
-  });
+  const [filters, setFilters] = useState(DEFAULT_SEARCH_FILTERS);
+  const [openGroup, setOpenGroup] = useState('regions');
+  const [activeCategory, setActiveCategory] = useState('사업공고');
+
+  const SIDEBAR_CATEGORIES = [
+    '전체', '사업공고', '지원사업안내', '정책금융', '제도 안내', '사용매뉴얼'
+  ];
+
   const location = useLocation();
   const initialSentRef = useRef(false);
   const encodedPayload = useMemo(() => {
@@ -56,6 +57,9 @@ const AiChat = () => {
     setSelectedPrograms(payload.programs || []);
     setInitialQuery(payload.query || '');
     setInitialSummary(payload.summary || '');
+    if (payload.filters) {
+      setFilters(payload.filters);
+    }
     clearMessages?.();
     // 이미 요약 정보가 있다면 진입 시 자동 검색을 수행하지 않음
     if (payload.summary) {
@@ -264,97 +268,229 @@ const AiChat = () => {
             </Link>
           </div>
           <div className="sidebar-filter hide-scrollbar">
+            {/* 상단 카테고리 그리드 */}
+            <div className="sidebar-category-grid">
+              {SIDEBAR_CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  className={`category-btn ${activeCategory === cat ? 'active' : ''}`}
+                  onClick={() => setActiveCategory(cat)}
+                  disabled={cat !== '사업공고'}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            <h3 className="sidebar-title">지원공고</h3>
+
             <div className="sidebar-filter-panel">
-              <h3>상세검색</h3>
-              <div className="filter-group">
-                <h4>지원분야</h4>
-                <div className="filter-options">
-                  {SUPPORT_FIELD_OPTIONS.map((field) => (
-                    <label
-                      key={field}
-                      className={`filter-option ${filters.supportFields.includes(field) ? 'is-active' : ''}`}
-                    >
+              {/* 지역 */}
+              <div className={`filter-group-accordion ${openGroup === 'regions' ? 'is-open' : ''}`}>
+                <button 
+                  type="button" 
+                  className="accordion-header"
+                  onClick={() => setOpenGroup(openGroup === 'regions' ? null : 'regions')}
+                >
+                  <span className="group-name">지역</span>
+                  <div className="header-right">
+                    {filters.regions.length > 0 && <span className="selection-count">{filters.regions.length}</span>}
+                    <i className={`svg-icon ico-angle ${openGroup === 'regions' ? 'up' : 'down'}`}></i>
+                  </div>
+                </button>
+                <div className="accordion-content">
+                  <div className="filter-options-grid col-4">
+                    <label className={`grid-option ${filters.regions.length === 0 ? 'is-active' : ''}`}>
                       <input
                         type="checkbox"
-                        checked={filters.supportFields.includes(field)}
-                        onChange={() => handleToggleFilter('supportFields', field)}
+                        checked={filters.regions.length === 0}
+                        onChange={() => setFilters(prev => ({ ...prev, regions: [] }))}
                       />
-                      <span>{field}</span>
+                      <span>전체</span>
                     </label>
-                  ))}
+                    {REGION_OPTIONS.map((region) => (
+                      <label
+                        key={region}
+                        className={`grid-option ${filters.regions.includes(region) ? 'is-active' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={filters.regions.includes(region)}
+                          onChange={() => handleToggleFilter('regions', region)}
+                        />
+                        <span>{region}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="filter-group">
-                <h4>지원유형</h4>
-                <div className="filter-options">
-                  {SUPPORT_TYPE_OPTIONS.map((type) => (
-                    <label
-                      key={type}
-                      className={`filter-option ${filters.supportTypes.includes(type) ? 'is-active' : ''}`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={filters.supportTypes.includes(type)}
-                        onChange={() => handleToggleFilter('supportTypes', type)}
-                      />
-                      <span>{type}</span>
-                    </label>
-                  ))}
+
+              {/* 기업규모 */}
+              <div className={`filter-group-accordion ${openGroup === 'companySizes' ? 'is-open' : ''}`}>
+                <button 
+                  type="button" 
+                  className="accordion-header"
+                  onClick={() => setOpenGroup(openGroup === 'companySizes' ? null : 'companySizes')}
+                >
+                  <span className="group-name">기업규모</span>
+                  <div className="header-right">
+                    {filters.companySizes.length > 0 && <span className="selection-count">{filters.companySizes.length}</span>}
+                    <i className={`svg-icon ico-angle ${openGroup === 'companySizes' ? 'up' : 'down'}`}></i>
+                  </div>
+                </button>
+                <div className="accordion-content">
+                  <div className="filter-options-grid col-2">
+                    {COMPANY_SIZE_OPTIONS.map((size) => (
+                      <label
+                        key={size}
+                        className={`grid-option ${filters.companySizes.includes(size) ? 'is-active' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={filters.companySizes.includes(size)}
+                          onChange={() => handleToggleFilter('companySizes', size)}
+                        />
+                        <span>{size}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="filter-group">
-                <h4>기업규모</h4>
-                <div className="filter-options">
-                  {COMPANY_SIZE_OPTIONS.map((size) => (
-                    <label
-                      key={size}
-                      className={`filter-option ${filters.companySizes.includes(size) ? 'is-active' : ''}`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={filters.companySizes.includes(size)}
-                        onChange={() => handleToggleFilter('companySizes', size)}
-                      />
-                      <span>{size}</span>
-                    </label>
-                  ))}
+
+              {/* 지원분야 */}
+              <div className={`filter-group-accordion ${openGroup === 'supportFields' ? 'is-open' : ''}`}>
+                <button 
+                  type="button" 
+                  className="accordion-header"
+                  onClick={() => setOpenGroup(openGroup === 'supportFields' ? null : 'supportFields')}
+                >
+                  <span className="group-name">지원분야</span>
+                  <div className="header-right">
+                    {filters.supportFields.length > 0 && <span className="selection-count">{filters.supportFields.length}</span>}
+                    <i className={`svg-icon ico-angle ${openGroup === 'supportFields' ? 'up' : 'down'}`}></i>
+                  </div>
+                </button>
+                <div className="accordion-content">
+                  <div className="filter-options-grid col-2">
+                    {SUPPORT_FIELD_OPTIONS.map((field) => (
+                      <label
+                        key={field}
+                        className={`grid-option ${filters.supportFields.includes(field) ? 'is-active' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={filters.supportFields.includes(field)}
+                          onChange={() => handleToggleFilter('supportFields', field)}
+                        />
+                        <span>{field}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="filter-group">
-                <h4>지역</h4>
-                <div className="filter-options">
-                  {REGION_OPTIONS.map((region) => (
-                    <label
-                      key={region}
-                      className={`filter-option ${filters.regions.includes(region) ? 'is-active' : ''}`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={filters.regions.includes(region)}
-                        onChange={() => handleToggleFilter('regions', region)}
-                      />
-                      <span>{region}</span>
-                    </label>
-                  ))}
+
+              {/* 지원유형 */}
+              <div className={`filter-group-accordion ${openGroup === 'supportTypes' ? 'is-open' : ''}`}>
+                <button 
+                  type="button" 
+                  className="accordion-header"
+                  onClick={() => setOpenGroup(openGroup === 'supportTypes' ? null : 'supportTypes')}
+                >
+                  <span className="group-name">지원유형</span>
+                  <div className="header-right">
+                    {filters.supportTypes.length > 0 && <span className="selection-count">{filters.supportTypes.length}</span>}
+                    <i className={`svg-icon ico-angle ${openGroup === 'supportTypes' ? 'up' : 'down'}`}></i>
+                  </div>
+                </button>
+                <div className="accordion-content">
+                  <div className="filter-options-grid col-2">
+                    {SUPPORT_TYPE_OPTIONS.map((type) => (
+                      <label
+                        key={type}
+                        className={`grid-option ${filters.supportTypes.includes(type) ? 'is-active' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={filters.supportTypes.includes(type)}
+                          onChange={() => handleToggleFilter('supportTypes', type)}
+                        />
+                        <span>{type}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="filter-group">
-                <h4>마감유형</h4>
-                <div className="filter-options">
-                  {DEADLINE_TYPE_OPTIONS.map((type) => (
-                    <label
-                      key={type}
-                      className={`filter-option ${filters.deadlineTypes.includes(type) ? 'is-active' : ''}`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={filters.deadlineTypes.includes(type)}
-                        onChange={() => handleToggleFilter('deadlineTypes', type)}
-                      />
-                      <span>{type}</span>
-                    </label>
-                  ))}
+
+              {/* 접수유형 (샘플 이미지에 있으나 SDK에 없으면 빈 상태로 두거나 목데이터 활용) */}
+              <div className={`filter-group-accordion ${openGroup === 'receptionTypes' ? 'is-open' : ''}`}>
+                <button 
+                  type="button" 
+                  className="accordion-header"
+                  onClick={() => setOpenGroup(openGroup === 'receptionTypes' ? null : 'receptionTypes')}
+                >
+                  <span className="group-name">접수유형</span>
+                  <div className="header-right">
+                    <i className={`svg-icon ico-angle ${openGroup === 'receptionTypes' ? 'up' : 'down'}`}></i>
+                  </div>
+                </button>
+                <div className="accordion-content">
+                  <div className="filter-options-grid col-2">
+                    {['온라인', '오프라인', '우편', '기타'].map((type) => (
+                      <label key={type} className="grid-option">
+                        <span>{type}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
+              </div>
+
+              {/* 마감유형 */}
+              <div className={`filter-group-accordion ${openGroup === 'deadlineTypes' ? 'is-open' : ''}`}>
+                <button 
+                  type="button" 
+                  className="accordion-header"
+                  onClick={() => setOpenGroup(openGroup === 'deadlineTypes' ? null : 'deadlineTypes')}
+                >
+                  <span className="group-name">마감유형</span>
+                  <div className="header-right">
+                    {filters.deadlineTypes.length > 0 && <span className="selection-count">{filters.deadlineTypes.length}</span>}
+                    <i className={`svg-icon ico-angle ${openGroup === 'deadlineTypes' ? 'up' : 'down'}`}></i>
+                  </div>
+                </button>
+                <div className="accordion-content">
+                  <div className="filter-options-grid col-2">
+                    {DEADLINE_TYPE_OPTIONS.map((type) => (
+                      <label
+                        key={type}
+                        className={`grid-option ${filters.deadlineTypes.includes(type) ? 'is-active' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={filters.deadlineTypes.includes(type)}
+                          onChange={() => handleToggleFilter('deadlineTypes', type)}
+                        />
+                        <span>{type}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 마감공고 포함 토글 */}
+            <div className="sidebar-bottom-toggle">
+              <div className="krds-form-check toggle-style">
+                <input
+                  type="checkbox"
+                  id="includePast"
+                  checked={filters.includePast}
+                  onChange={(e) => setFilters(prev => ({ ...prev, includePast: e.target.checked }))}
+                />
+                <label htmlFor="includePast">
+                  <span className="check-icon"></span>
+                  마감공고 포함
+                </label>
               </div>
             </div>
           </div>

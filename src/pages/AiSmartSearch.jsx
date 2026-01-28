@@ -305,6 +305,7 @@ const AiSmartSearchContent = () => {
       query: currentQuery || '',
       summary: summaryPayload || '',
       total: displayTotal || compactPrograms.length,
+      filters: filters, // 현재 검색 필터 추가
     };
     const encodedPayload = encodeURIComponent(
       btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
