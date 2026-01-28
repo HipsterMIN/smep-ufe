@@ -32,6 +32,12 @@ const Pbanc = () => {
     shadowTextRef3.current.classList.toggle('on');
   };
 
+  const shadowTextRef4 = useRef('null');
+
+  const handleToggleTextShadow4 = () => {
+    shadowTextRef4.current.classList.toggle('on');
+  };
+
   const detail = async () => {
     /*const config = {
       method: 'GET',
@@ -92,8 +98,8 @@ const Pbanc = () => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems}/>
         <div className="page-title-wrap" data-type="responsive">
-          <p className="on-p1 on-colorblue">지원사업공고</p>
-          <h2 className="h-tit2">지원사업 공고</h2>
+          <p className="on-p1 on-colorblue">사업공고</p>
+          <h2 className="h-tit2">{item?.pbancnm}</h2>
         </div>
         <ul className="onboard-summary">
           <li>
@@ -178,9 +184,19 @@ const Pbanc = () => {
             ) : (<dd>{item?.sbmsndcmnt}</dd>)}
             <dt>신청 제외 대상</dt>
             <dd>{item?.aplyexcltrgt}</dd>
-
             <dt>문의처</dt>
-            <dd>{item?.inqpl}</dd>
+            {item?.inqpl.length > 200 ? (
+              <dd>
+                <div className="onshadow-text" ref={shadowTextRef4}>
+                  {item?.inqpl}
+                </div>
+                <button type="button" className="krds-btn tertiary xsmall ontoggle-textshadow"
+                  onClick={handleToggleTextShadow4}>
+                    전체보기
+                  <i className="svg-icon ico-angle"></i>
+                </button>
+              </dd>
+            ) : (<dd>{item?.inqpl}</dd>)}
           </dl>
         </div>
         <div style={{
@@ -290,11 +306,11 @@ const Pbanc = () => {
             </button>
           </div>
           <div>
-            <button type="button" className="krds-btn secondary xlarge" onClick={() => {window.scrollTo(0, 0);navigate('/req/ai/ai-smart-search');}}>
-              <i className="svg-icon ico-faq"></i>
-                AI 상세 상담
-            </button>
             {/*todo 시연용 임시주석*/}
+            {/*<button type="button" className="krds-btn secondary xlarge" onClick={() => {window.scrollTo(0, 0);navigate('/req/ai/ai-smart-search');}}>*/}
+            {/*  <i className="svg-icon ico-faq"></i>*/}
+            {/*    AI 상세 상담*/}
+            {/*</button>*/}
             {/*<button type="button" className="krds-btn tertiary xlarge">*/}
             {/*  <i className="svg-icon ico-like"></i>*/}
             {/*    관심*/}
