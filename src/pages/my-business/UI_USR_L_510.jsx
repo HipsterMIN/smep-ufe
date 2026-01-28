@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import SideNavigation from '../components/ui/SideNavigation';
-import Breadcrumb from '../components/ui/Breadcrumb';
-import Pagination from '../components/ui/Pagination';
-import { api as apiClient } from '../lib/apiClient.js';
-import { useUserMenu } from '../context/UserMenuContext.jsx';
+import SideNavigation from '@components/ui/SideNavigation.jsx';
+import Breadcrumb from '@components/ui/Breadcrumb.jsx';
+import Pagination from '@components/ui/Pagination.jsx';
+import { api as apiClient } from '@lib/apiClient.js';
+import { useUserMenu } from '@context/UserMenuContext.jsx';
  
 const UI_USR_L_510 = () => {
   const [issuanceList, setIssuanceList] = useState([]);
