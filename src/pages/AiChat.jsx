@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useChatContext } from '@cube-i-ax/sdk/react';
 import {
   calculateDaysRemaining,
   formatAIResponse,
@@ -13,6 +12,7 @@ import {
   DEADLINE_TYPE_OPTIONS,
   convertFiltersToQuery,
   DEFAULT_SEARCH_FILTERS,
+  useProgramChat,
 } from '@cube-i-ax/sdk/smes/program';
 import Logo from '../../styles/img/ai_chat_logo.svg';
 
@@ -42,15 +42,17 @@ const AiChat = () => {
     return params.get('payload');
   }, [location.search]);
 
+  const chat = useProgramChat();
+  console.log('[DEBUG_LOG] useProgramChat returns:', Object.keys(chat || {}));
   const {
     messages,
-    isLoading,
+    isTyping: isLoading,
     streamingContent,
     followupSuggestions,
     setDocumentContext,
-    sendMessage,
-    clearMessages,
-  } = useChatContext();
+    send,
+    clear: clearMessages,
+  } = chat || {};
 
   const applyPayload = (payload) => {
     console.log('[DEBUG_LOG] applyPayload called', { hasSummary: !!payload.summary, query: payload.query });
@@ -171,8 +173,8 @@ const AiChat = () => {
     console.log('[DEBUG_LOG] Executing auto-search', initialQuery);
     initialSentRef.current = true;
     setHasUserInteracted(true);
-    sendMessage(initialQuery, { documentContext: programIds, filters: filtersQuery });
-  }, [payloadReady, initialQuery, messages.length, programIds, filtersQuery, sendMessage, initialSummary]);
+    send(initialQuery, { documentContext: programIds, filters: filtersQuery });
+  }, [payloadReady, initialQuery, messages.length, programIds, filtersQuery, send, initialSummary]);
 
   const handleToggle = (type) => {
     setStatus((prev) => (prev === type ? null : type));
@@ -186,7 +188,7 @@ const AiChat = () => {
     const trimmed = message.trim();
     if (!trimmed) return;
     setHasUserInteracted(true);
-    sendMessage(trimmed, { documentContext: programIds, filters: filtersQuery });
+    send(trimmed, { documentContext: programIds, filters: filtersQuery });
     setInput('');
   };
 
@@ -198,7 +200,7 @@ const AiChat = () => {
   };
   const handleToggleFilter = (key, value) => {
     setFilters((prev) => {
-      const current = prev[key];
+      const current = prev[key] || [];
       const next = current.includes(value)
         ? current.filter((item) => item !== value)
         : [...current, value];
@@ -209,7 +211,7 @@ const AiChat = () => {
     const message = input.trim() || initialQuery;
     if (!message) return;
     setHasUserInteracted(true);
-    sendMessage(message, { documentContext: programIds, filters: filtersQuery });
+    send(message, { documentContext: programIds, filters: filtersQuery });
     setInput('');
   };
 
@@ -431,13 +433,19 @@ const AiChat = () => {
                 >
                   <span className="group-name">접수유형</span>
                   <div className="header-right">
+                    {(filters.receptionTypes?.length > 0) && <span className="selection-count">{filters.receptionTypes.length}</span>}
                     <i className={`svg-icon ico-angle ${openGroup === 'receptionTypes' ? 'up' : 'down'}`}></i>
                   </div>
                 </button>
                 <div className="accordion-content">
                   <div className="filter-options-grid col-2">
                     {['온라인', '오프라인', '우편', '기타'].map((type) => (
-                      <label key={type} className="grid-option">
+                      <label key={type} className={`grid-option ${filters.receptionTypes?.includes(type) ? 'is-active' : ''}`}>
+                        <input
+                          type="checkbox"
+                          checked={filters.receptionTypes?.includes(type)}
+                          onChange={() => handleToggleFilter('receptionTypes', type)}
+                        />
                         <span>{type}</span>
                       </label>
                     ))}
@@ -480,7 +488,7 @@ const AiChat = () => {
 
             {/* 마감공고 포함 토글 */}
             <div className="sidebar-bottom-toggle">
-              <div className="krds-form-check toggle-style">
+              <div className="krds-form-toggle-switch medium">
                 <input
                   type="checkbox"
                   id="includePast"
@@ -488,13 +496,14 @@ const AiChat = () => {
                   onChange={(e) => setFilters(prev => ({ ...prev, includePast: e.target.checked }))}
                 />
                 <label htmlFor="includePast">
-                  <span className="check-icon"></span>
-                  마감공고 포함
+                  <span className="switch-toggle"><i></i></span>
+                  지난 공고 포함
+                  <span className="on-toggle-desc">(마감된 공고도 검색)</span>
                 </label>
               </div>
             </div>
           </div>
-          <button type="button" className="krds-btn primary medium" onClick={handleRefineSearch}>결과 내 재검색하기</button>
+          {/*<button type="button" className="krds-btn primary medium" onClick={handleRefineSearch}>결과 내 재검색하기</button>*/}
         </div>
 
         {/* container */}

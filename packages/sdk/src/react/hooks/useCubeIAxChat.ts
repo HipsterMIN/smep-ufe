@@ -82,6 +82,10 @@ export interface UseCubeIAxChatOptions {
   maxTokens?: number;
   /** Whether to include citation markers [1], [2] in response (default: true) */
   includeCitations?: boolean;
+  /** Field to group results by at Milvus level (default: "group_id") */
+  groupByField?: string;
+  /** Whether to use streaming (default: true) */
+  stream?: boolean;
   /** Callback when session is established */
   onSession?: (sessionId: string) => void;
   /** Callback when status message is received (e.g., "검색 중...", "분석 중...") */
@@ -515,6 +519,7 @@ export function useCubeIAxChat(
           maxResponseLength: options.maxResponseLength,
           maxTokens: options.maxTokens,
           includeCitations: options.includeCitations,
+          groupByField: options.groupByField,
           signal: abortControllerRef.current.signal,
         };
 
