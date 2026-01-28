@@ -360,10 +360,10 @@
     display: block;
 }
 .ai-sidebar .sidebar-filter {
+    max-height: calc(100vh - 225px);
+    padding: 4px;
     margin-top: 24px;
-    max-height: calc(100vh - 180px);
     overflow-y: auto;
-    padding-right: 4px;
 }
 
 /* 카테고리 그리드 */
@@ -1188,10 +1188,128 @@
 }
 
 
-
-
-
-
+/* AiChat Components */
+.ai-btnBox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+button.aichatButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  width: 50%;
+  height: 50px;
+  color: #464C53;
+  font-family: "Pretendard GOV";
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  padding: 8px 15px;
+  border-radius: 8px;
+  border: 1px solid #D6E0EB;
+  box-sizing: border-box;
+  background: #fff;
+  /* transition: all 0.35s; */
+}
+button.aichatButton:hover {
+  color: #0B50D0;
+  border: 1px solid #256EF4;
+}
+button.aichatButton.active {
+  color: #fff;
+  font-weight: 700;
+  border: 2px solid var(--color, #705DEB);
+  background: var(--SNB-GRA, linear-gradient(286deg, #7742D9 -1.35%, #328CDF 100.25%));
+}
+.ai-accBox {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.ai-accBox h2 {
+  color: #1E2124;
+  font-family: "Pretendard GOV";
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin-bottom: 12px;
+}
+.accordionButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  width: 100%;
+  height: 39px;
+  color: #464C53;
+  font-family: "Pretendard GOV";
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  padding: 8px 15px;
+  border-radius: 4px;
+  background-color: #fff;
+}
+.accordionBox {
+  height: auto;
+}
+.accordionBox.open {
+  height: 100%;
+}
+.accordionBox span.total {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  color: #256EF4;
+  padding: 0 8px;
+  margin-left: auto;
+  margin-right: 4px;
+  border-radius: 1000px;
+  background: #fff;
+}
+.accordionBox span.total.close {
+  color: #fff;
+  background: #256EF4;
+}
+.accordionButton.active {
+  color: #fff;
+  font-weight: 700;
+  background: var(--SNB-GRA, linear-gradient(286deg, #7742D9 -1.35%, #328CDF 100.25%));
+}
+.accordionButton.active i.up {
+  background-color: #CDD1D5;
+}
+.accordionList {
+  position: relative;
+  padding: 15px;
+  margin-top: 6px;
+  background-color: #ECF2FE;
+}
+.accordionList .krds-check-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.accordionList .krds-check-area .krds-form-chip {
+  flex: 1;
+}
+.ai-toggleBox {
+  display: flex;
+}
+.ai-toggleBox .krds-form-toggle-switch [type=checkbox] ~ label {
+  color: #1E2124;
+  font-family: "Pretendard GOV";
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 150%;
+  letter-spacing: 0;
+}
 
 
 

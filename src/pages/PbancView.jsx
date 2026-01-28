@@ -134,6 +134,22 @@ const Pbanc = () => {
                 </button>
               </dd>
             ) : (<dd>{item?.bizotln}</dd>)}
+            <dt>사업신청 방법</dt>
+            <dd>
+              <ul className="list">
+                <li>{item?.aplymthcn}</li>
+                {item?.bizaplyurl && (
+                  <li>
+                    <button type="button" className="krds-btn xsmall"
+                      onClick={() => window.open(item?.bizaplyurl, '_blank')}>
+                        온라인 신청 바로가기
+                      <i className="svg-icon ico-angle right"></i>
+                    </button>
+                  </li>
+                )}
+                {/*<li>오프라인 신청</li>*/}
+              </ul>
+            </dd>
             <dt>지원대상</dt>
             {item?.sprttrgt.length > 200 ? (
               <dd>
@@ -162,22 +178,7 @@ const Pbanc = () => {
             ) : (<dd>{item?.sbmsndcmnt}</dd>)}
             <dt>신청 제외 대상</dt>
             <dd>{item?.aplyexcltrgt}</dd>
-            <dt>사업신청 방법</dt>
-            <dd>
-              <ul className="list">
-                <li>{item?.aplymthcn}</li>
-                {item?.bizaplyurl && (
-                  <li>
-                    <button type="button" className="krds-btn xsmall"
-                      onClick={() => window.open(item?.bizaplyurl, '_blank')}>
-                        온라인 신청 바로가기
-                      <i className="svg-icon ico-angle right"></i>
-                    </button>
-                  </li>
-                )}
-                {/*<li>오프라인 신청</li>*/}
-              </ul>
-            </dd>
+
             <dt>문의처</dt>
             <dd>{item?.inqpl}</dd>
           </dl>
@@ -289,7 +290,7 @@ const Pbanc = () => {
             </button>
           </div>
           <div>
-            <button type="button" className="krds-btn secondary xlarge">
+            <button type="button" className="krds-btn secondary xlarge" onClick={() => {window.scrollTo(0, 0);navigate('/req/ai/ai-smart-search');}}>
               <i className="svg-icon ico-faq"></i>
                 AI 상세 상담
             </button>

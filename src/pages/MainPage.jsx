@@ -106,32 +106,32 @@ const MainPage = () => {
               <div className="inner">
                 <h3>통합플랫폼 주요 메뉴<span>많이 찾는 메뉴로 바로 이동합니다.</span></h3>
                 <ul>
-                  <li><button type="button" className="mtlist-bu">
+                  <li><button type="button" className="mtlist-bu" onClick={() => navigate('/req/pbanc/pbanc' )}>
                     <span className="main-totalbox-img"><img src={mainIcon01} alt="" /></span>
                     <span className="main-totalbox-tit">사업공고</span>
                     <span className="main-totalbox-txt">지원사업<br/>조회,신청</span>
                   </button></li>
-                  <li><button type="button" className="mtlist-bu">
+                  <li><button type="button" className="mtlist-bu" onClick={() => alert('준비중입니다.') }>
                     <span className="main-totalbox-img"><img src={mainIcon02} alt="" /></span>
                     <span className="main-totalbox-tit">사업공고 캘린더</span>
                     <span className="main-totalbox-txt">일자별<br/>사업공고 조회</span>
                   </button></li>
-                  <li><button type="button" className="mtlist-bu">
+                  <li><button type="button" className="mtlist-bu" onClick={() => navigate('/req/crtf/UI_USR_L_040' )}>
                     <span className="main-totalbox-img"><img src={mainIcon03} alt="" /></span>
                     <span className="main-totalbox-tit">증명서 발급</span>
                     <span className="main-totalbox-txt">각종 증명서<br/>발급 및 출력</span>
                   </button></li>
-                  <li><button type="button" className="mtlist-bu">
+                  <li><button type="button" className="mtlist-bu" onClick={() => navigate('/req/plcy/UI_USR_L_030' )}>
                     <span className="main-totalbox-img"><img src={mainIcon04} alt="" /></span>
                     <span className="main-totalbox-tit">정책금융</span>
                     <span className="main-totalbox-txt">금융정책상품<br/>안내</span>
                   </button></li>
-                  <li><button type="button" className="mtlist-bu">
+                  <li><button type="button" className="mtlist-bu" onClick={() => alert('준비중입니다.') }>
                     <span className="main-totalbox-img"><img src={mainIcon05} alt="" /></span>
                     <span className="main-totalbox-tit">행사정보</span>
                     <span className="main-totalbox-txt">각종<br/>행사정보 안내</span>
                   </button></li>
-                  <li><button type="button" className="mtlist-bu">
+                  <li><button type="button" className="mtlist-bu" onClick={() => alert('준비중입니다.') }>
                     <span className="main-totalbox-img"><img src={mainIcon06} alt="" /></span>
                     <span className="main-totalbox-tit">입법·행정예고/고시</span>
                     <span className="main-totalbox-txt">법령,정책, 제도 등<br/>안내</span>
