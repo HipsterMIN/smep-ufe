@@ -33,8 +33,16 @@ const UI_USR_R_212 = lazy(() => import('@pages/data-open/UI-USR-R-212.jsx'));
 const UI_USR_R_213 = lazy(() => import('@pages/data-open/UI-USR-R-213.jsx'));
 const UI_USR_R_214 = lazy(() => import('@pages/data-open/UI-USR-R-214.jsx'));
 const UI_USR_R_215 = lazy(() => import('@pages/data-open/UI-USR-R-215.jsx'));
-
-
+const UI_USR_R_232 = lazy(() => import('@pages/data-open/UI-USR-R-232.jsx'));
+const UI_USR_W_231 = lazy(() => import('@pages/data-open/UI-USR-W-231.jsx'));
+const UI_USR_L_310 = lazy(() => import('@pages/customer-support/UI-USR-L-310.jsx'));
+const UI_USR_L_320 = lazy(() => import('@pages/customer-support/UI-USR-L-320.jsx'));
+const UI_USR_L_330 = lazy(() => import('@pages/customer-support/UI-USR-L-330.jsx'));
+const UI_USR_R_340 = lazy(() => import('@pages/customer-support/UI-USR-R-340.jsx'));
+const UI_USR_R_341 = lazy(() => import('@pages/customer-support/UI-USR-R-341.jsx'));
+const UI_USR_R_311 = lazy(() => import('@pages/customer-support/UI-USR-R-311.jsx'));
+const UI_USR_R_331 = lazy(() => import('@pages/customer-support/UI-USR-R-331.jsx'));
+const UI_USR_W_332 = lazy(() => import('@pages/customer-support/UI-USR-W-332.jsx'));
 
 /**
  * =============================================================================
@@ -283,6 +291,49 @@ export const componentMap = {
   // API Q&A
   'M_PIIO_00098': {
     component: UI_USR_L_230,
+    layout: SubpageLayoutWithMenu,
+    children: [
+      { path: 'create', component: UI_USR_W_231 }, // API Q&A 등록
+      { path: ':id', component: UI_USR_R_232 }, // API Q&A 상세
+    ],
+  },
+
+  // ========== 고객지원 (M_PIIO_00067) ==========
+
+  // 공지사항
+  'M_PIIO_00101': {
+    component: UI_USR_L_310,
+    layout: SubpageLayoutWithMenu,
+    children: [
+      { path: ':id', component: UI_USR_R_311 }, // 공지사항 상세
+    ],
+  },
+
+  // 자주 묻는 질문
+  'M_PIIO_00102': {
+    component: UI_USR_L_320,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // Q&A
+  'M_PIIO_00103': {
+    component: UI_USR_L_330,
+    layout: SubpageLayoutWithMenu,
+    children: [
+      { path: ':id', component: UI_USR_R_331 }, // Q&A 상세
+      { path: 'save', component: UI_USR_W_332 }, // Q&A 등록/수정
+    ],
+  },
+
+  // 콜센터안내
+  'M_PIIO_00104': {
+    component: UI_USR_R_340,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 고객 만족도 조사
+  'M_PIIO_00105': {
+    component: UI_USR_R_341,
     layout: SubpageLayoutWithMenu,
   },
 
