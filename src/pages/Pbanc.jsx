@@ -11,6 +11,8 @@ const Pbanc = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [items, setItems] = useState([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState('');
   const [searchType, setSearchType] = useState('');
@@ -23,7 +25,10 @@ const Pbanc = () => {
 
   const search = async (pageParam) => {
     const response = await apiClient.get(`/api/v1/pbanc?page=${pageParam}&searchText=${searchText}&searchType=${searchType}`);
-    setItems(response.data);
+    console.log(response.data);
+    setItems(response.data.content);
+    setTotalPages(response.data.totalPages);
+    setTotalElements(response.data.totalElements);
     setPage(pageParam);
   };
 
@@ -107,88 +112,108 @@ const Pbanc = () => {
                 <i className="svg-icon ico-sch"></i>
               </button>
             </div>
-            <button type="button" className="krds-btn medium text" onClick={handleToggleFilter}>
-              <i className="svg-icon ico-sch-plus"></i>
-                상세검색
-              <span className="onfilter-open sr-only">열기</span>
-              <span className="onfilter-close sr-only">닫기</span>
-            </button>
+            {/*<button type="button" className="krds-btn medium text" onClick={handleToggleFilter}>*/}
+            {/*  <i className="svg-icon ico-sch-plus"></i>*/}
+            {/*    상세검색*/}
+            {/*  <span className="onfilter-open sr-only">열기</span>*/}
+            {/*  <span className="onfilter-close sr-only">닫기</span>*/}
+            {/*</button>*/}
           </div>
-          <div className="sch-filter-box">
-            <div className="filter-form">
-              <div>
-                <label className="label" htmlFor="appl-sch-sel1">분야</label>
-                <select id="appl-sch-sel1" className="krds-form-select medium">
-                  <option value="">전체</option>
-                  <option value="">항목</option>
-                  <option value="">항목</option>
-                </select>
-              </div>
-              <div>
-                <label className="label" htmlFor="appl-sch-sel2">지역</label>
-                <select id="appl-sch-sel2" className="krds-form-select medium">
-                  <option value="">전체</option>
-                  <option value="">항목</option>
-                  <option value="">항목</option>
-                </select>
-              </div>
-              <div>
-                <label className="label" htmlFor="appl-sch-sel3">기관별</label>
-                <select id="appl-sch-sel3" className="krds-form-select medium">
-                  <option value="">전체</option>
-                  <option value="">항목</option>
-                  <option value="">항목</option>
-                </select>
-              </div>
-            </div>
-            <dl className="filter-chip">
-              <dt>선택된 필터 <span className="num">4</span></dt>
-              <dd>
-                <button type="button" className="krds-btn xlarge icon border">
-                  <span className="sr-only">새로고침</span>
-                  <i className="svg-icon ico-refresh"></i>
-                </button>
-                <div className="chip-wrap krds-tag-wrap large">
-                  <span className="krds-btn-tag">
-                    중앙부처 복지사업
-                    <button type="button" className="btn-delete">
-                      <span className="sr-only">삭제</span>
-                    </button>
-                  </span>
-                  <span className="krds-btn-tag">
-                    임신출산
-                    <button type="button" className="btn-delete">
-                      <span className="sr-only">삭제</span>
-                    </button>
-                  </span>
-                  <span className="krds-btn-tag">
-                    저소득
-                    <button type="button" className="btn-delete">
-                      <span className="sr-only">삭제</span>
-                    </button>
-                  </span>
-                  <span className="krds-btn-tag">
-                    맞춤형급여안내
-                    <button type="button" className="btn-delete">
-                      <span className="sr-only">삭제</span>
-                    </button>
-                  </span>
-                </div>
-              </dd>
-            </dl>
-          </div>
+          {/*todo 상세검색 주석처리 ( 시연으로 인한 임시주석 )*/}
+          {/*<div className="sch-filter-box">*/}
+          {/*  <div className="filter-form">*/}
+          {/*    <div>*/}
+          {/*      <label className="label" htmlFor="appl-sch-sel1">분야</label>*/}
+          {/*      <select id="appl-sch-sel1" className="krds-form-select medium">*/}
+          {/*        <option value="">전체</option>*/}
+          {/*        <option value="">항목</option>*/}
+          {/*        <option value="">항목</option>*/}
+          {/*      </select>*/}
+          {/*    </div>*/}
+          {/*    <div>*/}
+          {/*      <label className="label" htmlFor="appl-sch-sel2">지역</label>*/}
+          {/*      <select id="appl-sch-sel2" className="krds-form-select medium">*/}
+          {/*        <option value="">전체</option>*/}
+          {/*        <option value="">항목</option>*/}
+          {/*        <option value="">항목</option>*/}
+          {/*      </select>*/}
+          {/*    </div>*/}
+          {/*    <div>*/}
+          {/*      <label className="label" htmlFor="appl-sch-sel3">기관별</label>*/}
+          {/*      <select id="appl-sch-sel3" className="krds-form-select medium">*/}
+          {/*        <option value="">전체</option>*/}
+          {/*        <option value="">항목</option>*/}
+          {/*        <option value="">항목</option>*/}
+          {/*      </select>*/}
+          {/*    </div>*/}
+          {/*  </div>*/}
+          {/*  <dl className="filter-chip">*/}
+          {/*    <dt>선택된 필터 <span className="num">4</span></dt>*/}
+          {/*    <dd>*/}
+          {/*      <button type="button" className="krds-btn xlarge icon border">*/}
+          {/*        <span className="sr-only">새로고침</span>*/}
+          {/*        <i className="svg-icon ico-refresh"></i>*/}
+          {/*      </button>*/}
+          {/*      <div className="chip-wrap krds-tag-wrap large">*/}
+          {/*        <span className="krds-btn-tag">*/}
+          {/*          중앙부처 복지사업*/}
+          {/*          <button type="button" className="btn-delete">*/}
+          {/*            <span className="sr-only">삭제</span>*/}
+          {/*          </button>*/}
+          {/*        </span>*/}
+          {/*        <span className="krds-btn-tag">*/}
+          {/*          임신출산*/}
+          {/*          <button type="button" className="btn-delete">*/}
+          {/*            <span className="sr-only">삭제</span>*/}
+          {/*          </button>*/}
+          {/*        </span>*/}
+          {/*        <span className="krds-btn-tag">*/}
+          {/*          저소득*/}
+          {/*          <button type="button" className="btn-delete">*/}
+          {/*            <span className="sr-only">삭제</span>*/}
+          {/*          </button>*/}
+          {/*        </span>*/}
+          {/*        <span className="krds-btn-tag">*/}
+          {/*          맞춤형급여안내*/}
+          {/*          <button type="button" className="btn-delete">*/}
+          {/*            <span className="sr-only">삭제</span>*/}
+          {/*          </button>*/}
+          {/*        </span>*/}
+          {/*      </div>*/}
+          {/*    </dd>*/}
+          {/*  </dl>*/}
+          {/*</div>*/}
         </div>
-        <SearchListTop />
+        <div className="search-list-top">
+          <ul className="sch-info" aria-live="polite">
+            <li>검색 결과 <span className="point">{(totalElements || 0).toLocaleString()}</span>개</li>
+          </ul>
+          <ul className="sch-sort">
+            <li>
+              <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
+              <div className="w-sort-btn">
+                <button type="button" onClick="fnSearch('0')" className=" active">등록일순</button>
+                <button type="button" onClick="fnSearch('1')">마감일순</button>
+              </div>
+              <div className="m-sort-btn">
+                <select className="krds-form-select-sort" id="sort">
+                  <option value="0" selected="selected">등록일순</option>
+                  <option value="1">마감일순</option>
+                </select>
+              </div>
+            </li>
+          </ul>
+        </div>
         <div className="krds-table-wrap">
           <table className="tbl col data">
             <caption>지원사업 공고표. 번호, 제목, 신청기간, 소관부처·지자체, 사업수행기관, 조회수 정보가 제공됨.</caption>
             <colgroup>
-              <col style={{ width: '5%' }} />
-              <col />
-              <col style={{ width: '200px' }} />
-              <col style={{ width: '14%' }} />
-              <col style={{ width: '14%' }} />
-              <col style={{ width: '5%' }} />
+              <col style={{ width: '5%' }}/>
+              <col/>
+              <col style={{ width: '200px' }}/>
+              <col style={{ width: '14%' }}/>
+              <col style={{ width: '14%' }}/>
+              <col style={{ width: '5%' }}/>
             </colgroup>
             <thead>
               <tr>
@@ -226,6 +251,7 @@ const Pbanc = () => {
             </tbody>
           </table>
           <Pagination
+            totalPages={totalPages}
             currentPage={page}
             onPageChange={(p) => search(p)}
           />
