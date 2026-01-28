@@ -118,32 +118,40 @@ const UI_USR_R_031 = () => {
               </div>
             </div>
             <div className="ac">
-              <a
-                href={detailData.plcyFnncDtlUrlAddr}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="krds-btn secondary large krds-btn-shadow"
-              >
-                <i className="svg-icon ico-information"></i>
-                상세정보
-              </a>
-              <a
-                href={detailData.plcyFnncInqplUrlAddr}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="krds-btn secondary large krds-btn-shadow"
-              >
-                <i className="svg-icon ico-faq"></i>
-                문의하기
-              </a>
-              <a
-                href={detailData.plcyFnncAplyUrlAddr}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="krds-btn primary large krds-btn-shadow"
-              >
-                신청하기
-              </a>
+              {detailData.plcyFnncDtlUrlAddr && (
+                <a
+                  href={detailData.plcyFnncDtlUrlAddr}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="krds-btn secondary large krds-btn-shadow"
+                >
+                  <i className="svg-icon ico-information"></i>
+                    상세정보
+                </a>
+              )}
+
+              {detailData.plcyFnncInqplUrlAddr && (
+                <a
+                  href={detailData.plcyFnncInqplUrlAddr}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="krds-btn secondary large krds-btn-shadow"
+                >
+                  <i className="svg-icon ico-faq"></i>
+                    문의하기
+                </a>
+              )}
+
+              {detailData.plcyFnncAplyUrlAddr && (
+                <a
+                  href={detailData.plcyFnncAplyUrlAddr}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="krds-btn primary large krds-btn-shadow"
+                >
+                    신청하기
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -271,41 +279,50 @@ const UI_USR_R_031 = () => {
             </button>
           </div>
           <div>
-            <button type="button" className="krds-btn secondary xlarge">
-              <i className="svg-icon ico-faq"></i>
-                AI 상세 상담
-            </button>
-            <button type="button" className="krds-btn tertiary xlarge">
-              <i className="svg-icon ico-like"></i>
-                관심공고
-            </button>
-            <a
-              href={detailData.plcyFnncInqplUrlAddr}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="krds-btn tertiary xlarge"
-            >
-              <i className="svg-icon ico-faq"></i>
-              문의하기
-            </a>
-            <a
-              href={detailData.plcyFnncDtlUrlAddr}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="krds-btn tertiary xlarge"
-            >
-              상세정보
-              <i className="svg-icon ico-link"></i>
-            </a>
-            <a
-              href={detailData.plcyFnncAplyUrlAddr}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="krds-btn primary xlarge"
-            >
-              신청하기
-              <i className="svg-icon ico-angle right"></i>
-            </a>
+            {/*<button type="button" className="krds-btn secondary xlarge">*/}
+            {/*  <i className="svg-icon ico-faq"></i>*/}
+            {/*    AI 상세 상담*/}
+            {/*</button>*/}
+            {/*<button type="button" className="krds-btn tertiary xlarge">*/}
+            {/*  <i className="svg-icon ico-like"></i>*/}
+            {/*    관심공고*/}
+            {/*</button>*/}
+            {detailData.plcyFnncInqplUrlAddr && (
+              <a
+                href={detailData.plcyFnncInqplUrlAddr}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="krds-btn tertiary xlarge"
+              >
+                <i className="svg-icon ico-faq"></i>
+                  문의하기
+              </a>
+            )}
+
+            {detailData.plcyFnncDtlUrlAddr && (
+              <a
+                href={detailData.plcyFnncDtlUrlAddr}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="krds-btn tertiary xlarge"
+              >
+                  상세정보
+                <i className="svg-icon ico-link"></i>
+              </a>
+            )}
+
+            {detailData.plcyFnncAplyUrlAddr && (
+              <a
+                href={detailData.plcyFnncAplyUrlAddr}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="krds-btn primary xlarge"
+              >
+                  신청하기
+                <i className="svg-icon ico-angle right"></i>
+              </a>
+            )}
+
           </div>
         </div>
       </div>
