@@ -20,6 +20,11 @@ const UI_USR_L_050 = lazy(() => import('@pages/UI_USR_L_050.jsx'));
 const UI_USR_L_210 = lazy(() => import('@pages/data-open/UI-USR-L-210.jsx'));
 const UI_USR_L_220 = lazy(() => import('@pages/data-open/UI-USR-L-220.jsx'));
 const UI_USR_L_230 = lazy(() => import('@pages/data-open/UI-USR-L-230.jsx'));
+const UI_USR_R_211 = lazy(() => import('@pages/data-open/UI-USR-R-211.jsx'));
+const UI_USR_R_212 = lazy(() => import('@pages/data-open/UI-USR-R-212.jsx'));
+const UI_USR_R_213 = lazy(() => import('@pages/data-open/UI-USR-R-213.jsx'));
+const UI_USR_R_214 = lazy(() => import('@pages/data-open/UI-USR-R-214.jsx'));
+const UI_USR_R_215 = lazy(() => import('@pages/data-open/UI-USR-R-215.jsx'));
 
 
 /**
@@ -171,6 +176,13 @@ export const componentMap = {
   'M_PIIO_00096': {
     component: UI_USR_L_210,
     layout: SubpageLayoutWithMenu,
+    children: [
+      { path: 'a', component: UI_USR_R_211 }, // API_지원사업정보 상세
+      { path: 'b', component: UI_USR_R_212 }, // API_행사정보 API 상세
+      { path: 'c', component: UI_USR_R_213 }, // API_이노비즈확인서 상세
+      { path: 'd', component: UI_USR_R_214 }, // API_벤처기업확인서 상세
+      { path: 'e', component: UI_USR_R_215 }, // API_메인비즈확인서 상세
+    ],
   },
 
   // 인증키 신청,
