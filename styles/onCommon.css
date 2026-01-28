@@ -1360,7 +1360,7 @@
 }
 /* onshadow-text */
 .onshadow-text {
-  height: 130px;
+  height: 80px;/* 원래 130px 시연용으로 임시로 80px변경 협의필요 */
   overflow: hidden;
   position: relative;
   margin-bottom: 12px;
@@ -2374,6 +2374,16 @@ textarea.krds-input::placeholder {
   border-radius: 12px;
   background-color: #F4F5F6;
 }
+.helper-box.refer.blue {
+  background-color: #EEF2F7;
+  border-color: #D6E0EB;
+}
+.helper-box.refer.blue .helper-desc-wrap {
+  margin-top: 12px;
+}
+.helper-box.refer.blue .helper-tit {
+  color: #052B57;
+}
 .helper-box.refer .helper-tit {
   font-size: var(--krds-pc-font-size-heading-xsmall);
   font-weight: 700;
@@ -2852,6 +2862,178 @@ textarea.krds-input::placeholder {
   mask-image: url(./img/component/icon/ico_lock.svg);
 }
 
+/* 로그인 폼 */
+.login-contents .helper-box.blue {
+  margin-top: 40px;
+}
+.login-form-area {
+  --login-form-color-border: var(--krds-light-color-divider-gray);
+  --login-form-width-border: var(--krds-light-border-width-variable-regular);
+  display: flex;
+  position: relative;
+  padding: var(--krds-padding-10);
+  gap: var(--krds-gap-12);
+  width: 100%;
+  border-top: var(--login-form-width-border) solid var(--login-form-color-border);
+  border-bottom: var(--login-form-width-border) solid var(--login-form-color-border);
+}
+.login-form-area::after {
+  content: "";
+  position: absolute;
+  top: var(--krds-gap-9);
+  left: calc(50% - var(--login-form-width-border));
+  width: var(--login-form-width-border);
+  height: calc(100% - var(--krds-gap-12));
+  background-color: var(--login-form-color-border);
+}
+.login-form-area > div {
+  flex: 1;
+}
+.link-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+}
+.link-group > li + li::before {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 var(--krds-gap-3);
+  content: "";
+  width: var(--krds-number-1);
+  height: var(--krds-size-height-2);
+  background-color: var(--login-form-color-border);
+}
+
+.login-form-area .login-info-wrap {
+  padding: var(--krds-padding-8) 0;
+}
+
+.login-form-area .sns-login {
+  margin-top: 36px;
+}
+.login-form-area .login-sub-tit {
+  position: relative;
+  font-weight: 700;
+  text-align: center;
+}
+.login-form-area .login-wrap .login-sub-tit::before, 
+.login-form-area .login-wrap .login-sub-tit::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  height: 1px;
+  background-color: #CDD1D5;
+  transform: translateY(-50%);
+}
+.login-form-area .login-wrap .login-sub-tit::before {
+  left: 0;
+  width: 216px;
+}
+.login-form-area .login-wrap .login-sub-tit::after {
+  right: 0;
+  width: 216px;
+}
+.login-form-area .sns-login-btns {
+  margin-top: 24px;
+  display: flex;
+  gap: 10px;
+}
+.login-form-area .sns-login-btns button {
+  flex: 1;
+  justify-content: flex-start;
+}
+.login-form-area .sns-login-btns .sns-login-tit {
+  flex: 1;
+  text-align: center;
+  transition: all .4s ease;
+}
+.login-form-area .sns-login-btns i {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  background: no-repeat 50%;
+  background-size: 100% auto;
+}
+.login-form-area .sns-login-btns .ico-google {
+  background-image: url(../src/assets/sub/ico_google.svg);
+}
+.login-form-area .sns-login-btns .ico-kakao {
+  background-image: url(../src/assets/sub/ico_kakao.svg);
+}
+.login-form-area .sns-login-btns .ico-naver {
+  width: 20px;
+  height: 20px;
+  background-image: url(../src/assets/sub/ico_naver.svg);
+}
+.login-form-area .other-login-methods .login-sub-tit {
+  text-align: left;
+}
+.login-form-area .other-login-box {
+  margin-top: 24px;
+}
+.login-form-area .other-login-btns li ~ li {
+  margin-top: 16px;
+}
+.login-form-area .other-login-btns button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  height: 104px;
+  padding: 0 30px;
+  background-color: #F4F5F6;
+  border-radius: 8px;
+  transition: all .4s ease;
+}
+.login-form-area .other-login-btns button:hover {
+  border: 1px solid #256EF4;
+  background: linear-gradient(106deg, #FCF9FF 10.51%, #E3E8FA 150.93%);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.05), 0 4px 8px 0 rgba(0, 0, 0, 0.08);
+}
+.login-form-area .other-login-btns button:hover .ico-angle {
+  background-image: none;
+  background-color: #256EF4;
+}
+.login-form-area .other-login-btns button:hover .btn-title {
+  color: #0B50D0;
+}
+.login-form-area .other-login-btns .btn-icon {
+  width: 36px;
+  height: 44px;
+  margin-right: 24px;
+}
+.login-form-area .other-login-btns .btn-title {
+  font-size: 19px;
+  font-weight: 700;
+}
+.login-form-area .other-login-btns .svg-icon {
+  margin-left: auto;
+}
+.login-form-area .other-login-btns .btn-icon {
+  width: 50px;
+  height: 50px;
+  background: no-repeat 50%;
+  background-size: 100% auto;
+}
+.login-form-area .other-login-btns .btn-icon {
+  width: 50px;
+  height: 50px;
+  background: no-repeat 50%;
+  background-size: 100% auto;
+}
+.login-form-area .other-login-btns .phone {
+  background-image: url(../src/assets/sub/ico_login_phone.svg);
+}
+.login-form-area .other-login-btns .public {
+  background-image: url(../src/assets/sub/ico_login_public.svg);
+}
+.login-form-area .other-login-btns .authentication {
+  background-image: url(../src/assets/sub/ico_login_auth.svg);
+}
+.login-form-area .other-login-btns .any-id {
+  background-image: url(../src/assets/sub/ico_login_anyid.svg);
+}
+
 /* util */
 .bold {
   font-weight: 700;
@@ -2881,6 +3063,20 @@ textarea.krds-input::placeholder {
   .krds-main-menu-mobile .gnb-wrap .gnb-body .gnb-menu .subMenuLists {display: flex; flex-direction: column; gap: 8px;}
   .krds-main-menu-mobile .gnb-wrap .gnb-body .gnb-menu .subMenuLists li a {display: block; padding: 0 16px 0 26px; font-size: 16px; position: relative; }
   .krds-main-menu-mobile .gnb-wrap .gnb-body .gnb-menu .subMenuLists li a:before {content: ""; position: absolute; left: 16px; top: 50%; transform: translateY(-50%); border-radius: 50%; background: #1e2124; width: 3px; height: 3px;}
+
+   /* 로그인 정보 입력 */
+  .login-form-area {
+    flex-direction: column;
+    padding: var(--krds-padding-8) 0;
+    gap: var(--krds-gap-8);
+  }
+  .login-form-area::after {
+    display: none;
+  }
+  .login-form-area .login-info-wrap {
+    padding-bottom: 0;
+    border-top: var(--krds-light-border-width-variable-regular) solid var(--krds-light-color-divider-gray);
+  }
 }
 @media (max-width: 767px) {
 
@@ -3215,6 +3411,17 @@ textarea.krds-input::placeholder {
   }
   .service-guide .guide-cont-list .detail-info {
     font-size: 16px;
+  }
+
+  .login-form-area .sns-login-btns {
+    flex-direction: column;
+  }
+  .login-form-area .login-wrap .login-sub-tit::before, 
+  .login-form-area .login-wrap .login-sub-tit::after {
+    display: none;
+  }
+  .login-form-area .sns-login-btns button {
+    flex: 1 1 auto;
   }
 }
 

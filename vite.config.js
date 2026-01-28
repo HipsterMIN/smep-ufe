@@ -47,6 +47,7 @@ export default defineConfig(({ mode }) => {
         '@routes': path.resolve(__dirname, './src/routes'),  // import { router } from '@routes/index'
         '@store': path.resolve(__dirname, './src/store'),  // import { useUserStore } from '@store/userStore'
         '@utils': path.resolve(__dirname, './src/utils'),  // import { formatDate } from '@utils/date'
+        '@styles': path.resolve(__dirname, './styles'),  // import { formatDate } from '@style/common.css'
       },
     },
   }

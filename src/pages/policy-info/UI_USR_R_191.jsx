@@ -1,0 +1,163 @@
+import React, { useRef } from 'react';
+import SideNavigation from '@components/ui/SideNavigation';
+import Breadcrumb from '@components/ui/Breadcrumb';
+import { useUserMenu } from '@context/UserMenuContext.jsx';
+
+const UI_USR_R_021 = () => {
+  const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const shadowTextRef = useRef(null);
+
+  const handleToggleTextShadow = () => {
+    shadowTextRef.current.classList.toggle('on');
+  };
+
+  // ✅ 사이드바 데이터 계산
+  const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
+  const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+
+  return (
+    <>
+      <SideNavigation
+        pageTitle={depth1Menu?.menuNm || ''}
+        menuItems={sidebarData}
+      />
+      <div className="contents">
+        <Breadcrumb items={breadcrumbItems} />
+        <div className="page-title-wrap" data-type="responsive">
+          <p className="on-p1 on-colorblue">행사정보</p>
+          <h2 className="h-tit2">[경기ㆍ대전] 2026년 스마트 제조혁신 지원사업 사업설명회</h2>
+        </div>
+        <ul className="onboard-summary">
+          <li>
+            <span className="sr-only">작성일</span>
+            <span>2025.12.29</span>
+          </li>
+          <li>
+            <span>
+              <span className="sr-only">조회수</span>
+              <i className="svg-icon ico-scrap"></i>
+                36
+            </span>
+          </li>
+          <li>
+            <span>
+              <span className="sr-only">스크랩수</span>
+              <i className="svg-icon ico-pw-visible-on"></i>
+                0
+            </span>
+          </li>
+        </ul>
+        <div className="def-list-wrap">
+          <dl className="def-list">
+            <dt>분야</dt>
+            <dd>기술</dd>
+            <dt>소관부처·지자체</dt>
+            <dd>보건복지부</dd>
+            <dt>사업수행기관</dt>
+            <dd>2025.12.24 ~ 2026.02.06</dd>
+            <dt>사업신청 방법</dt>
+            <dd>국번 없이 129 (보건복지부 장애인자립기반과)</dd>
+          </dl>
+        </div>
+        <div className="krds-tag-wrap mt-24 mb-24" >
+          <span className="krds-btn-tag">#혁신성장</span>
+          <span className="krds-btn-tag">#혁신성장</span>
+          <span className="krds-btn-tag">#혁신성장</span>
+          <span className="krds-btn-tag">#혁신성장</span>
+          <span className="krds-btn-tag">#혁신성장</span>
+          <span className="krds-btn-tag">#혁신성장지원자금</span>
+        </div>
+        <div style={{ width: '100%', height: '800px', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', marginBottom: '48px' }}>
+            PDF VIEWER
+        </div>
+
+        <div className="onbox-group-areawrap">
+          <p className="onbox-group-title">본문출력파일</p>
+          <ul className="box-group-area">
+            <li>
+              <p className="tit">
+                <i className="svg-icon ico-file2"></i>
+                  2026년 스마트 제조혁신 지원사업 사업설명회 추가 개최 안내.png
+              </p>
+              <div className="btn-wrap">
+                <a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열림"><i className="svg-icon ico-sch-plus"></i> 바로보기 </a>
+                <button type="button" className="krds-btn medium text on-colorblue"><i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드 </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div className="onbox-group-areawrap">
+          <p className="onbox-group-title">첨부파일</p>
+          <ul className="box-group-area">
+            <li>
+              <p className="tit">
+                <i className="svg-icon ico-file2"></i>
+                  2026년 스마트 제조혁신 지원사업 사업설명회 추가 개최 안내.png
+              </p>
+              <div className="btn-wrap">
+                <a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열림"><i className="svg-icon ico-sch-plus"></i> 바로보기 </a>
+                <button type="button" className="krds-btn medium text on-colorblue"><i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드 </button>
+              </div>
+            </li>
+            <li>
+              <p className="tit">
+                <i className="svg-icon ico-file2"></i>
+                  2026년 스마트 제조혁신 지원사업 사업설명회 추가 개최 안내.png
+              </p>
+              <div className="btn-wrap">
+                <a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열림"><i className="svg-icon ico-sch-plus"></i> 바로보기 </a>
+                <button type="button" className="krds-btn medium text on-colorblue"><i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드 </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div className="onboard-btm-btngroup">
+          <div>
+            <button type="button" className="krds-btn tertiary xlarge">
+                목록
+            </button>
+          </div>
+          <div>
+            <button type="button" className="krds-btn tertiary xlarge">
+              <i className="svg-icon ico-like"></i>    
+                관심
+            </button>
+            <button type="button" className="krds-btn tertiary xlarge">
+              <i className="svg-icon ico-copy"></i>    
+                링크복사
+            </button>
+            <button type="button" className="krds-btn tertiary xlarge">
+                출처바로가기
+              <i className="svg-icon ico-angle right"></i>              
+            </button>
+          </div>
+        </div>
+
+        <div className="assess-question-wrap">
+          <div className="assess-qu">이 페이지에 만족하시나요?</div>
+          <div className="assess-an">
+            <div className="krds-form-chip large">
+              <input type="radio" className="radio" name="rdo_chip_size2" id="rdo_chip_lg2-1" checked="" />
+              <label className="krds-form-chip-outline yes" for="rdo_chip_lg2-1">
+                  네
+                <i className="svg-icon ico-smile"></i>
+              </label>
+            </div>
+            <div className="krds-form-chip large">
+              <input type="radio" className="radio" name="rdo_chip_size2" id="rdo_chip_lg2-2" />
+              <label className="krds-form-chip-outline no" for="rdo_chip_lg2-2">
+                  아니오
+                <i className="svg-icon ico-sad"></i>
+              </label>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </>
+  );
+};
+
+export default UI_USR_R_021;
