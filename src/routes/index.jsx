@@ -23,8 +23,9 @@ const createAppRouter = (menuTree, flatMenuMap) => {
 
   // BASE_URL 설정
   const base = import.meta.env.BASE_URL || '/'; // 기본값 '/'
-  // ✅ 끝에 '/'가 없으면 추가 (슬래시 보장)
-  const basename = base.endsWith('/') ? base : `${base}/`;
+  // ✅ React Router의 basename은 트레일링 슬래시가 없어야 함 (단, '/' 자체인 경우는 제외)
+  // 트레일링 슬래시가 있으면 /main-dev (슬래시 없음)와 매칭되지 않는 문제가 발생함
+  const basename = base.endsWith('/') && base !== '/' ? base.slice(0, -1) : base;
 
   // 브라우저 라우터 생성
   return createBrowserRouter(allRoutes, { basename });

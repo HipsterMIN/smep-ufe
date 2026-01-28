@@ -109,7 +109,7 @@ export default function Header() {
             <div className="inner">
               <div className="header-branding">
                 <h2 className="logo sample">
-                  <a href="/main-dev/">
+                  <a href={BASE_URL}>
                     <span className="sr-only">중소기업통합플랫폼</span>
                   </a>
                 </h2>
