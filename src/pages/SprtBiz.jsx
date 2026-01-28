@@ -223,7 +223,7 @@ const SprtBiz = () => {
                       <a href="#" className="c-text">
                         <p className="c-tit no-icon"><span className="span onellipsis-2">{item.sprtBizNm}</span></p>
                         <p className="c-txt onellipsis-2">
-                          {item.sprtCn}
+                          <span dangerouslySetInnerHTML={{ __html: item.sprtCn }}/>
                         </p>
                         <p className="c-date">
                           <strong className="key">진행중인 공고</strong>

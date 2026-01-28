@@ -124,7 +124,7 @@ const UI_USR_R_041 = () => {
               <div className="form-tit">
                 <label htmlFor="id_01" className="form-label">사업자등록번호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
               </div>
-              <input type="text" id="id_01" className="krds-input small" placeholder="사업자등록번호를 입력해주세요" value="2288105280" disabled />
+              <input type="text" id="id_01" className="krds-input small" placeholder="사업자등록번호를 입력해주세요" value="228-81-05280" disabled />
             </div>
           </div>
           <div className="form-group">
