@@ -25,6 +25,7 @@ const AiChat = () => {
   const [notice, setNotice] = useState('');
   const [payloadReady, setPayloadReady] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const [filters, setFilters] = useState({
     regions: [],
     companySizes: [],
@@ -51,21 +52,30 @@ const AiChat = () => {
   } = useChatContext();
 
   const applyPayload = (payload) => {
+    console.log('[DEBUG_LOG] applyPayload called', { hasSummary: !!payload.summary, query: payload.query });
     setSelectedPrograms(payload.programs || []);
     setInitialQuery(payload.query || '');
     setInitialSummary(payload.summary || '');
     clearMessages?.();
-    initialSentRef.current = false;
+    // 이미 요약 정보가 있다면 진입 시 자동 검색을 수행하지 않음
+    if (payload.summary) {
+      console.log('[DEBUG_LOG] Summary found in payload, blocking initial sent');
+      initialSentRef.current = true;
+    } else {
+      initialSentRef.current = false;
+    }
     setPayloadReady(true);
   };
 
   useEffect(() => {
+    console.log('[DEBUG_LOG] encodedPayload effect', { encodedPayload: !!encodedPayload });
     setPayloadReady(false);
     setSelectedPrograms([]);
     setInitialQuery('');
     setInitialSummary('');
     setDocumentContext(null);
     clearMessages?.();
+    // encodedPayload가 바뀔 때만 리셋. applyPayload 내부에서 다시 설정될 것임.
     initialSentRef.current = false;
 
     if (!encodedPayload) {
@@ -116,25 +126,49 @@ const AiChat = () => {
 
   const displayContent = useMemo(() => {
     if (!payloadReady) return '';
+    // 사용자가 명시적으로 질문을 던지기 전이고 초기 요약이 존재한다면,
+    // SDK의 메시지(자동 검색 결과 등)보다 초기 요약을 우선 표시하여 결과가 바뀌는 것을 방지
+    if (!hasUserInteracted && initialSummary && !streamingContent) {
+      return formatAIResponse(initialSummary, { stripTags: true });
+    }
     const rawContent = streamingContent || lastAssistantMessage?.content || initialSummary;
     if (!rawContent) return '';
     return formatAIResponse(rawContent, { stripTags: true });
-  }, [payloadReady, streamingContent, lastAssistantMessage, initialSummary]);
+  }, [payloadReady, streamingContent, lastAssistantMessage, initialSummary, hasUserInteracted]);
 
   useEffect(() => {
     if (!payloadReady) return;
     if (programIds.length > 0) {
+      console.log('[DEBUG_LOG] Setting document context', programIds);
       setDocumentContext(programIds);
     }
   }, [payloadReady, programIds, setDocumentContext]);
 
   useEffect(() => {
     if (!payloadReady) return;
-    if (initialSentRef.current) return;
-    if (!initialQuery || messages.length > 0 || programIds.length === 0) return;
+    
+    // 이미 요약 정보가 존재한다면 절대로 자동 검색을 수행하지 않음
+    if (initialSummary) {
+      console.log('[DEBUG_LOG] Skip auto-search: initialSummary exists');
+      initialSentRef.current = true;
+      return;
+    }
+
+    if (initialSentRef.current) {
+      console.log('[DEBUG_LOG] Skip auto-search: already sent or blocked');
+      return;
+    }
+
+    if (!initialQuery || messages.length > 0 || programIds.length === 0) {
+      console.log('[DEBUG_LOG] Skip auto-search: conditions not met', { initialQuery, messagesLen: messages.length, programsLen: programIds.length });
+      return;
+    }
+
+    console.log('[DEBUG_LOG] Executing auto-search', initialQuery);
     initialSentRef.current = true;
+    setHasUserInteracted(true);
     sendMessage(initialQuery, { documentContext: programIds, filters: filtersQuery });
-  }, [payloadReady, initialQuery, messages.length, programIds, filtersQuery, sendMessage]);
+  }, [payloadReady, initialQuery, messages.length, programIds, filtersQuery, sendMessage, initialSummary]);
 
   const handleToggle = (type) => {
     setStatus((prev) => (prev === type ? null : type));
@@ -147,6 +181,7 @@ const AiChat = () => {
   const handleSendMessage = (message) => {
     const trimmed = message.trim();
     if (!trimmed) return;
+    setHasUserInteracted(true);
     sendMessage(trimmed, { documentContext: programIds, filters: filtersQuery });
     setInput('');
   };
@@ -169,6 +204,7 @@ const AiChat = () => {
   const handleRefineSearch = () => {
     const message = input.trim() || initialQuery;
     if (!message) return;
+    setHasUserInteracted(true);
     sendMessage(message, { documentContext: programIds, filters: filtersQuery });
     setInput('');
   };
