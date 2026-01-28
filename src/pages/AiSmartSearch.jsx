@@ -790,6 +790,7 @@ const AiSmartSearchContent = () => {
               </div>
             </div>
 
+            {/* 통합 검색 결과 영역 - 현재 미작동으로 인해 비활성화
             <div className="search-list-top">
               <ul className="sch-info" aria-live="polite">
                 <li>검색 결과 <span className="point">{totalSearchDisplayTotal}</span>개</li>
@@ -804,6 +805,7 @@ const AiSmartSearchContent = () => {
                 </li>
               </ul>
             </div>
+            */}
 
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-6">
@@ -811,6 +813,7 @@ const AiSmartSearchContent = () => {
               </div>
             )}
 
+            {/* 통합검색 오류 및 결과 리스트 - 비활성화
             {totalSearchError && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-6">
                 통합검색 중 오류가 발생했습니다: {totalSearchError.message}
@@ -933,6 +936,7 @@ const AiSmartSearchContent = () => {
                 </li>
               )}
             </ul>
+            */}
             {/* <Pagination /> */}
 
           </div>
