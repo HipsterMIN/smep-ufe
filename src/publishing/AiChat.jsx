@@ -1,7 +1,8 @@
- import React, {useState} from "react";
+import React, {useState} from "react";
 import {Link} from "react-router-dom";
+import AiChatButton from "../components/ui/AiChatButton";
+import AiChatAccordionButton from "../components/ui/AiChatAccordionButton";
 import Logo from "../../styles/img/ai_chat_logo.svg";
-import LngImg from "../../styles/img/lnb_img.png";
 
 
 const AiChat = () => {
@@ -18,7 +19,10 @@ const AiChat = () => {
   const showMoreList = () => {
     setShowList(true);
   };
-  
+
+  // 임시변수
+  const [isBtnClick, setBtnClick] = useState(true);
+ 
 
   return (
     <>
@@ -32,7 +36,33 @@ const AiChat = () => {
           </Link>
         </div>
         <div className="sidebar-filter hide-scrollbar">
-          <img src={LngImg} alt="" />
+          {/** AiChat Filter */}
+          <div className="ai-btnBox">
+            <AiChatButton btnName="전체" />
+            <AiChatButton btnName="사업공고" isBtnClick={isBtnClick} />
+            <AiChatButton btnName="지원사업안내" />
+            <AiChatButton btnName="정책금융" />
+            <AiChatButton btnName="제도 안내" />
+            <AiChatButton btnName="사용매뉴얼" />
+          </div>
+
+          <div className="ai-accBox">
+            <h2>사업공고</h2>
+            <AiChatAccordionButton btnName="지역" isOpen={true} onSelect={true} />
+            <AiChatAccordionButton btnName="기업규모" isOpen={false} onSelect={true} />
+            <AiChatAccordionButton btnName="지원분야" isOpen={false} onSelect={false} />
+            <AiChatAccordionButton btnName="지원유형" isOpen={false} onSelect={false} />
+            <AiChatAccordionButton btnName="접수유형" isOpen={false} onSelect={false} />
+            <AiChatAccordionButton btnName="마감유형" isOpen={false} onSelect={false} />
+          </div>
+
+          <div className="ai-toggleBox">
+            <div className="krds-form-toggle-switch">
+              <input type="checkbox" id="switch" />
+              <label for="switch"><span className="switch-toggle"><i></i></span>마감공고 포함</label>
+            </div>
+          </div>
+
         </div>
         <button type="button" className="krds-btn primary medium">결과 내 재검색하기</button>
       </div>

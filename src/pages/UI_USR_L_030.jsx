@@ -37,6 +37,8 @@ const UI_USR_L_030 = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
+  const [sortType, setSortType] = useState('INQ_CNT');
+
   // ============================================
   // 필터 검색 State (입력용)
   // ============================================
@@ -70,11 +72,12 @@ const UI_USR_L_030 = () => {
         const params = new URLSearchParams({
           page: currentPage + 1,
           size: pageSize,
+          sortType: sortType,
         });
 
         // 탭 필터
         if (appliedTab) {
-          params.append('productType', appliedTab);
+          params.append('plcyFnncGdsTypeCd', appliedTab);
         }
 
         // 검색 키워드
@@ -83,9 +86,6 @@ const UI_USR_L_030 = () => {
         }
 
         // 상세 필터
-        if (appliedProductType) {
-          params.append('productType', appliedProductType);
-        }
         if (appliedFinancialInst) {
           params.append('financialInst', appliedFinancialInst);
         }
@@ -124,6 +124,7 @@ const UI_USR_L_030 = () => {
   }, [
     currentPage,
     pageSize,
+    sortType,
     appliedSearchKeyword,
     appliedTab,
     appliedProductType,
@@ -158,6 +159,13 @@ const UI_USR_L_030 = () => {
       [index]: !prev[index],
     }));
   };
+
+  // 정렬 핸들러
+  const handleSortChange = (type) => {
+    setSortType(type);
+    setCurrentPage(0);
+  };
+
 
   // 검색 버튼 클릭 (입력용 → 전송용)
   const handleSearch = () => {
@@ -267,7 +275,7 @@ const UI_USR_L_030 = () => {
 
           {/* 탭 콘텐츠 */}
           <div className="tab-conts-wrap">
-            <section className={`tab-conts ${activeTabIndex === 0 ? 'active' : ''}`}>
+            <section className="tab-conts active">
               <h3 className="sr-only">정책금융 목록</h3>
 
               {/* 검색 영역 */}
@@ -275,6 +283,7 @@ const UI_USR_L_030 = () => {
                 <div className="sch-form-wrap" ref={schFormWrapRef}>
                   <select className="krds-form-select">
                     <option value="">전체</option>
+                    <option value="flcyFnncNm">상품명</option>
                   </select>
                   <div className="sch-input">
                     <input
@@ -370,9 +379,9 @@ const UI_USR_L_030 = () => {
                         <option value="FS04">중견기업</option>
                         <option value="FS05">계열대기업</option>
                       </select>
-                      <button type="button" className="krds-btn medium text">
+                      {/*<button type="button" className="krds-btn medium text">
                         업종선택 <i className="svg-icon ico-go"></i>
-                      </button>
+                      </button>*/}
                     </div>
 
                     {/* 4. 접수상황 */}
@@ -435,7 +444,7 @@ const UI_USR_L_030 = () => {
                   </div>
 
                   {/*TODO ::: 필터 기능 구현*/}
-                  <dl className="filter-chip">
+                  {/*<dl className="filter-chip">
                     <dt>선택된 필터 <span className="num">2</span></dt>
                     <dd>
                       <button type="button" className="krds-btn xlarge icon border">
@@ -457,7 +466,7 @@ const UI_USR_L_030 = () => {
                         </span>
                       </div>
                     </dd>
-                  </dl>
+                  </dl>*/}
                 </div>
               </div>
 
@@ -473,6 +482,7 @@ const UI_USR_L_030 = () => {
                     <i className="svg-icon ico-help-gray"></i>
                   </Tooltip>
                 </div>
+                {/*TODO ::: 해시태그 구현*/}
                 <div className="krds-tag-wrap">
                   <span className="krds-btn-tag">#개발기술사업화자금</span>
                   <span className="krds-btn-tag">#혁신성장지원자금</span>
@@ -509,15 +519,32 @@ const UI_USR_L_030 = () => {
                       <label htmlFor="sort">정렬기준</label>
                     </strong>
                     <div className="w-sort-btn">
-                      <button type="button" className="active">
-                          등록일순<span className="sr-only">선택됨</span>
+                      <button
+                        type="button"
+                        className={sortType === 'INQ_CNT' ? 'active' : ''}
+                        onClick={() => handleSortChange('INQ_CNT')}
+                      >
+                        조회순
+                        {sortType === 'INQ_CNT' && <span className="sr-only">선택됨</span>}
                       </button>
-                      <button type="button">마감일순</button>
+                      <button
+                        type="button"
+                        className={sortType === 'REG_DT' ? 'active' : ''}
+                        onClick={() => handleSortChange('REG_DT')}
+                      >
+                        등록순
+                        {sortType === 'REG_DT' && <span className="sr-only">선택됨</span>}
+                      </button>
                     </div>
                     <div className="m-sort-btn">
-                      <select className="krds-form-select-sort" id="sort">
-                        <option>등록일순</option>
-                        <option>마감일순</option>
+                      <select
+                        className="krds-form-select-sort"
+                        id="sort"
+                        value={sortType}
+                        onChange={(e) => handleSortChange(e.target.value)}
+                      >
+                        <option value="INQ_CNT">조회순</option>
+                        <option value="REG_DT">등록순</option>
                       </select>
                     </div>
                   </li>

@@ -80,7 +80,7 @@ const Pbanc = () => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">지원사업 공고</h2>
+          <h2 className="h-tit">사업 공고</h2>
         </div>
         <div className="search-top-box">
           <div className="sch-form-wrap" ref={schFormWrapRef}>
@@ -190,15 +190,27 @@ const Pbanc = () => {
           </ul>
           <ul className="sch-sort">
             <li>
+              <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
+              <select className="krds-form-select-sort" id="search_result_count">
+                <option value="10">10개</option>
+                <option value="20">20개</option>
+                <option value="30">30개</option>
+                <option value="40">40개</option>
+                <option value="50">50개</option>
+              </select>
+            </li>
+            <li>
               <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
               <div className="w-sort-btn">
                 <button type="button" onClick="fnSearch('0')" className=" active">등록일순</button>
                 <button type="button" onClick="fnSearch('1')">마감일순</button>
+                <button type="button" onClick="fnSearch('2')">조회순</button>
               </div>
               <div className="m-sort-btn">
                 <select className="krds-form-select-sort" id="sort">
                   <option value="0" selected="selected">등록일순</option>
                   <option value="1">마감일순</option>
+                  <option value="2">조회순</option>
                 </select>
               </div>
             </li>

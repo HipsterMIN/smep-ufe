@@ -13,8 +13,8 @@ const UI_USR_L_030 = lazy(() => import('@pages/UI_USR_L_030.jsx'));
 const UI_USR_L_040 = lazy(() => import('@pages/UI_USR_L_040.jsx'));
 const UI_USR_R_041 = lazy(() => import('@pages/UI_USR_R_041.jsx'));
 const UI_USR_R_031 = lazy(() => import('@pages/UI_USR_R_031.jsx'));
-const UI_USR_R_480 = lazy(() => import('@pages/UI_USR_R_480.jsx'));
-const UI_USR_L_510 = lazy(() => import('@pages/UI_USR_L_510.jsx'));
+const UI_USR_R_480 = lazy(() => import('@pages/my-business/UI_USR_R_480.jsx'));
+const UI_USR_L_510 = lazy(() => import('@pages/my-business/UI_USR_L_510.jsx'));
 const UI_USR_R_060 = lazy(() => import('@pages/UI_USR_R_060.jsx'));
 const UI_USR_L_050 = lazy(() => import('@pages/UI_USR_L_050.jsx'));
 const UI_USR_L_070 = lazy(() => import('@pages/policy-info/UI_USR_L_070.jsx'));
@@ -43,6 +43,17 @@ const UI_USR_R_341 = lazy(() => import('@pages/customer-support/UI-USR-R-341.jsx
 const UI_USR_R_311 = lazy(() => import('@pages/customer-support/UI-USR-R-311.jsx'));
 const UI_USR_R_331 = lazy(() => import('@pages/customer-support/UI-USR-R-331.jsx'));
 const UI_USR_W_332 = lazy(() => import('@pages/customer-support/UI-USR-W-332.jsx'));
+const UI_USR_R_451 = lazy(() => import('@pages/UI-USR-R-451.jsx'));
+const UI_USR_R_420 = lazy(() => import('@pages/my-business/UI-USR-R-420.jsx'));
+const UI_USR_W_430 = lazy(() => import('@pages/my-business/UI-USR-W-430.jsx'));
+const UI_USR_R_440 = lazy(() => import('@pages/my-business/UI-USR-R-440.jsx'));
+const UI_USR_R_450 = lazy(() => import('@pages/my-business/UI-USR-R-450.jsx'));
+const UI_USR_L_460 = lazy(() => import('@pages/my-business/UI-USR-L-460.jsx'));
+const UI_USR_L_020 = lazy(() => import('@pages/UI-USR-L-020.jsx'));
+const UI_USR_L_520 = lazy(() => import('@pages/my-business/UI-USR-L-520.jsx'));
+const UI_USR_L_530 = lazy(() => import('@pages/my-business/UI-USR-L-530.jsx'));
+const UI_USR_L_540 = lazy(() => import('@pages/my-business/UI-USR-L-540.jsx'));
+const UI_USR_L_550 = lazy(() => import('@pages/my-business/UI-USR-L-550.jsx'));
 
 /**
  * =============================================================================
@@ -337,6 +348,18 @@ export const componentMap = {
     layout: SubpageLayoutWithMenu,
   },
 
+  // 플랫폼 소개
+  // 'M_PIIO_00106': {
+  //   component: null,
+  //   layout: SubpageLayoutWithMenu,
+  // },
+
+  // 이용가이드
+  // 'M_PIIO_00107': {
+  //   component: null,
+  //   layout: SubpageLayoutWithMenu,
+  // },
+
   // ========== 마이비즈니스 (M_PIIO_00068) ==========
 
   // AI맞춤추천공고
@@ -348,6 +371,78 @@ export const componentMap = {
   // 증명서 발급 조회
   'M_PIIO_00113': {
     component: UI_USR_L_510,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 지원사업 신청 현황
+  'M_PIIO_00114': {
+    component: UI_USR_L_520,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 회원정보변경
+  'M_PIIO_00115': {
+    component: UI_USR_R_451, //from UI_USR_R_410
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 비밀번호 수정
+  'M_PIIO_00116': {
+    component: UI_USR_R_420,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 인증수단 재설정
+  'M_PIIO_00117': {
+    component: UI_USR_W_430,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 회원탈퇴
+  'M_PIIO_00118': {
+    component: UI_USR_R_440,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 기업 기본정보
+  'M_PIIO_00119': {
+    component: UI_USR_R_450,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 경영현황 분석
+  // 'M_PIIO_00120': {
+  //   component: UI_USR_R_490,
+  //   layout: SubpageLayoutWithMenu,
+  // },
+
+  // 담당자 관리
+  'M_PIIO_00121': {
+    component: UI_USR_L_460,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 문의 관리
+  'M_PIIO_00122': {
+    component: UI_USR_L_020, // from UI_USR_L_470,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 관심 공고
+  'M_PIIO_00123': {
+    component: UI_USR_L_530,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 나의 알림
+  'M_PIIO_00124': {
+    component: UI_USR_L_540,
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 나의 Open API 신청내역
+  'M_PIIO_00125': {
+    component: UI_USR_L_550,
     layout: SubpageLayoutWithMenu,
   },
 

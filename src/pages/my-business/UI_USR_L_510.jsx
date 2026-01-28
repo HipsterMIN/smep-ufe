@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import SideNavigation from '../components/ui/SideNavigation';
-import Breadcrumb from '../components/ui/Breadcrumb';
-import Pagination from '../components/ui/Pagination';
-import { api as apiClient } from '../lib/apiClient.js';
-import { useUserMenu } from '../context/UserMenuContext.jsx';
+import SideNavigation from '@components/ui/SideNavigation.jsx';
+import Breadcrumb from '@components/ui/Breadcrumb.jsx';
+import Pagination from '@components/ui/Pagination.jsx';
+import { api as apiClient } from '@lib/apiClient.js';
+import { useUserMenu } from '@context/UserMenuContext.jsx';
+import Datepicker from '@components/ui/Datepicker.jsx';
  
 const UI_USR_L_510 = () => {
   const [issuanceList, setIssuanceList] = useState([]);
@@ -81,6 +82,12 @@ const UI_USR_L_510 = () => {
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
 
+  // 조회기간 Datepicker start
+  const [startDate, setStartDate] = useState(null);
+
+  // 조회기간 Datepicker end
+  const [endDate, setEndDate] = useState(null);
+
   return (
     <>
       <SideNavigation
@@ -94,14 +101,37 @@ const UI_USR_L_510 = () => {
         </div>
         <div className="txt-box">
           <p className="outline-txt">
-						증명(확인)서는 발급완료 후 하루 동안 출력할 수 있으며, 익일 이후에는 다시 발급신청을 하셔야 출력 가능합니다.<br/>
-						(발급이후 변경 승인된 경우 발급으로부터 24시간 동안은 변경 이전 내용으로 동일하게 발급되며 24시간 이후 변경된 내용으로 발급 가능합니다.)<br/>
-						모바일에서는 PDF파일 다운로드 방식만 지원되므로, 인쇄를 원하실 경우 PC로 접속하여 증명서 출력을 진행해 주시기 바랍니다.<br/><br/>
-						발급된 전자증명서는 정부전자문서지갑에서 확인이 가능합니다.<br/>
-						· 개인사업자회원: 전자증명서를 발급한 담당자의 개인 정부전자문서지갑에서 확인<br/>
-						· 법인사업자회원: 법인사업자용 정부전자문서지갑(<a className="on-linktxt2" href="https://dpaper.kr/" target="_blank" title="새 창 열림">dpaper.kr</a>)에서 확인
+            증명(확인)서는 발급완료 후 하루 동안 출력할 수 있으며, 익일 이후에는 다시 발급신청을 하셔야 출력 가능합니다.<br/>
+            (발급이후 변경 승인된 경우 발급으로부터 24시간 동안은 변경 이전 내용으로 동일하게 발급되며 24시간 이후 변경된 내용으로 발급 가능합니다.)<br/>
+            모바일에서는 PDF파일 다운로드 방식만 지원되므로, 인쇄를 원하실 경우 PC로 접속하여 증명서 출력을 진행해 주시기 바랍니다.<br/><br/>
+            발급된 전자증명서는 정부전자문서지갑에서 확인이 가능합니다.<br/>
+            · 개인사업자회원: 전자증명서를 발급한 담당자의 개인 정부전자문서지갑에서 확인<br/>
+            · 법인사업자회원: 법인사업자용 정부전자문서지갑(<a className="on-linktxt2" href="https://dpaper.kr/" target="_blank"
+              title="새 창 열림">dpaper.kr</a>)에서 확인
           </p>
         </div>
+        <div className="search-top-box no-details mt-40">
+          <div className="form-row-box gap-12">
+
+            <div className="datepicker-group">
+              <Datepicker
+                menuName="조회기간"
+                id="datepicker_01"
+                selected={startDate}
+                onChange={(date) => setStartDate(date)}
+              />
+              <span>~</span>
+              <Datepicker
+                id="datepicker_02"
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+              />
+            </div>
+
+            <button type="button" className="krds-btn primary medium">검색</button>
+          </div>
+        </div>
+
 
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
@@ -187,17 +217,17 @@ const UI_USR_L_510 = () => {
                       </select>
                     </td>
                     <td className="ac">
-                      {isExpired(item.aplyDt) ? (
-                        <button type="button" className="krds-btn small" disabled>출력</button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="krds-btn small"
-                          onClick={() => window.open('https://www.smes.go.kr/ClipReport4/commonTibero.jsp?fileName=AA_SME&CRTF_REQST_SNO=20260113620149', '_blank')}
-                        >
-												출력
-                        </button>
-                      )}
+                      {/*{isExpired(item.aplyDt) ? (*/}
+                      {/*  <button type="button" className="krds-btn small" disabled>출력</button>*/}
+                      {/*) : (*/}
+                      <button
+                        type="button"
+                        className="krds-btn small"
+                        onClick={() => window.open('https://www.smes.go.kr/ClipReport4/commonTibero.jsp?fileName=AA_SME&CRTF_REQST_SNO=20260113620149', '_blank')}
+                      >
+                            출력
+                      </button>
+                      {/*)}*/}
                     </td>
                   </tr>
                 ))

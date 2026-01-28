@@ -32,6 +32,12 @@ const Pbanc = () => {
     shadowTextRef3.current.classList.toggle('on');
   };
 
+  const shadowTextRef4 = useRef('null');
+
+  const handleToggleTextShadow4 = () => {
+    shadowTextRef4.current.classList.toggle('on');
+  };
+
   const detail = async () => {
     /*const config = {
       method: 'GET',
@@ -92,8 +98,8 @@ const Pbanc = () => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems}/>
         <div className="page-title-wrap" data-type="responsive">
-          <p className="on-p1 on-colorblue">지원사업공고</p>
-          <h2 className="h-tit2">지원사업 공고</h2>
+          <p className="on-p1 on-colorblue">사업공고</p>
+          <h2 className="h-tit2">{item?.pbancnm}</h2>
         </div>
         <ul className="onboard-summary">
           <li>
@@ -134,6 +140,22 @@ const Pbanc = () => {
                 </button>
               </dd>
             ) : (<dd>{item?.bizotln}</dd>)}
+            <dt>사업신청 방법</dt>
+            <dd>
+              <ul className="list">
+                <li>{item?.aplymthcn}</li>
+                {item?.bizaplyurl && (
+                  <li>
+                    <button type="button" className="krds-btn xsmall"
+                      onClick={() => window.open(item?.bizaplyurl, '_blank')}>
+                        온라인 신청 바로가기
+                      <i className="svg-icon ico-angle right"></i>
+                    </button>
+                  </li>
+                )}
+                {/*<li>오프라인 신청</li>*/}
+              </ul>
+            </dd>
             <dt>지원대상</dt>
             {item?.sprttrgt.length > 200 ? (
               <dd>
@@ -162,24 +184,19 @@ const Pbanc = () => {
             ) : (<dd>{item?.sbmsndcmnt}</dd>)}
             <dt>신청 제외 대상</dt>
             <dd>{item?.aplyexcltrgt}</dd>
-            <dt>사업신청 방법</dt>
-            <dd>
-              <ul className="list">
-                <li>{item?.aplymthcn}</li>
-                {item?.bizaplyurl && (
-                  <li>
-                    <button type="button" className="krds-btn xsmall"
-                      onClick={() => window.open(item?.bizaplyurl, '_blank')}>
-                        온라인 신청 바로가기
-                      <i className="svg-icon ico-angle right"></i>
-                    </button>
-                  </li>
-                )}
-                {/*<li>오프라인 신청</li>*/}
-              </ul>
-            </dd>
             <dt>문의처</dt>
-            <dd>{item?.inqpl}</dd>
+            {item?.inqpl.length > 200 ? (
+              <dd>
+                <div className="onshadow-text" ref={shadowTextRef4}>
+                  {item?.inqpl}
+                </div>
+                <button type="button" className="krds-btn tertiary xsmall ontoggle-textshadow"
+                  onClick={handleToggleTextShadow4}>
+                    전체보기
+                  <i className="svg-icon ico-angle"></i>
+                </button>
+              </dd>
+            ) : (<dd>{item?.inqpl}</dd>)}
           </dl>
         </div>
         <div style={{
@@ -289,11 +306,11 @@ const Pbanc = () => {
             </button>
           </div>
           <div>
-            <button type="button" className="krds-btn secondary xlarge" onClick={() => {window.scrollTo(0, 0);navigate('/req/ai/ai-smart-search');}}>
-              <i className="svg-icon ico-faq"></i>
-                AI 상세 상담
-            </button>
             {/*todo 시연용 임시주석*/}
+            {/*<button type="button" className="krds-btn secondary xlarge" onClick={() => {window.scrollTo(0, 0);navigate('/req/ai/ai-smart-search');}}>*/}
+            {/*  <i className="svg-icon ico-faq"></i>*/}
+            {/*    AI 상세 상담*/}
+            {/*</button>*/}
             {/*<button type="button" className="krds-btn tertiary xlarge">*/}
             {/*  <i className="svg-icon ico-like"></i>*/}
             {/*    관심*/}
