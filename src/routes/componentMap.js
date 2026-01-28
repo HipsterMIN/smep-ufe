@@ -25,6 +25,8 @@ const UI_USR_R_212 = lazy(() => import('@pages/data-open/UI-USR-R-212.jsx'));
 const UI_USR_R_213 = lazy(() => import('@pages/data-open/UI-USR-R-213.jsx'));
 const UI_USR_R_214 = lazy(() => import('@pages/data-open/UI-USR-R-214.jsx'));
 const UI_USR_R_215 = lazy(() => import('@pages/data-open/UI-USR-R-215.jsx'));
+const UI_USR_L_070 = lazy(() => import('@pages/policy-info/UI_USR_L_070.jsx'));
+const UI_USR_R_091 = lazy(() => import('@pages/policy-info/UI_USR_R_091.jsx'));
 const UI_USR_R_232 = lazy(() => import('@pages/data-open/UI-USR-R-232.jsx'));
 const UI_USR_W_231 = lazy(() => import('@pages/data-open/UI-USR-W-231.jsx'));
 
@@ -170,6 +172,20 @@ export const componentMap = {
   'M_PIIO_00080': {
     component: UI_USR_R_060,
     layout: SubpageLayoutWithMenu,
+  },
+
+  // ========== 정책정보 (M_PIIO_00065) ==========
+
+  // 정책뉴스
+  'M_PIIO_00084': {
+    component: UI_USR_L_070, // /plcy/reprt/UI_USR_L_070
+    layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: ':id',  // /plcy/reprt/UI_USR_L_070/123
+        component: UI_USR_R_091,
+      },
+    ],
   },
 
   // ========== 데이터 개방 (M_PIIO_00066) ==========
