@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api as apiClient } from '../lib/apiClient.js';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
 import reportImage from '../assets/temp/ReportView.png';
+import temphwp from '@assets/temp/Temp.png';
 
 const Pbanc = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -17,6 +18,18 @@ const Pbanc = () => {
 
   const handleToggleTextShadow = () => {
     shadowTextRef.current.classList.toggle('on');
+  };
+
+  const shadowTextRef2 = useRef('null');
+
+  const handleToggleTextShadow2 = () => {
+    shadowTextRef2.current.classList.toggle('on');
+  };
+
+  const shadowTextRef3 = useRef('null');
+
+  const handleToggleTextShadow3 = () => {
+    shadowTextRef3.current.classList.toggle('on');
   };
 
   const detail = async () => {
@@ -109,20 +122,44 @@ const Pbanc = () => {
             <dt>소관부처·지자체</dt>
             <dd>{item?.mngdeptnm}</dd>
             <dt>사업개요</dt>
-            <dd>
-              <div className="onshadow-text" ref={shadowTextRef}>
-                {item?.bizotln}
-              </div>
-              <button type="button" className="krds-btn tertiary xsmall ontoggle-textshadow"
-                onClick={handleToggleTextShadow}>
-                전체보기
-                <i className="svg-icon ico-angle"></i>
-              </button>
-            </dd>
+            {item?.bizotln.length > 200 ? (
+              <dd>
+                <div className="onshadow-text" ref={shadowTextRef}>
+                  {item?.bizotln}
+                </div>
+                <button type="button" className="krds-btn tertiary xsmall ontoggle-textshadow"
+                  onClick={handleToggleTextShadow}>
+                    전체보기
+                  <i className="svg-icon ico-angle"></i>
+                </button>
+              </dd>
+            ) : (<dd>{item?.bizotln}</dd>)}
             <dt>지원대상</dt>
-            <dd>{item?.sprttrgt}</dd>
+            {item?.sprttrgt.length > 200 ? (
+              <dd>
+                <div className="onshadow-text" ref={shadowTextRef2}>
+                  {item?.sprttrgt}
+                </div>
+                <button type="button" className="krds-btn tertiary xsmall ontoggle-textshadow"
+                  onClick={handleToggleTextShadow2}>
+                    전체보기
+                  <i className="svg-icon ico-angle"></i>
+                </button>
+              </dd>
+            ) : (<dd>{item?.sprttrgt}</dd>)}
             <dt>제출서류</dt>
-            <dd>{item?.sbmsndcmnt}</dd>
+            {item?.sbmsndcmnt.length > 200 ? (
+              <dd>
+                <div className="onshadow-text" ref={shadowTextRef3}>
+                  {item?.sbmsndcmnt}
+                </div>
+                <button type="button" className="krds-btn tertiary xsmall ontoggle-textshadow"
+                  onClick={handleToggleTextShadow3}>
+                    전체보기
+                  <i className="svg-icon ico-angle"></i>
+                </button>
+              </dd>
+            ) : (<dd>{item?.sbmsndcmnt}</dd>)}
             <dt>신청 제외 대상</dt>
             <dd>{item?.aplyexcltrgt}</dd>
             <dt>사업신청 방법</dt>
@@ -177,20 +214,32 @@ const Pbanc = () => {
               </li>
             </ul>
           </div>*/}
-        {item?.atchfilenm && (
+        {item?.pbancmtxtfilenm && (
           <div className="onbox-group-areawrap">
             <p className="onbox-group-title">첨부파일</p>
             <ul className="box-group-area">
               <li>
                 <p className="tit">
                   <i className="svg-icon ico-file2"></i>
-                  {item?.atchfilenm}
+                  {item?.pbancmtxtfilenm}
                 </p>
                 <div className="btn-wrap">
-                  <a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열기"><i
-                    className="svg-icon ico-sch-plus"></i> 바로보기 </a>
-                  <button type="button" className="krds-btn medium text on-colorblue"><i
-                    className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
+                  {/* todo 시연용 임시주석 */}
+                  {/*<a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열기"><i*/}
+                  {/*  className="svg-icon ico-sch-plus"></i> 바로보기 </a>*/}
+                  <button
+                    type="button"
+                    className="krds-btn medium text on-colorblue"
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = temphwp; // todo 시연용 임시파일
+                      link.download = item?.pbancmtxtfilenm;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                  >
+                    <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
                   </button>
                 </div>
               </li>
@@ -234,7 +283,7 @@ const Pbanc = () => {
             <button
               type="button"
               className="krds-btn tertiary xlarge"
-              onClick={() => navigate('/service/pbanc')}
+              onClick={() => navigate('/req/pbanc/pbanc')}
             >
                 목록
             </button>
@@ -244,40 +293,46 @@ const Pbanc = () => {
               <i className="svg-icon ico-faq"></i>
                 AI 상세 상담
             </button>
-            <button type="button" className="krds-btn tertiary xlarge">
-              <i className="svg-icon ico-like"></i>
-                관심
-            </button>
-            <button type="button" className="krds-btn tertiary xlarge">
-              <i className="svg-icon ico-copy"></i>
-                링크복사
-            </button>
-            <button type="button" className="krds-btn tertiary xlarge">
+            {/*todo 시연용 임시주석*/}
+            {/*<button type="button" className="krds-btn tertiary xlarge">*/}
+            {/*  <i className="svg-icon ico-like"></i>*/}
+            {/*    관심*/}
+            {/*</button>*/}
+            {/*<button type="button" className="krds-btn tertiary xlarge">*/}
+            {/*  <i className="svg-icon ico-copy"></i>*/}
+            {/*    링크복사*/}
+            {/*</button>*/}
+            <button
+              type="button"
+              className="krds-btn tertiary xlarge"
+              onClick={() => window.open(item?.pbancurl, '_blank')}
+            >
                 출처바로가기
               <i className="svg-icon ico-angle right"></i>
             </button>
           </div>
         </div>
 
-        <div className="assess-question-wrap">
-          <div className="assess-qu">이 페이지에 만족하시나요?</div>
-          <div className="assess-an">
-            <div className="krds-form-chip large">
-              <input type="radio" className="radio" name="rdo_chip_size2" id="rdo_chip_lg2-1" checked=""/>
-              <label className="krds-form-chip-outline yes" htmlFor="rdo_chip_lg2-1">
-                  네
-                <i className="svg-icon ico-smile"></i>
-              </label>
-            </div>
-            <div className="krds-form-chip large">
-              <input type="radio" className="radio" name="rdo_chip_size2" id="rdo_chip_lg2-2"/>
-              <label className="krds-form-chip-outline no" htmlFor="rdo_chip_lg2-2">
-                  아니오
-                <i className="svg-icon ico-sad"></i>
-              </label>
-            </div>
-          </div>
-        </div>
+        {/*todo 시연용 임시주석*/}
+        {/*<div className="assess-question-wrap">*/}
+        {/*  <div className="assess-qu">이 페이지에 만족하시나요?</div>*/}
+        {/*  <div className="assess-an">*/}
+        {/*    <div className="krds-form-chip large">*/}
+        {/*      <input type="radio" className="radio" name="rdo_chip_size2" id="rdo_chip_lg2-1" checked=""/>*/}
+        {/*      <label className="krds-form-chip-outline yes" htmlFor="rdo_chip_lg2-1">*/}
+        {/*          네*/}
+        {/*        <i className="svg-icon ico-smile"></i>*/}
+        {/*      </label>*/}
+        {/*    </div>*/}
+        {/*    <div className="krds-form-chip large">*/}
+        {/*      <input type="radio" className="radio" name="rdo_chip_size2" id="rdo_chip_lg2-2"/>*/}
+        {/*      <label className="krds-form-chip-outline no" htmlFor="rdo_chip_lg2-2">*/}
+        {/*          아니오*/}
+        {/*        <i className="svg-icon ico-sad"></i>*/}
+        {/*      </label>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
 
 
       </div>

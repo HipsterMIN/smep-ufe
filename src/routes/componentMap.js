@@ -38,6 +38,9 @@ const UI_USR_L_510 = lazy(() => import('../pages/UI_USR_L_510.jsx'));
 const UI_USR_R_060 = lazy(() => import('../pages/UI_USR_R_060.jsx'));
 const UI_USR_L_050 = lazy(() => import('../pages/UI_USR_L_050.jsx'));
 
+const UI_USR_L_070 = lazy(() => import('../pages/policy-info/UI_USR_L_070.jsx'));
+const UI_USR_R_091 = lazy(() => import('../pages/policy-info/UI_USR_R_091.jsx'));
+
 
 // 컴포넌트 매핑
 export const componentMap = {
@@ -121,6 +124,20 @@ export const componentMap = {
   'M_PIIO_00080': {
     component: UI_USR_R_060,
     layout: SubpageLayoutWithMenu,
+  },
+
+  // ========== 정책정보 (M_PIIO_00065) ==========
+
+  // 정책뉴스
+  'M_PIIO_00084': {
+    component: UI_USR_L_070, // /plcy/reprt/UI_USR_L_070
+    layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: ':id',  // /plcy/reprt/UI_USR_L_070/123
+        component: UI_USR_R_091,
+      },
+    ],
   },
 
   // ========== 마이비즈니스 (M_PIIO_00068) ==========

@@ -1360,7 +1360,7 @@
 }
 /* onshadow-text */
 .onshadow-text {
-  height: 130px;
+  height: 80px;/* 원래 130px 시연용으로 임시로 80px변경 협의필요 */
   overflow: hidden;
   position: relative;
   margin-bottom: 12px;
