@@ -265,6 +265,18 @@ export const componentMap = {
     layout: SubpageLayoutWithMenu,
   },
 
+  // 플랫폼 소개
+  // 'M_PIIO_00106': {
+  //   component: null,
+  //   layout: SubpageLayoutWithMenu,
+  // },
+
+  // 이용가이드
+  // 'M_PIIO_00107': {
+  //   component: null,
+  //   layout: SubpageLayoutWithMenu,
+  // },
+
   // ========== 마이비즈니스 (M_PIIO_00068) ==========
 
   // AI맞춤추천공고
