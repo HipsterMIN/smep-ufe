@@ -183,11 +183,11 @@ export default function Header() {
                         <span
                           className="krds-btn-tag"
                           style={{ cursor: 'pointer',
-                            backgroundColor: isCompany ? '#FFFFFF' : '#1c267b',
-                            color: isCompany ? '#000000' : '#FFFFFF' }}
+                            backgroundColor: !isCompany ? '#FFFFFF' : '#1c267b',
+                            color: !isCompany ? '#000000' : '#FFFFFF' }}
                           onClick={() => setIsCompany(!isCompany)}
                         >
-                          {isCompany ? '개인회원 전환' : '기업회원 전환'}
+                          {!isCompany ? '개인회원 전환' : '기업회원 전환'}
                         </span>
                       </div>
                       <button type="button" className="btn-navi logout" onClick={logout}>로그아웃</button>
