@@ -681,7 +681,7 @@ const AiSmartSearchContent = () => {
                           {summaryMarkdown}
                         </ReactMarkdown>
                       ) : isRealLoading ? (
-                        'AI가 요약을 생성 중입니다...'
+                        'AI가 응답을 생성 중입니다...'
                       ) : (
                         '분석 결과가 없습니다.'
                       )}
