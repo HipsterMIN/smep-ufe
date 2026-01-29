@@ -46,11 +46,11 @@ const UI_USR_R_002 = () => {
         'brno': brno,
       };
 
-      const response = await apiClient.post('/api/v1/account/scenario-login', body);
-      const companyProfile = response.data || await getCompanyProfileByBizNo(brno);
+      //const response = await apiClient.post('/api/v1/account/scenario-login', body);
+      const companyProfile = getCompanyProfileByBizNo(brno);
 
       // 로그인 처리
-      login(brno, response.cmpNm, response.companySize, companyProfile);
+      login(brno, companyProfile.cmpNm, companyProfile.companySize, companyProfile);
 
       // ✅ 부모 창에 메시지 전송
       if (window.opener) {
@@ -59,8 +59,8 @@ const UI_USR_R_002 = () => {
             type: 'LOGIN_SUCCESS',
             data: {
               brno,
-              cmpNm: response.cmpNm,
-              companySize: response.companySize,
+              cmpNm: companyProfile.cmpNm,
+              companySize: companyProfile.companySize,
               companyProfile: companyProfile,
             },
           },
