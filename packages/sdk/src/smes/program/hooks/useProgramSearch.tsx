@@ -27,6 +27,7 @@ import type {
   CompanyProfile,
 } from "../types";
 import type { DomainType, SearchRequest } from "../../../core/types";
+import type { StatusEvent } from "../../../react/hooks/useCubeIAxChat";
 
 // ============================================
 // Types
@@ -126,6 +127,8 @@ export interface ProgramSearchContextValue {
   streamingSummary: string;
   /** 요약 로딩 중 */
   isSummaryLoading: boolean;
+  /** 상태 메시지 */
+  status: StatusEvent | null;
   /** 검색 실행 */
   search: (query: string, filters?: SearchFilters, options?: Partial<SearchRequest>) => void;
 }
@@ -386,6 +389,7 @@ function useProgramSearchInternal(): ProgramSearchContextValue {
     summary,
     streamingSummary,
     isSummaryLoading: sdk.isLoading && sdk.results.length > 0,
+    status: sdk.status,
     search: (query: string, filters?: SearchFilters, options?: Partial<SearchRequest>) => {
       currentFiltersRef.current = filters;
       const backendFilters = buildBackendFilters(filters);
