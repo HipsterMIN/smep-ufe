@@ -318,6 +318,29 @@ const SprtBiz = () => {
                       </div>
                     </div>
                   </div>
+                  {/*<dl className="filter-chip">
+                    <dt>선택된 필터 <span className="num">2</span></dt>
+                    <dd>
+                      <button type="button" className="krds-btn xlarge icon border">
+                        <span className="sr-only">새로고침</span>
+                        <i className="svg-icon ico-refresh"></i>
+                      </button>
+                      <div className="chip-wrap krds-tag-wrap large">
+                        <span className="krds-btn-tag">
+                              금융
+                          <button type="button" className="btn-delete">
+                            <span className="sr-only">삭제</span>
+                          </button>
+                        </span>
+                        <span className="krds-btn-tag">
+                              서울
+                          <button type="button" className="btn-delete">
+                            <span className="sr-only">삭제</span>
+                          </button>
+                        </span>
+                      </div>
+                    </dd>
+                  </dl>*/}
                 </div>
               </div>
 
@@ -495,6 +518,29 @@ const SprtBiz = () => {
                       </div>
                     </div>
                   </div>
+                  {/*<dl className="filter-chip">
+                    <dt>선택된 필터 <span className="num">2</span></dt>
+                    <dd>
+                      <button type="button" className="krds-btn xlarge icon border">
+                        <span className="sr-only">새로고침</span>
+                        <i className="svg-icon ico-refresh"></i>
+                      </button>
+                      <div className="chip-wrap krds-tag-wrap large">
+                        <span className="krds-btn-tag">
+                              금융
+                          <button type="button" className="btn-delete">
+                            <span className="sr-only">삭제</span>
+                          </button>
+                        </span>
+                        <span className="krds-btn-tag">
+                              서울
+                          <button type="button" className="btn-delete">
+                            <span className="sr-only">삭제</span>
+                          </button>
+                        </span>
+                      </div>
+                    </dd>
+                  </dl>*/}
                 </div>
               </div>
 

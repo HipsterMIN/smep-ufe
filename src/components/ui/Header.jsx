@@ -13,12 +13,13 @@ const BASE_URL = import.meta.env.VITE_BASE || '/';
 export default function Header() {
   const [openIndex, setOpenIndex] = useState(null);
   const [activeMobileTab, setActiveMobileTab] = useState(0);
-  const { isLogin, logout } = useAuthStore();
+  const { isLogin, logout, companyProfile } = useAuthStore();
   const { menuTree, flatMenuMap, fetchMenuData } = useMenuStore();
   const mobGnbRef = useRef(null);
   const { getFullPath } = useUserMenu();
   const openTimeoutRef = useRef(null);
   const closeTimeoutRef = useRef(null);
+  const [isCompany, setIsCompany] = useState(false);
   
   // 메뉴 데이터 로드
   useEffect(() => {
@@ -130,10 +131,35 @@ export default function Header() {
                   {/* <button type="button" className="btn-navi sch open-modal" data-target="popTotalSch">통합검색</button> */}
                   {isLogin ? (
                     <>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: '8px',
+                      }}>{companyProfile.cmpNm}님이 로그인 되었습니다.
+                      </div>
+                      <div className="chip-wrap krds-tag-wrap large" style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: '8px',
+                      }}>
+                        <span
+                          className="krds-btn-tag"
+                          style={{ cursor: 'pointer',
+                            backgroundColor: isCompany ? '#FFFFFF' : '#1c267b',
+                            color: isCompany ? '#000000' : '#FFFFFF' }}
+                          onClick={() => setIsCompany(!isCompany)}
+                        >
+                          {isCompany ? '개인회원 전환' : '기업회원 전환'}
+                        </span>
+                      </div>
                       <button type="button" className="btn-navi logout" onClick={logout}>로그아웃</button>
                       <div className="krds-drop-wrap my-drop">
-                        <button type="button" className="btn-navi my drop-btn active" onClick={() => handleClickMypage()}>마이 비즈니스</button>
-                        <div className="drop-menu" >
+                        <button type="button" className="btn-navi my drop-btn active"
+                          onClick={() => handleClickMypage()}>마이 비즈니스
+                        </button>
+                        <div className="drop-menu">
                           <div className="drop-in">
                             <div className="drop-top">
                               <p className="my-name">홍길동님</p>
@@ -162,11 +188,15 @@ export default function Header() {
                     </>
                   ) : (
                     <>
-                      <a href="#" className="btn-navi login" onClick={(e) => { handleClick();}}>로그인</a>
+                      <a href="#" className="btn-navi login" onClick={(e) => {
+                        handleClick();
+                      }}>로그인</a>
                       <button type="button" className="btn-navi join">회원가입</button>
                     </>
                   )}
-                  <button type="button" onClick={handleOpenMobGnb} className="btn-navi all" aria-controls="mobile-nav">전체메뉴</button>
+                  <button type="button" onClick={handleOpenMobGnb} className="btn-navi all"
+                    aria-controls="mobile-nav">전체메뉴
+                  </button>
                 </div>
               </div>
             </div>
