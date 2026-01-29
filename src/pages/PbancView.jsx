@@ -13,6 +13,7 @@ const Pbanc = () => {
   const { id } = useParams();
   const [item, setItem] = useState(null);
   const navigate = useNavigate();
+  const [viewerVisible, setViewerVisible] = useState(false);
 
   const shadowTextRef = useRef('null');
 
@@ -199,20 +200,21 @@ const Pbanc = () => {
             ) : (<dd>{item?.inqpl}</dd>)}
           </dl>
         </div>
-        <div style={{
-          width: '100%',
-          textAlign: 'center',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: '48px',
-        }}>
-          <img style={{
+        {viewerVisible && (
+          <div style={{
             width: '100%',
-          }}
-          src={reportImage} alt="문서뷰어 영역"/>
-        </div>
-
+            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '48px',
+          }}>
+            <img style={{
+              width: '100%',
+            }}
+            src={reportImage} alt="문서뷰어 영역"/>
+          </div>
+        )}
         {/*<div className="onbox-group-areawrap">
             <p className="onbox-group-title">본문출력파일</p>
             <ul className="box-group-area">
@@ -241,9 +243,18 @@ const Pbanc = () => {
                   {item?.pbancmtxtfilenm}
                 </p>
                 <div className="btn-wrap">
-                  {/* todo 시연용 임시주석 */}
-                  {/*<a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열기"><i*/}
-                  {/*  className="svg-icon ico-sch-plus"></i> 바로보기 </a>*/}
+                  <a
+                    href="#"
+                    className="krds-btn medium link basic"
+                    target="_blank"
+                    title="새 창 열기"
+                    onClick={(e) => {
+                      e.preventDefault(); // 새 탭 열기 방지
+                      setViewerVisible(v => !v); // 토글
+                    }}
+                  >
+                    <i className="svg-icon ico-sch-plus"></i> 바로보기
+                  </a>
                   <button
                     type="button"
                     className="krds-btn medium text on-colorblue"
