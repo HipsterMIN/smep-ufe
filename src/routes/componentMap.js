@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 
 // 즉시 import (페이지 로드 시 바로 필요한 것들)
-import AiSmartSearch from '@pages/AiSmartSearch.jsx';
+import AiSmartSearch from '@pages/ai/AiSmartSearch.jsx';
 import { MenuProviderOnly, SubpageLayoutWithMenu } from '@layouts/layoutIndex.jsx';
 
 // Lazy import (필요할 때 로드)
