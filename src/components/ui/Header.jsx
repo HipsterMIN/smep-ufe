@@ -74,7 +74,7 @@ export default function Header() {
   const navigate = useNavigate();
   const handleClick = () => {
     // 새 창 열기 (크기 지정)
-    const loginWindow = window.open('/main-dev/service/SSO-login', 'login-popup', 'width=700,height=650');
+    const loginWindow = window.open('/main-dev/service/SSO-login', 'login-popup', 'width=1050,height=1000');
 
     // 부모 창에서 메시지 리스너 등록
     const handleLoginMessage = (event) => {
