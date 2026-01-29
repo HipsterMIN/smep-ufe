@@ -17,7 +17,8 @@ export default function Header() {
   const { menuTree, flatMenuMap, fetchMenuData } = useMenuStore();
   const mobGnbRef = useRef(null);
   const { getFullPath } = useUserMenu();
-  const hoverTimeoutRef = useRef(null);
+  const openTimeoutRef = useRef(null);
+  const closeTimeoutRef = useRef(null);
   
   // 메뉴 데이터 로드
   useEffect(() => {
@@ -56,12 +57,16 @@ export default function Header() {
   }, [menuTree, flatMenuMap]);
 
   const handleMouseEnter = (menuId) => {
-    clearTimeout(hoverTimeoutRef.current);
-    setOpenIndex(menuId);
+    clearTimeout(closeTimeoutRef.current);
+    clearTimeout(openTimeoutRef.current);
+    openTimeoutRef.current = setTimeout(() => {
+      setOpenIndex(menuId);
+    }, 200);
   };
 
   const handleMouseLeave = () => {
-    hoverTimeoutRef.current = setTimeout(() => {
+    clearTimeout(openTimeoutRef.current);
+    closeTimeoutRef.current = setTimeout(() => {
       setOpenIndex(null);
     }, 230); // 딜레이 조절 가능
   };
