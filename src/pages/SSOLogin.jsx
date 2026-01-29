@@ -47,8 +47,7 @@ const UI_USR_R_002 = () => {
       };
 
       const response = await apiClient.post('/api/v1/account/scenario-login', body);
-      //const companyProfile = getCompanyProfileByBizNo(brno);
-      const companyProfile = response.data;
+      const companyProfile = response.data || await getCompanyProfileByBizNo(brno);
 
       // 로그인 처리
       login(brno, response.cmpNm, response.companySize, companyProfile);

@@ -166,7 +166,7 @@ export default function Header() {
                         justifyContent: 'center',
                         alignItems: 'center',
                         marginRight: '8px',
-                      }}>{companyProfile.cmpNm}님이 로그인 되었습니다.
+                      }}>{companyProfile?.cmpNm || ''}님이 로그인 되었습니다.
                       </div>
                       <div className="chip-wrap krds-tag-wrap large" style={{
                         display: 'flex',
