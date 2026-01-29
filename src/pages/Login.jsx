@@ -38,9 +38,9 @@ const UI_USR_R_002 = () => {
 
     const response = await apiClient.post('/api/v1/account/scenario-login', body);
     console.log(response);
-    const companyProfile = getCompanyProfileByBizNo(brno);
+    // const companyProfile = getCompanyProfileByBizNo(brno);
+    const companyProfile = response.data;
     login(brno, response.cmpNm, response.companySize, companyProfile);
-
 
     navigate('/'); // 지원사업 상세 이미지 페이지 링크
   };
