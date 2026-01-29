@@ -11,6 +11,7 @@ const BASE_URL = import.meta.env.VITE_BASE || '/';
 
 // 관리자 - 상단 메뉴
 export default function Header() {
+  const { login } = useAuthStore();
   const [openIndex, setOpenIndex] = useState(null);
   const [activeMobileTab, setActiveMobileTab] = useState(0);
   const { isLogin, logout, companyProfile } = useAuthStore();
@@ -90,9 +91,13 @@ export default function Header() {
         if (loginWindow && !loginWindow.closed) {
           loginWindow.close();
         }
+        const data = event.data.data;
+
+        login(data.brno, data.cmpNm, data.companySize, data.companyProfile);
 
         // 페이지 새로고침
-        window.location.reload();
+        // window.location.reload();
+        console.log( data.companyProfile );
       }
     };
 
@@ -105,6 +110,7 @@ export default function Header() {
         window.removeEventListener('message', handleLoginMessage);
       }
     }, 500);
+
   };
   const handleClickMypage = () => {
     navigate(getFullPath('M_PIIO_00113')); // 증명서 발급 메뉴로 이동

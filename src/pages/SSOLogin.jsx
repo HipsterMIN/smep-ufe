@@ -8,7 +8,7 @@ import { getCompanyProfileByBizNo } from '../lib/companyProfiles.js';
 
 const UI_USR_R_002 = () => {
   const { login } = useAuthStore();
-  const [lgnId, setLgnId] = useState('test01');
+  const [lgnId, setLgnId] = useState('01');
 
   const navigate = useNavigate();
   const breadcrumbItems = [
@@ -61,6 +61,7 @@ const UI_USR_R_002 = () => {
               brno,
               cmpNm: response.cmpNm,
               companySize: response.companySize,
+              companyProfile: companyProfile,
             },
           },
           window.location.origin, // 보안: 같은 출처만 허용
