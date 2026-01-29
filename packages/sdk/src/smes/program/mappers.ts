@@ -32,6 +32,26 @@ import {
 } from "./constants";
 
 // ============================================
+// 텍스트 정리 유틸
+// ============================================
+
+/**
+ * 깨진 유니코드 문자 정리
+ * - U+FFFD (�) 제거
+ * - 연속된 특수문자 정리
+ */
+function sanitizeText(text: string): string {
+  if (!text) return text;
+  return text
+    // U+FFFD (replacement character) 제거
+    .replace(/\uFFFD+/g, '')
+    // 결과적으로 빈 괄호가 생기면 정리: [] () 「」 『』 등
+    .replace(/[\[\]()「」『』]{2,}/g, '')
+    // 앞뒤 공백 정리
+    .trim();
+}
+
+// ============================================
 // 마감 관련 유틸
 // ============================================
 
@@ -248,8 +268,8 @@ export function mapSourceToProgram(
     supportMethod: get("support_method") || null,
     supportRate: getNum("support_rate"),
 
-    // 기본 정보
-    title: source.title || get("title") || DEFAULT_VALUES.title,
+    // 기본 정보 (깨진 문자 정리)
+    title: sanitizeText(source.title || get("title") || DEFAULT_VALUES.title),
     ministry: get("ministry") || "",
     agency: get("agency") || DEFAULT_VALUES.agency,
     executor: get("executor") || "",
@@ -289,14 +309,14 @@ export function mapSourceToProgram(
 
     // LLM 분석 필드
     matchReason: get("matchReason") || get("match_reason"),
-    // score: vector search score, relevance_score/relevanceScore: LLM analysis score
-    relevanceScore: getNum("relevanceScore") ?? getNum("relevance_score") ?? getNum("score") ?? undefined,
+    // score: vector search score, match_score: profile match score, relevance_score: LLM analysis score
+    relevanceScore: getNum("relevanceScore") ?? getNum("relevance_score") ?? getNum("match_score") ?? getNum("score") ?? undefined,
     // aiRecommended: 명시적 값 또는 matchReason/score가 있으면 true
     aiRecommended:
       getBool("ai_recommended") ||
       getBool("aiRecommended") ||
       !!(get("matchReason") || get("match_reason")) ||
-      (getNum("relevanceScore") ?? getNum("relevance_score") ?? getNum("score")) !== null,
+      (getNum("relevanceScore") ?? getNum("relevance_score") ?? getNum("match_score") ?? getNum("score")) !== null,
   };
 }
 

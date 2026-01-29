@@ -24,8 +24,6 @@ export interface SearchFilters {
   supportTypes?: SupportType[];
   /** 마감유형 필터 */
   deadlineTypes?: DeadlineType[];
-  /** 접수유형 필터 */
-  receptionTypes?: string[];
   /** 지난 공고 포함 여부 (false면 현재 접수중인 공고만) */
   includePast?: boolean;
 }
@@ -115,11 +113,6 @@ export function convertFiltersToQuery(
     } else {
       query.deadline_type = { $in: filters.deadlineTypes };
     }
-  }
-
-  // 접수유형: $contains_any (OR 조건)
-  if (filters?.receptionTypes && filters.receptionTypes.length > 0) {
-    query.reception_types = { $contains_any: filters.receptionTypes };
   }
 
   // 지난 공고 제외 (기본: includePast가 true가 아니면 마감 공고 제외)

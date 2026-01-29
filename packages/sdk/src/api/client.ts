@@ -16,7 +16,7 @@ import type {
 const DEFAULT_TIMEOUT = 60000;
 
 // API defaults (exported for consistency across layers)
-export const DEFAULT_TOP_K = 50;
+export const DEFAULT_TOP_K = 20;
 export const DEFAULT_RERANKER_TOP_K = 10;
 export const DEFAULT_GROUP_BY_FIELD = 'group_id';
 
@@ -167,6 +167,76 @@ export class CubeIAxClient {
   }
 
   /**
+   * Ensures a value is an array. If it's a JSON-stringified array, parses it.
+   * This prevents 422 errors when document_context is accidentally stored as a string.
+   */
+  private ensureArray(value: unknown): string[] | undefined {
+    if (value === undefined || value === null) return undefined;
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {
+        // Not valid JSON
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Parse a value that may be in Python repr format or double-encoded JSON.
+   * Handles: "\"['a', 'b']\"" or "['a', 'b']" or ["a", "b"] or "{...}"
+   */
+  private parsePythonRepr<T>(value: unknown): T | undefined {
+    // 이미 객체/배열이면 그대로 반환
+    if (value !== null && typeof value === 'object') return value as T;
+
+    if (typeof value !== 'string') return undefined;
+
+    // 1단계: 표준 JSON 파싱 시도 (결과가 객체/배열인 경우만 반환)
+    try {
+      const parsed = JSON.parse(value);
+      // 파싱 결과가 객체/배열이면 바로 반환 (문자열이면 계속 진행)
+      if (parsed !== null && typeof parsed === 'object') {
+        return parsed as T;
+      }
+    } catch {
+      // JSON 파싱 실패 - 계속 진행
+    }
+
+    // 2단계: Python repr 형식 처리: "\"['a', 'b']\""
+    let cleaned = value;
+    // 이중 인코딩된 따옴표 제거: "\"[...]\"" -> "[...]"
+    if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+      cleaned = cleaned.slice(1, -1);
+    }
+    // Python 스타일 싱글쿼트를 JSON 더블쿼트로 변환: ['a'] -> ["a"]
+    if (cleaned.includes("'")) {
+      cleaned = cleaned.replace(/'/g, '"');
+    }
+    try {
+      const result = JSON.parse(cleaned);
+      if (result !== null && typeof result === 'object') {
+        return result as T;
+      }
+    } catch {
+      // 파싱 실패 시 무시
+    }
+    return undefined;
+  }
+
+  /**
+   * Parse suggestions that may be in Python repr format or double-encoded JSON.
+   */
+  private parseSuggestions(value: unknown): string[] | undefined {
+    const result = this.parsePythonRepr<string[]>(value);
+    if (!Array.isArray(result)) return undefined;
+    // 깨진 유니코드 문자 제거 (U+FFFD)
+    return result.map(s => typeof s === 'string' ? s.replace(/\uFFFD+/g, '').trim() : s);
+  }
+
+  /**
    * Send a chat message with streaming response
    *
    * @param request - Chat request parameters
@@ -230,7 +300,7 @@ export class CubeIAxClient {
           profile: request.profile,
           metadata: request.metadata,
           filters: request.filters,
-          document_context: request.documentContext,  // group_ids for fast filtering
+          document_context: this.ensureArray(request.documentContext),  // group_ids for fast filtering
           stream: false,
           top_k: request.topK ?? DEFAULT_TOP_K,
           reranker_top_k: request.rerankerTopK ?? DEFAULT_RERANKER_TOP_K,
@@ -295,7 +365,7 @@ export class CubeIAxClient {
           profile: request.profile,
           metadata: request.metadata,
           filters: request.filters,
-          document_context: request.documentContext,  // group_ids for fast filtering
+          document_context: this.ensureArray(request.documentContext),  // group_ids for fast filtering
           stream: true,
           top_k: request.topK ?? DEFAULT_TOP_K,
           reranker_top_k: request.rerankerTopK ?? DEFAULT_RERANKER_TOP_K,
@@ -419,7 +489,12 @@ export class CubeIAxClient {
               case 'sources':
                 // Sources arrive before answer - enable sources-first UI pattern
                 if (event.sources) {
-                  sources = this.parseJsonField<Source[]>(event.sources) || [];
+                  const parsedSources = this.parseJsonField<Record<string, unknown>[]>(event.sources) || [];
+                  // normalizeDocumentId로 group_id 추출하여 documentId에 저장
+                  sources = parsedSources.map((s) => ({
+                    ...s,
+                    documentId: this.normalizeDocumentId(s),
+                  })) as Source[];
                   // Only notify if sources exist (prevents UI flicker on empty results)
                   if (sources.length > 0) {
                     callbacks.onSources?.(sources);
@@ -433,27 +508,32 @@ export class CubeIAxClient {
                 }
                 break;
 
-              case 'clarification':
+              case 'clarification': {
                 // Backend sends: { question: "main question", suggestions: ["opt1", "opt2"] }
                 const clarificationMessage = event.question || '';
                 const clarificationSuggestions: string[] = [];
-                const suggestions = this.parseJsonField<string[]>(event.suggestions);
+                // console.log('[CubeIAxClient] clarification raw:', { question: event.question, suggestions: event.suggestions });
+                const suggestions = this.parseSuggestions(event.suggestions);
+                // console.log('[CubeIAxClient] clarification parsed suggestions:', suggestions);
                 if (suggestions) clarificationSuggestions.push(...suggestions);
                 // Fallback: legacy format with questions array
-                const questions = this.parseJsonField<string[]>(event.questions);
+                const questions = this.parseSuggestions(event.questions);
                 if (questions) clarificationSuggestions.push(...questions);
+                // console.log('[CubeIAxClient] clarification final:', { message: clarificationMessage, suggestions: clarificationSuggestions });
                 if (clarificationMessage || clarificationSuggestions.length > 0) {
                   callbacks.onClarification?.(clarificationMessage, clarificationSuggestions);
                 }
                 break;
+              }
 
-              case 'followup':
-                const followupSuggestions = this.parseJsonField<string[]>(event.suggestions);
+              case 'followup': {
+                const followupSuggestions = this.parseSuggestions(event.suggestions);
                 const followupMessage = event.message as string | undefined;
-                if (followupSuggestions) {
+                if (followupSuggestions && followupSuggestions.length > 0) {
                   callbacks.onFollowup?.(followupSuggestions, followupMessage);
                 }
                 break;
+              }
 
               case 'rewrite':
                 // Backend sends 'rewritten' field (not 'rewritten_query')
@@ -475,12 +555,13 @@ export class CubeIAxClient {
                 }
                 break;
 
-              case 'item_details':
-                const itemDetails = this.parseJsonField<Array<{ id: string; title: string; description: string; url: string }>>(event.item_details);
-                if (itemDetails) {
+              case 'item_details': {
+                const itemDetails = this.parsePythonRepr<Array<{ id: string; title: string; description: string; url: string }>>(event.item_details);
+                if (itemDetails && Array.isArray(itemDetails)) {
                   callbacks.onItemDetails?.(itemDetails);
                 }
                 break;
+              }
 
               case 'context': {
                 // Context event with documents and focus
@@ -501,8 +582,12 @@ export class CubeIAxClient {
               }
 
               case 'end':
-                if (event.full_answer) {
-                  fullContent = event.full_answer;
+                {
+                  const endContent =
+                    event.full_answer || event.answer || event.content || event.message;
+                  if (endContent) {
+                    fullContent = endContent;
+                  }
                 }
                 if (event.sources) {
                   sources = this.parseJsonField<Source[]>(event.sources) || sources;
@@ -597,7 +682,7 @@ export class CubeIAxClient {
           profile: request.profile,
           metadata: request.metadata,
           filters: request.filters,
-          document_context: request.documentContext,  // group_ids for fast filtering
+          document_context: this.ensureArray(request.documentContext),  // group_ids for fast filtering
           stream: false,
           group_by_field: request.groupByField ?? DEFAULT_GROUP_BY_FIELD,
           group_results_by: request.groupResultsBy,
@@ -660,7 +745,7 @@ export class CubeIAxClient {
           profile: request.profile,
           metadata: request.metadata,
           filters: request.filters,
-          document_context: request.documentContext,  // group_ids for fast filtering
+          document_context: this.ensureArray(request.documentContext),  // group_ids for fast filtering
           stream: true,
           group_by_field: request.groupByField ?? DEFAULT_GROUP_BY_FIELD,
           group_results_by: request.groupResultsBy,
@@ -821,9 +906,9 @@ export class CubeIAxClient {
               case 'clarification': {
                 const clarifyMsg = event.question || '';
                 const clarifySuggestions: string[] = [];
-                const clarifyS = this.parseJsonField<string[]>(event.suggestions);
+                const clarifyS = this.parseSuggestions(event.suggestions);
                 if (clarifyS) clarifySuggestions.push(...clarifyS);
-                const clarifyQ = this.parseJsonField<string[]>(event.questions);
+                const clarifyQ = this.parseSuggestions(event.questions);
                 if (clarifyQ) clarifySuggestions.push(...clarifyQ);
                 if (clarifyMsg || clarifySuggestions.length > 0) {
                   callbacks.onClarification?.(clarifyMsg, clarifySuggestions);
@@ -832,9 +917,9 @@ export class CubeIAxClient {
               }
 
               case 'followup': {
-                const followupS = this.parseJsonField<string[]>(event.suggestions);
+                const followupS = this.parseSuggestions(event.suggestions);
                 const followupMsg = event.message as string | undefined;
-                if (followupS) {
+                if (followupS && followupS.length > 0) {
                   callbacks.onFollowup?.(followupS, followupMsg);
                 }
                 break;
@@ -859,8 +944,8 @@ export class CubeIAxClient {
                 break;
 
               case 'item_details': {
-                const searchItemDetails = this.parseJsonField<Array<{ id: string; title: string; description: string; url: string }>>(event.item_details);
-                if (searchItemDetails) {
+                const searchItemDetails = this.parsePythonRepr<Array<{ id: string; title: string; description: string; url: string }>>(event.item_details);
+                if (searchItemDetails && Array.isArray(searchItemDetails)) {
                   callbacks.onItemDetails?.(searchItemDetails);
                 }
                 break;

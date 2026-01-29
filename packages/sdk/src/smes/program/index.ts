@@ -152,15 +152,13 @@ export {
 } from "./mappers";
 
 // ─────────────────────────────────────────
-// SMES 전용 훅 (검색/채팅)
+// SMES Service Hooks (Search/Chat Providers)
 // ─────────────────────────────────────────
 export {
   ProgramSearchProvider,
   useProgramSearch,
   ProgramChatProvider,
   useProgramChat,
-  DEFAULT_FILTER_STATE,
-  type FilterState,
   type ProgramSearchContextValue,
   type ProgramSearchProviderProps,
   type ProgramChatContextValue,

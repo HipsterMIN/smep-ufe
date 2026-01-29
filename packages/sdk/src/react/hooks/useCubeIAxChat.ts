@@ -80,12 +80,12 @@ export interface UseCubeIAxChatOptions {
   maxResponseLength?: number;
   /** Maximum tokens for LLM response (default: 1024, range: 100-2048) */
   maxTokens?: number;
+  /** Whether to stream the response (default: true) */
+  stream?: boolean;
+  /** Field to group results by at Milvus level for deduplication */
+  groupByField?: string | null;
   /** Whether to include citation markers [1], [2] in response (default: true) */
   includeCitations?: boolean;
-  /** Field to group results by at Milvus level (default: "group_id") */
-  groupByField?: string;
-  /** Whether to use streaming (default: true) */
-  stream?: boolean;
   /** Callback when session is established */
   onSession?: (sessionId: string) => void;
   /** Callback when status message is received (e.g., "검색 중...", "분석 중...") */
@@ -367,6 +367,8 @@ export function useCubeIAxChat(
   const contextDocumentsRef = useRef<string[] | null>(null);
   // config를 ref로 관리하여 getClient 의존성 안정화
   const configRef = useRef<CubeIAxConfig>(config);
+  // options를 ref로 관리하여 sendMessage 의존성 안정화 (무한 렌더링 방지)
+  const optionsRef = useRef<UseCubeIAxChatOptions>(options);
   // 초기 마운트 완료 플래그 (persistence 저장 시 초기 로드와 구분)
   const isMountedRef = useRef(false);
 
@@ -384,6 +386,11 @@ export function useCubeIAxChat(
       clientRef.current = null; // config 변경 시 client 재생성 트리거
     }
   }, [config.apiKey, config.baseUrl, config.timeout, config.agent, config.debug]);
+
+  // optionsRef 동기화 (콜백 최신 값 유지, 의존성에서 options 제외하여 무한 렌더링 방지)
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
 
   // sessionIdRef 동기화 + persistence 저장
   useEffect(() => {
@@ -450,10 +457,40 @@ export function useCubeIAxChat(
     setError(null);
   }, []);
 
+  const parseContextDocuments = useCallback((documents: unknown): string[] | null => {
+    if (!documents) return null;
+    if (Array.isArray(documents)) {
+      return documents.filter((value): value is string => typeof value === 'string' && value.length > 0);
+    }
+    if (typeof documents === 'string') {
+      const tryParse = (value: string) => {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return null;
+        }
+      };
+      const first = tryParse(documents);
+      if (Array.isArray(first)) {
+        return first.filter((value): value is string => typeof value === 'string' && value.length > 0);
+      }
+      if (typeof first === 'string') {
+        const second = tryParse(first);
+        if (Array.isArray(second)) {
+          return second.filter((value): value is string => typeof value === 'string' && value.length > 0);
+        }
+      }
+    }
+    return null;
+  }, []);
+
   // Send a message
   const sendMessage = useCallback(
     async (message: string, sendOptions?: { metadata?: Record<string, unknown>; filters?: Record<string, unknown>; documentContext?: string[] }) => {
       if (!message.trim()) return;
+
+      // optionsRef에서 최신 옵션 가져오기 (의존성 배열에서 options 제외하여 무한 렌더링 방지)
+      const opts = optionsRef.current;
 
       // 로딩 상태를 먼저 설정 (UI 응답성 향상)
       setIsLoading(true);
@@ -465,7 +502,7 @@ export function useCubeIAxChat(
         setIsLoading(false);
         const error = err instanceof Error ? err : new Error(String(err));
         setError(error);
-        options.onError?.(error);
+        opts.onError?.(error);
         return;
       }
 
@@ -493,33 +530,33 @@ export function useCubeIAxChat(
 
         // Merge default metadata with message-specific metadata
         const mergedMetadata = {
-          ...options.defaultMetadata,
+          ...opts.defaultMetadata,
           ...sendOptions?.metadata,
         };
 
         // Merge default filters with message-specific filters
         const mergedFilters = {
-          ...options.defaultFilters,
+          ...opts.defaultFilters,
           ...sendOptions?.filters,
         };
 
         const request: ChatRequest = {
           message,
           sessionId: sessionIdRef.current,
-          stream: true,
-          profile: options.profile,
+          stream: opts.stream ?? true,
+          profile: opts.profile,
           metadata: Object.keys(mergedMetadata).length > 0 ? mergedMetadata : undefined,
           filters: Object.keys(mergedFilters).length > 0 ? mergedFilters : undefined,
           // ★ Document context 우선순위: 명시적 전달 > 자동 추적된 컨텍스트
           // SDK가 검색 결과를 자동으로 컨텍스트로 유지하여 후속 질문에서 활용
           documentContext: sendOptions?.documentContext ?? contextDocumentsRef.current ?? undefined,
-          domain: options.domain,
-          topK: options.topK,
-          rerankerTopK: options.rerankerTopK,
-          maxResponseLength: options.maxResponseLength,
-          maxTokens: options.maxTokens,
-          includeCitations: options.includeCitations,
-          groupByField: options.groupByField,
+          domain: opts.domain,
+          topK: opts.topK,
+          rerankerTopK: opts.rerankerTopK,
+          groupByField: opts.groupByField ?? undefined,
+          maxResponseLength: opts.maxResponseLength,
+          maxTokens: opts.maxTokens,
+          includeCitations: opts.includeCitations,
           signal: abortControllerRef.current.signal,
         };
 
@@ -532,14 +569,14 @@ export function useCubeIAxChat(
           onSession: (newSessionId) => {
             if (abortedRef.current) return;
             setSessionId(newSessionId);
-            options.onSession?.(newSessionId);
+            opts.onSession?.(newSessionId);
           },
           onStatus: (statusMessage, stage) => {
             if (abortedRef.current) return;
             flushSync(() => {
               setStatus({ message: statusMessage, stage });
             });
-            options.onStatus?.(statusMessage, stage);
+            opts.onStatus?.(statusMessage, stage);
           },
           onSources: (sources) => {
             if (abortedRef.current) return;
@@ -549,31 +586,29 @@ export function useCubeIAxChat(
               setPendingSources(sources);
             });
             // ★ 검색 결과를 컨텍스트로 자동 설정
-            // sources의 group_id를 추출하여 다음 요청의 documentContext로 사용
+            // sources의 documentId(=group_id)를 추출하여 다음 요청의 documentContext로 사용
             const groupIds = sources
-              .map(s => s.group_id || s.documentId)
+              .map(s => s.documentId)
               .filter((id): id is string => !!id);
             if (groupIds.length > 0) {
               setContextDocuments(groupIds);
             }
-            options.onSources?.(sources);
+            opts.onSources?.(sources);
           },
           onContent: (content) => {
             if (abortedRef.current) return;
             fullContent += content;
-            // Force synchronous render for real-time streaming UI
-            flushSync(() => {
-              setStreamingContent(fullContent);
-            });
-            options.onContent?.(content);
+            setStreamingContent(fullContent);
+            opts.onContent?.(content);
           },
           onClarification: (message, suggestions) => {
             if (abortedRef.current) return;
+            // console.log('[useCubeIAxChat] onClarification:', { message, suggestions });
             setClarificationMessage(message || '');
             // Ensure suggestions is always an array
             const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
             setClarificationQuestions(safeSuggestions);
-            options.onClarification?.(message, safeSuggestions);
+            opts.onClarification?.(message, safeSuggestions);
           },
           onFollowup: (suggestions, message) => {
             if (abortedRef.current) return;
@@ -587,30 +622,35 @@ export function useCubeIAxChat(
                 setStreamingContent(message);
               });
             }
-            options.onFollowup?.(safeSuggestions, message);
+            opts.onFollowup?.(safeSuggestions, message);
           },
           onRewrite: (query) => {
             if (abortedRef.current) return;
             setRewrittenQuery(query);
-            options.onRewrite?.(query);
+            opts.onRewrite?.(query);
           },
           onAnalysis: (analysis) => {
             if (abortedRef.current) return;
             setQueryAnalysis(analysis);
-            options.onAnalysis?.(analysis);
+            opts.onAnalysis?.(analysis);
           },
           onItemDetails: (items) => {
             if (abortedRef.current) return;
             // Ensure items is always an array (defensive against malformed backend response)
             const safeItems = Array.isArray(items) ? items : [];
             setItemDetails(safeItems);
-            options.onItemDetails?.(safeItems);
+            opts.onItemDetails?.(safeItems);
           },
           onContext: (documents, focus) => {
             if (abortedRef.current) return;
-            setContextDocuments(documents);
+            // contextDocuments는 onSources에서 이미 설정됨
+            // context 이벤트로 전달되는 documents가 있으면 갱신
+            const parsedDocuments = parseContextDocuments(documents);
+            if (parsedDocuments && parsedDocuments.length > 0) {
+              setContextDocuments(parsedDocuments);
+            }
             if (focus) setContextFocus(focus);
-            options.onContext?.(documents, focus);
+            opts.onContext?.(documents, focus);
           },
           onComplete: (res) => {
             if (abortedRef.current) return;
@@ -639,7 +679,7 @@ export function useCubeIAxChat(
               setIsLoading(false);
             });
 
-            options.onComplete?.(res);
+            opts.onComplete?.(res);
           },
           onError: (err) => {
             if (abortedRef.current) return;
@@ -651,11 +691,11 @@ export function useCubeIAxChat(
               setStatus(null);
               setIsLoading(false);
             });
-            options.onError?.(err);
+            opts.onError?.(err);
           },
-          onCitations: options.onCitations,
-          onEvent: options.onEvent,
-          onParseError: options.onParseError,
+          onCitations: opts.onCitations,
+          onEvent: opts.onEvent,
+          onParseError: opts.onParseError,
         });
       } catch (err) {
         // abort된 요청의 에러는 무시
@@ -668,12 +708,12 @@ export function useCubeIAxChat(
           setStatus(null);
           setIsLoading(false);
         });
-        options.onError?.(error);
+        opts.onError?.(error);
       } finally {
         abortControllerRef.current = null;
       }
     },
-    [getClient, options, resetStreamingState]
+    [getClient, resetStreamingState, parseContextDocuments]
   );
 
   // Clear all messages

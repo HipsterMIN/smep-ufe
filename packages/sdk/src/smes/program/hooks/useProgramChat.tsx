@@ -58,6 +58,8 @@ export interface ProgramChatContextValue {
   messageCount: number;
   /** 타이핑 중 (응답 대기) */
   isTyping: boolean;
+  /** 상태 메시지 */
+  status: { message: string; stage?: string } | null;
   /** 스트리밍 중인 콘텐츠 */
   streamingContent: string | null;
   /** 먼저 도착한 sources (스트리밍 UI용) */
@@ -68,6 +70,8 @@ export interface ProgramChatContextValue {
   error: Error | null;
   /** 컨텍스트 설정 */
   setDocumentContext: (documentIds: string[] | null) => void;
+  /** 컨텍스트 문서 목록 */
+  contextDocuments: string[] | null;
   /** 메시지 전송 */
   send: (message: string, options?: {
     metadata?: Record<string, unknown>;
@@ -116,15 +120,15 @@ function useProgramChatInternal(): ProgramChatContextValue {
       if (msg.role === "assistant" && msg.sources && msg.sources.length > 0) {
         // domain === 'bizinfo' → programs
         const bizinfoSources = msg.sources.filter(
-          (s) => s.domain === BIZINFO_DOMAIN
+          (s) => !s.domain || s.domain === BIZINFO_DOMAIN || s.domain === "support_program"
         );
         if (bizinfoSources.length > 0) {
-          programs = mapSourcesToPrograms(bizinfoSources, 4);
+          programs = mapSourcesToPrograms(bizinfoSources);
         }
 
         // domain !== 'bizinfo' → citations
         const otherSources = msg.sources.filter(
-          (s) => s.domain !== BIZINFO_DOMAIN
+          (s) => s.domain && s.domain !== BIZINFO_DOMAIN && s.domain !== "support_program"
         );
         if (otherSources.length > 0) {
           citations = otherSources.map(mapSourceToCitation);
@@ -148,20 +152,22 @@ function useProgramChatInternal(): ProgramChatContextValue {
       return [];
     }
     const bizinfoSources = sdk.pendingSources.filter(
-      (s) => s.domain === BIZINFO_DOMAIN
+      (s) => !s.domain || s.domain === BIZINFO_DOMAIN || s.domain === "support_program"
     );
-    return bizinfoSources.length > 0 ? mapSourcesToPrograms(bizinfoSources, 4) : [];
+    return bizinfoSources.length > 0 ? mapSourcesToPrograms(bizinfoSources) : [];
   }, [sdk.pendingSources]);
 
   return {
     messages,
     messageCount: sdk.messages.length,
     isTyping: sdk.isLoading,
+    status: sdk.status,
     streamingContent: sdk.streamingContent || null,
     pendingPrograms,
     followupSuggestions: sdk.followupSuggestions,
     error: sdk.error,
     setDocumentContext: sdk.setDocumentContext,
+    contextDocuments: sdk.contextDocuments ?? null,
     send: sdk.sendMessage,
     clear: sdk.clearMessages,
     abort: sdk.abort,

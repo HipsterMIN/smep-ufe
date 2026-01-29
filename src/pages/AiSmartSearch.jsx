@@ -19,6 +19,7 @@ import {
   DEADLINE_TYPE_OPTIONS,
   DEFAULT_SEARCH_FILTERS,
   countSelectedFilters,
+  toFriendlyStatusMessage,
 } from '@cube-i-ax/sdk/smes/program';
 import useSearchStore from '../store/useSearchStore';
 import { useAuthStore } from '../store/useAuthStore.jsx';
@@ -63,6 +64,7 @@ const AiSmartSearchContent = () => {
     summary: sdkSummary, 
     streamingSummary, 
     isSummaryLoading, 
+    status,
     lastQuery: sdkLastQuery, 
     search, 
   } = useProgramSearch();
@@ -96,6 +98,9 @@ const AiSmartSearchContent = () => {
     if (!rawSummary) return '';
     return formatAIResponse(rawSummary, { stripTags: true });
   }, [streamingSummary, displaySummary]);
+  const statusMessage = useMemo(() => {
+    return toFriendlyStatusMessage(status?.message, '관련 지원사업을 찾아보고 있어요.');
+  }, [status]);
 
   // 데이터 수신 시 타임아웃 해제
   useEffect(() => {
@@ -276,6 +281,46 @@ const AiSmartSearchContent = () => {
     return labels;
   }, [filters]);
 
+  const sendPayloadToPopup = (popup, payload, payloadId) => {
+    if (!popup) return;
+    const resolvedPayloadId = payloadId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const targetOrigin = window.location.origin;
+    const message = {
+      type: 'ai-chat-payload',
+      payload,
+      payloadId: resolvedPayloadId,
+    };
+    let attempts = 0;
+    const maxAttempts = 20;
+    const timer = setInterval(() => {
+      if (!popup || popup.closed) {
+        clearInterval(timer);
+        window.removeEventListener('message', handleMessage);
+        return;
+      }
+      popup.postMessage(message, targetOrigin);
+      attempts += 1;
+      if (attempts >= maxAttempts) {
+        clearInterval(timer);
+        window.removeEventListener('message', handleMessage);
+      }
+    }, 300);
+
+    const handleMessage = (event) => {
+      if (event.origin !== targetOrigin) return;
+      if (event.data?.type === 'ai-chat-request-payload') {
+        event.source?.postMessage(message, targetOrigin);
+        return;
+      }
+      if (event.data?.type === 'ai-chat-payload-ack' && event.data.payloadId === resolvedPayloadId) {
+        clearInterval(timer);
+        window.removeEventListener('message', handleMessage);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+  };
+
   const handleAiChat = (programIds) => {
     // 선택된 공고가 있으면 해당 공고 정보를 state로 전달
     const targetIds = Array.isArray(programIds) ? programIds : [programIds];
@@ -307,16 +352,14 @@ const AiSmartSearchContent = () => {
       total: displayTotal || compactPrograms.length,
       filters: filters, // 현재 검색 필터 추가
     };
-    const encodedPayload = encodeURIComponent(
-      btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
-    );
     const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+    const payloadId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const screenWidth = window.screen?.availWidth || 1200;
     const screenHeight = window.screen?.availHeight || 900;
     const popup = window.open(
-      `${baseUrl}/service/ai-chat?payload=${encodedPayload}`,
+      `${baseUrl}/service/ai-chat?payloadId=${payloadId}`,
       'ai-consultant',
-      `popup=yes,width=${screenWidth},height=${screenHeight},top=0,left=0`
+      `popup=yes,width=${screenWidth},height=${screenHeight},top=0,left=0,location=no,toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
     );
     if (popup) {
       try {
@@ -326,8 +369,14 @@ const AiSmartSearchContent = () => {
         // Ignore browser restrictions on resize/move.
       }
       popup.focus();
+      sendPayloadToPopup(popup, payload, payloadId);
     } else {
-      window.location.href = `${baseUrl}/service/ai-chat?payload=${encodedPayload}`;
+      try {
+        sessionStorage.setItem(`ai-chat-payload:${payloadId}`, JSON.stringify(payload));
+      } catch (e) {
+        console.warn('Failed to store ai-chat payload in sessionStorage', e);
+      }
+      window.location.href = `${baseUrl}/service/ai-chat?payloadId=${payloadId}`;
     }
   };
 
@@ -423,32 +472,6 @@ const AiSmartSearchContent = () => {
 
   // 로딩 상태 판단 (SDK 로딩이면서 타임아웃이 아닐 때)
   const isRealLoading = isLoading && !isTimeout;
-
-  // 로딩 오버레이 컴포넌트
-  const LoadingOverlay = () => (
-    <div style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(255, 255, 255, 0.7)',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 100,
-      borderRadius: '15px'
-    }}>
-      <div className="on-ai-loading" style={{ padding: 0 }}>
-        <div className="icon-wrap">
-          <i className="svg-icon ico-ai lg"></i>
-        </div>
-        <h3 className="on-p2 mb-2">AI 스마트 검색 중입니다</h3>
-        <p className="on-p3">귀하의 기업에 꼭 맞는 지원사업을 인공지능이 분석하고 있습니다.</p>
-      </div>
-    </div>
-  );
 
   return (
     <div id="wrap" >
@@ -629,11 +652,10 @@ const AiSmartSearchContent = () => {
             </p>
 
             <div className={`on-smartsearch ${ (streamingSummary || displaySummary || isRealLoading) ? 'on' : ''}`} ref={aiSmartSearchRef}>
-              {isRealLoading && <LoadingOverlay />}
               <div className="on-smartsearch-left">
                 <div>
                   <h3>
-                    <span className="title"><i className="svg-icon ico-ai2"></i> AI 스마트 검색</span>
+                    {/*<span className="title"><i className="svg-icon ico-ai2"></i> AI 스마트 검색</span>*/}
                     <span className="content">
                       {isRealLoading && !streamingSummary && !displaySummary ? (
                         'AI가 검색 결과를 분석 중입니다...'
@@ -643,35 +665,31 @@ const AiSmartSearchContent = () => {
                     </span>
                   </h3>
                   <div className="on-smartsearch-conts hide-scrollbar" style={{ height: '100%' }}>
-                    {isRealLoading && !streamingSummary && !displaySummary ? (
-                      <div className="on-ai-loading">
-                        <div className="icon-wrap">
-                          <i className="svg-icon ico-ai lg"></i>
-                        </div>
-                        <h3 className="on-p2 mb-2">AI 스마트 검색 중입니다</h3>
-                        <p className="on-p3">귀하의 기업에 꼭 맞는 지원사업을 인공지능이 분석하고 있습니다.</p>
+                    {(isRealLoading || status) && (
+                      <div className="on-ai-status">
+                        <span className="on-ai-status-label">AI 분석</span>
+                        <span className="on-ai-status-text">{statusMessage}</span>
+                        <span className="on-ai-status-dots" aria-hidden="true">
+                          <i></i><i></i><i></i>
+                        </span>
                       </div>
-                    ) : (
-                      <>
-                        <p className="on-p2">종합 판단</p>
-                        <div className="on-p3 on-ai-summary-markdown">
-                          {summaryMarkdown ? (
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {summaryMarkdown}
-                            </ReactMarkdown>
-                          ) : isRealLoading ? (
-                            'AI가 요약을 생성 중입니다...'
-                          ) : (
-                            '분석 결과가 없습니다.'
-                          )}
-                        </div>
-                        {/* 퍼블리싱 파일에 있던 샘플 리스트 구조는 필요 시 SDK 데이터에서 추출하여 바인딩 가능하나, 현재는 요약문 위주로 표시 */}
-                        <button className="krds-btn gradient full medium mt-22" onClick={handleConsultSelected}>
-                            AI에게 더 자세히 물어보기
-                          <i className="svg-icon ico-angle right"></i>
-                        </button>
-                      </>
                     )}
+                    <div className="on-p3 on-ai-summary-markdown">
+                      {summaryMarkdown ? (
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {summaryMarkdown}
+                        </ReactMarkdown>
+                      ) : isRealLoading ? (
+                        'AI가 요약을 생성 중입니다...'
+                      ) : (
+                        '분석 결과가 없습니다.'
+                      )}
+                    </div>
+                    {/* 퍼블리싱 파일에 있던 샘플 리스트 구조는 필요 시 SDK 데이터에서 추출하여 바인딩 가능하나, 현재는 요약문 위주로 표시 */}
+                    <button className="krds-btn gradient full medium mt-22" onClick={handleConsultSelected}>
+                        AI에게 더 자세히 물어보기
+                      <i className="svg-icon ico-angle right"></i>
+                    </button>
                   </div>
                 </div>
               </div>

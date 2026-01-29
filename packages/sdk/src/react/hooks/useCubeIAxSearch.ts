@@ -203,6 +203,8 @@ export function useCubeIAxSearch(
   const abortedRef = useRef(false);
   // config를 ref로 관리하여 getClient 의존성 안정화
   const configRef = useRef<CubeIAxConfig>(config);
+  // options를 ref로 관리하여 search 의존성 안정화 (무한 렌더링 방지)
+  const optionsRef = useRef<UseCubeIAxSearchOptions>(options);
 
   // configRef 동기화 (config 값 변경 시 client 재생성)
   useEffect(() => {
@@ -218,6 +220,11 @@ export function useCubeIAxSearch(
       clientRef.current = null; // config 변경 시 client 재생성 트리거
     }
   }, [config.apiKey, config.baseUrl, config.timeout, config.agent, config.debug]);
+
+  // optionsRef 동기화 (콜백 최신 값 유지, 의존성에서 options 제외하여 무한 렌더링 방지)
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
 
   // Cleanup: abort any in-flight request when component unmounts
   useEffect(() => {
@@ -272,39 +279,40 @@ export function useCubeIAxSearch(
       // Create abort controller for this request
       abortControllerRef.current = new AbortController();
 
+      // optionsRef에서 최신 옵션 가져오기 (의존성 배열에서 options 제외하여 무한 렌더링 방지)
+      const opts = optionsRef.current;
+
       try {
         // Merge default metadata with search-specific metadata
         const mergedMetadata = {
-          ...options.defaultMetadata,
+          ...opts.defaultMetadata,
           ...searchOptions?.metadata,
         };
 
         // Merge default filters with search-specific filters
         const mergedFilters = {
-          ...options.defaultFilters,
+          ...opts.defaultFilters,
           ...searchOptions?.filters,
         };
 
-        const shouldStream = searchOptions?.stream ?? options.stream ?? true;
+        const shouldStream = searchOptions?.stream ?? opts.stream ?? true;
 
-        // documentContext: 명시적으로 전달되면 사용, 아니면 이전 검색 결과의 context 유지
-        // 이를 통해 후속 질문 시 이전 검색 결과 참조 가능
-        // 예: "IT 지원사업" 검색 후 "재난안전제품 인증 자격이?" 질문 시 이전 결과에서 해당 공고 찾기
-        const documentContextToUse = searchOptions?.documentContext ?? contextDocuments ?? undefined;
+        // 검색은 단발성 - documentContext 전달하지 않음
+        // 검색 결과는 contextDocuments에 저장하여 챗봇에 전달용으로만 사용
 
         const request: SearchRequest = {
           query,
-          topK: searchOptions?.topK ?? options.topK ?? DEFAULT_TOP_K,
-          rerankerTopK: searchOptions?.rerankerTopK ?? options.rerankerTopK,
-          profile: searchOptions?.profile ?? options.profile,
+          topK: searchOptions?.topK ?? opts.topK ?? DEFAULT_TOP_K,
+          rerankerTopK: searchOptions?.rerankerTopK ?? opts.rerankerTopK,
+          profile: searchOptions?.profile ?? opts.profile,
           metadata: Object.keys(mergedMetadata).length > 0 ? mergedMetadata : undefined,
           filters: Object.keys(mergedFilters).length > 0 ? mergedFilters : undefined,
-          documentContext: documentContextToUse && documentContextToUse.length > 0 ? documentContextToUse : undefined,
+          // documentContext 전달하지 않음 (검색은 단발성)
           stream: shouldStream,
-          domain: options.domain,
-          agent: searchOptions?.agent ?? options.agent,
-          groupByField: searchOptions?.groupByField ?? options.groupByField,
-          groupResultsBy: searchOptions?.groupResultsBy ?? options.groupResultsBy,
+          domain: opts.domain,
+          agent: searchOptions?.agent ?? opts.agent,
+          groupByField: searchOptions?.groupByField ?? opts.groupByField,
+          groupResultsBy: searchOptions?.groupResultsBy ?? opts.groupResultsBy,
           signal: abortControllerRef.current?.signal,
         };
 
@@ -314,14 +322,14 @@ export function useCubeIAxSearch(
           onSession: (sid) => {
             if (abortedRef.current) return;
             setSessionId(sid);
-            options.onSession?.(sid);
+            opts.onSession?.(sid);
           },
           onStatus: (statusMessage, stage) => {
             if (abortedRef.current) return;
             flushSync(() => {
               setStatus({ message: statusMessage, stage });
             });
-            options.onStatus?.(statusMessage, stage);
+            opts.onStatus?.(statusMessage, stage);
           },
           onSources: (sourceResults) => {
             if (abortedRef.current) return;
@@ -331,7 +339,15 @@ export function useCubeIAxSearch(
               setResults(sourceResults);
               setTotal(sourceResults.length);
             });
-            options.onSources?.(sourceResults);
+            // 검색 결과에서 documentId(=group_id) 추출하여 contextDocuments 자동 업데이트
+            // 후속 검색/질문 시 이전 검색 결과 참조 가능
+            const groupIds = sourceResults
+              .map((r) => (r as Record<string, unknown>).documentId as string)
+              .filter((id): id is string => !!id);
+            if (groupIds.length > 0) {
+              setContextDocuments(groupIds);
+            }
+            opts.onSources?.(sourceResults);
           },
           onContent: (chunk) => {
             if (abortedRef.current) return;
@@ -340,11 +356,11 @@ export function useCubeIAxSearch(
             flushSync(() => {
               setStreamingContent(fullContent);
             });
-            options.onContent?.(chunk);
+            opts.onContent?.(chunk);
           },
           onCitations: (citations) => {
             if (abortedRef.current) return;
-            options.onCitations?.(citations);
+            opts.onCitations?.(citations);
           },
           onClarification: (message, suggestions) => {
             if (abortedRef.current) return;
@@ -352,37 +368,38 @@ export function useCubeIAxSearch(
             // Ensure suggestions is always an array
             const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
             setClarificationQuestions(safeSuggestions);
-            options.onClarification?.(message, safeSuggestions);
+            opts.onClarification?.(message, safeSuggestions);
           },
           onFollowup: (suggestions, message) => {
             if (abortedRef.current) return;
             // Ensure suggestions is always an array
             const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
             setFollowupSuggestions(safeSuggestions);
-            options.onFollowup?.(safeSuggestions, message);
+            opts.onFollowup?.(safeSuggestions, message);
           },
           onRewrite: (query) => {
             if (abortedRef.current) return;
             setRewrittenQuery(query);
-            options.onRewrite?.(query);
+            opts.onRewrite?.(query);
           },
           onAnalysis: (analysis) => {
             if (abortedRef.current) return;
             setQueryAnalysis(analysis);
-            options.onAnalysis?.(analysis);
+            opts.onAnalysis?.(analysis);
           },
           onItemDetails: (items) => {
             if (abortedRef.current) return;
             // Ensure items is always an array (defensive against malformed backend response)
             const safeItems = Array.isArray(items) ? items : [];
             setItemDetails(safeItems);
-            options.onItemDetails?.(safeItems);
+            opts.onItemDetails?.(safeItems);
           },
           onContext: (documents, focus) => {
             if (abortedRef.current) return;
-            setContextDocuments(documents);
+            // contextDocuments는 onSources에서 이미 설정됨
+            // context 이벤트의 documents는 focus용 단일 문서일 수 있으므로 덮어쓰지 않음
             if (focus) setContextFocus(focus);
-            options.onContext?.(documents, focus);
+            opts.onContext?.(documents, focus);
           },
           onComplete: (res) => {
             if (abortedRef.current) return;
@@ -395,7 +412,7 @@ export function useCubeIAxSearch(
               setStatus(null);
               setIsLoading(false);
             });
-            options.onComplete?.(res);
+            opts.onComplete?.(res);
           },
           onError: (err) => {
             if (abortedRef.current) return;
@@ -406,20 +423,23 @@ export function useCubeIAxSearch(
               setStatus(null);
               setIsLoading(false);
             });
-            options.onError?.(err);
+            opts.onError?.(err);
           },
           onEvent: (event) => {
-            options.onEvent?.(event);
+            opts.onEvent?.(event);
           },
-          onParseError: options.onParseError,
+          onParseError: opts.onParseError,
         } : undefined);
 
         // For non-streaming, set results here
         if (!shouldStream) {
-          setResults(response.results);
-          setTotal(response.total);
-          setContent(response.content);
-          options.onComplete?.(response);
+          flushSync(() => {
+            setResults(response.results);
+            setTotal(response.total);
+            setContent(response.content);
+            setIsLoading(false);
+          });
+          opts.onComplete?.(response);
         }
 
         return response;
@@ -433,13 +453,13 @@ export function useCubeIAxSearch(
           setStatus(null);
           setIsLoading(false);
         });
-        options.onError?.(error);
+        opts.onError?.(error);
         return null;
       } finally {
         abortControllerRef.current = null;
       }
     },
-    [getClient, options, resetStreamingState, contextDocuments]
+    [getClient, resetStreamingState]
   );
 
   // Clear results

@@ -202,8 +202,9 @@ export const SEARCH_KEYWORDS = [
  */
 export const SUGGESTED_QUESTIONS_MULTI_PROGRAM = [
   "우리 회사에 맞는 공고를 추천해주세요",
-  "신청 마감이 임박한 공고는?",
-  "각 공고의 지원 자격을 비교해주세요",
+  // "신청 마감이 임박한 공고는?",
+  // "각 공고의 지원 자격을 비교해주세요",
+  "가장 지원금액 큰 공고는?", 
 ] as const;
 
 /**
@@ -212,10 +213,12 @@ export const SUGGESTED_QUESTIONS_MULTI_PROGRAM = [
  * 특정 공고 하나에 대해 질문할 때 사용합니다.
  */
 export const SUGGESTED_QUESTIONS_SINGLE_PROGRAM = [
-  "이 공고에 대해 설명해주세요",
-  "신청 자격은 어떻게 되나요?",
   "지원 내용과 혜택은?",
   "신청 방법을 알려주세요",
+  "신청자격 알려줘",                                                                                                                                                                                                                     
+  "지원금액이랑 지원내용 정리해줘",                                                                                                                                                                                                      
+  "신청 마감일이 언제야?",                                                                                                                                                                                                               
+  "제출서류 뭐 필요해?",      
 ] as const;
 
 // ============================================
@@ -520,6 +523,11 @@ export function formatAIResponse(
 
   // 옵션에 따라 태그 제거
   let result = options.stripTags ? stripAIResponseTags(text) : text;
+
+  // 0. GFM 마크다운 취소선 방지: ~ → ～ (fullwidth tilde U+FF5E)
+  // "0~1,000" → "0～1,000" (~~text~~가 취소선으로 해석되는 것 방지)
+  // result = result.replace(/~/g, '～');
+  result = result.replace(/[~\u223C\u02DC\uFF5E]/g, '–')
 
   // 1. 마커 앞에 줄바꿈 추가 (Markdown은 \n\n이 필요)
   result = result
