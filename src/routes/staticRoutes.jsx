@@ -1,6 +1,7 @@
 // routes/staticRoutes.jsx
 import MainPage from '../pages/MainPage.jsx';
 import Login from '../pages/Login.jsx';
+import SSOLogin from '../pages/SSOLogin.jsx';
 import AiChat from '../pages/AiChat.jsx';
 import PublishingList from '../publishing/PublishingList.jsx';
 import SubpageLayout from '../layouts/SubpageLayout.jsx';
@@ -69,6 +70,17 @@ export const staticRoutes = [
           {
             path: '/service/login', // 로그인 페이지
             element: <Login/>,
+          },
+        ],
+  },
+
+  {
+    element: <MenuProviderOnly />,
+    children:
+        [
+          {
+            path: '/service/SSO-login', // 로그인 페이지
+            element: <SSOLogin/>,
           },
         ],
   },

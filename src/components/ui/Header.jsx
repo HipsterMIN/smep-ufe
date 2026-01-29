@@ -74,7 +74,37 @@ export default function Header() {
 
   const navigate = useNavigate();
   const handleClick = () => {
-    navigate('/service/login');
+    // 새 창 열기 (크기 지정)
+    const loginWindow = window.open('/main-dev/service/SSO-login', 'login-popup', 'width=700,height=650');
+
+    // 부모 창에서 메시지 리스너 등록
+    const handleLoginMessage = (event) => {
+      // 보안: 출처 확인
+      if (event.origin !== window.location.origin) return;
+
+      if (event.data.type === 'LOGIN_SUCCESS') {
+        // 로그인 성공 메시지 수신
+        console.log('로그인 성공:', event.data);
+
+        // 새 창이 이미 닫혔을 수 있지만, 확인 후 닫기
+        if (loginWindow && !loginWindow.closed) {
+          loginWindow.close();
+        }
+
+        // 페이지 새로고침
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('message', handleLoginMessage);
+
+    // 정리: 새 창이 닫혔을 때 리스너 제거
+    const checkWindowClosed = setInterval(() => {
+      if (loginWindow.closed) {
+        clearInterval(checkWindowClosed);
+        window.removeEventListener('message', handleLoginMessage);
+      }
+    }, 500);
   };
   const handleClickMypage = () => {
     navigate(getFullPath('M_PIIO_00113')); // 증명서 발급 메뉴로 이동
