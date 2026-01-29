@@ -14,7 +14,7 @@ import {
   mapSourcesToPrograms,
 } from '@cube-i-ax/sdk/smes/program';
 import { api as apiClient } from '../../lib/apiClient.js';
-import Logo from './ai_chat_logo.svg';
+import Logo from '../../../styles/img/ai_chat_logo.svg';
 import './ai.css';
 
 const AiChat = () => {

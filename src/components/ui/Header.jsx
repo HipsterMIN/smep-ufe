@@ -21,6 +21,9 @@ export default function Header() {
   const openTimeoutRef = useRef(null);
   const closeTimeoutRef = useRef(null);
   const [isCompany, setIsCompany] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchRef = useRef(null);
+  const searchInputRef = useRef(null);
   
   // 메뉴 데이터 로드
   useEffect(() => {
@@ -135,6 +138,45 @@ export default function Header() {
     }
   };
 
+  const handleSearchToggle = () => {
+    setIsSearchOpen((prev) => !prev);
+  };
+
+  // 외부 클릭 및 ESC 시 검색창 닫기
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsSearchOpen(false);
+      }
+    };
+    const handleEsc = (event) => {
+      if (event.key === 'Escape') {
+        setIsSearchOpen(false);
+      }
+    };
+
+    if (isSearchOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEsc);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEsc);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [isSearchOpen]);
+
+  useEffect(() => {
+    if (!isSearchOpen) return;
+    const focusTimer = requestAnimationFrame(() => {
+      searchInputRef.current?.focus();
+    });
+    return () => cancelAnimationFrame(focusTimer);
+  }, [isSearchOpen]);
+
   return (
     <>
       <div id="krds-skip-link">
@@ -164,6 +206,37 @@ export default function Header() {
                   </a>
                 </h2>
                 <div className="header-actions">
+                  <div className="header-search-wrap" ref={searchRef}>
+                    <button
+                      type="button"
+                      className="btn-navi sch"
+                      onClick={handleSearchToggle}
+                      aria-expanded={isSearchOpen}
+                      aria-controls="header-search-layer"
+                    >
+                      <span className="sr-only">통합검색</span>
+                    </button>
+                    <div
+                      id="header-search-layer"
+                      className={`header-search-layer ${isSearchOpen ? 'is-open' : ''}`}
+                      role="dialog"
+                      aria-label="통합검색"
+                    >
+                      <div className="sch-input">
+                        <input
+                          type="text"
+                          className="krds-input"
+                          placeholder="검색어를 입력해 주세요"
+                          title="검색어 입력"
+                          ref={searchInputRef}
+                        />
+                        <button type="button" className="krds-btn medium icon ico-search">
+                          <span className="sr-only">검색</span>
+                          <i className="svg-icon ico-sch"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                   {/* <button type="button" className="btn-navi sch open-modal" data-target="popTotalSch">통합검색</button> */}
                   {isLogin ? (
                     <>
