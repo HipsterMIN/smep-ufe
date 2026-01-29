@@ -688,12 +688,24 @@
 .krds-structured-list.type-full.small .card-body .c-text {
     gap: 10px;
 }
-.ai-container .answer-wrap { 
+.ai-container .answer-wrap {
     display: flex;
     align-items: flex-start;
     gap: 46px;
     margin-top: 0;
     min-height: calc(100vh - 220px);
+}
+.ai-container .answer-wrap.ai-chat-section {
+    margin-top: 32px;
+    min-height: auto;
+}
+.ai-container .answer-wrap.ai-chat-section:first-of-type {
+    margin-top: 0;
+}
+.ai-container .answer-wrap.ai-chat-section .announcement-cont {
+    position: relative;
+    top: auto;
+    max-height: none;
 }
 .ai-container .answer-box {
     width: 60%;
