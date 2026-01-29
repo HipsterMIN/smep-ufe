@@ -245,11 +245,11 @@ export const DEFAULT_VALUES = {
 /**
  * YYYYMMDD 형식의 숫자를 날짜 문자열로 변환
  */
-export function formatDate(date: number | null): string {
+export function formatDate(date: number | string | null): string {
   if (!date) return "-";
-  const str = String(date);
-  if (str.length !== 8) return "-";
-  return `${str.slice(0, 4)}.${str.slice(4, 6)}.${str.slice(6, 8)}`;
+  const str = String(date).replace(/[^0-9]/g, "");
+  if (str.length !== 8) return String(date);
+  return `${str.slice(0, 4)}-${str.slice(4, 6)}-${str.slice(6, 8)}`;
 }
 
 /**

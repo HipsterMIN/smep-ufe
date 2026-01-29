@@ -10,6 +10,7 @@ import { api as apiClient } from '../lib/apiClient.js';
 import {
   ProgramSearchProvider,
   useProgramSearch,
+  formatDate,
   calculateDaysRemaining,
   formatAIResponse,
   REGION_OPTIONS,
@@ -761,7 +762,7 @@ const AiSmartSearchContent = () => {
                                     {program.agency}
                                   </span>
                                   <span>
-                                    {program.startDate} ~ {program.endDate || '상시접수'}
+                                    {formatDate(program.startDate)} ~ {formatDate(program.endDate) === '-' ? '상시접수' : formatDate(program.endDate)}
                                   </span>
                                 </p>
                                 <div className="card-btm noborder pt-0">
@@ -928,7 +929,7 @@ const AiSmartSearchContent = () => {
                                 )}
                               </span>
                               <span>
-                                {programStartDate} ~ {programEndDate || '상시접수'}
+                                {formatDate(programStartDate)} ~ {formatDate(programEndDate) === '-' ? '상시접수' : formatDate(programEndDate)}
                               </span>
                               <span>
                                 <i className="svg-icon ico-building"></i>
