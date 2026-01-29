@@ -2,7 +2,7 @@
 import MainPage from '../pages/MainPage.jsx';
 import Login from '../pages/Login.jsx';
 import SSOLogin from '../pages/SSOLogin.jsx';
-import AiChat from '../pages/AiChat.jsx';
+import AiChat from '../pages/ai/AiChat.jsx';
 import PublishingList from '../publishing/PublishingList.jsx';
 import SubpageLayout from '../layouts/SubpageLayout.jsx';
 import { autoPublishingRoutesWithLayout, autoPublishingRoutesWithoutLayout } from './autoRoutes.jsx';

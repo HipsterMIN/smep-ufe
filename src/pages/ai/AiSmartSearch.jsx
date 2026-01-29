@@ -2,11 +2,12 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Link, useLocation } from 'react-router-dom';
-import Header from '../components/ui/Header.jsx';
-import Footer from '../components/ui/Footer.jsx';
-import Breadcrumb from '../components/ui/Breadcrumb';
-import Pagination from '../components/ui/Pagination'; 
-import { api as apiClient } from '../lib/apiClient.js';
+import Header from '../../components/ui/Header.jsx';
+import Footer from '../../components/ui/Footer.jsx';
+import Breadcrumb from '../../components/ui/Breadcrumb';
+import Pagination from '../../components/ui/Pagination'; 
+import { api as apiClient } from '../../lib/apiClient.js';
+import './ai.css';
 import {
   ProgramSearchProvider,
   useProgramSearch,
@@ -22,8 +23,8 @@ import {
   countSelectedFilters,
   toFriendlyStatusMessage,
 } from '@cube-i-ax/sdk/smes/program';
-import useSearchStore from '../store/useSearchStore';
-import { useAuthStore } from '../store/useAuthStore.jsx';
+import useSearchStore from '../../store/useSearchStore';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 
 const AiSmartSearchContent = () => {
   const location = useLocation();
