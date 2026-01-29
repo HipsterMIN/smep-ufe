@@ -259,12 +259,14 @@ const Pbanc = () => {
                     type="button"
                     className="krds-btn medium text on-colorblue"
                     onClick={() => {
-                      const link = document.createElement('a');
-                      link.href = temphwp; // todo 시연용 임시파일
-                      link.download = item?.pbancmtxtfilenm;
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
+                      window.location.href = `/main-dev/api/v1/pbanc/${item?.id}/download?fileName=${encodeURIComponent(item?.pbancmtxtfilenm)}`;
+                      //             /aidata/save/pbanc/${item?.id}/attached_files/${item?.pbancmtxtfilenm}
+                      // const link = document.createElement('a');
+                      // link.href = temphwp; // todo 시연용 임시파일
+                      // link.download = item?.pbancmtxtfilenm;
+                      // document.body.appendChild(link);
+                      // link.click();
+                      // document.body.removeChild(link);
                     }}
                   >
                     <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
