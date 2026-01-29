@@ -572,6 +572,17 @@ const AiChat = () => {
     return conversations[conversations.length - 1].id;
   }, [conversations]);
 
+  const handleLogoClick = (event) => {
+    if (!window.opener || window.opener.closed) return;
+    event.preventDefault();
+    try {
+      window.opener.focus();
+    } catch {
+      // Ignore focus errors from cross-origin openers.
+    }
+    window.close();
+  };
+
   const openInNewTab = (path) => {
     const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
     const targetUrl = `${baseUrl}${path}`;
@@ -622,7 +633,7 @@ const AiChat = () => {
         {/* sidebar */}
         <div className={`ai-sidebar ${isSidebarOpen ? 'is-open' : ''}`}>
           <div className="sidebar-logo">
-            <Link to="#" className="sidebar-logo-link">
+            <Link to="/" className="sidebar-logo-link" onClick={handleLogoClick}>
               <img src={Logo} alt="logo" />
             </Link>
           </div>
