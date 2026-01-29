@@ -17,6 +17,7 @@ import Logo from '../../styles/img/ai_chat_logo.svg';
 
 const AiChat = () => {
   const [selectedPrograms, setSelectedPrograms] = useState([]);
+  const [selectedProgramIds, setSelectedProgramIds] = useState(() => new Set());
   const [initialQuery, setInitialQuery] = useState('');
   const [initialSummary, setInitialSummary] = useState('');
   const [input, setInput] = useState('');
@@ -56,6 +57,7 @@ const AiChat = () => {
 
   const applyPayload = (payload) => {
     setSelectedPrograms(payload.programs || []);
+    setSelectedProgramIds(new Set());
     setInitialQuery(payload.query || '');
     setInitialSummary(payload.summary || '');
     if (payload.filters) {
@@ -76,6 +78,7 @@ const AiChat = () => {
   useEffect(() => {
     setPayloadReady(false);
     setSelectedPrograms([]);
+    setSelectedProgramIds(new Set());
     setInitialQuery('');
     setInitialSummary('');
     setExpandedPanels(new Set());
@@ -262,11 +265,41 @@ const AiChat = () => {
     });
   };
 
+  const handleToggleProgram = (programId) => {
+    if (!programId) return;
+    setSelectedProgramIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(programId)) {
+        next.delete(programId);
+      } else {
+        next.add(programId);
+      }
+      return next;
+    });
+  };
+
+  const handleToggleSelectAll = (programIdsList) => {
+    if (!programIdsList || programIdsList.length === 0) return;
+    setSelectedProgramIds((prev) => {
+      const next = new Set(prev);
+      const isAllSelected = programIdsList.every((id) => next.has(id));
+      if (isAllSelected) {
+        programIdsList.forEach((id) => next.delete(id));
+      } else {
+        programIdsList.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  };
+
   const handleSendMessage = (message) => {
     const trimmed = message.trim();
     if (!trimmed) return;
     const shouldUseInitialContext = messages.length === 0 && programIds.length > 0;
-    const documentContext = shouldUseInitialContext ? programIds : undefined;
+    const selectedIds = Array.from(selectedProgramIds);
+    const documentContext = selectedIds.length > 0
+      ? selectedIds
+      : (shouldUseInitialContext ? programIds : undefined);
     sendMessage(trimmed, { documentContext, filters: filtersQuery });
     setInput('');
   };
@@ -400,32 +433,71 @@ const AiChat = () => {
     pendingSources,
   ]);
 
-  const programPanels = useMemo(() => {
-    const panels = [];
-    if (selectedPrograms.length > 0) {
-      panels.push({
-        id: 'initial-programs',
+  const chatSections = useMemo(() => {
+    const sections = [];
+    const shouldShowSummary =
+      payloadReady ||
+      initialSummary ||
+      selectedPrograms.length > 0 ||
+      (!payloadReady && !hasChatContent);
+
+    if (shouldShowSummary) {
+      sections.push({
+        id: 'summary-section',
+        type: 'summary',
         title: '지원공고',
         query: initialQuery,
+        summary: initialSummary,
         programs: selectedPrograms,
-        programIds: selectedPrograms.map((program) => program.id).filter(Boolean),
+        programIds: programIds,
       });
     }
+
+    const contextQueue = [...contextPanels];
     conversations.forEach((conv) => {
-      if (!conv.programs || conv.programs.length === 0) return;
-      panels.push({
-        id: conv.id,
+      let programs = conv.programs || [];
+      let panelIds = programs.map((program) => program.id).filter(Boolean);
+      if (programs.length === 0 && contextQueue.length > 0) {
+        const matchedIndex = contextQueue.findIndex(
+          (panel) => panel.query === conv.query
+        );
+        if (matchedIndex !== -1) {
+          const matchedPanel = contextQueue.splice(matchedIndex, 1)[0];
+          programs = matchedPanel.programs || [];
+          panelIds = programs.map((program) => program.id).filter(Boolean);
+          if (panelIds.length === 0) {
+            panelIds = normalizeProgramIds(matchedPanel.programIds);
+          }
+        }
+      }
+      sections.push({
+        id: `conversation-${conv.id}`,
+        type: 'conversation',
         title: 'AI 추천 공고',
         query: conv.query,
-        programs: conv.programs,
-        programIds: conv.programs.map((program) => program.id).filter(Boolean),
+        conversation: conv,
+        programs,
+        programIds: panelIds,
       });
     });
-    contextPanels.forEach((panel) => {
-      if (!panel.programIds || panel.programIds.length === 0) return;
-      panels.push(panel);
+
+    contextQueue.forEach((panel) => {
+      const panelIds = normalizeProgramIds(panel.programIds);
+      if (panelIds.length === 0 && (!panel.programs || panel.programs.length === 0)) {
+        return;
+      }
+      sections.push({
+        id: panel.id,
+        type: 'context',
+        title: 'AI 추천 공고',
+        query: panel.query,
+        panel,
+        programs: panel.programs || [],
+        programIds: panelIds,
+      });
     });
-    if (isPending && displaySources.length > 0) {
+
+    if (isPending) {
       const pendingPrograms = mapSourcesToPrograms(displaySources);
       const pendingProgramIds = pendingPrograms
         .map((program) => program.id)
@@ -436,24 +508,35 @@ const AiChat = () => {
       const resolvedProgramIds =
         pendingProgramIds.length > 0 ? pendingProgramIds : fallbackProgramIds;
       const pendingKey = createProgramKey(resolvedProgramIds) || 'pending';
-      panels.push({
+      sections.push({
         id: `pending-${pendingKey}`,
+        type: 'pending',
         title: 'AI 추천 공고',
         query: pendingQuery || '검색',
         programs: pendingPrograms,
         programIds: resolvedProgramIds,
       });
     }
-    return panels;
+
+    return sections;
   }, [
+    payloadReady,
+    initialSummary,
     selectedPrograms,
+    programIds,
     initialQuery,
     conversations,
     contextPanels,
     displaySources,
     isPending,
     pendingQuery,
+    hasChatContent,
   ]);
+
+  const lastConversationId = useMemo(() => {
+    if (conversations.length === 0) return null;
+    return conversations[conversations.length - 1].id;
+  }, [conversations]);
 
   const openInNewTab = (path) => {
     const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
@@ -544,215 +627,293 @@ const AiChat = () => {
             <div className="chat-box">
 
               {/* 답변 영역 */}
-              <div className="answer-wrap">
-                <div className="answer-box">
-                  <div className="answer-title ai-summary-title">
-                    <span className="ai-summary-badge">AI 요약</span>
-                    <p>{payloadReady ? (initialQuery || 'AI 요약') : 'AI 요약'}</p>
-                  </div>
-                    <div className="answer-conts-inner">
-                      <div className="answer-content">
-                      {!payloadReady && !hasChatContent ? (
-                        <p className="content-desc">데이터를 불러오는 중입니다...</p>
-                      ) : !hasChatContent ? (
-                        <p className="content-desc">{isLoading ? 'AI가 응답을 생성 중입니다...' : '응답을 기다리고 있습니다.'}</p>
-                      ) : null}
-                      {hasChatContent && (
-                        <div className="ai-chat-thread">
-                          {initialSummary && (
-                            <div className="ai-chat-message is-assistant">
+              {chatSections.map((section) => {
+                const panelPrograms = section.programs || [];
+                const panelProgramIds = section.programIds && section.programIds.length > 0
+                  ? section.programIds
+                  : panelPrograms.map((program) => program.id).filter(Boolean);
+                const selectedCount = panelProgramIds.filter((id) => selectedProgramIds.has(id)).length;
+                const totalCount = panelPrograms.length > 0 ? panelPrograms.length : panelProgramIds.length;
+                const isAllSelected = panelProgramIds.length > 0 && selectedCount === panelProgramIds.length;
+                const isExpanded = expandedPanels.has(section.id);
+                const visiblePrograms = isExpanded ? panelPrograms : panelPrograms.slice(0, 4);
+                const showFollowups = followupSuggestions.length > 0 && !isPending && (
+                  (section.type === 'conversation' && section.conversation?.id === lastConversationId) ||
+                  (section.type === 'summary' && conversations.length === 0)
+                );
+
+                return (
+                  <div key={section.id} className="answer-wrap ai-chat-section">
+                    <div className="answer-box">
+                      {section.type === 'summary' && (
+                        <>
+                          <div className="answer-title ai-summary-title">
+                            <span className="ai-summary-badge">AI 요약</span>
+                            <p>{payloadReady ? (initialQuery || 'AI 요약') : 'AI 요약'}</p>
+                          </div>
+                          <div className="answer-conts-inner">
+                            <div className="answer-content">
+                              {!payloadReady && !initialSummary ? (
+                                <p className="content-desc">데이터를 불러오는 중입니다...</p>
+                              ) : !initialSummary ? (
+                                <p className="content-desc">{isLoading ? 'AI가 응답을 생성 중입니다...' : '응답을 기다리고 있습니다.'}</p>
+                              ) : (
+                                <div className="ai-chat-markdown">
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {formatAIResponse(initialSummary, { stripTags: true })}
+                                  </ReactMarkdown>
+                                </div>
+                              )}
+                            </div>
+                            {showFollowups && (
+                              <div className="recommend-question">
+                                <h3 className="gradient-text">추가 질문하기</h3>
+                                <ul className="question-list">
+                                  {followupSuggestions.map((suggestion) => (
+                                    <li key={suggestion} className="question-item">
+                                      <button
+                                        type="button"
+                                        className="question-text"
+                                        onClick={() => handleSendMessage(suggestion)}
+                                      >
+                                        {suggestion}
+                                      </button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            <div className="option-btn-box">
+                              <button type="button" className="option-btn btn-smile" onClick={() => handleToggle('smile')}>
+                                <i className={`svg-icon ico-smile ${feedbackStatus === 'smile' ? 'is-active' : ''}`}></i>
+                              </button>
+                              <button type="button" className="option-btn btn-sad" onClick={() => handleToggle('sad')}>
+                                <i className={`svg-icon ico-sad ${feedbackStatus === 'sad' ? 'is-active' : ''}`}></i>
+                              </button>
+                              <button type="button" className="option-btn btn-copy" onClick={handleCopyMarkdown}>
+                                <i className="svg-icon ico-copy"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {section.type === 'conversation' && (
+                        <div className="answer-conts-inner">
+                          <div className="ai-chat-thread">
+                            <div className="ai-chat-message is-user">
                               <div className="ai-chat-bubble">
-                                  <div className="ai-chat-markdown">
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                      {formatAIResponse(initialSummary, { stripTags: true })}
-                                    </ReactMarkdown>
-                                  </div>
+                                <p>{section.conversation?.query}</p>
                               </div>
                             </div>
-                          )}
-                          {conversations.map((conv) => (
-                            <React.Fragment key={conv.id}>
-                              <div className="ai-chat-message is-user">
-                                <div className="ai-chat-bubble">
-                                  <p>{conv.query}</p>
-                                </div>
-                              </div>
-                              <div className="ai-chat-message is-assistant">
+                            <div className="ai-chat-message is-assistant">
                               <div className="ai-chat-bubble">
                                 <div className="ai-chat-markdown">
                                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                      {formatAIResponse(
-                                        conv.aiResponse || assistantOverrides.get(conv.id) || '',
-                                        { stripTags: true }
-                                      )}
+                                    {formatAIResponse(
+                                      section.conversation?.aiResponse ||
+                                        assistantOverrides.get(section.conversation?.id) ||
+                                        '',
+                                      { stripTags: true }
+                                    )}
                                   </ReactMarkdown>
                                 </div>
                               </div>
                             </div>
-                            </React.Fragment>
-                          ))}
-                          {isPending && (
-                            <>
-                              {pendingQuery && (
-                                <div className="ai-chat-message is-user">
-                                  <div className="ai-chat-bubble">
-                                    <p>{pendingQuery}</p>
-                                  </div>
-                                </div>
-                              )}
-                              {showStatus && (
-                                <div className="ai-chat-message is-status">
-                                  <div className="ai-chat-bubble ai-chat-status-bubble">
-                                    <span className="ai-chat-status-label">AI 진행 상태</span>
-                                    <span className="ai-chat-status-text">{statusMessage}</span>
-                                    <span className="on-ai-status-dots" aria-hidden="true">
-                                      <i></i><i></i><i></i>
-                                    </span>
-                                  </div>
-                                </div>
-                              )}
-                              {showStreaming && displayContent && (
-                                <div className="ai-chat-message is-assistant is-streaming">
-                                  <div className="ai-chat-bubble">
-                                    <div className="ai-chat-markdown">
-                                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                        {formatAIResponse(displayContent, { stripTags: true })}
-                                      </ReactMarkdown>
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                              {showLoadingSpinner && !showStreaming && (
-                                <div className="ai-chat-message is-assistant is-streaming">
-                                  <div className="ai-chat-bubble">
-                                    <p>응답을 준비 중입니다...</p>
-                                  </div>
-                                </div>
-                              )}
-                            </>
+                          </div>
+                          {showFollowups && (
+                            <div className="recommend-question">
+                              <h3 className="gradient-text">추가 질문하기</h3>
+                              <ul className="question-list">
+                                {followupSuggestions.map((suggestion) => (
+                                  <li key={suggestion} className="question-item">
+                                    <button
+                                      type="button"
+                                      className="question-text"
+                                      onClick={() => handleSendMessage(suggestion)}
+                                    >
+                                      {suggestion}
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
                           )}
                         </div>
                       )}
-                      </div>
-                    {followupSuggestions.length > 0 && (
-                      <div className="recommend-question">
-                        <h3 className="gradient-text">추가 질문하기</h3>
-                        <ul className="question-list">
-                          {followupSuggestions.map((suggestion) => (
-                            <li key={suggestion} className="question-item">
-                              <button
-                                type="button"
-                                className="question-text"
-                                onClick={() => handleSendMessage(suggestion)}
-                              >
-                                {suggestion}
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <div className="option-btn-box">
-                      <button type="button" className="option-btn btn-smile" onClick={() => handleToggle('smile')}>
-                        <i className={`svg-icon ico-smile ${feedbackStatus === 'smile' ? 'is-active' : ''}`}></i>
-                      </button>
-                      <button type="button" className="option-btn btn-sad" onClick={() => handleToggle('sad')}>
-                        <i className={`svg-icon ico-sad ${feedbackStatus === 'sad' ? 'is-active' : ''}`}></i>
-                      </button>
-                      <button type="button" className="option-btn btn-copy" onClick={handleCopyMarkdown}>
-                        <i className="svg-icon ico-copy"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="announcement-cont">
-                  {programPanels.length === 0 ? (
-                    <div className="ai-type">
-                      <div className="on-ai-type-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', backgroundColor: '#052B57', padding: '10px 16px', borderRadius: '8px' }}>
-                        <span style={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}>지원공고 0건</span>
-                      </div>
-                      <p className="on-p3 ac">추천 공고가 없습니다.</p>
-                    </div>
-                  ) : (
-                    programPanels.map((panel) => {
-                      const isExpanded = expandedPanels.has(panel.id);
-                      const visiblePrograms = isExpanded ? panel.programs : panel.programs.slice(0, 4);
-                      const totalCount = panel.programs.length > 0 ? panel.programs.length : (panel.programIds ? panel.programIds.length : 0);
-                      return (
-                        <div key={panel.id} className="ai-type">
-                          <div className="on-ai-type-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '6px', marginBottom: '16px', backgroundColor: '#052B57', padding: '10px 16px', borderRadius: '8px' }}>
-                            <span style={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}>
-                              {panel.title} {totalCount}건
-                            </span>
-                            {panel.query && (
-                              <span style={{ color: '#D6E4FF', fontSize: '12px' }}>
-                                "{panel.query}" 검색 결과
-                              </span>
+                      {section.type === 'pending' && (
+                        <div className="answer-conts-inner">
+                          <div className="ai-chat-thread">
+                            {pendingQuery && (
+                              <div className="ai-chat-message is-user">
+                                <div className="ai-chat-bubble">
+                                  <p>{pendingQuery}</p>
+                                </div>
+                              </div>
+                            )}
+                            {showStatus && (
+                              <div className="ai-chat-message is-status">
+                                <div className="ai-chat-bubble ai-chat-status-bubble">
+                                  <span className="ai-chat-status-label">AI 진행 상태</span>
+                                  <span className="ai-chat-status-text">{statusMessage}</span>
+                                  <span className="on-ai-status-dots" aria-hidden="true">
+                                    <i></i><i></i><i></i>
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                            {showStreaming && displayContent && (
+                              <div className="ai-chat-message is-assistant is-streaming">
+                                <div className="ai-chat-bubble">
+                                  <div className="ai-chat-markdown">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                      {formatAIResponse(displayContent, { stripTags: true })}
+                                    </ReactMarkdown>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            {showLoadingSpinner && !showStreaming && (
+                              <div className="ai-chat-message is-assistant is-streaming">
+                                <div className="ai-chat-bubble">
+                                  <p>응답을 준비 중입니다...</p>
+                                </div>
+                              </div>
                             )}
                           </div>
-                          <ul className={`krds-structured-list type-full ${isExpanded ? 'is-active' : ''}`}>
-                            {visiblePrograms.length > 0 ? (
-                              visiblePrograms.map((program) => {
-                                const days = calculateDaysRemaining(program.endDate);
-                                const ddayText = days !== null ? (days === 0 ? 'D-Day' : (days > 0 ? `D-${days}` : '마감')) : '상시';
-                                return (
-                                  <li key={`${panel.id}-${program.id}`} className="structured-item">
-                                    <div className="in">
-                                      <div className="card-top">
+                        </div>
+                      )}
+
+                      {section.type === 'context' && (
+                        <div className="answer-conts-inner">
+                          <div className="ai-chat-thread">
+                            {section.query && (
+                              <div className="ai-chat-message is-user">
+                                <div className="ai-chat-bubble">
+                                  <p>{section.query}</p>
+                                </div>
+                              </div>
+                            )}
+                            <div className="ai-chat-message is-assistant">
+                              <div className="ai-chat-bubble">
+                                <p>AI 추천 공고를 업데이트했습니다.</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="announcement-cont">
+                      <div className="ai-type">
+                        <div className="on-ai-type-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '6px', marginBottom: '16px', backgroundColor: '#052B57', padding: '10px 16px', borderRadius: '8px' }}>
+                          <div className="krds-check-area" style={{ width: '100%' }}>
+                            <div className="krds-form-check">
+                              <input
+                                type="checkbox"
+                                className="checkbox"
+                                id={`chk_all_${section.id}`}
+                                checked={isAllSelected}
+                                onChange={() => handleToggleSelectAll(panelProgramIds)}
+                                disabled={panelProgramIds.length === 0}
+                              />
+                              <label className="krds-form-check-label" htmlFor={`chk_all_${section.id}`} style={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}>
+                                {selectedCount > 0
+                                  ? `${section.title} ${selectedCount}건 선택됨`
+                                  : `${section.title} ${totalCount}건`}
+                              </label>
+                            </div>
+                          </div>
+                          {section.query && (
+                            <span style={{ color: '#D6E4FF', fontSize: '12px' }}>
+                              "{section.query}" 검색 결과
+                            </span>
+                          )}
+                        </div>
+                        <ul className={`krds-structured-list type-full ${isExpanded ? 'is-active' : ''}`}>
+                          {visiblePrograms.length > 0 ? (
+                            visiblePrograms.map((program) => {
+                              const days = calculateDaysRemaining(program.endDate);
+                              const ddayText = days !== null ? (days === 0 ? 'D-Day' : (days > 0 ? `D-${days}` : '마감')) : '상시';
+                              return (
+                                <li key={`${section.id}-${program.id}`} className="structured-item">
+                                  <div className="in">
+                                    <div className="card-top">
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div className="krds-check-area">
+                                          <div className="krds-form-check">
+                                            <input
+                                              type="checkbox"
+                                              className="checkbox"
+                                              id={`chk_${section.id}_${program.id}`}
+                                              checked={selectedProgramIds.has(program.id)}
+                                              onChange={() => handleToggleProgram(program.id)}
+                                            />
+                                            <label className="krds-form-check-label" htmlFor={`chk_${section.id}_${program.id}`}>
+                                              <span className="sr-only">선택</span>
+                                            </label>
+                                          </div>
+                                        </div>
                                         <div className="krds-badge-wrap">
                                           <span className="krds-badge bg-white">{program.supportField}</span>
                                           <span className="krds-badge bg-primary number">{ddayText}</span>
                                         </div>
                                       </div>
-                                      <div className="card-body">
-                                        <a
-                                          href={`/req/pbanc/pbanc/${program.id}`}
-                                          className="c-text"
-                                          onClick={(event) => {
-                                            event.preventDefault();
-                                            openInNewTab(`/req/pbanc/pbanc/${program.id}`);
-                                          }}
-                                        >
-                                          <p className="c-tit visited sml no-icon"><span className="span">{program.title}</span></p>
-                                          <p className="on-list-btm">
-                                            <span>
-                                              <i className="svg-icon ico-building"></i>
-                                              {program.agency}
-                                            </span>
-                                            <span>
-                                              {program.startDate} ~ {program.endDate || '상시접수'}
-                                            </span>
-                                          </p>
-                                        </a>
-                                      </div>
                                     </div>
-                                  </li>
-                                );
-                              })
-                            ) : (
-                              <li className="structured-item">
-                                <div className="in ac py-12">
-                                  <p className="text-neutral-600">추천 공고를 불러오는 중입니다...</p>
-                                </div>
-                              </li>
-                            )}
-                          </ul>
-                          {panel.programs.length > 4 && (
-                            <button
-                              className="krds-btn white full medium"
-                              onClick={() => togglePanel(panel.id)}
-                            >
-                              {isExpanded ? '접기' : '더보기'}
-                              <i className={`svg-icon ico-angle ${isExpanded ? 'up' : 'down'}`}></i>
-                            </button>
+                                    <div className="card-body">
+                                      <a
+                                        href={`/req/pbanc/pbanc/${program.id}`}
+                                        className="c-text"
+                                        onClick={(event) => {
+                                          event.preventDefault();
+                                          openInNewTab(`/req/pbanc/pbanc/${program.id}`);
+                                        }}
+                                      >
+                                        <p className="c-tit visited sml no-icon"><span className="span">{program.title}</span></p>
+                                        <p className="on-list-btm">
+                                          <span>
+                                            <i className="svg-icon ico-building"></i>
+                                            {program.agency}
+                                          </span>
+                                          <span>
+                                            {program.startDate} ~ {program.endDate || '상시접수'}
+                                          </span>
+                                        </p>
+                                      </a>
+                                    </div>
+                                  </div>
+                                </li>
+                              );
+                            })
+                          ) : panelProgramIds.length > 0 ? (
+                            <li className="structured-item">
+                              <div className="in ac py-12">
+                                <p className="text-neutral-600">추천 공고를 불러오는 중입니다...</p>
+                              </div>
+                            </li>
+                          ) : (
+                            <li className="structured-item">
+                              <div className="in ac py-12">
+                                <p className="text-neutral-600">추천 공고가 없습니다.</p>
+                              </div>
+                            </li>
                           )}
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
+                        </ul>
+                        {panelPrograms.length > 4 && (
+                          <button
+                            className="krds-btn white full medium"
+                            onClick={() => togglePanel(section.id)}
+                          >
+                            {isExpanded ? '접기' : '더보기'}
+                            <i className={`svg-icon ico-angle ${isExpanded ? 'up' : 'down'}`}></i>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
