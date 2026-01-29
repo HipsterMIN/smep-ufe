@@ -703,9 +703,9 @@
     margin-top: 0;
 }
 .ai-container .answer-wrap.ai-chat-section .announcement-cont {
-    position: relative;
-    top: auto;
-    max-height: none;
+    position: sticky;
+    top: 40px;
+    max-height: calc(100vh - 120px);
 }
 .ai-container .answer-box {
     width: 60%;
