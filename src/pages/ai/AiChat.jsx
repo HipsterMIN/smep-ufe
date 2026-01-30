@@ -12,10 +12,17 @@ import {
   toFriendlyStatusMessage,
   transformMessagesToConversations,
   mapSourcesToPrograms,
+  REGION_OPTIONS,
+  COMPANY_SIZE_OPTIONS,
+  SUPPORT_FIELD_OPTIONS,
+  SUPPORT_TYPE_OPTIONS,
+  DEADLINE_TYPE_OPTIONS,
 } from '@cube-i-ax/sdk/smes/program';
 import { api as apiClient } from '../../lib/apiClient.js';
 import Logo from '../../../styles/img/ai_chat_logo.svg';
 import './ai.css';
+
+import { AI_SETTINGS } from '../../App.jsx';
 
 const AiChat = () => {
   const [selectedPrograms, setSelectedPrograms] = useState([]);
@@ -28,9 +35,14 @@ const AiChat = () => {
   const [notice, setNotice] = useState('');
   const [payloadReady, setPayloadReady] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [filters, setFilters] = useState(DEFAULT_SEARCH_FILTERS);
+  const [filters, setFilters] = useState({
+    ...DEFAULT_SEARCH_FILTERS,
+    includePast: false,
+  });
+  const [openSections, setOpenSections] = useState(new Set());
   const [contextPanels, setContextPanels] = useState([]);
   const [assistantOverrides, setAssistantOverrides] = useState(() => new Map());
+  const initialFiltersRef = useRef(null);
   const contextPanelKeysRef = useRef(new Set());
   const lastStreamingRef = useRef('');
 
@@ -64,6 +76,7 @@ const AiChat = () => {
     setInitialSummary(payload.summary || '');
     if (payload.filters) {
       setFilters(payload.filters);
+      initialFiltersRef.current = payload.filters;
     }
     setExpandedPanels(new Set());
     setContextPanels([]);
@@ -76,6 +89,15 @@ const AiChat = () => {
     setNotice('');
     setPayloadReady(true);
   };
+
+  useEffect(() => {
+    if (!payloadReady || !initialFiltersRef.current) return;
+    if (JSON.stringify(filters) !== JSON.stringify(initialFiltersRef.current)) {
+      setNotice('필터가 변경되었습니다. 다음 질문부터 새로운 조건으로 분석합니다.');
+      const timer = setTimeout(() => setNotice(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [filters, payloadReady]);
 
   useEffect(() => {
     setPayloadReady(false);
@@ -294,6 +316,42 @@ const AiChat = () => {
     });
   };
 
+  const toggleAccordion = (section) => {
+    setOpenSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(section)) {
+        next.delete(section);
+      } else {
+        next.add(section);
+      }
+      return next;
+    });
+  };
+
+  const handleToggleFilterValue = (key, value) => {
+    setFilters((prev) => {
+      if (key === 'includePast') {
+        return { ...prev, [key]: value };
+      }
+      const current = prev[key] || [];
+      const exists = current.includes(value);
+      const nextValue = exists
+        ? current.filter((item) => item !== value)
+        : [...current, value];
+      return {
+        ...prev,
+        [key]: nextValue,
+      };
+    });
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      ...DEFAULT_SEARCH_FILTERS,
+      includePast: false,
+    });
+  };
+
   const handleSendMessage = (message) => {
     const trimmed = message.trim();
     if (!trimmed) return;
@@ -368,6 +426,7 @@ const AiChat = () => {
       title: item.pbancnm || item.pbancNm || item.title || '',
       agency: item.mngdeptnm || item.mngDeptNm || item.flfmtinst || item.agency || '',
       supportField: item.sprtfld || item.supportField || '',
+      deadlineType: item.deadline_type || item.deadlineType || '',
       startDate: item.aplybgngday || item.applyStartDate || item.startDate || null,
       endDate: item.aplyddlnday || item.applyEndDate || item.endDate || null,
     };
@@ -639,6 +698,129 @@ const AiChat = () => {
             </Link>
           </div>
           <div className="sidebar-filter hide-scrollbar">
+            <div className="sidebar-filters-header">
+              <h3>맞춤 필터</h3>
+              <button type="button" className="krds-btn xsmall text" onClick={handleResetFilters}>
+                <i className="svg-icon ico-refresh"></i>
+                초기화
+              </button>
+            </div>
+            <div className="sidebar-filters-wrap">
+              <div className={`filter-section is-accordion ${openSections.has('regions') ? 'is-open' : ''}`}>
+                <h4 onClick={() => toggleAccordion('regions')}>
+                  지역 {filters.regions.length > 0 && <span className="count">{filters.regions.length}</span>}
+                  <i className="svg-icon ico-angle"></i>
+                </h4>
+                <div className="filter-content">
+                  <div className="filter-chips">
+                    {REGION_OPTIONS.map((region) => (
+                      <div className="krds-form-chip small" key={region}>
+                        <input
+                          type="checkbox"
+                          className="checkbox"
+                          id={`filter_region_${region}`}
+                          checked={filters.regions.includes(region)}
+                          onChange={() => handleToggleFilterValue('regions', region)}
+                        />
+                        <label className="krds-form-chip-outline" htmlFor={`filter_region_${region}`}>{region}</label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className={`filter-section is-accordion ${openSections.has('companySizes') ? 'is-open' : ''}`}>
+                <h4 onClick={() => toggleAccordion('companySizes')}>
+                  기업규모 {filters.companySizes.length > 0 && <span className="count">{filters.companySizes.length}</span>}
+                  <i className="svg-icon ico-angle"></i>
+                </h4>
+                <div className="filter-content">
+                  <div className="filter-chips">
+                    {COMPANY_SIZE_OPTIONS.map((size) => (
+                      <div className="krds-form-chip small" key={size}>
+                        <input
+                          type="checkbox"
+                          className="checkbox"
+                          id={`filter_size_${size}`}
+                          checked={filters.companySizes.includes(size)}
+                          onChange={() => handleToggleFilterValue('companySizes', size)}
+                        />
+                        <label className="krds-form-chip-outline" htmlFor={`filter_size_${size}`}>{size}</label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className={`filter-section is-accordion ${openSections.has('supportFields') ? 'is-open' : ''}`}>
+                <h4 onClick={() => toggleAccordion('supportFields')}>
+                  지원분야 {filters.supportFields.length > 0 && <span className="count">{filters.supportFields.length}</span>}
+                  <i className="svg-icon ico-angle"></i>
+                </h4>
+                <div className="filter-content">
+                  <div className="filter-chips">
+                    {SUPPORT_FIELD_OPTIONS.map((field) => (
+                      <div className="krds-form-chip small" key={field}>
+                        <input
+                          type="checkbox"
+                          className="checkbox"
+                          id={`filter_field_${field}`}
+                          checked={filters.supportFields.includes(field)}
+                          onChange={() => handleToggleFilterValue('supportFields', field)}
+                        />
+                        <label className="krds-form-chip-outline" htmlFor={`filter_field_${field}`}>{field}</label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className={`filter-section is-accordion ${openSections.has('deadlineTypes') ? 'is-open' : ''}`}>
+                <h4 onClick={() => toggleAccordion('deadlineTypes')}>
+                  마감유형 {filters.deadlineTypes.length > 0 && <span className="count">{filters.deadlineTypes.length}</span>}
+                  <i className="svg-icon ico-angle"></i>
+                </h4>
+                <div className="filter-content">
+                  <div className="filter-chips">
+                    {DEADLINE_TYPE_OPTIONS.map((type) => (
+                      <div className="krds-form-chip small" key={type}>
+                        <input
+                          type="checkbox"
+                          className="checkbox"
+                          id={`filter_deadline_${type}`}
+                          checked={filters.deadlineTypes.includes(type)}
+                          onChange={() => handleToggleFilterValue('deadlineTypes', type)}
+                        />
+                        <label className="krds-form-chip-outline" htmlFor={`filter_deadline_${type}`}>{type}</label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className={`filter-section is-accordion ${openSections.has('includePast') ? 'is-open' : ''}`}>
+                <h4 onClick={() => toggleAccordion('includePast')}>
+                  공고 상태
+                  <i className="svg-icon ico-angle"></i>
+                </h4>
+                <div className="filter-content">
+                  <div className="krds-form-toggle-switch medium">
+                    <input
+                      type="checkbox"
+                      id="chk_include_past"
+                      checked={filters.includePast}
+                      onChange={(e) => handleToggleFilterValue('includePast', e.target.checked)}
+                    />
+                    <label htmlFor="chk_include_past">
+                      <span className="switch-toggle"><i></i></span>
+                      지난공고 포함
+                      <span className="on-toggle-desc">(마감된 공고도 검색)</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="sidebar-guide">
               <h3>AI 상담 가이드</h3>
               <p className="guide-desc">
@@ -955,6 +1137,11 @@ const AiChat = () => {
                             {isExpanded ? '접기' : '더보기'}
                             <i className={`svg-icon ico-angle ${isExpanded ? 'up' : 'down'}`}></i>
                           </button>
+                        )}
+                        {panelPrograms.length === AI_SETTINGS.topK && !isExpanded && (
+                          <p className="ai-bottom-guide" style={{ marginTop: '8px', color: '#666' }}>
+                            최대 {AI_SETTINGS.topK}건의 결과만 표시됩니다. 더 정확한 결과를 원하시면 질문을 구체화해주세요.
+                          </p>
                         )}
                       </div>
                     </div>

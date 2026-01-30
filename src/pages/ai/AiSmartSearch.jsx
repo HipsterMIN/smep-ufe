@@ -26,6 +26,8 @@ import {
 import useSearchStore from '../../store/useSearchStore';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 
+import { AI_SETTINGS } from '../../App.jsx';
+
 const AiSmartSearchContent = () => {
   const location = useLocation();
   const [query, setQuery] = useState('');
@@ -1001,7 +1003,6 @@ const SAMPLE_COMPANY_PROFILE = {
 const AiSmartSearch = () => {
   const { companyProfile } = useAuthStore();
   const effectiveProfile = companyProfile || SAMPLE_COMPANY_PROFILE;
-  const [topK, setTopK] = useState(50);
   const [aiEnv, setAiEnv] = useState(() => localStorage.getItem('__ai_env__') || 'dev');
 
   useEffect(() => {
@@ -1013,7 +1014,15 @@ const AiSmartSearch = () => {
   }, []);
   
   return (
-    <ProgramSearchProvider key={aiEnv} profile={effectiveProfile} stream topK={topK}>
+    <ProgramSearchProvider 
+      key={aiEnv} 
+      profile={effectiveProfile} 
+      stream 
+      topK={AI_SETTINGS.topK}
+      rerankerTopK={AI_SETTINGS.rerankerTopK}
+      domain={AI_SETTINGS.domain}
+      groupByField={AI_SETTINGS.groupByField}
+    >
       <AiSmartSearchContent />
     </ProgramSearchProvider>
   );

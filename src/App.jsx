@@ -46,6 +46,13 @@ import '../styles/onCommon.css';
 import '../styles/onCommon_2.css';
 // import '@krds-ui/core/dist/style.css';
 
+export const AI_SETTINGS = {
+  topK: 50,
+  rerankerTopK: 10,
+  groupByField: 'group_id',
+  domain: 'support_program',
+};
+
 function App() {
   const { companyProfile } = useAuthStore();
   const effectiveProfile = companyProfile || SAMPLE_COMPANY_PROFILE;
@@ -82,13 +89,13 @@ function App() {
       >
         <ProgramChatProvider 
           profile={effectiveProfile}
-          domain="support_program"
+          domain={AI_SETTINGS.domain}
           includeCitations={true}
           maxResponseLength={2048}
           maxTokens={1024}
-          topK={50}
-          rerankerTopK={10}
-          groupByField="group_id"
+          topK={AI_SETTINGS.topK}
+          rerankerTopK={AI_SETTINGS.rerankerTopK}
+          groupByField={AI_SETTINGS.groupByField}
         >
           <AppRouter />
         </ProgramChatProvider>
