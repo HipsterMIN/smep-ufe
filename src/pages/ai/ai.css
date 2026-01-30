@@ -214,3 +214,33 @@
 .ai-env-switcher button:hover {
   background: #e1e4e6;
 }
+
+/* AI Markdown Table Styles */
+.ai-chat-markdown table,
+.on-ai-summary-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+.ai-chat-markdown th,
+.ai-chat-markdown td,
+.on-ai-summary-markdown th,
+.on-ai-summary-markdown td {
+  border: 1px solid #d6e0eb; /* 테두리 색상 */
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.ai-chat-markdown th,
+.on-ai-summary-markdown th {
+  background-color: #f4f6f8; /* 헤더 배경색 */
+  font-weight: 600;
+  color: #1e2124;
+}
+
+.ai-chat-markdown tr:nth-child(even),
+.on-ai-summary-markdown tr:nth-child(even) {
+  background-color: #fafbfc; /* 짝수 행 배경색 (선택 사항) */
+}
