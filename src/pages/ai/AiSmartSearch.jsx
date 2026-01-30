@@ -342,6 +342,7 @@ const AiSmartSearchContent = () => {
       title: program.title,
       agency: program.agency,
       supportField: program.supportField,
+      deadlineType: program.deadlineType,
       startDate: program.startDate,
       endDate: program.endDate,
       tags: program.tags,
@@ -750,6 +751,7 @@ const AiSmartSearchContent = () => {
                                 </div>
                                 <div className="krds-badge-wrap">
                                   <span className="krds-badge bg-white">{program.supportField}</span>
+                                  {program.deadlineType && <span className="krds-badge bg-white">{program.deadlineType}</span>}
                                   <span className="krds-badge bg-primary number">{ddayText}</span>
                                 </div>
                               </div>
@@ -988,7 +990,7 @@ const AiSmartSearch = () => {
   const { companyProfile } = useAuthStore();
   const effectiveProfile = companyProfile || SAMPLE_COMPANY_PROFILE;
   return (
-    <ProgramSearchProvider profile={effectiveProfile} stream topK={20}>
+    <ProgramSearchProvider profile={effectiveProfile} stream topK={50}>
       <AiSmartSearchContent />
     </ProgramSearchProvider>
   );
