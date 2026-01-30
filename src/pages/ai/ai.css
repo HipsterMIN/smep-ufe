@@ -161,3 +161,36 @@
 .on-ai-status-dots i:nth-child(2) { animation-delay: 0.2s; }
 .on-ai-status-dots i:nth-child(3) { animation-delay: 0.4s; }
 @keyframes onAiStatusPulse { 0%, 100% { opacity: 0.3; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1); } }
+
+/* AI Env Switcher */
+.ai-env-switcher {
+  position: absolute;
+  left: 200px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fff;
+  border: 1px solid #0B50D0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.ai-env-switcher select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+}
+.ai-env-switcher button {
+  padding: 4px 10px;
+  background: #f4f5f6;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ai-env-switcher button:hover {
+  background: #e1e4e6;
+}

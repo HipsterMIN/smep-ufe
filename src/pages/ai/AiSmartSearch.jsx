@@ -1001,8 +1001,19 @@ const SAMPLE_COMPANY_PROFILE = {
 const AiSmartSearch = () => {
   const { companyProfile } = useAuthStore();
   const effectiveProfile = companyProfile || SAMPLE_COMPANY_PROFILE;
+  const [topK, setTopK] = useState(50);
+  const [aiEnv, setAiEnv] = useState(() => localStorage.getItem('__ai_env__') || 'dev');
+
+  useEffect(() => {
+    const handleEnvChange = (e) => {
+      setAiEnv(e.detail || 'dev');
+    };
+    window.addEventListener('ai-env-change', handleEnvChange);
+    return () => window.removeEventListener('ai-env-change', handleEnvChange);
+  }, []);
+  
   return (
-    <ProgramSearchProvider profile={effectiveProfile} stream topK={50}>
+    <ProgramSearchProvider key={aiEnv} profile={effectiveProfile} stream topK={topK}>
       <AiSmartSearchContent />
     </ProgramSearchProvider>
   );
