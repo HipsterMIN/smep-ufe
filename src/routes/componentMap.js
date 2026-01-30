@@ -59,6 +59,7 @@ const UI_USR_L_110 = lazy(() => import('@pages/policy-info/UI_USR_L_110.jsx'));
 const UI_USR_L_150 = lazy(() => import('@pages/more-service/UI-USR-L-150.jsx'));
 const UI_USR_L_180 = lazy(() => import('@pages/more-service/UI-USR-L-180.jsx'));
 const UI_Usr_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
+const UI_USR_R_190 = lazy(() => import('@pages/more-service/UI-USR-R-190.jsx'));
 /**
  * =============================================================================
  * Component Map - menuId와 실제 컴포넌트 매핑
@@ -279,6 +280,12 @@ export const componentMap = {
   // 입주기업 모집공고
   'M_PIIO_00094': {
     component: UI_USR_L_180, //퍼블없음 게시판관리로 해야돼서 없는듯
+    layout: SubpageLayoutWithMenu,
+  },
+
+  // 통합로그인 시스템
+  'M_PIIO_00128': {
+    component: UI_USR_R_190,
     layout: SubpageLayoutWithMenu,
   },
 
