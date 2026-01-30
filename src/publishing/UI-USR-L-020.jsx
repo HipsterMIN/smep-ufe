@@ -187,8 +187,11 @@ const UI_USR_L_020 = () => {
 									<span>1444</span>
 								</th>
 								<td>
-						 			<a className="onellipsis-1" href="#">
-									  <span className="krds-badge bg-light-primary">기술</span>
+									<div className="badge-txt-box">
+										<span className="krds-badge bg-light-primary">기술</span>
+										<span className="krds-badge bg-primary number">D-234</span>
+									</div>
+									<a className="onellipsis-1" href="#">
 										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
@@ -202,8 +205,11 @@ const UI_USR_L_020 = () => {
 									<span>1444</span>
 								</th>
 								<td>
-						 			<a className="onellipsis-1" href="#">
-									  <span className="krds-badge bg-light-primary">기술</span>
+						 			<div className="badge-txt-box">
+										<span className="krds-badge bg-light-primary">기술</span>
+										<span className="krds-badge bg-primary number">D-234</span>
+									</div>
+									<a className="onellipsis-1" href="#">
 										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
@@ -217,8 +223,11 @@ const UI_USR_L_020 = () => {
 									<span>1444</span>
 								</th>
 								<td>
-						 			<a className="onellipsis-1" href="#">
-									  <span className="krds-badge bg-light-primary">기술</span>
+						 			<div className="badge-txt-box">
+										<span className="krds-badge bg-light-primary">기술</span>
+										<span className="krds-badge bg-primary number">D-234</span>
+									</div>
+									<a className="onellipsis-1" href="#">
 										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
@@ -232,8 +241,11 @@ const UI_USR_L_020 = () => {
 									<span>1444</span>
 								</th>
 								<td>
-						 			<a className="onellipsis-1" href="#">
-									  <span className="krds-badge bg-light-primary">기술</span>
+						 			<div className="badge-txt-box">
+										<span className="krds-badge bg-light-primary">기술</span>
+										<span className="krds-badge bg-primary number">D-234</span>
+									</div>
+									<a className="onellipsis-1" href="#">
 										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
@@ -247,8 +259,11 @@ const UI_USR_L_020 = () => {
 									<span>1444</span>
 								</th>
 								<td>
-						 			<a className="onellipsis-1" href="#">
-									  <span className="krds-badge bg-light-primary">기술</span>
+						 			<div className="badge-txt-box">
+										<span className="krds-badge bg-light-primary">기술</span>
+										<span className="krds-badge bg-primary number">D-234</span>
+									</div>
+									<a className="onellipsis-1" href="#">
 										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
@@ -262,8 +277,11 @@ const UI_USR_L_020 = () => {
 									<span>1444</span>
 								</th>
 								<td>
-						 			<a className="onellipsis-1" href="#">
-									  <span className="krds-badge bg-light-primary">기술</span>
+						 			<div className="badge-txt-box">
+										<span className="krds-badge bg-light-primary">기술</span>
+										<span className="krds-badge bg-primary number">D-234</span>
+									</div>
+									<a className="onellipsis-1" href="#">
 										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
@@ -277,8 +295,11 @@ const UI_USR_L_020 = () => {
 									<span>1444</span>
 								</th>
 								<td>
-						 			<a className="onellipsis-1" href="#">
-									  <span className="krds-badge bg-light-primary">기술</span>
+						 			<div className="badge-txt-box">
+										<span className="krds-badge bg-light-primary">기술</span>
+										<span className="krds-badge bg-primary number">D-234</span>
+									</div>
+									<a className="onellipsis-1" href="#">
 										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
@@ -292,8 +313,11 @@ const UI_USR_L_020 = () => {
 									<span>1444</span>
 								</th>
 								<td>
-						 			<a className="onellipsis-1" href="#">
-									  <span className="krds-badge bg-light-primary">기술</span>
+						 			<div className="badge-txt-box">
+										<span className="krds-badge bg-light-primary">기술</span>
+										<span className="krds-badge bg-primary number">D-234</span>
+									</div>
+									<a className="onellipsis-1" href="#">
 										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
@@ -307,8 +331,11 @@ const UI_USR_L_020 = () => {
 									<span>1444</span>
 								</th>
 								<td>
-						 			<a className="onellipsis-1" href="#">
-									  <span className="krds-badge bg-light-primary">기술</span>
+						 			<div className="badge-txt-box">
+										<span className="krds-badge bg-light-primary">기술</span>
+										<span className="krds-badge bg-primary number">D-234</span>
+									</div>
+									<a className="onellipsis-1" href="#">
 										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
@@ -322,8 +349,11 @@ const UI_USR_L_020 = () => {
 									<span>1444</span>
 								</th>
 								<td>
-						 			<a className="onellipsis-1" href="#">
-									  <span className="krds-badge bg-light-primary">기술</span>
+						 			<div className="badge-txt-box">
+										<span className="krds-badge bg-light-primary">기술</span>
+										<span className="krds-badge bg-primary number">D-234</span>
+									</div>
+									<a className="onellipsis-1" href="#">
 										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
