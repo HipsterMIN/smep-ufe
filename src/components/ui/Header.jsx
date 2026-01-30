@@ -466,8 +466,8 @@ export default function Header() {
           className="quickbox-top"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
-          <img src={arrowIcon} alt="" />
           <span className="sr-only">상단으로</span>
+          <i className="svg-icon ico-angle up"></i>
         </button>
       </div>
     </>

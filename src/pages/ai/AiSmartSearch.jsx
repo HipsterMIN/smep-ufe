@@ -324,6 +324,7 @@ const AiSmartSearchContent = () => {
   };
 
   const handleAiChat = (programIds) => {
+    if (isRealLoading) return;
     // 선택된 공고가 있으면 해당 공고 정보를 state로 전달
     const targetIds = Array.isArray(programIds) ? programIds : [programIds];
     const targetPrograms = displayPrograms.filter(p => targetIds.includes(p.id));
@@ -404,6 +405,7 @@ const AiSmartSearchContent = () => {
   };
 
   const handleConsultSelected = () => {
+    if (isRealLoading) return;
     const ids = Array.from(selectedIds);
     // 선택된 공고가 없으면 검색된 모든 공고를 대상으로 함
     const targetIds = ids.length > 0 ? ids : displayPrograms.map(p => p.id);
@@ -693,7 +695,11 @@ const AiSmartSearchContent = () => {
                       )}
                     </div>
                     {/* 퍼블리싱 파일에 있던 샘플 리스트 구조는 필요 시 SDK 데이터에서 추출하여 바인딩 가능하나, 현재는 요약문 위주로 표시 */}
-                    <button className="krds-btn gradient full medium mt-22" onClick={handleConsultSelected}>
+                    <button 
+                      className="krds-btn gradient full medium mt-22" 
+                      onClick={handleConsultSelected}
+                      disabled={isRealLoading}
+                    >
                         AI에게 더 자세히 물어보기
                       <i className="svg-icon ico-angle right"></i>
                     </button>
@@ -720,6 +726,7 @@ const AiSmartSearchContent = () => {
                     <button 
                       className="krds-btn white small" 
                       onClick={handleConsultSelected}
+                      disabled={isRealLoading}
                       style={{ fontSize: '13px', padding: '4px 12px', height: 'auto', borderRadius: '4px', flexShrink: 0, marginLeft: '12px' }}
                     >
                       AI 컨설턴트
@@ -755,7 +762,12 @@ const AiSmartSearchContent = () => {
                                   <span className="krds-badge bg-primary number">{ddayText}</span>
                                 </div>
                               </div>
-                              <button className="on-qna-ai on-colorblue2" type="button" onClick={() => handleAiChat(program.id)}>
+                              <button 
+                                className="on-qna-ai on-colorblue2" 
+                                type="button" 
+                                onClick={() => handleAiChat(program.id)}
+                                disabled={isRealLoading}
+                              >
                                 <i className="svg-icon ico-ai2 xs"></i>
                                     AI 상담
                               </button>
