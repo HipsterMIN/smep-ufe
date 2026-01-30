@@ -207,15 +207,6 @@ export default function Header() {
                 </h2>
                 <div className="header-actions">
                   <div className="header-search-wrap" ref={searchRef}>
-                    <button
-                      type="button"
-                      className="btn-navi sch"
-                      onClick={handleSearchToggle}
-                      aria-expanded={isSearchOpen}
-                      aria-controls="header-search-layer"
-                    >
-                      <span className="sr-only">통합검색</span>
-                    </button>
                     <div
                       id="header-search-layer"
                       className={`header-search-layer ${isSearchOpen ? 'is-open' : ''}`}
