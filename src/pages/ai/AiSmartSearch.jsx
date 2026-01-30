@@ -447,18 +447,22 @@ const AiSmartSearchContent = () => {
   }, [totalSearchResults, totalSearchLoading]);
 
   const [visibleCount, setVisibleCount] = useState(4);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const PAGE_SIZE = 4;
-  const MAX_VISIBLE_COUNT = 10;
+
+  useEffect(() => {
+    if (displayPrograms.length > 0) {
+      if (isExpanded) {
+        setVisibleCount(displayPrograms.length);
+      } else {
+        setVisibleCount(PAGE_SIZE);
+      }
+    }
+  }, [displayPrograms.length, isExpanded]);
 
   const handleLoadMore = () => {
-    setVisibleCount(prev => {
-      if (prev >= MAX_VISIBLE_COUNT) {
-        return PAGE_SIZE; // 접기 기능: 초기 개수로 복원
-      }
-      const nextCount = prev + PAGE_SIZE;
-      return nextCount > MAX_VISIBLE_COUNT ? MAX_VISIBLE_COUNT : nextCount;
-    });
+    setIsExpanded(!isExpanded);
   };
 
   const aiSmartSearchRef = useRef(null);
@@ -682,7 +686,7 @@ const AiSmartSearchContent = () => {
                           {summaryMarkdown}
                         </ReactMarkdown>
                       ) : isRealLoading ? (
-                        'AI가 응답을 생성 중입니다...'
+                        ' '
                       ) : (
                         '분석 결과가 없습니다.'
                       )}
@@ -696,7 +700,7 @@ const AiSmartSearchContent = () => {
                 </div>
               </div>
               <div className="on-smartsearch-right">
-                <div className="ai-type" style={{ height: '100%' }}>
+                <div className="ai-type">
                   <div className="on-ai-type-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', backgroundColor: '#052B57', padding: '10px 16px', borderRadius: '8px' }}>
                     <div className="krds-check-area" style={{ flex: '1' }}>
                       <div className="krds-form-check">
@@ -720,7 +724,7 @@ const AiSmartSearchContent = () => {
                       AI 컨설턴트
                     </button>
                   </div>
-                  <ul className="krds-structured-list type-full">
+                  <ul className={`krds-structured-list type-full ${isExpanded ? 'is-active' : ''}`}>
                     {displayPrograms.slice(0, visibleCount).map((program) => {
                       const days = calculateDaysRemaining(program.endDate);
                       const ddayText = days !== null ? (days === 0 ? 'D-Day' : (days > 0 ? `D-${days}` : '마감')) : '상시';
@@ -790,7 +794,7 @@ const AiSmartSearchContent = () => {
                   </ul>
                   {displayPrograms.length > PAGE_SIZE && (
                     <button className="krds-btn white full medium" onClick={handleLoadMore}>
-                      {visibleCount >= MAX_VISIBLE_COUNT || visibleCount >= displayPrograms.length ? (
+                      {isExpanded ? (
                         <>
                           접기
                           <i className="svg-icon ico-angle up"></i>
