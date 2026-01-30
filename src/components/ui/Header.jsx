@@ -27,7 +27,7 @@ export default function Header() {
   const [clickCount, setClickCount] = useState(0);
   const searchRef = useRef(null);
   const searchInputRef = useRef(null);
-  
+
   // 메뉴 데이터 로드
   useEffect(() => {
     if (!menuTree) {
@@ -155,7 +155,7 @@ export default function Header() {
     e.preventDefault();
     const newCount = clickCount + 1;
     setClickCount(newCount);
-    
+
     if (newCount >= 5) {
       setShowAiSwitcher(true);
       setClickCount(0);
@@ -405,7 +405,7 @@ export default function Header() {
                             <div>
                               <ul>
                                 {menu.children.map((subMenu) => (
-                                  <li key={subMenu.menuId}>
+                                  <li key={subMenu.menuId} style={{ width: 'auto', minWidth: '180px' }}>
                                     {/* ✅ depth2 외부 링크 처리 */}
                                     <a
                                       href={subMenu.fullPath}
