@@ -718,13 +718,19 @@
   cursor: pointer !important;
 }
 
+.quickbox-top .ico-angle {
+  width: 24px !important;
+  height: 24px !important;
+  background-color: #1E2124 !important;
+}
+
+.quickbox-top:hover .ico-angle {
+  background-color: #fff !important;
+}
+
 .quickbox-top:hover {
   transform: scale(1.1) !important;
   background: #328CDF !important;
   border: 1px solid #5a5a5a !important;
 }
 
-.quickbox-top img {
-  width: 24px !important;
-  height: 24px !important;
-}

@@ -2,14 +2,16 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Link, useLocation } from 'react-router-dom';
-import Header from '../components/ui/Header.jsx';
-import Footer from '../components/ui/Footer.jsx';
-import Breadcrumb from '../components/ui/Breadcrumb';
-import Pagination from '../components/ui/Pagination'; 
-import { api as apiClient } from '../lib/apiClient.js';
+import Header from '../../components/ui/Header.jsx';
+import Footer from '../../components/ui/Footer.jsx';
+import Breadcrumb from '../../components/ui/Breadcrumb';
+import Pagination from '../../components/ui/Pagination'; 
+import { api as apiClient } from '../../lib/apiClient.js';
+import './ai.css';
 import {
   ProgramSearchProvider,
   useProgramSearch,
+  formatDate,
   calculateDaysRemaining,
   formatAIResponse,
   REGION_OPTIONS,
@@ -21,8 +23,8 @@ import {
   countSelectedFilters,
   toFriendlyStatusMessage,
 } from '@cube-i-ax/sdk/smes/program';
-import useSearchStore from '../store/useSearchStore';
-import { useAuthStore } from '../store/useAuthStore.jsx';
+import useSearchStore from '../../store/useSearchStore';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 
 const AiSmartSearchContent = () => {
   const location = useLocation();
@@ -322,6 +324,7 @@ const AiSmartSearchContent = () => {
   };
 
   const handleAiChat = (programIds) => {
+    if (isRealLoading) return;
     // 선택된 공고가 있으면 해당 공고 정보를 state로 전달
     const targetIds = Array.isArray(programIds) ? programIds : [programIds];
     const targetPrograms = displayPrograms.filter(p => targetIds.includes(p.id));
@@ -340,6 +343,7 @@ const AiSmartSearchContent = () => {
       title: program.title,
       agency: program.agency,
       supportField: program.supportField,
+      deadlineType: program.deadlineType,
       startDate: program.startDate,
       endDate: program.endDate,
       tags: program.tags,
@@ -401,6 +405,7 @@ const AiSmartSearchContent = () => {
   };
 
   const handleConsultSelected = () => {
+    if (isRealLoading) return;
     const ids = Array.from(selectedIds);
     // 선택된 공고가 없으면 검색된 모든 공고를 대상으로 함
     const targetIds = ids.length > 0 ? ids : displayPrograms.map(p => p.id);
@@ -445,18 +450,22 @@ const AiSmartSearchContent = () => {
   }, [totalSearchResults, totalSearchLoading]);
 
   const [visibleCount, setVisibleCount] = useState(4);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const PAGE_SIZE = 4;
-  const MAX_VISIBLE_COUNT = 10;
+
+  useEffect(() => {
+    if (displayPrograms.length > 0) {
+      if (isExpanded) {
+        setVisibleCount(displayPrograms.length);
+      } else {
+        setVisibleCount(PAGE_SIZE);
+      }
+    }
+  }, [displayPrograms.length, isExpanded]);
 
   const handleLoadMore = () => {
-    setVisibleCount(prev => {
-      if (prev >= MAX_VISIBLE_COUNT) {
-        return PAGE_SIZE; // 접기 기능: 초기 개수로 복원
-      }
-      const nextCount = prev + PAGE_SIZE;
-      return nextCount > MAX_VISIBLE_COUNT ? MAX_VISIBLE_COUNT : nextCount;
-    });
+    setIsExpanded(!isExpanded);
   };
 
   const aiSmartSearchRef = useRef(null);
@@ -680,13 +689,17 @@ const AiSmartSearchContent = () => {
                           {summaryMarkdown}
                         </ReactMarkdown>
                       ) : isRealLoading ? (
-                        'AI가 요약을 생성 중입니다...'
+                        ' '
                       ) : (
                         '분석 결과가 없습니다.'
                       )}
                     </div>
                     {/* 퍼블리싱 파일에 있던 샘플 리스트 구조는 필요 시 SDK 데이터에서 추출하여 바인딩 가능하나, 현재는 요약문 위주로 표시 */}
-                    <button className="krds-btn gradient full medium mt-22" onClick={handleConsultSelected}>
+                    <button 
+                      className="krds-btn gradient full medium mt-22" 
+                      onClick={handleConsultSelected}
+                      disabled={isRealLoading}
+                    >
                         AI에게 더 자세히 물어보기
                       <i className="svg-icon ico-angle right"></i>
                     </button>
@@ -694,7 +707,7 @@ const AiSmartSearchContent = () => {
                 </div>
               </div>
               <div className="on-smartsearch-right">
-                <div className="ai-type" style={{ height: '100%' }}>
+                <div className="ai-type">
                   <div className="on-ai-type-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', backgroundColor: '#052B57', padding: '10px 16px', borderRadius: '8px' }}>
                     <div className="krds-check-area" style={{ flex: '1' }}>
                       <div className="krds-form-check">
@@ -713,12 +726,13 @@ const AiSmartSearchContent = () => {
                     <button 
                       className="krds-btn white small" 
                       onClick={handleConsultSelected}
+                      disabled={isRealLoading}
                       style={{ fontSize: '13px', padding: '4px 12px', height: 'auto', borderRadius: '4px', flexShrink: 0, marginLeft: '12px' }}
                     >
                       AI 컨설턴트
                     </button>
                   </div>
-                  <ul className="krds-structured-list type-full">
+                  <ul className={`krds-structured-list type-full ${isExpanded ? 'is-active' : ''}`}>
                     {displayPrograms.slice(0, visibleCount).map((program) => {
                       const days = calculateDaysRemaining(program.endDate);
                       const ddayText = days !== null ? (days === 0 ? 'D-Day' : (days > 0 ? `D-${days}` : '마감')) : '상시';
@@ -744,10 +758,16 @@ const AiSmartSearchContent = () => {
                                 </div>
                                 <div className="krds-badge-wrap">
                                   <span className="krds-badge bg-white">{program.supportField}</span>
+                                  {program.deadlineType && <span className="krds-badge bg-white">{program.deadlineType}</span>}
                                   <span className="krds-badge bg-primary number">{ddayText}</span>
                                 </div>
                               </div>
-                              <button className="on-qna-ai on-colorblue2" type="button" onClick={() => handleAiChat(program.id)}>
+                              <button 
+                                className="on-qna-ai on-colorblue2" 
+                                type="button" 
+                                onClick={() => handleAiChat(program.id)}
+                                disabled={isRealLoading}
+                              >
                                 <i className="svg-icon ico-ai2 xs"></i>
                                     AI 상담
                               </button>
@@ -761,7 +781,7 @@ const AiSmartSearchContent = () => {
                                     {program.agency}
                                   </span>
                                   <span>
-                                    {program.startDate} ~ {program.endDate || '상시접수'}
+                                    {formatDate(program.startDate)} ~ {formatDate(program.endDate) === '-' ? '상시접수' : formatDate(program.endDate)}
                                   </span>
                                 </p>
                                 <div className="card-btm noborder pt-0">
@@ -788,7 +808,7 @@ const AiSmartSearchContent = () => {
                   </ul>
                   {displayPrograms.length > PAGE_SIZE && (
                     <button className="krds-btn white full medium" onClick={handleLoadMore}>
-                      {visibleCount >= MAX_VISIBLE_COUNT || visibleCount >= displayPrograms.length ? (
+                      {isExpanded ? (
                         <>
                           접기
                           <i className="svg-icon ico-angle up"></i>
@@ -928,7 +948,7 @@ const AiSmartSearchContent = () => {
                                 )}
                               </span>
                               <span>
-                                {programStartDate} ~ {programEndDate || '상시접수'}
+                                {formatDate(programStartDate)} ~ {formatDate(programEndDate) === '-' ? '상시접수' : formatDate(programEndDate)}
                               </span>
                               <span>
                                 <i className="svg-icon ico-building"></i>
@@ -981,8 +1001,19 @@ const SAMPLE_COMPANY_PROFILE = {
 const AiSmartSearch = () => {
   const { companyProfile } = useAuthStore();
   const effectiveProfile = companyProfile || SAMPLE_COMPANY_PROFILE;
+  const [topK, setTopK] = useState(50);
+  const [aiEnv, setAiEnv] = useState(() => localStorage.getItem('__ai_env__') || 'dev');
+
+  useEffect(() => {
+    const handleEnvChange = (e) => {
+      setAiEnv(e.detail || 'dev');
+    };
+    window.addEventListener('ai-env-change', handleEnvChange);
+    return () => window.removeEventListener('ai-env-change', handleEnvChange);
+  }, []);
+  
   return (
-    <ProgramSearchProvider profile={effectiveProfile} stream topK={20}>
+    <ProgramSearchProvider key={aiEnv} profile={effectiveProfile} stream topK={topK}>
       <AiSmartSearchContent />
     </ProgramSearchProvider>
   );

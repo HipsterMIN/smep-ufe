@@ -21,7 +21,13 @@ export default function Header() {
   const openTimeoutRef = useRef(null);
   const closeTimeoutRef = useRef(null);
   const [isCompany, setIsCompany] = useState(false);
-  
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showAiSwitcher, setShowAiSwitcher] = useState(false);
+  const [aiEnv, setAiEnv] = useState(() => localStorage.getItem('__ai_env__') || 'dev');
+  const [clickCount, setClickCount] = useState(0);
+  const searchRef = useRef(null);
+  const searchInputRef = useRef(null);
+
   // 메뉴 데이터 로드
   useEffect(() => {
     if (!menuTree) {
@@ -38,24 +44,48 @@ export default function Header() {
     return menuTree.children
       .filter(menu => menu.depth === 1 && menu.upendMenuExpsrYn === 'Y')
       .sort((a, b) => a.sortSeq - b.sortSeq)
-      .map(menu => ({
-        ...menu,
-        fullPath: basePath + buildFullPath(menu, flatMenuMap),
-        children: (menu.children || [])
-          .filter(child => child.lfsdMenuExpsrYn === 'Y')
-          .sort((a, b) => a.sortSeq - b.sortSeq)
-          .map(child => ({
-            ...child,
-            fullPath: basePath + buildFullPath(child, flatMenuMap),
-            children: (child.children || [])
-              .filter(grandChild => grandChild.lfsdMenuExpsrYn === 'Y')
-              .sort((a, b) => a.sortSeq - b.sortSeq)
-              .map(grandChild => ({
-                ...grandChild,
-                fullPath: basePath + buildFullPath(grandChild, flatMenuMap),
-              })),
-          })),
-      }));
+      .map(menu => {
+        // ✅ depth 1 외부 링크 체크
+        const isDepth1External = menu.scrnUrlAddr && /^https?:\/\//i.test(menu.scrnUrlAddr);
+
+        return {
+          ...menu,
+          fullPath: isDepth1External
+            ? menu.scrnUrlAddr
+            : basePath + buildFullPath(menu, flatMenuMap),
+          isExternal: isDepth1External,
+          children: (menu.children || [])
+            .filter(child => child.lfsdMenuExpsrYn === 'Y')
+            .sort((a, b) => a.sortSeq - b.sortSeq)
+            .map(child => {
+              // ✅ depth 2 외부 링크 체크
+              const isDepth2External = child.scrnUrlAddr && /^https?:\/\//i.test(child.scrnUrlAddr);
+
+              return {
+                ...child,
+                fullPath: isDepth2External
+                  ? child.scrnUrlAddr
+                  : basePath + buildFullPath(child, flatMenuMap),
+                isExternal: isDepth2External,
+                children: (child.children || [])
+                  .filter(grandChild => grandChild.lfsdMenuExpsrYn === 'Y')
+                  .sort((a, b) => a.sortSeq - b.sortSeq)
+                  .map(grandChild => {
+                    // ✅ depth 3 외부 링크 체크
+                    const isDepth3External = grandChild.scrnUrlAddr && /^https?:\/\//i.test(grandChild.scrnUrlAddr);
+
+                    return {
+                      ...grandChild,
+                      fullPath: isDepth3External
+                        ? grandChild.scrnUrlAddr
+                        : basePath + buildFullPath(grandChild, flatMenuMap),
+                      isExternal: isDepth3External,
+                    };
+                  }),
+              };
+            }),
+        };
+      });
   }, [menuTree, flatMenuMap]);
 
   const handleMouseEnter = (menuId) => {
@@ -112,8 +142,39 @@ export default function Header() {
     }, 500);
 
   };
+
+  const handleClickAiSearch = () => {
+    navigate(getFullPath('M_PIIO_00074')); // AI 스마트검색 메뉴로 이동
+  };
+
   const handleClickMypage = () => {
     navigate(getFullPath('M_PIIO_00113')); // 증명서 발급 메뉴로 이동
+  };
+
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    const newCount = clickCount + 1;
+    setClickCount(newCount);
+
+    if (newCount >= 5) {
+      setShowAiSwitcher(true);
+      setClickCount(0);
+    } else {
+      // 2초 내에 다시 안 누르면 카운트 초기화
+      if (window.__logo_timer__) clearTimeout(window.__logo_timer__);
+      window.__logo_timer__ = setTimeout(() => setClickCount(0), 2000);
+      navigate('/');
+    }
+  };
+
+  const handleAiEnvChange = (env) => {
+    setAiEnv(env);
+    localStorage.setItem('__ai_env__', env);
+    // App.jsx에 알림
+    window.dispatchEvent(new CustomEvent('ai-env-change', { detail: env }));
+    setShowAiSwitcher(false);
+    alert(`AI 서버가 ${env === 'prod' ? '운영' : '개발'} 서버로 변경되었습니다. 페이지를 새로고침합니다.`);
+    window.location.reload();
   };
 
   const handleOpenMobGnb = () => {
@@ -134,6 +195,45 @@ export default function Header() {
       targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   };
+
+  const handleSearchToggle = () => {
+    setIsSearchOpen((prev) => !prev);
+  };
+
+  // 외부 클릭 및 ESC 시 검색창 닫기
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsSearchOpen(false);
+      }
+    };
+    const handleEsc = (event) => {
+      if (event.key === 'Escape') {
+        setIsSearchOpen(false);
+      }
+    };
+
+    if (isSearchOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEsc);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEsc);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [isSearchOpen]);
+
+  useEffect(() => {
+    if (!isSearchOpen) return;
+    const focusTimer = requestAnimationFrame(() => {
+      searchInputRef.current?.focus();
+    });
+    return () => cancelAnimationFrame(focusTimer);
+  }, [isSearchOpen]);
 
   return (
     <>
@@ -159,12 +259,44 @@ export default function Header() {
             <div className="inner">
               <div className="header-branding">
                 <h2 className="logo sample">
-                  <a href={BASE_URL}>
+                  <a href={BASE_URL} onClick={handleLogoClick}>
                     <span className="sr-only">중소기업통합플랫폼</span>
                   </a>
                 </h2>
+                {showAiSwitcher && (
+                  <div className="ai-env-switcher">
+                    <select value={aiEnv} onChange={(e) => handleAiEnvChange(e.target.value)}>
+                      <option value="prod">운영(개발) 서버</option>
+                      <option value="dev">개발 서버</option>
+                    </select>
+                    <button onClick={() => setShowAiSwitcher(false)}>닫기</button>
+                  </div>
+                )}
                 <div className="header-actions">
+                  <div className="header-search-wrap" ref={searchRef}>
+                    <div
+                      id="header-search-layer"
+                      className={`header-search-layer ${isSearchOpen ? 'is-open' : ''}`}
+                      role="dialog"
+                      aria-label="통합검색"
+                    >
+                      <div className="sch-input">
+                        <input
+                          type="text"
+                          className="krds-input"
+                          placeholder="검색어를 입력해 주세요"
+                          title="검색어 입력"
+                          ref={searchInputRef}
+                        />
+                        <button type="button" className="krds-btn medium icon ico-search">
+                          <span className="sr-only">검색</span>
+                          <i className="svg-icon ico-sch"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                   {/* <button type="button" className="btn-navi sch open-modal" data-target="popTotalSch">통합검색</button> */}
+                  {/* ai 검색 추가 */}
                   {isLogin ? (
                     <>
                       <div style={{
@@ -182,14 +314,18 @@ export default function Header() {
                       }}>
                         <span
                           className="krds-btn-tag"
-                          style={{ cursor: 'pointer',
+                          style={{
+                            cursor: 'pointer',
                             backgroundColor: !isCompany ? '#FFFFFF' : '#1c267b',
-                            color: !isCompany ? '#000000' : '#FFFFFF' }}
+                            color: !isCompany ? '#000000' : '#FFFFFF',
+                          }}
                           onClick={() => setIsCompany(!isCompany)}
                         >
                           {!isCompany ? '개인회원 전환' : '기업회원 전환'}
                         </span>
                       </div>
+                      <button type="button" className="btn-navi sch" onClick={() => handleClickAiSearch()}>AI 스마트검색
+                      </button>
                       <button type="button" className="btn-navi logout" onClick={logout}>로그아웃</button>
                       <div className="krds-drop-wrap my-drop">
                         <button type="button" className="btn-navi my drop-btn active"
@@ -224,6 +360,8 @@ export default function Header() {
                     </>
                   ) : (
                     <>
+                      <button type="button" className="btn-navi sch" onClick={() => handleClickAiSearch()}>AI 스마트검색
+                      </button>
                       <a href="#" className="btn-navi login" onClick={(e) => {
                         handleClick();
                       }}>로그인</a>
@@ -244,7 +382,7 @@ export default function Header() {
             <div className="inner">
               <ul className="gnb-menu" aria-label="메인 메뉴">
                 {dynamicMenus.map((menu) => (
-                  <li 
+                  <li
                     key={menu.menuId}
                     onMouseEnter={() => handleMouseEnter(menu.menuId)}
                     onMouseLeave={handleMouseLeave}
@@ -268,14 +406,30 @@ export default function Header() {
                               <ul>
                                 {menu.children.map((subMenu) => (
                                   <li key={subMenu.menuId} style={{ width: 'auto', minWidth: '180px' }}>
-                                    <a href={subMenu.fullPath}>
+                                    {/* ✅ depth2 외부 링크 처리 */}
+                                    <a
+                                      href={subMenu.fullPath}
+                                      {...(subMenu.isExternal && {
+                                        target: '_blank',
+                                        rel: 'noopener noreferrer',
+                                      })}
+                                    >
                                       {subMenu.menuNm}
                                       <i className="svg-icon ico-angle right sm"></i>
                                     </a>
                                     <ul className='subMenuLists'>
                                       {(subMenu.children || []).map((depth3Menu) => (
                                         <li key={depth3Menu.menuId}>
-                                          <a href={depth3Menu.fullPath}>{depth3Menu.menuNm}</a>
+                                          {/* ✅ depth3 외부 링크 처리 */}
+                                          <a
+                                            href={depth3Menu.fullPath}
+                                            {...(depth3Menu.isExternal && {
+                                              target: '_blank',
+                                              rel: 'noopener noreferrer',
+                                            })}
+                                          >
+                                            {depth3Menu.menuNm}
+                                          </a>
                                         </li>
                                       ))}
                                     </ul>
@@ -299,7 +453,7 @@ export default function Header() {
         { /*헤더 컨텐츠 영역  */}
 
         { /*메인메뉴 : 모바일 */}
-        <div id="mobile-nav" className="krds-main-menu-mobile" ref={mobGnbRef}> 
+        <div id="mobile-nav" className="krds-main-menu-mobile" ref={mobGnbRef}>
           <div className="gnb-wrap">
             {/* gnb-header */}
             <div className="gnb-header">
@@ -390,8 +544,8 @@ export default function Header() {
           className="quickbox-top"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
-          <img src={arrowIcon} alt="" />
           <span className="sr-only">상단으로</span>
+          <i className="svg-icon ico-angle up"></i>
         </button>
       </div>
     </>
