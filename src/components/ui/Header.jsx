@@ -115,6 +115,11 @@ export default function Header() {
     }, 500);
 
   };
+
+  const handleClickAiSearch = () => {
+    navigate(getFullPath('M_PIIO_00074')); // AI 스마트검색 메뉴로 이동
+  };
+
   const handleClickMypage = () => {
     navigate(getFullPath('M_PIIO_00113')); // 증명서 발급 메뉴로 이동
   };
@@ -230,7 +235,6 @@ export default function Header() {
                   </div>
                   {/* <button type="button" className="btn-navi sch open-modal" data-target="popTotalSch">통합검색</button> */}
                   {/* ai 검색 추가 */}
-                   <button type="button" className="btn-navi sch">AI 스마트검색</button>
                   {isLogin ? (
                     <>
                       <div style={{
@@ -248,14 +252,18 @@ export default function Header() {
                       }}>
                         <span
                           className="krds-btn-tag"
-                          style={{ cursor: 'pointer',
+                          style={{
+                            cursor: 'pointer',
                             backgroundColor: !isCompany ? '#FFFFFF' : '#1c267b',
-                            color: !isCompany ? '#000000' : '#FFFFFF' }}
+                            color: !isCompany ? '#000000' : '#FFFFFF',
+                          }}
                           onClick={() => setIsCompany(!isCompany)}
                         >
                           {!isCompany ? '개인회원 전환' : '기업회원 전환'}
                         </span>
                       </div>
+                      <button type="button" className="btn-navi sch" onClick={() => handleClickAiSearch()}>AI 스마트검색
+                      </button>
                       <button type="button" className="btn-navi logout" onClick={logout}>로그아웃</button>
                       <div className="krds-drop-wrap my-drop">
                         <button type="button" className="btn-navi my drop-btn active"
@@ -290,6 +298,8 @@ export default function Header() {
                     </>
                   ) : (
                     <>
+                      <button type="button" className="btn-navi sch" onClick={() => handleClickAiSearch()}>AI 스마트검색
+                      </button>
                       <a href="#" className="btn-navi login" onClick={(e) => {
                         handleClick();
                       }}>로그인</a>
