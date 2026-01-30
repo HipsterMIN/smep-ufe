@@ -351,7 +351,7 @@
 /* quick */
 .quickbox {
   position: fixed;
-  top: 700px;
+  bottom: 30px;
   left: 50%;
   margin-left: 780px;
   z-index: 100;
@@ -385,8 +385,17 @@
   border-radius: 50%;
   display: flex;
   justify-content: center;
+  align-items: center;
   background: #fff;
   transition: all 0.6s ease;
+}
+.quickbox-top .ico-angle {
+  width: 24px;
+  height: 24px;
+  background-color: #1E2124;
+}
+.quickbox-top:hover .ico-angle {
+  background-color: #fff;
 }
 .quickbox-top:hover {
   transform: scale(1.1);
