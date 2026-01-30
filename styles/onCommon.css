@@ -24,8 +24,9 @@
   padding-bottom: 90px;
 }
 .main-totallayout {
-  height: 900px;
-  background-image: url(../src/assets/main/mainBg.png);
+  /* height: 900px; */
+  background: url(../src/assets/main/mainBg.png) no-repeat 50% 0;
+  background-size: 100% auto;
   letter-spacing: -2px;
 }
 .main-totallayout > .inner {
@@ -57,6 +58,9 @@
   display: flex;
   background-size: 400% 400%;
   animation: gradientFlow 10s ease infinite;
+}
+.main-totallistbox{
+  padding: 62px 0;
 }
 @keyframes gradientFlow {
   0% {
@@ -941,6 +945,9 @@
 }
 .krds-table-wrap .tbl td a:not(.krds-btn) {display: block;}
 .krds-table-wrap .tbl td a[class ^= "onellipsis-"] { display: -webkit-box;}
+.krds-table-wrap .tbl td .badge-txt-box {
+  margin-bottom: 4px;
+}
 /* krds-tab-area  */
 
 .krds-tab-area {gap: 0px;}
