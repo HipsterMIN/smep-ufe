@@ -22,6 +22,9 @@ export default function Header() {
   const closeTimeoutRef = useRef(null);
   const [isCompany, setIsCompany] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showAiSwitcher, setShowAiSwitcher] = useState(false);
+  const [aiEnv, setAiEnv] = useState(() => localStorage.getItem('__ai_env__') || 'dev');
+  const [clickCount, setClickCount] = useState(0);
   const searchRef = useRef(null);
   const searchInputRef = useRef(null);
   
@@ -124,6 +127,32 @@ export default function Header() {
     navigate(getFullPath('M_PIIO_00113')); // 증명서 발급 메뉴로 이동
   };
 
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    const newCount = clickCount + 1;
+    setClickCount(newCount);
+    
+    if (newCount >= 5) {
+      setShowAiSwitcher(true);
+      setClickCount(0);
+    } else {
+      // 2초 내에 다시 안 누르면 카운트 초기화
+      if (window.__logo_timer__) clearTimeout(window.__logo_timer__);
+      window.__logo_timer__ = setTimeout(() => setClickCount(0), 2000);
+      navigate('/');
+    }
+  };
+
+  const handleAiEnvChange = (env) => {
+    setAiEnv(env);
+    localStorage.setItem('__ai_env__', env);
+    // App.jsx에 알림
+    window.dispatchEvent(new CustomEvent('ai-env-change', { detail: env }));
+    setShowAiSwitcher(false);
+    alert(`AI 서버가 ${env === 'prod' ? '운영' : '개발'} 서버로 변경되었습니다. 페이지를 새로고침합니다.`);
+    window.location.reload();
+  };
+
   const handleOpenMobGnb = () => {
     mobGnbRef.current?.classList.add('is-open', 'is-backdrop');
     document.body.classList.add('is-gnb-mobile');
@@ -206,10 +235,19 @@ export default function Header() {
             <div className="inner">
               <div className="header-branding">
                 <h2 className="logo sample">
-                  <a href={BASE_URL}>
+                  <a href={BASE_URL} onClick={handleLogoClick}>
                     <span className="sr-only">중소기업통합플랫폼</span>
                   </a>
                 </h2>
+                {showAiSwitcher && (
+                  <div className="ai-env-switcher">
+                    <select value={aiEnv} onChange={(e) => handleAiEnvChange(e.target.value)}>
+                      <option value="prod">운영(개발) 서버</option>
+                      <option value="dev">개발 서버</option>
+                    </select>
+                    <button onClick={() => setShowAiSwitcher(false)}>닫기</button>
+                  </div>
+                )}
                 <div className="header-actions">
                   <div className="header-search-wrap" ref={searchRef}>
                     <div
@@ -466,8 +504,8 @@ export default function Header() {
           className="quickbox-top"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
-          <img src={arrowIcon} alt="" />
           <span className="sr-only">상단으로</span>
+          <i className="svg-icon ico-angle up"></i>
         </button>
       </div>
     </>
