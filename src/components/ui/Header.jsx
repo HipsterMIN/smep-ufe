@@ -139,6 +139,11 @@ export default function Header() {
     }, 500);
 
   };
+
+  const handleClickAiSearch = () => {
+    navigate(getFullPath('M_PIIO_00074')); // AI 스마트검색 메뉴로 이동
+  };
+
   const handleClickMypage = () => {
     navigate(getFullPath('M_PIIO_00113')); // 증명서 발급 메뉴로 이동
   };
@@ -254,7 +259,6 @@ export default function Header() {
                   </div>
                   {/* <button type="button" className="btn-navi sch open-modal" data-target="popTotalSch">통합검색</button> */}
                   {/* ai 검색 추가 */}
-                  <button type="button" className="btn-navi sch">AI 스마트검색</button>
                   {isLogin ? (
                     <>
                       <div style={{
@@ -282,6 +286,8 @@ export default function Header() {
                           {!isCompany ? '개인회원 전환' : '기업회원 전환'}
                         </span>
                       </div>
+                      <button type="button" className="btn-navi sch" onClick={() => handleClickAiSearch()}>AI 스마트검색
+                      </button>
                       <button type="button" className="btn-navi logout" onClick={logout}>로그아웃</button>
                       <div className="krds-drop-wrap my-drop">
                         <button type="button" className="btn-navi my drop-btn active"
@@ -316,6 +322,8 @@ export default function Header() {
                     </>
                   ) : (
                     <>
+                      <button type="button" className="btn-navi sch" onClick={() => handleClickAiSearch()}>AI 스마트검색
+                      </button>
                       <a href="#" className="btn-navi login" onClick={(e) => {
                         handleClick();
                       }}>로그인</a>
@@ -347,6 +355,7 @@ export default function Header() {
                     >
                       {menu.menuNm}
                     </button>
+                    {/* gnb-toggle-wrap */}
                     <div className={`gnb-toggle-wrap ${openIndex === menu.menuId ? 'is-open' : ''}`}>
                       <div className="gnb-main-list">
                         <div className="gnb-sub-list single-list between">
@@ -394,6 +403,7 @@ export default function Header() {
                         </div>
                       </div>
                     </div>
+                    { /*gnb-toggle-wrap */}
                   </li>
                 ))}
               </ul>
@@ -412,16 +422,13 @@ export default function Header() {
               {/* gnb-login */}
               <div className="gnb-login">
                 <span className="user">홍길동님</span>
-                <button type="button" className="krds-btn large text"><i className="svg-icon ico-logout"></i> 로그아웃
-                </button>
-                <button type="button" className="krds-btn large text"><i className="svg-icon ico-log"></i> 로그인을 해주세요
-                </button>
+                <button type="button" className="krds-btn large text"><i className="svg-icon ico-logout"></i> 로그아웃</button>
+                <button type="button" className="krds-btn large text"><i className="svg-icon ico-log"></i> 로그인을 해주세요</button>
               </div>
               { /*gnb-login */}
               {/* 검색 */}
               <div className="sch-input">
-                <input type="text" className="krds-input" placeholder="찾고자 하는 메뉴명을 입력해 주세요"
-                  title="찾고자 하는 메뉴명 입력"></input>
+                <input type="text" className="krds-input" placeholder="찾고자 하는 메뉴명을 입력해 주세요" title="찾고자 하는 메뉴명 입력"></input>
                 <button type="button" className="krds-btn medium icon ico-search">
                   <span className="sr-only">검색</span>
                   <i className="svg-icon ico-sch"></i>

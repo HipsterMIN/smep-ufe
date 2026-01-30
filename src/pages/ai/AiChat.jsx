@@ -903,6 +903,7 @@ const AiChat = () => {
                                         </div>
                                         <div className="krds-badge-wrap">
                                           <span className="krds-badge bg-white">{program.supportField}</span>
+                                          {program.deadlineType && <span className="krds-badge bg-white">{program.deadlineType}</span>}
                                           <span className="krds-badge bg-primary number">{ddayText}</span>
                                         </div>
                                       </div>
