@@ -165,6 +165,8 @@ export default function Header() {
                 </h2>
                 <div className="header-actions">
                   {/* <button type="button" className="btn-navi sch open-modal" data-target="popTotalSch">통합검색</button> */}
+                  {/* ai 검색 추가 */}
+                   <button type="button" className="btn-navi sch">AI 스마트검색</button>
                   {isLogin ? (
                     <>
                       <div style={{

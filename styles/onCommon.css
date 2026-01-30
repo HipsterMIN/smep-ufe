@@ -3384,3 +3384,9 @@ textarea.krds-input::placeholder {
   font-size: 13px;
   font-weight: 600;
 }
+
+/* gnb */
+.krds-main-menu .gnb-menu .gnb-main-trigger {
+  min-width: 200px;
+  padding:0 30px;
+}
