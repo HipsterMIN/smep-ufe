@@ -499,9 +499,10 @@ const SprtBiz = () => {
                   <div className="filter-form">
                     <div className="on-flexwrap on-mw100p">
                       <label className="label">지원기관</label>
-                      <div className="krds-check-area">
+                      <div className="krds-check-area"
+                        style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', width: '100%' }}>
                         {organizations.map((item) => (
-                          <div className="krds-form-chip small" key={item.value}>
+                          <div className="krds-form-chip small" key={item.value} style={{ width: '100%' }}>
                             <input
                               type="checkbox"
                               className="checkbox"
@@ -510,11 +511,34 @@ const SprtBiz = () => {
                               checked={selectedOrgs.includes(item.value)}
                               onChange={() => handleOrgChange(item.value)}
                             />
-                            <label className="krds-form-chip-outline" htmlFor={`tab1_${item.value}`}>
+                            <label className="krds-form-chip-outline" htmlFor={`tab1_${item.value}`} style={{
+                              width: '100%',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              display: 'flex',
+                            }}>
                               {item.label}
                             </label>
                           </div>
                         ))}
+                        {/*<div className="krds-check-area">
+                          {bizTypes.map((item) => (
+                            <div className="krds-form-chip small" key={item.value}>
+                              <input
+                                type="checkbox"
+                                className="checkbox"
+                                id={`tab0_${item.value}`}
+                                name="bizType"
+                                checked={selectedBizTypes.includes(item.value)}
+                                onChange={() => handleBizTypeChange(item.value)}
+                              />
+                              <label className="krds-form-chip-outline" htmlFor={`tab0_${item.value}`}>
+                                {item.label}
+                              </label>
+                            </div>
+                          ))}
+                        </div>*/}
                       </div>
                     </div>
                   </div>
