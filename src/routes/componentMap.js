@@ -23,7 +23,7 @@ const UI_USR_L_190 = lazy(() => import('@pages/policy-info/UI_USR_L_190.jsx'));
 const UI_USR_R_191 = lazy(() => import('@pages/policy-info/UI_USR_R_191.jsx'));
 const UI_USR_W_130 = lazy(() => import('@pages/policy-info/UI_USR_W_130.jsx'));
 const UI_USR_R_131 = lazy(() => import('@pages/policy-info/UI_USR_R_131.jsx'));
-const UI_USR_L_140 = lazy(() => import('@pages/policy-info/UI_USR_L_140.jsx'));
+const UI_USR_L_140 = lazy(() => import('@pages/more-service/UI_USR_L_140.jsx'));
 const UI_USR_L_170 = lazy(() => import('@pages/policy-info/UI_USR_L_170.jsx'));
 const UI_USR_L_210 = lazy(() => import('@pages/data-open/UI-USR-L-210.jsx'));
 const UI_USR_L_220 = lazy(() => import('@pages/data-open/UI-USR-L-220.jsx'));
@@ -55,7 +55,10 @@ const UI_USR_L_530 = lazy(() => import('@pages/my-business/UI-USR-L-530.jsx'));
 const UI_USR_L_540 = lazy(() => import('@pages/my-business/UI-USR-L-540.jsx'));
 const UI_USR_L_550 = lazy(() => import('@pages/my-business/UI-USR-L-550.jsx'));
 const UI_USR_L_100 = lazy(() => import('@pages/policy-info/UI_USR_L_100.jsx'));
-
+const UI_USR_L_110 = lazy(() => import('@pages/policy-info/UI_USR_L_110.jsx'));
+const UI_USR_L_150 = lazy(() => import('@pages/more-service/UI-USR-L-150.jsx'));
+const UI_USR_L_180 = lazy(() => import('@pages/more-service/UI-USR-L-180.jsx'));
+const UI_Usr_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
 /**
  * =============================================================================
  * Component Map - menuId와 실제 컴포넌트 매핑
@@ -227,19 +230,19 @@ export const componentMap = {
 
   // 월간중기누리
   'M_PIIO_00086': {
-    component: UI_USR_L_100, //퍼블없음 게시판관리로 해야돼서 없는듯
+    component: UI_USR_L_100,
     layout: SubpageLayoutWithMenu,
   },
 
   // 입법행정예고/고시
   'M_PIIO_00087': {
-    component: UI_USR_L_190, //퍼블없음 게시판관리로 해야돼서 없는듯
+    component: UI_USR_L_110,
     layout: SubpageLayoutWithMenu,
   },
 
   // 품목별 법정의무 인증제도
   'M_PIIO_00088': {
-    component: UI_USR_L_190, //퍼블없음 게시판관리로 해야돼서 없는듯
+    component: UI_Usr_L_120,
     layout: SubpageLayoutWithMenu,
   },
 
@@ -263,7 +266,7 @@ export const componentMap = {
 
   // 주택특별공급 사업공고
   'M_PIIO_00091': {
-    component: UI_USR_L_190, //퍼블없음 게시판관리로 해야돼서 없는듯
+    component: UI_USR_L_150, //퍼블없음 게시판관리로 해야돼서 없는듯
     layout: SubpageLayoutWithMenu,
   },
 
@@ -275,7 +278,7 @@ export const componentMap = {
 
   // 입주기업 모집공고
   'M_PIIO_00094': {
-    component: UI_USR_L_190, //퍼블없음 게시판관리로 해야돼서 없는듯
+    component: UI_USR_L_180, //퍼블없음 게시판관리로 해야돼서 없는듯
     layout: SubpageLayoutWithMenu,
   },
 

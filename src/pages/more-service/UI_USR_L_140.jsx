@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
-import SideNavigation from '@components/ui/SideNavigation';
-import Breadcrumb from '@components/ui/Breadcrumb';
-import Tab from '@components/ui/Tab';
-import Pagination from '@components/ui/Pagination';
-import Popup from '@components/ui/Popup';
+import SideNavigation from '@components/ui/SideNavigation.jsx';
+import Breadcrumb from '@components/ui/Breadcrumb.jsx';
+import Tab from '@components/ui/Tab.jsx';
+import Pagination from '@components/ui/Pagination.jsx';
+import Popup from '@components/ui/Popup.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 const UI_USR_L_140 = () => {
