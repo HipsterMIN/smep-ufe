@@ -30,7 +30,10 @@ import {
   useChatContext as useSDKChatContext,
   type Source,
 } from "../../../react";
-import { mapSourcesToPrograms } from "../mappers";
+import {
+  mapSourcesToPrograms,
+  buildBackendProfile,
+} from "../index";
 import {
   calculateDaysRemaining,
   formatAIResponse,
@@ -218,11 +221,14 @@ export function ProgramChatProvider({
   groupByField = "group_id",
   stream = true,
 }: ProgramChatProviderProps) {
+  // CompanyProfile → 백엔드 프로필 형식으로 변환 (snake_case)
+  const backendProfile = useMemo(() => buildBackendProfile(profile), [profile]);
+
   return (
     <ChatRoot
       maxResponseLength={maxResponseLength}
       includeCitations={includeCitations}
-      profile={profile as any}
+      profile={backendProfile}
       domain={domain}
       maxTokens={maxTokens}
       topK={topK}
