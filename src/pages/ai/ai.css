@@ -21,7 +21,7 @@
 .ai-type .krds-structured-list.is-active { overflow-y: visible; }
 .ai-type .structured-item { padding: 0; border: none; border-radius: 0px; background: none; border-bottom: 1px solid #D6E0EB; padding-bottom: 16px; margin-bottom: 16px;}
 .ai-type .structured-item:last-child {border-bottom: none; margin-bottom: 0;}
-.ai-type .on-qna-ai {margin-left: auto; font-size: 15px; font-weight: 400; display: flex; gap: 4px; align-items: center;}
+.ai-type .on-qna-ai {margin-left: auto; font-size: 15px; font-weight: 400; display: flex; gap: 4px; align-items: center; margin-right: 4px;}
 .ai-type .krds-structured-list {gap:0px;}
 .ai-type .krds-structured-list .card-body .c-text .c-tit .span {display: block; font-size: 17px;}
 .on-smartsearch .ai-type .structured-item { padding-bottom: 10px; margin-bottom: 10px; }
