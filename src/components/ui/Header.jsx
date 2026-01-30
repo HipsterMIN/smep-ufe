@@ -44,24 +44,48 @@ export default function Header() {
     return menuTree.children
       .filter(menu => menu.depth === 1 && menu.upendMenuExpsrYn === 'Y')
       .sort((a, b) => a.sortSeq - b.sortSeq)
-      .map(menu => ({
-        ...menu,
-        fullPath: basePath + buildFullPath(menu, flatMenuMap),
-        children: (menu.children || [])
-          .filter(child => child.lfsdMenuExpsrYn === 'Y')
-          .sort((a, b) => a.sortSeq - b.sortSeq)
-          .map(child => ({
-            ...child,
-            fullPath: basePath + buildFullPath(child, flatMenuMap),
-            children: (child.children || [])
-              .filter(grandChild => grandChild.lfsdMenuExpsrYn === 'Y')
-              .sort((a, b) => a.sortSeq - b.sortSeq)
-              .map(grandChild => ({
-                ...grandChild,
-                fullPath: basePath + buildFullPath(grandChild, flatMenuMap),
-              })),
-          })),
-      }));
+      .map(menu => {
+        // ✅ depth 1 외부 링크 체크
+        const isDepth1External = menu.scrnUrlAddr && /^https?:\/\//i.test(menu.scrnUrlAddr);
+
+        return {
+          ...menu,
+          fullPath: isDepth1External
+            ? menu.scrnUrlAddr
+            : basePath + buildFullPath(menu, flatMenuMap),
+          isExternal: isDepth1External,
+          children: (menu.children || [])
+            .filter(child => child.lfsdMenuExpsrYn === 'Y')
+            .sort((a, b) => a.sortSeq - b.sortSeq)
+            .map(child => {
+              // ✅ depth 2 외부 링크 체크
+              const isDepth2External = child.scrnUrlAddr && /^https?:\/\//i.test(child.scrnUrlAddr);
+
+              return {
+                ...child,
+                fullPath: isDepth2External
+                  ? child.scrnUrlAddr
+                  : basePath + buildFullPath(child, flatMenuMap),
+                isExternal: isDepth2External,
+                children: (child.children || [])
+                  .filter(grandChild => grandChild.lfsdMenuExpsrYn === 'Y')
+                  .sort((a, b) => a.sortSeq - b.sortSeq)
+                  .map(grandChild => {
+                    // ✅ depth 3 외부 링크 체크
+                    const isDepth3External = grandChild.scrnUrlAddr && /^https?:\/\//i.test(grandChild.scrnUrlAddr);
+
+                    return {
+                      ...grandChild,
+                      fullPath: isDepth3External
+                        ? grandChild.scrnUrlAddr
+                        : basePath + buildFullPath(grandChild, flatMenuMap),
+                      isExternal: isDepth3External,
+                    };
+                  }),
+              };
+            }),
+        };
+      });
   }, [menuTree, flatMenuMap]);
 
   const handleMouseEnter = (menuId) => {
@@ -358,7 +382,7 @@ export default function Header() {
             <div className="inner">
               <ul className="gnb-menu" aria-label="메인 메뉴">
                 {dynamicMenus.map((menu) => (
-                  <li 
+                  <li
                     key={menu.menuId}
                     onMouseEnter={() => handleMouseEnter(menu.menuId)}
                     onMouseLeave={handleMouseLeave}
@@ -382,14 +406,30 @@ export default function Header() {
                               <ul>
                                 {menu.children.map((subMenu) => (
                                   <li key={subMenu.menuId}>
-                                    <a href={subMenu.fullPath}>
+                                    {/* ✅ depth2 외부 링크 처리 */}
+                                    <a
+                                      href={subMenu.fullPath}
+                                      {...(subMenu.isExternal && {
+                                        target: '_blank',
+                                        rel: 'noopener noreferrer',
+                                      })}
+                                    >
                                       {subMenu.menuNm}
                                       <i className="svg-icon ico-angle right sm"></i>
                                     </a>
                                     <ul className='subMenuLists'>
                                       {(subMenu.children || []).map((depth3Menu) => (
                                         <li key={depth3Menu.menuId}>
-                                          <a href={depth3Menu.fullPath}>{depth3Menu.menuNm}</a>
+                                          {/* ✅ depth3 외부 링크 처리 */}
+                                          <a
+                                            href={depth3Menu.fullPath}
+                                            {...(depth3Menu.isExternal && {
+                                              target: '_blank',
+                                              rel: 'noopener noreferrer',
+                                            })}
+                                          >
+                                            {depth3Menu.menuNm}
+                                          </a>
                                         </li>
                                       ))}
                                     </ul>
@@ -413,7 +453,7 @@ export default function Header() {
         { /*헤더 컨텐츠 영역  */}
 
         { /*메인메뉴 : 모바일 */}
-        <div id="mobile-nav" className="krds-main-menu-mobile" ref={mobGnbRef}> 
+        <div id="mobile-nav" className="krds-main-menu-mobile" ref={mobGnbRef}>
           <div className="gnb-wrap">
             {/* gnb-header */}
             <div className="gnb-header">
