@@ -26,7 +26,8 @@ const UI_USR_L_190 = () => {
         <div className="search-top-box">
           <div className="sch-form-wrap">
             <select className="krds-form-select">
-              <option value="">행사명</option>
+              <option value="">제목</option>
+              <option value="">내용</option>
             </select>
             <div className="sch-input">
               <input type="text" className="krds-input" placeholder="검색어를 입력해주세요." title="검색어 입력" />
