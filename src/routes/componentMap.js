@@ -54,6 +54,7 @@ const UI_USR_L_520 = lazy(() => import('@pages/my-business/UI-USR-L-520.jsx'));
 const UI_USR_L_530 = lazy(() => import('@pages/my-business/UI-USR-L-530.jsx'));
 const UI_USR_L_540 = lazy(() => import('@pages/my-business/UI-USR-L-540.jsx'));
 const UI_USR_L_550 = lazy(() => import('@pages/my-business/UI-USR-L-550.jsx'));
+const UI_USR_L_100 = lazy(() => import('@pages/policy-info/UI_USR_L_100.jsx'));
 
 /**
  * =============================================================================
@@ -226,7 +227,7 @@ export const componentMap = {
 
   // 월간중기누리
   'M_PIIO_00086': {
-    component: UI_USR_L_190, //퍼블없음 게시판관리로 해야돼서 없는듯
+    component: UI_USR_L_100, //퍼블없음 게시판관리로 해야돼서 없는듯
     layout: SubpageLayoutWithMenu,
   },
 
