@@ -267,7 +267,7 @@ export default function Header() {
                             <div>
                               <ul>
                                 {menu.children.map((subMenu) => (
-                                  <li key={subMenu.menuId}>
+                                  <li key={subMenu.menuId} style={{ width: 'auto', minWidth: '180px' }}>
                                     <a href={subMenu.fullPath}>
                                       {subMenu.menuNm}
                                       <i className="svg-icon ico-angle right sm"></i>
