@@ -295,14 +295,14 @@ function buildBackendProfile(profile?: CompanyProfile): Record<string, unknown> 
   // 인증 보유 (Boolean)
   if (profile.hasInnobiz !== undefined) backendProfile.is_innobiz_target = profile.hasInnobiz;
   if (profile.hasMainbiz !== undefined) backendProfile.is_mainbiz_target = profile.hasMainbiz;
-  if (profile.hasResearchDept !== undefined) backendProfile.has_research_dept = profile.hasResearchDept;
-  if (profile.hasIso !== undefined) backendProfile.has_iso = profile.hasIso;
+  if (profile.hasResearchDept !== undefined) backendProfile.is_research_dept_target = profile.hasResearchDept;
+  if (profile.hasIso !== undefined) backendProfile.is_iso_target = profile.hasIso;
 
   // 수치 정보 (Numeric)
   if (profile.registeredPatents !== undefined) {
     backendProfile.registered_patents = profile.registeredPatents;
     // 내부 프로필 호환: 특허 수 > 0이면 has_patent = true
-    backendProfile.has_patent = profile.registeredPatents > 0;
+    backendProfile.has_patent_target = profile.registeredPatents > 0;
   }
   if (profile.employeeCount !== undefined) backendProfile.employee_count = profile.employeeCount;
   if (profile.sales !== undefined) backendProfile.sales = profile.sales;
