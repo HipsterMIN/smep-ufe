@@ -1,12 +1,12 @@
 /* on-smartsearch */
-.on-smartsearch  { margin-top: 64px; background: #fff; border-radius: 15px; box-shadow: 0 4px 20px 0 rgba(22, 83, 215, 0.15); padding: 30px; display: flex; align-items: flex-start; position: relative; overflow: hidden; height: 630px;}
-.on-smartsearch-conts {height: calc(100% - 60px); overflow-y: auto;}
-.on-smartsearch-left { padding-right: 30px; width: 880px; flex:  0 0 auto; display: flex; flex-direction: column; height: 100%;}
+.on-smartsearch  { margin-top: 64px; background: #fff; border-radius: 15px; box-shadow: 0 4px 20px 0 rgba(22, 83, 215, 0.15); padding: 30px; display: flex; align-items: flex-start; position: relative; overflow: hidden; min-height: 630px;}
+.on-smartsearch-conts {height: auto; overflow-y: visible;}
+.on-smartsearch-left { padding-right: 30px; width: 880px; flex:  0 0 auto; display: flex; flex-direction: column; min-height: 100%;}
 .on-smartsearch-left > div { flex: 1; display: flex; flex-direction: column; }
 .on-smartsearch-left > div h3 { display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding-bottom: 20px; gap: 20px; border-bottom: 1px solid #D6E0EB; margin-bottom: 20px; }
 .on-smartsearch-left > div h3 .title { display: flex; align-items: center; background: linear-gradient(286deg, #705DEB -1.35%, #5C8EE7 100.25%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 24px; gap: 10px; font-weight: 700; }
 .on-smartsearch-left > div > div p { color: #1E2124; text-align: left; }
-.on-smartsearch-right { padding-left: 30px; border-left: 1px solid #D6E0EB; flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; }
+.on-smartsearch-right { padding-left: 30px; border-left: 1px solid #D6E0EB; flex: 1 1 0; min-width: 0; min-height: 100%; display: flex; flex-direction: column; justify-content: flex-start; }
 .on-ai-summary-markdown { line-height: 1.6; text-align: left; }
 .on-ai-summary-markdown p { margin: 0 0 10px; }
 .on-ai-summary-markdown ul,
@@ -16,8 +16,9 @@
 .on-ai-summary-markdown h2,
 .on-ai-summary-markdown h3,
 .on-ai-summary-markdown h4 { margin: 10px 0 8px; text-align: left; }
-.ai-type { background: #EBF1FE; border-radius: 10px; overflow: hidden; padding: 25px 20px; height: 670px; display: flex; flex-direction: column; }
-.ai-type .krds-structured-list {height: 100%; overflow-y: auto; margin-bottom: 16px;}
+.ai-type { background: #EBF1FE; border-radius: 10px; overflow: hidden; padding: 25px 20px; height: auto; display: flex; flex-direction: column; }
+.ai-type .krds-structured-list {height: auto; overflow-y: hidden; margin-bottom: 16px;}
+.ai-type .krds-structured-list.is-active { overflow-y: visible; }
 .ai-type .structured-item { padding: 0; border: none; border-radius: 0px; background: none; border-bottom: 1px solid #D6E0EB; padding-bottom: 16px; margin-bottom: 16px;}
 .ai-type .structured-item:last-child {border-bottom: none; margin-bottom: 0;}
 .ai-type .on-qna-ai {margin-left: auto; font-size: 15px; font-weight: 400; display: flex; gap: 4px; align-items: center;}
@@ -28,7 +29,7 @@
 .on-smartsearch-moreview:before {content:""; position: absolute; width: 100%; height: 150px; left: 0; background: linear-gradient(0deg, #FFF 0%, rgba(255, 255, 255, 0.00) 100%); bottom: 108px;}
 .on-smartsearch-moreview button { width: 300px; }
 .on-smartsearch.on {height: auto;}
-.on-smartsearch.on .ai-type {height: 100%;}
+.on-smartsearch.on .ai-type {height: auto;}
 .on-smartsearch.on .on-smartsearch-moreview {display: none;}
 
 /* AI Loading & Skeleton UI */
@@ -56,7 +57,7 @@
 .ai-chat-wrap { min-height: 100vh; background: #F7F9FC; }
 .ai-chat-toast { position: fixed; right: 20px; top: 20px; z-index: 9999; padding: 10px 14px; border-radius: 8px; background: #0B50D0; color: #fff; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
 .ai-chat-wrap .ai-sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 300px; background: linear-gradient(106deg, #FCF9FF 10.51%, #E3E8FA 150.93%); border-radius: 0 20px 0 0; transition: transform 0.25s ease; z-index: 50; padding: 30px 18px 30px 24px;}
-.ai-chat-wrap .ai-container { position: relative; margin-left: 300px; padding: 26px 26px 220px 26px; }
+.ai-chat-wrap .ai-container { position: relative; margin-left: 300px; padding: 26px 26px 220px 26px; display: flex; flex-direction: column; align-items: flex-end; }
 .ai-sidebar .sidebar-logo-link { display: block; }
 .ai-sidebar .sidebar-filter { max-height: calc(100vh - 225px); padding: 4px; margin-top: 24px; overflow-y: auto; }
 .ai-sidebar .sidebar-guide { padding: 18px; background: #fff; border-radius: 12px; border: 1px solid #E0E6ED; box-shadow: 0 6px 14px rgba(5, 43, 87, 0.06); }
@@ -84,11 +85,14 @@
   .ai-sidebar-overlay { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.2); z-index: 40; border: 0; }
 }
 .ai-sidebar .krds-btn { width: 100%; margin-top: 24px; }
-.ai-container .question-wrap { width: 60%; }
-.ai-container .answer-wrap { display: flex; align-items: flex-start; gap: 46px; margin-top: 0; min-height: calc(100vh - 220px); }
+.ai-container .chat-section { width: 100%; display: flex; flex-direction: column; }
+.chat-box { width: 100%; }
+.ai-container .question-wrap { width: 60%; align-self: flex-end; display: flex; flex-direction: column; align-items: flex-end; }
+.ai-container .answer-wrap { width: 100%; display: flex; align-items: flex-start; gap: 46px; margin-top: 0; min-height: calc(100vh - 220px); }
+.answer-box { flex: 1; min-width: 0; }
 .ai-container .answer-wrap.ai-chat-section { margin-top: 32px; min-height: auto; }
 .ai-container .answer-wrap.ai-chat-section:first-of-type { margin-top: 0; }
-.ai-container .answer-wrap.ai-chat-section .announcement-cont { position: sticky; top: 40px; max-height: calc(100vh - 120px); }
+.ai-container .answer-wrap.ai-chat-section .announcement-cont { position: relative; width: 30%; min-width: 320px; flex-shrink: 0; }
 .answer-wrap .recommend-question .gradient-text { background: linear-gradient(286deg, #7742D9 -1.35%, #328CDF 100.25%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; font-size: 17px; font-weight: 700; }
 .answer-wrap .recommend-question .question-list { margin-top: 20px; display: flex; flex-direction: column; align-items: flex-start; }
 .answer-wrap .recommend-question .question-item ~ .question-item { margin-top: 10px; }
@@ -130,9 +134,11 @@
 .ai-chat-status-label { font-size: 12px; font-weight: 700; background: #0B50D0; color: #fff; border-radius: 10px; padding: 2px 6px; }
 .ai-chat-status-text { font-size: 13px; font-weight: 600; }
 .answer-wrap .recommend-question .question-item .question-text { border: 0; background: none; padding: 0; margin: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
-.answer-wrap .ai-type .krds-structured-list { flex: 1; overflow-y: auto; min-height: 0; }
-.answer-wrap .ai-type .krds-structured-list.is-active { overflow-y: auto; }
-.answer-wrap .ai-type { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.answer-wrap .ai-type .krds-structured-list { flex: none; height: auto; overflow-y: hidden; margin-bottom: 0; }
+.answer-wrap .ai-type .krds-structured-list.is-active { height: auto; overflow-y: visible; }
+.question-box { width: 100%; display: flex; justify-content: flex-end; }
+.question-bubble { background: #E8F0FF; color: #1E2124; padding: 12px 16px; border-radius: 16px; border-top-right-radius: 6px; font-size: 15px; line-height: 1.6; word-break: break-word; }
+.answer-wrap .ai-type { display: flex; flex-direction: column; height: auto; max-height: none; align-items: stretch; background: #EBF1FE; border-radius: 10px; padding: 16px 12px; margin-bottom: 24px; box-sizing: border-box; }
 .ai-chat-wrap .ai-bottom-search { position: fixed; bottom: 0; padding: 0 0 30px 20px; left: 300px; width: 50%; }
 .ai-bottom-search .search-field-wrap  { display: flex; gap: 20px; }
 .ai-bottom-search .search-field-wrap .search-field { position: relative; flex: 1; background: #fff; border-radius: 70px; border: 1px solid #7742D9; overflow: hidden; box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.08), 0 8px 16px 0 rgba(0, 0, 0, 0.12); }
