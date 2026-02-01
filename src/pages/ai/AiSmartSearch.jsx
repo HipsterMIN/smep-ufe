@@ -28,7 +28,7 @@ import { useAuthStore } from '@store/useAuthStore.jsx';
 
 import { AI_SETTINGS } from '../../App.jsx';
 
-const AiSmartSearchContent = () => {
+const AiSmartSearchContent = ({ profile }) => {
   const location = useLocation();
   const [query, setQuery] = useState('');
   const searchOptionModalRef = useRef(null);
@@ -357,6 +357,7 @@ const AiSmartSearchContent = () => {
       summary: summaryPayload || '',
       total: displayTotal || compactPrograms.length,
       filters: filters, // 현재 검색 필터 추가
+      profile: profile, // 기업 프로필 전달 (props로 받은 profile 사용)
     };
     const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
     const payloadId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -847,11 +848,11 @@ const AiSmartSearchContent = () => {
             </div>
             */}
 
-            {error && (
+            {/*{error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-6">
                   검색 중 오류가 발생했습니다: {error.message}
               </div>
-            )}
+            )}*/}
 
             {/* 통합검색 오류 및 결과 리스트 - 비활성화
             {totalSearchError && (
@@ -1023,7 +1024,7 @@ const AiSmartSearch = () => {
       domain={AI_SETTINGS.domain}
       groupByField={AI_SETTINGS.groupByField}
     >
-      <AiSmartSearchContent />
+      <AiSmartSearchContent profile={effectiveProfile} />
     </ProgramSearchProvider>
   );
 };
