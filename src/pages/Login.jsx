@@ -3,46 +3,59 @@ import React, { useState } from 'react';
 import { api as apiClient } from '../lib/apiClient.js';
 import { useAuthStore } from '../store/useAuthStore.jsx';
 import { useNavigate, Link } from 'react-router-dom';
-import { getCompanyProfileByBizNo } from '../lib/companyProfiles.js';
 
+// 테스트 계정 정보 상수화
+const TEST_ACCOUNTS = {
+  test01: { brno: '2288105280', name: '유큐브' },
+  test02: { brno: '6058189115', name: '유림이엔씨' },
+  test03: { brno: '3078130710', name: '한국바이오켐제약' },
+};
 
 const UI_USR_R_002 = () => {
   const { login } = useAuthStore();
   const [lgnId, setLgnId] = useState('test01');
-
   const navigate = useNavigate();
+  
   const breadcrumbItems = [
     { label: '로그인', link: '#' },
   ];
 
-  // 로그인아이디 변경
   const lgnIdChange = (e) => {
     setLgnId(e.target.value);
   };
 
   const handleClick = async () => {
-
-    let brno = '';
-
-    if (lgnId === 'test01'){
-      brno = '2288105280';
-    } else if (lgnId === 'test02'){
-      brno = '6058189115';
-    } else if (lgnId === 'test03'){
-      brno = '3078130710';
+    const account = TEST_ACCOUNTS[lgnId];
+    if (!account) {
+      alert('유효하지 않은 계정입니다.');
+      return;
     }
 
-    let body = {
-      'brno': brno,
-    };
+    try {
+      const body = { brno: account.brno };
+      
+      // apiClient는 fetch 기반이며, JSON 응답 본문을 그대로 반환함
+      // 따라서 profileData는 { cmpNm: "...", ... } 형태의 객체임
+      const profileData = await apiClient.post('/api/v1/account/scenario-login', body);
+      
+      console.log('Login Response:', profileData); // 디버깅용 로그
 
-    const response = await apiClient.post('/api/v1/account/scenario-login', body);
-    console.log(response);
-    // const companyProfile = getCompanyProfileByBizNo(brno);
-    const companyProfile = response.data;
-    login(brno, response.cmpNm, response.companySize, companyProfile);
+      // 응답 데이터 검증 (필수 필드 확인)
+      if (!profileData || !profileData.cmpNm) {
+        console.warn('Invalid login response structure:', profileData);
+        // 필요 시 에러 처리 또는 폴백 로직 추가
+      }
+      
+      // 로그인 상태 업데이트
+      // profileData 자체가 companyProfile이 됨
+      login(account.brno, profileData.cmpNm, profileData.companySize, profileData);
 
-    navigate('/'); // 지원사업 상세 이미지 페이지 링크
+      // 메인 페이지로 이동
+      navigate('/'); 
+    } catch (error) {
+      console.error('Login failed:', error);
+      alert('로그인에 실패했습니다. 다시 시도해 주세요.');
+    }
   };
 
   return (
@@ -63,18 +76,15 @@ const UI_USR_R_002 = () => {
                     <div className="form-tit">
                       <label htmlFor="login_id">아이디</label>
                     </div>
-                    {/*<div className="form-conts">*/}
-                    {/*  <input type="text" id="lgnId" className="krds-input" autoComplete="on" placeholder="아이디를 입력하세요"/>*/}
-                    {/*</div>*/}
                     <select
                       className="krds-form-select"
                       id="login_id"
                       value={lgnId}
                       onChange={lgnIdChange}
                     >
-                      <option value="test01">유큐브</option>
-                      <option value="test02">유림이엔씨</option>
-                      <option value="test03">한국바이오켐제약</option>
+                      {Object.entries(TEST_ACCOUNTS).map(([id, info]) => (
+                        <option key={id} value={id}>{info.name}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="form-group">
@@ -176,8 +186,7 @@ const UI_USR_R_002 = () => {
         </div>
       </div>
     </>
-  )
-  ;
+  );
 };
 
 export default UI_USR_R_002;
