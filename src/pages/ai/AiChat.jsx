@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useChatContext, useStreamingMessage } from '@cube-i-ax/sdk/react';
 import {
+  ProgramChatProvider,
   formatDate,
   calculateDaysRemaining,
   formatAIResponse,
@@ -24,7 +25,7 @@ import './ai.css';
 
 import { AI_SETTINGS } from '../../App.jsx';
 
-const AiChat = () => {
+const AiChatContent = ({ profile }) => {
   const [selectedPrograms, setSelectedPrograms] = useState([]);
   const [selectedProgramIds, setSelectedProgramIds] = useState(() => new Set());
   const [initialQuery, setInitialQuery] = useState('');
@@ -1180,6 +1181,86 @@ const AiChat = () => {
 
       </div>
     </>
+  );
+};
+
+const AiChat = () => {
+  const [profile, setProfile] = useState(null);
+  const location = useLocation();
+  const encodedPayload = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('payload');
+  }, [location.search]);
+  const payloadId = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('payloadId');
+  }, [location.search]);
+
+  useEffect(() => {
+    const parsePayload = (raw) => {
+      if (!raw) return null;
+      if (typeof raw === 'string') {
+        try {
+          return JSON.parse(raw);
+        } catch {
+          return null;
+        }
+      }
+      if (typeof raw === 'object') return raw;
+      return null;
+    };
+
+    // 1. URL payload 확인
+    if (encodedPayload) {
+      try {
+        const decoded = decodeURIComponent(encodedPayload);
+        const json = decodeURIComponent(escape(atob(decoded)));
+        const parsed = JSON.parse(json);
+        if (parsed.profile) setProfile(parsed.profile);
+        return;
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    // 2. SessionStorage 확인
+    if (payloadId) {
+      try {
+        const raw = sessionStorage.getItem(`ai-chat-payload:${payloadId}`);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.profile) setProfile(parsed.profile);
+          // sessionStorage는 AiChatContent에서 삭제하므로 여기서는 읽기만 함
+          return;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    // 3. postMessage 수신 대기
+    const handleMessage = (event) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== 'ai-chat-payload') return;
+      const payload = parsePayload(event.data.payload);
+      if (payload?.profile) {
+        setProfile(payload.profile);
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [encodedPayload, payloadId]);
+
+  return (
+    <ProgramChatProvider 
+      profile={profile} 
+      domain="support_program"
+      topK={AI_SETTINGS.topK}
+      rerankerTopK={AI_SETTINGS.rerankerTopK}
+      groupByField={AI_SETTINGS.groupByField}
+    >
+      <AiChatContent profile={profile} />
+    </ProgramChatProvider>
   );
 };
 
