@@ -26,7 +26,7 @@ import { useAiChatPayload } from '../../hooks/useAiChat';
 
 import { AI_SETTINGS } from '../../App.jsx';
 
-const AiChatContent = ({ profile }) => {
+const AiChatContent = ({ profile, payload }) => {
   const [selectedPrograms, setSelectedPrograms] = useState([]);
   const [selectedProgramIds, setSelectedProgramIds] = useState(() => new Set());
   const [initialQuery, setInitialQuery] = useState('');
@@ -47,10 +47,6 @@ const AiChatContent = ({ profile }) => {
   const initialFiltersRef = useRef(null);
   const contextPanelKeysRef = useRef(new Set());
   const lastStreamingRef = useRef('');
-
-  // useAiChatPayload 훅을 사용하여 데이터 수신 (AiChat Wrapper에서 이미 처리했지만, 내부에서도 필요할 경우 사용 가능)
-  // 여기서는 AiChat Wrapper에서 profile을 넘겨주므로, payload의 다른 정보(query, programs 등)를 받기 위해 사용
-  const { payload, isReady } = useAiChatPayload();
 
   const {
     messages = [],
@@ -86,11 +82,12 @@ const AiChatContent = ({ profile }) => {
     setPayloadReady(true);
   };
 
+  // 부모로부터 받은 payload가 있으면 적용
   useEffect(() => {
-    if (isReady && payload) {
+    if (payload) {
       applyPayload(payload);
     }
-  }, [isReady, payload]);
+  }, [payload]);
 
   useEffect(() => {
     if (!payloadReady || !initialFiltersRef.current) return;
@@ -103,14 +100,14 @@ const AiChatContent = ({ profile }) => {
 
   // 타임아웃 처리 (데이터 수신 실패 시)
   useEffect(() => {
-    if (isReady) return;
+    if (payload) return;
     const timer = setTimeout(() => {
       if (!payloadReady) {
         setNotice('공고 정보를 불러오지 못했습니다. 다시 시도해 주세요.');
       }
     }, 5000);
     return () => clearTimeout(timer);
-  }, [isReady, payloadReady]);
+  }, [payload, payloadReady]);
 
   useEffect(() => {
     const updateSidebar = () => {
@@ -1124,7 +1121,7 @@ const AiChat = () => {
       rerankerTopK={AI_SETTINGS.rerankerTopK}
       groupByField={AI_SETTINGS.groupByField}
     >
-      <AiChatContent profile={profile} />
+      <AiChatContent profile={profile} payload={payload} />
     </ProgramChatProvider>
   );
 };
