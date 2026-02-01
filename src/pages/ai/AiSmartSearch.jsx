@@ -25,6 +25,7 @@ import {
 } from '@cube-i-ax/sdk/smes/program';
 import useSearchStore from '../../store/useSearchStore';
 import { useAuthStore } from '@store/useAuthStore.jsx';
+import { useAiChatPopup } from '../../hooks/useAiChat';
 
 import { AI_SETTINGS } from '../../App.jsx';
 
@@ -38,6 +39,9 @@ const AiSmartSearchContent = ({ profile }) => {
   const TOTAL_REVEAL_INTERVAL_MS = 140;
   const [filters, setFilters] = useState(DEFAULT_SEARCH_FILTERS);
   const lastExecutedQueryRef = useRef('');
+  
+  // Custom Hook for AI Chat Popup
+  const { openChat } = useAiChatPopup();
   
   // Zustand Store
   const { 
@@ -285,59 +289,12 @@ const AiSmartSearchContent = ({ profile }) => {
     return labels;
   }, [filters]);
 
-  const sendPayloadToPopup = (popup, payload, payloadId) => {
-    if (!popup) return;
-    const resolvedPayloadId = payloadId || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const targetOrigin = window.location.origin;
-    const message = {
-      type: 'ai-chat-payload',
-      payload,
-      payloadId: resolvedPayloadId,
-    };
-    let attempts = 0;
-    const maxAttempts = 20;
-    const timer = setInterval(() => {
-      if (!popup || popup.closed) {
-        clearInterval(timer);
-        window.removeEventListener('message', handleMessage);
-        return;
-      }
-      popup.postMessage(message, targetOrigin);
-      attempts += 1;
-      if (attempts >= maxAttempts) {
-        clearInterval(timer);
-        window.removeEventListener('message', handleMessage);
-      }
-    }, 300);
-
-    const handleMessage = (event) => {
-      if (event.origin !== targetOrigin) return;
-      if (event.data?.type === 'ai-chat-request-payload') {
-        event.source?.postMessage(message, targetOrigin);
-        return;
-      }
-      if (event.data?.type === 'ai-chat-payload-ack' && event.data.payloadId === resolvedPayloadId) {
-        clearInterval(timer);
-        window.removeEventListener('message', handleMessage);
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-  };
-
   const handleAiChat = (programIds) => {
     if (isRealLoading) return;
     // 선택된 공고가 있으면 해당 공고 정보를 state로 전달
     const targetIds = Array.isArray(programIds) ? programIds : [programIds];
     const targetPrograms = displayPrograms.filter(p => targetIds.includes(p.id));
     
-    // AI 상담 페이지를 새 탭으로 열면서 선택된 공고 정보를 전달
-    // (참고: window.open으로 state를 전달하기 어려우므로, 실제 프로젝트에서는 
-    //  localStorage나 별도의 공유 저장소를 사용하거나, URL 파라미터를 활용해야 할 수 있음.
-    //  여기서는 사용자의 요청에 따라 state를 활용하는 방향으로 UI를 구성하되, 
-    //  탭 전환 시 데이터 유지 방식은 프로젝트 설정을 따름)
-    
-    // 현재는 window.open을 사용하므로 state 전달을 위해 임시로 localStorage 사용 (이전 issue에서 localStorage 지양 요청이 있었으나 탭 이동간 데이터 공유를 위해 최소한으로 사용)
     const currentQuery = lastExecutedQueryRef.current || query.trim() || sdkLastQuery || '';
     const summaryPayload = streamingSummary || displaySummary || '';
     const compactPrograms = targetPrograms.map((program) => ({
@@ -359,32 +316,9 @@ const AiSmartSearchContent = ({ profile }) => {
       filters: filters, // 현재 검색 필터 추가
       profile: profile, // 기업 프로필 전달 (props로 받은 profile 사용)
     };
-    const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
-    const payloadId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const screenWidth = window.screen?.availWidth || 1200;
-    const screenHeight = window.screen?.availHeight || 900;
-    const popup = window.open(
-      `${baseUrl}/service/ai-chat?payloadId=${payloadId}`,
-      'ai-consultant',
-      `popup=yes,width=${screenWidth},height=${screenHeight},top=0,left=0,location=no,toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
-    );
-    if (popup) {
-      try {
-        popup.moveTo(0, 0);
-        popup.resizeTo(screenWidth, screenHeight);
-      } catch (e) {
-        // Ignore browser restrictions on resize/move.
-      }
-      popup.focus();
-      sendPayloadToPopup(popup, payload, payloadId);
-    } else {
-      try {
-        sessionStorage.setItem(`ai-chat-payload:${payloadId}`, JSON.stringify(payload));
-      } catch (e) {
-        console.warn('Failed to store ai-chat payload in sessionStorage', e);
-      }
-      window.location.href = `${baseUrl}/service/ai-chat?payloadId=${payloadId}`;
-    }
+
+    // Custom Hook을 사용하여 팝업 오픈 및 데이터 전송
+    openChat(payload);
   };
 
   const handleToggleSelect = (id) => {
