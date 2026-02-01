@@ -143,6 +143,12 @@ export default function Header() {
 
   };
 
+  const handleLogout = () => {
+    logout();
+    // navigate('/'); // 메인 페이지로 이동 (제거)
+    // window.location.reload(); // 상태 완전 초기화를 위해 새로고침 (제거)
+  };
+
   const handleClickAiSearch = () => {
     navigate(getFullPath('M_PIIO_00074')); // AI 스마트검색 메뉴로 이동
   };
@@ -326,7 +332,7 @@ export default function Header() {
                       </div>
                       <button type="button" className="btn-navi sch" onClick={() => handleClickAiSearch()}>AI 스마트검색
                       </button>
-                      <button type="button" className="btn-navi logout" onClick={logout}>로그아웃</button>
+                      <button type="button" className="btn-navi logout" onClick={handleLogout}>로그아웃</button>
                       <div className="krds-drop-wrap my-drop">
                         <button type="button" className="btn-navi my drop-btn active"
                           onClick={() => handleClickMypage()}>마이 비즈니스
@@ -350,7 +356,7 @@ export default function Header() {
                               <li><a href="#" className="item-link">나의 정보관리<span className="sr-only"></span></a></li>
                             </ul>
                             <div className="drop-bottom">
-                              <button type="button" className="krds-btn medium text" onClick={logout}>
+                              <button type="button" className="krds-btn medium text" onClick={handleLogout}>
                                 <i className="svg-icon ico-logout"></i> 로그아웃
                               </button>
                             </div>

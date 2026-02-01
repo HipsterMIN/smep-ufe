@@ -230,7 +230,7 @@ const AiSmartSearchContent = ({ profile }) => {
   const handleOpenSearchOptionModal = () => searchOptionModalRef.current.classList.add('on');
   const handleCloseSearchOptionModal = () => searchOptionModalRef.current.classList.remove('on');
   const handleApplyFilters = () => {
-    handleSearch();
+    // handleSearch();
     handleCloseSearchOptionModal();
   };
   const handleResetFilters = () => setFilters(DEFAULT_SEARCH_FILTERS);
