@@ -22,6 +22,7 @@ import {
 import { api as apiClient } from '../../lib/apiClient.js';
 import Logo from '../../../styles/img/ai_chat_logo.svg';
 import './ai.css';
+import { useAiChatPayload } from '../../hooks/useAiChat';
 
 import { AI_SETTINGS } from '../../App.jsx';
 
@@ -47,15 +48,9 @@ const AiChatContent = ({ profile }) => {
   const contextPanelKeysRef = useRef(new Set());
   const lastStreamingRef = useRef('');
 
-  const location = useLocation();
-  const encodedPayload = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    return params.get('payload');
-  }, [location.search]);
-  const payloadId = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    return params.get('payloadId');
-  }, [location.search]);
+  // useAiChatPayload 훅을 사용하여 데이터 수신 (AiChat Wrapper에서 이미 처리했지만, 내부에서도 필요할 경우 사용 가능)
+  // 여기서는 AiChat Wrapper에서 profile을 넘겨주므로, payload의 다른 정보(query, programs 등)를 받기 위해 사용
+  const { payload, isReady } = useAiChatPayload();
 
   const {
     messages = [],
@@ -70,14 +65,14 @@ const AiChatContent = ({ profile }) => {
     clearMessages,
   } = useChatContext();
 
-  const applyPayload = (payload) => {
-    setSelectedPrograms(payload.programs || []);
+  const applyPayload = (payloadData) => {
+    setSelectedPrograms(payloadData.programs || []);
     setSelectedProgramIds(new Set());
-    setInitialQuery(payload.query || '');
-    setInitialSummary(payload.summary || '');
-    if (payload.filters) {
-      setFilters(payload.filters);
-      initialFiltersRef.current = payload.filters;
+    setInitialQuery(payloadData.query || '');
+    setInitialSummary(payloadData.summary || '');
+    if (payloadData.filters) {
+      setFilters(payloadData.filters);
+      initialFiltersRef.current = payloadData.filters;
     }
     setExpandedPanels(new Set());
     setContextPanels([]);
@@ -92,6 +87,12 @@ const AiChatContent = ({ profile }) => {
   };
 
   useEffect(() => {
+    if (isReady && payload) {
+      applyPayload(payload);
+    }
+  }, [isReady, payload]);
+
+  useEffect(() => {
     if (!payloadReady || !initialFiltersRef.current) return;
     if (JSON.stringify(filters) !== JSON.stringify(initialFiltersRef.current)) {
       setNotice('필터가 변경되었습니다. 다음 질문부터 새로운 조건으로 분석합니다.');
@@ -100,96 +101,16 @@ const AiChatContent = ({ profile }) => {
     }
   }, [filters, payloadReady]);
 
+  // 타임아웃 처리 (데이터 수신 실패 시)
   useEffect(() => {
-    setPayloadReady(false);
-    setSelectedPrograms([]);
-    setSelectedProgramIds(new Set());
-    setInitialQuery('');
-    setInitialSummary('');
-    setExpandedPanels(new Set());
-    setContextPanels([]);
-    setAssistantOverrides(new Map());
-    lastStreamingRef.current = '';
-    contextPanelKeysRef.current = new Set();
-    setDocumentContext(null);
-    clearMessages?.();
-    setNotice('');
-
-    if (encodedPayload) {
-      try {
-        const decoded = decodeURIComponent(encodedPayload);
-        const json = decodeURIComponent(escape(atob(decoded)));
-        const parsed = JSON.parse(json);
-        applyPayload(parsed);
-        return;
-      } catch (e) {
-        console.error('Failed to decode payload', e);
-        setNotice('공고 정보를 불러오지 못했습니다. 다시 시도해 주세요.');
-        return;
-      }
-    }
-
-    if (payloadId) {
-      try {
-        const raw = sessionStorage.getItem(`ai-chat-payload:${payloadId}`);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          sessionStorage.removeItem(`ai-chat-payload:${payloadId}`);
-          applyPayload(parsed);
-          return;
-        }
-      } catch (e) {
-        console.warn('Failed to read ai-chat payload from sessionStorage', e);
-      }
-    }
-  }, [encodedPayload, payloadId]);
-
-  useEffect(() => {
-    if (encodedPayload || payloadReady) return;
-    const origin = window.location.origin;
-    const parsePayload = (raw) => {
-      if (!raw) return null;
-      if (typeof raw === 'string') {
-        try {
-          return JSON.parse(raw);
-        } catch {
-          return null;
-        }
-      }
-      if (typeof raw === 'object') return raw;
-      return null;
-    };
-    const handleMessage = (event) => {
-      if (event.origin !== origin) return;
-      if (event.data?.type !== 'ai-chat-payload') return;
-      const payload = parsePayload(event.data.payload);
-      if (!payload) return;
-      applyPayload(payload);
-      if (event.data?.payloadId) {
-        event.source?.postMessage(
-          { type: 'ai-chat-payload-ack', payloadId: event.data.payloadId },
-          event.origin
-        );
-      }
-    };
-    window.addEventListener('message', handleMessage);
-    if (window.opener && !window.opener.closed) {
-      window.opener.postMessage({ type: 'ai-chat-request-payload' }, origin);
-    }
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
-  }, [encodedPayload, payloadReady]);
-
-  useEffect(() => {
-    if (encodedPayload || payloadReady) return;
+    if (isReady) return;
     const timer = setTimeout(() => {
       if (!payloadReady) {
         setNotice('공고 정보를 불러오지 못했습니다. 다시 시도해 주세요.');
       }
     }, 5000);
     return () => clearTimeout(timer);
-  }, [encodedPayload, payloadReady]);
+  }, [isReady, payloadReady]);
 
   useEffect(() => {
     const updateSidebar = () => {
@@ -1185,71 +1106,15 @@ const AiChatContent = ({ profile }) => {
 };
 
 const AiChat = () => {
+  // useAiChatPayload 훅을 사용하여 데이터 수신
+  const { payload, isReady } = useAiChatPayload();
   const [profile, setProfile] = useState(null);
-  const location = useLocation();
-  const encodedPayload = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    return params.get('payload');
-  }, [location.search]);
-  const payloadId = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    return params.get('payloadId');
-  }, [location.search]);
 
   useEffect(() => {
-    const parsePayload = (raw) => {
-      if (!raw) return null;
-      if (typeof raw === 'string') {
-        try {
-          return JSON.parse(raw);
-        } catch {
-          return null;
-        }
-      }
-      if (typeof raw === 'object') return raw;
-      return null;
-    };
-
-    // 1. URL payload 확인
-    if (encodedPayload) {
-      try {
-        const decoded = decodeURIComponent(encodedPayload);
-        const json = decodeURIComponent(escape(atob(decoded)));
-        const parsed = JSON.parse(json);
-        if (parsed.profile) setProfile(parsed.profile);
-        return;
-      } catch (e) {
-        // ignore
-      }
+    if (isReady && payload?.profile) {
+      setProfile(payload.profile);
     }
-
-    // 2. SessionStorage 확인
-    if (payloadId) {
-      try {
-        const raw = sessionStorage.getItem(`ai-chat-payload:${payloadId}`);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed.profile) setProfile(parsed.profile);
-          // sessionStorage는 AiChatContent에서 삭제하므로 여기서는 읽기만 함
-          return;
-        }
-      } catch (e) {
-        // ignore
-      }
-    }
-
-    // 3. postMessage 수신 대기
-    const handleMessage = (event) => {
-      if (event.origin !== window.location.origin) return;
-      if (event.data?.type !== 'ai-chat-payload') return;
-      const payload = parsePayload(event.data.payload);
-      if (payload?.profile) {
-        setProfile(payload.profile);
-      }
-    };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [encodedPayload, payloadId]);
+  }, [isReady, payload]);
 
   return (
     <ProgramChatProvider 
