@@ -47,7 +47,7 @@ import '../styles/onCommon_2.css';
 // import '@krds-ui/core/dist/style.css';
 
 export const AI_SETTINGS = {
-  topK: 50,
+  topK: 20,
   rerankerTopK: 10,
   groupByField: 'group_id',
   domain: 'support_program',
