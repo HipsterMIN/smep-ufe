@@ -694,6 +694,12 @@ const AiSmartSearch = () => {
   const { clearSearch } = useSearchStore();
   const [filters, setFilters] = useState(DEFAULT_SEARCH_FILTERS);
   
+  // 컴포넌트 마운트 시 검색 상태 초기화
+  useEffect(() => {
+    setFilters(DEFAULT_SEARCH_FILTERS);
+    clearSearch();
+  }, [clearSearch]);
+  
   const prevIsLoginRef = useRef(isLogin);
   useEffect(() => {
     if (!prevIsLoginRef.current && isLogin) {
