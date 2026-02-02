@@ -217,10 +217,13 @@ const AiSmartSearchContent = ({
 
   const handleSearch = () => {
     const trimmedQuery = query.trim();
-    if (trimmedQuery) {
+    // 쿼리가 있거나 선택된 필터가 있으면 검색 실행
+    if (trimmedQuery || selectedFilterCount > 0) {
       setVisibleCount(PAGE_SIZE);
       startSearch(trimmedQuery, filters);
-      startTotalSearch(trimmedQuery);
+      if (trimmedQuery) {
+        startTotalSearch(trimmedQuery);
+      }
       if (aiSmartSearchRef.current) {
         aiSmartSearchRef.current.classList.add('on');
       }
@@ -237,7 +240,6 @@ const AiSmartSearchContent = ({
   const handleOpenSearchOptionModal = () => searchOptionModalRef.current.classList.add('on');
   const handleCloseSearchOptionModal = () => searchOptionModalRef.current.classList.remove('on');
   const handleApplyFilters = () => {
-    // handleSearch();
     handleCloseSearchOptionModal();
   };
 
