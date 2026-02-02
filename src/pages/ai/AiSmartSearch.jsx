@@ -1,6 +1,4 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Header from '../../components/ui/Header.jsx';
 import Footer from '../../components/ui/Footer.jsx';
@@ -12,7 +10,6 @@ import {
   useProgramSearch,
   formatDate,
   calculateDaysRemaining,
-  formatAIResponse,
   REGION_OPTIONS,
   COMPANY_SIZE_OPTIONS,
   SUPPORT_FIELD_OPTIONS,
@@ -25,7 +22,8 @@ import {
 } from '@cube-i-ax/sdk/smes/program';
 import useSearchStore from '../../store/useSearchStore';
 import { useAuthStore } from '@store/useAuthStore.jsx';
-import { useAiChatPopup } from '../../hooks/useAiChat';
+import { usePopupSender } from '@/hooks/usePopupCommunication.js';
+import AIMarkdownRenderer from '../../components/ui/AIMarkdownRenderer';
 
 import { AI_SETTINGS } from '../../App.jsx';
 
@@ -48,8 +46,8 @@ const AiSmartSearchContent = ({
   const TOTAL_REVEAL_INTERVAL_MS = 140;
   const lastExecutedQueryRef = useRef('');
   
-  // Custom Hook for AI Chat Popup
-  const { openChat } = useAiChatPopup();
+  // Custom Hook for Popup Communication
+  const { openPopup } = usePopupSender();
   
   // Zustand Store
   const { 
@@ -79,7 +77,6 @@ const AiSmartSearchContent = ({
     error, 
     summary: sdkSummary, 
     streamingSummary, 
-    isSummaryLoading, 
     status,
     lastQuery: sdkLastQuery, 
     search, 
@@ -99,18 +96,11 @@ const AiSmartSearchContent = ({
 
   // 화면에 표시할 데이터 결정 (SDK 데이터가 우선, 없으면 Store 데이터)
   const qFromState = location.state?.q;
-  const currentQuery = qFromState;
-  const isMatchingStoredQuery = currentQuery && currentQuery === storedLastQuery;
+  const isMatchingStoredQuery = qFromState && qFromState === storedLastQuery;
   
   const displayPrograms = (isLoading || !isMatchingStoredQuery) ? sdkPrograms : (sdkPrograms.length > 0 ? sdkPrograms : storedPrograms);
   const displayTotal = (isLoading || !isMatchingStoredQuery) ? sdkTotal : (sdkTotal > 0 ? sdkTotal : storedTotal);
   const displaySummary = (isLoading || !isMatchingStoredQuery) ? sdkSummary : (sdkSummary || storedSummary);
-  
-  const summaryMarkdown = useMemo(() => {
-    const rawSummary = streamingSummary || displaySummary || '';
-    if (!rawSummary) return '';
-    return formatAIResponse(rawSummary, { stripTags: true });
-  }, [streamingSummary, displaySummary]);
   
   const statusMessage = useMemo(() => {
     return toFriendlyStatusMessage(status?.message, '관련 지원사업을 찾아보고 있어요.');
@@ -174,16 +164,7 @@ const AiSmartSearchContent = ({
       setIsTimeout(true);
     }, SEARCH_TIMEOUT_MS);
 
-    const sdkFilters = {
-      regions: activeFilters.regions,
-      companySizes: activeFilters.companySizes,
-      supportFields: activeFilters.supportFields,
-      supportTypes: activeFilters.supportTypes,
-      deadlineTypes: activeFilters.deadlineTypes,
-      includePast: activeFilters.includePast,
-      exactRegions: true,
-    };
-    search(trimmedQuery, sdkFilters, { metadata: { summaryMode: true } });
+    search(trimmedQuery, activeFilters, { metadata: { summaryMode: true } });
   };
 
   const startTotalSearch = async (searchQuery) => {
@@ -297,7 +278,21 @@ const AiSmartSearchContent = ({
       profile: profile,
     };
 
-    openChat(payload);
+    const screenWidth = window.screen?.availWidth || 1200;
+    const screenHeight = window.screen?.availHeight || 900;
+    const windowFeatures = `popup=yes,width=${screenWidth},height=${screenHeight},top=0,left=0,location=no,toolbar=no,menubar=no,scrollbars=yes,resizable=yes`;
+
+    const popup = openPopup('/service/ai-chat', payload, windowFeatures);
+    
+    if (popup) {
+        try {
+            popup.moveTo(0, 0);
+            popup.resizeTo(screenWidth, screenHeight);
+            popup.focus();
+        } catch (e) {
+            // Ignore browser restrictions
+        }
+    }
   };
 
   const handleToggleSelect = (id) => {
@@ -599,10 +594,8 @@ const AiSmartSearchContent = ({
                       </div>
                     )}
                     <div className="on-p3 on-ai-summary-markdown">
-                      {summaryMarkdown ? (
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {summaryMarkdown}
-                        </ReactMarkdown>
+                      {streamingSummary || displaySummary ? (
+                        <AIMarkdownRenderer content={streamingSummary || displaySummary} className="on-ai-summary-markdown" />
                       ) : isRealLoading ? (
                         ' '
                       ) : (

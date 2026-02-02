@@ -334,6 +334,7 @@ function useProgramSearchInternal(): ProgramSearchContextValue {
       const effectiveQuery = query.trim() || "지원사업";
       sdk.search(effectiveQuery, { ...options, filters: backendFilters });
     },
+    restore: sdk.restore,
     abort: sdk.abort,
   };
 }
