@@ -39,6 +39,7 @@ const AiSmartSearchContent = ({
   const { isLogin } = useAuthStore();
   const location = useLocation();
   const [query, setQuery] = useState('');
+  const [isSearchOptionModalOpen, setIsSearchOptionModalOpen] = useState(false);
   const searchOptionModalRef = useRef(null);
   const totalSearchAbortRef = useRef(null);
   const totalRevealTimerRef = useRef(null);
@@ -237,8 +238,8 @@ const AiSmartSearchContent = ({
   };
 
   // Modal Handlers
-  const handleOpenSearchOptionModal = () => searchOptionModalRef.current.classList.add('on');
-  const handleCloseSearchOptionModal = () => searchOptionModalRef.current.classList.remove('on');
+  const handleOpenSearchOptionModal = () => setIsSearchOptionModalOpen(true);
+  const handleCloseSearchOptionModal = () => setIsSearchOptionModalOpen(false);
   const handleApplyFilters = () => {
     handleCloseSearchOptionModal();
   };
@@ -420,7 +421,7 @@ const AiSmartSearchContent = ({
                   상세검색
                 <span className="sr-only">툴팁 열기</span>
               </button>
-              <div className="on-tooltipbox" ref={searchOptionModalRef}>
+              <div className={`on-tooltipbox ${isSearchOptionModalOpen ? 'on' : ''}`} ref={searchOptionModalRef}>
                 <div className="on-tooltipbox-header">
                   <h3>상세검색</h3>
                   <button type="button" className="krds-btn medium text" onClick={handleCloseSearchOptionModal}><i className="svg-icon ico-modal-close"></i>
@@ -802,7 +803,7 @@ const AiSmartSearch = () => {
   
   return (
     <ProgramSearchProvider 
-      key={`${aiEnv}-${isLogin}-${!!effectiveProfile}`} 
+      key={`${aiEnv}-${isLogin}`} 
       profile={effectiveProfile} 
       stream 
       topK={AI_SETTINGS.topK}
