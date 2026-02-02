@@ -136,6 +136,8 @@ export interface ProgramSearchContextValue {
   lastQuery: string | null;
   /** 검색 실행 */
   search: (query: string, filters?: SearchFilters, options?: Partial<SearchRequest>) => void;
+  /** 상태 복구 */
+  restore: (state: any) => void;
   /** 검색 중단 */
   abort: () => void;
 }
