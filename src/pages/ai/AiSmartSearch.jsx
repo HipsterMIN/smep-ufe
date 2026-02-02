@@ -19,6 +19,7 @@ import {
   SUPPORT_TYPE_OPTIONS,
   DEADLINE_TYPE_OPTIONS,
   DEFAULT_SEARCH_FILTERS,
+  isFiltersEmpty,
   countSelectedFilters,
   toFriendlyStatusMessage,
 } from '@cube-i-ax/sdk/smes/program';
@@ -28,7 +29,14 @@ import { useAiChatPopup } from '../../hooks/useAiChat';
 
 import { AI_SETTINGS } from '../../App.jsx';
 
-const AiSmartSearchContent = ({ profile }) => {
+const AiSmartSearchContent = ({ 
+  profile, 
+  filters, 
+  onToggleFilterValue, 
+  onIncludePastChange, 
+  onResetFilters 
+}) => {
+  const { isLogin } = useAuthStore();
   const location = useLocation();
   const [query, setQuery] = useState('');
   const searchOptionModalRef = useRef(null);
@@ -36,7 +44,6 @@ const AiSmartSearchContent = ({ profile }) => {
   const totalRevealTimerRef = useRef(null);
   const TOTAL_SEARCH_ENDPOINT = '/api/v1/search/total';
   const TOTAL_REVEAL_INTERVAL_MS = 140;
-  const [filters, setFilters] = useState(DEFAULT_SEARCH_FILTERS);
   const lastExecutedQueryRef = useRef('');
   
   // Custom Hook for AI Chat Popup
@@ -232,22 +239,6 @@ const AiSmartSearchContent = ({ profile }) => {
   const handleApplyFilters = () => {
     // handleSearch();
     handleCloseSearchOptionModal();
-  };
-  const handleResetFilters = () => setFilters(DEFAULT_SEARCH_FILTERS);
-  
-  const handleToggleFilterValue = (key, value) => {
-    setFilters(prev => {
-      const current = prev[key];
-      const exists = current.includes(value);
-      return {
-        ...prev,
-        [key]: exists ? current.filter(item => item !== value) : [...current, value],
-      };
-    });
-  };
-  
-  const handleIncludePastChange = (value) => {
-    setFilters(prev => ({ ...prev, includePast: value }));
   };
 
   const selectedFilterCount = countSelectedFilters(filters);
@@ -448,7 +439,7 @@ const AiSmartSearchContent = ({ profile }) => {
                                 className="checkbox"
                                 id={id}
                                 checked={filters.regions.includes(region)}
-                                onChange={() => handleToggleFilterValue('regions', region)}
+                                onChange={() => onToggleFilterValue('regions', region)}
                               />
                               <label className="krds-form-chip-outline" htmlFor={id}>{region}</label>
                             </div>
@@ -468,7 +459,7 @@ const AiSmartSearchContent = ({ profile }) => {
                                 className="checkbox"
                                 id={id}
                                 checked={filters.companySizes.includes(size)}
-                                onChange={() => handleToggleFilterValue('companySizes', size)}
+                                onChange={() => onToggleFilterValue('companySizes', size)}
                               />
                               <label className="krds-form-chip-outline" htmlFor={id}>{size}</label>
                             </div>
@@ -488,7 +479,7 @@ const AiSmartSearchContent = ({ profile }) => {
                                 className="checkbox"
                                 id={id}
                                 checked={filters.supportFields.includes(field)}
-                                onChange={() => handleToggleFilterValue('supportFields', field)}
+                                onChange={() => onToggleFilterValue('supportFields', field)}
                               />
                               <label className="krds-form-chip-outline" htmlFor={id}>{field}</label>
                             </div>
@@ -508,7 +499,7 @@ const AiSmartSearchContent = ({ profile }) => {
                                 className="checkbox"
                                 id={id}
                                 checked={filters.supportTypes.includes(type)}
-                                onChange={() => handleToggleFilterValue('supportTypes', type)}
+                                onChange={() => onToggleFilterValue('supportTypes', type)}
                               />
                               <label className="krds-form-chip-outline" htmlFor={id}>{type}</label>
                             </div>
@@ -528,7 +519,7 @@ const AiSmartSearchContent = ({ profile }) => {
                                 className="checkbox"
                                 id={id}
                                 checked={filters.deadlineTypes.includes(type)}
-                                onChange={() => handleToggleFilterValue('deadlineTypes', type)}
+                                onChange={() => onToggleFilterValue('deadlineTypes', type)}
                               />
                               <label className="krds-form-chip-outline" htmlFor={id}>{type}</label>
                             </div>
@@ -544,7 +535,7 @@ const AiSmartSearchContent = ({ profile }) => {
                       type="checkbox"
                       id="include_past_toggle"
                       checked={filters.includePast}
-                      onChange={(e) => handleIncludePastChange(e.target.checked)}
+                      onChange={(e) => onIncludePastChange(e.target.checked)}
                     />
                     <label htmlFor="include_past_toggle">
                       <span className="switch-toggle"><i></i></span>
@@ -553,7 +544,7 @@ const AiSmartSearchContent = ({ profile }) => {
                     </label>
                   </div>
                   <div className="on-tooltipbox-footer-meta">
-                    <button className="krds-btn medium text" onClick={handleResetFilters}>전체 해제</button>
+                    <button className="krds-btn medium text" onClick={onResetFilters}>전체 해제</button>
                     {selectedFilterCount > 0 && (
                       <span className="on-tooltipbox-footer-count">{selectedFilterCount}개 선택됨</span>
                     )}
@@ -756,7 +747,7 @@ const AiSmartSearchContent = ({ profile }) => {
 const SAMPLE_COMPANY_PROFILE = {
   region: '전국',
   // companySize: "소기업",
-  isSme: true,
+  // isSme: true,
   // isVenture: true,
   // isStartup: true,
   // isYouth: true,
@@ -767,8 +758,19 @@ const SAMPLE_COMPANY_PROFILE = {
 };
 
 const AiSmartSearch = () => {
-  const { companyProfile } = useAuthStore();
-  const effectiveProfile = companyProfile || SAMPLE_COMPANY_PROFILE;
+  const { isLogin, companyProfile } = useAuthStore();
+  const [filters, setFilters] = useState(DEFAULT_SEARCH_FILTERS);
+  
+  const effectiveProfile = useMemo(() => {
+    if (isLogin) return companyProfile;
+    // 로그인 안된 상태에서 필터가 설정되어 있으면 샘플 프로필 생성
+    if (!isFiltersEmpty(filters)) {
+      return SAMPLE_COMPANY_PROFILE;
+    }
+    // 기본적으로는 프로필 없음
+    return null;
+  }, [isLogin, companyProfile, filters]);
+
   const [aiEnv, setAiEnv] = useState(() => localStorage.getItem('__ai_env__') || 'dev');
 
   useEffect(() => {
@@ -778,10 +780,27 @@ const AiSmartSearch = () => {
     window.addEventListener('ai-env-change', handleEnvChange);
     return () => window.removeEventListener('ai-env-change', handleEnvChange);
   }, []);
+
+  const handleToggleFilterValue = (key, value) => {
+    setFilters(prev => {
+      const current = prev[key];
+      const exists = current.includes(value);
+      return {
+        ...prev,
+        [key]: exists ? current.filter(item => item !== value) : [...current, value],
+      };
+    });
+  };
+
+  const handleIncludePastChange = (value) => {
+    setFilters(prev => ({ ...prev, includePast: value }));
+  };
+
+  const handleResetFilters = () => setFilters(DEFAULT_SEARCH_FILTERS);
   
   return (
     <ProgramSearchProvider 
-      key={aiEnv} 
+      key={`${aiEnv}-${isLogin}-${!!effectiveProfile}`} 
       profile={effectiveProfile} 
       stream 
       topK={AI_SETTINGS.topK}
@@ -789,7 +808,13 @@ const AiSmartSearch = () => {
       domain={AI_SETTINGS.domain}
       groupByField={AI_SETTINGS.groupByField}
     >
-      <AiSmartSearchContent profile={effectiveProfile} />
+      <AiSmartSearchContent 
+        profile={effectiveProfile} 
+        filters={filters}
+        onToggleFilterValue={handleToggleFilterValue}
+        onIncludePastChange={handleIncludePastChange}
+        onResetFilters={handleResetFilters}
+      />
     </ProgramSearchProvider>
   );
 };
