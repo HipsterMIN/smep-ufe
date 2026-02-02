@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Header from '../../components/ui/Header.jsx';
 import Footer from '../../components/ui/Footer.jsx';
 import Breadcrumb from '../../components/ui/Breadcrumb';
@@ -38,6 +38,7 @@ const AiSmartSearchContent = ({
 }) => {
   const { isLogin } = useAuthStore();
   const location = useLocation();
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [isSearchOptionModalOpen, setIsSearchOptionModalOpen] = useState(false);
   const searchOptionModalRef = useRef(null);
@@ -140,11 +141,14 @@ const AiSmartSearchContent = ({
     };
   }, []);
 
-  // 검색 실행 로직
+  // 검색 실행 로직 (URL 상태 변화 감지)
   useEffect(() => {
     const q = qFromState;
     if (q) {
+      // 입력창 동기화
       setQuery(q);
+      
+      // 검색 실행 여부 판단
       if (q !== sdkLastQuery && q !== storedLastQuery) {
         setVisibleCount(PAGE_SIZE);
         startSearch(q, filters);
@@ -156,7 +160,7 @@ const AiSmartSearchContent = ({
         startTotalSearch(q);
       }
     }
-  }, [qFromState, sdkLastQuery, storedLastQuery, lastTotalQuery]); 
+  }, [qFromState]); 
 
   const startSearch = (searchQuery, activeFilters = filters) => {
     setIsTimeout(false);
@@ -220,6 +224,11 @@ const AiSmartSearchContent = ({
     const trimmedQuery = query.trim();
     // 쿼리가 있거나 선택된 필터가 있으면 검색 실행
     if (trimmedQuery || selectedFilterCount > 0) {
+      // URL 상태 업데이트 (동기화) - 뒤로가기 대응 및 새로고침 시 상태 유지
+      if (trimmedQuery !== qFromState) {
+        navigate(location.pathname, { replace: true, state: { ...location.state, q: trimmedQuery } });
+      }
+
       setVisibleCount(PAGE_SIZE);
       startSearch(trimmedQuery, filters);
       if (trimmedQuery) {
