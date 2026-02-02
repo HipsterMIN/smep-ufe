@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import SideNavigation from '../components/ui/SideNavigation';
-import Breadcrumb from '../components/ui/Breadcrumb';
-import { api } from '../lib/apiClient.js';
-import { useUserMenu } from '../context/UserMenuContext.jsx';
+import SideNavigation from '@components/ui/SideNavigation.jsx';
+import Breadcrumb from '@components/ui/Breadcrumb.jsx';
+import { api } from '@lib/apiClient.js';
+import { useUserMenu } from '@context/UserMenuContext.jsx';
+import VerificationResultPopup from '@pages/certificate/VerificationResultPopup.jsx';
 
 const UI_USR_L_050 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -17,8 +18,12 @@ const UI_USR_L_050 = () => {
     prdocCd: '',
     prdocIssuAplyNo: '',
   });
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
+
+  // 팝업 관련 state
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [verificationResult, setVerificationResult] = useState(null);
+
+  const [error, setError] = useState(''); // 폼 유효성 검증 에러만 표시
 
   useEffect(() => {
     fetchInstitutions();
@@ -49,10 +54,11 @@ const UI_USR_L_050 = () => {
       ...prev,
       [name]: value,
     }));
-    setError('');
+    setError(''); // 입력 시 에러 초기화
   };
 
   const handleVerify = async () => {
+    // 유효성 검증
     if (!formData.prdocCd) {
       setError('문서종류는 필수사항입니다.');
       return;
@@ -80,18 +86,38 @@ const UI_USR_L_050 = () => {
         `/api/v1/certificate/verify?${params.toString()}`,
       );
 
+      // 성공 케이스
       if (response.data) {
-        setResult(response.data);
-        setError('');
+        setVerificationResult({
+          isSuccess: true,
+          data: response.data,
+        });
+        setError(''); // 폼 에러 초기화
       } else {
-        setResult(null);
-        setError('해당 문서확인번호로 조회되는 출력내역이 없습니다.');
+        // 실패 케이스 (데이터 없음)
+        setVerificationResult({
+          isSuccess: false,
+          data: null,
+        });
       }
+
+      setIsPopupOpen(true); // 팝업 열기
+
     } catch (err) {
       console.error('진위확인 실패:', err);
-      setError('조회 중 오류가 발생했습니다.');
-      setResult(null);
+      // 에러 발생 시 실패 팝업
+      setVerificationResult({
+        isSuccess: false,
+        data: null,
+      });
+      setIsPopupOpen(true); // 팝업 열기
     }
+  };
+
+  const handleClosePopup = () => {
+    setIsPopupOpen(false);
+    // 팝업 닫을 때 결과 초기화 (선택사항)
+    // setVerificationResult(null);
   };
 
   return (
@@ -109,7 +135,7 @@ const UI_USR_L_050 = () => {
         <div className="txt-box outline">
           <h4 className="outline-tit">알려드립니다.</h4>
           <ul className="check-list">
-            <li>중소벤처24 <a href="http://smes.go.kr/" target="_blank" title="새 창 열림" className="on-linktxt2">(www.smes.go.kr)</a>를 통해 출력된 증명/확인서의 진위확인 서비스입니다.</li>
+            <li>중소벤처24 <a href="http://smes.go.kr/" target="_blank" rel="noopener noreferrer" className="on-linktxt2">(www.smes.go.kr)</a>를 통해 출력된 증명/확인서의 진위확인 서비스입니다.</li>
             <li>발급된 증명/확인서의 종류를 선택한 후 발급문서 우측 상단의 문서확인번호 17자리를 입력하세요.</li>
           </ul>
         </div>
@@ -142,7 +168,7 @@ const UI_USR_L_050 = () => {
             <div className="form-row-item">
               <dt className="form-row-label">
                 <label htmlFor="select_02">
-                                    문서종류<span className="on-required"><span className="sr-only">필수입력</span></span>
+                    문서종류<span className="on-required"><span className="sr-only">필수입력</span></span>
                 </label>
               </dt>
               <dd className="form-row-content">
@@ -167,7 +193,7 @@ const UI_USR_L_050 = () => {
             <div className="form-row-item">
               <dt className="form-row-label">
                 <label htmlFor="input_01">
-                                    문서확인번호<span className="on-required"><span className="sr-only">필수입력</span></span>
+                    문서확인번호<span className="on-required"><span className="sr-only">필수입력</span></span>
                 </label>
               </dt>
               <dd className="form-row-content">
@@ -188,16 +214,10 @@ const UI_USR_L_050 = () => {
           </dl>
         </div>
 
+        {/* 폼 유효성 검증 에러만 표시 */}
         {error && (
           <div className="mt-16" style={{ color: 'red', textAlign: 'center' }}>
             {error}
-          </div>
-        )}
-
-        {result && (
-          <div className="mt-24">
-            <p>TODO : 퍼블 완료 후 수정 예정</p>
-            <pre>{JSON.stringify(result, null, 2)}</pre>
           </div>
         )}
 
@@ -208,11 +228,21 @@ const UI_USR_L_050 = () => {
               className="krds-btn xlarge"
               onClick={handleVerify}
             >
-                            진위확인
+                진위확인
             </button>
           </div>
         </div>
       </div>
+
+      {/* 진위확인 결과 팝업 */}
+      {verificationResult && (
+        <VerificationResultPopup
+          isOpen={isPopupOpen}
+          onClose={handleClosePopup}
+          isSuccess={verificationResult.isSuccess}
+          data={verificationResult.data}
+        />
+      )}
     </>
   );
 };
