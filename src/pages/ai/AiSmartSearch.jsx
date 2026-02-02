@@ -21,9 +21,8 @@ import {
 } from '@cube-i-ax/sdk/smes/program';
 import useSearchStore from '../../store/useSearchStore';
 import { useAuthStore } from '@store/useAuthStore.jsx';
-import { usePopupSender } from '@/hooks/usePopupCommunication.js';
-import { useTotalSearch } from '@/hooks/useTotalSearch.js';
-import { useNumberCounter } from '@/hooks/useNumberCounter.js';
+import { usePopupSender } from '../../hooks/usePopupCommunication';
+import { useTotalSearch } from '../../hooks/useTotalSearch';
 
 import { AI_SETTINGS } from '../../App.jsx';
 
@@ -37,7 +36,6 @@ const AiSmartSearchContent = ({
   onIncludePastChange, 
   onResetFilters 
 }) => {
-  const { isLogin } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
@@ -48,15 +46,10 @@ const AiSmartSearchContent = ({
   // Custom Hooks
   const { openPopup } = usePopupSender();
   const { 
-    results: totalSearchResults, 
     totalCount: totalSearchTotal, 
-    isLoading: totalSearchLoading, 
     search: searchTotal 
   } = useTotalSearch();
   
-  // Animated Counter
-  const animatedTotalCount = useNumberCounter(totalSearchTotal, 1000);
-
   // Zustand Store
   const { 
     programs: storedPrograms, 
@@ -65,9 +58,6 @@ const AiSmartSearchContent = ({
     lastQuery: storedLastQuery,
     setSearchResults, 
   } = useSearchStore();
-
-  const [totalVisibleCount, setTotalVisibleCount] = useState(0);
-  const [lastTotalQuery, setLastTotalQuery] = useState('');
 
   // 타임아웃 상태 관리
   const [isTimeout, setIsTimeout] = useState(false);
@@ -141,10 +131,8 @@ const AiSmartSearchContent = ({
           aiSmartSearchRef.current.classList.add('on');
         }
       }
-      if (q !== lastTotalQuery) {
-        searchTotal(q);
-        setLastTotalQuery(q);
-      }
+      // 통합 검색 실행 (필요한 경우)
+      // searchTotal(q); 
     }
   }, [qFromState]); 
 
@@ -181,10 +169,8 @@ const AiSmartSearchContent = ({
 
       setVisibleCount(PAGE_SIZE);
       startSearch(trimmedQuery, filters);
-      if (trimmedQuery) {
-        searchTotal(trimmedQuery);
-        setLastTotalQuery(trimmedQuery);
-      }
+      // searchTotal(trimmedQuery); // 통합 검색 필요 시 주석 해제
+      
       if (aiSmartSearchRef.current) {
         aiSmartSearchRef.current.classList.add('on');
       }
@@ -327,6 +313,21 @@ const AiSmartSearchContent = ({
   ];
 
   const isRealLoading = isLoading && !isTimeout;
+
+  // 검색 결과 메시지 생성 로직
+  const getSearchResultMessage = () => {
+    if (isRealLoading) {
+      return 'AI가 검색 결과를 분석 중입니다...';
+    }
+    
+    const currentSearchQuery = sdkLastQuery || storedLastQuery || query;
+    
+    if (!currentSearchQuery && displayTotal === 0) {
+      return 'AI가 기업 조건에 맞는 지원사업을 찾아드립니다. 검색어를 입력해주세요.';
+    }
+    
+    return `"${currentSearchQuery}"에 대한 검색 결과를 분석한 결과, 총 ${displayTotal}개의 지원사업을 발견했습니다.`;
+  };
 
   return (
     <div id="wrap" >
@@ -516,11 +517,7 @@ const AiSmartSearchContent = ({
                 <div>
                   <h3>
                     <span className="content">
-                      {isRealLoading && !streamingSummary && !displaySummary ? (
-                        'AI가 검색 결과를 분석 중입니다...'
-                      ) : (
-                        `"${(isRealLoading || streamingSummary) ? (qFromState || query) : (sdkLastQuery || storedLastQuery || query)}"에 대한 검색 결과를 분석한 결과, 총 ${displayTotal}개의 지원사업을 발견했습니다.`
-                      )}
+                      {getSearchResultMessage()}
                     </span>
                   </h3>
                   <div className="on-smartsearch-conts hide-scrollbar" style={{ height: '100%' }}>
