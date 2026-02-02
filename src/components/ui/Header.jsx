@@ -23,7 +23,7 @@ export default function Header() {
   const [isCompany, setIsCompany] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showAiSwitcher, setShowAiSwitcher] = useState(false);
-  const [aiEnv, setAiEnv] = useState(() => localStorage.getItem('__ai_env__') || 'dev');
+  const [aiEnv, setAiEnv] = useState(() => localStorage.getItem('__ai_env__') || 'prod');
   const [clickCount, setClickCount] = useState(0);
   const searchRef = useRef(null);
   const searchInputRef = useRef(null);
