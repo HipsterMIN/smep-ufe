@@ -771,7 +771,19 @@ const SAMPLE_COMPANY_PROFILE = {
 
 const AiSmartSearch = () => {
   const { isLogin, companyProfile } = useAuthStore();
+  const { clearSearch } = useSearchStore();
   const [filters, setFilters] = useState(DEFAULT_SEARCH_FILTERS);
+  
+  // 로그인 상태 변화 감지 (로그인 시 필터 및 검색 결과 초기화)
+  const prevIsLoginRef = useRef(isLogin);
+  useEffect(() => {
+    // 로그인 안된 상태에서 로그인으로 전환된 경우에만 실행
+    if (!prevIsLoginRef.current && isLogin) {
+      setFilters(DEFAULT_SEARCH_FILTERS);
+      clearSearch();
+    }
+    prevIsLoginRef.current = isLogin;
+  }, [isLogin, clearSearch]);
   
   const effectiveProfile = useMemo(() => {
     if (isLogin) return companyProfile;
