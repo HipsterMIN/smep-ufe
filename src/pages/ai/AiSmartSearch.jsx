@@ -584,7 +584,7 @@ const AiSmartSearchContent = ({
                       {isRealLoading && !streamingSummary && !displaySummary ? (
                         'AI가 검색 결과를 분석 중입니다...'
                       ) : (
-                        `"${sdkLastQuery || storedLastQuery || query}"에 대한 검색 결과를 분석한 결과, 총 ${displayTotal}개의 지원사업을 발견했습니다.`
+                        `"${(isRealLoading || streamingSummary) ? (qFromState || query) : (sdkLastQuery || storedLastQuery || query)}"에 대한 검색 결과를 분석한 결과, 총 ${displayTotal}개의 지원사업을 발견했습니다.`
                       )}
                     </span>
                   </h3>
