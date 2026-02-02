@@ -103,6 +103,8 @@ export interface UseCubeIAxSearchReturn {
   status: StatusEvent | null;
   /** Session ID for continuing conversation in chat */
   sessionId: string | null;
+  /** Last executed query */
+  lastQuery: string | null;
   /** Clarification message if any */
   clarificationMessage: string;
   /** Clarification suggestions if any */
@@ -188,6 +190,7 @@ export function useCubeIAxSearch(
   const [streamingContent, setStreamingContent] = useState('');
   const [status, setStatus] = useState<StatusEvent | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [lastQuery, setLastQuery] = useState<string | null>(null);
   const [clarificationMessage, setClarificationMessage] = useState<string>('');
   const [clarificationQuestions, setClarificationQuestions] = useState<string[]>([]);
   const [followupSuggestions, setFollowupSuggestions] = useState<string[]>([]);
@@ -199,8 +202,6 @@ export function useCubeIAxSearch(
 
   const clientRef = useRef<CubeIAxClient | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  // abort 후 콜백 방지용 플래그 (AbortController.signal 외에 추가 보호)
-  const abortedRef = useRef(false);
   // config를 ref로 관리하여 getClient 의존성 안정화
   const configRef = useRef<CubeIAxConfig>(config);
   // options를 ref로 관리하여 search 의존성 안정화 (무한 렌더링 방지)
@@ -229,7 +230,6 @@ export function useCubeIAxSearch(
   // Cleanup: abort any in-flight request when component unmounts
   useEffect(() => {
     return () => {
-      abortedRef.current = true;
       abortControllerRef.current?.abort();
     };
   }, []);
@@ -269,15 +269,15 @@ export function useCubeIAxSearch(
 
       const client = getClient();
       // 이전 요청이 있으면 abort (race condition 방지)
-      // 순서 중요: 먼저 플래그 설정 → abort → 새 요청용 플래그 리셋
-      abortedRef.current = true; // 이전 콜백 차단
       abortControllerRef.current?.abort();
-      abortedRef.current = false; // 새 요청 시작 시 플래그 리셋
+
       resetStreamingState();
       setIsLoading(true);
 
-      // Create abort controller for this request
-      abortControllerRef.current = new AbortController();
+      // 새 요청을 위한 컨트롤러 생성
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+      const signal = abortController.signal;
 
       // optionsRef에서 최신 옵션 가져오기 (의존성 배열에서 options 제외하여 무한 렌더링 방지)
       const opts = optionsRef.current;
@@ -313,26 +313,26 @@ export function useCubeIAxSearch(
           agent: searchOptions?.agent ?? opts.agent,
           groupByField: searchOptions?.groupByField ?? opts.groupByField,
           groupResultsBy: searchOptions?.groupResultsBy ?? opts.groupResultsBy,
-          signal: abortControllerRef.current?.signal,
+          signal,
         };
 
         let fullContent = '';
 
         const response = await client.search(request, shouldStream ? {
           onSession: (sid) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             setSessionId(sid);
             opts.onSession?.(sid);
           },
           onStatus: (statusMessage, stage) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             flushSync(() => {
               setStatus({ message: statusMessage, stage });
             });
             opts.onStatus?.(statusMessage, stage);
           },
           onSources: (sourceResults) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             // Sources arrive early - update UI immediately
             // Use flushSync to force synchronous render (bypass React 18 automatic batching)
             flushSync(() => {
@@ -350,7 +350,7 @@ export function useCubeIAxSearch(
             opts.onSources?.(sourceResults);
           },
           onContent: (chunk) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             fullContent += chunk;
             // Force synchronous render for real-time streaming UI
             flushSync(() => {
@@ -359,11 +359,11 @@ export function useCubeIAxSearch(
             opts.onContent?.(chunk);
           },
           onCitations: (citations) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             opts.onCitations?.(citations);
           },
           onClarification: (message, suggestions) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             setClarificationMessage(message || '');
             // Ensure suggestions is always an array
             const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
@@ -371,43 +371,44 @@ export function useCubeIAxSearch(
             opts.onClarification?.(message, safeSuggestions);
           },
           onFollowup: (suggestions, message) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             // Ensure suggestions is always an array
             const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
             setFollowupSuggestions(safeSuggestions);
             opts.onFollowup?.(safeSuggestions, message);
           },
           onRewrite: (query) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             setRewrittenQuery(query);
             opts.onRewrite?.(query);
           },
           onAnalysis: (analysis) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             setQueryAnalysis(analysis);
             opts.onAnalysis?.(analysis);
           },
           onItemDetails: (items) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             // Ensure items is always an array (defensive against malformed backend response)
             const safeItems = Array.isArray(items) ? items : [];
             setItemDetails(safeItems);
             opts.onItemDetails?.(safeItems);
           },
           onContext: (documents, focus) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             // contextDocuments는 onSources에서 이미 설정됨
             // context 이벤트의 documents는 focus용 단일 문서일 수 있으므로 덮어쓰지 않음
             if (focus) setContextFocus(focus);
             opts.onContext?.(documents, focus);
           },
           onComplete: (res) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             // Final response with LLM analysis
             flushSync(() => {
               setResults(res.results);
               setTotal(res.total);
               setContent(res.content);
+              setLastQuery(query);
               setStreamingContent('');
               setStatus(null);
               setIsLoading(false);
@@ -415,7 +416,7 @@ export function useCubeIAxSearch(
             opts.onComplete?.(res);
           },
           onError: (err) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             // 에러 발생 시 모든 스트리밍 상태 정리
             flushSync(() => {
               setError(err);
@@ -426,6 +427,7 @@ export function useCubeIAxSearch(
             opts.onError?.(err);
           },
           onEvent: (event) => {
+            if (signal.aborted) return;
             opts.onEvent?.(event);
           },
           onParseError: opts.onParseError,
@@ -433,10 +435,12 @@ export function useCubeIAxSearch(
 
         // For non-streaming, set results here
         if (!shouldStream) {
+          if (signal.aborted) return null;
           flushSync(() => {
             setResults(response.results);
             setTotal(response.total);
             setContent(response.content);
+            setLastQuery(query);
             setIsLoading(false);
           });
           opts.onComplete?.(response);
@@ -445,7 +449,7 @@ export function useCubeIAxSearch(
         return response;
       } catch (err) {
         // abort된 요청의 에러는 무시
-        if (abortedRef.current) return null;
+        if (signal.aborted) return null;
         const error = err instanceof Error ? err : new Error(String(err));
         flushSync(() => {
           setError(error);
@@ -456,7 +460,9 @@ export function useCubeIAxSearch(
         opts.onError?.(error);
         return null;
       } finally {
-        abortControllerRef.current = null;
+        if (abortControllerRef.current === abortController) {
+          abortControllerRef.current = null;
+        }
       }
     },
     [getClient, resetStreamingState]
@@ -467,12 +473,12 @@ export function useCubeIAxSearch(
     setResults([]);
     setTotal(0);
     setContent(undefined);
+    setLastQuery(null);
     resetStreamingState();
   }, [resetStreamingState]);
 
   // Abort current search request
   const abort = useCallback(() => {
-    abortedRef.current = true;
     abortControllerRef.current?.abort();
     // 모든 스트리밍 관련 상태 초기화 (flushSync로 동기 업데이트)
     flushSync(() => {
@@ -495,6 +501,7 @@ export function useCubeIAxSearch(
     setTotal(state.total);
     setContent(state.content);
     setSessionId(state.sessionId);
+    setLastQuery(state.query);
     // Reset streaming state
     setStreamingContent('');
     setStatus(null);
@@ -511,6 +518,7 @@ export function useCubeIAxSearch(
     streamingContent,
     status,
     sessionId,
+    lastQuery,
     clarificationMessage,
     clarificationQuestions,
     followupSuggestions,

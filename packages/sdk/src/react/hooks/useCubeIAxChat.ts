@@ -357,8 +357,6 @@ export function useCubeIAxChat(
 
   const clientRef = useRef<CubeIAxClient | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  // abort 후 콜백 방지용 플래그 (AbortController.signal 외에 추가 보호)
-  const abortedRef = useRef(false);
   // sessionId를 ref로 관리하여 sendMessage 의존성에서 제외 (불필요한 함수 재생성 방지)
   const sessionIdRef = useRef<string | undefined>(initialSessionId);
   // earlySources를 ref로 관리하여 onComplete에서 stale 값 참조 방지
@@ -422,7 +420,6 @@ export function useCubeIAxChat(
   // Cleanup: abort any in-flight request when component unmounts
   useEffect(() => {
     return () => {
-      abortedRef.current = true;
       abortControllerRef.current?.abort();
     };
   }, []);
@@ -507,11 +504,13 @@ export function useCubeIAxChat(
       }
 
       // 이전 요청이 있으면 abort (race condition 방지)
-      // 순서 중요: 먼저 플래그 설정 → abort → 새 요청용 플래그 리셋
-      abortedRef.current = true; // 이전 콜백 차단
       abortControllerRef.current?.abort();
-      abortedRef.current = false; // 새 요청 시작 시 플래그 리셋
       resetStreamingState();
+
+      // 새 요청을 위한 컨트롤러 생성
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+      const signal = abortController.signal;
 
       // Add user message
       const userMessage: Message = {
@@ -526,8 +525,6 @@ export function useCubeIAxChat(
       const assistantMessageId = generateId();
 
       try {
-        abortControllerRef.current = new AbortController();
-
         // Merge default metadata with message-specific metadata
         const mergedMetadata = {
           ...opts.defaultMetadata,
@@ -557,7 +554,7 @@ export function useCubeIAxChat(
           maxResponseLength: opts.maxResponseLength,
           maxTokens: opts.maxTokens,
           includeCitations: opts.includeCitations,
-          signal: abortControllerRef.current.signal,
+          signal,
         };
 
         let fullContent = '';
@@ -567,19 +564,19 @@ export function useCubeIAxChat(
 
         await client.chat(request, {
           onSession: (newSessionId) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             setSessionId(newSessionId);
             opts.onSession?.(newSessionId);
           },
           onStatus: (statusMessage, stage) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             flushSync(() => {
               setStatus({ message: statusMessage, stage });
             });
             opts.onStatus?.(statusMessage, stage);
           },
           onSources: (sources) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             // Sources arrive before answer - update pending sources for UI
             earlySourcesRef.current = sources;
             flushSync(() => {
@@ -596,13 +593,13 @@ export function useCubeIAxChat(
             opts.onSources?.(sources);
           },
           onContent: (content) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             fullContent += content;
             setStreamingContent(fullContent);
             opts.onContent?.(content);
           },
           onClarification: (message, suggestions) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             // console.log('[useCubeIAxChat] onClarification:', { message, suggestions });
             setClarificationMessage(message || '');
             // Ensure suggestions is always an array
@@ -611,7 +608,7 @@ export function useCubeIAxChat(
             opts.onClarification?.(message, safeSuggestions);
           },
           onFollowup: (suggestions, message) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             // Ensure suggestions is always an array
             const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
             setFollowupSuggestions(safeSuggestions);
@@ -625,24 +622,24 @@ export function useCubeIAxChat(
             opts.onFollowup?.(safeSuggestions, message);
           },
           onRewrite: (query) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             setRewrittenQuery(query);
             opts.onRewrite?.(query);
           },
           onAnalysis: (analysis) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             setQueryAnalysis(analysis);
             opts.onAnalysis?.(analysis);
           },
           onItemDetails: (items) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             // Ensure items is always an array (defensive against malformed backend response)
             const safeItems = Array.isArray(items) ? items : [];
             setItemDetails(safeItems);
             opts.onItemDetails?.(safeItems);
           },
           onContext: (documents, focus) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             // contextDocuments는 onSources에서 이미 설정됨
             // context 이벤트로 전달되는 documents가 있으면 갱신
             const parsedDocuments = parseContextDocuments(documents);
@@ -653,7 +650,7 @@ export function useCubeIAxChat(
             opts.onContext?.(documents, focus);
           },
           onComplete: (res) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             // Update session ID if provided
             if (res.sessionId) {
               setSessionId(res.sessionId);
@@ -682,7 +679,7 @@ export function useCubeIAxChat(
             opts.onComplete?.(res);
           },
           onError: (err) => {
-            if (abortedRef.current) return;
+            if (signal.aborted) return;
             // 에러 발생 시 모든 스트리밍 상태 정리
             flushSync(() => {
               setError(err);
@@ -699,7 +696,7 @@ export function useCubeIAxChat(
         });
       } catch (err) {
         // abort된 요청의 에러는 무시
-        if (abortedRef.current) return;
+        if (signal.aborted) return;
         const error = err instanceof Error ? err : new Error(String(err));
         flushSync(() => {
           setError(error);
@@ -710,7 +707,9 @@ export function useCubeIAxChat(
         });
         opts.onError?.(error);
       } finally {
-        abortControllerRef.current = null;
+        if (abortControllerRef.current === abortController) {
+          abortControllerRef.current = null;
+        }
       }
     },
     [getClient, resetStreamingState, parseContextDocuments]
@@ -737,7 +736,6 @@ export function useCubeIAxChat(
 
   // Abort current request
   const abort = useCallback(() => {
-    abortedRef.current = true;
     abortControllerRef.current?.abort();
     // 모든 스트리밍 관련 상태 초기화 (flushSync로 동기 업데이트)
     flushSync(() => {
