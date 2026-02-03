@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useMemo, Suspense } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import Header from '../../components/ui/Header.jsx';
 import Footer from '../../components/ui/Footer.jsx';
 import Breadcrumb from '../../components/ui/Breadcrumb';
@@ -688,23 +688,33 @@ const SAMPLE_COMPANY_PROFILE = {
 
 const AiSmartSearch = () => {
   const { isLogin, companyProfile } = useAuthStore();
-  const { clearSearch } = useSearchStore();
-  const [filters, setFilters] = useState(DEFAULT_SEARCH_FILTERS);
+  const { clearSearch, filters: storedFilters, setSearchFilters } = useSearchStore();
+  const navigationType = useNavigationType();
+  const filters = storedFilters || DEFAULT_SEARCH_FILTERS;
   
-  // 컴포넌트 마운트 시 검색 상태 초기화
+  // 초기 진입 시 검색 상태 초기화 (뒤로가기 제외)
   useEffect(() => {
-    setFilters(DEFAULT_SEARCH_FILTERS);
+    if (navigationType === 'POP') {
+      return;
+    }
+    setSearchFilters(DEFAULT_SEARCH_FILTERS);
     clearSearch();
-  }, [clearSearch]);
+  }, [navigationType, clearSearch, setSearchFilters]);
+
+  useEffect(() => {
+    if (storedFilters == null) {
+      setSearchFilters(DEFAULT_SEARCH_FILTERS);
+    }
+  }, [storedFilters, setSearchFilters]);
   
   const prevIsLoginRef = useRef(isLogin);
   useEffect(() => {
     if (!prevIsLoginRef.current && isLogin) {
-      setFilters(DEFAULT_SEARCH_FILTERS);
+      setSearchFilters(DEFAULT_SEARCH_FILTERS);
       clearSearch();
     }
     prevIsLoginRef.current = isLogin;
-  }, [isLogin, clearSearch]);
+  }, [isLogin, clearSearch, setSearchFilters]);
   
   const effectiveProfile = useMemo(() => {
     if (isLogin) return companyProfile;
@@ -725,21 +735,19 @@ const AiSmartSearch = () => {
   }, []);
 
   const handleToggleFilterValue = (key, value) => {
-    setFilters(prev => {
-      const current = prev[key];
-      const exists = current.includes(value);
-      return {
-        ...prev,
-        [key]: exists ? current.filter(item => item !== value) : [...current, value],
-      };
+    const current = filters[key];
+    const exists = current.includes(value);
+    setSearchFilters({
+      ...filters,
+      [key]: exists ? current.filter(item => item !== value) : [...current, value],
     });
   };
 
   const handleIncludePastChange = (value) => {
-    setFilters(prev => ({ ...prev, includePast: value }));
+    setSearchFilters({ ...filters, includePast: value });
   };
 
-  const handleResetFilters = () => setFilters(DEFAULT_SEARCH_FILTERS);
+  const handleResetFilters = () => setSearchFilters(DEFAULT_SEARCH_FILTERS);
   
   return (
     <ProgramSearchProvider 
