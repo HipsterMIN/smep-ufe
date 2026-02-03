@@ -4,6 +4,7 @@ import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import { api } from '@lib/apiClient.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import VerificationResultPopup from '@pages/certificate/VerificationResultPopup.jsx';
+import { shortenInstName } from '@utils/stringUtils.js';
 
 const UI_USR_L_050 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -158,7 +159,7 @@ const UI_USR_L_050 = () => {
                     <option value="">전체</option>
                     {institutions.map(inst => (
                       <option key={inst.code} value={inst.code}>
-                        {inst.name}
+                        {shortenInstName(inst.name)}
                       </option>
                     ))}
                   </select>
