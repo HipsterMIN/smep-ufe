@@ -13,6 +13,7 @@ const useSearchStore = create(
       total: 0,
       summary: null,
       lastQuery: null,
+      filters: null,
       
       // 액션
       setSearchResults: (data) => set({
@@ -21,6 +22,7 @@ const useSearchStore = create(
         summary: data.summary || null,
         lastQuery: data.lastQuery || null,
       }),
+      setSearchFilters: (filters) => set({ filters }),
       
       clearSearch: () => set({
         programs: [],
