@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
-import SideNavigation from '../components/ui/SideNavigation';
-import Breadcrumb from '../components/ui/Breadcrumb';
-import Pagination from '../components/ui/Pagination';
-import Popup from '../components/ui/Popup';
-import { api as apiClient } from '../lib/apiClient.js';
-import { shortenInstName  } from '../utils/stringUtils';
+import SideNavigation from '@components/ui/SideNavigation.jsx';
+import Breadcrumb from '@components/ui/Breadcrumb.jsx';
+import Pagination from '@components/ui/Pagination.jsx';
+import Popup from '@components/ui/Popup.jsx';
+import { api as apiClient } from '@lib/apiClient.js';
+import { shortenInstName  } from '@utils/stringUtils.js';
 import { useNavigate } from 'react-router-dom';
-import { useUserMenu } from '../context/UserMenuContext.jsx';
+import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 const UI_USR_L_040 = () => {
   const navigate = useNavigate();

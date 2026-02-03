@@ -1,12 +1,12 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { api as apiClient } from '../lib/apiClient.js';
+import { api as apiClient } from '@lib/apiClient.js';
 
-import SideNavigation from '../components/ui/SideNavigation';
-import Breadcrumb from '../components/ui/Breadcrumb';
-import Popup from '../components/ui/Popup';
-import { useUserMenu } from '../context/UserMenuContext.jsx';
+import SideNavigation from '@components/ui/SideNavigation.jsx';
+import Breadcrumb from '@components/ui/Breadcrumb.jsx';
+import Popup from '@components/ui/Popup.jsx';
+import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 const UI_USR_R_041 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
