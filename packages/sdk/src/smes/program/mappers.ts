@@ -138,6 +138,21 @@ export function mapSourceToProgram(
   const getDate = (key: string): number | null => {
     const val = getNum(key);
     if (val !== null) return val;
+    
+    // Legacy field names fallback
+    if (key === "apply_start_date") {
+      const legacyVal = getNum("aplybgngday") || getNum("applyStartDate");
+      if (legacyVal) return legacyVal;
+    }
+    if (key === "apply_end_date") {
+      const legacyVal = getNum("aplyddlnday") || getNum("applyEndDate");
+      if (legacyVal) return legacyVal;
+    }
+    if (key === "register_date") {
+      const legacyVal = getNum("regDate");
+      if (legacyVal) return legacyVal;
+    }
+
     const tsVal = getNum(`${key}_ts`);
     if (tsVal !== null && tsVal > 19000000) {
       // Unix timestamp로 판단 (1970년 이후의 값)
@@ -153,11 +168,14 @@ export function mapSourceToProgram(
     groupId ||
     sourceId ||
     source.documentId ||
+    get("pbancid") ||
+    get("pbancId") ||
+    get("pbanc_id") ||
     get("file_id") ||
     get("program_id");
 
   // 마감유형 결정 (상수 배열로 유효성 검증)
-  const deadlineTypeRaw = get("deadline_type") || DEFAULT_VALUES.deadlineType;
+  const deadlineTypeRaw = get("deadline_type") || get("deadlineType") || DEFAULT_VALUES.deadlineType;
   const deadlineType = (
     (DEADLINE_TYPE_OPTIONS as readonly string[]).includes(deadlineTypeRaw)
       ? deadlineTypeRaw
@@ -165,7 +183,7 @@ export function mapSourceToProgram(
   ) as DeadlineType;
 
   // 지원분야 결정 (상수 배열로 유효성 검증)
-  const supportFieldRaw = get("support_field") || DEFAULT_VALUES.supportField;
+  const supportFieldRaw = get("support_field") || get("supportField") || get("sprtfld") || DEFAULT_VALUES.supportField;
   const supportField = (
     (SUPPORT_FIELD_OPTIONS as readonly string[]).includes(supportFieldRaw)
       ? supportFieldRaw
@@ -269,9 +287,9 @@ export function mapSourceToProgram(
     supportRate: getNum("support_rate"),
 
     // 기본 정보 (깨진 문자 정리)
-    title: sanitizeText(source.title || get("title") || DEFAULT_VALUES.title),
+    title: sanitizeText(source.title || get("title") || get("pbancnm") || get("pbancNm") || DEFAULT_VALUES.title),
     ministry: get("ministry") || "",
-    agency: get("agency") || DEFAULT_VALUES.agency,
+    agency: get("agency") || get("mngdeptnm") || get("mngDeptNm") || get("flfmtinst") || DEFAULT_VALUES.agency,
     executor: get("executor") || "",
     supportField,
     supportFieldDetail: get("support_field_detail") || "",

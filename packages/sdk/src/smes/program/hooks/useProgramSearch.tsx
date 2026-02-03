@@ -136,6 +136,8 @@ export interface ProgramSearchContextValue {
   lastQuery: string | null;
   /** 검색 실행 */
   search: (query: string, filters?: SearchFilters, options?: Partial<SearchRequest>) => void;
+  /** 상태 복구 */
+  restore: (state: any) => void;
   /** 검색 중단 */
   abort: () => void;
 }
@@ -334,6 +336,7 @@ function useProgramSearchInternal(): ProgramSearchContextValue {
       const effectiveQuery = query.trim() || "지원사업";
       sdk.search(effectiveQuery, { ...options, filters: backendFilters });
     },
+    restore: sdk.restore,
     abort: sdk.abort,
   };
 }
