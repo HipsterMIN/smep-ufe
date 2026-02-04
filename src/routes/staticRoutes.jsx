@@ -6,7 +6,7 @@ import AiChat from '../pages/ai/AiChat.jsx';
 import PublishingList from '../publishing/PublishingList.jsx';
 import SubpageLayout from '../layouts/SubpageLayout.jsx';
 import { autoPublishingRoutesWithLayout, autoPublishingRoutesWithoutLayout } from './autoRoutes.jsx';
-import { MenuProviderOnly, SubpageLayoutWithMenu } from '../layouts/layoutIndex.jsx';
+import { MenuProviderOnly, SubpageLayoutWithMenu } from '@layouts';
 
 /**
  * =============================================================================
