@@ -1,33 +1,26 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import arrowIcon from '../../assets/main/icon-arrow.svg';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import { useNavigate } from 'react-router-dom';
 import { useMenuStore } from '@store/useMenuStore.js';
 import { buildFullPath } from '@utils/menuUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import HeaderDesktopGNB from './header/HeaderDesktopGNB';
+import HeaderMobileGNB from './header/HeaderMobileGNB';
+import HeaderUserMenu from './header/HeaderUserMenu';
+import HeaderSearch from './header/HeaderSearch';
 
 // BASE URL 상수
 const BASE_URL = import.meta.env.VITE_BASE || '/';
 
 // 관리자 - 상단 메뉴
 export default function Header() {
-  const { login } = useAuthStore();
-  const [openIndex, setOpenIndex] = useState(null);
-  const [activeMobileTab, setActiveMobileTab] = useState(0);
-  const { isLogin, logout, companyProfile } = useAuthStore();
+  const { isLogin, logout, login, companyProfile } = useAuthStore();
   const { menuTree, flatMenuMap, fetchMenuData } = useMenuStore();
   const mobGnbRef = useRef(null);
   const { getFullPath } = useUserMenu();
-  const openTimeoutRef = useRef(null);
-  const closeTimeoutRef = useRef(null);
-  const [isCompany, setIsCompany] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [showAiSwitcher, setShowAiSwitcher] = useState(false);
-  const [aiEnv, setAiEnv] = useState(() => localStorage.getItem('__ai_env__') || 'dev');
-  const [clickCount, setClickCount] = useState(0);
-  const searchRef = useRef(null);
-  const searchInputRef = useRef(null);
-
+  const navigate = useNavigate();
+  
   // 메뉴 데이터 로드
   useEffect(() => {
     if (!menuTree) {
@@ -35,7 +28,7 @@ export default function Header() {
     }
   }, [menuTree, fetchMenuData]);
 
-  // 동적 메뉴 구성: depth 1에서 upendMenuExpsrYn === 'Y'인 메뉴만 필터링
+  // 동적 메뉴 구성
   const dynamicMenus = useMemo(() => {
     if (!menuTree || !menuTree.children) return [];
 
@@ -44,203 +37,71 @@ export default function Header() {
     return menuTree.children
       .filter(menu => menu.depth === 1 && menu.upendMenuExpsrYn === 'Y')
       .sort((a, b) => a.sortSeq - b.sortSeq)
-      .map(menu => {
-        // ✅ depth 1 외부 링크 체크
-        const isDepth1External = menu.scrnUrlAddr && /^https?:\/\//i.test(menu.scrnUrlAddr);
-
-        return {
-          ...menu,
-          fullPath: isDepth1External
-            ? menu.scrnUrlAddr
-            : basePath + buildFullPath(menu, flatMenuMap),
-          isExternal: isDepth1External,
-          children: (menu.children || [])
-            .filter(child => child.lfsdMenuExpsrYn === 'Y')
-            .sort((a, b) => a.sortSeq - b.sortSeq)
-            .map(child => {
-              // ✅ depth 2 외부 링크 체크
-              const isDepth2External = child.scrnUrlAddr && /^https?:\/\//i.test(child.scrnUrlAddr);
-
-              return {
-                ...child,
-                fullPath: isDepth2External
-                  ? child.scrnUrlAddr
-                  : basePath + buildFullPath(child, flatMenuMap),
-                isExternal: isDepth2External,
-                children: (child.children || [])
-                  .filter(grandChild => grandChild.lfsdMenuExpsrYn === 'Y')
-                  .sort((a, b) => a.sortSeq - b.sortSeq)
-                  .map(grandChild => {
-                    // ✅ depth 3 외부 링크 체크
-                    const isDepth3External = grandChild.scrnUrlAddr && /^https?:\/\//i.test(grandChild.scrnUrlAddr);
-
-                    return {
-                      ...grandChild,
-                      fullPath: isDepth3External
-                        ? grandChild.scrnUrlAddr
-                        : basePath + buildFullPath(grandChild, flatMenuMap),
-                      isExternal: isDepth3External,
-                    };
-                  }),
-              };
-            }),
-        };
-      });
+      .map(menu => ({
+        ...menu,
+        fullPath: basePath + buildFullPath(menu, flatMenuMap),
+        children: (menu.children || [])
+          .filter(child => child.lfsdMenuExpsrYn === 'Y')
+          .sort((a, b) => a.sortSeq - b.sortSeq)
+          .map(child => ({
+            ...child,
+            fullPath: basePath + buildFullPath(child, flatMenuMap),
+            children: (child.children || [])
+              .filter(grandChild => grandChild.lfsdMenuExpsrYn === 'Y')
+              .sort((a, b) => a.sortSeq - b.sortSeq)
+              .map(grandChild => ({
+                ...grandChild,
+                fullPath: basePath + buildFullPath(grandChild, flatMenuMap),
+              })),
+          })),
+      }));
   }, [menuTree, flatMenuMap]);
 
-  const handleMouseEnter = (menuId) => {
-    clearTimeout(closeTimeoutRef.current);
-    clearTimeout(openTimeoutRef.current);
-    openTimeoutRef.current = setTimeout(() => {
-      setOpenIndex(menuId);
-    }, 200);
-  };
-
-  const handleMouseLeave = () => {
-    clearTimeout(openTimeoutRef.current);
-    closeTimeoutRef.current = setTimeout(() => {
-      setOpenIndex(null);
-    }, 230); // 딜레이 조절 가능
-  };
-
-  const navigate = useNavigate();
-  const handleClick = () => {
-    // 새 창 열기 (크기 지정)
+  const handleLogin = () => {
     const loginWindow = window.open('/main-dev/service/SSO-login', 'login-popup', 'width=1050,height=1000');
 
-    // 부모 창에서 메시지 리스너 등록
     const handleLoginMessage = (event) => {
-      // 보안: 출처 확인
       if (event.origin !== window.location.origin) return;
 
       if (event.data.type === 'LOGIN_SUCCESS') {
-        // 로그인 성공 메시지 수신
-        console.log('로그인 성공:', event.data);
-
-        // 새 창이 이미 닫혔을 수 있지만, 확인 후 닫기
         if (loginWindow && !loginWindow.closed) {
           loginWindow.close();
         }
         const data = event.data.data;
-
         login(data.brno, data.cmpNm, data.companySize, data.companyProfile);
-
-        // 페이지 새로고침
-        // window.location.reload();
-        console.log( data.companyProfile );
       }
     };
 
     window.addEventListener('message', handleLoginMessage);
 
-    // 정리: 새 창이 닫혔을 때 리스너 제거
     const checkWindowClosed = setInterval(() => {
       if (loginWindow.closed) {
         clearInterval(checkWindowClosed);
         window.removeEventListener('message', handleLoginMessage);
       }
     }, 500);
-
   };
 
-  const handleClickAiSearch = () => {
-    navigate(getFullPath('M_PIIO_00074')); // AI 스마트검색 메뉴로 이동
-  };
-
-  const handleClickMypage = () => {
-    navigate(getFullPath('M_PIIO_00113')); // 증명서 발급 메뉴로 이동
-  };
-
-  const handleLogoClick = (e) => {
-    e.preventDefault();
-    const newCount = clickCount + 1;
-    setClickCount(newCount);
-
-    if (newCount >= 5) {
-      setShowAiSwitcher(true);
-      setClickCount(0);
-    } else {
-      // 2초 내에 다시 안 누르면 카운트 초기화
-      if (window.__logo_timer__) clearTimeout(window.__logo_timer__);
-      window.__logo_timer__ = setTimeout(() => setClickCount(0), 2000);
-      navigate('/');
-    }
-  };
-
-  const handleAiEnvChange = (env) => {
-    setAiEnv(env);
-    localStorage.setItem('__ai_env__', env);
-    // App.jsx에 알림
-    window.dispatchEvent(new CustomEvent('ai-env-change', { detail: env }));
-    setShowAiSwitcher(false);
-    alert(`AI 서버가 ${env === 'prod' ? '운영' : '개발'} 서버로 변경되었습니다. 페이지를 새로고침합니다.`);
-    window.location.reload();
+  const handleMyPage = () => {
+    navigate(getFullPath('M_PIIO_00113'));
   };
 
   const handleOpenMobGnb = () => {
     mobGnbRef.current?.classList.add('is-open', 'is-backdrop');
     document.body.classList.add('is-gnb-mobile');
   };
+
   const handleCloseMobGnb = () => {
     mobGnbRef.current?.classList.remove('is-open', 'is-backdrop');
     document.body.classList.remove('is-gnb-mobile');
   };
-
-  const handleMobileTabClick = (e, index) => {
-    e.preventDefault();
-    setActiveMobileTab(index);
-    const targetId = `mGnb-anchor${index + 1}`;
-    const targetElement = document.getElementById(targetId);
-    if (targetElement) {
-      targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  };
-
-  const handleSearchToggle = () => {
-    setIsSearchOpen((prev) => !prev);
-  };
-
-  // 외부 클릭 및 ESC 시 검색창 닫기
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setIsSearchOpen(false);
-      }
-    };
-    const handleEsc = (event) => {
-      if (event.key === 'Escape') {
-        setIsSearchOpen(false);
-      }
-    };
-
-    if (isSearchOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleEsc);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEsc);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEsc);
-    };
-  }, [isSearchOpen]);
-
-  useEffect(() => {
-    if (!isSearchOpen) return;
-    const focusTimer = requestAnimationFrame(() => {
-      searchInputRef.current?.focus();
-    });
-    return () => cancelAnimationFrame(focusTimer);
-  }, [isSearchOpen]);
 
   return (
     <>
       <div id="krds-skip-link">
         <a href="#breadcrumb">본문 바로가기</a>
       </div>
-      { /*본문 바로가기 영역  */}
+      
       <div id="krds-masthead">
         <div className="toggle-wrap">
           <div className="toggle-head">
@@ -250,302 +111,52 @@ export default function Header() {
           </div>
         </div>
       </div>
-      { /*헤더 영역 */}
+      
       <header id="krds-header">
-        { /*헤더 컨텐츠 영역  */}
         <div className="header-in">
-          { /*헤더 상단 기타메뉴 */}
           <div className="header-container">
             <div className="inner">
               <div className="header-branding">
                 <h2 className="logo sample">
-                  <a href={BASE_URL} onClick={handleLogoClick}>
+                  <a href={BASE_URL}>
                     <span className="sr-only">중소기업통합플랫폼</span>
                   </a>
                 </h2>
-                {showAiSwitcher && (
-                  <div className="ai-env-switcher">
-                    <select value={aiEnv} onChange={(e) => handleAiEnvChange(e.target.value)}>
-                      <option value="prod">운영(개발) 서버</option>
-                      <option value="dev">개발 서버</option>
-                    </select>
-                    <button onClick={() => setShowAiSwitcher(false)}>닫기</button>
-                  </div>
-                )}
                 <div className="header-actions">
-                  <div className="header-search-wrap" ref={searchRef}>
-                    <div
-                      id="header-search-layer"
-                      className={`header-search-layer ${isSearchOpen ? 'is-open' : ''}`}
-                      role="dialog"
-                      aria-label="통합검색"
-                    >
-                      <div className="sch-input">
-                        <input
-                          type="text"
-                          className="krds-input"
-                          placeholder="검색어를 입력해 주세요"
-                          title="검색어 입력"
-                          ref={searchInputRef}
-                        />
-                        <button type="button" className="krds-btn medium icon ico-search">
-                          <span className="sr-only">검색</span>
-                          <i className="svg-icon ico-sch"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  {/* <button type="button" className="btn-navi sch open-modal" data-target="popTotalSch">통합검색</button> */}
-                  {/* ai 검색 추가 */}
-                  {isLogin ? (
-                    <>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        marginRight: '8px',
-                      }}>{companyProfile?.cmpNm || ''}님이 로그인 되었습니다.
-                      </div>
-                      <div className="chip-wrap krds-tag-wrap large" style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        marginRight: '8px',
-                      }}>
-                        <span
-                          className="krds-btn-tag"
-                          style={{
-                            cursor: 'pointer',
-                            backgroundColor: !isCompany ? '#FFFFFF' : '#1c267b',
-                            color: !isCompany ? '#000000' : '#FFFFFF',
-                          }}
-                          onClick={() => setIsCompany(!isCompany)}
-                        >
-                          {!isCompany ? '개인회원 전환' : '기업회원 전환'}
-                        </span>
-                      </div>
-                      <button type="button" className="btn-navi sch" onClick={() => handleClickAiSearch()}>AI 스마트검색
-                      </button>
-                      <button type="button" className="btn-navi logout" onClick={logout}>로그아웃</button>
-                      <div className="krds-drop-wrap my-drop">
-                        <button type="button" className="btn-navi my drop-btn active"
-                          onClick={() => handleClickMypage()}>마이 비즈니스
-                        </button>
-                        <div className="drop-menu">
-                          <div className="drop-in">
-                            <div className="drop-top">
-                              <p className="my-name">홍길동님</p>
-                              <dl className="my-time">
-                                <dt>로그아웃까지 남은 시간</dt>
-                                <dd>
-                                  <span className="time">12:00</span>
-                                  <button type="button" className="krds-btn small text h-auto">시간 연장</button>
-                                </dd>
-                              </dl>
-                            </div>
-                            <ul className="drop-list">
-                              <li><a href="#" className="item-link">나의 GOV 홈<span className="sr-only"></span></a></li>
-                              <li><a href="#" className="item-link">나의 신청내역<span className="sr-only"></span></a></li>
-                              <li><a href="#" className="item-link">나의 생활정보<span className="sr-only"></span></a></li>
-                              <li><a href="#" className="item-link">나의 정보관리<span className="sr-only"></span></a></li>
-                            </ul>
-                            <div className="drop-bottom">
-                              <button type="button" className="krds-btn medium text" onClick={logout}>
-                                <i className="svg-icon ico-logout"></i> 로그아웃
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <button type="button" className="btn-navi sch" onClick={() => handleClickAiSearch()}>AI 스마트검색
-                      </button>
-                      <a href="#" className="btn-navi login" onClick={(e) => {
-                        handleClick();
-                      }}>로그인</a>
-                      <button type="button" className="btn-navi join">회원가입</button>
-                    </>
-                  )}
-                  <button type="button" onClick={handleOpenMobGnb} className="btn-navi all"
-                    aria-controls="mobile-nav">전체메뉴
-                  </button>
+                  <HeaderUserMenu
+                    isLogin={isLogin}
+                    companyProfile={companyProfile}
+                    onLogin={handleLogin}
+                    onLogout={logout}
+                    onMyPage={handleMyPage}
+                  />
+                  <HeaderSearch />
+                  <button type="button" onClick={handleOpenMobGnb} className="btn-navi all" aria-controls="mobile-nav">전체메뉴</button>
                 </div>
               </div>
             </div>
           </div>
-          { /*헤더 상단 기타메뉴 */}
 
-          { /*메인메뉴 : 데스크탑 */}
-          <nav className="krds-main-menu">
-            <div className="inner">
-              <ul className="gnb-menu" aria-label="메인 메뉴">
-                {dynamicMenus.map((menu) => (
-                  <li
-                    key={menu.menuId}
-                    onMouseEnter={() => handleMouseEnter(menu.menuId)}
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    <button
-                      type="button"
-                      className={`gnb-main-trigger ${openIndex === menu.menuId ? 'active' : ''}`}
-                    >
-                      {menu.menuNm}
-                    </button>
-                    {/* gnb-toggle-wrap */}
-                    <div className={`gnb-toggle-wrap ${openIndex === menu.menuId ? 'is-open' : ''}`}>
-                      <div className="gnb-main-list">
-                        <div className="gnb-sub-list single-list between">
-                          <div className="gnb-sub-content">
-                            <h2 className="sub-title">
-                              <span className="on-p4">{menu.menuNm}</span>
-                              <span>{menu.menuExplain}</span>
-                            </h2>
-                            <div>
-                              <ul>
-                                {menu.children.map((subMenu) => (
-                                  <li key={subMenu.menuId} style={{ width: 'auto', minWidth: '180px' }}>
-                                    {/* ✅ depth2 외부 링크 처리 */}
-                                    <a
-                                      href={subMenu.fullPath}
-                                      {...(subMenu.isExternal && {
-                                        target: '_blank',
-                                        rel: 'noopener noreferrer',
-                                      })}
-                                    >
-                                      {subMenu.menuNm}
-                                      <i className="svg-icon ico-angle right sm"></i>
-                                    </a>
-                                    <ul className='subMenuLists'>
-                                      {(subMenu.children || []).map((depth3Menu) => (
-                                        <li key={depth3Menu.menuId}>
-                                          {/* ✅ depth3 외부 링크 처리 */}
-                                          <a
-                                            href={depth3Menu.fullPath}
-                                            {...(depth3Menu.isExternal && {
-                                              target: '_blank',
-                                              rel: 'noopener noreferrer',
-                                            })}
-                                          >
-                                            {depth3Menu.menuNm}
-                                          </a>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    { /*gnb-toggle-wrap */}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </nav>
-
-          { /*메인메뉴 : 데스크탑 */}
-        </div>
-        { /*헤더 컨텐츠 영역  */}
-
-        { /*메인메뉴 : 모바일 */}
-        <div id="mobile-nav" className="krds-main-menu-mobile" ref={mobGnbRef}>
-          <div className="gnb-wrap">
-            {/* gnb-header */}
-            <div className="gnb-header">
-              {/* gnb-login */}
-              <div className="gnb-login">
-                <span className="user">홍길동님</span>
-                <button type="button" className="krds-btn large text"><i className="svg-icon ico-logout"></i> 로그아웃</button>
-                <button type="button" className="krds-btn large text"><i className="svg-icon ico-log"></i> 로그인을 해주세요</button>
-              </div>
-              { /*gnb-login */}
-              {/* 검색 */}
-              <div className="sch-input">
-                <input type="text" className="krds-input" placeholder="찾고자 하는 메뉴명을 입력해 주세요" title="찾고자 하는 메뉴명 입력"></input>
-                <button type="button" className="krds-btn medium icon ico-search">
-                  <span className="sr-only">검색</span>
-                  <i className="svg-icon ico-sch"></i>
-                </button>
-              </div>
-              { /*검색 */}
-            </div>
-            { /*gnb-header */}
-
-            {/* gnb-body */}
-            <div className="gnb-body">
-              {/* gnb-menu */}
-              <div className="gnb-menu">
-                <div className="menu-wrap">
-                  <ul role="tablist">
-                    {dynamicMenus.map((menu, index) => (
-                      <li role="none" key={menu.menuId}>
-                        <a
-                          href={`#mGnb-anchor${index + 1}`}
-                          className={`gnb-main-trigger ${activeMobileTab === index ? 'active' : ''}`}
-                          onClick={(e) => handleMobileTabClick(e, index)}
-                        >
-                          {menu.menuNm}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="submenu-wrap">
-                  {dynamicMenus.map((menu, index) => (
-                    <div
-                      className="gnb-sub-list"
-                      id={`mGnb-anchor${index + 1}`}
-                      role="tabpanel"
-                      aria-labelledby={`tab-${index}`}
-                      key={menu.menuId}
-                    >
-                      <h2 className="sub-title">{menu.menuNm}</h2>
-                      <ul>
-                        {menu.children.map((subMenu) => (
-                          <li key={subMenu.menuId}>
-                            <a href={subMenu.fullPath} className="gnb-sub-trigger">{subMenu.menuNm}</a>
-                            <ul className='subMenuLists'>
-                              {(subMenu.children || []).map((depth3Menu) => (
-                                <li key={depth3Menu.menuId}>
-                                  <a href={depth3Menu.fullPath}>{depth3Menu.menuNm}</a>
-                                </li>
-                              ))}
-                            </ul>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              { /*gnb-menu */}
-            </div>
-            { /*gnb-body */}
-
-            {/* gnb-close */}
-            <button type="button" className="krds-btn medium icon" id="close-nav" onClick={handleCloseMobGnb}>
-              <span className="sr-only">전체메뉴 닫기</span>
-              <i className="svg-icon ico-popup-close"></i>
-            </button>
-            { /*gnb-close */}
-          </div>
+          <HeaderDesktopGNB menus={dynamicMenus} />
         </div>
 
-        { /*메인메뉴 : 모바일 */}
+        <HeaderMobileGNB 
+          ref={mobGnbRef} 
+          menus={dynamicMenus} 
+          onClose={handleCloseMobGnb} 
+          isLogin={isLogin}
+          userName={companyProfile?.cmpNm}
+        />
       </header>
+      
       <div className="quickbox">
         <button
           type="button"
           className="quickbox-top"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
+          <img src={arrowIcon} alt="" />
           <span className="sr-only">상단으로</span>
-          <i className="svg-icon ico-angle up"></i>
         </button>
       </div>
     </>

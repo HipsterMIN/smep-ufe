@@ -1,8 +1,8 @@
 import React from 'react';
-import SideNavigation from '../components/ui/SideNavigation';
-import Breadcrumb from '../components/ui/Breadcrumb';
-import LogoImg from '../../styles/img/component/icon/ico_logo_24.svg';
-import { useUserMenu } from '../context/UserMenuContext.jsx';
+import SideNavigation from '@components/ui/SideNavigation.jsx';
+import Breadcrumb from '@components/ui/Breadcrumb.jsx';
+import LogoImg from '@styles/img/component/icon/ico_logo_24.svg';
+import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 
 

@@ -614,6 +614,12 @@ export interface CompanyProfile {
   // 기본 정보
   // ─────────────────────────────────────────
 
+  /** 사업자등록번호 */
+  bizno?: string;
+
+  /** 기업명 */
+  cmpNm?: string;
+
   /** 지역 (17개 시도) → regions 필드와 매칭 */
   region?: Region;
 

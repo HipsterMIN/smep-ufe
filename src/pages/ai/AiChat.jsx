@@ -1,17 +1,16 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { Link } from 'react-router-dom';
 import { useChatContext, useStreamingMessage } from '@cube-i-ax/sdk/react';
 import {
+  ProgramChatProvider,
   formatDate,
   calculateDaysRemaining,
-  formatAIResponse,
   convertFiltersToQuery,
   DEFAULT_SEARCH_FILTERS,
   toFriendlyStatusMessage,
   transformMessagesToConversations,
   mapSourcesToPrograms,
+  mapSourceToProgram,
   REGION_OPTIONS,
   COMPANY_SIZE_OPTIONS,
   SUPPORT_FIELD_OPTIONS,
@@ -21,10 +20,13 @@ import {
 import { api as apiClient } from '../../lib/apiClient.js';
 import Logo from '../../../styles/img/ai_chat_logo.svg';
 import './ai.css';
+import { usePopupReceiver } from '@/hooks/usePopupCommunication.js';
+import { useChatSections } from '@/hooks/useChatSections.js';
+import AIMarkdownRenderer from '../../components/ui/AIMarkdownRenderer';
 
 import { AI_SETTINGS } from '../../App.jsx';
 
-const AiChat = () => {
+const AiChatContent = ({ profile, payload }) => {
   const [selectedPrograms, setSelectedPrograms] = useState([]);
   const [selectedProgramIds, setSelectedProgramIds] = useState(() => new Set());
   const [initialQuery, setInitialQuery] = useState('');
@@ -46,16 +48,6 @@ const AiChat = () => {
   const contextPanelKeysRef = useRef(new Set());
   const lastStreamingRef = useRef('');
 
-  const location = useLocation();
-  const encodedPayload = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    return params.get('payload');
-  }, [location.search]);
-  const payloadId = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    return params.get('payloadId');
-  }, [location.search]);
-
   const {
     messages = [],
     isLoading,
@@ -69,14 +61,14 @@ const AiChat = () => {
     clearMessages,
   } = useChatContext();
 
-  const applyPayload = (payload) => {
-    setSelectedPrograms(payload.programs || []);
+  const applyPayload = (payloadData) => {
+    setSelectedPrograms(payloadData.programs || []);
     setSelectedProgramIds(new Set());
-    setInitialQuery(payload.query || '');
-    setInitialSummary(payload.summary || '');
-    if (payload.filters) {
-      setFilters(payload.filters);
-      initialFiltersRef.current = payload.filters;
+    setInitialQuery(payloadData.query || '');
+    setInitialSummary(payloadData.summary || '');
+    if (payloadData.filters) {
+      setFilters(payloadData.filters);
+      initialFiltersRef.current = payloadData.filters;
     }
     setExpandedPanels(new Set());
     setContextPanels([]);
@@ -90,6 +82,13 @@ const AiChat = () => {
     setPayloadReady(true);
   };
 
+  // 부모로부터 받은 payload가 있으면 적용
+  useEffect(() => {
+    if (payload) {
+      applyPayload(payload);
+    }
+  }, [payload]);
+
   useEffect(() => {
     if (!payloadReady || !initialFiltersRef.current) return;
     if (JSON.stringify(filters) !== JSON.stringify(initialFiltersRef.current)) {
@@ -99,96 +98,16 @@ const AiChat = () => {
     }
   }, [filters, payloadReady]);
 
+  // 타임아웃 처리 (데이터 수신 실패 시)
   useEffect(() => {
-    setPayloadReady(false);
-    setSelectedPrograms([]);
-    setSelectedProgramIds(new Set());
-    setInitialQuery('');
-    setInitialSummary('');
-    setExpandedPanels(new Set());
-    setContextPanels([]);
-    setAssistantOverrides(new Map());
-    lastStreamingRef.current = '';
-    contextPanelKeysRef.current = new Set();
-    setDocumentContext(null);
-    clearMessages?.();
-    setNotice('');
-
-    if (encodedPayload) {
-      try {
-        const decoded = decodeURIComponent(encodedPayload);
-        const json = decodeURIComponent(escape(atob(decoded)));
-        const parsed = JSON.parse(json);
-        applyPayload(parsed);
-        return;
-      } catch (e) {
-        console.error('Failed to decode payload', e);
-        setNotice('공고 정보를 불러오지 못했습니다. 다시 시도해 주세요.');
-        return;
-      }
-    }
-
-    if (payloadId) {
-      try {
-        const raw = sessionStorage.getItem(`ai-chat-payload:${payloadId}`);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          sessionStorage.removeItem(`ai-chat-payload:${payloadId}`);
-          applyPayload(parsed);
-          return;
-        }
-      } catch (e) {
-        console.warn('Failed to read ai-chat payload from sessionStorage', e);
-      }
-    }
-  }, [encodedPayload, payloadId]);
-
-  useEffect(() => {
-    if (encodedPayload || payloadReady) return;
-    const origin = window.location.origin;
-    const parsePayload = (raw) => {
-      if (!raw) return null;
-      if (typeof raw === 'string') {
-        try {
-          return JSON.parse(raw);
-        } catch {
-          return null;
-        }
-      }
-      if (typeof raw === 'object') return raw;
-      return null;
-    };
-    const handleMessage = (event) => {
-      if (event.origin !== origin) return;
-      if (event.data?.type !== 'ai-chat-payload') return;
-      const payload = parsePayload(event.data.payload);
-      if (!payload) return;
-      applyPayload(payload);
-      if (event.data?.payloadId) {
-        event.source?.postMessage(
-          { type: 'ai-chat-payload-ack', payloadId: event.data.payloadId },
-          event.origin
-        );
-      }
-    };
-    window.addEventListener('message', handleMessage);
-    if (window.opener && !window.opener.closed) {
-      window.opener.postMessage({ type: 'ai-chat-request-payload' }, origin);
-    }
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
-  }, [encodedPayload, payloadReady]);
-
-  useEffect(() => {
-    if (encodedPayload || payloadReady) return;
+    if (payload) return;
     const timer = setTimeout(() => {
       if (!payloadReady) {
         setNotice('공고 정보를 불러오지 못했습니다. 다시 시도해 주세요.');
       }
     }, 5000);
     return () => clearTimeout(timer);
-  }, [encodedPayload, payloadReady]);
+  }, [payload, payloadReady]);
 
   useEffect(() => {
     const updateSidebar = () => {
@@ -419,19 +338,6 @@ const AiChat = () => {
     return normalized.filter(Boolean).slice().sort().join('|');
   };
 
-  const normalizeProgramDetail = (item) => {
-    if (!item) return null;
-    return {
-      id: item.id || item.pbancid || item.pbancId || item.pbanc_id || '',
-      title: item.pbancnm || item.pbancNm || item.title || '',
-      agency: item.mngdeptnm || item.mngDeptNm || item.flfmtinst || item.agency || '',
-      supportField: item.sprtfld || item.supportField || '',
-      deadlineType: item.deadline_type || item.deadlineType || '',
-      startDate: item.aplybgngday || item.applyStartDate || item.startDate || null,
-      endDate: item.aplyddlnday || item.applyEndDate || item.endDate || null,
-    };
-  };
-
   useEffect(() => {
     if (!normalizedContextDocuments || normalizedContextDocuments.length === 0) return;
     if (pendingSources.length > 0) return;
@@ -473,7 +379,7 @@ const AiChat = () => {
     ).then((results) => {
       if (!active) return;
       const programs = results
-        .map(normalizeProgramDetail)
+        .map((item, idx) => item ? mapSourceToProgram(item, idx) : null)
         .filter((item) => item && item.id);
       if (programs.length === 0) return;
       setContextPanels((prev) =>
@@ -494,126 +400,7 @@ const AiChat = () => {
     pendingSources,
   ]);
 
-  const chatSections = useMemo(() => {
-    const sections = [];
-    const shouldShowSummary =
-      payloadReady ||
-      initialSummary ||
-      selectedPrograms.length > 0 ||
-      (!payloadReady && !hasChatContent);
-
-    if (shouldShowSummary) {
-      sections.push({
-        id: 'summary-section',
-        type: 'summary',
-        title: '지원공고',
-        query: initialQuery,
-        summary: initialSummary,
-        programs: selectedPrograms,
-        programIds: programIds,
-      });
-    }
-
-    const contextQueue = [...contextPanels];
-
-    // 1. Pending 섹션 미리 준비 (중복 체크용)
-    let pendingSection = null;
-    if (isPending) {
-      const pendingPrograms = mapSourcesToPrograms(displaySources);
-      const pendingProgramIds = pendingPrograms.map((p) => p.id).filter(Boolean);
-      const fallbackProgramIds = displaySources.map((s) => s.documentId).filter(Boolean);
-      const resolvedProgramIds = pendingProgramIds.length > 0 ? pendingProgramIds : fallbackProgramIds;
-      const pendingKey = createProgramKey(resolvedProgramIds) || 'pending';
-      pendingSection = {
-        id: `pending-${pendingKey}`,
-        type: 'pending',
-        title: 'AI 추천 공고',
-        query: pendingQuery || '검색',
-        programs: pendingPrograms,
-        programIds: resolvedProgramIds,
-      };
-    }
-
-    // 2. conversations 처리
-    conversations.forEach((conv) => {
-      let programs = conv.programs || [];
-      let panelIds = programs.map((program) => program.id).filter(Boolean);
-
-      // contextQueue에서 매칭되는 패널 소모 (강화된 매칭)
-      if (contextQueue.length > 0) {
-        const convKey = createProgramKey(panelIds);
-        const matchedIndex = contextQueue.findIndex((panel) => {
-          // 쿼리가 정확히 일치하거나
-          if (panel.query === conv.query) return true;
-          // 공고 목록이 일치하는 경우 (둘 다 공고 정보가 있을 때만)
-          const panelKey = createProgramKey(panel.programIds);
-          return convKey && panelKey && convKey === panelKey;
-        });
-
-        if (matchedIndex !== -1) {
-          const matchedPanel = contextQueue.splice(matchedIndex, 1)[0];
-          // conversation에 프로그램 정보가 없으면 패널 정보를 가져옴
-          if (programs.length === 0) {
-            programs = matchedPanel.programs || [];
-            panelIds = programs.map((p) => p.id).filter(Boolean);
-            if (panelIds.length === 0) {
-              panelIds = normalizeProgramIds(matchedPanel.programIds);
-            }
-          }
-        }
-      }
-
-      sections.push({
-        id: `conversation-${conv.id}`,
-        type: 'conversation',
-        title: 'AI 추천 공고',
-        query: conv.query,
-        conversation: conv,
-        programs,
-        programIds: panelIds,
-      });
-    });
-
-    // 3. 남은 contextQueue 처리
-    contextQueue.forEach((panel) => {
-      const panelIds = normalizeProgramIds(panel.programIds);
-      if (panelIds.length === 0 && (!panel.programs || panel.programs.length === 0)) {
-        return;
-      }
-
-      const currentKey = createProgramKey(panelIds);
-
-      // 직전 섹션(conversation)과 공고 목록이 중복되는지 체크
-      if (sections.length > 0) {
-        const lastSection = sections[sections.length - 1];
-        const lastKey = createProgramKey(lastSection.programIds);
-        if (currentKey && lastKey === currentKey) return;
-      }
-
-      // Pending 섹션과 공고 목록이 중복되는지 체크 (이미 나올 예정인 경우 생략)
-      if (pendingSection) {
-        const pendingKey = createProgramKey(pendingSection.programIds);
-        if (currentKey && pendingKey === currentKey) return;
-      }
-
-      sections.push({
-        id: panel.id,
-        type: 'context',
-        title: 'AI 추천 공고',
-        query: panel.query,
-        panel,
-        programs: panel.programs || [],
-        programIds: panelIds,
-      });
-    });
-
-    // 4. Pending 섹션 추가
-    if (pendingSection) {
-      sections.push(pendingSection);
-    }
-
-    return sections;
-  }, [
+  const chatSections = useChatSections({
     payloadReady,
     initialSummary,
     selectedPrograms,
@@ -625,7 +412,9 @@ const AiChat = () => {
     isPending,
     pendingQuery,
     hasChatContent,
-  ]);
+    createProgramKey,
+    normalizeProgramIds,
+  });
 
   const lastConversationId = useMemo(() => {
     if (conversations.length === 0) return null;
@@ -673,6 +462,19 @@ const AiChat = () => {
       document.body.removeChild(textarea);
     }
   };
+
+  // usePopupReceiver Hook 사용
+  const [receivedPayload, setReceivedPayload] = useState(null);
+  const { isReady } = usePopupReceiver((data) => {
+    setReceivedPayload(data);
+  });
+
+  // 부모로부터 받은 payload가 있으면 적용
+  useEffect(() => {
+    if (receivedPayload) {
+      applyPayload(receivedPayload);
+    }
+  }, [receivedPayload]);
 
   return (
     <>
@@ -886,11 +688,7 @@ const AiChat = () => {
                               ) : !initialSummary ? (
                                 <p className="content-desc">{isLoading ? 'AI가 응답을 생성 중입니다...' : '응답을 기다리고 있습니다.'}</p>
                               ) : (
-                                <div className="ai-chat-markdown">
-                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                    {formatAIResponse(initialSummary, { stripTags: true })}
-                                  </ReactMarkdown>
-                                </div>
+                                <AIMarkdownRenderer content={initialSummary} />
                               )}
                             </div>
                             {showFollowups && (
@@ -936,16 +734,13 @@ const AiChat = () => {
                             </div>
                             <div className="ai-chat-message is-assistant">
                               <div className="ai-chat-bubble">
-                                <div className="ai-chat-markdown">
-                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                    {formatAIResponse(
-                                      section.conversation?.aiResponse ||
-                                        assistantOverrides.get(section.conversation?.id) ||
-                                        '',
-                                      { stripTags: true }
-                                    )}
-                                  </ReactMarkdown>
-                                </div>
+                                <AIMarkdownRenderer 
+                                  content={
+                                    section.conversation?.aiResponse ||
+                                    assistantOverrides.get(section.conversation?.id) ||
+                                    ''
+                                  } 
+                                />
                               </div>
                             </div>
                           </div>
@@ -994,11 +789,7 @@ const AiChat = () => {
                             {showStreaming && displayContent && (
                               <div className="ai-chat-message is-assistant is-streaming">
                                 <div className="ai-chat-bubble">
-                                  <div className="ai-chat-markdown">
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                      {formatAIResponse(displayContent, { stripTags: true })}
-                                    </ReactMarkdown>
-                                  </div>
+                                  <AIMarkdownRenderer content={displayContent} />
                                 </div>
                               </div>
                             )}
@@ -1180,6 +971,34 @@ const AiChat = () => {
 
       </div>
     </>
+  );
+};
+
+const AiChat = () => {
+  // usePopupReceiver Hook을 사용하여 데이터 수신
+  const [receivedPayload, setReceivedPayload] = useState(null);
+  const { isReady } = usePopupReceiver((data) => {
+    setReceivedPayload(data);
+  });
+  
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    if (isReady && receivedPayload?.profile) {
+      setProfile(receivedPayload.profile);
+    }
+  }, [isReady, receivedPayload]);
+
+  return (
+    <ProgramChatProvider 
+      profile={profile} 
+      domain="support_program"
+      topK={AI_SETTINGS.topK}
+      rerankerTopK={AI_SETTINGS.rerankerTopK}
+      groupByField={AI_SETTINGS.groupByField}
+    >
+      <AiChatContent profile={profile} payload={receivedPayload} />
+    </ProgramChatProvider>
   );
 };
 

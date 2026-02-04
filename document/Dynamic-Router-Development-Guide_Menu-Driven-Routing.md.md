@@ -239,7 +239,7 @@ src/
 │
 ├── layouts/
 │   ├── SubpageLayout.jsx      기본 레이아웃 (Header + Footer)
-│   └── layoutIndex.jsx        레이아웃 조합 (WithMenu 등)
+│   └── index.jsx        레이아웃 조합 (WithMenu 등)
 │
 ├── components/ui/
 │   ├── Header.jsx            ⭐ 상단 메뉴 (자동 생성)

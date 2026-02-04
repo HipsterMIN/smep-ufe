@@ -48,6 +48,12 @@ export default defineConfig(({ mode }) => {
         '@store': path.resolve(__dirname, './src/store'),  // import { useUserStore } from '@store/userStore'
         '@utils': path.resolve(__dirname, './src/utils'),  // import { formatDate } from '@utils/date'
         '@styles': path.resolve(__dirname, './styles'),  // import { formatDate } from '@style/common.css'
+        
+        // SDK Development Alias (빌드 없이 소스 직접 참조)
+        '@cube-i-ax/sdk/react': path.resolve(__dirname, './packages/sdk/src/react.ts'),
+        '@cube-i-ax/sdk/smes/program': path.resolve(__dirname, './packages/sdk/src/smes/program/index.ts'),
+        '@cube-i-ax/sdk/smes': path.resolve(__dirname, './packages/sdk/src/smes/index.ts'),
+        '@cube-i-ax/sdk': path.resolve(__dirname, './packages/sdk/src/index.ts'),
       },
     },
   }

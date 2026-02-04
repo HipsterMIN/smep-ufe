@@ -16,7 +16,10 @@ import {
   useSearchContext as useSDKSearchContext,
   type Source,
 } from "../../../react";
-import { mapSourceToProgram } from "../mappers";
+import {
+  mapSourceToProgram,
+  buildBackendProfile,
+} from "../index";
 import type {
   SupportProgram,
   Region,
@@ -129,8 +132,14 @@ export interface ProgramSearchContextValue {
   isSummaryLoading: boolean;
   /** 상태 메시지 */
   status: StatusEvent | null;
+  /** 마지막 실행 쿼리 */
+  lastQuery: string | null;
   /** 검색 실행 */
   search: (query: string, filters?: SearchFilters, options?: Partial<SearchRequest>) => void;
+  /** 상태 복구 */
+  restore: (state: any) => void;
+  /** 검색 중단 */
+  abort: () => void;
 }
 
 // ============================================
@@ -265,77 +274,6 @@ function buildBackendFilters(filters?: SearchFilters): Record<string, unknown> |
 }
 
 /**
- * CompanyProfile을 백엔드 프로필 형식으로 변환
- *
- * @see labs/analysis/smes/02_implementation.xlsx - 4_프로필매핑
- */
-function buildBackendProfile(profile?: CompanyProfile): Record<string, unknown> | undefined {
-  if (!profile) return undefined;
-
-  const backendProfile: Record<string, unknown> = {};
-
-  // 기본 정보
-  if (profile.region) backendProfile.region = profile.region;
-  if (profile.companySize) backendProfile.company_size = profile.companySize;
-  if (profile.industry) backendProfile.industry = profile.industry;
-
-  // 기업 유형 (Boolean)
-  if (profile.isSme !== undefined) backendProfile.is_sme_target = profile.isSme;
-  if (profile.isSmallBusiness !== undefined) backendProfile.is_small_business_target = profile.isSmallBusiness;
-  if (profile.isVenture !== undefined) backendProfile.is_venture_target = profile.isVenture;
-  if (profile.isStartup !== undefined) backendProfile.is_startup_target = profile.isStartup;
-  if (profile.isWomenOwned !== undefined) backendProfile.is_women_target = profile.isWomenOwned;
-  if (profile.isSocialEnterpriseTarget !== undefined) backendProfile.is_social_enterprise_target = profile.isSocialEnterpriseTarget;
-  if (profile.isExporter !== undefined) backendProfile.is_exporter_target = profile.isExporter;
-  if (profile.isYouth !== undefined) backendProfile.is_youth_target = profile.isYouth;
-  if (profile.isDisabledOwned !== undefined) backendProfile.is_disabled_target = profile.isDisabledOwned;
-  if (profile.isVeteran !== undefined) backendProfile.is_veteran_target = profile.isVeteran;
-  if (profile.isSenior !== undefined) backendProfile.is_senior_target = profile.isSenior;
-
-  // 인증 보유 (Boolean)
-  if (profile.hasInnobiz !== undefined) backendProfile.is_innobiz_target = profile.hasInnobiz;
-  if (profile.hasMainbiz !== undefined) backendProfile.is_mainbiz_target = profile.hasMainbiz;
-  if (profile.hasResearchDept !== undefined) backendProfile.is_research_dept_target = profile.hasResearchDept;
-  if (profile.hasIso !== undefined) backendProfile.is_iso_target = profile.hasIso;
-
-  // 수치 정보 (Numeric)
-  if (profile.registeredPatents !== undefined) {
-    backendProfile.registered_patents = profile.registeredPatents;
-    // 내부 프로필 호환: 특허 수 > 0이면 has_patent = true
-    backendProfile.has_patent_target = profile.registeredPatents > 0;
-  }
-  if (profile.employeeCount !== undefined) backendProfile.employee_count = profile.employeeCount;
-  if (profile.sales !== undefined) backendProfile.sales = profile.sales;
-  if (profile.yearsInBusiness !== undefined) {
-    backendProfile.years_in_business = profile.yearsInBusiness;
-    // 내부 프로필 호환: 업력으로 설립연도 계산
-    backendProfile.established_year = new Date().getFullYear() - profile.yearsInBusiness;
-  }
-
-  // 제외조건 (Boolean) - bool_exclude 연산으로 해당 공고 제외
-  if (profile.hasClosedStatus !== undefined) backendProfile.has_closed_status = profile.hasClosedStatus;
-  if (profile.hasBankruptcy !== undefined) backendProfile.has_bankruptcy = profile.hasBankruptcy;
-  if (profile.hasCapitalImpairment !== undefined) backendProfile.has_capital_impairment = profile.hasCapitalImpairment;
-  if (profile.hasFinancialIssue !== undefined) backendProfile.has_financial_issue = profile.hasFinancialIssue;
-  if (profile.hasTaxArrears !== undefined) backendProfile.has_tax_arrears = profile.hasTaxArrears;
-  if (profile.hasCreditIssue !== undefined) backendProfile.has_credit_issue = profile.hasCreditIssue;
-  if (profile.hasParticipationBan !== undefined) backendProfile.has_participation_ban = profile.hasParticipationBan;
-  if (profile.hasLegalSanction !== undefined) backendProfile.has_legal_sanction = profile.hasLegalSanction;
-  if (profile.hasFraudRecord !== undefined) backendProfile.has_fraud_record = profile.hasFraudRecord;
-  if (profile.hasProjectFailure !== undefined) backendProfile.has_project_failure = profile.hasProjectFailure;
-  if (profile.hasWageArrears !== undefined) backendProfile.has_wage_arrears = profile.hasWageArrears;
-  if (profile.isNonprofit !== undefined) backendProfile.is_nonprofit = profile.isNonprofit;
-  if (profile.isFranchise !== undefined) backendProfile.is_franchise = profile.isFranchise;
-  if (profile.hasDuplicateSupport !== undefined) backendProfile.has_duplicate_support = profile.hasDuplicateSupport;
-  if (profile.isLargeCompany !== undefined) backendProfile.is_large_company = profile.isLargeCompany;
-  if (profile.hasRelatedParty !== undefined) backendProfile.has_related_party = profile.hasRelatedParty;
-  if (profile.isFinanceIndustry !== undefined) backendProfile.is_finance_industry = profile.isFinanceIndustry;
-  if (profile.isExcludedIndustry !== undefined) backendProfile.is_excluded_industry = profile.isExcludedIndustry;
-
-  return Object.keys(backendProfile).length > 0 ? backendProfile : undefined;
-}
-
-/**
  * 클라이언트 측 필터링
  *
  * 모든 필터는 백엔드(Milvus)에서 처리
@@ -390,6 +328,7 @@ function useProgramSearchInternal(): ProgramSearchContextValue {
     streamingSummary,
     isSummaryLoading: sdk.isLoading && sdk.results.length > 0,
     status: sdk.status,
+    lastQuery: sdk.lastQuery,
     search: (query: string, filters?: SearchFilters, options?: Partial<SearchRequest>) => {
       currentFiltersRef.current = filters;
       const backendFilters = buildBackendFilters(filters);
@@ -397,6 +336,8 @@ function useProgramSearchInternal(): ProgramSearchContextValue {
       const effectiveQuery = query.trim() || "지원사업";
       sdk.search(effectiveQuery, { ...options, filters: backendFilters });
     },
+    restore: sdk.restore,
+    abort: sdk.abort,
   };
 }
 
@@ -432,8 +373,8 @@ export function ProgramSearchProvider({
   domain = "support_program",
   groupByField = "group_id",
 }: ProgramSearchProviderProps) {
-  // CompanyProfile → 백엔드 프로필 형식으로 변환
-  const backendProfile = buildBackendProfile(profile);
+  // CompanyProfile → 백엔드 프로필 형식으로 변환 (snake_case)
+  const backendProfile = useMemo(() => buildBackendProfile(profile), [profile]);
 
   return (
     <SearchRoot

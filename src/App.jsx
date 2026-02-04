@@ -47,7 +47,7 @@ import '../styles/onCommon_2.css';
 // import '@krds-ui/core/dist/style.css';
 
 export const AI_SETTINGS = {
-  topK: 50,
+  topK: 20,
   rerankerTopK: 10,
   groupByField: 'group_id',
   domain: 'support_program',
@@ -56,7 +56,7 @@ export const AI_SETTINGS = {
 function App() {
   const { companyProfile } = useAuthStore();
   const effectiveProfile = companyProfile || SAMPLE_COMPANY_PROFILE;
-  const [aiEnv, setAiEnv] = useState(() => localStorage.getItem('__ai_env__') || 'dev');
+  const [aiEnv, setAiEnv] = useState(() => localStorage.getItem('__ai_env__') || 'prod');
 
   const currentAiConfig = AI_CONFIGS[aiEnv] || AI_CONFIGS.dev;
 
