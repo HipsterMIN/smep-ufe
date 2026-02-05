@@ -319,13 +319,13 @@
 }
 .main-totalbox-tit {
   margin: 16px 0px 8px;
-  font-size: 20px;
-  color: #333;
+  font-size: 17px;
   font-weight: 700;
+  color: #333;
 }
 .main-totalbox-txt {
   font-size: 15px;
-  color: #464c53;
+  color: #464C53;
 }
 .mtlist-bu:hover .main-totalbox-img {
   transform: scale(1.2);
@@ -2833,22 +2833,20 @@ textarea.krds-input::placeholder {
   font-weight: 700;
   text-align: center;
 }
-.login-form-area .login-wrap .login-sub-tit::before, 
-.login-form-area .login-wrap .login-sub-tit::after {
+.login-form-area .login-sub-tit span {
+  background-color: #fff;
+  padding: 0 20px;
+}
+.login-form-area .login-wrap .login-sub-tit::before {
   content: '';
   position: absolute;
   top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  right: 0;
   height: 1px;
   background-color: #CDD1D5;
-  transform: translateY(-50%);
-}
-.login-form-area .login-wrap .login-sub-tit::before {
-  left: 0;
-  width: 216px;
-}
-.login-form-area .login-wrap .login-sub-tit::after {
-  right: 0;
-  width: 216px;
+  z-index: -1;
 }
 .login-form-area .sns-login-btns {
   margin-top: 24px;
@@ -3331,10 +3329,6 @@ textarea.krds-input::placeholder {
 
   .login-form-area .sns-login-btns {
     flex-direction: column;
-  }
-  .login-form-area .login-wrap .login-sub-tit::before, 
-  .login-form-area .login-wrap .login-sub-tit::after {
-    display: none;
   }
   .login-form-area .sns-login-btns button {
     flex: 1 1 auto;
