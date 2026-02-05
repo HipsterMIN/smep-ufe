@@ -99,43 +99,43 @@ const UI_USR_L_010 = () => {
                           <div className="krds-check-area">
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_1" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_1">금융</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_1">금융</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_2" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_2">기술</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_2">기술</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_3" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_3">인력</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_3">인력</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_4" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_4">수출</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_4">수출</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_5" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_5">내수</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_5">내수</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_6" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_6">창업</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_6">창업</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_7" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_7">경영</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_7">경영</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_8" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_8">소상공인</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_8">소상공인</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_9" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_9">중견</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_9">중견</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_10" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_10">기타</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_10">기타</label>
                             </div>
                           </div>
                         </div>
@@ -171,14 +171,14 @@ const UI_USR_L_010 = () => {
                     </ul>
                     <ul className="sch-sort">
                       <li>
-                        <strong className="sort-label"><label for="search_result_count">목록 표시 개수</label></strong>
+                        <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
                         <select className="krds-form-select-sort" id="search_result_count">
                           <option>12개</option>
                           <option>9개</option>
                         </select>
                       </li>
                       <li>
-                        <strong className="sort-label"><label for="sort">정렬기준</label></strong>
+                        <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
                         <div className="w-sort-btn">
                           <button type="button" className="active">등록일순<span className="sr-only">선택됨</span></button>
                           <button type="button">마감일순</button>
@@ -248,43 +248,43 @@ const UI_USR_L_010 = () => {
                           <div className="krds-check-area">
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_1" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_1">금융</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_1">금융</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_2" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_2">기술</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_2">기술</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_3" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_3">인력</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_3">인력</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_4" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_4">수출</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_4">수출</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_5" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_5">내수</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_5">내수</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_6" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_6">창업</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_6">창업</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_7" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_7">경영</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_7">경영</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_8" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_8">소상공인</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_8">소상공인</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_9" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_9">중견</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_9">중견</label>
                             </div>
                             <div className="krds-form-chip small">
                               <input type="checkbox" className="checkbox" id="chk1_10" name="chk1"/>
-                              <label className="krds-form-chip-outline" for="chk1_10">기타</label>
+                              <label className="krds-form-chip-outline" htmlFor="chk1_10">기타</label>
                             </div>
                           </div>
                         </div>
@@ -320,14 +320,14 @@ const UI_USR_L_010 = () => {
                     </ul>
                     <ul className="sch-sort">
                       <li>
-                        <strong className="sort-label"><label for="search_result_count">목록 표시 개수</label></strong>
+                        <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
                         <select className="krds-form-select-sort" id="search_result_count">
                           <option>12개</option>
                           <option>9개</option>
                         </select>
                       </li>
                       <li>
-                        <strong className="sort-label"><label for="sort">정렬기준</label></strong>
+                        <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
                         <div className="w-sort-btn">
                           <button type="button" className="active">등록일순<span className="sr-only">선택됨</span></button>
                           <button type="button">마감일순</button>

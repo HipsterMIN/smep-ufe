@@ -105,7 +105,7 @@ const UI_USR_L_220 = () => {
             </ul>
             <ul className="sch-sort">
               <li>
-                <strong className="sort-label"><label for="sort">정렬기준</label></strong>
+                <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
                 <div className="w-sort-btn">
                   <button type="button" className="active">최신순<span className="sr-only">선택됨</span></button>
                   <button type="button">과거순</button>

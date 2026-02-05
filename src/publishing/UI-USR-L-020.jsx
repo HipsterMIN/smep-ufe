@@ -78,7 +78,7 @@ const UI_USR_L_020 = () => {
 				<div className="sch-filter-box">
 					<div className="filter-form">
 						<div>
-							<label className="label" for="appl-sch-sel1">분야</label>
+							<label className="label" htmlFor="appl-sch-sel1">분야</label>
 							<select id="appl-sch-sel1" className="krds-form-select medium">
 								<option value="">전체</option>
 								<option value="">항목</option>
@@ -86,7 +86,7 @@ const UI_USR_L_020 = () => {
 							</select>
 						</div>
 						<div>
-							<label className="label" for="appl-sch-sel2">지역</label>
+							<label className="label" htmlFor="appl-sch-sel2">지역</label>
 							<select id="appl-sch-sel2" className="krds-form-select medium">
 								<option value="">전체</option>
 								<option value="">항목</option>
@@ -94,7 +94,7 @@ const UI_USR_L_020 = () => {
 							</select>
 						</div>
 						<div>
-							<label className="label" for="appl-sch-sel3">기관별</label>
+							<label className="label" htmlFor="appl-sch-sel3">기관별</label>
 							<select id="appl-sch-sel3" className="krds-form-select medium">
 								<option value="">전체</option>
 								<option value="">항목</option>
@@ -145,7 +145,7 @@ const UI_USR_L_020 = () => {
 					</ul>
           <ul className="sch-sort">
             <li>
-            <strong className="sort-label"><label for="sort">정렬기준</label></strong>
+            <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
               <div className="w-sort-btn">
                 <button type="button" onclick="fnSearch('0')" className=" active">등록일순</button>
                 <button type="button" onclick="fnSearch('1')">마감일순</button>

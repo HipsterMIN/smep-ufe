@@ -58,75 +58,75 @@ const MainPage = () => {
                         <div className="krds-check-area">
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_1" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_1">전체</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_1">전체</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_2" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_2">서울</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_2">서울</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_3" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_3">부산</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_3">부산</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_4" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_4">대구</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_4">대구</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_5" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_5">인천</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_5">인천</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_6" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_6">광주</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_6">광주</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_7" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_7">대전</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_7">대전</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_8" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_8">울산</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_8">울산</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_9" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_9">세종</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_9">세종</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_10" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_10">경기</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_10">경기</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_11" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_11">강원</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_11">강원</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_12" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_12">충북</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_12">충북</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_13" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_13">충남</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_13">충남</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_14" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_14">전북</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_14">전북</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_15" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_15">전남</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_15">전남</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_16" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_16">경북</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_16">경북</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_17" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_17">경남</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_17">경남</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk1_18" name="chk1"/>
-                            <label className="krds-form-chip-outline" for="chk1_18">제주</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk1_18">제주</label>
                           </div>
                         </div>
                       </div>
@@ -135,39 +135,39 @@ const MainPage = () => {
                         <div className="krds-check-area">
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_1" name="chk2"/>
-                            <label className="krds-form-chip-outline" for="chk2_1">기술개발</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk2_1">기술개발</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_2" name="chk2"/>
-                            <label className="krds-form-chip-outline" for="chk2_2">자금지원</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk2_2">자금지원</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_3" name="chk2"/>
-                            <label className="krds-form-chip-outline" for="chk2_3">판로개척</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk2_3">판로개척</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_4" name="chk2"/>
-                            <label className="krds-form-chip-outline" for="chk2_4">창업지원</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk2_4">창업지원</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_5" name="chk2"/>
-                            <label className="krds-form-chip-outline" for="chk2_5">시설·설비</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk2_5">시설·설비</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_6" name="chk2"/>
-                            <label className="krds-form-chip-outline" for="chk2_6">인력양성</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk2_6">인력양성</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_7" name="chk2"/>
-                            <label className="krds-form-chip-outline" for="chk2_7">경영지원</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk2_7">경영지원</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_8" name="chk2"/>
-                            <label className="krds-form-chip-outline" for="chk2_8">해외진출</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk2_8">해외진출</label>
                           </div>
                           <div className="krds-form-chip small">
                             <input type="checkbox" className="checkbox" id="chk2_9" name="chk2"/>
-                            <label className="krds-form-chip-outline" for="chk2_9">기타</label>
+                            <label className="krds-form-chip-outline" htmlFor="chk2_9">기타</label>
                           </div>
                         </div>
                       </div>
@@ -235,14 +235,14 @@ const MainPage = () => {
                 </ul>
                 <ul className="sch-sort">
                   <li>
-                    <strong className="sort-label"><label for="search_result_count">목록 표시 개수</label></strong>
+                    <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
                     <select className="krds-form-select-sort" id="search_result_count">
                       <option>12개</option>
                       <option>9개</option>
                     </select>
                   </li>
                   <li>
-                    <strong className="sort-label"><label for="sort">정렬기준</label></strong>
+                    <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
                     <div className="w-sort-btn">
                       <button type="button" className="active">등록일순<span className="sr-only">선택됨</span></button>
                       <button type="button">마감일순</button>

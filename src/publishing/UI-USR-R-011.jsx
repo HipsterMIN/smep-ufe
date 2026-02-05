@@ -254,14 +254,14 @@ const UI_USR_R_011 = () => {
             <div className="assess-an">
               <div className="krds-form-chip large">
                 <input type="radio" className="radio" name="rdo_chip_size2" id="rdo_chip_lg2-1" checked="" />
-                <label className="krds-form-chip-outline yes" for="rdo_chip_lg2-1">
+                <label className="krds-form-chip-outline yes" htmlFor="rdo_chip_lg2-1">
                   네
                   <i className="svg-icon ico-smile"></i>
                 </label>
               </div>
               <div className="krds-form-chip large">
                 <input type="radio" className="radio" name="rdo_chip_size2" id="rdo_chip_lg2-2" />
-                <label className="krds-form-chip-outline no" for="rdo_chip_lg2-2">
+                <label className="krds-form-chip-outline no" htmlFor="rdo_chip_lg2-2">
                   아니오
                   <i className="svg-icon ico-sad"></i>
                 </label>

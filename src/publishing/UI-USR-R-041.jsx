@@ -195,7 +195,7 @@ const UI_USR_R_041 = () => {
           <div className="form-group">
             <div className="form-conts">
               <div className="form-tit">
-                <label for="id_01" className="form-label">사업자등록번호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
+                <label htmlFor="id_01" className="form-label">사업자등록번호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
               </div>
               <input type="text" id="id_01" className="krds-input small" placeholder="사업자등록번호를 입력해주세요" value="2288105280" disabled />
             </div>
@@ -203,7 +203,7 @@ const UI_USR_R_041 = () => {
           <div className="form-group">
             <div className="form-conts">
               <div className="form-tit">
-                <label for="id_02" className="form-label">상호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
+                <label htmlFor="id_02" className="form-label">상호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
               </div>
               <input type="text" id="id_02" className="krds-input small" placeholder="상호를 입력해주세요" value="주식회사 중소벤처" disabled />
             </div>
@@ -211,7 +211,7 @@ const UI_USR_R_041 = () => {
           <div className="form-group">
             <div className="form-conts">
               <div className="form-tit">
-                <label for="id_03" className="form-label">대표자명 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
+                <label htmlFor="id_03" className="form-label">대표자명 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
               </div>
               <input type="text" id="id_03" className="krds-input small" placeholder="대표자명을 입력해주세요" value="홍길동" disabled />
             </div>

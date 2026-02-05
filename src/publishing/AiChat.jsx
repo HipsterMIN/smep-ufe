@@ -59,7 +59,7 @@ const AiChat = () => {
           <div className="ai-toggleBox">
             <div className="krds-form-toggle-switch">
               <input type="checkbox" id="switch" />
-              <label for="switch"><span className="switch-toggle"><i></i></span>마감공고 포함</label>
+              <label htmlFor="switch"><span className="switch-toggle"><i></i></span>마감공고 포함</label>
             </div>
           </div>
 

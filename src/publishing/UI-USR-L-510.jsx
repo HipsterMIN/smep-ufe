@@ -76,7 +76,7 @@ const UI_USR_L_010 = () => {
           </ul>
           <ul className="sch-sort">
              <li>
-              <strong className="sort-label"><label for="sort1">출력</label></strong>
+              <strong className="sort-label"><label htmlFor="sort1">출력</label></strong>
               <div>
                 <select className="krds-form-select-sort" id="sort1">
                   <option>전체</option>
@@ -84,7 +84,7 @@ const UI_USR_L_010 = () => {
               </div>
             </li>
             <li>
-              <strong className="sort-label"><label for="sort2">정렬기준</label></strong>
+              <strong className="sort-label"><label htmlFor="sort2">정렬기준</label></strong>
               <div className="w-sort-btn">
                 <button type="button" className="active">등록일순<span className="sr-only">선택됨</span></button>
                 <button type="button">마감일순</button>

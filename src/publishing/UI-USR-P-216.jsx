@@ -35,7 +35,7 @@ const UI_USR_P_216 = () => {
               <div className="form-group-row">
                 <div className="form-group">
                     <div className="form-tit">
-                      <label for="id_01" className="form-label">이름</label>
+                      <label htmlFor="id_01" className="form-label">이름</label>
                     </div>
                   <div className="form-conts">
                     <input type="text" id="id_01" className="krds-input small" value="010-0000-0000" disabled />
@@ -43,7 +43,7 @@ const UI_USR_P_216 = () => {
                 </div>
                 <div className="form-group">
                     <div className="form-tit">
-                      <label for="id_02" className="form-label">휴대전화 번호</label>
+                      <label htmlFor="id_02" className="form-label">휴대전화 번호</label>
                     </div>
                   <div className="form-conts">
                     <input type="text" id="id_02" className="krds-input small" value="010-0000-0000" disabled />
@@ -53,7 +53,7 @@ const UI_USR_P_216 = () => {
               <div className="form-group-row">
                 <div className="form-group">
                     <div className="form-tit">
-                      <label for="id_03" className="form-label">이메일</label>
+                      <label htmlFor="id_03" className="form-label">이메일</label>
                     </div>
                   <div className="form-conts">
                     <input type="text" id="id_03" className="krds-input small" value="-" disabled />
@@ -61,7 +61,7 @@ const UI_USR_P_216 = () => {
                 </div>
                 <div className="form-group">
                     <div className="form-tit">
-                      <label for="id_04" className="form-label">유선전화번호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
+                      <label htmlFor="id_04" className="form-label">유선전화번호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
                     </div>
                   <div className="form-conts">
                     <input type="text" id="id_04" className="krds-input small"  value="010-0000-0000" disabled />
@@ -71,7 +71,7 @@ const UI_USR_P_216 = () => {
               <div className="form-group-row">
                 <div className="form-group">
                     <div className="form-tit">
-                      <label for="id_04" className="form-label">소속기관 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
+                      <label htmlFor="id_04" className="form-label">소속기관 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
                     </div>
                   <div className="form-conts">
                     <select className="krds-form-select small" >
@@ -81,7 +81,7 @@ const UI_USR_P_216 = () => {
                 </div>
                 <div className="form-group">
                     <div className="form-tit">
-                      <label for="id_04" className="form-label sr-only">소속기관</label>
+                      <label htmlFor="id_04" className="form-label sr-only">소속기관</label>
                     </div>
                   <div className="form-conts">
                     <input type="text" id="id_04" className="krds-input small" value="중소벤처기업부" disabled />
@@ -91,7 +91,7 @@ const UI_USR_P_216 = () => {
               <div className="form-group-row">
                 <div className="form-group">
                     <div className="form-tit">
-                      <label for="id_05" className="form-label">부서</label>
+                      <label htmlFor="id_05" className="form-label">부서</label>
                     </div>
                   <div className="form-conts">
                     <input type="text" id="id_05" className="krds-input small" value="-" disabled />
@@ -99,7 +99,7 @@ const UI_USR_P_216 = () => {
                 </div>
                 <div className="form-group">
                     <div className="form-tit">
-                      <label for="id_06" className="form-label">직위</label>
+                      <label htmlFor="id_06" className="form-label">직위</label>
                     </div>
                   <div className="form-conts">
                     <input type="text" id="id_06" className="krds-input small" value="-" disabled />
@@ -115,7 +115,7 @@ const UI_USR_P_216 = () => {
           <div className="box-cnt gap-24">
             <div className="form-group">
                 <div className="form-tit">
-                  <label for="id_07" className="form-label">시스템명<span className="on-required"><span className="sr-only">필수입력</span></span></label>
+                  <label htmlFor="id_07" className="form-label">시스템명<span className="on-required"><span className="sr-only">필수입력</span></span></label>
                 </div>
               <div className="form-conts">
                 <input type="text" id="id_07" className="krds-input small" placeholder="API가 적용될 시스템명을 입력해주세요."  disabled />
@@ -130,22 +130,22 @@ const UI_USR_P_216 = () => {
                 <div className="krds-check-area">
                   <div className="krds-form-check medium">
                     <input type="radio" name="rdo_1-1" id="rdo_1-1" checked />
-                    <label for="rdo_1-1">공고목록정보</label>
+                    <label htmlFor="rdo_1-1">공고목록정보</label>
                   </div>
                 </div>
 
                 <div className="krds-check-area">
                   <div className="krds-form-check medium">
                     <input type="checkbox" id="chk_1-2a" />
-                    <label for="chk_1-2a">이노비즈확인서 <br />[확인서 API]</label>
+                    <label htmlFor="chk_1-2a">이노비즈확인서 <br />[확인서 API]</label>
                   </div>
                   <div className="krds-form-check medium">
                     <input type="checkbox" id="chk_1-3a" />
-                    <label for="chk_1-3a">벤처기업확인서</label>
+                    <label htmlFor="chk_1-3a">벤처기업확인서</label>
                   </div>
                   <div className="krds-form-check medium">
                     <input type="checkbox" id="chk_1-4a" />
-                    <label for="chk_1-4a">메인비즈확인서</label>
+                    <label htmlFor="chk_1-4a">메인비즈확인서</label>
                   </div>
                 </div>
                 <p className="txt-caution">※ 이미 신청승인된 API는 신청이 불가능 합니다.</p>
@@ -160,15 +160,15 @@ const UI_USR_P_216 = () => {
                 <div className="krds-check-area">
                   <div className="krds-form-check medium">
                     <input type="radio" name="rdo_2-1" id="rdo_2-1" />
-                    <label for="rdo_2-1">웹사이트 개발</label>
+                    <label htmlFor="rdo_2-1">웹사이트 개발</label>
                   </div>
                   <div className="krds-form-check medium">
                     <input type="radio" name="rdo_2-1" id="rdo_2-2" />
-                    <label for="rdo_2-2">앱 개발</label>
+                    <label htmlFor="rdo_2-2">앱 개발</label>
                   </div>
                   <div className="krds-form-check medium">
                     <input type="radio" name="rdo_2-1" id="rdo_2-3" />
-                    <label for="rdo_2-3">기타</label>
+                    <label htmlFor="rdo_2-3">기타</label>
                   </div>
                 </div>
               </div>

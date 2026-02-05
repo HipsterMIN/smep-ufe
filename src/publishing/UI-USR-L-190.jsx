@@ -86,7 +86,7 @@ const UI_USR_L_190 = () => {
             </ul>
             <ul className="sch-sort">
               <li>
-                <strong className="sort-label"><label for="sort">정렬기준</label></strong>
+                <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
                 <div className="w-sort-btn">
                   <button type="button" className="active">등록일순<span className="sr-only">선택됨</span></button>
                   <button type="button">마감일순</button>

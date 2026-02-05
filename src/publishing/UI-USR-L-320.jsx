@@ -81,7 +81,7 @@ const UI_USR_L_320 = () => {
             </ul>
                 <ul className="sch-sort">
             <li>
-              <strong className="sort-label"><label for="search_result_count">목록 표시 개수</label></strong>
+              <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
               <select className="krds-form-select-sort" id="search_result_count">
                 <option>12개</option>
                 <option>9개</option>

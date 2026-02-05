@@ -82,7 +82,7 @@ const UI_USR_P_042 = () => {
           <dl className="on-form-row large mt-24">
               <div className="form-row-item ">
                 <dt className="form-row-label">
-                  <label for="id_01" className="form-label">사업자등록번호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
+                  <label htmlFor="id_01" className="form-label">사업자등록번호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper w-220">
@@ -92,7 +92,7 @@ const UI_USR_P_042 = () => {
               </div>
               <div className="form-row-item">
                 <dt className="form-row-label">
-                  <label for="id_02" className="form-label">상호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
+                  <label htmlFor="id_02" className="form-label">상호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper w-220">
@@ -102,7 +102,7 @@ const UI_USR_P_042 = () => {
               </div>
               <div className="form-row-item">
                 <dt className="form-row-label">
-                  <label for="id_03" className="form-label">대표자명 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
+                  <label htmlFor="id_03" className="form-label">대표자명 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper w-220">
