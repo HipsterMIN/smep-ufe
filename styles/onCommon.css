@@ -163,11 +163,6 @@
 .main-totalbox-left .main-totalbox-input input {
   flex: 1 1 auto;
 }
-@media (min-width: 1024px) {
-  .main-totalbox-left .main-totalbox-input input {
-    min-width: 620px;
-  }
-}
 .main-totalbox-left p {
   font-size: 20px;
   color: #fff;
@@ -549,6 +544,8 @@
   font-size: 19px;
   color: #1e2124;
 }
+.krds-structured-list .card-top:has(.krds-form-check) { gap: 12px; }
+.krds-structured-list .card-top .krds-form-check {display: flex;}
 .krds-structured-list.box-type {gap: 0px; border-radius: 12px; border: 1px solid #B1B8BE; overflow: hidden;}
 .krds-structured-list.box-type > li {border-radius: 0px; border: none; position: relative;}
 .krds-structured-list.box-type > li + li:before {content:""; position: absolute; width: calc(100% - 64px); left:50%; top: 0px; height: 1px; background: #D6E0EB; transform: translateX(-50%);}
@@ -594,6 +591,7 @@
 .onellipsis-1 {
   display: -webkit-box;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: auto-phrase;
@@ -601,6 +599,7 @@
 .onellipsis-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: auto-phrase;
@@ -608,6 +607,7 @@
 .onellipsis-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3 !important;
+  line-clamp: 3 !important;
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: auto-phrase;
@@ -769,7 +769,6 @@
   mask-image: url(./img/component/icon/ico_like_on.svg);
   background-size: cover;
 }
-/* icon */
 .svg-icon.ico-information {
  -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center center;
@@ -823,6 +822,10 @@
   background-image: url(./img/component/icon/ico_pin.svg);
   mask-image: url(./img/component/icon/ico_pin.svg);
   background-size: cover;
+}
+#wrap .svg-icon.ico-refresh {
+  width: 16px;
+  height: 16px;
 }
 /* SideNavigation */
 .krds-side-navigation .lnb-tit {
@@ -1051,7 +1054,7 @@
 .search-top-box .sch-filter-box .filter-form .label {
   font-weight: var(--krds-font-weight-bold);
   white-space: nowrap;
-  min-width: 6.3rem;
+  min-width: fit-content;
 }
 .search-top-box .sch-filter-box .krds-btn.text {
   font-weight: 700;
@@ -1059,6 +1062,7 @@
   display: flex;
   gap: 12px;
 }
+.search-top-box .sch-filter-box .krds-btn.text i{margin-bottom: 0px;}
 .krds-btn.text.primary {
   color: #3358EE;
 }
@@ -1214,7 +1218,7 @@
 }
 .search-list-top .sch-info li:not(:last-child),
 .search-list-top .sch-sort li:not(:last-child) {
-  padding-right: 1.7rem;
+  padding-right: 25px;
 }
 .search-list-top .sch-info li:not(:last-child)::after,
 .search-list-top .sch-sort li:not(:last-child)::after {
@@ -1224,8 +1228,8 @@
   height: var(--krds-size-height-2);
   background-color: var(--search-list-color-border);
   position: absolute;
-  bottom: 0.3rem;
-  right: 0.5rem;
+  bottom: 5px;
+  right: 16px;
 }
 .search-list-top .sch-sort {
   flex-shrink: 0;
@@ -2283,7 +2287,6 @@ textarea.krds-input::placeholder {
   background-size: 100% auto;
 }
 
-/* --------------------------------------01-21 김혜연 start-------------------------------------- */
 .helper-box.refer {
   padding: var(--krds-padding-6);
   border: 1px solid #cdd1d5;
@@ -2433,12 +2436,17 @@ textarea.krds-input::placeholder {
 .krds-form-chip.round input[type=radio] ~ label::before,
 .krds-form-chip.round input[type=checkbox] ~ label::before {
   display: none;
-}
+}z
 .krds-form-chip.round input[type=radio]:checked ~ label,
 .krds-form-chip.round input[type=checkbox]:checked ~ label {
   background: #fff;
   border: 1px solid #004edf;
 }
+/* krds-form-check (only checkbox) */
+.krds-form-check.no-txt label:before {margin-top: 0 !important;}
+.krds-form-check.no-txt > input[type=checkbox] ~ label:after {top: 4px;}
+.krds-form-check.no-txt > input[type=checkbox]:focus ~ label,
+.krds-form-check.no-txt > input[type=checkbox]:active + label{box-shadow: none; outline: 2px solid #256ef4; outline-offset: 2px;}
 
 .def-list-wrap.border {
   border-top: var(--krds-light-border-width-variable-regular) solid var(--krds-light-color-divider-gray);
@@ -2756,7 +2764,15 @@ textarea.krds-input::placeholder {
   gap: 16px;
 }
 
-
+.svg-icon.ico-round-check {
+   -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: contain;
+  mask-image: url(./img/component/icon/ico_round_check.svg);
+}
 .svg-icon.ico-tel-fill {
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center center;
@@ -2991,9 +3007,11 @@ textarea.krds-input::placeholder {
     padding-bottom: 0;
     border-top: var(--krds-light-border-width-variable-regular) solid var(--krds-light-color-divider-gray);
   }
+   .main-totalbox-left .main-totalbox-input input {
+    min-width: 620px;
+  }
 }
 @media (max-width: 767px) {
-
   #krds-header .header-container .logo {
     width: 180px;
   }
@@ -3028,6 +3046,8 @@ textarea.krds-input::placeholder {
   .search-list-top .sch-sort {
     order: 1;
     margin-left: auto;
+    flex-wrap: wrap;
+    gap: 10px;
   }
   .search-list-top .sch-sort .w-hide {
     display: flex !important;
@@ -3333,8 +3353,21 @@ textarea.krds-input::placeholder {
   .login-form-area .sns-login-btns button {
     flex: 1 1 auto;
   }
+  
+  .sch-form-wrap, .search-top-box .sch-filter-box {padding: 20px 26px !important;}
+  
+  .sch-form-wrap,
+  .search-top-box .sch-filter-box .filter-form {
+    gap: 12px;
+    flex-direction: column;
+  }
+  .search-top-box .sch-filter-box .filter-form > div {
+    width: 100%;
+    max-width: 100% !important;
+    flex-wrap: wrap;
+  }
+ 
 }
-
 .on-searchoption-toggle {
   display: flex;
   gap: 6px;
