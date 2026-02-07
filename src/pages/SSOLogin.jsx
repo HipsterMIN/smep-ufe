@@ -50,7 +50,7 @@ const UI_USR_R_002 = () => {
       const companyProfile = getCompanyProfileByBizNo(brno);
 
       // 로그인 처리
-      login(brno, companyProfile.cmpNm, companyProfile.companySize, companyProfile);
+      login({ profile: companyProfile });
 
       // ✅ 부모 창에 메시지 전송
       if (window.opener) {

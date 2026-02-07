@@ -32,7 +32,16 @@ function parseJwt(token) {
 
 // 관리자 - 상단 메뉴
 export default function Header() {
-  const { isLogin, logout, login, companyProfile } = useAuthStore();
+  const {
+    isLogin,
+    token,
+    user,
+    currentMode,
+    currentCompany,
+    linkedCompanies,
+    logout,
+    login,
+  } = useAuthStore();
   const { menuTree, flatMenuMap, fetchMenuData } = useMenuStore();
   const mobGnbRef = useRef(null);
   const { getFullPath } = useUserMenu();
@@ -82,75 +91,51 @@ export default function Header() {
       if (!allowedOrigins.has(event.origin)) return;
 
       if (event.data.type === 'LOGIN_SUCCESS') {
-        console.log('Login Success Event:', event.data); // 디버깅용 로그
         if (loginWindow && !loginWindow.closed) {
           loginWindow.close();
         }
-        
-        const { token, data } = event.data;
 
-        // 1. 데이터가 직접 전달된 경우 (시나리오 로그인 등)
+        const { token: receivedToken, data } = event.data;
+
         if (data && data.brno) {
-          login(data.brno, data.cmpNm, data.companySize, data.companyProfile || data);
+          login({ profile: data });
           return;
         }
 
-        // 2. 토큰만 전달된 경우 (SSO 로그인)
-        if (token) {
-          // 2-1. 토큰 디코딩 시도
-          const decoded = parseJwt(token);
-          console.log('Decoded Token:', decoded);
-
-          // 토큰에서 brno 추출 시도 (email 필드 파싱: corp.2288105280@example.com)
+        if (receivedToken) {
+          const decoded = parseJwt(receivedToken);
           let brno = decoded?.brno;
           if (!brno && decoded?.email) {
             const match = decoded.email.match(/corp\.(\d+)@/);
             if (match) {
               brno = match[1];
-              console.log('Extracted brno from email:', brno);
             }
           }
 
-          // 2-2. API 호출 시도 (우선순위 1)
           try {
-            const response = await apiClient.get('/api/v1/account/me', { token });
+            const response = await apiClient.get('/api/v1/account/me', { token: receivedToken });
             const userInfo = response.data || response;
-
-            console.log('Fetched User Info:', JSON.stringify(userInfo, null, 2)); // 전체 구조 확인용 로그
-
-            // 사업자번호 및 회사 정보 유연한 처리
-            const apiBrno = userInfo.companyRegNo || userInfo.brno || userInfo.bizno;
-            const apiCmpNm = userInfo.companyName || userInfo.cmpNm || userInfo.name;
-            const apiCompanySize = userInfo.companySize || userInfo.companyProfile?.size || userInfo.companyProfile?.company_size;
-            const apiCompanyProfile = userInfo.companyProfile || userInfo.company || userInfo;
-
-            if (userInfo && apiBrno) {
-              login(apiBrno, apiCmpNm, apiCompanySize, apiCompanyProfile);
+            if (userInfo) {
+              console.log("userInfo: ", userInfo)
+              login({ token: receivedToken, profile: userInfo });
               return;
-            } else {
-              console.warn('User info fetched but brno/bizno missing:', userInfo);
             }
           } catch (error) {
             console.error('Failed to fetch user info:', error);
           }
 
-          // 2-3. API 실패 또는 brno 누락 시 토큰 정보로 Fallback (우선순위 2)
           if (brno) {
-            console.log('Using brno extracted from token as fallback:', brno);
-            // 토큰 정보와 추출한 brno를 합쳐서 로그인 처리
-            // 주의: 상세 프로필(매출 등)은 없을 수 있음
             const fallbackProfile = {
               ...decoded,
-              brno: brno,
+              brno,
               cmpNm: decoded.name || '사용자',
-              companySize: '중소기업', // 기본값
+              companySize: '중소기업',
             };
-            login(brno, fallbackProfile.cmpNm, fallbackProfile.companySize, fallbackProfile);
+            login({ token: receivedToken, profile: fallbackProfile });
             return;
           }
 
-          // 모든 시도 실패
-          alert('사용자 정보를 불러올 수 없습니다. (사업자번호 확인 불가)');
+          alert('사용자 정보를 불러올 수 없습니다.');
         } else {
           console.error('Invalid login event data: No token or user data found.', event.data);
         }
@@ -243,10 +228,36 @@ export default function Header() {
                 <div className="header-actions">
                   <HeaderUserMenu
                     isLogin={isLogin}
-                    companyProfile={companyProfile}
+                    currentMode={currentMode}
+                    currentCompany={currentCompany}
+                    linkedCompanies={linkedCompanies}
+                    user={user}
                     onLogin={handleLogin}
                     onLogout={logout}
                     onMyPage={handleMyPage}
+                    onSwitchContext={async (companyId) => {
+                      if (!token) {
+                        return;
+                      }
+                      try {
+                        const response = await apiClient.post(
+                          '/api/v1/auth/switch-context',
+                          { targetCompanyId: companyId },
+                          { token },
+                        );
+                        const newToken = response.accessToken || response.data?.accessToken;
+                        if (!newToken) {
+                          throw new Error('Missing access token');
+                        }
+                        const profileResponse = await apiClient.get('/api/v1/account/me', {
+                          token: newToken,
+                        });
+                        const profile = profileResponse.data || profileResponse;
+                        login({ token: newToken, profile });
+                      } catch (error) {
+                        console.error('Failed to switch context:', error);
+                      }
+                    }}
                   />
                   <HeaderSearch />
                   <button type="button" onClick={handleOpenMobGnb} className="btn-navi all" aria-controls="mobile-nav">전체메뉴</button>
@@ -263,7 +274,7 @@ export default function Header() {
           menus={dynamicMenus} 
           onClose={handleCloseMobGnb} 
           isLogin={isLogin}
-          userName={companyProfile?.cmpNm}
+          userName={currentCompany?.companyName || user?.name}
         />
       </header>
       

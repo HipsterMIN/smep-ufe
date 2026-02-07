@@ -8,6 +8,85 @@ export const useAuthStore = create(
   devtools(
     persist(
       (set, get) => {
+        const normalizeCompany = (company) => {
+          if (!company) return null;
+          return {
+            companyId: company.companyId || company.company_id || company.id || null,
+            companyName: company.companyName || company.company_name || company.cmpNm || null,
+            bizNo: company.bizNo || company.biz_no || company.business_reg_no || company.brno || null,
+            role: company.role || company.contextRole || company.context_role || null,
+            status: company.status || null,
+          };
+        };
+
+        const buildCompanyProfile = (normalizedCompany, fallbackProfile) => {
+          if (fallbackProfile) return fallbackProfile;
+          if (!normalizedCompany) return null;
+          return {
+            company_id: normalizedCompany.companyId,
+            company_name: normalizedCompany.companyName,
+            business_reg_no: normalizedCompany.bizNo,
+            role: normalizedCompany.role,
+          };
+        };
+
+        const normalizeProfile = (profile) => {
+          const safeProfile = profile || {};
+          const currentCompany = normalizeCompany(
+            safeProfile.currentCompany || safeProfile.companyProfile || safeProfile.company,
+          );
+          const fallbackProfile =
+            safeProfile.companyProfile ||
+            (safeProfile.cmpNm || safeProfile.companySize || safeProfile.brno ? safeProfile : null);
+          const linkedCompaniesRaw =
+            safeProfile.linkedCompanies || safeProfile.linked_companies || safeProfile.linked || [];
+          const linkedCompanies = Array.isArray(linkedCompaniesRaw)
+            ? linkedCompaniesRaw.map(normalizeCompany).filter(Boolean)
+            : [];
+          const currentMode =
+            safeProfile.currentMode ||
+            safeProfile.current_mode ||
+            (currentCompany ? 'CORPORATE' : 'INDIVIDUAL');
+          const companyProfile = buildCompanyProfile(currentCompany, fallbackProfile);
+          const bizno =
+            safeProfile.brno ||
+            safeProfile.bizno ||
+            currentCompany?.bizNo ||
+            companyProfile?.business_reg_no ||
+            companyProfile?.biz_no ||
+            null;
+          const cmpNm =
+            safeProfile.cmpNm ||
+            safeProfile.companyName ||
+            currentCompany?.companyName ||
+            companyProfile?.company_name ||
+            safeProfile.name ||
+            null;
+          const companySize =
+            safeProfile.companySize || companyProfile?.size || companyProfile?.company_size || null;
+          const user =
+            safeProfile.user ||
+            {
+              id: safeProfile.id || null,
+              name: safeProfile.name || safeProfile.username || null,
+              email: safeProfile.email || null,
+            };
+          const contextRole =
+            safeProfile.contextRole || safeProfile.context_role || currentCompany?.role || null;
+
+          return {
+            currentMode,
+            currentCompany,
+            linkedCompanies,
+            companyProfile,
+            bizno,
+            cmpNm,
+            companySize,
+            user,
+            contextRole,
+          };
+        };
+
         // 채널 메시지 리스너 등록
         authChannel.onmessage = (event) => {
           if (event.data.type === 'LOGOUT') {
@@ -15,6 +94,12 @@ export const useAuthStore = create(
             set(
               {
                 isLogin: false,
+                token: null,
+                user: null,
+                currentMode: null,
+                currentCompany: null,
+                linkedCompanies: [],
+                contextRole: null,
                 bizno: null,
                 cmpNm: null,
                 companySize: null,
@@ -29,26 +114,65 @@ export const useAuthStore = create(
 
         return {
           isLogin: false,
+          token: null,
+          user: null,
+          currentMode: null,
+          currentCompany: null,
+          linkedCompanies: [],
+          contextRole: null,
           bizno: null,
           cmpNm: null,
           companySize: null,
           companyProfile: null,
-          login: (bizno, cmpNm, companySize, companyProfile) =>
+          login: ({ token, profile } = {}) => {
+            const normalized = normalizeProfile(profile);
             set(
               {
                 isLogin: true,
-                bizno: bizno,
-                cmpNm: cmpNm,
-                companySize: companySize,
-                companyProfile: companyProfile || null,
+                token: token || null,
+                user: normalized.user,
+                currentMode: normalized.currentMode,
+                currentCompany: normalized.currentCompany,
+                linkedCompanies: normalized.linkedCompanies,
+                contextRole: normalized.contextRole,
+                bizno: normalized.bizno,
+                cmpNm: normalized.cmpNm,
+                companySize: normalized.companySize,
+                companyProfile: normalized.companyProfile,
               },
               false,
               'auth/login',
-            ),
+            );
+          },
+          updateProfile: (profile) => {
+            const normalized = normalizeProfile(profile);
+            set(
+              {
+                user: normalized.user,
+                currentMode: normalized.currentMode,
+                currentCompany: normalized.currentCompany,
+                linkedCompanies: normalized.linkedCompanies,
+                contextRole: normalized.contextRole,
+                bizno: normalized.bizno,
+                cmpNm: normalized.cmpNm,
+                companySize: normalized.companySize,
+                companyProfile: normalized.companyProfile,
+              },
+              false,
+              'auth/update_profile',
+            );
+          },
+          setToken: (token) => set({ token }, false, 'auth/set_token'),
           logout: () => {
             set(
               {
                 isLogin: false,
+                token: null,
+                user: null,
+                currentMode: null,
+                currentCompany: null,
+                linkedCompanies: [],
+                contextRole: null,
                 bizno: null,
                 cmpNm: null,
                 companySize: null,
