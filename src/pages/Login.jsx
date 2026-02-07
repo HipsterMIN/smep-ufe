@@ -4,54 +4,33 @@ import { api as apiClient } from '../lib/apiClient.js';
 import { useAuthStore } from '../store/useAuthStore.jsx';
 import { useNavigate, Link } from 'react-router-dom';
 
-// 테스트 계정 정보 상수화
-const TEST_ACCOUNTS = {
-  test01: { brno: '2288105280', name: '유큐브' },
-  test02: { brno: '6058189115', name: '유림이엔씨' },
-  test03: { brno: '3078130710', name: '한국바이오켐제약' },
-};
-
 const UI_USR_R_002 = () => {
   const { login } = useAuthStore();
-  const [lgnId, setLgnId] = useState('test01');
+  const [loginType, setLoginType] = useState('INDIVIDUAL');
+  const [loginId, setLoginId] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
   
   const breadcrumbItems = [
     { label: '로그인', link: '#' },
   ];
 
-  const lgnIdChange = (e) => {
-    setLgnId(e.target.value);
-  };
-
   const handleClick = async () => {
-    const account = TEST_ACCOUNTS[lgnId];
-    if (!account) {
-      alert('유효하지 않은 계정입니다.');
-      return;
-    }
-
     try {
-      const body = { brno: account.brno };
-      
-      // apiClient는 fetch 기반이며, JSON 응답 본문을 그대로 반환함
-      // 따라서 profileData는 { cmpNm: "...", ... } 형태의 객체임
-      const profileData = await apiClient.post('/api/v1/account/scenario-login', body);
-      
-      console.log('Login Response:', profileData); // 디버깅용 로그
-
-      // 응답 데이터 검증 (필수 필드 확인)
-      if (!profileData || !profileData.cmpNm) {
-        console.warn('Invalid login response structure:', profileData);
-        // 필요 시 에러 처리 또는 폴백 로직 추가
+      const response = await apiClient.post('/api/v1/auth/login', {
+        id: loginId,
+        password,
+        type: loginType,
+      });
+      const accessToken = response.accessToken || response.data?.accessToken;
+      if (!accessToken) {
+        throw new Error('Access token is missing');
       }
-      
-      // 로그인 상태 업데이트
-      // profileData 자체가 companyProfile이 됨
-      login(account.brno, profileData.cmpNm, profileData.companySize, profileData);
 
-      // 메인 페이지로 이동
-      navigate('/'); 
+      const profileResponse = await apiClient.get('/api/v1/account/me', { token: accessToken });
+      const profile = profileResponse.data || profileResponse;
+      login({ token: accessToken, profile });
+      navigate('/');
     } catch (error) {
       console.error('Login failed:', error);
       alert('로그인에 실패했습니다. 다시 시도해 주세요.');
@@ -66,6 +45,23 @@ const UI_USR_R_002 = () => {
           <h2 className="h-tit">로그인 방식을 선택해주세요.</h2>
         </div>
 
+        <div className="login-tab" style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+          <button
+            type="button"
+            className={`krds-btn ${loginType === 'INDIVIDUAL' ? 'primary' : 'secondary'}`}
+            onClick={() => setLoginType('INDIVIDUAL')}
+          >
+            개인 회원
+          </button>
+          <button
+            type="button"
+            className={`krds-btn ${loginType === 'CORPORATE' ? 'primary' : 'secondary'}`}
+            onClick={() => setLoginType('CORPORATE')}
+          >
+            기업 회원
+          </button>
+        </div>
+
         <div className="login-contents">
           <div className="login-form-area">
             <div className="login-wrap">
@@ -76,23 +72,28 @@ const UI_USR_R_002 = () => {
                     <div className="form-tit">
                       <label htmlFor="login_id">아이디</label>
                     </div>
-                    <select
-                      className="krds-form-select"
+                    <input
+                      type="text"
                       id="login_id"
-                      value={lgnId}
-                      onChange={lgnIdChange}
-                    >
-                      {Object.entries(TEST_ACCOUNTS).map(([id, info]) => (
-                        <option key={id} value={id}>{info.name}</option>
-                      ))}
-                    </select>
+                      className="krds-input"
+                      value={loginId}
+                      onChange={(e) => setLoginId(e.target.value)}
+                      placeholder={loginType === 'INDIVIDUAL' ? '개인 로그인 ID' : '기업 로그인 ID'}
+                    />
                   </div>
                   <div className="form-group">
                     <div className="form-tit">
                       <label htmlFor="login_pw">비밀번호</label>
                     </div>
                     <div className="form-conts btn-ico-wrap">
-                      <input type="password" id="login_pw" className="krds-input" placeholder="비밀번호를 입력하세요"/>
+                      <input
+                        type="password"
+                        id="login_pw"
+                        className="krds-input"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="비밀번호를 입력하세요"
+                      />
                     </div>
                   </div>
                   <div className="form-group krds-check-area">
