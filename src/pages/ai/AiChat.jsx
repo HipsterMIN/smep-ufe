@@ -274,6 +274,8 @@ const AiChatContent = ({ profile, payload }) => {
   const handleSendMessage = (message) => {
     const trimmed = message.trim();
     if (!trimmed) return;
+    if (isLoading) return; // 전송 중 중복 방지
+
     const shouldUseInitialContext = messages.length === 0 && programIds.length > 0;
     const selectedIds = Array.from(selectedProgramIds);
     const documentContext = selectedIds.length > 0
@@ -284,6 +286,7 @@ const AiChatContent = ({ profile, payload }) => {
   };
 
   const handleKeyDown = (e) => {
+    if (e.nativeEvent.isComposing) return; // IME 조합 중 무시
     if (e.key === 'Enter') {
       e.preventDefault();
       handleSendMessage(input);
@@ -462,19 +465,6 @@ const AiChatContent = ({ profile, payload }) => {
       document.body.removeChild(textarea);
     }
   };
-
-  // usePopupReceiver Hook 사용
-  const [receivedPayload, setReceivedPayload] = useState(null);
-  const { isReady } = usePopupReceiver((data) => {
-    setReceivedPayload(data);
-  });
-
-  // 부모로부터 받은 payload가 있으면 적용
-  useEffect(() => {
-    if (receivedPayload) {
-      applyPayload(receivedPayload);
-    }
-  }, [receivedPayload]);
 
   return (
     <>
