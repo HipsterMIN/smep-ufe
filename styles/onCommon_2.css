@@ -1164,17 +1164,44 @@ button.aichatButton.active {
   letter-spacing: 0;
 }
 
+.krds-table-wrap .tbl.data thead th.bd-r {
+  border-right: 1px solid var(--krds-light-color-border-secondary-light);
+}
 
+.search-top-box.only-filter {
+  padding: 24px;
+}
+.search-top-box.only-filter .filter-chip {
+  margin-top: 0;
+}
+.search-top-box .sch-form-wrap .input-wrap.w-180 {
+  width: 180px;
+}
+.search-top-box .sch-form-wrap .sch-input.w-304 {
+  width: 304px;
+}
+.search-top-box .krds-btn.icon.border .ico-refresh {
+  width: 16px;
+  height: 16px;
+}
 
+.txt-caution.has-icon {
+  display: flex;
+  gap: 5px;
+}
+.txt-caution .ico-info {
+  flex-shrink: 0;
+  margin-top: 4px;
+  width: 16px;
+  height: 16px;
+  background: url(../src/assets/sub/ico_info.svg) no-repeat 50%;
+  background-size: 100% auto;
+}
 
-
-
-
-
-
-
-
-
+/* util  */
+.mt-8 {
+  margin-top: 8px;
+}
 
 
 

@@ -1,17 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
-const Popup = ({ 
-    isOpen, 
-    onClose, 
-    title, 
+const Popup = ({
+    isOpen,
+    onClose,
+    title,
     size, // "large"(default) || "small" || "medium"
-    children, 
-    footer, 
+    children,
+    footer,
     noBottomBtn = false,
     noCloseBtn = false, //상단 닫기 버튼 여부
 }) => {
   const popupRef = useRef(null);
+  const closeButtonRef = useRef(null);
   const previousFocus = useRef(null);
 
   // 스크롤, ESC, 포커스 복원
@@ -35,14 +36,53 @@ const Popup = ({
     };
   }, [isOpen, onClose]);
 
-  // 팝업이 DOM에 그려진 "직후"에 포커스를 잡음
+  // 팝업 열릴 때 닫기 버튼에 포커스
   useEffect(() => {
     if (isOpen) {
       const timer = requestAnimationFrame(() => {
-        popupRef.current?.focus();
+        closeButtonRef.current?.focus();
       });
       return () => cancelAnimationFrame(timer);
     }
+  }, [isOpen]);
+
+  // 포커스 트랩 (Tab, Shift+Tab)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleTabKey = (e) => {
+      if (e.key !== 'Tab') return;
+
+      const modalContent = popupRef.current?.querySelector('.modal-content');
+      if (!modalContent) return;
+
+      const focusableElements = modalContent.querySelectorAll(
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+
+      const focusableArray = Array.from(focusableElements);
+      const firstElement = focusableArray[0];
+      const lastElement = focusableArray[focusableArray.length - 1];
+
+      if (e.shiftKey) {
+        // Shift + Tab
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement?.focus();
+        }
+      } else {
+        // Tab
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement?.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleTabKey);
+    return () => {
+      window.removeEventListener('keydown', handleTabKey);
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -78,12 +118,13 @@ const Popup = ({
             </div>
           )}
 
-          {!noCloseBtn && 
+          {!noCloseBtn &&
             (
-              <button 
-              type="button" 
-              className="btn-close close-modal" 
+              <button
+              type="button"
+              className="btn-close close-modal"
               onClick={onClose}
+              ref={closeButtonRef}
               >
                 <span className="sr-only">닫기</span>
                 <i className="svg-icon ico-del"></i>

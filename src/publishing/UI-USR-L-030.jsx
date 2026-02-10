@@ -4,7 +4,7 @@ import Breadcrumb from "../components/ui/Breadcrumb";
 import Tab from "../components/ui/Tab";
 import Pagination from "../components/ui/Pagination";
 import Tooltip from "../components/ui/Tooltip";
-import Popup from "../components/ui/Popup";
+import Popup from '../components/ui/Popup';
 
 const UI_USR_L_030 = () => {
   const tabData = useRef(['전체', '융자', '보증', '보험']);
@@ -12,7 +12,11 @@ const UI_USR_L_030 = () => {
   const schFormWrapRef2 = useRef(null);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [likedItems, setLikedItems] = useState({});
+  // 상품 비교 팝업 동작
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  // 업종선택 팝업 동작
+  const [isPopupOpen02, setIsPopupOpen02] = useState(false); 
 
   const handleToggleFilter = (tabIndex) => {
     const ref = tabIndex === 0 ? schFormWrapRef1 : schFormWrapRef2;
@@ -28,6 +32,8 @@ const UI_USR_L_030 = () => {
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
   };
+
+
 
   const navigationData = {
     depth1Title: "신청·발급",
@@ -130,9 +136,9 @@ const UI_USR_L_030 = () => {
                             <option value="">항목</option>
                             <option value="">항목</option>
                           </select>
-                          <a href="#" className="krds-btn medium text" target="_blank" title="새 창 열림">
-                            업종 <i className="svg-icon ico-go"></i>
-                          </a>
+                          <button type="button" className="krds-btn medium text" onClick={() => setIsPopupOpen02(true)} >
+                            업종<i className="svg-icon ico-go"></i>
+                          </button>
                         </div>
                         <div>
                           <label className="label" htmlFor="appl-sch-sel4">접수상황</label>
@@ -656,8 +662,8 @@ const UI_USR_L_030 = () => {
                                     </tr>
                                     <tr>
                                       <th scope="row" className="ac">상품목적</th>
-                                      <td scope="row" className="ac">중소기업이 보유한 우수 기술, 제품의 글로벌화 촉진 및 수출인프라 조성을 위한 생산설비 자금을 지원하여 기술기반 수출 중소기업을 육성하는 사업입니다.</td>
-                                      <td scope="row" className="ac">사업성과 기술성이 우수한 성장유망 중소기업의 생산성 향상, 고부가가치화 등 경쟁력 강화에 필요한 자금을 지원하여 성장동력을 창출하는 사업입니다.</td>
+                                      <td scope="row">중소기업이 보유한 우수 기술, 제품의 글로벌화 촉진 및 수출인프라 조성을 위한 생산설비 자금을 지원하여 기술기반 수출 중소기업을 육성하는 사업입니다.</td>
+                                      <td scope="row">사업성과 기술성이 우수한 성장유망 중소기업의 생산성 향상, 고부가가치화 등 경쟁력 강화에 필요한 자금을 지원하여 성장동력을 창출하는 사업입니다.</td>
                                     </tr>
                                     <tr>
                                       <th scope="row" className="ac">금융기관</th>
@@ -952,6 +958,105 @@ const UI_USR_L_030 = () => {
             </div>
         </div>
       </div> 
+
+      {/* 업종선택 팝업 */}
+      <Popup 
+        isOpen={isPopupOpen02} 
+        onClose={() => setIsPopupOpen02(false)} 
+        title="업종선택"
+        footer={
+          <>
+            <button type="button" className="krds-btn tertiary medium" onClick={() => setIsPopupOpen02(false)}>닫기</button>
+            <button type="button" className="krds-btn primary medium" onClick={() => setIsPopupOpen02(false)}>적용</button>
+          </>
+        }
+      >
+          <div className="search-top-box">
+            <div className="sch-form-wrap">
+              <div className="input-wrap w-180">
+                <input type="text" className="krds-input" placeholder="업종코드" title="업종코드 입력" />
+              </div>
+
+              <div className="sch-input w-304">
+                <input type="text" className="krds-input" placeholder="업종명" title="업종명 입력" />
+                <button type="button" className="krds-btn medium icon ico-search" >
+                  <span className="sr-only">검색</span>
+                  <i className="svg-icon ico-sch"></i>
+                </button>
+              </div>
+
+              <button type="button" className="krds-btn xlarge icon border">
+                  <span className="sr-only">새로고침</span>
+                  <i className="svg-icon ico-refresh"></i>
+              </button>
+            </div>
+          </div>
+          <p className="txt-caution has-icon">
+            <i className="svg-icon ico-info"></i> 업종코드 또는 업종명 중 하나는 2글자 이상 입력해야 합니다.
+          </p>
+
+          <div className="krds-table-wrap mt-8">
+            <table className="tbl col data">
+              <caption>업종선택 표. 번호, 코드, 항목명, 업종코드, 업종명 정보가 제공됨.</caption>
+              <colgroup>
+                <col style={{width: "6.7%"}}/>
+                <col style={{width: "11%"}}/>
+                <col style={{width: "25.8%"}}/>
+                <col style={{width: "12%"}}/>
+                <col/>
+              </colgroup>
+              <thead>
+                <tr>
+                  <th scope="col" rowSpan={2} className="ac bd-r">번호</th>
+                  <th scope="col" colSpan={2} className="ac bd-r">대분류</th>
+                  <th scope="col" colSpan={2} className="ac">세세분류</th>
+                </tr>
+                <tr>
+                  <th scope="col" className="ac">코드</th>
+                  <th scope="col" className="ac">항목명</th>
+                  <th scope="col" className="ac">업종코드</th>
+                  <th scope="col" className="ac">업종명</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td scope="row" className="ac"><span>0</span></td>
+                  <td className="ac"><span>V</span></td>
+                  <td className="ac"><span><button type="button" className="underline">기타 테마업종</button></span></td>
+                  <td className="ac"><span>V</span></td>
+                  <td><span>첨단전략산업,한국형녹색분류체계,혁신성장공동기준품목</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+
+          <div className="search-top-box only-filter mt-8">
+            <dl className="filter-chip">
+              <dt>선택된 필터 <span className="num">2</span></dt>
+              <dd>
+                <button type="button" className="krds-btn xlarge icon border">
+                  <span className="sr-only">새로고침</span>
+                  <i className="svg-icon ico-refresh"></i>
+                </button>
+                <div className="chip-wrap krds-tag-wrap large">
+                  <span className="krds-btn-tag">
+                    금융
+                    <button type="button" className="btn-delete">
+                      <span className="sr-only">삭제</span>
+                    </button>
+                  </span>
+                  <span className="krds-btn-tag">
+                    서울
+                    <button type="button" className="btn-delete">
+                      <span className="sr-only">삭제</span>
+                    </button>
+                  </span>
+                </div>
+              </dd>
+            </dl>
+          </div>
+      </Popup>
     </>
   );
 };
