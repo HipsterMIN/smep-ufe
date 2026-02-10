@@ -1198,6 +1198,40 @@ button.aichatButton.active {
   background-size: 100% auto;
 }
 
+.krds-info-list.point li strong.point {
+  display: block;
+  margin-bottom: 8px;
+  color: #052B57;
+}
+.krds-info-list.point.decimal > li::before {
+  background-color: #052B57;
+}
+.krds-info-list > li > .krds-info-list {
+  margin-top: 8px;
+}
+.krds-info-list > li .bold {
+  color: #1E2124;
+} 
+.conts-desc.on-important {
+  color: #052B57;
+  font-weight: 700;
+}
+.conts-wrap .conts-desc.on-important ~ .conts-desc.on-important {
+  margin-top: 16px;
+}
+.conts-wrap .conts-desc.on-important ~ .conts-desc {
+  margin-top: 40px;
+}
+.conts-wrap .btns-box {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.krds-btn.text .svg-icon.gray {
+  background-color: #33363D;
+}
+
 /* util  */
 .mt-8 {
   margin-top: 8px;
@@ -1501,6 +1535,10 @@ button.aichatButton.active {
   .main-newsbox {
     padding: 24px 0;
   } 
+
+  .search-top-box .sch-form-wrap .sch-input.w-304 {
+    width: auto;
+  }
   
 }
 

@@ -1,5 +1,4 @@
 /* css variables */
-
 :root {
   /* color */
   --blue-color1: #0062e8;
@@ -10,6 +9,84 @@
   --layout-space: 24px;
 }
 
+@font-face {
+  font-family: 'Pretendard GOV';
+  font-weight: 100;
+  font-style: normal;
+  src: url('../src/assets/fonts/PretendardGOV/PretendardGOV-Thin.subset.woff2') format('woff2'),
+       url('../src/assets/fonts/PretendardGOV/PretendardGOV-Thin.subset.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard GOV';
+  font-weight: 200;
+  font-style: normal;
+  src: url('../src/assets/fonts/PretendardGOV/PretendardGOV-ExtraLight.subset.woff2') format('woff2'),
+       url('../src/assets/fonts/PretendardGOV/PretendardGOV-ExtraLight.subset.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard GOV';
+  font-weight: 300;
+  font-style: normal;
+  src: url('../src/assets/fonts/PretendardGOV/PretendardGOV-Light.subset.woff2') format('woff2'),
+       url('../src/assets/fonts/PretendardGOV/PretendardGOV-Light.subset.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard GOV';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../src/assets/fonts/PretendardGOV/PretendardGOV-Regular.subset.woff2') format('woff2'),
+       url('../src/assets/fonts/PretendardGOV/PretendardGOV-Regular.subset.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard GOV';
+  font-weight: 500;
+  font-style: normal;
+  src: url('../src/assets/fonts/PretendardGOV/PretendardGOV-Medium.subset.woff2') format('woff2'),
+       url('../src/assets/fonts/PretendardGOV/PretendardGOV-Medium.subset.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard GOV';
+  font-weight: 600;
+  font-style: normal;
+  src: url('../src/assets/fonts/PretendardGOV/PretendardGOV-SemiBold.subset.woff2') format('woff2'),
+       url('../src/assets/fonts/PretendardGOV/PretendardGOV-SemiBold.subset.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard GOV';
+  font-weight: 700;
+  font-style: normal;
+  src: url('../src/assets/fonts/PretendardGOV/PretendardGOV-Bold.subset.woff2') format('woff2'),
+       url('../src/assets/fonts/PretendardGOV/PretendardGOV-Bold.subset.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard GOV';
+  font-weight: 800;
+  font-style: normal;
+  src: url('../src/assets/fonts/PretendardGOV/PretendardGOV-ExtraBold.subset.woff2') format('woff2'),
+       url('../src/assets/fonts/PretendardGOV/PretendardGOV-ExtraBold.subset.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard GOV';
+  font-weight: 900;
+  font-style: normal;
+  src: url('../src/assets/fonts/PretendardGOV/PretendardGOV-Black.subset.woff2') format('woff2'),
+       url('../src/assets/fonts/PretendardGOV/PretendardGOV-Black.subset.woff') format('woff');
+}
+
+
+
+html, body {
+  font-family: 'Pretendard GOV';
+  /* font-family: Georgia, Serif; */
+}
 /* main */
 .inner {
   max-width: 1428px;
@@ -2260,6 +2337,9 @@ textarea.krds-input::placeholder {
 .krds-accordion .accordion-title .krds-badge {
   flex-shrink: 0;
 }
+.krds-accordion.type-line .accordion-item .btn-accordion::after {
+  transition: all .4s  cubic-bezier(0.075, 0.82, 0.165, 1);
+}
 .krds-accordion.type-line .accordion-item .accordion-body {
   padding-bottom: 0;
   border-radius: 0;
@@ -2273,6 +2353,9 @@ textarea.krds-input::placeholder {
 }
 .krds-accordion  .accordion-item.active .accordion-title {
   color: #1C267B;
+}
+.krds-accordion.type-line .accordion-item.active .btn-accordion::after {
+  transform: rotate(-180deg);
 }
 .krds-accordion.type-line .accordion-item.active .accordion-body {
   background: #F5F6F7;
@@ -2754,10 +2837,6 @@ textarea.krds-input::placeholder {
 .form-confirm .txt-caution {
   font-size: 15px;
   margin-top: 8px;
-}
-.conts-wrap .sec-tit {
-    margin-bottom: var(--krds-pc-gap-layout-title-body-large);
-    font-size: var(--krds-pc-font-size-heading-medium);
 }
 .search-list-top.flex-end {
   justify-content: flex-end;
