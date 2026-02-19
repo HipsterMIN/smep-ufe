@@ -27,6 +27,46 @@ const HeaderMobileGNB = forwardRef(({ menus, onClose, userName, isLogin }, ref) 
               <button type="button" className="krds-btn large text"><i className="svg-icon ico-log"></i> 로그인을 해주세요</button>
             )}
           </div>
+
+          {/** HeaderUserMenu.jsx 개인/기업회원전환 디자인 변경 20260219 */}
+          <div className="chip-wrap krds-tag-wrap large">
+            {/* <select
+              className="krds-form-select"
+              style={{ minWidth: '180px' }}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value && onSwitchContext) {
+                  onSwitchContext(Number(value));
+                }
+              }}
+            >
+              <option value="">기업 전환</option>
+              {linkedCompanies.map((company) => (
+                <option key={company.companyId} value={company.companyId}>
+                  {company.companyName}
+                </option>
+              ))}
+            </select> */}
+
+            <button
+              type="button"
+              className="krds-btn-tag"
+              style={{
+                backgroundColor: '#fff',
+                color: '#000',
+                border: '1px solid #ddd',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                fontSize: '13px',
+                cursor: 'pointer',
+              }}
+              // onClick={() => onSwitchContext && onSwitchContext(null)}
+            >
+              개인회원전환
+            </button>
+        </div>
+
+
           <div className="sch-input">
             <input type="text" className="krds-input" placeholder="찾고자 하는 메뉴명을 입력해 주세요" title="찾고자 하는 메뉴명 입력"></input>
             <button type="button" className="krds-btn medium icon ico-search">

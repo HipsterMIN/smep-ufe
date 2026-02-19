@@ -20,14 +20,14 @@ export default function HeaderUserMenu({
 
     return (
       <>
-        <div className="user-info-wrap" style={{ display: 'flex', alignItems: 'center', marginRight: '12px' }}>
-          <span className="user-name" style={{ fontWeight: 'bold', marginRight: '4px' }}>
+        <div className="user-info-wrap">
+          <span className="user-name">
             {displayName}
           </span>
           <span>님 ({modeLabel})</span>
         </div>
 
-        <div className="chip-wrap krds-tag-wrap large" style={{ marginRight: '12px' }}>
+        <div className="chip-wrap krds-tag-wrap large on-mobile-none" style={{ marginRight: '12px' }}>
           {currentMode === 'INDIVIDUAL' && Array.isArray(linkedCompanies) && linkedCompanies.length > 0 ? (
             <select
               className="krds-form-select"
@@ -66,7 +66,7 @@ export default function HeaderUserMenu({
           ) : null}
         </div>
 
-        <button type="button" className="btn-navi logout" onClick={onLogout}>
+        <button type="button" className="btn-navi logout on-mobile-none" onClick={onLogout}>
           로그아웃
         </button>
 
