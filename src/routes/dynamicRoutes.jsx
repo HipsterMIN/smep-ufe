@@ -60,6 +60,7 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
       menuId: menuNode.menuId,
       menuNm: menuNode.menuNm,
       scrnTypeCd: menuNode.scrnTypeCd,
+      bbsNo: menuNode?.bbsNo,
     },
   };
 
