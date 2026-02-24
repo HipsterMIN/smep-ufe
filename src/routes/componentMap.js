@@ -35,9 +35,7 @@ const UI_USR_R_214 = lazy(() => import('@pages/data-open/UI-USR-R-214.jsx'));
 const UI_USR_R_215 = lazy(() => import('@pages/data-open/UI-USR-R-215.jsx'));
 const UI_USR_R_232 = lazy(() => import('@pages/data-open/UI-USR-R-232.jsx'));
 const UI_USR_W_231 = lazy(() => import('@pages/data-open/UI-USR-W-231.jsx'));
-const UI_USR_L_310 = lazy(() => import('@pages/customer-support/UI-USR-L-310.jsx'));
-const UI_USR_L_320 = lazy(() => import('@pages/customer-support/UI-USR-L-320.jsx'));
-const UI_USR_L_330 = lazy(() => import('@pages/customer-support/UI-USR-L-330.jsx'));
+const BoardResolver = lazy(() => import('@pages/board/BoardResolver.jsx'));
 const UI_USR_R_340 = lazy(() => import('@pages/customer-support/UI-USR-R-340.jsx'));
 const UI_USR_R_341 = lazy(() => import('@pages/customer-support/UI-USR-R-341.jsx'));
 const UI_USR_R_311 = lazy(() => import('@pages/customer-support/UI-USR-R-311.jsx'));
@@ -324,22 +322,22 @@ export const componentMap = {
 
   // 공지사항
   'M_PIIO_00101': {
-    component: UI_USR_L_310,
+    component: BoardResolver,
     layout: SubpageLayoutWithMenu,
     children: [
       { path: ':id', component: UI_USR_R_311 }, // 공지사항 상세
     ],
   },
 
-  // 자주 묻는 질문
+  // 자주 묻는 질문 (FAQ)
   'M_PIIO_00102': {
-    component: UI_USR_L_320,
+    component: BoardResolver,
     layout: SubpageLayoutWithMenu,
   },
 
   // Q&A
   'M_PIIO_00103': {
-    component: UI_USR_L_330,
+    component: BoardResolver,
     layout: SubpageLayoutWithMenu,
     children: [
       { path: ':id', component: UI_USR_R_331 }, // Q&A 상세
