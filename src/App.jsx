@@ -1,114 +1,105 @@
-import React from 'react';
-import FileUpload from './components/FileUpload';
-import './App.css';
-import RichEditor from "./components/RichEditor.jsx";
-import SvarGridExample from "./SvarGridExample.jsx";
-import Counter from './components/Counter.jsx';
+import React, { useState, useEffect } from 'react';
+import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import AppRouter from './routes/index.jsx';
+import { CubeIAxProvider } from '@cube-i-ax/sdk/react';
+import { ProgramChatProvider } from '@cube-i-ax/sdk/smes/program';
+import { useAuthStore } from './store/useAuthStore.jsx';
 
-// 공통 콜백 함수
-const handleUploadComplete = (results) => {
-  console.log('Upload results:', results);
-  const successfulUploads = results.filter(r => r.success).length;
-  const failedUploads = results.filter(r => !r.success).length;
-  if (successfulUploads > 0) alert(`${successfulUploads}개 파일 업로드 성공!`);
-  if (failedUploads > 0) alert(`${failedUploads}개 파일 업로드 실패.`);
+const AI_CONFIGS = {
+  prod: {
+    url: 'https://www.smes-tipa.go.kr/aiax-dev/v1',
+    key: 'sk-F4E9gAEtT-5NKFuPIiDnT3UoNyXqXSwOFqcfp__CUDY',
+    label: '운영(개발) 서버'
+  },
+  dev: {
+    url: 'https://ax.llmonx.kr:28443/v1',
+    key: 'sk-dSXsb0I7zcjxqr23mwYsjJoFFpCfvjg5LHkwaf-CP0s',
+    label: '개발 서버'
+  }
+};
+
+const SAMPLE_COMPANY_PROFILE = {
+  region: '서울',
+  companySize: '소상공인',
+  employeeCount: 20,
+  sales: 3000000000,
+  isSme: false,
+  isVenture: false,
+  isStartup: false,
+  isSocialEnterpriseTarget: false,
+  isExporter: false,
+  isWomenOwned: false,
+  isYouth: false,
+  isDisabledOwned: false,
+  isVeteran: false,
+  isSenior: false,
+  hasInnobiz: false,
+  hasMainbiz: false,
+  hasResearchDept: false,
+  hasIso: false,
+};
+
+// KRDS 스타일과 컴포넌트 불러오기
+import '../styles/output.css';
+import '../styles/onCommon.css';
+import '../styles/onCommon_2.css';
+// import '@krds-ui/core/dist/style.css';
+
+export const AI_SETTINGS = {
+  topK: 20,
+  rerankerTopK: 10,
+  groupByField: 'group_id',
+  domain: 'support_program',
 };
 
 function App() {
+  const { companyProfile } = useAuthStore();
+  const effectiveProfile = companyProfile || SAMPLE_COMPANY_PROFILE;
+  const [aiEnv, setAiEnv] = useState(() => localStorage.getItem('__ai_env__') || 'prod');
+
+  const currentAiConfig = AI_CONFIGS[aiEnv] || AI_CONFIGS.dev;
+
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === '__ai_env__') {
+        setAiEnv(e.newValue || 'dev');
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Custom event for same-window updates
+    const handleCustomChange = (e) => {
+      setAiEnv(e.detail || 'dev');
+    };
+    window.addEventListener('ai-env-change', handleCustomChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('ai-env-change', handleCustomChange);
+    };
+  }, []);
+
   return (
     <AuthProvider>
-      <div className="App">
-        <style>{`
-        /* --- 글로벌 스타일 --- */
-        .file-upload__dropzone { border: 2px dashed #ccc; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: all .2s; }
-        .file-upload__dropzone:hover, .file-upload__dropzone.dragging { border-color: #2196f3; background-color: rgba(33, 150, 243, .1); }
-        .file-upload__trigger { background-color: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
-        .file-upload__list-container { margin-top: 15px; }
-        .file-upload__list { list-style: none; padding: 0; margin: 0; }
-        .file-upload__item { display: flex; align-items: center; padding: 10px; border: 1px solid #eee; border-radius: 4px; margin-bottom: 8px; background: #fff; color: #333; }
-        .file-upload__item-icon { margin-right: 12px; }
-        .file-upload__item-details { flex-grow: 1; overflow: hidden; }
-        .file-upload__item-name { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
-        .file-upload__item-info { display: flex; align-items: center; margin-top: 4px; font-size: 0.8rem; color: #666; }
-        .file-upload__item-error { color: #f44336; margin-left: 8px; font-weight: 500; }
-        .file-upload__progress-bar-container { width: 100%; height: 4px; background-color: #e0e0e0; border-radius: 2px; margin-top: 6px; }
-        .file-upload__progress-bar { height: 100%; background-color: #2196f3; border-radius: 2px; transition: width .2s; }
-        .file-upload__item-status { margin-left: 12px; }
-        .file-upload__item-status .spinning { animation: spin 1.5s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .file-upload__item-remove { background: none; border: none; cursor: pointer; opacity: 0.6; margin-left: 12px; padding: 4px; border-radius: 50%; }
-        .file-upload__item-remove:hover { opacity: 1; background-color: rgba(0,0,0,.05); }
-        .file-upload__submit { background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-top: 15px; width: 100%; }
-        .file-upload__submit:disabled { background-color: #9e9e9e; cursor: not-allowed; }
-
-        /* --- 유형별 커스텀 스타일 --- */
-        .type-1-container { display: flex; flex-direction: column; }
-        .type-1-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        
-        .type-2-container { display: flex; flex-direction: column; height: 400px; /* 높이 고정 예시 */ }
-        .type-2-container .file-upload__list-container { flex-grow: 1; overflow-y: auto; } /* 목록이 남은 공간을 모두 차지하고 스크롤 */
-
-        .type-3-container .file-upload__trigger { width: 100%; }
-        .type-3-container .file-upload__list-container { max-height: 300px; overflow-y: auto; }
-      `}</style>
-
-      <main className="component-container">
-        {/* Zustand Counter 예제 추가 */}
-        <section>
-          <h2>Zustand Counter Example</h2>
-          <Counter />
-        </section>
-
-        {/* --- 유형 1: 버튼 + 목록 + 제출 --- */}
-        <section>
-          <h2>Type 1: Trigger + List + Submit</h2>
-          <FileUpload onUploadComplete={handleUploadComplete}>
-            <div className="type-1-container">
-              <div className="type-1-header">
-                <h3>선택된 파일</h3>
-                <FileUpload.Trigger>파일 선택</FileUpload.Trigger>
-              </div>
-              <FileUpload.List />
-              <FileUpload.Submit />
-            </div>
-          </FileUpload>
-        </section>
-
-        {/* --- 유형 2: 드롭존 + 목록 + 제출 --- */}
-        <section>
-          <h2>Type 2: Dropzone + List + Submit</h2>
-          <FileUpload onUploadComplete={handleUploadComplete}>
-            <div className="type-2-container">
-              <FileUpload.Dropzone>
-                <p>여기에 파일을 드래그하거나, <FileUpload.Trigger>클릭하여 선택</FileUpload.Trigger>하세요.</p>
-              </FileUpload.Dropzone>
-              <FileUpload.List />
-              <FileUpload.Submit />
-            </div>
-          </FileUpload>
-        </section>
-
-        {/* --- 유형 3: 버튼 + 자동 업로드 --- */}
-        <section>
-          <h2>Type 3: Trigger with Auto-Upload</h2>
-          <FileUpload autoUpload={true} onUploadComplete={handleUploadComplete}>
-            <div className="type-3-container">
-              <FileUpload.Trigger>파일 선택 (즉시 업로드)</FileUpload.Trigger>
-              <FileUpload.List />
-            </div>
-          </FileUpload>
-        </section>
-
-          <h2>TipTap 리치 에디터 예제</h2>
-          <RichEditor />
-
-          <hr style={{ margin: '40px 0' }} />
-
-          {/* Svar Grid 예제 추가 */}
-          <SvarGridExample />
-      </main>
-    </div>
+      <CubeIAxProvider
+        key={aiEnv}
+        apiKey={currentAiConfig.key}
+        baseUrl={currentAiConfig.url}
+      >
+        <ProgramChatProvider 
+          profile={effectiveProfile}
+          domain={AI_SETTINGS.domain}
+          includeCitations={true}
+          maxResponseLength={2048}
+          maxTokens={1024}
+          topK={AI_SETTINGS.topK}
+          rerankerTopK={AI_SETTINGS.rerankerTopK}
+          groupByField={AI_SETTINGS.groupByField}
+        >
+          <AppRouter />
+        </ProgramChatProvider>
+      </CubeIAxProvider>
     </AuthProvider>
   );
 }

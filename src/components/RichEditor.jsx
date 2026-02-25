@@ -247,7 +247,7 @@ export default function RichEditor({
     },
   }), [])
 
-  // IframeEmbed Node: render <div class="embed"><iframe .../></div> as an atom block
+  // IframeEmbed Node: render <div className="embed"><iframe .../></div> as an atom block
   const IframeEmbed = useMemo(() => Node.create({
     name: 'iframeEmbed',
     group: 'block',
