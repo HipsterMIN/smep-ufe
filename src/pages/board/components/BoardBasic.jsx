@@ -23,9 +23,15 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const navigate = useNavigate();
 
+  const [selectedCategoryNo, setSelectedCategoryNo] = useState('');
+  const [searchType, setSearchType] = useState('TITLE');
   const [searchKeyword, setSearchKeyword] = useState('');
+
+  const [appliedCategoryNo, setAppliedCategoryNo] = useState('');
+  const [appliedSearchType, setAppliedSearchType] = useState('TITLE');
   const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
 
+  const [categories, setCategories] = useState([]);
   const [postList, setPostList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [totalElements, setTotalElements] = useState(0);
@@ -36,6 +42,35 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
   // 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchCategories = async () => {
+      if (!bbsNo) {
+        if (!isMounted) return;
+        setCategories([]);
+        return;
+      }
+
+      try {
+        const response = await apiClient.get(`/api/v1/board/${bbsNo}/categories`);
+        const data = response?.data || {};
+        if (!isMounted) return;
+        setCategories(Array.isArray(data) ? data : []);
+      } catch (error) {
+        if (!isMounted) return;
+        setCategories([]);
+        console.error('Q&A 카테고리 조회 실패:', error);
+      }
+    };
+
+    fetchCategories();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [bbsNo]);
 
   const boardTitle = useMemo(() => boardDetail?.bbsNm || '공지사항', [boardDetail]);
 
@@ -60,7 +95,12 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
           size: String(pageSize),
         });
 
+        if (appliedCategoryNo) {
+          params.append('ctgryNo', appliedCategoryNo);
+        }
+
         if (appliedSearchKeyword.trim()) {
+          params.append('searchType', appliedSearchType);
           params.append('searchKeyword', appliedSearchKeyword.trim());
         }
 
@@ -89,9 +129,11 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
     return () => {
       isMounted = false;
     };
-  }, [bbsNo, currentPage, pageSize, appliedSearchKeyword]);
+  }, [bbsNo, currentPage, pageSize, appliedCategoryNo, appliedSearchType, appliedSearchKeyword]);
 
   const handleSearch = () => {
+    setAppliedCategoryNo(selectedCategoryNo);
+    setAppliedSearchType(searchType);
     setAppliedSearchKeyword(searchKeyword);
     setCurrentPage(0);
   };
@@ -130,10 +172,27 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
         </div>
         <div className="search-top-box">
           <div className="sch-form-wrap">
-            <select className="krds-form-select">
+            <select
+              className="krds-form-select"
+              value={selectedCategoryNo}
+              onChange={(event) => setSelectedCategoryNo(event.target.value)}
+            >
+              <option value="">구분 전체</option>
+              {categories.map((category) => (
+                <option key={category?.ctgryNo} value={String(category?.ctgryNo ?? '')}>
+                  {category?.ctgryNm || '-'}
+                </option>
+              ))}
+            </select>
+            <select
+              className="krds-form-select"
+              value={searchType}
+              onChange={(event) => setSearchType(event.target.value)}
+            >
               <option value="">전체</option>
-              <option value="">제목</option>
-              <option value="">내용</option>
+              <option value="TITLE">제목</option>
+              <option value="CONTENT">내용</option>
+              <option value="WRITER">작성자</option>
             </select>
             <div className="sch-input">
               <input
