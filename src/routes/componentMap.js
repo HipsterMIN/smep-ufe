@@ -36,11 +36,10 @@ const UI_USR_R_215 = lazy(() => import('@pages/data-open/UI-USR-R-215.jsx'));
 const UI_USR_R_232 = lazy(() => import('@pages/data-open/UI-USR-R-232.jsx'));
 const UI_USR_W_231 = lazy(() => import('@pages/data-open/UI-USR-W-231.jsx'));
 const BoardResolver = lazy(() => import('@pages/board/BoardResolver.jsx'));
+const BoardPostResolver = lazy(() => import('@pages/board/BoardPostResolver.jsx'));
+const UI_USR_W_332 = lazy(() => import('@pages/customer-support/UI-USR-W-332.jsx'));
 const UI_USR_R_340 = lazy(() => import('@pages/customer-support/UI-USR-R-340.jsx'));
 const UI_USR_R_341 = lazy(() => import('@pages/customer-support/UI-USR-R-341.jsx'));
-const UI_USR_R_311 = lazy(() => import('@pages/customer-support/UI-USR-R-311.jsx'));
-const UI_USR_R_331 = lazy(() => import('@pages/customer-support/UI-USR-R-331.jsx'));
-const UI_USR_W_332 = lazy(() => import('@pages/customer-support/UI-USR-W-332.jsx'));
 const UI_USR_R_451 = lazy(() => import('@pages/UI-USR-R-451.jsx'));
 const UI_USR_R_420 = lazy(() => import('@pages/my-business/UI-USR-R-420.jsx'));
 const UI_USR_W_430 = lazy(() => import('@pages/my-business/UI-USR-W-430.jsx'));
@@ -322,11 +321,14 @@ export const componentMap = {
 
   // 공지사항
   'M_PIIO_00101': {
-    component: BoardResolver,
+    component: BoardResolver, // (게시판 상세 공통 사용)
     layout: SubpageLayoutWithMenu,
     children: [
-      { path: ':id', component: UI_USR_R_311 }, // 공지사항 상세
+      { path: ':id', component: BoardPostResolver }, // 공지사항 상세 (게시물 상세 공통 사용)
     ],
+    /*children: [
+      { path: ':id', component: UI_USR_R_311 }, // 공지사항 상세
+    ],*/
   },
 
   // 자주 묻는 질문 (FAQ)
@@ -340,7 +342,8 @@ export const componentMap = {
     component: BoardResolver,
     layout: SubpageLayoutWithMenu,
     children: [
-      { path: ':id', component: UI_USR_R_331 }, // Q&A 상세
+      { path: ':id', component: BoardPostResolver }, // Q&A 상세 (게시물 상세 공통 사용)
+      /*{ path: ':id', component: UI_USR_R_331 }, // Q&A 상세*/
       { path: 'save', component: UI_USR_W_332 }, // Q&A 등록/수정
     ],
   },

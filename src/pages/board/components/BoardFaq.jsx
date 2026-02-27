@@ -253,7 +253,7 @@ const BoardFaq = ({ boardDetail, bbsNo }) => {
                 </Accordion.Header>
                 <Accordion.Panel>
                   <div className="accordion-panel-box">
-                    <p>{item?.pstCn || '-'}</p>
+                    <div dangerouslySetInnerHTML={{ __html: item?.pstCn || '-' }} />
                   </div>
                 </Accordion.Panel>
               </Accordion.Item>
