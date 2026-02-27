@@ -991,6 +991,9 @@ table tbody tr:hover td {
   [class*="lnb-toggle"][aria-expanded="true"]::after {
   background-color: var(--blue-color1);
 }
+.krds-side-navigation .lnb-list .lnb-item .lnb-btn.lnb-toggle {
+  font-weight: 700;
+}
 .krds-side-navigation .lnb-list .lnb-item.active .lnb-submenu {
   width: 100%;
   position: relative;
@@ -1027,8 +1030,9 @@ table tbody tr:hover td {
   display: none;
 }
 .krds-side-navigation .lnb-list .lnb-item .lnb-submenu .lnb-subitem .lnb-btn {
-  padding: 6px 12px;
   min-height: 38px;
+  font-size: 17px;
+  padding: 6px 12px;
 }
 
 .krds-side-navigation .lnb-list .lnb-item .lnb-submenu .lnb-subitem .lnb-btn.lnb-link.active {
