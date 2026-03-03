@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useMatches } from 'react-router-dom';
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import SearchListTop from '../components/ui/SearchListTop';
@@ -8,6 +8,7 @@ import { api as apiClient } from '../lib/apiClient.js';
 import { useUserMenu } from '../context/UserMenuContext';
 
 const Pbanc = () => {
+  const matches = useMatches();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [items, setItems] = useState([]);
@@ -70,6 +71,7 @@ const Pbanc = () => {
   // ✅ 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+  const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '사업 공고';
 
   return (
     <>
@@ -80,7 +82,7 @@ const Pbanc = () => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">사업 공고</h2>
+          <h2 className="h-tit">{pageTitle}</h2>
         </div>
         <div className="search-top-box">
           <div className="sch-form-wrap" ref={schFormWrapRef}>
