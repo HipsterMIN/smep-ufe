@@ -4,11 +4,14 @@ import { api as apiClient } from '@lib/apiClient.js';
 import BoardBasic from './components/BoardBasic.jsx';
 import BoardFaq from './components/BoardFaq.jsx';
 import BoardQna from './components/BoardQna.jsx';
+import BoardThumbnail from './components/BoardThumbnail.jsx';
 
 const BOARD_COMPONENT_BY_TYPE = {
   BSC: BoardBasic,
   QNA: BoardQna,
   FAQ: BoardFaq,
+  IMG: BoardThumbnail,
+  VDO: BoardThumbnail,
 };
 
 const getBoardTypeCd = (boardDetail) => {

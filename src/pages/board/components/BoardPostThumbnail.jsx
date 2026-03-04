@@ -21,7 +21,7 @@ const formatDate = (dateString) => {
 
 const appBaseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
-const BoardPostBasic = ({ boardDetail, bbsNo, pstNo }) => {
+const BoardPostThumbnail = ({ boardDetail, bbsNo, pstNo }) => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const navigate = useNavigate();
 
@@ -230,4 +230,4 @@ const BoardPostBasic = ({ boardDetail, bbsNo, pstNo }) => {
   );
 };
 
-export default BoardPostBasic;
+export default BoardPostThumbnail;
