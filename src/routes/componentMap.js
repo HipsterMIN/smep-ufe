@@ -17,7 +17,6 @@ const UI_USR_R_480 = lazy(() => import('@pages/my-business/UI_USR_R_480.jsx'));
 const UI_USR_L_510 = lazy(() => import('@pages/my-business/UI_USR_L_510.jsx'));
 const UI_USR_R_060 = lazy(() => import('@pages/certificate/UI_USR_R_060.jsx'));
 const UI_USR_L_050 = lazy(() => import('@pages/certificate/UI_USR_L_050.jsx'));
-const UI_USR_L_070 = lazy(() => import('@pages/policy-info/UI_USR_L_070.jsx'));
 const UI_USR_R_091 = lazy(() => import('@pages/policy-info/UI_USR_R_091.jsx'));
 const UI_USR_L_190 = lazy(() => import('@pages/policy-info/UI_USR_L_190.jsx'));
 const UI_USR_R_191 = lazy(() => import('@pages/policy-info/UI_USR_R_191.jsx'));
@@ -37,6 +36,7 @@ const UI_USR_R_232 = lazy(() => import('@pages/data-open/UI-USR-R-232.jsx'));
 const UI_USR_W_231 = lazy(() => import('@pages/data-open/UI-USR-W-231.jsx'));
 const BoardResolver = lazy(() => import('@pages/board/BoardResolver.jsx'));
 const BoardPostResolver = lazy(() => import('@pages/board/BoardPostResolver.jsx'));
+const UI_USR_L_070 = lazy(() => import('@pages/policy-info/UI_USR_L_070.jsx')); // image/video 일때 포멧
 const UI_USR_W_332 = lazy(() => import('@pages/customer-support/UI-USR-W-332.jsx'));
 const UI_USR_R_340 = lazy(() => import('@pages/customer-support/UI-USR-R-340.jsx'));
 const UI_USR_R_341 = lazy(() => import('@pages/customer-support/UI-USR-R-341.jsx'));
@@ -204,14 +204,17 @@ export const componentMap = {
 
   // 정책뉴스
   'M_PIIO_00084': {
-    component: UI_USR_L_070, // /plcy/reprt/UI_USR_L_070
+    component: BoardResolver, // /plcy/reprt/UI_USR_L_070
     layout: SubpageLayoutWithMenu,
     children: [
+      { path: ':id', component: BoardPostResolver }, // 공지사항 상세 (게시물 상세 공통 사용)
+    ],
+    /*children: [
       {
         path: ':id',  // /plcy/reprt/UI_USR_L_070/123
         component: UI_USR_R_091,
       },
-    ],
+    ],*/
   },
 
   // 행사정보

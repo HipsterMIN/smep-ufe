@@ -3,11 +3,14 @@ import { useMatches, useParams } from 'react-router-dom';
 import { api as apiClient } from '@lib/apiClient.js';
 import BoardPostBasic from './components/BoardPostBasic.jsx';
 import BoardPostQna from './components/BoardPostQna.jsx';
+import BoardPostThumbnail from './components/BoardPostThumbnail.jsx';
 
 const BOARD_POST_COMPONENT_BY_TYPE = {
   BSC: BoardPostBasic,
   QNA: BoardPostQna,
   FAQ: BoardPostBasic,
+  IMG: BoardPostThumbnail,
+  VDO: BoardPostThumbnail,
 };
 
 const getBoardTypeCd = (boardDetail) => {
