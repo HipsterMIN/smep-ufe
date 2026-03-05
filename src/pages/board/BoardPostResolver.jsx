@@ -1,17 +1,16 @@
-﻿import { useEffect, useMemo, useState } from 'react';
-import { useMatches } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useMatches, useParams } from 'react-router-dom';
 import { api as apiClient } from '@lib/apiClient.js';
-import BoardBasic from './components/BoardBasic.jsx';
-import BoardFaq from './components/BoardFaq.jsx';
-import BoardQna from './components/BoardQna.jsx';
-import BoardThumbnail from './components/BoardThumbnail.jsx';
+import BoardPostBasic from './components/BoardPostBasic.jsx';
+import BoardPostQna from './components/BoardPostQna.jsx';
+import BoardPostThumbnail from './components/BoardPostThumbnail.jsx';
 
-const BOARD_COMPONENT_BY_TYPE = {
-  BSC: BoardBasic,
-  QNA: BoardQna,
-  FAQ: BoardFaq,
-  IMG: BoardThumbnail,
-  VDO: BoardThumbnail,
+const BOARD_POST_COMPONENT_BY_TYPE = {
+  BSC: BoardPostBasic,
+  QNA: BoardPostQna,
+  FAQ: BoardPostBasic,
+  IMG: BoardPostThumbnail,
+  VDO: BoardPostThumbnail,
 };
 
 const getBoardTypeCd = (boardDetail) => {
@@ -19,8 +18,10 @@ const getBoardTypeCd = (boardDetail) => {
   return String(rawBoardTypeCd).trim().toUpperCase();
 };
 
-const BoardResolver = () => {
+const BoardPostResolver = () => {
   const matches = useMatches();
+  const { id } = useParams();
+
   const [boardDetail, setBoardDetail] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
@@ -31,6 +32,11 @@ const BoardResolver = () => {
       .reverse()
       .find((match) => match?.handle?.bbsNo != null)?.handle?.bbsNo ?? currentMatch?.handle?.bbsNo;
   }, [matches]);
+
+  const pstNo = useMemo(() => {
+    if (id == null) return '';
+    return String(id).trim();
+  }, [id]);
 
   useEffect(() => {
     let isMounted = true;
@@ -44,6 +50,14 @@ const BoardResolver = () => {
         return;
       }
 
+      if (!pstNo) {
+        if (!isMounted) return;
+        setBoardDetail(null);
+        setErrorMessage('게시물 번호를 확인할 수 없습니다.');
+        setIsLoading(false);
+        return;
+      }
+
       try {
         if (!isMounted) return;
         setIsLoading(true);
@@ -52,7 +66,7 @@ const BoardResolver = () => {
         const response = await apiClient.get(`/api/v1/board/${bbsNo}`);
 
         if (!isMounted) return;
-        setBoardDetail(response.data);
+        setBoardDetail(response?.data ?? null);
       } catch (error) {
         if (!isMounted) return;
         setBoardDetail(null);
@@ -69,19 +83,19 @@ const BoardResolver = () => {
     return () => {
       isMounted = false;
     };
-  }, [bbsNo]);
+  }, [bbsNo, pstNo]);
 
   const boardTypeCd = useMemo(() => getBoardTypeCd(boardDetail), [boardDetail]);
-  const ResolvedBoardComponent = boardTypeCd ? BOARD_COMPONENT_BY_TYPE[boardTypeCd] : null;
+  const ResolvedBoardPostComponent = boardTypeCd ? BOARD_POST_COMPONENT_BY_TYPE[boardTypeCd] : null;
 
-  if (isLoading) return <div>게시판 정보를 불러오는 중입니다.</div>;
+  if (isLoading) return <div>게시물 정보를 불러오는 중입니다.</div>;
   if (errorMessage) return <div>{errorMessage}</div>;
 
-  if (!ResolvedBoardComponent) {
+  if (!ResolvedBoardPostComponent) {
     return <div>지원하지 않는 게시판 유형입니다.</div>;
   }
 
-  return <ResolvedBoardComponent boardDetail={boardDetail} bbsNo={bbsNo} />;
+  return <ResolvedBoardPostComponent boardDetail={boardDetail} bbsNo={bbsNo} pstNo={pstNo} />;
 };
 
-export default BoardResolver;
+export default BoardPostResolver;

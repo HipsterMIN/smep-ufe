@@ -991,6 +991,9 @@ table tbody tr:hover td {
   [class*="lnb-toggle"][aria-expanded="true"]::after {
   background-color: var(--blue-color1);
 }
+.krds-side-navigation .lnb-list .lnb-item .lnb-btn.lnb-toggle {
+  font-weight: 700;
+}
 .krds-side-navigation .lnb-list .lnb-item.active .lnb-submenu {
   width: 100%;
   position: relative;
@@ -1006,6 +1009,10 @@ table tbody tr:hover td {
   gap: 8px;
   position: relative;
 }
+.krds-side-navigation .lnb-list .lnb-item .lnb-submenu > ul li:last-child {
+  padding-bottom: 16px;
+}
+
 /* .krds-side-navigation .lnb-list .lnb-item .lnb-btn.active + .lnb-submenu > ul {
   padding-bottom: 16px;
 } */
@@ -1023,8 +1030,14 @@ table tbody tr:hover td {
   display: none;
 }
 .krds-side-navigation .lnb-list .lnb-item .lnb-submenu .lnb-subitem .lnb-btn {
-  padding: 6px 12px 16px;
   min-height: 38px;
+  font-size: 17px;
+  padding: 6px 12px;
+}
+
+.krds-side-navigation .lnb-list .lnb-item .lnb-submenu .lnb-subitem .lnb-btn.lnb-link.active {
+  border-radius: 8px;
+  background: #EBF1FE;
 }
 .krds-side-navigation
   .lnb-list
