@@ -1374,7 +1374,7 @@ button.aichatButton.active {
   /* ~~~~~~~~~~~~~~~~~~~메인~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
   .main-totallayout {
     height: auto;
-    background: url(/main-dev/src/assets/main/mainBg_mo.png) no-repeat 50% 0;
+    background: url(/home-dev/src/assets/main/mainBg_mo.png) no-repeat 50% 0;
     background-size: 100% auto;
   }
  .main-totallayout .main-totallistbox .inner {
