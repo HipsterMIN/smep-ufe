@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api as apiClient } from '../lib/apiClient.js';
+import { api as apiClient, apiBaseUrl } from '../lib/apiClient.js';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
 import reportImage from '../assets/temp/ReportView.png';
 import temphwp from '@assets/temp/Temp.png';
@@ -259,7 +259,7 @@ const Pbanc = () => {
                     type="button"
                     className="krds-btn medium text on-colorblue"
                     onClick={() => {
-                      window.location.href = `/main-dev/api/v1/pbanc/${item?.id}/download?fileName=${encodeURIComponent(item?.pbancmtxtfilenm)}`;
+                      window.location.href = `${apiBaseUrl}/api/v1/pbanc/${item?.id}/download?fileName=${encodeURIComponent(item?.pbancmtxtfilenm)}`;
                       //             /aidata/save/pbanc/${item?.id}/attached_files/${item?.pbancmtxtfilenm}
                       // const link = document.createElement('a');
                       // link.href = temphwp; // todo 시연용 임시파일

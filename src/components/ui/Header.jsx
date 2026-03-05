@@ -178,7 +178,8 @@ export default function Header() {
         openFallback(loginUrl);
       } catch (error) {
         console.error('Failed to fetch login URL:', error);
-        openFallback('/main-dev/service/SSO-login');
+        const basePath = BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/';
+        openFallback(`${basePath}service/SSO-login`);
       }
     };
 
