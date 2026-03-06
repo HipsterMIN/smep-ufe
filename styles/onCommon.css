@@ -2392,6 +2392,7 @@ table tbody tr:hover td {
 .post-nav-list {
   padding: 32px 0;
   display: flex;
+  justify-content: space-between;
   gap: 14%;
   border-top: 1px solid  #6D7882;
   border-bottom: 1px solid var(--krds-light-color-divider-gray-light); 
