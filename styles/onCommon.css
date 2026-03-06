@@ -1566,6 +1566,43 @@ table tbody tr:hover td {
   flex-wrap: wrap;
   gap: 16px;
 }
+.onboard-btm-btngroup .onanswerbox {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  padding: 40px;
+  border-radius: 12px;
+  background: #F4F5F6;
+}
+.onboard-btm-btngroup .onanswerbox dl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #CDD1D5;
+}
+.onboard-btm-btngroup .onanswerbox dl dt {
+  color: #131416;
+  font-size: 17px;
+  font-weight: 400;
+}
+.onboard-btm-btngroup .onanswerbox dl dd.usrNm {
+  color: #6D7882;
+  font-size: 17px;
+  font-weight: 400;
+}
+.onboard-btm-btngroup .onanswerbox p.answer-txt {
+  position: relative;
+  width: 100%;
+  color: #131416;
+  font-size: 17px;
+  font-weight: 400;
+  text-align: left;
+}
 /* ** 평가 ** */
 .assess-question-wrap {
   display: flex;
