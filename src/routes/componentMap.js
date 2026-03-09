@@ -52,6 +52,7 @@ const UI_USR_L_530 = lazy(() => import('@pages/my-business/UI-USR-L-530.jsx'));
 const UI_USR_L_540 = lazy(() => import('@pages/my-business/UI-USR-L-540.jsx'));
 const UI_USR_L_550 = lazy(() => import('@pages/my-business/UI-USR-L-550.jsx'));
 const UI_USR_L_100 = lazy(() => import('@pages/policy-info/UI_USR_L_100.jsx'));
+const UI_USR_R_101 = lazy(() => import('@pages/policy-info/UI_USR_R_101.jsx'));
 const UI_USR_L_110 = lazy(() => import('@pages/policy-info/UI_USR_L_110.jsx'));
 const UI_USR_L_150 = lazy(() => import('@pages/more-service/UI-USR-L-150.jsx'));
 const UI_USR_L_180 = lazy(() => import('@pages/more-service/UI-USR-L-180.jsx'));
@@ -233,6 +234,12 @@ export const componentMap = {
   'M_PIIO_00086': {
     component: UI_USR_L_100,
     layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: ':id',
+        component: UI_USR_R_101,
+      },
+    ],
   },
 
   // 입법행정예고/고시
