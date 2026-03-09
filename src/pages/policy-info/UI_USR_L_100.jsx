@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useMatches } from 'react-router-dom';
+import { useMatches, useNavigate } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Tab from '@components/ui/Tab';
@@ -8,7 +8,7 @@ import noImg from '@assets/common/noImg.png';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 
-const IMAGE_URL_PATTERN = /\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i;
+const appBaseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -24,41 +24,14 @@ const formatDate = (dateString) => {
 };
 
 const resolveThumbnailSrc = (post) => {
-  const candidates = [
-    post?.thumbnailUrl,
-    post?.thumbnail_url,
-    post?.thmbnUrl,
-    post?.thmbn_url,
-    post?.thmbnUrlAddr,
-    post?.thmbn_url_addr,
-    post?.imgUrl,
-    post?.img_url,
-    post?.rprsImgUrl,
-    post?.rprs_img_url,
-    post?.rprsImgUrlAddr,
-    post?.rprs_img_url_addr,
-    post?.rprsImgAtchFiles?.[0]?.fileUrlAddr,
-    post?.rprsImgAtchFiles?.[0]?.file_url_addr,
-    post?.rprsImgAtchFiles?.[0]?.url,
-    post?.rprsImgAtchFiles?.[0]?.fileUrl,
-    post?.rprsImgAtchFiles?.[0]?.file_url,
-  ];
-
-  const directUrl = candidates.find((value) => typeof value === 'string' && value.trim() !== '');
-  if (directUrl) {
-    return directUrl.trim();
-  }
-
-  const pstUrlAddr = String(post?.pstUrlAddr ?? '').trim();
-  if (pstUrlAddr && IMAGE_URL_PATTERN.test(pstUrlAddr)) {
-    return pstUrlAddr;
-  }
-
-  return '';
+  const rprsImgAtchFileId = String(post?.rprsImgAtchFileId ?? post?.rprs_img_atch_file_id ?? '').trim();
+  if (!rprsImgAtchFileId) return '';
+  return `${appBaseUrl}/api/v1/board/thumbnails/${encodeURIComponent(rprsImgAtchFileId)}`;
 };
 
 const UI_USR_L_100 = () => {
   const matches = useMatches();
+  const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [boardDetail, setBoardDetail] = useState(null);
@@ -213,7 +186,7 @@ const UI_USR_L_100 = () => {
   }, [bbsNo, currentPage, pageSize, selectedCategoryNo]);
 
   const boardTitle = useMemo(
-    () => boardDetail?.bbsNm || depth1Menu?.menuNm || '정책중기누리',
+    () => boardDetail?.bbsNm || depth1Menu?.menuNm || '월간중기누리',
     [boardDetail, depth1Menu],
   );
 
@@ -243,6 +216,11 @@ const UI_USR_L_100 = () => {
   const handlePageSizeChange = (event) => {
     setPageSize(Number(event.target.value));
     setCurrentPage(0);
+  };
+
+  const moveToDetail = (pstNo) => {
+    if (pstNo == null) return;
+    navigate(`${pstNo}`);
   };
 
   return (
@@ -306,21 +284,16 @@ const UI_USR_L_100 = () => {
                   postList.map((item, index) => {
                     const thumbnailSrc = resolveThumbnailSrc(item);
                     const badgeLabel = String(item?.ctgryNm ?? item?.pstSrcCn ?? '').trim() || '게시물';
-                    const postLink = String(item?.pstUrlAddr ?? '').trim();
-                    const isExternalLink = /^https?:\/\//i.test(postLink);
 
                     return (
                       <li key={item?.pstNo ?? `${item?.pstTtl ?? 'post'}-${index}`} className="structured-item">
                         <div className="card-body">
                           <a
-                            href={postLink || '#'}
+                            href="#"
                             className="c-text"
-                            target={isExternalLink ? '_blank' : undefined}
-                            rel={isExternalLink ? 'noreferrer' : undefined}
                             onClick={(event) => {
-                              if (!postLink) {
-                                event.preventDefault();
-                              }
+                              event.preventDefault();
+                              moveToDetail(item?.pstNo);
                             }}
                           >
                             <div className={`ongallery-thumnb ${thumbnailSrc ? '' : 'noImage'}`}>
