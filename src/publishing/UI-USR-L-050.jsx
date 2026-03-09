@@ -23,7 +23,7 @@ const UI_USR_L_050 = () => {
         depth3: [
           {
             label: "정책금융안내",
-            link: "/main-dev/service/UI_USR_L_030",
+            link: "/home-dev/service/UI_USR_L_030",
             active: true,
           },
         ],

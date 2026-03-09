@@ -17,7 +17,6 @@ const UI_USR_R_480 = lazy(() => import('@pages/my-business/UI_USR_R_480.jsx'));
 const UI_USR_L_510 = lazy(() => import('@pages/my-business/UI_USR_L_510.jsx'));
 const UI_USR_R_060 = lazy(() => import('@pages/certificate/UI_USR_R_060.jsx'));
 const UI_USR_L_050 = lazy(() => import('@pages/certificate/UI_USR_L_050.jsx'));
-const UI_USR_L_070 = lazy(() => import('@pages/policy-info/UI_USR_L_070.jsx'));
 const UI_USR_R_091 = lazy(() => import('@pages/policy-info/UI_USR_R_091.jsx'));
 const UI_USR_L_190 = lazy(() => import('@pages/policy-info/UI_USR_L_190.jsx'));
 const UI_USR_R_191 = lazy(() => import('@pages/policy-info/UI_USR_R_191.jsx'));
@@ -35,14 +34,12 @@ const UI_USR_R_214 = lazy(() => import('@pages/data-open/UI-USR-R-214.jsx'));
 const UI_USR_R_215 = lazy(() => import('@pages/data-open/UI-USR-R-215.jsx'));
 const UI_USR_R_232 = lazy(() => import('@pages/data-open/UI-USR-R-232.jsx'));
 const UI_USR_W_231 = lazy(() => import('@pages/data-open/UI-USR-W-231.jsx'));
-const UI_USR_L_310 = lazy(() => import('@pages/customer-support/UI-USR-L-310.jsx'));
-const UI_USR_L_320 = lazy(() => import('@pages/customer-support/UI-USR-L-320.jsx'));
-const UI_USR_L_330 = lazy(() => import('@pages/customer-support/UI-USR-L-330.jsx'));
+const BoardResolver = lazy(() => import('@pages/board/BoardResolver.jsx'));
+const BoardPostResolver = lazy(() => import('@pages/board/BoardPostResolver.jsx'));
+const UI_USR_L_070 = lazy(() => import('@pages/policy-info/UI_USR_L_070.jsx')); // image/video 일때 포멧
+const UI_USR_W_332 = lazy(() => import('@pages/customer-support/UI-USR-W-332.jsx'));
 const UI_USR_R_340 = lazy(() => import('@pages/customer-support/UI-USR-R-340.jsx'));
 const UI_USR_R_341 = lazy(() => import('@pages/customer-support/UI-USR-R-341.jsx'));
-const UI_USR_R_311 = lazy(() => import('@pages/customer-support/UI-USR-R-311.jsx'));
-const UI_USR_R_331 = lazy(() => import('@pages/customer-support/UI-USR-R-331.jsx'));
-const UI_USR_W_332 = lazy(() => import('@pages/customer-support/UI-USR-W-332.jsx'));
 const UI_USR_R_451 = lazy(() => import('@pages/UI-USR-R-451.jsx'));
 const UI_USR_R_420 = lazy(() => import('@pages/my-business/UI-USR-R-420.jsx'));
 const UI_USR_W_430 = lazy(() => import('@pages/my-business/UI-USR-W-430.jsx'));
@@ -207,14 +204,17 @@ export const componentMap = {
 
   // 정책뉴스
   'M_PIIO_00084': {
-    component: UI_USR_L_070, // /plcy/reprt/UI_USR_L_070
+    component: BoardResolver, // /plcy/reprt/UI_USR_L_070
     layout: SubpageLayoutWithMenu,
     children: [
+      { path: ':id', component: BoardPostResolver }, // 공지사항 상세 (게시물 상세 공통 사용)
+    ],
+    /*children: [
       {
         path: ':id',  // /plcy/reprt/UI_USR_L_070/123
         component: UI_USR_R_091,
       },
-    ],
+    ],*/
   },
 
   // 행사정보
@@ -324,25 +324,29 @@ export const componentMap = {
 
   // 공지사항
   'M_PIIO_00101': {
-    component: UI_USR_L_310,
+    component: BoardResolver, // (게시판 상세 공통 사용)
     layout: SubpageLayoutWithMenu,
     children: [
-      { path: ':id', component: UI_USR_R_311 }, // 공지사항 상세
+      { path: ':id', component: BoardPostResolver }, // 공지사항 상세 (게시물 상세 공통 사용)
     ],
+    /*children: [
+      { path: ':id', component: UI_USR_R_311 }, // 공지사항 상세
+    ],*/
   },
 
-  // 자주 묻는 질문
+  // 자주 묻는 질문 (FAQ)
   'M_PIIO_00102': {
-    component: UI_USR_L_320,
+    component: BoardResolver,
     layout: SubpageLayoutWithMenu,
   },
 
   // Q&A
   'M_PIIO_00103': {
-    component: UI_USR_L_330,
+    component: BoardResolver,
     layout: SubpageLayoutWithMenu,
     children: [
-      { path: ':id', component: UI_USR_R_331 }, // Q&A 상세
+      { path: ':id', component: BoardPostResolver }, // Q&A 상세 (게시물 상세 공통 사용)
+      /*{ path: ':id', component: UI_USR_R_331 }, // Q&A 상세*/
       { path: 'save', component: UI_USR_W_332 }, // Q&A 등록/수정
     ],
   },
