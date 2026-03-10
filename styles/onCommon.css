@@ -508,11 +508,17 @@ table tbody tr:hover td {
   overflow-x: auto;
 }
 #krds-header .header-container .logo {
-  width: 29.6rem;
+  width: 28rem;
   flex: 0 0 auto;
 }
 #krds-header .header-container .logo a {
   background-image: url(../src/assets/common/logo.svg);
+}
+#krds-header .header-container .logo-platform {
+  margin-left: 2rem;
+  width: 15rem;
+  height: 3.3rem;
+  background: url(../src/assets/common/logo_platform.svg) no-repeat 50%/ 100% auto;
 }
 #krds-header .header-search-wrap {
   position: relative;
@@ -574,6 +580,9 @@ table tbody tr:hover td {
   -webkit-mask-image: url(./img/component/icon/ico_logout.svg);
   mask-image: url(./img/component/icon/ico_logout.svg);
 }
+#krds-header .header-container .btn-navi {flex-direction: row;}
+#krds-header .header-utility .utility-list > li:not(:first-child)::before {display: none;}
+
 .krds-main-menu .gnb-toggle-wrap .gnb-sub-list.single-list {padding: 30px 0;}
 .krds-main-menu .gnb-toggle-wrap .gnb-sub-list .gnb-sub-content { flex-direction: row;}
 .krds-main-menu .gnb-toggle-wrap .gnb-sub-list .gnb-sub-content .sub-title { width: 200px; border-right: 1px solid #D6E0EB; height: 100%; flex-direction: column; align-items: flex-start; padding-left: 16px; padding-right: 16px; gap: 10px; }
@@ -1075,6 +1084,7 @@ table tbody tr:hover td {
 .search-top-box + .krds-tab-area .tab-conts-wrap {margin-top: 0;}
 .tab + .tab-conts-wrap {margin-top: 40px;}
 .tab.full {max-width: calc(100vw - 32px);}
+.tab.full > ul {overflow-y: hidden;}
 
 /* conts-desc */
 .conts-desc {color: #666; margin-top: 24px; margin-bottom: 48px; width: 100%;}
@@ -1522,6 +1532,21 @@ table tbody tr:hover td {
   flex-direction: column;
   gap: var(--krds-gap-3);
 }
+
+.def-list-wrap.no-border .def-list {
+  padding: 0;
+  gap: var(--krds-gap-7) 0;
+}
+.def-list-wrap.no-border .def-list dt {
+  width: 18rem;
+}
+.def-list-wrap.no-border .def-list > dd {
+  color: #131416;
+  width: calc(100% - (18rem + var(--krds-gap-7)));
+}
+
+
+
 /* onshadow-text */
 .onshadow-text {
   height: 80px;/* 원래 130px 시연용으로 임시로 80px변경 협의필요 */
@@ -2123,6 +2148,15 @@ table tbody tr:hover td {
 .step-imgguide .step-imgguide-title {font-size: var(--krds-mobile-font-size-body-small); font-weight: 700; color: #464C53; }
 .step-imgguide .step-imgguide-desc {font-size: var(--krds-mobile-font-size-body-xsmall); color: #464C53; line-height: 20px; text-align: center;}
 
+.krds-info-list.small {gap: 4px;}
+.krds-info-list.small > li {
+  color: #131416;
+}
+.krds-info-list.small > li::before {
+  width: 0.4rem;
+  height: 0.4rem;
+}
+
 .txt-box.small {padding: var(--krds-pc-padding-card-xsmall) var(--krds-pc-padding-card-small);}
 .issuance-popup .step-box { margin-top: 20px;}
 .issuance-popup .txt-box { margin-top: 20px; font-size: 17px; font-weight: 700; color: #052B57; letter-spacing: var(--krds-typo-letter-spacing-0); }
@@ -2270,6 +2304,10 @@ table tbody tr:hover td {
 }
 .krds-structured-list.small .c-info-group {
   font-size: 15px;
+}
+
+.krds-structured-list .bottom-link {
+  margin-top: 64px;
 }
 
 .def-list-wrap .def-list .def-list-group {
@@ -2743,6 +2781,9 @@ textarea.krds-input::placeholder {
   display: flex;
   align-items: center;
   gap: 24px;
+}
+.search-top-box .form-row-box.row-center {
+  justify-content: center;
 }
 .search-top-box .form-row-box ~ .form-row-box {
   margin-top: 16px; 
@@ -3479,6 +3520,7 @@ textarea.krds-input::placeholder {
    .main-totalbox-left .main-totalbox-input input {
     min-width: 620px;
   }
+
   /* 모바일 로그인 Header CSS 추가 */
   .user-info-wrap {
     display: none;
@@ -3584,6 +3626,8 @@ textarea.krds-input::placeholder {
   .def-list-wrap .def-list > dd {
     width: calc(100% - (8.6rem + var(--krds-gap-5)));
   }
+
+
   .box-group-area {
     gap: var(--krds-gap-4);
   }
@@ -3840,9 +3884,12 @@ textarea.krds-input::placeholder {
   .login-form-area .sns-login-btns button {
     flex: 1 1 auto;
   }
-  
-  .sch-form-wrap, .search-top-box .sch-filter-box {padding: 20px 26px !important;}
-  
+
+  .sch-form-wrap, 
+  .search-top-box .sch-filter-box {
+    padding: 20px 26px !important;
+  }
+
   .sch-form-wrap,
   .search-top-box .sch-filter-box .filter-form {
     gap: 12px;
@@ -3855,6 +3902,16 @@ textarea.krds-input::placeholder {
   }
   .krds-structured-list.relate {
       grid-template-columns: 1fr;
+  }
+
+  .def-list-wrap.no-border .def-list {
+    flex-direction: column;
+    gap: var(--krds-gap-4) 0;
+  }
+  .def-list-wrap.no-border .def-list > dd {width: 100%;}
+
+  #krds-header .header-container .logo-platform {
+    display: none;
   }
 }
 .on-searchoption-toggle {
