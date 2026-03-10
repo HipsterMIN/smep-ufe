@@ -508,11 +508,17 @@ table tbody tr:hover td {
   overflow-x: auto;
 }
 #krds-header .header-container .logo {
-  width: 29.6rem;
+  width: 28rem;
   flex: 0 0 auto;
 }
 #krds-header .header-container .logo a {
   background-image: url(../src/assets/common/logo.svg);
+}
+#krds-header .header-container .logo-platform {
+  margin-left: 2rem;
+  width: 15rem;
+  height: 3.3rem;
+  background: url(../src/assets/common/logo_platform.svg) no-repeat 50%/ 100% auto;
 }
 #krds-header .header-search-wrap {
   position: relative;
@@ -574,6 +580,9 @@ table tbody tr:hover td {
   -webkit-mask-image: url(./img/component/icon/ico_logout.svg);
   mask-image: url(./img/component/icon/ico_logout.svg);
 }
+#krds-header .header-container .btn-navi {flex-direction: row;}
+#krds-header .header-utility .utility-list > li:not(:first-child)::before {display: none;}
+
 .krds-main-menu .gnb-toggle-wrap .gnb-sub-list.single-list {padding: 30px 0;}
 .krds-main-menu .gnb-toggle-wrap .gnb-sub-list .gnb-sub-content { flex-direction: row;}
 .krds-main-menu .gnb-toggle-wrap .gnb-sub-list .gnb-sub-content .sub-title { width: 200px; border-right: 1px solid #D6E0EB; height: 100%; flex-direction: column; align-items: flex-start; padding-left: 16px; padding-right: 16px; gap: 10px; }
@@ -3510,6 +3519,7 @@ textarea.krds-input::placeholder {
    .main-totalbox-left .main-totalbox-input input {
     min-width: 620px;
   }
+
   /* 모바일 로그인 Header CSS 추가 */
   .user-info-wrap {
     display: none;
@@ -3873,9 +3883,12 @@ textarea.krds-input::placeholder {
   .login-form-area .sns-login-btns button {
     flex: 1 1 auto;
   }
-  
-  .sch-form-wrap, .search-top-box .sch-filter-box {padding: 20px 26px !important;}
-  
+
+  .sch-form-wrap, 
+  .search-top-box .sch-filter-box {
+    padding: 20px 26px !important;
+  }
+
   .sch-form-wrap,
   .search-top-box .sch-filter-box .filter-form {
     gap: 12px;
@@ -3895,6 +3908,10 @@ textarea.krds-input::placeholder {
     gap: var(--krds-gap-4) 0;
   }
   .def-list-wrap.no-border .def-list > dd {width: 100%;}
+
+  #krds-header .header-container .logo-platform {
+    display: none;
+  }
 }
 .on-searchoption-toggle {
   display: flex;
