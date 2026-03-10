@@ -9,7 +9,7 @@ const HeaderSearch = () => {
   };
 
   return (
-    <button type="button" className="btn-navi sch on-mobile-none" onClick={handleSearchClick}>
+    <button type="button" className="btn-navi sch on-pc-none" onClick={handleSearchClick}>
       AI 스마트검색
     </button>
   );
