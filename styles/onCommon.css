@@ -1084,6 +1084,7 @@ table tbody tr:hover td {
 .search-top-box + .krds-tab-area .tab-conts-wrap {margin-top: 0;}
 .tab + .tab-conts-wrap {margin-top: 40px;}
 .tab.full {max-width: calc(100vw - 32px);}
+.tab.full > ul {overflow-y: hidden;}
 
 /* conts-desc */
 .conts-desc {color: #666; margin-top: 24px; margin-bottom: 48px; width: 100%;}
