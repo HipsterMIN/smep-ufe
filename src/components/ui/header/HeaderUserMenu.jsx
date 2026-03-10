@@ -20,14 +20,14 @@ export default function HeaderUserMenu({
 
     return (
       <>
-        <div className="user-info-wrap">
+        {/* <div className="user-info-wrap">
           <span className="user-name">
             {displayName}
           </span>
           <span>님 ({modeLabel})</span>
-        </div>
+        </div> */}
 
-        <div className="chip-wrap krds-tag-wrap large on-mobile-none" style={{ marginRight: '12px' }}>
+        {/* <div className="chip-wrap krds-tag-wrap large on-mobile-none" style={{ marginRight: '12px' }}>
           {currentMode === 'INDIVIDUAL' && Array.isArray(linkedCompanies) && linkedCompanies.length > 0 ? (
             <select
               className="krds-form-select"
@@ -64,24 +64,30 @@ export default function HeaderUserMenu({
               개인회원전환
             </button>
           ) : null}
-        </div>
-
-        <button type="button" className="btn-navi logout on-mobile-none" onClick={onLogout}>
-          로그아웃
-        </button>
+        </div> */}
 
         <div className="krds-drop-wrap my-drop">
           <button type="button" className="btn-navi my drop-btn active" onClick={onMyPage}>
             마이 비즈니스
           </button>
         </div>
+
+        <div className="gnb-sesseion-timer">
+          <div className="timer"><span className="sr-only">남은 시간</span><i className="svg-icon ico-clock"></i> 28: 38</div>
+          <button type="button" className="krds-btn secondary xsmall">연장</button>
+        </div>
+
+        <button type="button" className="btn-navi logout on-mobile-none" onClick={onLogout}>
+          로그아웃
+        </button>
+
       </>
     );
   }
 
   return (
     <>
-      <button type="button" className="btn-navi login" onClick={onLogin}>
+      <button type="button" className="btn-navi login on-mobile-none" onClick={onLogin}>
         로그인
       </button>
       <button type="button" className="btn-navi join">
