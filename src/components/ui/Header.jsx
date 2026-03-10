@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import arrowIcon from '../../assets/main/icon-arrow.svg';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +9,7 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 import HeaderDesktopGNB from './header/HeaderDesktopGNB';
 import HeaderMobileGNB from './header/HeaderMobileGNB';
 import HeaderUserMenu from './header/HeaderUserMenu';
+import HeaderFontDropdown from './header/HeaderFontDropdown'
 import HeaderSearch from './header/HeaderSearch';
 import { api as apiClient } from '../../lib/apiClient.js';
 
@@ -220,48 +222,75 @@ export default function Header() {
         <div className="header-in">
           <div className="header-container">
             <div className="inner">
+              <div className="header-utility">
+                <ul className="utility-list">
+                  {/* 글자 설정 dropdown */}
+                  <li>
+                    <HeaderFontDropdown />
+                  </li>
+                  <li>
+                    <Link to="#" className="krds-btn small text">
+                      <i class="svg-icon ico-system"></i> 유관시스템 둘러보기
+                    </Link>
+                  </li>
+                </ul>
+              </div>
               <div className="header-branding">
                 <h2 className="logo sample">
                   <a href={BASE_URL}>
-                    <span className="sr-only">중소기업통합플랫폼</span>
+                    <span className="sr-only">중소벤처24(기업마당)</span>
                   </a>
                 </h2>
-                <div className="header-actions">
-                  <HeaderUserMenu
-                    isLogin={isLogin}
-                    currentMode={currentMode}
-                    currentCompany={currentCompany}
-                    linkedCompanies={linkedCompanies}
-                    user={user}
-                    onLogin={handleLogin}
-                    onLogout={logout}
-                    onMyPage={handleMyPage}
-                    onSwitchContext={async (companyId) => {
-                      if (!token) {
-                        return;
-                      }
-                      try {
-                        const response = await apiClient.post(
-                          '/api/v1/auth/switch-context',
-                          { targetCompanyId: companyId },
-                          { token },
-                        );
-                        const newToken = response.accessToken || response.data?.accessToken;
-                        if (!newToken) {
-                          throw new Error('Missing access token');
+                <div className="logo-platform">
+                  <span className="sr-only">중소기업 지원의 시작 중소기업 지원 통합 플랫폼 로고</span>
+                </div>
+                <div className="header-right">
+                  {/* 검색란 */}
+                  <div className="sch-input">
+                    <input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력"></input>
+                    <button type="button" className="krds-btn medium icon ico-search">
+                      <span className="sr-only">검색</span>
+                      <i className="svg-icon ico-sch"></i>
+                    </button>
+                  </div>
+                  <div className="header-actions">
+                    <HeaderUserMenu
+                      isLogin={isLogin}
+                      currentMode={currentMode}
+                      currentCompany={currentCompany}
+                      linkedCompanies={linkedCompanies}
+                      user={user}
+                      onLogin={handleLogin}
+                      onLogout={logout}
+                      onMyPage={handleMyPage}
+                      onSwitchContext={async (companyId) => {
+                        if (!token) {
+                          return;
                         }
-                        const profileResponse = await apiClient.get('/api/v1/account/me', {
-                          token: newToken,
-                        });
-                        const profile = profileResponse.data || profileResponse;
-                        login({ token: newToken, profile });
-                      } catch (error) {
-                        console.error('Failed to switch context:', error);
-                      }
-                    }}
-                  />
-                  <HeaderSearch />
-                  <button type="button" onClick={handleOpenMobGnb} className="btn-navi all" aria-controls="mobile-nav">전체메뉴</button>
+                        try {
+                          const response = await apiClient.post(
+                            '/api/v1/auth/switch-context',
+                            { targetCompanyId: companyId },
+                            { token },
+                          );
+                          const newToken = response.accessToken || response.data?.accessToken;
+                          if (!newToken) {
+                            throw new Error('Missing access token');
+                          }
+                          const profileResponse = await apiClient.get('/api/v1/account/me', {
+                            token: newToken,
+                          });
+                          const profile = profileResponse.data || profileResponse;
+                          login({ token: newToken, profile });
+                        } catch (error) {
+                          console.error('Failed to switch context:', error);
+                        }
+                      }}
+                    />
+                    {/* <HeaderSearch /> */}
+                    <button type="button" className="btn-navi sch open-modal"><span className="sr-only">검색</span></button>
+                    <button type="button" onClick={handleOpenMobGnb} className="btn-navi all" aria-controls="mobile-nav"><span className="sr-only">전체메뉴</span></button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -277,7 +306,7 @@ export default function Header() {
           isLogin={isLogin}
           userName={currentCompany?.companyName || user?.name}
         />
-      </header>
+      </header> 
       
       <div className="quickbox">
         <button

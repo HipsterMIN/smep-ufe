@@ -28,6 +28,8 @@ import newsVideo from "../assets/main/news_video.jpg"
 const MainPage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
+  const containerRef = useRef(null);
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -38,11 +40,35 @@ const MainPage = () => {
     }
   };
 
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsFocused(false);
+      }
+    };
+    const handleScroll = () => setIsFocused(false);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
   };
+
+  const handleClear = () => {
+    setSearchQuery("");
+  };
+
+  const showPopular = isFocused && searchQuery === "";
+  const showAutoComplete = isFocused && searchQuery !== "";
 
   // 통합플랫폼 주요 메뉴
   const platformMenus = [
@@ -147,78 +173,157 @@ const MainPage = () => {
           { /*컨텐츠 영역 */}
 
           {/* S - main-totallayout */}
-          <div className="main-totallayout">
-            <div className="inner">
-              <p className="main-total-p">“중소벤처24”와 “기업마당”이 통합되어 더 편리해진 서비스</p>
-              <h2 className="main-total-tit">중소기업을 위한 모든 것<span>중소기업 통합플랫폼</span></h2>
-              <div className="main-totalbox">
-                <div className="main-totalbox-left">
-                  <h3><span className="totalbox-txt">중소기업에 딱 맞는 정보를 검색</span><span className="totalbox-tit">AI 통합검색</span></h3>
-                  <div className="main-totalbox-input">
-                    <div className="boxinner">
-                      <select>
-                        <option value="">지원사업안내</option>
-                        <option value="">지원사업안내</option>
-                      </select>
-                      <input 
-                        type="text" 
-                        placeholder='기업 조건에 맞는 지원사업 공고를 찾아줘'
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        /> 
-                    </div>
+          <div className="main-toplayout">
+            <div className="main-top-inner">
+              <div className="main-top-srch">
+                <div
+                  ref={containerRef}
+                  className={`top-srch sch-input ${isFocused ? "is-focused" : ""}`}
+                  >
+                  <div className="sch-input-box">
+                    <input 
+                      type="text" 
+                      placeholder='지원사업·정책금융·확인서·사업공고를 검색하세요'
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      onFocus={() => setIsFocused(true)}
+                      className="krds-input"
+                      /> 
+                    {isFocused && (
+                        <button
+                        type="button"
+                        className="krds-btn icon ico-keyboard"
+                        >
+                          <span className="sr-only">키보드 입력</span>
+                          <i className="svg-icon ico-key"></i>
+                        </button>
+                      )}
+                    {isFocused && (
+                      <button
+                        type="button"
+                        className="krds-btn icon ico-clear"
+                        onClick={handleClear}
+                      >
+                        <span className="sr-only">검색어 삭제</span>
+                        <i className="svg-icon ico-del"></i>
+                      </button>
+                    )}
                     <button 
                       type="button" 
-                      className="main-totalbox-button" 
+                      className="krds-btn large icon ico-search" 
                       onClick={handleSearch}
                     >
-                      <span className="sr-only">선택됨</span>
+                      <span className="sr-only">통합검색</span>
+                      <i className="svg-icon ico-sch"></i>
                     </button>
                   </div>
+                  {isFocused && (
+                    <div className="sch-layer">
 
-                  {/* 로그인 전 상태    */}
-                  {/* <p><span>로그인</span> 후, 나에게 맞는 추천 검색어를 받아보세요</p>  */}
-                 
+                      {showPopular && (
+                        <div className="sch-layer-popular">
+                          <div className="sch-layer-inner">
+                            <strong className="sch-layer-title">인기검색어</strong>
+                            <ul className="sch-layer-popular-list">
+                              <li className="sch-popular-item">
+                                <Link to="#" className="item-link">
+                                  <em className="rank">
+                                    <span className="sr-only">인기검색어</span>1
+                                  </em>
+                                  안전보건교육
+                                </Link>
+                              </li>
+                              <li className="sch-popular-item">
+                                <Link to="#" className="item-link">
+                                  <em className="rank">
+                                    <span className="sr-only">인기검색어</span>2
+                                  </em>
+                                  안전보건교육
+                                </Link>
+                              </li>
+                              <li className="sch-popular-item">
+                                <Link to="#" className="item-link">
+                                  <em className="rank">
+                                    <span className="sr-only">인기검색어</span>3
+                                  </em>
+                                  안전보건교육
+                                </Link>
+                              </li>
+                              <li className="sch-popular-item">
+                                <Link to="#" className="item-link">
+                                  <em className="rank">
+                                    <span className="sr-only">인기검색어</span>4
+                                  </em>
+                                  안전보건교육
+                                </Link>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      )}
 
-                  {/*로그인 후 */}
-                  <div className="main-totalbox-word">
-                    <h3>AI 추천검색어</h3>
-                    <ul>
-                      <li><button type="button" className="word-bu">소상공인지원</button></li>
-                      <li><button type="button" className="word-bu">초기창업</button></li>
-                      <li><button type="button" className="word-bu">창업지원포털</button></li>
-                      <li><button type="button" className="word-bu">지원사업공고</button></li>
-                      <li><button type="button" className="word-bu">AP소재정보</button></li>
-                      <li><button type="button" className="word-bu">맞춤서비스</button></li>
-                    </ul>
-                  </div>
+                      {showAutoComplete && (
+                        <div className="sch-layer-inner">
+                          <ul className="sch-layer-auto-list">
+                            <li>
+                              <button type="button">
+                                <i className="ico-keyword"></i>
+                                <em className="keyword">수출입</em> 지원사업
+                              </button>
+                            </li>
+                            <li>
+                              <button type="button">
+                                <i className="ico-keyword"></i>
+                                <em className="keyword">수출입</em> 지원사업
+                              </button>
+                            </li>
+
+                          </ul>
+                        </div>
+                      )}
+
+                      <div className="sch-layer-footer">
+                        <label className="sch-layer__toggle">
+                          <input type="checkbox" defaultChecked />
+                          <span className="sch-layer__toggle-ui"></span>
+                          자동완성기능
+                        </label>
+                      </div>
+
+                    </div>
+                  )}
                 </div>
-                <div className="main-totalbox-right">
-                  <h3>인기검색어</h3>
-                  <ul>
-                    <li className="up"><button type="button" className="mtr-bu"><span className="mtr-num">1.</span><span className="mtr-name">소상공인지원</span><span className="mtr-rank"><span className="mtr-rank-icon"></span> <span>1</span></span></button></li>
-                    <li><button type="button" className="mtr-bu"><span className="mtr-num">2.</span><span className="mtr-name">초기창업</span><span className="mtr-rank"> <span>21</span></span></button></li>
-                    <li className="down"><button type="button" className="mtr-bu"><span className="mtr-num">3.</span><span className="mtr-name">증명서발급</span><span className="mtr-rank"><span className="mtr-rank-icon"></span> <span>1</span></span></button></li>
-                    <li><button type="button" className="mtr-bu"><span className="mtr-num">4.</span><span className="mtr-name">플랫폼교육</span><span className="mtr-rank"> <span>88</span></span></button></li>
-                    <li><button type="button" className="mtr-bu"><span className="mtr-num">5.</span><span className="mtr-name">지원사업</span><span className="mtr-rank"> <span>1</span></span></button></li>
+
+                {/* 인기 검색어 */}
+                <div className="main-top-keyword">
+                  <h3>인기 검색어</h3>
+                  <ul className="keyword-list">
+                    <li><button type="button" className="word">소상공인지원</button></li>
+                    <li><button type="button" className="word">초기창업</button></li>
+                    <li><button type="button" className="word">창업지원포털</button></li>
+                    <li><button type="button" className="word">지원사업공고</button></li>
+                    <li><button type="button" className="word">AP소재정보</button></li>
+                    <li><button type="button" className="word">맞춤서비스</button></li>
                   </ul>
                 </div>
               </div>
+
+              {/* S - 자주 찾는 서비스  */}
               <section className="main-totallistbox main-section">
-                <div className="inner">
-                  <h3 className="section-tit">통합플랫폼 주요 메뉴<span className="sub-text">많이 찾는 메뉴로 바로 이동합니다.</span></h3>
+                <div className="">
+                  <h3 className="section-tit">자주 찾는 <br />서비스 </h3>
                   <div className="totallist-swiper">
                     <Swiper
                       breakpoints={{
                         320: {
                           enabled: true,
-                          slidesPerView: 3.7,
+                          slidesPerView: 3.4,
                           spaceBetween: 20
                         },
                         768: {
                           enabled: true,
-                          slidesPerView: 6,
+                          slidesPerView: 5,
                           spaceBetween: 0
                         },
                       }}
@@ -255,7 +360,7 @@ const MainPage = () => {
                   </div>
                 </div>
               </section>
-              {/*  E - main-totallistbox */}
+              {/*  E - 자주 찾는 서비스 */}
             </div>
           </div>
           {/* E - main-totallayout */}
