@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useMatches, useNavigate, useParams } from 'react-router-dom';
-
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import http from '@lib/http.js';
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -18,8 +18,6 @@ const formatDate = (dateString) => {
 
   return `${year}.${month}.${day}`;
 };
-
-const appBaseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
 const UI_USR_R_101 = () => {
   const matches = useMatches();
@@ -115,7 +113,6 @@ const UI_USR_R_101 = () => {
 
   const boardTitle = useMemo(() => boardDetail?.bbsNm || depth1Menu?.menuNm || '', [boardDetail, depth1Menu]);
   const postTitle = useMemo(() => postDetail?.pstTtl || '-', [postDetail]);
-  const categoryName = useMemo(() => postDetail?.ctgryNm || '-', [postDetail]);
   const regDate = useMemo(() => formatDate(postDetail?.pstRegDt ?? postDetail?.regDt), [postDetail]);
   const viewCount = useMemo(() => postDetail?.inqCnt ?? '-', [postDetail]);
 
@@ -138,14 +135,46 @@ const UI_USR_R_101 = () => {
     navigate('..');
   };
 
-  const buildAttachmentDownloadUrl = (file) => {
-    const atchFileId = String(file?.atchFileId ?? '').trim();
-    const atchFileSn = file?.atchFileSn;
-    if (!atchFileId || atchFileSn == null) {
-      return '#';
+  const handleDownload = async (e, file) => {
+    e.preventDefault();
+
+    if (file.status === 'new') {
+      alert('신규 파일은 아직 서버에 저장되지 않아 다운로드할 수 없습니다.');
+      return;
     }
 
-    return `${appBaseUrl}/api/v1/files/download/${encodeURIComponent(atchFileId)}/${encodeURIComponent(atchFileSn)}`;
+    const atchFileId = file.atchFileId;
+    const atchFileSn = file.atchFileSn;
+
+    if (!atchFileId || atchFileSn === undefined || atchFileSn === null) {
+      alert('다운로드에 필요한 파일 식별자(atchFileId, atchFileSn)가 없습니다.');
+      return;
+    }
+
+    try {
+      const blob = await http.get(
+        `/api/v1/files/download/${encodeURIComponent(atchFileId)}/${encodeURIComponent(String(atchFileSn))}`,
+        {
+          responseType: 'blob',
+          headers: { Accept: 'application/octet-stream' },
+        },
+      );
+
+      const downloadName = file.fileName || file.orgnlFileNm || 'download';
+
+      console.log(downloadName);
+      const url = window.URL.createObjectURL(blob.data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = downloadName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('파일 다운로드 실패:', error);
+      alert('파일 다운로드 중 오류가 발생했습니다.');
+    }
   };
 
   const buildPostLink = (targetPstNo) => {
@@ -197,7 +226,6 @@ const UI_USR_R_101 = () => {
               {attachFiles.map((file, index) => {
                 const fileLabel =
                   String(file?.orgnlFileNm ?? file?.strgFileNm ?? '').trim() || `첨부파일 ${index + 1}`;
-                const downloadUrl = buildAttachmentDownloadUrl(file);
 
                 return (
                   <li key={`${file?.atchFileId ?? 'atch'}-${file?.atchFileSn ?? index}`}>
@@ -206,7 +234,7 @@ const UI_USR_R_101 = () => {
                       {fileLabel}
                     </p>
                     <div className="btn-wrap">
-                      <a className="krds-btn medium text on-colorblue" href={downloadUrl}>
+                      <a className="krds-btn medium text on-colorblue" onClick={(e) => handleDownload(e, file)}>
                         <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
                       </a>
                     </div>
