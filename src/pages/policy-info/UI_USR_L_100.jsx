@@ -25,8 +25,9 @@ const formatDate = (dateString) => {
 
 const resolveThumbnailSrc = (post) => {
   const rprsImgAtchFileId = String(post?.rprsImgAtchFileId ?? post?.rprs_img_atch_file_id ?? '').trim();
+  const atchFileSn = String(post?.atchFileSn ?? post?.atchFileSn ?? '').trim();
   if (!rprsImgAtchFileId) return '';
-  return `${appBaseUrl}/api/v1/board/thumbnails/${encodeURIComponent(rprsImgAtchFileId)}`;
+  return `${appBaseUrl}/api/v1/board/thumbnails/${encodeURIComponent(rprsImgAtchFileId)}/${encodeURIComponent(atchFileSn)}`;
 };
 
 const UI_USR_L_100 = () => {
