@@ -139,19 +139,13 @@ const UI_USR_R_101 = () => {
   };
 
   const buildAttachmentDownloadUrl = (file) => {
+    const atchFileId = String(file?.atchFileId ?? '').trim();
     const atchFileSn = file?.atchFileSn;
-    if (!bbsNo || !pstNo || atchFileSn == null) {
+    if (!atchFileId || atchFileSn == null) {
       return '#';
     }
 
-    const params = new URLSearchParams();
-    const fileName = String(file?.orgnlFileNm ?? '').trim();
-    if (fileName) {
-      params.append('fileName', fileName);
-    }
-
-    const query = params.toString();
-    return `${appBaseUrl}/api/v1/board/${bbsNo}/posts/${pstNo}/attachments/${atchFileSn}/download${query ? `?${query}` : ''}`;
+    return `${appBaseUrl}/api/v1/files/download/${encodeURIComponent(atchFileId)}/${encodeURIComponent(atchFileSn)}`;
   };
 
   const buildPostLink = (targetPstNo) => {

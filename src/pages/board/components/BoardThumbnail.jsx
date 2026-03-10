@@ -8,7 +8,7 @@ import noImg from '@assets/common/noImg.png';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 
-const IMAGE_URL_PATTERN = /\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i;
+const appBaseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -24,37 +24,10 @@ const formatDate = (dateString) => {
 };
 
 const resolveThumbnailSrc = (post) => {
-  const candidates = [
-    post?.thumbnailUrl,
-    post?.thumbnail_url,
-    post?.thmbnUrl,
-    post?.thmbn_url,
-    post?.thmbnUrlAddr,
-    post?.thmbn_url_addr,
-    post?.imgUrl,
-    post?.img_url,
-    post?.rprsImgUrl,
-    post?.rprs_img_url,
-    post?.rprsImgUrlAddr,
-    post?.rprs_img_url_addr,
-    post?.rprsImgAtchFiles?.[0]?.fileUrlAddr,
-    post?.rprsImgAtchFiles?.[0]?.file_url_addr,
-    post?.rprsImgAtchFiles?.[0]?.url,
-    post?.rprsImgAtchFiles?.[0]?.fileUrl,
-    post?.rprsImgAtchFiles?.[0]?.file_url,
-  ];
-
-  const directUrl = candidates.find((value) => typeof value === 'string' && value.trim() !== '');
-  if (directUrl) {
-    return directUrl.trim();
-  }
-
-  const pstUrlAddr = String(post?.pstUrlAddr ?? '').trim();
-  if (pstUrlAddr && IMAGE_URL_PATTERN.test(pstUrlAddr)) {
-    return pstUrlAddr;
-  }
-
-  return '';
+  const rprsImgAtchFileId = String(post?.rprsImgAtchFileId ?? post?.rprs_img_atch_file_id ?? '').trim();
+  const atchFileSn = String(post?.atchFileSn ?? post?.atchFileSn ?? '').trim();
+  if (!rprsImgAtchFileId) return '';
+  return `${appBaseUrl}/api/v1/board/thumbnails/${encodeURIComponent(rprsImgAtchFileId)}/${encodeURIComponent(atchFileSn)}`;
 };
 
 const BoardThumbnail = ({ boardDetail, bbsNo }) => {
