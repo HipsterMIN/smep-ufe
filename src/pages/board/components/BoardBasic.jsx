@@ -39,6 +39,11 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
+  const isCategoryEnabled = useMemo(() => {
+    const raw = boardDetail?.ctgryUseYn ?? boardDetail?.ctgry_use_yn ?? '';
+    return String(raw).trim().toUpperCase() === 'Y';
+  }, [boardDetail]);
+
   // 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -47,7 +52,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
     let isMounted = true;
 
     const fetchCategories = async () => {
-      if (!bbsNo) {
+      if (!bbsNo || !isCategoryEnabled) {
         if (!isMounted) return;
         setCategories([]);
         return;
@@ -70,7 +75,13 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
     return () => {
       isMounted = false;
     };
-  }, [bbsNo]);
+  }, [bbsNo, isCategoryEnabled]);
+
+  useEffect(() => {
+    if (isCategoryEnabled) return;
+    setSelectedCategoryNo('');
+    setAppliedCategoryNo('');
+  }, [isCategoryEnabled]);
 
   const boardTitle = useMemo(() => boardDetail?.bbsNm || '공지사항', [boardDetail]);
 
@@ -132,7 +143,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
   }, [bbsNo, currentPage, pageSize, appliedCategoryNo, appliedSearchType, appliedSearchKeyword]);
 
   const handleSearch = () => {
-    setAppliedCategoryNo(selectedCategoryNo);
+    setAppliedCategoryNo(isCategoryEnabled ? selectedCategoryNo : '');
     setAppliedSearchType(searchType);
     setAppliedSearchKeyword(searchKeyword);
     setCurrentPage(0);
@@ -172,18 +183,20 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
         </div>
         <div className="search-top-box">
           <div className="sch-form-wrap">
-            <select
-              className="krds-form-select"
-              value={selectedCategoryNo}
-              onChange={(event) => setSelectedCategoryNo(event.target.value)}
-            >
-              <option value="">구분 전체</option>
-              {categories.map((category) => (
-                <option key={category?.ctgryNo} value={String(category?.ctgryNo ?? '')}>
-                  {category?.ctgryNm || '-'}
-                </option>
-              ))}
-            </select>
+            {isCategoryEnabled && (
+              <select
+                className="krds-form-select"
+                value={selectedCategoryNo}
+                onChange={(event) => setSelectedCategoryNo(event.target.value)}
+              >
+                <option value="">구분 전체</option>
+                {categories.map((category) => (
+                  <option key={category?.ctgryNo} value={String(category?.ctgryNo ?? '')}>
+                    {category?.ctgryNm || '-'}
+                  </option>
+                ))}
+              </select>
+            )}
             <select
               className="krds-form-select"
               value={searchType}
