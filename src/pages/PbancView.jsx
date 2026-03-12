@@ -33,7 +33,7 @@ const STREAMDOCS_ADAPTER_URL =
   || 'http://192.168.16.82:8088/venturein-pdf/adapter.js';
 
 const PbancView = () => {
-  const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const { breadcrumbItems, currentMenu, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const { id } = useParams();
   const [item, setItem] = useState(null);
   const [viewerVisible, setViewerVisible] = useState(false);
@@ -41,17 +41,18 @@ const PbancView = () => {
   const navigate = useNavigate();
   const viewerFrameRef = useRef(null);
   const streamdocsRef = useRef(null);
+  const bizPbancTypeCd = currentMenu?.menuId === 'M_PIIO_00091' ? 'HSSPLY' : 'BIZPBN';
 
   useEffect(() => {
     window.scrollTo(0, 0);
 
     const detail = async () => {
-      const response = await apiClient.get(`/api/v1/pbanc/${id}`);
+      const response = await apiClient.get(`/api/v1/pbanc/${id}?bizPbancTypeCd=${bizPbancTypeCd}`);
       setItem(response?.data || response);
     };
 
     detail();
-  }, [id]);
+  }, [bizPbancTypeCd, id]);
 
   useEffect(() => {
     if (!viewerVisible || !item?.strmdcsId || !viewerFrameRef.current) return undefined;
@@ -165,7 +166,7 @@ const PbancView = () => {
         <Breadcrumb items={breadcrumbItems} />
 
         <div className="page-title-wrap" data-type="responsive">
-          <p className="on-p1 on-colorblue">사업공고</p>
+          <p className="on-p1 on-colorblue">{currentMenu?.menuNm || '사업공고'}</p>
           <h2 className="h-tit2">{item?.bizPbancNm}</h2>
         </div>
 
@@ -311,7 +312,7 @@ const PbancView = () => {
 
         <div className="onboard-btm-btngroup">
           <div>
-            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate('/req/pbanc/pbanc')}>
+            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate(-1)}>
               목록
             </button>
           </div>

@@ -1,4 +1,4 @@
-import { lazy } from 'react';
+﻿import { lazy } from 'react';
 
 // 즉시 import (페이지 로드 시 바로 필요한 것들)
 import AiSmartSearch from '@pages/ai/AiSmartSearch.jsx';
@@ -274,8 +274,14 @@ export const componentMap = {
 
   // 주택특별공급 사업공고
   'M_PIIO_00091': {
-    component: UI_USR_L_150, //퍼블없음 게시판관리로 해야돼서 없는듯
+    component: Pbanc,
     layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: ':id',
+        component: PbancView,
+      },
+    ],
   },
 
   // 기업업무용 서식
