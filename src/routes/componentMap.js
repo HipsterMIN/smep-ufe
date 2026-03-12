@@ -54,6 +54,7 @@ const UI_USR_L_550 = lazy(() => import('@pages/my-business/UI-USR-L-550.jsx'));
 const UI_USR_L_100 = lazy(() => import('@pages/policy-info/UI_USR_L_100.jsx'));
 const UI_USR_R_101 = lazy(() => import('@pages/policy-info/UI_USR_R_101.jsx'));
 const UI_USR_L_110 = lazy(() => import('@pages/policy-info/UI_USR_L_110.jsx'));
+const UI_USR_R_111 = lazy(() => import('@pages/policy-info/UI_USR_R_111.jsx'));
 const UI_USR_L_150 = lazy(() => import('@pages/more-service/UI-USR-L-150.jsx'));
 const UI_USR_L_180 = lazy(() => import('@pages/more-service/UI-USR-L-180.jsx'));
 const UI_Usr_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
@@ -246,6 +247,12 @@ export const componentMap = {
   'M_PIIO_00087': {
     component: UI_USR_L_110,
     layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: ':id',
+        component: UI_USR_R_111,
+      },
+    ],
   },
 
   // 품목별 법정의무 인증제도
