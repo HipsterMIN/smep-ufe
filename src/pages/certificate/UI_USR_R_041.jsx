@@ -2,6 +2,8 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api as apiClient } from '@lib/apiClient.js';
+import Logo from '@assets/common/logo2.svg';
+// import { useAuthStore } from '@store/useAuthStore'; // TODO: 로그인/기업회원 정책 결정 후 활성화
 
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
@@ -9,19 +11,22 @@ import Popup from '@components/ui/Popup.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 const UI_USR_R_041 = () => {
-  const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const { breadcrumbItems, getSideNavigationData, getDepth1Parent, getFullPath } = useUserMenu();
 
   const { prdocCd } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { getFullPath } = useUserMenu();
 
-  // ✅ 사이드바 데이터 계산
-  const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
-  const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+  // 발급 불가 팝업 상태
+  const [isIneligiblePopupOpen, setIsIneligiblePopupOpen] = useState(false);
+  const [ineligibleInfo, setIneligibleInfo] = useState(null);
+
+  // 중복 발급 팝업 상태
+  const [isDuplicatePopupOpen, setIsDuplicatePopupOpen] = useState(false);
+
+  const sidebarData = getSideNavigationData();
+  const depth1Menu = getDepth1Parent();
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -43,8 +48,65 @@ const UI_USR_R_041 = () => {
     navigate(-1);
   };
 
-  const handleClickPrint = () => {
-    navigate(getFullPath('M_PIIO_00113')); // 증명서 발급 메뉴로 이동
+  /**
+   * 증명서 발급 버튼 클릭 핸들러
+   * TODO: 로그인/기업회원 정책 결정 후 아래 주석 처리된 체크 로직 활성화
+   */
+  const handleClickIssue = async () => {
+    // TODO: 로그인 체크 - 정책 결정 후 활성화
+    // if (!isLogin) {
+    //   if (window.confirm('로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?')) {
+    //     navigate('/login');
+    //   }
+    //   return;
+    // }
+
+    // TODO: 기업회원 체크 - 정책 결정 후 활성화
+    // if (currentMode !== 'CORPORATE') {
+    //   if (window.confirm('기업회원 로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?')) {
+    //     navigate('/login');
+    //   }
+    //   return;
+    // }
+
+    // 발급 가능 기업 여부 확인
+    try {
+      const result = await apiClient.post(
+        '/api/v1/certificate/eligibility',
+        {
+          prdocCd,
+          bizNo: '1378626719', // TODO: 로그인 구현 후 Zustand store bizno로 교체
+        },
+      );
+
+      // 24시간 내 중복 발급 이력 확인
+      if (result.data.isDuplicate) {
+        setIsDuplicatePopupOpen(true);
+        return;
+      }
+
+      if (!result.data.eligible) {
+        setIneligibleInfo({
+          prdocNm: result.data.prdocNm,
+          linkedSystemName: result.data.linkedSystemName,
+          linkedSystemUrl: result.data.linkedSystemUrl,
+        });
+        setIsIneligiblePopupOpen(true);
+        return;
+      }
+    } catch (error) {
+      console.error('발급 가능 여부 확인 실패:', error);
+      alert('발급 가능 여부 확인 중 오류가 발생했습니다.');
+      return;
+    }
+
+    navigate(`${getFullPath('M_PIIO_00078')}/${prdocCd}/apply`, {
+      state: {
+        prdocCd,
+        prdocNm: data.prdocTtl,
+        prdocIssuGdCn: data.prdocIssuGdCn,
+      },
+    });
   };
 
   if (loading) return <div>로딩 중...</div>;
@@ -75,72 +137,95 @@ const UI_USR_R_041 = () => {
             </button>
           </div>
           <div>
-            <button type="button" className="krds-btn primary xlarge" onClick={() => setIsPopupOpen(true)}>
+            <button type="button" className="krds-btn primary xlarge" onClick={handleClickIssue}>
                 증명서 발급 <i className="svg-icon ico-angle right"></i>
             </button>
           </div>
         </div>
       </div>
 
-      {/* 팝업 */}
+      {/* 발급 불가 안내 팝업 */}
       <Popup
-        isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-        title="중소기업(소상공인) 확인서발급"
-        closeLeftAction={
+        isOpen={isIneligiblePopupOpen}
+        onClose={() => setIsIneligiblePopupOpen(false)}
+        footer={
           <>
             <button
               type="button"
-              className="krds-btn text small"
-              //onClick={handleShare}
+              className="krds-btn tertiary medium"
+              onClick={() => setIsIneligiblePopupOpen(false)}
             >
-              <i className="svg-icon ico-share"></i>
-              공유
+                  닫기
             </button>
-          </>
-        }
-        footer={
-          <>
-            <button type="button" className="krds-btn primary md" onClick={() => handleClickPrint()}>발급</button>
-            <button type="button" className="krds-btn tertiary md" onClick={() => setIsPopupOpen(false)}>닫기</button>
+            {ineligibleInfo?.linkedSystemUrl && (
+              <button
+                type="button"
+                className="krds-btn primary medium"
+                onClick={() => window.open(`https://${ineligibleInfo.linkedSystemUrl}`, '_blank')}
+              >
+                      바로가기
+              </button>
+            )}
           </>
         }
       >
         <div className="txt-box outline">
-          <h4 className="outline-tit">알려드립니다.</h4>
-          <ul className="check-list">
-            <li>중소기업현황정보시스템을 통해 중소기업임을 확인 받은 기업에 한하여 출력할 수 있습니다.</li>
-            <li>신청 된 문서는 24시간 동안 출력할 수 있으며, 24시간 경과 후 삭제됩니다.</li>
-            <li>아래 기업정보를 확인하신 후 출력버튼을 클릭해주세요.</li>
-            <li>신규 신청버튼 클릭 시 중소기업임을 최초 확인받기 위하여 중소기업현황정보시스템으로 이동합니다.</li>
-            <li>발급된 전자증명서는 정부전자문서지갑에서 확인이 가능합니다.</li>
-          </ul>
+          <div className="guide-text-box">
+            <div className="guide-logo">
+              <img src={Logo} alt="중소벤처 24 로고" />
+            </div>
+            <div className="guide-text">
+                귀사 <span className="bold">업체명</span>은(는)
+              <br />
+              <strong>
+                  현재 중소기업통합플랫폼에서 <br /> {ineligibleInfo?.prdocNm} 발급 대상이 아닙니다.
+              </strong>
+              {ineligibleInfo?.linkedSystemName && (
+                <p>해당 증명서 발급 기관인 {ineligibleInfo.linkedSystemName}에서 확인바랍니다.</p>
+              )}
+            </div>
+          </div>
         </div>
+      </Popup>
 
-        {/* input  */}
-        <div className="on-border-box">
-          <div className="form-group">
-            <div className="form-conts">
-              <div className="form-tit">
-                <label htmlFor="id_01" className="form-label">사업자등록번호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
-              </div>
-              <input type="text" id="id_01" className="krds-input small" placeholder="사업자등록번호를 입력해주세요" value="228-81-05280" disabled />
+      {/* 24시간 내 중복 발급 안내 팝업 */}
+      <Popup
+        isOpen={isDuplicatePopupOpen}
+        onClose={() => setIsDuplicatePopupOpen(false)}
+        footer={
+          <>
+            <button
+              type="button"
+              className="krds-btn primary medium"
+              onClick={() => {
+                setIsDuplicatePopupOpen(false);
+                // TODO: 발급이력 목록 페이지 경로 확정 후 교체
+                navigate(getFullPath('M_PIIO_00078'));
+              }}
+            >
+              예
+            </button>
+            <button
+              type="button"
+              className="krds-btn tertiary medium"
+              onClick={() => {
+                setIsDuplicatePopupOpen(false);
+                navigate(-1);
+              }}
+            >
+              아니오
+            </button>
+          </>
+        }
+      >
+        <div className="txt-box outline">
+          <div className="guide-text-box">
+            <div className="guide-logo">
+              <img src={Logo} alt="중소벤처 24 로고"/>
             </div>
-          </div>
-          <div className="form-group">
-            <div className="form-conts">
-              <div className="form-tit">
-                <label htmlFor="id_02" className="form-label">상호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
-              </div>
-              <input type="text" id="id_02" className="krds-input small" placeholder="상호를 입력해주세요" value="주식회사 중소벤처" disabled />
-            </div>
-          </div>
-          <div className="form-group">
-            <div className="form-conts">
-              <div className="form-tit">
-                <label htmlFor="id_03" className="form-label">대표자명 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
-              </div>
-              <input type="text" id="id_03" className="krds-input small" placeholder="대표자명을 입력해주세요" value="홍길동" disabled />
+            <div className="guide-text">
+              <strong>24시간 이내에 발급된 증명서가 있습니다.</strong>
+              <p>발급이력조회로 이동하시겠습니까?</p>
             </div>
           </div>
         </div>
