@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useMatches } from 'react-router-dom';
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
@@ -24,7 +24,7 @@ const BIZ_FIELD_OPTIONS = [
 
 const Pbanc = () => {
   const matches = useMatches();
-  const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const { breadcrumbItems, currentMenu, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [items, setItems] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
@@ -39,6 +39,7 @@ const Pbanc = () => {
   const [sortType, setSortType] = useState(DEFAULT_SORT);
 
   const schFormWrapRef = useRef(null);
+  const bizPbancTypeCd = currentMenu?.menuId === 'M_PIIO_00091' ? 'HSSPLY' : 'BIZPBN';
 
   const fieldLabelMap = useMemo(
     () => Object.fromEntries(BIZ_FIELD_OPTIONS.map((option) => [option.value, option.label])),
@@ -54,6 +55,7 @@ const Pbanc = () => {
       params.set('page', String(pageParam));
       params.set('size', String(size));
       params.set('sortType', sortType);
+      params.set('bizPbancTypeCd', bizPbancTypeCd);
 
       if (searchText.trim()) params.set('searchText', searchText.trim());
       if (searchType) params.set('searchType', searchType);
@@ -62,7 +64,7 @@ const Pbanc = () => {
 
       return params.toString();
     },
-    [applyStatus, bizPbancClsfCd, searchText, searchType, size, sortType],
+    [applyStatus, bizPbancClsfCd, bizPbancTypeCd, searchText, searchType, size, sortType],
   );
 
   const search = useCallback(
