@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useMatches } from 'react-router-dom';
+import { useMatches, useNavigate } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
@@ -21,6 +21,7 @@ const formatDate = (dateString) => {
 
 const UI_USR_L_110 = () => {
   const matches = useMatches();
+  const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [boardDetail, setBoardDetail] = useState(null);
@@ -154,6 +155,11 @@ const UI_USR_L_110 = () => {
     setCurrentPage(0);
   };
 
+  const moveToDetail = (pstNo) => {
+    if (pstNo == null) return;
+    navigate(`${pstNo}`);
+  };
+
   return (
     <>
       <SideNavigation
@@ -218,21 +224,19 @@ const UI_USR_L_110 = () => {
         {/* table [S] */}
         <div className="krds-table-wrap">
           <table className="tbl col data">
-            <caption>행사정보 표. 번호, 지역, 제목, 수행기관, 작성일 조회수 정보가 제공됨.</caption>
+            <caption>행사정보 표. 번호, 제목, 출처, 작성일 조회수 정보가 제공됨.</caption>
             <colgroup>
-              <col style={{ width: '5%' }} />
-              <col style={{ width: '5%' }} />
+              <col style={{ width: '10px' }} />
               <col style={{ width: '340px' }} />
               <col style={{ width: '15%' }} />
-              <col style={{ width: '5%' }} />
-              <col style={{ width: '5%' }} />
+              <col style={{ width: '80px' }} />
+              <col style={{ width: '10px' }} />
             </colgroup>
             <thead>
               <tr>
                 <th scope="col" className="ac">번호</th>
-                <th scope="col" className="ac">지역</th>
                 <th scope="col" className="ac">제목</th>
-                <th scope="col" className="ac">수행기관</th>
+                <th scope="col" className="ac">출처</th>
                 <th scope="col" className="ac">작성일</th>
                 <th scope="col" className="ac">조회수</th>
               </tr>
@@ -256,9 +260,14 @@ const UI_USR_L_110 = () => {
                     <th scope="row" className="ac">
                       <span>{item?.pstNo ?? '-'}</span>
                     </th>
-                    <td className="ac"><span>{item?.ctgryNm || '-'}</span></td>
                     <td>
-                      <a href="#" onClick={(event) => event.preventDefault()}>
+                      <a
+                        href="#"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          moveToDetail(item?.pstNo);
+                        }}
+                      >
                         <span>{item?.pstTtl || '-'}</span>
                       </a>
                     </td>
