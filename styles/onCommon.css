@@ -2242,6 +2242,49 @@ table tbody tr:hover td {
   color: var(--krds-light-color-text-primary);
 }
 
+
+/* SEARCH ALL */
+
+#wrap.integrated-search .on-gradientpage {
+  padding-bottom: 0;
+}
+#wrap.integrated-search .onsearch-input-box .boxinner {
+  border: 3px solid #256EF4;
+}
+#wrap.integrated-search .onsearch-input-box .boxinner > input[type="text"] {
+  padding: 0 30px;
+}
+#wrap.integrated-search .onsearch-input-box .boxinner > button i {
+  mask-size: 28px;
+}
+#wrap.integrated-search .totalsearch-wrap .page-title-wrap .h-tit {
+  margin-bottom: 40px;
+}
+#wrap.integrated-search .search-top-box {
+  width: 100%;
+  margin-bottom: 40px;
+}
+#wrap.integrated-search .search-top-box .filter-chip {
+  width: 100%;
+  margin-top: 0;
+  padding: 20px 24px;
+}
+#wrap.integrated-search .search-top-box .sch-filter-box {
+  display: block;
+  padding: 0;
+}
+#wrap.integrated-search .search-top-box .filter-chip dt span.point {
+  color: #0B50D0;
+}
+#wrap.integrated-search .integrated-result {
+  margin-top: 64px;
+}
+#wrap.integrated-search .integrated-result .search-list-top .sch-info li:not(:last-child)::after {
+  right: 12.5px;
+}
+
+
+
 /* util class (컨텐츠 간 간격 적용 시)*/
 .mt-0 {margin-top: 0;}
 .mt-12 {margin-top: 12px;}

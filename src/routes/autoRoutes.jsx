@@ -4,7 +4,7 @@ import React, {lazy, Suspense} from 'react';
 const modules = import.meta.glob('../publishing/*.jsx');
 
 // SubpageLayout을 적용하지 않을 페이지 목록
-const NO_LAYOUT_PAGES = ['MainPage', 'AiSmartSearch', 'AiChat'];
+const NO_LAYOUT_PAGES = ['MainPage', 'AiSmartSearch', 'AiChat', 'SEARCHALL'];
 
 export const autoPublishingRoutes = Object.keys(modules).map((path) => {
     // 1. 파일 경로에서 순수 파일명 추출 및 확장자 제거, 앞뒤 공백 제거
