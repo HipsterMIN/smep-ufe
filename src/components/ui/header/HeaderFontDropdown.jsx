@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 
 const FONT_SIZES = [
-  { label: "작게", iconSize: "sm" },
-  { label: "보통", iconSize: "md" },
-  { label: "조금 크게", iconSize: "lg" },
-  { label: "크게", iconSize: "xl" },
-  { label: "가장 크게", iconSize: "xxl" },
+  { label: "작게", iconSize: "sm", zoom: 0.9 },
+  { label: "보통", iconSize: "md", zoom: 1.0 },
+  { label: "조금 크게", iconSize: "lg", zoom: 1.1 },
+  { label: "크게", iconSize: "xl", zoom: 1.3 },
+  { label: "가장 크게", iconSize: "xxl", zoom: 1.5 },
 ];
 
 export default function HeaderFontDropdown() {
@@ -13,13 +13,33 @@ export default function HeaderFontDropdown() {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const containerRef = useRef(null);
 
-  // 바깥 영역 클릭할때랑 사용자가 scroll할때 닫히게
+  // zoom 적용 함수
+  const changeZoom = (value) => {
+    document.body.style.zoom = value;
+    localStorage.setItem("siteZoom", value);
+  };
+
+  // 초기 로딩시 zoom 유지
+  useEffect(() => {
+    const savedZoom = localStorage.getItem("siteZoom");
+    if (savedZoom) {
+      document.body.style.zoom = savedZoom;
+
+      const index = FONT_SIZES.findIndex(
+        (item) => item.zoom === Number(savedZoom)
+      );
+      if (index !== -1) setSelectedIndex(index);
+    }
+  }, []);
+
+  // 바깥 영역 클릭 / 스크롤 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setIsOpen(false);
       }
     };
+
     const handleScroll = () => setIsOpen(false);
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -31,14 +51,19 @@ export default function HeaderFontDropdown() {
     };
   }, []);
 
+  // 선택시 zoom 적용
   const handleSelect = (index) => {
     setSelectedIndex(index);
+    changeZoom(FONT_SIZES[index].zoom);
     setIsOpen(false);
   };
 
+  // 초기화
   const handleReset = (e) => {
     e.stopPropagation();
     setSelectedIndex(null);
+    document.body.style.zoom = 1;
+    localStorage.removeItem("siteZoom");
   };
 
   return (
@@ -46,25 +71,23 @@ export default function HeaderFontDropdown() {
       {/* 트리거 버튼 */}
       <button
         type="button"
-        className={`krds-btn small text open-modal font-setting-trigger ${isOpen ? "is-open" : ""}`}
+        className={`krds-btn small text open-modal font-setting-trigger ${
+          isOpen ? "is-open" : ""
+        }`}
         onClick={() => setIsOpen((prev) => !prev)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
         <i className="svg-icon ico-view-mode" />
-         글자 설정
-        <i className={`svg-icon ico-angle  ${isOpen ? "up" : ""}`} />
+        글자 설정
+        <i className={`svg-icon ico-angle ${isOpen ? "up" : ""}`} />
       </button>
 
-      {/* 드롭다운 리스트 */}
+      {/* 드롭다운 */}
       {isOpen && (
         <div className="drop-menu">
           <div className="drop-in">
-            <ul
-              role="listbox"
-              aria-label="글자 크기 선택"
-              className="drop-list"
-            >
+            <ul role="listbox" aria-label="글자 크기 선택" className="drop-list">
               {FONT_SIZES.map((item, index) => {
                 const isSelected = selectedIndex === index;
 
@@ -77,13 +100,15 @@ export default function HeaderFontDropdown() {
                   >
                     <button
                       type="button"
-                      className={`${isSelected ? "is-selected" : ""} font-setting-button ${item.iconSize}`}
+                      className={`${
+                        isSelected ? "is-selected" : ""
+                      } font-setting-button ${item.iconSize}`}
                       onClick={() => handleSelect(index)}
                     >
-                      <span className="font-setting-icon">
-                      </span>
+                      <span className="font-setting-icon"></span>
                       <span className="font-setting-label">
-                        <span className="sr-only">글자 설정</span>{item.label}
+                        <span className="sr-only">글자 설정</span>
+                        {item.label}
                       </span>
                     </button>
                   </li>
@@ -95,7 +120,7 @@ export default function HeaderFontDropdown() {
                 <hr />
               </li>
 
-              {/* 초기화 버튼 */}
+              {/* 초기화 */}
               <li>
                 <button
                   type="button"
