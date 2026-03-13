@@ -19,7 +19,7 @@ const formatDate = (dateString) => {
   return `${year}-${month}-${day}`;
 };
 
-const UI_USR_L_110 = () => {
+const UI_USR_L_180 = () => {
   const matches = useMatches();
   const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -295,4 +295,4 @@ const UI_USR_L_110 = () => {
   );
 };
 
-export default UI_USR_L_110;
+export default UI_USR_L_180;
