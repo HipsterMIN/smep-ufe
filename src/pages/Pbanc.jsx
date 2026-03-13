@@ -4,23 +4,12 @@ import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import Pagination from '../components/ui/Pagination.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
+import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
 import { useUserMenu } from '../context/UserMenuContext';
 
 const DEFAULT_SIZE = 10;
 const DEFAULT_SORT = 'REG';
-
-const BIZ_FIELD_OPTIONS = [
-  { value: 'PC10', label: '금융' },
-  { value: 'PC20', label: '기술' },
-  { value: 'PC30', label: '인력' },
-  { value: 'PC40', label: '수출' },
-  { value: 'PC50', label: '내수' },
-  { value: 'PC60', label: '창업' },
-  { value: 'PC70', label: '경영' },
-  { value: 'PC80', label: '소상공인' },
-  { value: 'PC12', label: '중견' },
-  { value: 'PC99', label: '기타' },
-];
+const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
 
 const Pbanc = () => {
   const matches = useMatches();
@@ -30,6 +19,7 @@ const Pbanc = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
+  const [bizFieldOptions, setBizFieldOptions] = useState([]);
 
   const [searchText, setSearchText] = useState('');
   const [searchType, setSearchType] = useState('');
@@ -42,9 +32,10 @@ const Pbanc = () => {
   const bizPbancTypeCd = currentMenu?.menuId === 'M_PIIO_00091' ? 'HSSPLY' : 'BIZPBN';
 
   const fieldLabelMap = useMemo(
-    () => Object.fromEntries(BIZ_FIELD_OPTIONS.map((option) => [option.value, option.label])),
-    [],
+    () => Object.fromEntries(bizFieldOptions.map((option) => [option.value, option.label])),
+    [bizFieldOptions],
   );
+
   const handleToggleFilter = () => {
     schFormWrapRef.current?.classList.toggle('on');
   };
@@ -86,10 +77,38 @@ const Pbanc = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     search(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCommonCodes = async () => {
+      try {
+        const commonCodes = await fetchAndConvertCommonCodes([BIZ_PBANC_CLSF_GROUP_ID]);
+        if (!mounted) {
+          return;
+        }
+
+        setBizFieldOptions(commonCodes[BIZ_PBANC_CLSF_GROUP_ID] || []);
+      } catch (error) {
+        console.error('공통코드 조회 실패:', error);
+        if (mounted) {
+          setBizFieldOptions([]);
+        }
+      }
+    };
+
+    loadCommonCodes();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
     search(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size, sortType]);
 
   function formatToYYMMDD(value) {
@@ -124,7 +143,7 @@ const Pbanc = () => {
               <input
                 type="text"
                 className="krds-input"
-                placeholder="공고명/사업수행기관으로 검색해 주세요"
+                placeholder="공고명, 사업수행기관으로 검색해 주세요."
                 title="검색어 입력"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
@@ -154,7 +173,7 @@ const Pbanc = () => {
                   onChange={(e) => setBizPbancClsfCd(e.target.value)}
                 >
                   <option value="">전체</option>
-                  {BIZ_FIELD_OPTIONS.map((option) => (
+                  {bizFieldOptions.map((option) => (
                     <option key={option.value} value={option.value}>{option.label}</option>
                   ))}
                 </select>
@@ -175,9 +194,6 @@ const Pbanc = () => {
                 </select>
               </div>
             </div>
-            {/*<div style={{ marginTop: '12px' }}>*/}
-            {/*  <button type="button" className="krds-btn medium" onClick={() => search(1)}>필터 적용</button>*/}
-            {/*</div>*/}
           </div>
         </div>
 
@@ -221,7 +237,7 @@ const Pbanc = () => {
 
         <div className="krds-table-wrap">
           <table className="tbl col data">
-            <caption>지원사업 공고표. 번호, 제목, 신청기간, 신청, 지원기관, 조회수 정보가 제공됨.</caption>
+            <caption>지원사업 공고의 번호, 제목, 신청기간, 신청, 지원기관, 조회수 정보가 제공됩니다.</caption>
             <colgroup>
               <col style={{ width: '5%' }} />
               <col />

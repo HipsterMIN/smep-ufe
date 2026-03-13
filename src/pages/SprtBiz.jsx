@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
@@ -6,6 +6,7 @@ import Pagination from '../components/ui/Pagination';
 import Tab from '../components/ui/Tab';
 import { useUserMenu } from '../context/UserMenuContext';
 import { api as apiClient } from '../lib/apiClient.js';
+import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
 
 const DEFAULT_SIZE = 12;
 const DEFAULT_SORT = 'REG';
@@ -18,41 +19,8 @@ const INITIAL_CONDITION = {
   searchText: '',
 };
 
-const BIZ_FIELD_OPTIONS = [
-  { value: 'PC10', label: '금융' },
-  { value: 'PC20', label: '기술' },
-  { value: 'PC30', label: '인력' },
-  { value: 'PC40', label: '수출' },
-  { value: 'PC50', label: '내수' },
-  { value: 'PC60', label: '창업' },
-  { value: 'PC70', label: '경영' },
-  { value: 'PC80', label: '소상공인' },
-  { value: 'PC12', label: '중견' },
-  { value: 'PC99', label: '기타' },
-];
-
-const ORGANIZATION_OPTIONS = [
-  { value: 'SP16', label: '중소벤처기업부' },
-  { value: 'SP01', label: '중소벤처기업진흥공단' },
-  { value: 'SP02', label: '중소기업기술정보진흥원' },
-  { value: 'SP03', label: '소상공인시장진흥공단' },
-  { value: 'SP04', label: '창업진흥원' },
-  { value: 'SP05', label: '소상공인시장진흥공단' },
-  { value: 'SP06', label: '기술보증기금' },
-  { value: 'SP10', label: '대중소기업농어업협력재단' },
-  { value: 'SP13', label: '한국산업기술진흥원' },
-  { value: 'SP17', label: '중소기업중앙회' },
-  { value: 'SP22', label: '한국무역보험공사' },
-  { value: 'SP23', label: '기업은행' },
-  { value: 'SP24', label: '대한상공회의소' },
-  { value: 'SP25', label: '신용보증기금' },
-  { value: 'SP26', label: '신용보증재단중앙회' },
-  { value: 'SP27', label: '소상공인연합회' },
-  { value: 'SP28', label: '한국무역협회' },
-  { value: 'SP29', label: '한국무역협회' },
-  { value: 'SP30', label: '한국산업은행' },
-  { value: 'SP31', label: '한국수출입은행' },
-];
+const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
+const BIZ_PBANC_SPRT_INST_GROUP_ID = 'BIZ_PBANC_SPRT_INST_CD';
 
 const EMPTY_HTML_PATTERNS = new Set([
   '<p style="text-align: left;"></p>',
@@ -81,6 +49,8 @@ const SprtBiz = () => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [selectedBizTypes, setSelectedBizTypes] = useState([]);
   const [selectedOrgs, setSelectedOrgs] = useState([]);
+  const [bizFieldOptions, setBizFieldOptions] = useState([]);
+  const [organizationOptions, setOrganizationOptions] = useState([]);
 
   const [items, setItems] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
@@ -92,6 +62,11 @@ const SprtBiz = () => {
   const [searchText, setSearchText] = useState('');
   const [size, setSize] = useState(DEFAULT_SIZE);
   const [appliedCondition, setAppliedCondition] = useState(INITIAL_CONDITION);
+
+  const fieldLabelMap = useMemo(
+    () => Object.fromEntries(bizFieldOptions.map((option) => [option.value, option.label])),
+    [bizFieldOptions],
+  );
 
   const isMeaningfulHtml = (html) => {
     if (!html || typeof html !== 'string') return false;
@@ -136,6 +111,38 @@ const SprtBiz = () => {
     window.scrollTo(0, 0);
     fetchList(1, INITIAL_CONDITION, DEFAULT_SIZE);
   }, [fetchList]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCommonCodes = async () => {
+      try {
+        const commonCodes = await fetchAndConvertCommonCodes([
+          BIZ_PBANC_CLSF_GROUP_ID,
+          BIZ_PBANC_SPRT_INST_GROUP_ID,
+        ]);
+
+        if (!mounted) {
+          return;
+        }
+
+        setBizFieldOptions(commonCodes[BIZ_PBANC_CLSF_GROUP_ID] || []);
+        setOrganizationOptions(commonCodes[BIZ_PBANC_SPRT_INST_GROUP_ID] || []);
+      } catch (error) {
+        console.error('공통코드 조회 실패:', error);
+        if (mounted) {
+          setBizFieldOptions([]);
+          setOrganizationOptions([]);
+        }
+      }
+    };
+
+    loadCommonCodes();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (prevSizeRef.current !== size) {
@@ -185,11 +192,11 @@ const SprtBiz = () => {
     ));
   };
 
-  const getFieldLabel = (code) => BIZ_FIELD_OPTIONS.find((option) => option.value === code)?.label || code;
+  const getFieldLabel = (code) => fieldLabelMap[code] || code;
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
-  const currentFilters = activeTabIndex === 0 ? BIZ_FIELD_OPTIONS : ORGANIZATION_OPTIONS;
+  const currentFilters = activeTabIndex === 0 ? bizFieldOptions : organizationOptions;
   const selectedFilters = activeTabIndex === 0 ? selectedBizTypes : selectedOrgs;
 
   return (

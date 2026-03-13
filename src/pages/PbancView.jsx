@@ -1,22 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api as apiClient, apiBaseUrl } from '../lib/apiClient.js';
+import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
-
-const FIELD_LABEL_MAP = {
-  PC10: '금융',
-  PC20: '기술',
-  PC30: '인력',
-  PC40: '수출',
-  PC50: '내수',
-  PC60: '창업',
-  PC70: '경영',
-  PC80: '소상공인',
-  PC12: '중견',
-  PC99: '기타',
-};
 
 const EMPTY_HTML_PATTERNS = new Set([
   '<p style="text-align: left;"></p>',
@@ -32,16 +20,24 @@ const STREAMDOCS_ADAPTER_URL =
   import.meta.env.VITE_STREAMDOCS_ADAPTER_URL
   || 'http://192.168.16.82:8088/venturein-pdf/adapter.js';
 
+const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
+
 const PbancView = () => {
   const { breadcrumbItems, currentMenu, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const { id } = useParams();
   const [item, setItem] = useState(null);
+  const [bizFieldOptions, setBizFieldOptions] = useState([]);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerError, setViewerError] = useState('');
   const navigate = useNavigate();
   const viewerFrameRef = useRef(null);
   const streamdocsRef = useRef(null);
   const bizPbancTypeCd = currentMenu?.menuId === 'M_PIIO_00091' ? 'HSSPLY' : 'BIZPBN';
+
+  const fieldLabelMap = useMemo(
+    () => Object.fromEntries(bizFieldOptions.map((option) => [option.value, option.label])),
+    [bizFieldOptions],
+  );
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -53,6 +49,32 @@ const PbancView = () => {
 
     detail();
   }, [bizPbancTypeCd, id]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCommonCodes = async () => {
+      try {
+        const commonCodes = await fetchAndConvertCommonCodes([BIZ_PBANC_CLSF_GROUP_ID]);
+        if (!mounted) {
+          return;
+        }
+
+        setBizFieldOptions(commonCodes[BIZ_PBANC_CLSF_GROUP_ID] || []);
+      } catch (error) {
+        console.error('공통코드 조회 실패:', error);
+        if (mounted) {
+          setBizFieldOptions([]);
+        }
+      }
+    };
+
+    loadCommonCodes();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!viewerVisible || !item?.strmdcsId || !viewerFrameRef.current) return undefined;
@@ -193,7 +215,7 @@ const PbancView = () => {
 
         <div className="def-list-wrap">
           <dl className="def-list">
-            {renderTextRow('분야', item?.bizPbancClsfCd ? FIELD_LABEL_MAP[item.bizPbancClsfCd] || item.bizPbancClsfCd : '')}
+            {renderTextRow('분야', item?.bizPbancClsfCd ? fieldLabelMap[item.bizPbancClsfCd] || item.bizPbancClsfCd : '')}
             {renderTextRow('사업수행기관', item?.bizSprvsnInstNm)}
             {renderHtmlRow('사업개요', item?.bizPbancOtln)}
             {renderHtmlRow('지원규모', item?.bizSprtSclCn)}
