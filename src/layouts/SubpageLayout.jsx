@@ -7,7 +7,7 @@ const SubpageLayout = ({ children }) => {
   return (
     <div id="wrap">
       <Header />
-      <div id="container">
+      <div id="container" className="sub-container">
         <div className="inner in-between">
           {children || <Outlet />}  {/* ✅ children 우선, 없으면 Outlet */}
         </div>

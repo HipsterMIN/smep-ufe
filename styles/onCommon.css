@@ -372,11 +372,11 @@ table tbody tr:hover td {
 .main-quick-menu > ul > li:first-child img {
   width: 33px;
 }
-.main-quick-menu .quick-menu-list button {
+.main-quick-menu .quick-menu-item button {
   display: flex;
   justify-content: center;
 }
-.main-quick-menu .quick-menu-list button {
+.main-quick-menu .quick-menu-item button {
   min-width: 150px;
   display: flex;
   align-items: anchor-center;
@@ -396,12 +396,11 @@ table tbody tr:hover td {
 }
 .main-quick-menu .quick-menu-tit {
   margin-top: 16px;
-  max-width: 66%;
   font-size: 17px;
   font-weight: 700;
   color: #fff;
 }
-.main-quick-menu .quick-menu-list button:hover .main-totalbox-img {
+.main-quick-menu .quick-menu-item button:hover .main-totalbox-img {
   transform: scale(1.2);
   background-color: #b0c8ff;
 }
