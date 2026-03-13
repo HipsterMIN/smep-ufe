@@ -12,27 +12,16 @@ import certImgs3 from "../assets/main/certificate_icon_03.svg";
 import certImgs4 from "../assets/main/certificate_icon_04.svg";
 import certImgs5 from "../assets/main/certificate_icon_05.svg";
 import certImgs6 from "../assets/main/certificate_icon_06.svg";
+import logoImgsBi from "../assets/sub/bi_logo.svg";
+import logoVertical from "../assets/sub/logo_vertical.svg";
+import logoHorizontal from "../assets/sub/logo_horizontal.svg";
 
 const UI_USR_R_350 = () => {
   const tabData = useRef(['중소벤처24·기업마당', 'BI 소개']);
   const schFormWrapRef1 = useRef(null);
   const schFormWrapRef2 = useRef(null);
-	const [isOpen, setOpen] = useState(false); // 열기, 닫기 변수
 
   const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const [likedItems, setLikedItems] = useState({});
-
-  const handleToggleFilter = (tabIndex) => {
-    const ref = tabIndex === 0 ? schFormWrapRef1 : schFormWrapRef2;
-    ref.current.classList.toggle('on');
-		setOpen(!isOpen);
-  };
-  const handleToggleLike = (index) => {
-    setLikedItems(prev => ({
-      ...prev,
-      [index]: !prev[index]
-    }));
-  };
 
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
@@ -70,11 +59,13 @@ const UI_USR_R_350 = () => {
         </div>
 
         <div className="krds-tab-area layer">
-            <p className="guide-txt custom">중소벤처24·기업마당의 주요 기능과 이용 절차를 안내합니다.</p>
+            <p className="guide-txt custom mb-40">중소벤처24·기업마당의 주요 기능과 이용 절차를 안내합니다.</p>
+            <Tab tabData={tabData.current} onTabChange={handleTabChange} />
+
             <div className="tab-conts-wrap mt-40">
               <section className={`tab-conts ${activeTabIndex === 0 ? 'active' : ''}`}>
-								<h3 className="sr-only">사업유형별</h3>
-								<Tab tabData={tabData.current} onTabChange={handleTabChange} />
+								<h3 className="sr-only">중소벤처24·기업마당</h3>
+								
 								<div className="platform-intro-wrap" ref={schFormWrapRef1}>
 									<h2>기업이 필요한 모든 지원을 하나의 흐름으로 연결합니다.</h2>
 									<p>
@@ -195,6 +186,117 @@ const UI_USR_R_350 = () => {
 											</ul>
 										</div>
 									</div>
+								</div>
+
+              </section>
+              
+              <section className={`tab-conts ${activeTabIndex === 1 ? 'active' : ''}`}>
+								<h3 className="sr-only">BI 소개</h3>
+								<div className="platform-bi-wrap" ref={schFormWrapRef2}>
+                  <h4>기관상징 (MI)기본 디자인</h4>
+                  <div className="default-design-box mb-24">
+                    <img src={logoImgsBi} alt="중소벤처24·기업마당 BI 로고 이미지" />
+                  </div>
+                  <p>
+                    태극을 청색과 적색의 하나된 모습으로 역동적으로 표현하여<br/>
+                    국가와 국민, 대한민국과 세계, 과거와 현재를 융합하여 미래를 만들어가는 대한민국 정부를 상징.<br/>
+                    태극 원형의 색상을 연계하여 대한민국다움을 극대화함과 동시에 코리아 프리미엄의 문화적 세련미를 표현.
+                  </p>
+
+                  <h4>기관상징 조합</h4>
+                  <div className="default-design-box space mb-48">
+                    <div className="box-inner border-after">
+                      <h5>기본형 세로조합</h5>
+                      <img
+                        src={logoVertical}
+                        className="img-vertical"
+                        alt="기본형 세로조합 - 중소벤처24·기업마당 BI 로고 이미지"
+                      />
+                    </div>
+                    <div className="box-inner">
+                      <h5>기본형 가로조합</h5>
+                      <img
+                        src={logoHorizontal}
+                        className="img-horizontal"
+                        alt="기본형 가로조합 - 중소벤처24·기업마당 BI 로고 이미지"
+                      />
+                    </div>
+                  </div>
+
+                  <h4>상징색상</h4>
+                  <div className="default-design-box grid">
+                    <div className="box-color-inner">
+                      <em className="circle blue" />
+                      <div className="color-info">
+                        <h4>정부청색 GOK Blue</h4>
+                        <dl>
+                          <dt>CMYK</dt>
+                          <dd>C 100% + M 70% + Y 20% + K 40%</dd>
+                        </dl>
+                        <dl>
+                          <dt>RGB</dt>
+                          <dd>R 0 G 55 B 100</dd>
+                        </dl>
+                        <dl>
+                          <dt>PANTONE</dt>
+                          <dd>PANTONE 2955</dd>
+                        </dl>
+                      </div>
+                    </div>
+
+                    <div className="box-color-inner">
+                      <em className="circle red" />
+                      <div className="color-info">
+                        <h4>정부적색 GOK Red</h4>
+                        <dl>
+                          <dt>CMYK</dt>
+                          <dd>M 100% + Y 80%</dd>
+                        </dl>
+                        <dl>
+                          <dt>RGB</dt>
+                          <dd>R 228 G 3 B 46</dd>
+                        </dl>
+                        <dl>
+                          <dt>PANTONE</dt>
+                          <dd>PANTONE 1935 C</dd>
+                        </dl>
+                      </div>
+                    </div>
+
+                    <div className="box-color-inner">
+                      <em className="circle gray" />
+                      <div className="color-info">
+                        <h4>정부회색 GOK Gray</h4>
+                        <dl>
+                          <dt>CMYK</dt>
+                          <dd>K 80%</dd>
+                        </dl>
+                        <dl>
+                          <dt>RGB</dt>
+                          <dd>R 87 G 87 B 87</dd>
+                        </dl>
+                        <dl>
+                          <dt>PANTONE</dt>
+                          <dd>PANTONE Cool Gray 11 C</dd>
+                        </dl>
+                      </div>
+                    </div>
+
+                    <div className="box-color-inner">
+                      <em className="circle white" />
+                      <div className="color-info">
+                        <h4>정부회색 GOK Gray</h4>
+                        <dl>
+                          <dt>CMYK</dt>
+                          <dd>K 0%</dd>
+                        </dl>
+                        <dl>
+                          <dt>RGB</dt>
+                          <dd>R 255 G 255 B 255</dd>
+                        </dl>
+                      </div>
+                    </div>
+                  </div>
 								</div>
 
               </section>
