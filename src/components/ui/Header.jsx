@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import arrowIcon from '../../assets/main/icon-arrow.svg';
 import { useAuthStore } from '@store/useAuthStore.jsx';
@@ -202,23 +202,140 @@ export default function Header() {
     document.body.classList.remove('is-gnb-mobile');
   };
 
+//  // 스크롤 시 header 숨김/ 보임
+const headerRef = useRef(null);
+const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+const lastScrollY = useRef(0);
+const MOBILE_BREAKPOINT = 1024;
+
+const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
+
+const updateContainerMargin = (visible) => {
+  const container = document.querySelector('.main-container, .sub-container');
+  if (container) {
+    container.style.marginTop = visible ? `${headerRef.current?.offsetHeight || 0}px` : '0px';
+  }
+};
+
+// 스크롤 시 헤더 숨김/표시 (PC only)
+useEffect(() => {
+  const handleScroll = () => {
+    if (isMobile()) {
+      setIsHeaderVisible(true);
+      return;
+    }
+    const currentScrollY = window.scrollY;
+    const shouldHide = currentScrollY > lastScrollY.current && currentScrollY > 80;
+    setIsHeaderVisible(!shouldHide);
+    lastScrollY.current = currentScrollY;
+  };
+
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  return () => window.removeEventListener('scroll', handleScroll);
+}, []);
+
+// 리사이즈 시 헤더/margin 재계산
+useEffect(() => {
+  const handleResize = () => {
+    if (isMobile()) setIsHeaderVisible(true);
+    updateContainerMargin(isHeaderVisible);
+  };
+
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, [isHeaderVisible]);
+
+// 헤더 표시 상태 변경 시 margin 업데이트
+useEffect(() => {
+  updateContainerMargin(isHeaderVisible);
+}, [isHeaderVisible]);
+
+//   const headerRef = useRef(null);
+//   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+//   const lastScrollY = useRef(0);
+  
+//   useEffect(() => {
+//     const handleScroll = () => {
+//       // 1024px 이하 모바일은 항상 헤더 표시
+//       if (window.innerWidth <= 1024) {
+//         setIsHeaderVisible(true);
+//         return;
+//       }
+
+//       const currentScrollY = window.scrollY;
+
+//       if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+//         setIsHeaderVisible(false);
+//       } else {
+//         setIsHeaderVisible(true);
+//       }
+      
+//       lastScrollY.current = currentScrollY;
+//     };
+    
+//     window.addEventListener("scroll", handleScroll, { passive: true });
+//     return () => window.removeEventListener("scroll", handleScroll);
+//   }, []);
+
+//   // 리사이즈 시 모바일 전환되면 헤더 다시 표시
+//   useEffect(() => {
+//     const handleResize = () => {
+//       if (window.innerWidth <= 1024) {
+//         setIsHeaderVisible(true);
+//       }
+//     };
+
+//     window.addEventListener('resize', handleResize);
+//     return () => window.removeEventListener('resize', handleResize);
+//   }, []);
+          
+//   // container margin을 헤더 실제 높이로 동적 설정
+//   useEffect(() => {
+//     const container = document.querySelector('.main-container, .sub-container');
+//     const headerHeight = headerRef.current?.offsetHeight || 0;
+    
+//     if (container) {
+//       container.style.marginTop = isHeaderVisible 
+//         ? `${headerHeight}px` 
+//         : '0px';
+//     }
+//   }, [isHeaderVisible]);
+          
+//   // 리사이즈 시 margin 재계산
+//   useEffect(() => {
+//     const container = document.querySelector('.main-container, .sub-container');
+    
+//     const handleResize = () => {
+//       const headerHeight = headerRef.current?.offsetHeight || 0;
+//       if (container && isHeaderVisible) {
+//         container.style.marginTop = `${headerHeight}px`;
+//       }
+//     };
+
+//     window.addEventListener('resize', handleResize);
+//     return () => window.removeEventListener('resize', handleResize);
+//   }, [isHeaderVisible]);
+
   return (
     <>
       <div id="krds-skip-link">
         <a href="#breadcrumb">본문 바로가기</a>
       </div>
       
-      <div id="krds-masthead">
-        <div className="toggle-wrap">
-          <div className="toggle-head">
-            <div className="inner">
-              <span className="nuri-txt">이 누리집은 대한민국 공식 전자정부 누리집입니다.</span>
+      <header 
+        ref={headerRef}
+        id="krds-header"
+        className={isHeaderVisible ? '' : 'is-hidden'}
+      >
+        <div id="krds-masthead">
+          <div className="toggle-wrap">
+            <div className="toggle-head">
+              <div className="inner">
+                <span className="nuri-txt">이 누리집은 대한민국 공식 전자정부 누리집입니다.</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      
-      <header id="krds-header">
         <div className="header-in">
           <div className="header-container">
             <div className="inner">
