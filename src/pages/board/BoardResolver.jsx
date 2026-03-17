@@ -23,6 +23,8 @@ const BOARD_COMPONENT_BY_TYPE = {
   FAQ: BoardFaq,
   IMG: BoardThumbnail, // eg. 월간중기누리..
   VDO: BoardThumbnail, //
+  LNK: BoardBasic, //
+  WBZ: BoardBasic, //
 };
 
 /**

@@ -5,6 +5,7 @@ import BoardPostBasic from './components/BoardPostBasic.jsx';
 import BoardPostQna from './components/BoardPostQna.jsx';
 import BoardPostThumbnail from './components/BoardPostThumbnail.jsx';
 import BoardResolverStateView from './components/BoardResolverStateView.jsx';
+import BoardBasic from '@pages/board/components/BoardBasic.jsx';
 
 /**
  * 게시판 "상세 페이지" 타입별 실제 렌더 컴포넌트 매핑
@@ -18,6 +19,8 @@ const BOARD_POST_COMPONENT_BY_TYPE = {
   FAQ: BoardPostBasic,
   IMG: BoardPostThumbnail,
   VDO: BoardPostThumbnail,
+  LNK: BoardPostBasic, // 
+  WBZ: BoardPostBasic, //
 };
 
 /**

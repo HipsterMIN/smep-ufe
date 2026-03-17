@@ -1,17 +1,15 @@
-import React, { useMemo, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import arrowIcon from '../../assets/main/icon-arrow.svg';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import arrowIcon from '@assets/main/icon-arrow.svg';
 import { useAuthStore } from '@store/useAuthStore.jsx';
-import { useNavigate } from 'react-router-dom';
 import { useMenuStore } from '@store/useMenuStore.js';
 import { buildFullPath } from '@utils/menuUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
-import HeaderDesktopGNB from './header/HeaderDesktopGNB';
-import HeaderMobileGNB from './header/HeaderMobileGNB';
-import HeaderUserMenu from './header/HeaderUserMenu';
-import HeaderFontDropdown from './header/HeaderFontDropdown'
-import HeaderSearch from './header/HeaderSearch';
-import { api as apiClient } from '../../lib/apiClient.js';
+import HeaderUserMenu from '@components/ui/header/HeaderUserMenu';
+import HeaderDesktopGNB from '@components/ui/header/HeaderDesktopGNB';
+import HeaderMobileGNB from '@components/ui/header/HeaderMobileGNB';
+import HeaderFontDropdown from '@components/ui/header/HeaderFontDropdown';
+import { api as apiClient } from '@lib/apiClient.js';
 
 // BASE URL 상수
 const BASE_URL = import.meta.env.VITE_BASE || '/';
@@ -22,7 +20,7 @@ function parseJwt(token) {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
 
     return JSON.parse(jsonPayload);
@@ -48,6 +46,8 @@ export default function Header() {
   const mobGnbRef = useRef(null);
   const { getFullPath } = useUserMenu();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMainPage = location.pathname === '/';
   
   // 메뉴 데이터 로드
   useEffect(() => {
@@ -118,7 +118,7 @@ export default function Header() {
             const response = await apiClient.get('/api/v1/account/me', { token: receivedToken });
             const userInfo = response.data || response;
             if (userInfo) {
-              console.log("userInfo: ", userInfo)
+              console.log('userInfo: ', userInfo);
               login({ token: receivedToken, profile: userInfo });
               return;
             }
@@ -202,119 +202,119 @@ export default function Header() {
     document.body.classList.remove('is-gnb-mobile');
   };
 
-//  // 스크롤 시 header 숨김/ 보임
-const headerRef = useRef(null);
-const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-const lastScrollY = useRef(0);
-const MOBILE_BREAKPOINT = 1024;
+  //  // 스크롤 시 header 숨김/ 보임
+  const headerRef = useRef(null);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const MOBILE_BREAKPOINT = 1024;
 
-const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
+  const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
 
-const updateContainerMargin = (visible) => {
-  const container = document.querySelector('.main-container, .sub-container');
-  if (container) {
-    container.style.marginTop = visible ? `${headerRef.current?.offsetHeight || 0}px` : '0px';
-  }
-};
-
-// 스크롤 시 헤더 숨김/표시 (PC only)
-useEffect(() => {
-  const handleScroll = () => {
-    if (isMobile()) {
-      setIsHeaderVisible(true);
-      return;
+  const updateContainerMargin = (visible) => {
+    const container = document.querySelector('.main-container, .sub-container');
+    if (container) {
+      container.style.marginTop = visible ? `${headerRef.current?.offsetHeight || 0}px` : '0px';
     }
-    const currentScrollY = window.scrollY;
-    const shouldHide = currentScrollY > lastScrollY.current && currentScrollY > 80;
-    setIsHeaderVisible(!shouldHide);
-    lastScrollY.current = currentScrollY;
   };
 
-  window.addEventListener('scroll', handleScroll, { passive: true });
-  return () => window.removeEventListener('scroll', handleScroll);
-}, []);
+  // 스크롤 시 헤더 숨김/표시 (PC only)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isMobile()) {
+        setIsHeaderVisible(true);
+        return;
+      }
+      const currentScrollY = window.scrollY;
+      const shouldHide = currentScrollY > lastScrollY.current && currentScrollY > 80;
+      setIsHeaderVisible(!shouldHide);
+      lastScrollY.current = currentScrollY;
+    };
 
-// 리사이즈 시 헤더/margin 재계산
-useEffect(() => {
-  const handleResize = () => {
-    if (isMobile()) setIsHeaderVisible(true);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // 리사이즈 시 헤더/margin 재계산
+  useEffect(() => {
+    const handleResize = () => {
+      if (isMobile()) setIsHeaderVisible(true);
+      updateContainerMargin(isHeaderVisible);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isHeaderVisible]);
+
+  // 헤더 표시 상태 변경 시 margin 업데이트
+  useEffect(() => {
     updateContainerMargin(isHeaderVisible);
-  };
+  }, [isHeaderVisible]);
 
-  window.addEventListener('resize', handleResize);
-  return () => window.removeEventListener('resize', handleResize);
-}, [isHeaderVisible]);
-
-// 헤더 표시 상태 변경 시 margin 업데이트
-useEffect(() => {
-  updateContainerMargin(isHeaderVisible);
-}, [isHeaderVisible]);
-
-//   const headerRef = useRef(null);
-//   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-//   const lastScrollY = useRef(0);
+  //   const headerRef = useRef(null);
+  //   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  //   const lastScrollY = useRef(0);
   
-//   useEffect(() => {
-//     const handleScroll = () => {
-//       // 1024px 이하 모바일은 항상 헤더 표시
-//       if (window.innerWidth <= 1024) {
-//         setIsHeaderVisible(true);
-//         return;
-//       }
+  //   useEffect(() => {
+  //     const handleScroll = () => {
+  //       // 1024px 이하 모바일은 항상 헤더 표시
+  //       if (window.innerWidth <= 1024) {
+  //         setIsHeaderVisible(true);
+  //         return;
+  //       }
 
-//       const currentScrollY = window.scrollY;
+  //       const currentScrollY = window.scrollY;
 
-//       if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
-//         setIsHeaderVisible(false);
-//       } else {
-//         setIsHeaderVisible(true);
-//       }
+  //       if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+  //         setIsHeaderVisible(false);
+  //       } else {
+  //         setIsHeaderVisible(true);
+  //       }
       
-//       lastScrollY.current = currentScrollY;
-//     };
+  //       lastScrollY.current = currentScrollY;
+  //     };
     
-//     window.addEventListener("scroll", handleScroll, { passive: true });
-//     return () => window.removeEventListener("scroll", handleScroll);
-//   }, []);
+  //     window.addEventListener("scroll", handleScroll, { passive: true });
+  //     return () => window.removeEventListener("scroll", handleScroll);
+  //   }, []);
 
-//   // 리사이즈 시 모바일 전환되면 헤더 다시 표시
-//   useEffect(() => {
-//     const handleResize = () => {
-//       if (window.innerWidth <= 1024) {
-//         setIsHeaderVisible(true);
-//       }
-//     };
+  //   // 리사이즈 시 모바일 전환되면 헤더 다시 표시
+  //   useEffect(() => {
+  //     const handleResize = () => {
+  //       if (window.innerWidth <= 1024) {
+  //         setIsHeaderVisible(true);
+  //       }
+  //     };
 
-//     window.addEventListener('resize', handleResize);
-//     return () => window.removeEventListener('resize', handleResize);
-//   }, []);
+  //     window.addEventListener('resize', handleResize);
+  //     return () => window.removeEventListener('resize', handleResize);
+  //   }, []);
           
-//   // container margin을 헤더 실제 높이로 동적 설정
-//   useEffect(() => {
-//     const container = document.querySelector('.main-container, .sub-container');
-//     const headerHeight = headerRef.current?.offsetHeight || 0;
+  //   // container margin을 헤더 실제 높이로 동적 설정
+  //   useEffect(() => {
+  //     const container = document.querySelector('.main-container, .sub-container');
+  //     const headerHeight = headerRef.current?.offsetHeight || 0;
     
-//     if (container) {
-//       container.style.marginTop = isHeaderVisible 
-//         ? `${headerHeight}px` 
-//         : '0px';
-//     }
-//   }, [isHeaderVisible]);
+  //     if (container) {
+  //       container.style.marginTop = isHeaderVisible 
+  //         ? `${headerHeight}px` 
+  //         : '0px';
+  //     }
+  //   }, [isHeaderVisible]);
           
-//   // 리사이즈 시 margin 재계산
-//   useEffect(() => {
-//     const container = document.querySelector('.main-container, .sub-container');
+  //   // 리사이즈 시 margin 재계산
+  //   useEffect(() => {
+  //     const container = document.querySelector('.main-container, .sub-container');
     
-//     const handleResize = () => {
-//       const headerHeight = headerRef.current?.offsetHeight || 0;
-//       if (container && isHeaderVisible) {
-//         container.style.marginTop = `${headerHeight}px`;
-//       }
-//     };
+  //     const handleResize = () => {
+  //       const headerHeight = headerRef.current?.offsetHeight || 0;
+  //       if (container && isHeaderVisible) {
+  //         container.style.marginTop = `${headerHeight}px`;
+  //       }
+  //     };
 
-//     window.addEventListener('resize', handleResize);
-//     return () => window.removeEventListener('resize', handleResize);
-//   }, [isHeaderVisible]);
+  //     window.addEventListener('resize', handleResize);
+  //     return () => window.removeEventListener('resize', handleResize);
+  //   }, [isHeaderVisible]);
 
   return (
     <>
@@ -363,13 +363,15 @@ useEffect(() => {
                 </div>
                 <div className="header-right">
                   {/* 검색란 */}
-                  <div className="sch-input">
-                    <input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력"></input>
-                    <button type="button" className="krds-btn medium icon ico-search">
-                      <span className="sr-only">검색</span>
-                      <i className="svg-icon ico-sch"></i>
-                    </button>
-                  </div>
+                  {!isMainPage && (
+                    <div className="sch-input">
+                      <input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력"></input>
+                      <button type="button" className="krds-btn medium icon ico-search">
+                        <span className="sr-only">검색</span>
+                        <i className="svg-icon ico-sch"></i>
+                      </button>
+                    </div>
+                  )}
                   <div className="header-actions">
                     <HeaderUserMenu
                       isLogin={isLogin}
