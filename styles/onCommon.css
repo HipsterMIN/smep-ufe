@@ -1211,6 +1211,7 @@ table tbody tr:hover td {
   gap: 12px;
   width: 100%;
   max-width: 26.5rem;
+  max-width: fit-content;
 }
 .search-top-box .sch-filter-box .filter-form .label {
   font-weight: var(--krds-font-weight-bold);
