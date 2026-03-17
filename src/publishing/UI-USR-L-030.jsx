@@ -562,7 +562,7 @@ const UI_USR_L_030 = () => {
                           <label className="label" htmlFor="appl-sch-txt1">테마업종명</label>
                           <input type="text" id="appl-sch-txt1" className="krds-input medium" placeholder="내용을 입력하세요" title="테마업종명" />
                         </div>
-
+                        {/* 모든 케이스 */}
                         <div>
                           <label className="label" htmlFor="appl-sch-sel4">접수상황</label>
                           <select id="appl-sch-sel4" className="krds-form-select medium">
@@ -587,6 +587,47 @@ const UI_USR_L_030 = () => {
                             <option value="">항목</option>
                           </select>
                         </div>
+                        <div>
+                          <label className="label" htmlFor="appl-sch-sel6">상환방법</label>
+                          <select id="appl-sch-sel6" className="krds-form-select medium">
+                            <option value="">전체</option>
+                            <option value="">항목</option>
+                            <option value="">항목</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="label" htmlFor="appl-sch-sel6">금리변동여부</label>
+                          <select id="appl-sch-sel6" className="krds-form-select medium">
+                            <option value="">전체</option>
+                            <option value="">항목</option>
+                            <option value="">항목</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="label" htmlFor="appl-sch-sel6">융자방식(대출방식)전체</label>
+                          <select id="appl-sch-sel6" className="krds-form-select medium">
+                            <option value="">전체</option>
+                            <option value="">항목</option>
+                            <option value="">항목</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="label" htmlFor="appl-sch-sel6">자금용도 전체</label>
+                          <select id="appl-sch-sel6" className="krds-form-select medium">
+                            <option value="">전체</option>
+                            <option value="">항목</option>
+                            <option value="">항목</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="label" htmlFor="appl-sch-sel6">대출기간 전체</label>
+                          <select id="appl-sch-sel6" className="krds-form-select medium">
+                            <option value="">전체</option>
+                            <option value="">항목</option>
+                            <option value="">항목</option>
+                          </select>
+                        </div>
+
                       </div>
                     </div>
                 </div>
