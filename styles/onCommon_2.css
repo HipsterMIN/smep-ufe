@@ -1805,7 +1805,7 @@ button.aichatButton.active {
 
   .main-quick-menu {
     margin-top: 24px;
-    padding: 20px 0 20px 15px;
+    padding: 20px 0 50px 15px;
     border-radius: 0;
   }
   .main-quick-menu .section-tit br {
@@ -1872,10 +1872,18 @@ button.aichatButton.active {
     font-size: 19px;
     text-align: center;
   }
-  .quick-menu-swiper .swiper-nav-wrap .swiper-button-next {
-    left: auto;
+  .quick-menu-swiper .swiper-nav-wrap {
+    position: absolute;
+    bottom: -34px;
+    right: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
+  .quick-menu-swiper .swiper-nav-wrap .swiper-button-prev,
   .quick-menu-swiper .swiper-nav-wrap .swiper-button-next {
-    right: auto;
+    position: static;
+    left: 0;
+    transform: none;
   }
 }

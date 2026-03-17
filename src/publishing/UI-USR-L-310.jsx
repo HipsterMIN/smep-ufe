@@ -53,7 +53,7 @@ const UI_USR_L_310 = () => {
         </div>
 		<div className="search-top-box">
 			<div className="sch-form-wrap">
-				<select className="krds-form-select">
+				<select className="krds-form-select" title="카테고리 선택"> {/* 웹접근성 반영 */}
 					<option value="">전체</option>
 					<option value="">항목</option>
 					<option value="">항목</option>
