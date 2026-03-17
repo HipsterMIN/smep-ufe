@@ -1,373 +1,433 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api as apiClient } from '../lib/apiClient.js';
+import { api as apiClient, apiBaseUrl } from '../lib/apiClient.js';
+import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
-import reportImage from '../assets/temp/ReportView.png';
-import temphwp from '@assets/temp/Temp.png';
 
-const Pbanc = () => {
-  const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+const EMPTY_HTML_PATTERNS = new Set([
+  '<p style="text-align: left;"></p>',
+  '<p><br></p>',
+  '<p>&nbsp;</p>',
+]);
 
+const STREAMDOCS_VIEWER_URL =
+  import.meta.env.VITE_STREAMDOCS_VIEWER_URL
+  || 'http://192.168.16.82:8088/venturein-pdf/view/sd';
+
+const STREAMDOCS_ADAPTER_URL =
+  import.meta.env.VITE_STREAMDOCS_ADAPTER_URL
+  || 'http://192.168.16.82:8088/venturein-pdf/adapter.js';
+
+const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
+
+const PbancView = () => {
+  const { breadcrumbItems, currentMenu, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const { id } = useParams();
   const [item, setItem] = useState(null);
-  const navigate = useNavigate();
+  const [bizFieldOptions, setBizFieldOptions] = useState([]);
   const [viewerVisible, setViewerVisible] = useState(false);
+  const [viewerError, setViewerError] = useState('');
+  const [expandedRows, setExpandedRows] = useState({});
+  const navigate = useNavigate();
+  const viewerFrameRef = useRef(null);
+  const streamdocsRef = useRef(null);
+  const bizPbancTypeCd = currentMenu?.menuId === 'M_PIIO_00091' ? 'HSSPLY' : 'BIZPBN';
 
-  const shadowTextRef = useRef('null');
-
-  const handleToggleTextShadow = () => {
-    shadowTextRef.current.classList.toggle('on');
-  };
-
-  const shadowTextRef2 = useRef('null');
-
-  const handleToggleTextShadow2 = () => {
-    shadowTextRef2.current.classList.toggle('on');
-  };
-
-  const shadowTextRef3 = useRef('null');
-
-  const handleToggleTextShadow3 = () => {
-    shadowTextRef3.current.classList.toggle('on');
-  };
-
-  const shadowTextRef4 = useRef('null');
-
-  const handleToggleTextShadow4 = () => {
-    shadowTextRef4.current.classList.toggle('on');
-  };
-
-  const detail = async () => {
-    /*const config = {
-      method: 'GET',
-      url: `http://localhost:8081/api/v1/pbanc/${id}`,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-    };
-    const response = await axios(config);*/
-    const response = await apiClient.get(`/api/v1/pbanc/${id}`);
-    setItem(response.data);
-  };
+  const fieldLabelMap = useMemo(
+    () => Object.fromEntries(bizFieldOptions.map((option) => [option.value, option.label])),
+    [bizFieldOptions],
+  );
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    detail();
-  }, [id]);
 
-  function formatToYYMMDD(value) {
+    const detail = async () => {
+      const response = await apiClient.get(`/api/v1/pbanc/${id}?bizPbancTypeCd=${bizPbancTypeCd}`);
+      setItem(response?.data || response);
+    };
+
+    detail();
+  }, [bizPbancTypeCd, id]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCommonCodes = async () => {
+      try {
+        const commonCodes = await fetchAndConvertCommonCodes([BIZ_PBANC_CLSF_GROUP_ID]);
+        if (!mounted) {
+          return;
+        }
+
+        setBizFieldOptions(commonCodes[BIZ_PBANC_CLSF_GROUP_ID] || []);
+      } catch (error) {
+        console.error('공통코드 조회 실패:', error);
+        if (mounted) {
+          setBizFieldOptions([]);
+        }
+      }
+    };
+
+    loadCommonCodes();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!viewerVisible || !item?.strmdcsId || !viewerFrameRef.current) return undefined;
+
+    let cancelled = false;
+    setViewerError('');
+
+    const ensureStreamDocsAdapter = () =>
+      new Promise((resolve, reject) => {
+        if (window.StreamDocs) {
+          resolve(window.StreamDocs);
+          return;
+        }
+
+        const existingScript = document.querySelector('script[data-streamdocs-adapter="true"]');
+        if (existingScript) {
+          existingScript.addEventListener('load', () => resolve(window.StreamDocs), { once: true });
+          existingScript.addEventListener('error', () => reject(new Error('StreamDocs adapter load failed')), { once: true });
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.src = STREAMDOCS_ADAPTER_URL;
+        script.async = true;
+        script.dataset.streamdocsAdapter = 'true';
+        script.onload = () => resolve(window.StreamDocs);
+        script.onerror = () => reject(new Error('StreamDocs adapter load failed'));
+        document.body.appendChild(script);
+      });
+
+    ensureStreamDocsAdapter()
+      .then((StreamDocsCtor) => {
+        if (cancelled || !StreamDocsCtor || !viewerFrameRef.current) return;
+
+        streamdocsRef.current = new StreamDocsCtor({
+          element: viewerFrameRef.current,
+        });
+
+        return streamdocsRef.current.document.open({
+          streamdocsId: item.strmdcsId,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setViewerError('문서뷰어를 불러오지 못했습니다.');
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      streamdocsRef.current = null;
+    };
+  }, [viewerVisible, item?.strmdcsId]);
+
+  const sidebarData = getSideNavigationData();
+  const depth1Menu = getDepth1Parent();
+  const pbancMtxtFiles = item?.pbancMtxtFiles || [];
+  const pbancAtchFiles = item?.pbancAtchFiles || [];
+
+  const isMeaningfulHtml = (html) => {
+    if (!html || typeof html !== 'string') return false;
+
+    const normalized = html.replace(/\s+/g, ' ').trim().toLowerCase();
+    if (!normalized || EMPTY_HTML_PATTERNS.has(normalized)) return false;
+
+    const textOnly = normalized.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim();
+    return textOnly.length > 0;
+  };
+
+  const getPlainText = (value) => {
+    if (!value || typeof value !== 'string') return '';
+    return value.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+  };
+
+  const toggleExpandedRow = (key) => {
+    setExpandedRows((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const renderTextRow = (label, value) => {
+    if (!value) return null;
+    return (
+      <React.Fragment key={label}>
+        <dt>{label}</dt>
+        <dd>{value}</dd>
+      </React.Fragment>
+    );
+  };
+
+  const renderHtmlRow = (label, html) => {
+    if (!isMeaningfulHtml(html)) return null;
+    return (
+      <React.Fragment key={label}>
+        <dt>{label}</dt>
+        <dd dangerouslySetInnerHTML={{ __html: html }} />
+      </React.Fragment>
+    );
+  };
+
+  const renderExpandableTextRow = (label, value) => {
+    if (!value) return null;
+
+    const canExpand = getPlainText(String(value)).length > 200;
+    const isExpanded = Boolean(expandedRows[label]);
+
+    return (
+      <React.Fragment key={label}>
+        <dt>{label}</dt>
+        <dd>
+          <div className={canExpand ? `onshadow-text${isExpanded ? ' on' : ''}` : undefined}>
+            {value}
+          </div>
+          {canExpand && (
+            <button
+              type="button"
+              className="krds-btn tertiary xsmall ontoggle-textshadow"
+              onClick={() => toggleExpandedRow(label)}
+            >
+              {isExpanded ? '접기' : '전체보기'}
+              <i className="svg-icon ico-angle"></i>
+            </button>
+          )}
+        </dd>
+      </React.Fragment>
+    );
+  };
+
+  const renderExpandableHtmlRow = (label, html) => {
+    if (!isMeaningfulHtml(html)) return null;
+
+    const canExpand = getPlainText(html).length > 200;
+    const isExpanded = Boolean(expandedRows[label]);
+
+    return (
+      <React.Fragment key={label}>
+        <dt>{label}</dt>
+        <dd>
+          <div
+            className={canExpand ? `onshadow-text${isExpanded ? ' on' : ''}` : undefined}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+          {canExpand && (
+            <button
+              type="button"
+              className="krds-btn tertiary xsmall ontoggle-textshadow"
+              onClick={() => toggleExpandedRow(label)}
+            >
+              {isExpanded ? '접기' : '전체보기'}
+              <i className="svg-icon ico-angle"></i>
+            </button>
+          )}
+        </dd>
+      </React.Fragment>
+    );
+  };
+
+  const formatToYYMMDD = (value) => {
     if (!value) return '';
 
-    let date;
-
-    // YYYYMMDD (숫자 또는 문자열)
     if (/^\d{8}$/.test(String(value))) {
       const str = String(value);
-      const yyyy = str.slice(0, 4);
-      const mm = str.slice(4, 6);
-      const dd = str.slice(6, 8);
-
-      date = new Date(`${yyyy}-${mm}-${dd}`);
-    }
-    // ISO 형식 (2024-01-12T00:00:00)
-    else {
-      date = new Date(value);
+      return `${str.slice(2, 4)}-${str.slice(4, 6)}-${str.slice(6, 8)}`;
     }
 
-    // 유효성 체크
-    if (isNaN(date.getTime())) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
 
     const yyyy = String(date.getFullYear());
     const mm = String(date.getMonth() + 1).padStart(2, '0');
     const dd = String(date.getDate()).padStart(2, '0');
-
-    return `${yyyy}.${mm}.${dd}`;
-  }
-
-  // ✅ 사이드바 데이터 계산
-  const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
-  const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+    return `${yyyy.slice(2)}-${mm}-${dd}`;
+  };
 
   return (
     <>
-      <SideNavigation
-        pageTitle={depth1Menu?.menuNm || ''}
-        menuItems={sidebarData}
-      />
+      <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />
       <div className="contents">
-        <Breadcrumb items={breadcrumbItems}/>
+        <Breadcrumb items={breadcrumbItems} />
+
         <div className="page-title-wrap" data-type="responsive">
-          <p className="on-p1 on-colorblue">사업공고</p>
-          <h2 className="h-tit2">{item?.pbancnm}</h2>
+          <p className="on-p1 on-colorblue">{currentMenu?.menuNm || '사업공고'}</p>
+          <h2 className="h-tit2">{item?.bizPbancNm}</h2>
         </div>
+
         <ul className="onboard-summary">
           <li>
             <span className="sr-only">작성일</span>
-            <span>{formatToYYMMDD(item?.created_at)}</span>
+            <span>{formatToYYMMDD(item?.regDt)}</span>
           </li>
           <li>
             <span>
               <span className="sr-only">조회수</span>
               <i className="svg-icon ico-scrap"></i>
-                0
+              {(item?.bizPbancInqCnt ?? 0).toLocaleString()}
             </span>
           </li>
           <li>
             <span>
               <span className="sr-only">스크랩수</span>
               <i className="svg-icon ico-pw-visible-on"></i>
-                0
+              {(item?.scrapCnt ?? 0).toLocaleString()}
             </span>
           </li>
         </ul>
+
         <div className="def-list-wrap">
           <dl className="def-list">
-            <dt>분야</dt>
-            <dd>{item?.sprtfld}</dd>
-            <dt>소관부처·지자체</dt>
-            <dd>{item?.mngdeptnm}</dd>
-            <dt>사업개요</dt>
-            {item?.bizotln.length > 200 ? (
-              <dd>
-                <div className="onshadow-text" ref={shadowTextRef}>
-                  {item?.bizotln}
-                </div>
-                <button type="button" className="krds-btn tertiary xsmall ontoggle-textshadow"
-                  onClick={handleToggleTextShadow}>
-                    전체보기
-                  <i className="svg-icon ico-angle"></i>
-                </button>
-              </dd>
-            ) : (<dd>{item?.bizotln}</dd>)}
-            <dt>사업신청 방법</dt>
-            <dd>
-              <ul className="list">
-                <li>{item?.aplymthcn}</li>
-                {item?.bizaplyurl && (
-                  <li>
-                    <button type="button" className="krds-btn xsmall"
-                      onClick={() => window.open(item?.bizaplyurl, '_blank')}>
-                        온라인 신청 바로가기
-                      <i className="svg-icon ico-angle right"></i>
-                    </button>
-                  </li>
-                )}
-                {/*<li>오프라인 신청</li>*/}
-              </ul>
-            </dd>
-            <dt>지원대상</dt>
-            {item?.sprttrgt.length > 200 ? (
-              <dd>
-                <div className="onshadow-text" ref={shadowTextRef2}>
-                  {item?.sprttrgt}
-                </div>
-                <button type="button" className="krds-btn tertiary xsmall ontoggle-textshadow"
-                  onClick={handleToggleTextShadow2}>
-                    전체보기
-                  <i className="svg-icon ico-angle"></i>
-                </button>
-              </dd>
-            ) : (<dd>{item?.sprttrgt}</dd>)}
-            <dt>제출서류</dt>
-            {item?.sbmsndcmnt.length > 200 ? (
-              <dd>
-                <div className="onshadow-text" ref={shadowTextRef3}>
-                  {item?.sbmsndcmnt}
-                </div>
-                <button type="button" className="krds-btn tertiary xsmall ontoggle-textshadow"
-                  onClick={handleToggleTextShadow3}>
-                    전체보기
-                  <i className="svg-icon ico-angle"></i>
-                </button>
-              </dd>
-            ) : (<dd>{item?.sbmsndcmnt}</dd>)}
-            <dt>신청 제외 대상</dt>
-            <dd>{item?.aplyexcltrgt}</dd>
-            <dt>문의처</dt>
-            {item?.inqpl.length > 200 ? (
-              <dd>
-                <div className="onshadow-text" ref={shadowTextRef4}>
-                  {item?.inqpl}
-                </div>
-                <button type="button" className="krds-btn tertiary xsmall ontoggle-textshadow"
-                  onClick={handleToggleTextShadow4}>
-                    전체보기
-                  <i className="svg-icon ico-angle"></i>
-                </button>
-              </dd>
-            ) : (<dd>{item?.inqpl}</dd>)}
+            {renderTextRow('분야', item?.bizPbancClsfCd ? fieldLabelMap[item.bizPbancClsfCd] || item.bizPbancClsfCd : '')}
+            {renderTextRow('사업수행기관', item?.bizSprvsnInstNm)}
+            {renderExpandableHtmlRow('사업개요', item?.bizPbancOtln)}
+            {renderExpandableHtmlRow('지원규모', item?.bizSprtSclCn)}
+            {renderExpandableHtmlRow('지원내용', item?.bizSprtCn)}
+            {renderExpandableHtmlRow('지원대상', item?.bizSprtTrgtCn)}
+            {renderTextRow('신청기간', item?.applyPeriodText)}
+            {(isMeaningfulHtml(item?.bizAplyMthdCn) || item?.bizAplyUrlAddr) && (
+              <>
+                <dt>사업신청 방법</dt>
+                <dd>
+                  <ul className="list">
+                    {isMeaningfulHtml(item?.bizAplyMthdCn) && (
+                      <li dangerouslySetInnerHTML={{ __html: item.bizAplyMthdCn }} />
+                    )}
+                    {item?.bizAplyUrlAddr && (
+                      <li>
+                        <button
+                          type="button"
+                          className="krds-btn xsmall"
+                          onClick={() => window.open(item?.bizAplyUrlAddr, '_blank')}
+                        >
+                          온라인 신청 바로가기
+                          <i className="svg-icon ico-angle right"></i>
+                        </button>
+                      </li>
+                    )}
+                  </ul>
+                </dd>
+              </>
+            )}
+            {renderExpandableHtmlRow('지원자격', item?.bizSprtQlfcRqmtCn)}
+            {renderExpandableHtmlRow('신청제외대상', item?.bizAplyExclTrgtCn)}
+            {renderExpandableHtmlRow('제출서류', item?.bizAplySbmsnDcmntCn)}
+            {renderExpandableTextRow('기업규모', item?.sprtQlfcEntSclNm)}
+            {renderExpandableHtmlRow('기업유형', item?.sprtQlfcEntTypeCn)}
+            {renderExpandableHtmlRow('추진절차', item?.bizPbancPrtrtMttrCn)}
+            {renderExpandableHtmlRow('지원금액', item?.bizPbancSprtAmtCn)}
+            {renderExpandableHtmlRow('문의처', item?.bizPbancInqplCn)}
           </dl>
         </div>
-        {viewerVisible && (
-          <div style={{
-            width: '100%',
-            textAlign: 'center',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '48px',
-          }}>
-            <img style={{
-              width: '100%',
-            }}
-            src={reportImage} alt="문서뷰어 영역"/>
+
+        {item?.strmdcsId && viewerVisible && (
+          <div style={{ width: '100%', marginBottom: '48px' }}>
+            <iframe
+              ref={viewerFrameRef}
+              title="문서뷰어"
+              src={STREAMDOCS_VIEWER_URL}
+              style={{ width: '100%', minHeight: '960px', border: 0 }}
+            />
+            {viewerError && (
+              <p style={{ marginTop: '12px', textAlign: 'center' }}>{viewerError}</p>
+            )}
           </div>
         )}
-        {/*<div className="onbox-group-areawrap">
-            <p className="onbox-group-title">본문출력파일</p>
+
+        {pbancMtxtFiles.length > 0 && (
+          <div className="onbox-group-areawrap">
+            <p className="onbox-group-title">공고문</p>
             <ul className="box-group-area">
-              <li>
-                <p className="tit">
-                  <i className="svg-icon ico-file2"></i>
-                  2026년 스마트 제조혁신 지원사업 사업설명회 추가 개최 안내.png
-                </p>
-                <div className="btn-wrap">
-                  <a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열기"><i
-                      className="svg-icon ico-sch-plus"></i> 바로보기 </a>
-                  <button type="button" className="krds-btn medium text on-colorblue"><i
-                      className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
-                  </button>
-                </div>
-              </li>
+              {pbancMtxtFiles.map((file) => (
+                <li key={`${file.atchFileId}-${file.atchFileSn}`}>
+                  <p className="tit">
+                    <i className="svg-icon ico-file2"></i>
+                    {file.orgnlFileNm}
+                  </p>
+                  <div className="btn-wrap">
+                    {item?.strmdcsId && (
+                      <a
+                        href="#"
+                        className="krds-btn medium link basic"
+                        target="_blank"
+                        title="새 창 열기"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setViewerVisible((visible) => !visible);
+                        }}
+                      >
+                        <i className="svg-icon ico-sch-plus"></i> 바로보기
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      className="krds-btn medium text on-colorblue"
+                      onClick={() => {
+                        window.location.href = `${apiBaseUrl}/api/v1/files/download/${file.atchFileId}/${file.atchFileSn}`;
+                      }}
+                    >
+                      <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
+                    </button>
+                  </div>
+                </li>
+              ))}
             </ul>
-          </div>*/}
-        {item?.pbancmtxtfilenm && (
+          </div>
+        )}
+
+        {pbancAtchFiles.length > 0 && (
           <div className="onbox-group-areawrap">
             <p className="onbox-group-title">첨부파일</p>
             <ul className="box-group-area">
-              <li>
-                <p className="tit">
-                  <i className="svg-icon ico-file2"></i>
-                  {item?.pbancmtxtfilenm}
-                </p>
-                <div className="btn-wrap">
-                  <a
-                    href="#"
-                    className="krds-btn medium link basic"
-                    target="_blank"
-                    title="새 창 열기"
-                    onClick={(e) => {
-                      e.preventDefault(); // 새 탭 열기 방지
-                      setViewerVisible(v => !v); // 토글
-                    }}
-                  >
-                    <i className="svg-icon ico-sch-plus"></i> 바로보기
-                  </a>
-                  <button
-                    type="button"
-                    className="krds-btn medium text on-colorblue"
-                    onClick={() => {
-                      window.location.href = `/main-dev/api/v1/pbanc/${item?.id}/download?fileName=${encodeURIComponent(item?.pbancmtxtfilenm)}`;
-                      //             /aidata/save/pbanc/${item?.id}/attached_files/${item?.pbancmtxtfilenm}
-                      // const link = document.createElement('a');
-                      // link.href = temphwp; // todo 시연용 임시파일
-                      // link.download = item?.pbancmtxtfilenm;
-                      // document.body.appendChild(link);
-                      // link.click();
-                      // document.body.removeChild(link);
-                    }}
-                  >
-                    <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
-                  </button>
-                </div>
-              </li>
+              {pbancAtchFiles.map((file) => (
+                <li key={`${file.atchFileId}-${file.atchFileSn}`}>
+                  <p className="tit">
+                    <i className="svg-icon ico-file2"></i>
+                    {file.orgnlFileNm}
+                  </p>
+                  <div className="btn-wrap">
+                    <button
+                      type="button"
+                      className="krds-btn medium text on-colorblue"
+                      onClick={() => {
+                        window.location.href = `${apiBaseUrl}/api/v1/files/download/${file.atchFileId}/${file.atchFileSn}`;
+                      }}
+                    >
+                      <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
+                    </button>
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
         )}
-        {/*<div className="onbox-group-areawrap">
-            <p className="onbox-group-title">첨부파일</p>
-            <ul className="box-group-area">
-              <li>
-                <p className="tit">
-                  <i className="svg-icon ico-file2"></i>
-                  2026년 스마트 제조혁신 지원사업 사업설명회 추가 개최 안내.png
-                </p>
-                <div className="btn-wrap">
-                  <a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열기"><i
-                      className="svg-icon ico-sch-plus"></i> 바로보기 </a>
-                  <button type="button" className="krds-btn medium text on-colorblue"><i
-                      className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
-                  </button>
-                </div>
-              </li>
-              <li>
-                <p className="tit">
-                  <i className="svg-icon ico-file2"></i>
-                  2026년 스마트 제조혁신 지원사업 사업설명회 추가 개최 안내.png
-                </p>
-                <div className="btn-wrap">
-                  <a href="#" className="krds-btn medium link basic" target="_blank" title="새 창 열기"><i
-                      className="svg-icon ico-sch-plus"></i> 바로보기 </a>
-                  <button type="button" className="krds-btn medium text on-colorblue"><i
-                      className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
-                  </button>
-                </div>
-              </li>
-            </ul>
-          </div>*/}
 
         <div className="onboard-btm-btngroup">
           <div>
-            <button
-              type="button"
-              className="krds-btn tertiary xlarge"
-              onClick={() => navigate('/req/pbanc/pbanc')}
-            >
-                목록
+            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate(-1)}>
+              목록
             </button>
           </div>
           <div>
-            {/*todo 시연용 임시주석*/}
-            {/*<button type="button" className="krds-btn secondary xlarge" onClick={() => {window.scrollTo(0, 0);navigate('/req/ai/ai-smart-search');}}>*/}
-            {/*  <i className="svg-icon ico-faq"></i>*/}
-            {/*    AI 상세 상담*/}
-            {/*</button>*/}
-            {/*<button type="button" className="krds-btn tertiary xlarge">*/}
-            {/*  <i className="svg-icon ico-like"></i>*/}
-            {/*    관심*/}
-            {/*</button>*/}
-            {/*<button type="button" className="krds-btn tertiary xlarge">*/}
-            {/*  <i className="svg-icon ico-copy"></i>*/}
-            {/*    링크복사*/}
-            {/*</button>*/}
-            <button
-              type="button"
-              className="krds-btn tertiary xlarge"
-              onClick={() => window.open(item?.pbancurl, '_blank')}
-            >
-                출처바로가기
-              <i className="svg-icon ico-angle right"></i>
-            </button>
+            {item?.bizDtlUrlAddr && (
+              <button
+                type="button"
+                className="krds-btn tertiary xlarge"
+                onClick={() => window.open(item?.bizDtlUrlAddr, '_blank')}
+              >
+                출처 바로가기
+                <i className="svg-icon ico-angle right"></i>
+              </button>
+            )}
           </div>
         </div>
-
-        {/*todo 시연용 임시주석*/}
-        {/*<div className="assess-question-wrap">*/}
-        {/*  <div className="assess-qu">이 페이지에 만족하시나요?</div>*/}
-        {/*  <div className="assess-an">*/}
-        {/*    <div className="krds-form-chip large">*/}
-        {/*      <input type="radio" className="radio" name="rdo_chip_size2" id="rdo_chip_lg2-1" checked=""/>*/}
-        {/*      <label className="krds-form-chip-outline yes" htmlFor="rdo_chip_lg2-1">*/}
-        {/*          네*/}
-        {/*        <i className="svg-icon ico-smile"></i>*/}
-        {/*      </label>*/}
-        {/*    </div>*/}
-        {/*    <div className="krds-form-chip large">*/}
-        {/*      <input type="radio" className="radio" name="rdo_chip_size2" id="rdo_chip_lg2-2"/>*/}
-        {/*      <label className="krds-form-chip-outline no" htmlFor="rdo_chip_lg2-2">*/}
-        {/*          아니오*/}
-        {/*        <i className="svg-icon ico-sad"></i>*/}
-        {/*      </label>*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
-
-
       </div>
     </>
   );
 };
 
-export default Pbanc;
+export default PbancView;

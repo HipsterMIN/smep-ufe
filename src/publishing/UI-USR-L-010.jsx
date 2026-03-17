@@ -73,14 +73,14 @@ const UI_USR_L_010 = () => {
                  <h3 className="sr-only">사업유형별</h3>
                  <div className="search-top-box">
                     <div className="sch-form-wrap" ref={schFormWrapRef1}>
-                      <select className="krds-form-select">
+                      <select className="krds-form-select" title="공고상태 선택"> {/* 웹접근성 반영 */}
                         <option value="">공고상태 전체</option>
                       </select>
-                      <select className="krds-form-select">
+                      <select className="krds-form-select" title="검색구분 선택"> {/* 웹접근성 반영 */}
                         <option value="">검색구분 전체</option>
                       </select>
                       <div className="sch-input">
-                        <input type="text" className="krds-input" placeholder="공고명·사업명·기관명으로 검색하세요" title="검색어 입력" />
+                        <input type="text" className="krds-input" placeholder="공고명·사업명·기관명으로 검색하세요" title="공고명·사업명·기관명 검색" />
                         <button type="button" className="krds-btn medium icon ico-search" >
                           <span className="sr-only">검색</span>
                           <i className="svg-icon ico-sch"></i>
@@ -222,10 +222,10 @@ const UI_USR_L_010 = () => {
                  <h3 className="sr-only">지원기간별</h3>
                  <div className="search-top-box">
                     <div className="sch-form-wrap" ref={schFormWrapRef2}>
-                      <select className="krds-form-select">
+                      <select className="krds-form-select" title="공고상태 선택"> {/* 웹접근성 반영 */}
                         <option value="">공고상태 전체</option>
                       </select>
-                      <select className="krds-form-select">
+                      <select className="krds-form-select" title="검색구분 선택"> {/* 웹접근성 반영 */}
                         <option value="">검색구분 전체</option>
                       </select>
                       <div className="sch-input">

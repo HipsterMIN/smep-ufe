@@ -1,15 +1,15 @@
 // Simple API client using Fetch with environment-based base URL
-// 백엔드는 컨텍스트 패스가 없으므로 프론트엔드의 컨텍스트 패스(/main-dev, /main)를 사용하여 API를 호출하고
+// 백엔드는 컨텍스트 패스가 없으므로 프론트엔드의 컨텍스트 패스(/home-dev, /home)를 사용하여 API를 호출하고
 // 개발 서버(Vite)나 Nginx에서 이를 제거하여 백엔드로 전달합니다.
 
 import { useAuthStore } from '../store/useAuthStore';
 
 const API_CONTEXT = (import.meta.env.VITE_API_CONTEXT || '').replace(/^\/?/, '/');
 
-// 프론트엔드 베이스 경로(/main-dev/, /main/)
+// 프론트엔드 베이스 경로(/home-dev/, /home/)
 const APP_BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
-// 모든 API 호출은 /main-dev/api/... 또는 /main/api/... 형태로 시작하도록 구성
+// 모든 API 호출은 /home-dev/api/... 또는 /home/api/... 형태로 시작하도록 구성
 export const apiBaseUrl = `${APP_BASE}${API_CONTEXT}`.replace(/\/$/, '');
 
 function buildUrl(path) {

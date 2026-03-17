@@ -1,641 +1,680 @@
-import React, { useEffect, useRef, useState } from 'react';
-import SideNavigation from '../components/ui/SideNavigation';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Breadcrumb from '../components/ui/Breadcrumb';
-import Tab from '../components/ui/Tab.jsx';
-import Tooltip from '../components/ui/Tooltip.jsx';
 import Pagination from '../components/ui/Pagination';
+import Popup from '../components/ui/Popup';
+import SideNavigation from '../components/ui/SideNavigation';
+import Tab from '../components/ui/Tab.jsx';
+import Tooltip from '../components/ui/Tooltip';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
-import { useNavigate } from 'react-router-dom';
+
+const TAB_LABELS = ['전체', '융자', '보증', '보험'];
+const TAB_CODES = ['', 'FT01', 'FT02', 'FT03'];
+const SORT_OPTIONS = [
+  { code: 'INQ_CNT', name: '조회순' },
+  { code: 'REG_DT', name: '등록순' },
+];
+const EMPTY_FILTERS = {
+  plcyFnncGdsTypeCd: '',
+  plcyFnncSrchTypeCd: 'ALL',
+  plcyFnncSrchKwdCn: '',
+  plcyFnncBizFlfmtInstCd: '',
+  plcyFnncEntSclCd: '',
+  plcyFnncRcptSttsCd: '',
+  plcyFnncAddDtlCndCn: '',
+  plcyFnncAplyMthCd: '',
+  plcyFnncSprtTrgtFndsCn: '',
+  flctnIrtYnCn: '',
+  plcyFnncRpmtMthdCd: '',
+  loanPrdSmryCd: '',
+  plcyFndsLoanMthCn: '',
+  thmTpbizNm: '',
+  plcyFnncGdsKndCd: '',
+  plcyFnncGrnteRtSmryCn: '',
+  plcyFnncCmpnRtSmryCn: '',
+};
+const DEFAULT_FILTER_OPTIONS = {
+  searchTypes: [],
+  supportTypes: [],
+  financialInsts: [],
+  companySizes: [],
+  receptionStatuses: [],
+  preferredTypes: [],
+  applicationMethods: [],
+  repaymentMethods: [],
+  interestChangeTypes: [],
+  loanMethods: [],
+  supportTargetFunds: [],
+  loanPeriodSummaries: [],
+  grantKinds: [],
+  grantRateSummaries: [],
+  insuranceRateSummaries: [],
+};
+
+const EMPTY_DETAIL_FILTER_OPTIONS = DEFAULT_FILTER_OPTIONS;
+
+const unwrapResponse = (response) => response?.data ?? response;
+const tagList = (value) => (value || '').split(',').map((item) => item.trim()).filter(Boolean);
+const hasValue = (value) => value !== null && value !== undefined && String(value).trim() !== '';
+const asText = (value, fallback = '-') => (hasValue(value) ? value : fallback);
+const splitMultiValue = (value) => String(value || '').split(/\s*,\s*/).map((item) => item.trim()).filter(Boolean);
+const toCodeMap = (options = []) => options.reduce((acc, item) => {
+  acc[String(item.code).trim()] = item.name;
+  return acc;
+}, {});
+const decodeByMap = (value, codeMap) => {
+  const values = splitMultiValue(value);
+  if (values.length === 0) return '-';
+  return values.map((item) => codeMap[item] || item).join(', ');
+};
+
+const typeClass = (code) => {
+  if (code === 'FT01') return 'bg-light-primary';
+  if (code === 'FT02') return 'bg-light-success';
+  if (code === 'FT03') return 'bg-light-warning';
+  return 'bg-light-primary';
+};
+
+const renderSelectField = ({ id, label, value, onChange, options, placeholder, disabled = false }) => (
+  <div>
+    <label className="label" htmlFor={id}>{label}</label>
+    <select id={id} className="krds-form-select medium" value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
+      <option value="">{placeholder}</option>
+      {(options || []).map((item) => (
+        <option key={item.code} value={item.code}>{item.name}</option>
+      ))}
+    </select>
+  </div>
+);
+
+const getCompareRows = (typeCode) => {
+  switch (typeCode) {
+  case 'FT01':
+    return [
+      { label: '상품목적', key: 'plcyFnncGdsPrpsCn' },
+      { label: '금융기관', key: 'plcyFnncBizFlfmtInstNm' },
+      { label: '대출기간', values: ['loanPrdCn', 'loanPrdSmryNm', 'loanPrdSmryCd'], format: 'loanPeriodSummaries' },
+      { label: '지원대상', key: 'plcyFnncSprtTrgtCn' },
+      { label: '자금용도', values: ['plcyFnncSprtTrgtFndsCn', 'plcyFnncSprtTrgtFndsSmryCn'], format: 'supportTargetFunds' },
+      { label: '대출한도', values: ['plcyFnncSprtLimCn', 'plcyFnncSprtLimSmryCn'] },
+      { label: '우대조건', values: ['loanPrtrtCndCn', 'plcyFnncAddDtlCndCn'], format: 'preferredTypes' },
+      { label: '상환방법', values: ['plcyFnncRpmtMthdNm', 'plcyFnncRpmtMthdCd'], format: 'repaymentMethods' },
+      { label: '대출제외대상', key: 'plcyFnncSprtExclTrgtCn' },
+      { label: '금리변동여부', key: 'flctnIrtYnCn', format: 'interestChangeTypes' },
+    ];
+  case 'FT02':
+    return [
+      { label: '상품목적', key: 'plcyFnncGdsPrpsCn' },
+      { label: '금융기관', key: 'plcyFnncBizFlfmtInstNm' },
+      { label: '보증비율', values: ['plcyFnncGrnteRtCn', 'plcyFnncGrnteRtSmryCn'] },
+      { label: '보증료', key: 'plcyFnncGrfeCn' },
+      { label: '지원대상자금', values: ['plcyFnncSprtTrgtFndsUsgCn', 'plcyFnncSprtTrgtFndsUsgSmryCn'], format: 'supportTargetFunds' },
+      { label: '보증한도', values: ['plcyFnncSprtLimCn', 'plcyFnncSprtLimSmryCn'] },
+      { label: '우대조건', values: ['grntePrtrtCndCn', 'plcyFnncAddDtlCndCn'], format: 'preferredTypes' },
+      { label: '상품종류', values: ['plcyFnncGdsKndNm', 'plcyFnncGdsKndCd'], format: 'grantKinds' },
+      { label: '보증제한대상', key: 'plcyFnncSprtExclTrgtCn' },
+    ];
+  case 'FT03':
+    return [
+      { label: '상품목적', key: 'plcyFnncGdsPrpsCn' },
+      { label: '금융기관', key: 'plcyFnncBizFlfmtInstNm' },
+      { label: '보험료 우대', values: ['plcyFnncIspmPrtrtCndCn', 'insrncPrtrtCndCn', 'plcyFnncAddDtlCndCn'], format: 'preferredTypes' },
+      { label: '부보율(보상비율)', values: ['plcyFnncCmpnRtCn', 'plcyFnncCmpnRtSmryCn'] },
+      { label: '지급보험금', values: ['plcyFnncGiveInsrncAmtCn', 'plcyFnncGiveInsrncAmtSmryCn'] },
+      { label: '보험한도', values: ['plcyFnncSprtLimCn', 'plcyFnncSprtLimSmryCn'] },
+      { label: '우대조건', values: ['insrncPrtrtCndCn', 'plcyFnncIspmPrtrtCndCn', 'plcyFnncAddDtlCndCn'], format: 'preferredTypes' },
+      { label: '보험료', key: 'ispmCn' },
+      { label: '보험증권 유효기간', key: 'insrncScrtVldPrdCn' },
+    ];
+  default:
+    return [];
+  }
+};
+
+const getCompareValue = (item, row, filterOptions) => {
+  if (!item) return '-';
+  const codeMap = row.format ? toCodeMap(filterOptions[row.format] || []) : null;
+  if (row.key) {
+    if (codeMap && hasValue(item[row.key])) return decodeByMap(item[row.key], codeMap);
+    return asText(item[row.key]);
+  }
+  if (row.values) {
+    const matched = row.values.find((key) => hasValue(item[key]));
+    if (!matched) return '-';
+    if (codeMap) return decodeByMap(item[matched], codeMap);
+    return asText(item[matched]);
+  }
+  return '-';
+};
 
 const UI_USR_L_030 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-
-
   const navigate = useNavigate();
-
-  // ✅ 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
-
-  // ============================================
-  // 탭 & 검색 필터 State
-  // ============================================
-  const tabData = useRef(['전체', '융자', '보증', '보험']);
-  const schFormWrapRef = useRef(null);
+  const filterWrapRef = useRef(null);
 
   const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const [likedItems, setLikedItems] = useState({});
-
-  // ============================================
-  // API 조회 State
-  // ============================================
-  const [dataList, setDataList] = useState([]);
-  const [totalElements, setTotalElements] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [appliedFilters, setAppliedFilters] = useState(EMPTY_FILTERS);
+  const [filterOptions, setFilterOptions] = useState(EMPTY_DETAIL_FILTER_OPTIONS);
+  const [items, setItems] = useState([]);
+  const [popularItems, setPopularItems] = useState([]);
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(12);
   const [sortType, setSortType] = useState('INQ_CNT');
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [industryKeyword, setIndustryKeyword] = useState({ ksicCd: '', ksicNm: '' });
+  const [industryResults, setIndustryResults] = useState([]);
+  const [industryDraft, setIndustryDraft] = useState([]);
+  const [selectedIndustries, setSelectedIndustries] = useState([]);
+  const [appliedIndustries, setAppliedIndustries] = useState([]);
+  const [industryMessage, setIndustryMessage] = useState('');
+  const [compareIds, setCompareIds] = useState([]);
+  const [comparePopupOpen, setComparePopupOpen] = useState(false);
+  const [compareItems, setCompareItems] = useState([]);
+  const [compareLoading, setCompareLoading] = useState(false);
 
-  // ============================================
-  // 필터 검색 State (입력용)
-  // ============================================
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [selectedProductType, setSelectedProductType] = useState('');
-  const [selectedFinancialInst, setSelectedFinancialInst] = useState('');
-  const [selectedCompanySize, setSelectedCompanySize] = useState('');
-  const [selectedReceptionStatus, setSelectedReceptionStatus] = useState('');
-  const [selectedPreferredType, setSelectedPreferredType] = useState('');
-  const [selectedApplicationMethod, setSelectedApplicationMethod] = useState('');
-
-  // ============================================
-  // 필터 검색 State (전송용)
-  // ============================================
-  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
-  const [appliedProductType, setAppliedProductType] = useState('');
-  const [appliedFinancialInst, setAppliedFinancialInst] = useState('');
-  const [appliedCompanySize, setAppliedCompanySize] = useState('');
-  const [appliedReceptionStatus, setAppliedReceptionStatus] = useState('');
-  const [appliedPreferredType, setAppliedPreferredType] = useState('');
-  const [appliedApplicationMethod, setAppliedApplicationMethod] = useState('');
-  const [appliedTab, setAppliedTab] = useState('');
-
-  // ============================================
-  // API 호출 (페이징 및 필터 변경 시)
-  // ============================================
   useEffect(() => {
-    const fetchPolicyFinanceList = async () => {
-      setLoading(true);
-      try {
-        const params = new URLSearchParams({
-          page: currentPage + 1,
-          size: pageSize,
-          sortType: sortType,
-        });
+    const stored = sessionStorage.getItem('policyFinanceIndustries');
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        setSelectedIndustries(parsed);
+        setAppliedIndustries(parsed);
+      }
+    } catch (error) {
+      console.warn('Failed to restore industry selection:', error);
+    }
+  }, []);
 
-        // 탭 필터
-        if (appliedTab) {
-          params.append('plcyFnncGdsTypeCd', appliedTab);
-        }
+  useEffect(() => {
+    sessionStorage.setItem('policyFinanceIndustries', JSON.stringify(selectedIndustries));
+  }, [selectedIndustries]);
 
-        // 검색 키워드
-        if (appliedSearchKeyword && appliedSearchKeyword.trim()) {
-          params.append('searchKeyword', appliedSearchKeyword);
-        }
+  useEffect(() => {
+    const itemIds = new Set(items.map((item) => item.plcyFnncGdsSn));
+    setCompareIds((prev) => prev.filter((id) => itemIds.has(id)));
+  }, [items]);
 
-        // 상세 필터
-        if (appliedFinancialInst) {
-          params.append('financialInst', appliedFinancialInst);
-        }
-        if (appliedCompanySize) {
-          params.append('companySize', appliedCompanySize);
-        }
-        if (appliedReceptionStatus) {
-          params.append('receptionStatus', appliedReceptionStatus);
-        }
-        if (appliedPreferredType) {
-          params.append('preferredType', appliedPreferredType);
-        }
-        if (appliedApplicationMethod) {
-          params.append('applicationMethod', appliedApplicationMethod);
-        }
+  useEffect(() => {
+    apiClient.get('/api/v1/finance-policy/filters')
+      .then((response) => {
+        const data = unwrapResponse(response);
+        setFilterOptions({ ...DEFAULT_FILTER_OPTIONS, ...(data || {}) });
+      })
+      .catch((error) => {
+        console.error('Failed to load finance policy filters:', error);
+        setFilterOptions(DEFAULT_FILTER_OPTIONS);
+      });
+  }, []);
 
-        const response = await apiClient.get(
-          `/api/v1/finance-policy/list?${params.toString()}`,
-        );
 
-        const data = response.data;
-        setDataList(data.content || []);
-        setTotalElements(data.totalElements || 0);
-        setTotalPages(data.totalPages || 0);
-      } catch (error) {
-        console.error('정책금융 목록 조회 실패:', error);
-        setDataList([]);
+  useEffect(() => {
+    const params = new URLSearchParams({
+      page: String(page),
+      size: String(size),
+      sortType,
+    });
+    const tabCode = TAB_CODES[activeTabIndex];
+
+    params.set('plcyFnncGdsTypeCd', tabCode || appliedFilters.plcyFnncGdsTypeCd || '');
+
+    Object.entries(appliedFilters).forEach(([key, value]) => {
+      if (value && key !== 'plcyFnncGdsTypeCd') {
+        params.set(key, value);
+      }
+    });
+
+    if (appliedIndustries.length > 0) {
+      params.set('plcyFnncTpbizNm', appliedIndustries.map((item) => item.upperKsicCd).join(','));
+    }
+
+    setLoading(true);
+    apiClient.get(`/api/v1/finance-policy/list?${params.toString()}`)
+      .then((response) => {
+        const data = unwrapResponse(response);
+        const content = data?.content || [];
+        setItems(content);
+        setPopularItems(content.slice(0, 3));
+        setTotalElements(data?.totalElements || 0);
+        setTotalPages(data?.totalPages || 0);
+      })
+      .catch((error) => {
+        console.error('Failed to load finance policy list:', error);
+        setItems([]);
+        setPopularItems([]);
         setTotalElements(0);
         setTotalPages(0);
-      } finally {
-        setLoading(false);
-      }
-    };
+      })
+      .finally(() => setLoading(false));
+  }, [activeTabIndex, appliedFilters, appliedIndustries, page, size, sortType]);
 
-    fetchPolicyFinanceList();
-  }, [
-    currentPage,
-    pageSize,
-    sortType,
-    appliedSearchKeyword,
-    appliedTab,
-    appliedProductType,
-    appliedFinancialInst,
-    appliedCompanySize,
-    appliedReceptionStatus,
-    appliedPreferredType,
-    appliedApplicationMethod,
-  ]);
+  const selectedChips = useMemo(() => {
+    const chips = [];
+    const findName = (list, code) => list.find((item) => item.code === code)?.name;
 
-  // ============================================
-  // 핸들러 함수
-  // ============================================
+    if (filters.plcyFnncGdsTypeCd) chips.push({ key: 'plcyFnncGdsTypeCd', label: findName(filterOptions.supportTypes, filters.plcyFnncGdsTypeCd) || filters.plcyFnncGdsTypeCd });
+    if (filters.plcyFnncBizFlfmtInstCd) chips.push({ key: 'plcyFnncBizFlfmtInstCd', label: findName(filterOptions.financialInsts, filters.plcyFnncBizFlfmtInstCd) || filters.plcyFnncBizFlfmtInstCd });
+    if (filters.plcyFnncEntSclCd) chips.push({ key: 'plcyFnncEntSclCd', label: findName(filterOptions.companySizes, filters.plcyFnncEntSclCd) || filters.plcyFnncEntSclCd });
+    if (filters.plcyFnncRcptSttsCd) chips.push({ key: 'plcyFnncRcptSttsCd', label: findName(filterOptions.receptionStatuses, filters.plcyFnncRcptSttsCd) || filters.plcyFnncRcptSttsCd });
+    if (filters.plcyFnncAddDtlCndCn) chips.push({ key: 'plcyFnncAddDtlCndCn', label: findName(filterOptions.preferredTypes, filters.plcyFnncAddDtlCndCn) || filters.plcyFnncAddDtlCndCn });
+    if (filters.plcyFnncAplyMthCd) chips.push({ key: 'plcyFnncAplyMthCd', label: findName(filterOptions.applicationMethods, filters.plcyFnncAplyMthCd) || filters.plcyFnncAplyMthCd });
+    selectedIndustries.forEach((item) => chips.push({ key: `industry-${item.upperKsicCd}`, label: item.upperKsicNm }));
+    return chips;
+  }, [filterOptions, filters, selectedIndustries]);
 
-  // 탭 변경
-  const handleTabChange = (index) => {
-    setActiveTabIndex(index);
-    const tabValues = ['', 'FT01', 'FT02', 'FT03']; // 전체, 융자, 보증, 보험
-    setAppliedTab(tabValues[index]);
-    setCurrentPage(0);
+  const updateFilter = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
+
+  const applyFilters = () => {
+    setAppliedFilters(filters);
+    setAppliedIndustries(selectedIndustries);
+    setCompareIds([]);
+    setPage(1);
   };
 
-  // 필터 토글
-  const handleToggleFilter = () => {
-    schFormWrapRef.current?.classList.toggle('on');
+  const resetFilters = () => {
+    setFilters(EMPTY_FILTERS);
+    setAppliedFilters(EMPTY_FILTERS);
+    setSelectedIndustries([]);
+    setAppliedIndustries([]);
+    setIndustryDraft([]);
+    setCompareIds([]);
+    setCompareItems([]);
+    setComparePopupOpen(false);
+    setActiveTabIndex(0);
+    setPage(1);
+    setSortType('INQ_CNT');
+    filterWrapRef.current?.classList.remove('on');
   };
 
-  // 좋아요 토글
-  const handleToggleLike = (index) => {
-    setLikedItems((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
+  const removeChip = (key) => {
+    if (key.startsWith('industry-')) {
+      const code = key.replace('industry-', '');
+      const next = selectedIndustries.filter((item) => item.upperKsicCd !== code);
+      setSelectedIndustries(next);
+      setAppliedIndustries(next);
+      setPage(1);
+      return;
+    }
+    setFilters((prev) => ({ ...prev, [key]: '' }));
+    setAppliedFilters((prev) => ({ ...prev, [key]: '' }));
+    setPage(1);
   };
 
-  // 정렬 핸들러
-  const handleSortChange = (type) => {
-    setSortType(type);
-    setCurrentPage(0);
-  };
+  const searchIndustries = async () => {
+    const ksicCd = industryKeyword.ksicCd.trim();
+    const ksicNm = industryKeyword.ksicNm.trim();
 
+    if (ksicCd.length < 2 && ksicNm.length < 2) {
+      setIndustryResults([]);
+      setIndustryMessage('업종코드 또는 업종명을 2글자 이상 입력해 주세요.');
+      return;
+    }
 
-  // 검색 버튼 클릭 (입력용 → 전송용)
-  const handleSearch = () => {
-    setAppliedSearchKeyword(searchKeyword);
-    setCurrentPage(0);
-  };
+    const params = new URLSearchParams();
+    if (ksicCd.length >= 2) params.set('ksicCd', ksicCd);
+    if (ksicNm.length >= 2) params.set('ksicNm', ksicNm);
 
-  // 엔터키 검색
-  const handleSearchKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch();
+    try {
+      const response = await apiClient.get(`/api/v1/finance-policy/industries?${params.toString()}`);
+      const data = unwrapResponse(response);
+      setIndustryResults(data || []);
+      setIndustryMessage(data?.length ? '' : '검색 결과가 없습니다.');
+    } catch (error) {
+      console.error('Failed to search industries:', error);
+      setIndustryResults([]);
+      setIndustryMessage('업종 검색에 실패했습니다.');
     }
   };
 
-  // 필터 적용 (입력용 → 전송용)
-  const handleApplyFilters = () => {
-    setAppliedProductType(selectedProductType);
-    setAppliedFinancialInst(selectedFinancialInst);
-    setAppliedCompanySize(selectedCompanySize);
-    setAppliedReceptionStatus(selectedReceptionStatus);
-    setAppliedPreferredType(selectedPreferredType);
-    setAppliedApplicationMethod(selectedApplicationMethod);
-    setCurrentPage(0);
-    handleToggleFilter();
+  const showLoan = activeTabIndex === 1;
+  const showGrant = activeTabIndex === 2;
+  const showInsurance = activeTabIndex === 3;
+  const showCompare = activeTabIndex !== 0;
+  const compareTypeCode = TAB_CODES[activeTabIndex];
+  const compareRows = useMemo(() => getCompareRows(compareTypeCode), [compareTypeCode]);
+
+  const handleTabChange = (index) => {
+    setActiveTabIndex(index);
+    setCompareIds([]);
+    setCompareItems([]);
+    setComparePopupOpen(false);
+    setPage(1);
   };
 
-  // 필터 초기화
-  const handleResetFilters = () => {
-    setSearchKeyword('');
-    setSelectedProductType('');
-    setSelectedFinancialInst('');
-    setSelectedCompanySize('');
-    setSelectedReceptionStatus('');
-    setSelectedPreferredType('');
-    setSelectedApplicationMethod('');
-    setAppliedSearchKeyword('');
-    setAppliedProductType('');
-    setAppliedFinancialInst('');
-    setAppliedCompanySize('');
-    setAppliedReceptionStatus('');
-    setAppliedPreferredType('');
-    setAppliedApplicationMethod('');
-    setActiveTabIndex(0);
-    setAppliedTab('');
-    setCurrentPage(0);
+  const toggleCompare = (goodsSn, checked) => {
+    setCompareIds((prev) => {
+      if (!checked) return prev.filter((id) => id !== goodsSn);
+      if (prev.includes(goodsSn)) return prev;
+      if (prev.length >= 2) {
+        alert('상품 비교는 2개까지만 선택할 수 있습니다.');
+        return prev;
+      }
+      return [...prev, goodsSn];
+    });
   };
 
-  // 페이지 변경
-  const handlePageChange = (page) => {
-    setCurrentPage(page - 1);
-    window.scrollTo(0, 0);
-  };
+  const openComparePopup = async () => {
+    if (compareIds.length === 0) {
+      alert('선택된 항목이 없습니다.');
+      return;
+    }
+    if (compareIds.length !== 2) {
+      alert('항목은 반드시 2개만 선택해주세요.');
+      return;
+    }
 
-  // 페이지 사이즈 변경
-  const handlePageSizeChange = (e) => {
-    setPageSize(Number(e.target.value));
-    setCurrentPage(0);
-  };
-
-  // 상세페이지 이동
-  const goToDetail = (plcyFnncNo) => {
-    navigate(`${plcyFnncNo}`);
-  };
-
-  // ============================================
-  // 상태 표시 함수
-  // ============================================
-  const getReceptionStatusBadge = (statusCode) => {
-    const statusMap = {
-      'FG01': { text: '접수중', className: 'bg-light-success' },
-      'FG02': { text: '접수마감', className: 'bg-light-danger' },
-      'FG03': { text: '접수예정', className: 'bg-light-warning' },
-    };
-    return statusMap[statusCode] || { text: '미정', className: 'bg-light-gray' };
-  };
-
-  const getProductTypeBadge = (typeCode) => {
-    const typeMap = {
-      'FT01': '융자',
-      'FT02': '보증',
-      'FT03': '보험',
-    };
-    return typeMap[typeCode] || '';
+    try {
+      setCompareLoading(true);
+      const responses = await Promise.all(compareIds.map((goodsSn) => apiClient.get(`/api/v1/finance-policy/${goodsSn}`)));
+      setCompareItems(responses.map((response) => unwrapResponse(response)));
+      setComparePopupOpen(true);
+    } catch (error) {
+      console.error('Failed to load finance policy compare data:', error);
+      alert('상품 비교 정보를 불러오지 못했습니다.');
+    } finally {
+      setCompareLoading(false);
+    }
   };
 
   return (
     <>
-      <SideNavigation
-        pageTitle={depth1Menu?.menuNm || ''}
-        menuItems={sidebarData}
-      />
+      <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
-
-        {/* 페이지 제목 */}
         <div className="page-title-wrap" data-type="responsive">
           <h2 className="h-tit">정책금융</h2>
         </div>
 
-        {/* 탭 영역 */}
         <div className="krds-tab-area layer">
-          <Tab tabData={tabData.current} onTabChange={handleTabChange} />
+          <Tab tabData={TAB_LABELS} onTabChange={handleTabChange} />
           <div className="conts-desc">
-              정책금융은 정부 및 정책금융기관에서 중소기업의 성장과 발전을 지원하기 위해 제공하는
-              금융상품입니다. 다양한 금융상품 중 기업의 상황에 맞는 상품을 찾아보세요.
+            중소기업 성장과 경영 안정을 위해 제공하는 다양한 정책금융 상품을 조회할 수 있습니다.
           </div>
 
-          {/* 탭 콘텐츠 */}
           <div className="tab-conts-wrap">
             <section className="tab-conts active">
               <h3 className="sr-only">정책금융 목록</h3>
 
-              {/* 검색 영역 */}
               <div className="search-top-box">
-                <div className="sch-form-wrap" ref={schFormWrapRef}>
-                  <select className="krds-form-select">
-                    <option value="">전체</option>
-                    <option value="flcyFnncNm">상품명</option>
+                <div className="sch-form-wrap" ref={filterWrapRef}>
+                  <select className="krds-form-select" value={filters.plcyFnncSrchTypeCd} onChange={(e) => updateFilter('plcyFnncSrchTypeCd', e.target.value)}>
+                    <option value="ALL">전체</option>
+                    {filterOptions.searchTypes.filter((item) => item.code !== 'ALL').map((item) => (
+                      <option key={item.code} value={item.code}>{item.name}</option>
+                    ))}
                   </select>
                   <div className="sch-input">
                     <input
                       type="text"
                       className="krds-input"
-                      placeholder="검색어를 입력해주세요"
+                      placeholder="금융상품 조회를 위한 검색어를 입력해 주세요"
                       title="검색어 입력"
-                      value={searchKeyword}
-                      onChange={(e) => setSearchKeyword(e.target.value)}
-                      onKeyDown={handleSearchKeyDown}
+                      value={filters.plcyFnncSrchKwdCn}
+                      onChange={(e) => updateFilter('plcyFnncSrchKwdCn', e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
                     />
-                    <button
-                      type="button"
-                      className="krds-btn medium icon ico-search"
-                      onClick={handleSearch}
-                    >
+                    <button type="button" className="krds-btn medium icon ico-search" onClick={applyFilters}>
                       <span className="sr-only">검색</span>
                       <i className="svg-icon ico-sch"></i>
                     </button>
                   </div>
-                  <button
-                    type="button"
-                    className="krds-btn medium text"
-                    onClick={handleToggleFilter}
-                  >
+                  <button type="button" className="krds-btn medium text" onClick={() => filterWrapRef.current?.classList.toggle('on')}>
                     <i className="svg-icon ico-sch-plus"></i>
-                      상세검색
+                    상세검색
                     <span className="onfilter-open sr-only">열기</span>
                     <span className="onfilter-close sr-only">닫기</span>
                   </button>
                 </div>
 
-                {/* 상세 필터 영역 */}
                 <div className="sch-filter-box">
                   <div className="filter-form">
-                    {/* 1. 상품유형 */}
-                    <div>
-                      <label className="label" htmlFor="appl-sch-sel1">
-                        상품유형
-                      </label>
-                      <select
-                        id="appl-sch-sel1"
-                        className="krds-form-select medium"
-                        value={selectedProductType}
-                        onChange={(e) => setSelectedProductType(e.target.value)}
-                      >
-                        <option value="">상품유형 전체</option>
-                        <option value="FT01">융자</option>
-                        <option value="FT02">보증</option>
-                        <option value="FT03">보험</option>
-                      </select>
-                    </div>
-
-                    {/* 2. 금융기관 */}
-                    <div>
-                      <label className="label" htmlFor="appl-sch-sel2">
-                        금융기관
-                      </label>
-                      <select
-                        id="appl-sch-sel2"
-                        className="krds-form-select medium"
-                        value={selectedFinancialInst}
-                        onChange={(e) => setSelectedFinancialInst(e.target.value)}
-                      >
-                        <option value="">금융기관 전체</option>
-                        <option value="중소벤처기업진흥공단">중소벤처기업진흥공단</option>
-                        <option value="기술보증기금">기술보증기금</option>
-                        <option value="한국산업은행">한국산업은행</option>
-                        <option value="중소기업은행">중소기업은행</option>
-                        <option value="한국수출입은행">한국수출입은행</option>
-                        <option value="신용보증기금">신용보증기금</option>
-                        <option value="한국무역보험공사">한국무역보험공사</option>
-                        <option value="지역신용보증재단">지역신용보증재단</option>
-                        <option value="소상공인시장진흥공단">소상공인시장진흥공단</option>
-                      </select>
-                    </div>
-
-                    {/* 3. 기업규모 */}
-                    <div className="on-fit-width">
-                      <label className="label" htmlFor="appl-sch-sel3">
-                        기업규모
-                      </label>
-                      <select
-                        id="appl-sch-sel3"
-                        className="krds-form-select medium"
-                        value={selectedCompanySize}
-                        onChange={(e) => setSelectedCompanySize(e.target.value)}
-                      >
-                        <option value="">기업규모 전체</option>
-                        <option value="FS01">예비창업</option>
-                        <option value="FS02">소상공인</option>
-                        <option value="FS03">중소기업</option>
-                        <option value="FS04">중견기업</option>
-                        <option value="FS05">계열대기업</option>
-                      </select>
-                      {/*<button type="button" className="krds-btn medium text">
-                        업종선택 <i className="svg-icon ico-go"></i>
-                      </button>*/}
-                    </div>
-
-                    {/* 4. 접수상황 */}
-                    <div>
-                      <label className="label" htmlFor="appl-sch-sel4">
-                        접수상황
-                      </label>
-                      <select
-                        id="appl-sch-sel4"
-                        className="krds-form-select medium"
-                        value={selectedReceptionStatus}
-                        onChange={(e) => setSelectedReceptionStatus(e.target.value)}
-                      >
-                        <option value="">접수상황 전체</option>
-                        <option value="FG01">접수중</option>
-                        <option value="FG02">접수마감</option>
-                        <option value="FG03">접수예정</option>
-                      </select>
-                    </div>
-
-                    {/* 5. 우대기업유형 */}
-                    <div>
-                      <label className="label" htmlFor="appl-sch-sel5">
-                        우대기업
-                      </label>
-                      <select
-                        id="appl-sch-sel5"
-                        className="krds-form-select medium"
-                        value={selectedPreferredType}
-                        onChange={(e) => setSelectedPreferredType(e.target.value)}
-                      >
-                        <option value="">우대기업유형 전체</option>
-                        <option value="FU01">수출</option>
-                        <option value="FU02">벤처</option>
-                        <option value="FU03">창업</option>
-                        <option value="FU04">혁신성장공동기준</option>
-                        <option value="FU05">여성</option>
-                        <option value="FU06">장애인</option>
-                        <option value="FU07">고용창출우수</option>
-                        <option value="FU08">기타</option>
-                      </select>
-                    </div>
-
-                    {/* 6. 신청방식 */}
-                    <div>
-                      <label className="label" htmlFor="appl-sch-sel6">
-                        신청방식
-                      </label>
-                      <select
-                        id="appl-sch-sel6"
-                        className="krds-form-select medium"
-                        value={selectedApplicationMethod}
-                        onChange={(e) => setSelectedApplicationMethod(e.target.value)}
-                      >
-                        <option value="">신청방식 전체</option>
-                        <option value="FM01">온라인 신청</option>
-                        <option value="FM02">영업점 방문신청</option>
-                      </select>
-                    </div>
+                    {activeTabIndex === 0 && renderSelectField({
+                      id: 'plcyFnncGdsTypeCd',
+                      label: '상품유형',
+                      value: filters.plcyFnncGdsTypeCd,
+                      onChange: (value) => updateFilter('plcyFnncGdsTypeCd', value),
+                      options: filterOptions.supportTypes,
+                      placeholder: '전체',
+                    })}
+                    {renderSelectField({
+                      id: 'plcyFnncBizFlfmtInstCd',
+                      label: '금융기관',
+                      value: filters.plcyFnncBizFlfmtInstCd,
+                      onChange: (value) => updateFilter('plcyFnncBizFlfmtInstCd', value),
+                      options: filterOptions.financialInsts,
+                      placeholder: '전체',
+                    })}
+                    {activeTabIndex === 0 ? (
+                      <div className="on-fit-width">
+                        <label className="label" htmlFor="plcyFnncEntSclCd">기업규모</label>
+                        <select id="plcyFnncEntSclCd" className="krds-form-select medium" value={filters.plcyFnncEntSclCd} onChange={(e) => updateFilter('plcyFnncEntSclCd', e.target.value)}>
+                          <option value="">전체</option>
+                          {filterOptions.companySizes.map((item) => (
+                            <option key={item.code} value={item.code}>{item.name}</option>
+                          ))}
+                        </select>
+                        <button type="button" className="krds-btn medium text" onClick={() => { setIndustryDraft(selectedIndustries); setPopupOpen(true); }}>
+                          업종
+                          <i className="svg-icon ico-go"></i>
+                        </button>
+                      </div>
+                    ) : (
+                      renderSelectField({
+                        id: 'plcyFnncEntSclCd',
+                        label: '기업규모',
+                        value: filters.plcyFnncEntSclCd,
+                        onChange: (value) => updateFilter('plcyFnncEntSclCd', value),
+                        options: filterOptions.companySizes,
+                        placeholder: '전체',
+                      })
+                    )}
+                    {renderSelectField({
+                      id: 'plcyFnncRcptSttsCd',
+                      label: '접수상태',
+                      value: filters.plcyFnncRcptSttsCd,
+                      onChange: (value) => updateFilter('plcyFnncRcptSttsCd', value),
+                      options: filterOptions.receptionStatuses,
+                      placeholder: '전체',
+                    })}
+                    {activeTabIndex !== 0 && (
+                      <div className="on-fit-width">
+                        <label className="label" htmlFor="industryPopupButton">업종</label>
+                        <button id="industryPopupButton" type="button" className="krds-btn medium text" onClick={() => { setIndustryDraft(selectedIndustries); setPopupOpen(true); }}>
+                          <span className="sr-only">업종 선택</span>
+                          <i className="svg-icon ico-go"></i>
+                        </button>
+                      </div>
+                    )}
+                    {renderSelectField({
+                      id: 'plcyFnncAddDtlCndCn',
+                      label: '우대기업',
+                      value: filters.plcyFnncAddDtlCndCn,
+                      onChange: (value) => updateFilter('plcyFnncAddDtlCndCn', value),
+                      options: filterOptions.preferredTypes,
+                      placeholder: '전체',
+                    })}
+                    {renderSelectField({
+                      id: 'plcyFnncAplyMthCd',
+                      label: '신청방식',
+                      value: filters.plcyFnncAplyMthCd,
+                      onChange: (value) => updateFilter('plcyFnncAplyMthCd', value),
+                      options: filterOptions.applicationMethods,
+                      placeholder: '전체',
+                    })}
                   </div>
 
-                  {/*TODO ::: 필터 기능 구현*/}
-                  {/*<dl className="filter-chip">
-                    <dt>선택된 필터 <span className="num">2</span></dt>
+                  {showLoan && (
+                    <div className="filter-form">
+                      {renderSelectField({ id: 'plcyFnncRpmtMthdCd', label: '상환방법', value: filters.plcyFnncRpmtMthdCd, onChange: (value) => updateFilter('plcyFnncRpmtMthdCd', value), options: filterOptions.repaymentMethods, placeholder: '전체' })}
+                      {renderSelectField({ id: 'flctnIrtYnCn', label: '금리변동여부', value: filters.flctnIrtYnCn, onChange: (value) => updateFilter('flctnIrtYnCn', value), options: filterOptions.interestChangeTypes, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFndsLoanMthCn', label: '융자방식', value: filters.plcyFndsLoanMthCn, onChange: (value) => updateFilter('plcyFndsLoanMthCn', value), options: filterOptions.loanMethods, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncSprtTrgtFndsCn', label: '자금용도', value: filters.plcyFnncSprtTrgtFndsCn, onChange: (value) => updateFilter('plcyFnncSprtTrgtFndsCn', value), options: filterOptions.supportTargetFunds, placeholder: '전체' })}
+                      {renderSelectField({ id: 'loanPrdSmryCd', label: '대출기간', value: filters.loanPrdSmryCd, onChange: (value) => updateFilter('loanPrdSmryCd', value), options: filterOptions.loanPeriodSummaries, placeholder: '전체' })}
+                      <div>
+                        <label className="label" htmlFor="thmTpbizNm">테마업종명</label>
+                        <input id="thmTpbizNm" type="text" className="krds-input" value={filters.thmTpbizNm} onChange={(e) => updateFilter('thmTpbizNm', e.target.value)} />
+                      </div>
+                    </div>
+                  )}
+
+                  {showGrant && (
+                    <div className="filter-form">
+                      {renderSelectField({ id: 'plcyFnncSprtTrgtFndsCn', label: '지원대상 자금', value: filters.plcyFnncSprtTrgtFndsCn, onChange: (value) => updateFilter('plcyFnncSprtTrgtFndsCn', value), options: filterOptions.supportTargetFunds, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncGdsKndCd', label: '상품종류', value: filters.plcyFnncGdsKndCd, onChange: (value) => updateFilter('plcyFnncGdsKndCd', value), options: filterOptions.grantKinds, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncGrnteRtSmryCn', label: '보증비율', value: filters.plcyFnncGrnteRtSmryCn, onChange: (value) => updateFilter('plcyFnncGrnteRtSmryCn', value), options: filterOptions.grantRateSummaries, placeholder: '전체' })}
+                    </div>
+                  )}
+
+                  {showInsurance && (
+                    <div className="filter-form">
+                      {renderSelectField({ id: 'plcyFnncCmpnRtSmryCn', label: '보상비율', value: filters.plcyFnncCmpnRtSmryCn, onChange: (value) => updateFilter('plcyFnncCmpnRtSmryCn', value), options: filterOptions.insuranceRateSummaries, placeholder: '전체' })}
+                    </div>
+                  )}
+
+                  <dl className="filter-chip">
+                    <dt>선택된 필터 <span className="num">{selectedChips.length}</span></dt>
                     <dd>
-                      <button type="button" className="krds-btn xlarge icon border">
-                        <span className="sr-only">새로고침</span>
+                      <button type="button" className="krds-btn xlarge icon border" onClick={resetFilters}>
+                        <span className="sr-only">초기화</span>
                         <i className="svg-icon ico-refresh"></i>
                       </button>
                       <div className="chip-wrap krds-tag-wrap large">
-                        <span className="krds-btn-tag">
-                              금융
-                          <button type="button" className="btn-delete">
-                            <span className="sr-only">삭제</span>
-                          </button>
-                        </span>
-                        <span className="krds-btn-tag">
-                              서울
-                          <button type="button" className="btn-delete">
-                            <span className="sr-only">삭제</span>
-                          </button>
-                        </span>
+                        {selectedChips.length === 0 && <span className="krds-btn-tag">선택된 조건 없음</span>}
+                        {selectedChips.map((chip) => (
+                          <span key={chip.key} className="krds-btn-tag">
+                            {chip.label}
+                            <button type="button" className="btn-delete" onClick={() => removeChip(chip.key)}>
+                              <span className="sr-only">삭제</span>
+                            </button>
+                          </span>
+                        ))}
                       </div>
                     </dd>
-                  </dl>*/}
+                  </dl>
                 </div>
               </div>
 
-              {/* 인기 금융상품 */}
               <div className="onhotbox">
                 <div className="onhot-title">
                   <p>
                     <i className="svg-icon ico-hot"></i>
                     인기 금융상품
                   </p>
-                  <Tooltip tooltipText="인기 금융상품은 이용자가 가장 많이 찾는 금융정책상품입니다.">
-                    <span className="sr-only">도움말</span>
+                  <Tooltip tooltipText="인기 금융상품은 현재 조회 결과 중 조회수가 높은 상품을 기준으로 노출됩니다.">
+                    <span className="sr-only">안내</span>
                     <i className="svg-icon ico-help-gray"></i>
                   </Tooltip>
                 </div>
-                {/*TODO ::: 해시태그 구현*/}
                 <div className="krds-tag-wrap">
-                  <span className="krds-btn-tag">#개발기술사업화자금</span>
-                  <span className="krds-btn-tag">#혁신성장지원자금</span>
-                  <span className="krds-btn-tag">#수출기업글로벌화</span>
+                  {popularItems.length === 0 ? (
+                    <span className="krds-btn-tag">노출할 상품이 없습니다.</span>
+                  ) : (
+                    popularItems.map((item) => (
+                      <button type="button" key={`popular-${item.plcyFnncGdsSn}`} className="krds-btn-tag" onClick={() => navigate(`${item.plcyFnncGdsSn}`)}>
+                        #{item.plcyFnncGdsNm}
+                      </button>
+                    ))
+                  )}
                 </div>
               </div>
 
-              {/* 검색 결과 정보 & 정렬 */}
               <div className="search-list-top">
                 <ul className="sch-info" aria-live="polite">
-                  <li>
-                    검색 결과 <span className="point">{totalElements}</span>개
-                  </li>
+                  <li>검색 결과 <span className="point">{totalElements}</span>건</li>
                 </ul>
                 <ul className="sch-sort">
                   <li>
-                    <strong className="sort-label">
-                      <label htmlFor="search_result_count">목록 표시 개수</label>
-                    </strong>
-                    <select
-                      className="krds-form-select-sort"
-                      id="search_result_count"
-                      value={pageSize}
-                      onChange={handlePageSizeChange}
-                    >
-                      <option value={10}>10개</option>
-                      <option value={20}>20개</option>
-                      <option value={30}>30개</option>
-                      <option value={50}>50개</option>
+                    <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
+                    <select className="krds-form-select-sort" id="search_result_count" value={size} onChange={(e) => { setSize(Number(e.target.value)); setPage(1); }}>
+                      {[12, 24, 36].map((item) => <option key={item} value={item}>{item}개</option>)}
                     </select>
                   </li>
                   <li>
-                    <strong className="sort-label">
-                      <label htmlFor="sort">정렬기준</label>
-                    </strong>
+                    <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
                     <div className="w-sort-btn">
-                      <button
-                        type="button"
-                        className={sortType === 'INQ_CNT' ? 'active' : ''}
-                        onClick={() => handleSortChange('INQ_CNT')}
-                      >
-                        조회순
-                        {sortType === 'INQ_CNT' && <span className="sr-only">선택됨</span>}
-                      </button>
-                      <button
-                        type="button"
-                        className={sortType === 'REG_DT' ? 'active' : ''}
-                        onClick={() => handleSortChange('REG_DT')}
-                      >
-                        등록순
-                        {sortType === 'REG_DT' && <span className="sr-only">선택됨</span>}
-                      </button>
+                      {SORT_OPTIONS.map((option) => (
+                        <button key={option.code} type="button" className={sortType === option.code ? 'active' : ''} onClick={() => { setSortType(option.code); setPage(1); }}>
+                          {option.name}
+                          {sortType === option.code && <span className="sr-only">선택됨</span>}
+                        </button>
+                      ))}
                     </div>
                     <div className="m-sort-btn">
-                      <select
-                        className="krds-form-select-sort"
-                        id="sort"
-                        value={sortType}
-                        onChange={(e) => handleSortChange(e.target.value)}
-                      >
-                        <option value="INQ_CNT">조회순</option>
-                        <option value="REG_DT">등록순</option>
+                      <select className="krds-form-select-sort" id="sort" value={sortType} onChange={(e) => { setSortType(e.target.value); setPage(1); }}>
+                        {SORT_OPTIONS.map((option) => <option key={option.code} value={option.code}>{option.name}</option>)}
                       </select>
                     </div>
                   </li>
+                  {showCompare && (
+                    <li>
+                      <button type="button" className="krds-btn medium primary" onClick={openComparePopup} disabled={compareLoading}>
+                        <i className="svg-icon ico-round-check"></i>
+                        상품비교
+                      </button>
+                    </li>
+                  )}
                 </ul>
               </div>
 
-              {/* 목록 */}
               <ul className="krds-structured-list type-full">
                 {loading ? (
-                  <li style={{ padding: '40px', textAlign: 'center' }}>
-                    <span>로딩 중...</span>
-                  </li>
-                ) : dataList.length === 0 ? (
-                  <li style={{ padding: '40px', textAlign: 'center' }}>
-                    <span>조회된 데이터가 없습니다.</span>
-                  </li>
+                  <li className="structured-item"><div className="in" style={{ padding: 40, textAlign: 'center' }}>목록을 불러오는 중입니다.</div></li>
+                ) : items.length === 0 ? (
+                  <li className="structured-item"><div className="in" style={{ padding: 40, textAlign: 'center' }}>조회 결과가 없습니다.</div></li>
                 ) : (
-                  dataList.map((item, index) => (
-                    <li className="structured-item" key={item.plcyFnncNo || index}>
+                  items.map((item) => (
+                    <li className="structured-item" key={item.plcyFnncGdsSn}>
                       <div className="in">
-                        {/* 카드 상단 - 배지 */}
                         <div className="card-top">
+                          {showCompare && (
+                            <div className="krds-form-check large no-txt">
+                              <input
+                                type="checkbox"
+                                id={`compare-${item.plcyFnncGdsSn}`}
+                                checked={compareIds.includes(item.plcyFnncGdsSn)}
+                                onChange={(e) => toggleCompare(item.plcyFnncGdsSn, e.target.checked)}
+                              />
+                              <label htmlFor={`compare-${item.plcyFnncGdsSn}`}></label>
+                            </div>
+                          )}
                           <div className="krds-badge-wrap">
-                            <span className="krds-badge bg-light-success">신규</span>
-                            <span className="krds-badge bg-light-primary">
-                              {getProductTypeBadge(item.plcyFnncGdsTypeCd)}
-                            </span>
+                            {item.isHotGod === 'Y' && <span className="krds-badge bg-light-danger">인기</span>}
+                            {item.isNewGod === 'Y' && <span className="krds-badge bg-light-success">신규</span>}
+                            <span className={`krds-badge ${typeClass(item.plcyFnncGdsTypeCd)}`}>{item.plcyFnncGdsTypeNm || '정책금융'}</span>
                           </div>
                         </div>
-
-                        {/* 카드 본문 */}
                         <div className="card-body">
-                          <a href="#" className="c-text" onClick={(e) => {
-                            e.preventDefault();
-                            goToDetail(item.plcyFnncNo);
-                          }}>
-                            <p className="c-tit visited sml no-icon">
-                              <span className="span">{item.plcyFnncNm}</span>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              {item.plcyFnncGdsPrps || '정책금융상품 상세설명'}
-                            </p>
+                          <a href="#" className="c-text" onClick={(e) => { e.preventDefault(); navigate(`${item.plcyFnncGdsSn}`); }}>
+                            <p className="c-tit visited sml no-icon"><span className="span">{item.plcyFnncGdsNm}</span></p>
+                            <p className="c-txt onellipsis-2">{item.plcyFnncGdsPrpsCn || '-'}</p>
                             <p className="on-list-btm">
                               <span>
                                 <i className="svg-icon ico-checkbox on-bgcolorblue"></i>
-                                <strong className="on-colorblue">
-                                  {getReceptionStatusBadge(item.plcyFnncNtslSttsCd).text}
-                                </strong>
+                                <strong className="on-colorblue">{item.plcyFnncRcptSttsNm || '상태미정'}</strong>
                               </span>
-                              <span>
-                                <strong>{item.bizFlfmtInstNm || '중소벤처기업부'}</strong>
-                              </span>
-                              <span style={{
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                maxWidth: '500px',  // 👈 필요에 따라 조절
-                                display: 'inline-block',
-                              }}>
-                                <strong>지원대상</strong> {item.plcyFnncSprtTrgtCn || '미정'}
-                              </span>
+                              <span><strong>{item.plcyFnncBizFlfmtInstNm || '-'}</strong></span>
+                              <span><strong>지원대상</strong> {item.plcyFnncSprtTrgtCn || '-'}</span>
                             </p>
                           </a>
                         </div>
-
-                        {/* 카드 하단 - 태그 */}
                         <div className="card-btm">
-                          <span className="tag">정책금융</span>
-                          <span className="tag">{getProductTypeBadge(item.plcyFnncGdsTypeCd)}</span>
-                          <span className="tag">중소기업</span>
-                          <span className="tag">기업자금</span>
+                          {tagList(item.hashtags).slice(0, 4).map((tag) => (
+                            <span className="tag" key={`${item.plcyFnncGdsSn}-${tag}`}>{tag}</span>
+                          ))}
                         </div>
-
-                        {/* 카드 우측 - 조회수 & 좋아요 */}
                         <div className="card-btn">
                           <span className="krds-btn text">
                             <span className="sr-only">조회수</span>
                             <i className="svg-icon ico-pw-visible-on"></i>
                             <span>{item.inqCnt || 0}</span>
                           </span>
-                          <button
-                            type="button"
-                            className="krds-btn text"
-                            onClick={() => handleToggleLike(index)}
-                          >
-                            <i
-                              className={`svg-icon ico-like ${
-                                likedItems[index] ? 'on-bgcolored' : 'on-bgcolorgray'
-                              }`}
-                            ></i>
-                          </button>
                         </div>
                       </div>
                     </li>
@@ -643,20 +682,194 @@ const UI_USR_L_030 = () => {
                 )}
               </ul>
 
-              {/* 페이징 */}
-              {!loading && dataList.length > 0 && (
-                <Pagination
-                  totalPages={totalPages}
-                  currentPage={currentPage + 1}
-                  onPageChange={handlePageChange}
-                />
-              )}
+              {!loading && totalPages > 0 && <Pagination totalPages={totalPages} currentPage={page} onPageChange={setPage} />}
             </section>
           </div>
         </div>
       </div>
+
+      <Popup
+        isOpen={popupOpen}
+        onClose={() => setPopupOpen(false)}
+        title="업종선택"
+        footer={(
+          <>
+            <button type="button" className="krds-btn tertiary medium" onClick={() => setPopupOpen(false)}>닫기</button>
+            <button type="button" className="krds-btn primary medium" onClick={() => { setSelectedIndustries(industryDraft); setPopupOpen(false); }}>적용</button>
+          </>
+        )}
+      >
+        <div className="search-top-box">
+          <div className="sch-form-wrap">
+            <div className="input-wrap w-180">
+              <input
+                type="text"
+                className="krds-input"
+                placeholder="업종코드"
+                title="업종코드 입력"
+                value={industryKeyword.ksicCd}
+                onChange={(e) => setIndustryKeyword((prev) => ({ ...prev, ksicCd: e.target.value }))}
+                onKeyDown={(e) => e.key === 'Enter' && searchIndustries()}
+              />
+            </div>
+
+            <div className="sch-input w-304">
+              <input
+                type="text"
+                className="krds-input"
+                placeholder="업종명"
+                title="업종명 입력"
+                value={industryKeyword.ksicNm}
+                onChange={(e) => setIndustryKeyword((prev) => ({ ...prev, ksicNm: e.target.value }))}
+                onKeyDown={(e) => e.key === 'Enter' && searchIndustries()}
+              />
+              <button type="button" className="krds-btn medium icon ico-search" onClick={searchIndustries}>
+                <span className="sr-only">검색</span>
+                <i className="svg-icon ico-sch"></i>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              className="krds-btn xlarge icon border"
+              onClick={() => {
+                setIndustryKeyword({ ksicCd: '', ksicNm: '' });
+                setIndustryResults([]);
+                setIndustryMessage('');
+                setIndustryDraft([]);
+              }}
+            >
+              <span className="sr-only">초기화</span>
+              <i className="svg-icon ico-refresh"></i>
+            </button>
+          </div>
+        </div>
+
+        <p className="txt-caution has-icon">
+          <i className="svg-icon ico-info"></i> {industryMessage || '업종코드 또는 업종명 중 하나를 2글자 이상 입력해야 합니다.'}
+        </p>
+
+        <div className="krds-table-wrap mt-8">
+          <table className="tbl col data">
+            <caption>업종선택 표. 번호, 대분류 코드, 대분류명, 업종코드, 업종명 정보를 제공합니다.</caption>
+            <colgroup>
+              <col style={{ width: '8%' }} />
+              <col style={{ width: '12%' }} />
+              <col style={{ width: '24%' }} />
+              <col style={{ width: '16%' }} />
+              <col />
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col" rowSpan={2} className="ac bd-r">번호</th>
+                <th scope="col" colSpan={2} className="ac bd-r">대분류</th>
+                <th scope="col" colSpan={2} className="ac">세분류</th>
+              </tr>
+              <tr>
+                <th scope="col" className="ac">코드</th>
+                <th scope="col" className="ac">분류명</th>
+                <th scope="col" className="ac">업종코드</th>
+                <th scope="col" className="ac">업종명</th>
+              </tr>
+            </thead>
+            <tbody>
+              {industryResults.length === 0 ? (
+                <tr><td colSpan={5} className="ac">조회된 업종이 없습니다.</td></tr>
+              ) : (
+                industryResults.map((item, index) => (
+                  <tr key={`${item.ksicCd}-${item.ksicNm}`}>
+                    <td className="ac"><span>{index + 1}</span></td>
+                    <td className="ac"><span>{item.upperKsicCd}</span></td>
+                    <td className="ac">{item.upperKsicNm}</td>
+                    <td className="ac"><span>{item.ksicCd}</span></td>
+                    <td>
+                      <span>
+                        <button
+                          type="button"
+                          className="underline"
+                          onClick={() => {
+                            setIndustryDraft((prev) => (
+                              prev.some((selected) => selected.upperKsicCd === item.upperKsicCd) ? prev : [...prev, item]
+                            ));
+                          }}
+                        >
+                          {item.ksicNm}
+                        </button>
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="search-top-box only-filter mt-8">
+          <dl className="filter-chip">
+            <dt>선택된 필터 <span className="num">{industryDraft.length}</span></dt>
+            <dd>
+              <button
+                type="button"
+                className="krds-btn xlarge icon border"
+                onClick={() => setIndustryDraft([])}
+              >
+                <span className="sr-only">초기화</span>
+                <i className="svg-icon ico-refresh"></i>
+              </button>
+              <div className="chip-wrap krds-tag-wrap large">
+                {(industryDraft.length ? industryDraft : [{ upperKsicCd: 'none', upperKsicNm: '업종제한없음' }]).map((item) => (
+                  <span key={item.upperKsicCd} className="krds-btn-tag">
+                    {item.upperKsicNm}
+                    {item.upperKsicCd !== 'none' && (
+                      <button type="button" className="btn-delete" onClick={() => setIndustryDraft((prev) => prev.filter((selected) => selected.upperKsicCd !== item.upperKsicCd))}>
+                        <span className="sr-only">삭제</span>
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+            </dd>
+          </dl>
+        </div>
+      </Popup>
+
+      <Popup
+        isOpen={comparePopupOpen}
+        onClose={() => setComparePopupOpen(false)}
+        title="상품비교"
+        footer={<button type="button" className="krds-btn tertiary medium" onClick={() => setComparePopupOpen(false)}>닫기</button>}
+      >
+        <div className="conts-wrap">
+          <div className="krds-table-wrap">
+            <table className="tbl col data tbl-row">
+              <caption>정책금융 상품비교 표. 항목명과 선택한 두 상품의 비교 정보를 제공합니다.</caption>
+              <colgroup>
+                <col style={{ width: '18%' }} />
+                <col />
+                <col />
+              </colgroup>
+              <tbody>
+                <tr>
+                  <th scope="row" className="ac">상품명</th>
+                  <td className="ac"><strong>{asText(compareItems[0]?.plcyFnncGdsNm)}</strong></td>
+                  <td className="ac"><strong>{asText(compareItems[1]?.plcyFnncGdsNm)}</strong></td>
+                </tr>
+                {compareRows.map((row) => (
+                  <tr key={row.label}>
+                    <th scope="row" className="ac">{row.label}</th>
+                    <td>{getCompareValue(compareItems[0], row, filterOptions)}</td>
+                    <td>{getCompareValue(compareItems[1], row, filterOptions)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </Popup>
     </>
   );
 };
 
 export default UI_USR_L_030;
+
+

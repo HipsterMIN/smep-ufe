@@ -1,24 +1,276 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Tab from '@components/ui/Tab.jsx';
 import Pagination from '@components/ui/Pagination.jsx';
 import Popup from '@components/ui/Popup.jsx';
+import http from '@lib/http.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+
+const TAB_CLSF_CD = {
+  0: 'SC01',
+  1: 'SC02',
+  2: 'SC04',
+};
 
 const UI_USR_L_140 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const tabData = useRef(['소재부품장비 전문기업', '뿌리기술기업', '전문연구사업자']);
-  const [isOpen, setIsOpen] = useState(false); 
+
+  const [isOpen, setIsOpen] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [list, setList] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const [sidoList, setSidoList] = useState([]);
+  const [sigunguList, setSigunguList] = useState([]);
+
+  const [sdoCd, setSdoCd] = useState('');
+  const [sigunguCd, setSigunguCd] = useState('');
+  const [searchType, setSearchType] = useState('all');
+  const [searchKeyword, setSearchKeyword] = useState('');
+
+  const [appliedSdoCd, setAppliedSdoCd] = useState('');
+  const [appliedSigunguCd, setAppliedSigunguCd] = useState('');
+  const [appliedSearchType, setAppliedSearchType] = useState('all');
+  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
+
+  const sidebarData = getSideNavigationData();
+  const depth1Menu = getDepth1Parent();
+
+  // 시도 목록 조회 (최초 1회)
+  useEffect(() => {
+    const fetchSidoList = async () => {
+      try {
+        const response = await http.get('/api/v1/stdg/sido');
+        setSidoList(response.data.data ?? []);
+      } catch (error) {
+        console.error('시도 목록 조회 실패:', error);
+      }
+    };
+    fetchSidoList();
+  }, []);
+
+  // 시도 변경 시 시군구 목록 조회
+  useEffect(() => {
+    if (!sdoCd) {
+      setSigunguList([]);
+      setSigunguCd('');
+      return;
+    }
+    const fetchSigunguList = async () => {
+      try {
+        const response = await http.get('/api/v1/stdg/sigungu', { params: { sidoCd: sdoCd } });
+        setSigunguList(response.data.data ?? []);
+        setSigunguCd('');
+      } catch (error) {
+        console.error('시군구 목록 조회 실패:', error);
+      }
+    };
+    fetchSigunguList();
+  }, [sdoCd]);
+
+  const fetchList = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await http.get('/api/v1/bizm/cstm-spcltyent/list', {
+        params: {
+          cstmTelgmEntClsfCd: TAB_CLSF_CD[activeTabIndex],
+          sdoCd: appliedSdoCd,
+          sigunguCd: appliedSigunguCd,
+          searchType: appliedSearchType,
+          searchKeyword: appliedSearchKeyword,
+          page: currentPage + 1,
+        },
+      });
+      const res = response.data.data;
+      setList(res.content ?? []);
+      setTotalCount(res.totalElements ?? 0);
+      setTotalPages(res.totalPages ?? 0);
+    } catch (error) {
+      console.error('목록 조회 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTabIndex, appliedSdoCd, appliedSigunguCd, appliedSearchType, appliedSearchKeyword, currentPage]);
+
+  useEffect(() => {
+    fetchList();
+  }, [activeTabIndex, appliedSdoCd, appliedSigunguCd, appliedSearchType, appliedSearchKeyword, currentPage]);
 
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
+    setSdoCd('');
+    setSigunguCd('');
+    setSigunguList([]);
+    setSearchType('all');
+    setSearchKeyword('');
+    setAppliedSdoCd('');
+    setAppliedSigunguCd('');
+    setAppliedSearchType('all');
+    setAppliedSearchKeyword('');
+    setCurrentPage(0);
   };
 
-  // ✅ 사이드바 데이터 계산
-  const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
-  const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+  const handleSdoCdChange = (e) => {
+    setSdoCd(e.target.value);
+    setSigunguCd('');
+  };
+
+  const handleSearch = () => {
+    setAppliedSdoCd(sdoCd);
+    setAppliedSigunguCd(sigunguCd);
+    setAppliedSearchType(searchType);
+    setAppliedSearchKeyword(searchKeyword);
+    setCurrentPage(0);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page - 1);
+  };
+
+  const handleRowClick = (item) => {
+    setSelectedItem(item);
+    setIsOpen(true);
+  };
+
+  const formatDate = (ymd) => {
+    if (!ymd || ymd.length !== 8) return '-';
+    return `${ymd.substring(0, 4)}-${ymd.substring(4, 6)}-${ymd.substring(6, 8)}`;
+  };
+
+  const isSigunguDisabled = !sdoCd;
+
+  const renderTable = () => (
+    <>
+      <div className="search-top-box mt-40">
+        <div className="sch-form-wrap">
+          {/* 시도 선택 */}
+          <select
+            className="krds-form-select"
+            value={sdoCd}
+            onChange={handleSdoCdChange}
+          >
+            <option value="">전국</option>
+            {sidoList.map((item) => (
+              <option key={item.code} value={item.code}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+
+
+          {/* 시군구 선택 */}
+          <select
+            className="krds-form-select"
+            value={sigunguCd}
+            onChange={(e) => setSigunguCd(e.target.value)}
+            disabled={isSigunguDisabled}
+          >
+            <option value="">시군구선택</option>
+            {sigunguList.map((item) => (
+              <option key={item.code} value={item.code}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+
+          {/* 검색 유형 */}
+          <select
+            className="krds-form-select"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
+            <option value="all">전체</option>
+            <option value="entNm">기업명</option>
+            <option value="cstmTelgmEntFldNm">업종명</option>
+          </select>
+
+          {/* 검색어 */}
+          <div className="sch-input">
+            <input
+              type="text"
+              className="krds-input"
+              placeholder="검색어를 입력해주세요."
+              title="검색어 입력"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <button
+              type="button"
+              className="krds-btn medium icon ico-search"
+              onClick={handleSearch}
+            >
+              <span className="sr-only">검색</span>
+              <i className="svg-icon ico-sch"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="search-list-top">
+        <ul className="sch-info" aria-live="polite">
+          <li>검색 결과 <span className="point">{totalCount}</span>개</li>
+        </ul>
+      </div>
+
+      <div className="krds-table-wrap">
+        <table className="tbl col data">
+          <caption>{tabData.current[activeTabIndex]} 표. 번호, 기업명, 업종명, 만료일자 정보가 제공됨.</caption>
+          <colgroup>
+            <col style={{ width: '70px' }} />
+            <col style={{ width: '200px' }} />
+            <col />
+            <col style={{ width: '160px' }} />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col" className="ac">번호</th>
+              <th scope="col" className="ac">기업명</th>
+              <th scope="col" className="ac">업종명</th>
+              <th scope="col" className="ac">만료일자</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan={4} className="ac">로딩 중...</td></tr>
+            ) : list.length === 0 ? (
+              <tr><td colSpan={4} className="ac">조회된 데이터가 없습니다.</td></tr>
+            ) : (
+              list.map((item, index) => (
+                <tr key={item.cstmTelgmEntEntCd}>
+                  <th scope="row" className="ac">
+                    <span>{totalCount - (currentPage * 10) - index}</span>
+                  </th>
+                  <td>
+                    <button
+                      type="button"
+                      className="onellipsis-1 on-colorblue2"
+                      onClick={() => handleRowClick(item)}
+                    >
+                      {item.entNm}
+                    </button>
+                  </td>
+                  <td><span>{item.cstmTelgmEntFldNm || '-'}</span></td>
+                  <td className="ac"><span>{formatDate(item.expryYmd)}</span></td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+      <Pagination
+        totalPages={totalPages}
+        currentPage={currentPage + 1}
+        onPageChange={handlePageChange}
+      />
+    </>
+  );
 
   return (
     <>
@@ -42,133 +294,89 @@ const UI_USR_L_140 = () => {
                 <h4 className="outline-tit">소재부품장비 전문기업</h4>
                 <ul className="check-list">
                   <li>전문기업 확인 제도란? : 소재부품장비산업 기술경쟁력 제고를 위해 소재 부품 또는 장비 개발, 제조를 주된 사업으로 영위하는 기업을 전문기업으로 추천 확인하는 제도</li>
-                  <li>
-                      신청방법 : 소부장넷(<a className="on-linktxt2" href="https://www.sobujang.net/index.do#S22010" target="_blank" title="새 창 열림">https://www.sobujang.net/index.do#S22010</a>)에서 온라인 신청
+                  <li>신청방법 : 소부장넷(<a className="on-linktxt2" href="https://www.sobujang.net/index.do#S22010" target="_blank" title="새 창 열림">https://www.sobujang.net/index.do#S22010</a>)에서 온라인 신청</li>
+                </ul>
+              </div>
+              {activeTabIndex === 0 && renderTable()}
+            </section>
+
+            <section className={`tab-conts ${activeTabIndex === 1 ? 'active' : ''}`}>
+              <h3 className="sr-only">뿌리기술기업</h3>
+              <div className="txt-box outline">
+                <h4 className="outline-tit">뿌리기술기업</h4>
+                <ul className="check-list">
+                  <li>뿌리기술이란? : 주조(鑄造), 금형(金型), 소성가공(塑性加工), 용접(鎔接), 표면처리(表面處理), 열처리(熱處理) 등 제조업 전반에 걸쳐 활용되는 기반 공정기술과 사출(射出)ㆍ프레스, 정밀가공(精密加工), 로봇, 센서 등 제조업의 미래 성장 발전에 핵심적인 차세대 공정기술로서 대통령령으로 정하는 기술</li>
+                  <li>뿌리기술 전문기업이란? :<br />
+                      1. 뿌리산업의 범위(*)에 해당하는 기업 - (*)뿌리산업 진흥과 첨단화에 관한 법률 시행령 제2조에 근거한 뿌리산업의 범위<br />
+                      - 공장등록증상의 업종 코드와 뿌리산업 범위에 해당하는 분야별 업종 코드가 일치할 경우만 신청 가능<br />
+                      - 뿌리산업의 범위 확인 방법 : 국가뿌리산업진흥센터 → 정보 안내 → 뿌리산업의 범위<br />
+                      2. 「뿌리산업 진흥과 첨단화에 관한 법률」 제14조 1항 및 「핵심 뿌리기술 고시」에 따라 지정된 핵심 뿌리기술(*)을 보유한 기업<br />
+                      (*)핵심 뿌리기술 확인 방법 : 국가뿌리산업진흥센터 → 정보 안내 → 핵심 뿌리기술 목록<br />
+                      3. 총 매출액 중 뿌리기술을 이용한 제품의 매출액이 100분의 50 이상<br />
+                      4. 「독점규제 및 공정거래에 관한 법률」 제14조 제1항에 따른 상호출자제한기업에 속하지 아니하는 기업
                   </li>
+                  <li>신청방법 : 국가뿌리산업진흥센터(<a className="on-linktxt2" href="https://apply.kpic.re.kr/html/?pmode=guide" target="_blank" title="새 창 열림">https://apply.kpic.re.kr/html/?pmode=guide</a>)에서 뿌리기술 전문기업 온라인 신청ㆍ접수</li>
                 </ul>
               </div>
-              <div className="search-top-box mt-40">
-                <div className="sch-form-wrap">
-                  <select className="krds-form-select">
-                    <option value="">시도선택</option>
-                    <option value="">항목</option>
-                  </select>
-                  <select className="krds-form-select">
-                    <option value="">시군구선택</option>
-                    <option value="">항목</option>
-                  </select>
-                  <select className="krds-form-select">
-                    <option value="">전체</option>
-                    <option value="">항목</option>
-                  </select>
-                  <div className="sch-input">
-                    <input type="text" className="krds-input" placeholder="검색어를 입력해주세요." title="검색어 입력" />
-                    <button type="button" className="krds-btn medium icon ico-search" >
-                      <span className="sr-only">검색</span>
-                      <i className="svg-icon ico-sch"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="search-list-top">
-                <ul className="sch-info" aria-live="polite">
-                  <li>검색 결과 <span className="point">15,210</span>개</li>
-                </ul>
-                <ul className="sch-sort">
-                  <li>
-                    <strong className="sort-label"><label for="search_result_count">목록 표시 개수</label></strong>
-                    <select className="krds-form-select-sort" id="search_result_count">
-                      <option>12개</option>
-                      <option>9개</option>
-                    </select>
-                  </li>
+              {activeTabIndex === 1 && renderTable()}
+            </section>
+
+            <section className={`tab-conts ${activeTabIndex === 2 ? 'active' : ''}`}>
+              <h3 className="sr-only">전문연구사업자</h3>
+              <div className="txt-box outline">
+                <h4 className="outline-tit">전문연구사업자</h4>
+                <ul className="check-list">
+                  <li>연구개발, 제작, 디자인 등의 기술전문 서비스 분야를 보유하고 있는 전문 기업</li>
+                  <li>전문연구사업자 : 한국연구산업협회(<a className="on-linktxt2" href="https://www.rndia.or.kr/regSys/preCheck.do" target="_blank" title="새 창 열림">https://www.rndia.or.kr/regSys/preCheck.do</a>)에서 온라인 신청 및 조회</li>
                 </ul>
               </div>
-              {/* table [S] */}
-              <div className="krds-table-wrap">
-                <table className="tbl col data">
-                  <caption>소재부품장비 전문기업 표. 번호, 기업명, 업종명,만료일자 정보가 제공됨.</caption>
-                  <colgroup>
-                    <col style={{ width: '8%' }} />
-                    <col />
-                    <col style={{ width: '26%' }} />
-                    <col style={{ width: '12%' }} />
-                  </colgroup>
-                  <thead>
-                    <tr>
-                      <th scope="col" className="ac">번호</th>
-                      <th scope="col" className="ac">기업명</th>
-                      <th scope="col" className="ac">업종명</th>
-                      <th scope="col" className="ac">만료일자</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row" className="ac">
-                        <span>123</span>
-                      </th>
-                      <td>
-                        <button type="button" className="onellipsis-1 on-colorblue2" onClick={() => setIsOpen(true)}>
-                            쓰리워터
-                        </button>
-                      </td>
-                      <td className="ac"><span>금속 탱크 및 저장 용기 제조업</span></td>
-                      <td className="ac"><span>2025-04-16</span></td>
-                    </tr>
-                    <tr>
-                      <th scope="row" className="ac">
-                        <span>123</span>
-                      </th>
-                      <td>
-                        <button type="button" className="onellipsis-1 on-colorblue2" onClick={() => setIsOpen(true)}>
-                            쓰리워터
-                        </button>
-                      </td>
-                      <td className="ac"><span>금속 탱크 및 저장 용기 제조업</span></td>
-                      <td className="ac"><span>2025-04-16</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              {/* table [E] */}
-              <Pagination /> 
+              {activeTabIndex === 2 && renderTable()}
             </section>
           </div>
         </div>
-        <Popup 
-          isOpen={isOpen} 
-          onClose={() => setIsOpen(false)} 
-          title="(주) 쓰리워터"
+
+        <Popup
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          title={selectedItem?.entNm || ''}
           noBottomBtn={true}
         >
-          <div className="detail-list-wrap type2">
-            <div className="on-detail-list">
-              <dl>
-                <dt className="w-100">업체명</dt>
-                <dd><p>(주) 쓰리워터</p></dd>
-                <dt className="w-100">홈페이지</dt>
-                <dd></dd>
-              </dl>
-              <dl>
-                <dt className="w-100">신고업종</dt>
-                <dd><p>금속 탱크 및 저장 용기 제조업</p></dd>
-                <dt className="w-100">대표자명</dt>
-                <dd></dd>
-              </dl>
-              <dl>
-                <dt className="w-100">만료일자</dt>
-                <dd><p>2028-12-14</p></dd>
-                <dt className="w-100">발급일자</dt>
-                <dd><p>2028-12-15</p></dd>
-              </dl>
-              <dl>
-                <dt className="w-100">주소</dt>
-                <dd><p>경기도 화성시 장안면 중원길 5-57 1동</p></dd>
-              </dl>
+          {selectedItem && (
+            <div className="detail-list-wrap type2">
+              <div className="on-detail-list">
+                <dl>
+                  <dt className="w-100">업체명</dt>
+                  <dd><p>{selectedItem.entNm || '-'}</p></dd>
+                  <dt className="w-100">홈페이지</dt>
+                  <dd>
+                    {selectedItem.urlAddr ? (
+                      <a className="on-linktxt2" href={selectedItem.urlAddr} target="_blank" rel="noopener noreferrer" title="새 창 열림">
+                        {selectedItem.urlAddr}
+                      </a>
+                    ) : '-'}
+                  </dd>
+                </dl>
+                <dl>
+                  <dt className="w-100">신고업종</dt>
+                  <dd><p>{selectedItem.cstmTelgmEntFldNm || '-'}</p></dd>
+                  <dt className="w-100">대표자명</dt>
+                  <dd><p>{selectedItem.rprsvNm || '-'}</p></dd>
+                </dl>
+                <dl>
+                  <dt className="w-100">만료일자</dt>
+                  <dd><p>{formatDate(selectedItem.expryYmd)}</p></dd>
+                  <dt className="w-100">발급일자</dt>
+                  <dd><p>{formatDate(selectedItem.issuYmd)}</p></dd>
+                </dl>
+                <dl>
+                  <dt className="w-100">주소</dt>
+                  <dd><p>{selectedItem.bplcBscAddr || '-'}</p></dd>
+                </dl>
+              </div>
             </div>
-          </div>
+          )}
         </Popup>
-      </div> 
+      </div>
     </>
   );
 };

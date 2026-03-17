@@ -2686,7 +2686,7 @@ caption {
   outline-offset: -0.4rem;
 }
 .tab.fill .active .btn-tab {
-  background-color: var(--krds-tab--fill-button-color-action-active);
+  background-color: var(--krds-light-color-icon-secondary);
   border-color: var(--krds-tab--fill-button-color-border-active) !important;
   color: var(--krds-tab--fill-button-color-text);
 }

@@ -1,4 +1,6 @@
 import React, { useState, forwardRef } from 'react';
+import { Link } from 'react-router-dom';
+
 
 const HeaderMobileGNB = forwardRef(({ menus, onClose, userName, isLogin }, ref) => {
   const [activeMobileTab, setActiveMobileTab] = useState(0);
@@ -17,63 +19,43 @@ const HeaderMobileGNB = forwardRef(({ menus, onClose, userName, isLogin }, ref) 
     <div id="mobile-nav" className="krds-main-menu-mobile" ref={ref}> 
       <div className="gnb-wrap">
         <div className="gnb-header">
-          <div className="gnb-login">
+          {/* 03-10 디자인 변경 */}
+          <div className="gnb-utils">
+            <ul className="utility-list">
+              <li>
+                <Link to="#" className="krds-btn medium text">
+                  <i class="svg-icon ico-system"></i> 유관시스템 둘러보기
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div className={`gnb-login ${isLogin ? 'is-login' : 'is-logout'}`}>
             {isLogin ? (
               <>
-                <span className="user">{userName}님</span>
-                <button type="button" className="krds-btn large text"><i className="svg-icon ico-logout"></i> 로그아웃</button>
+                {/* 로그인 후 */}
+                <div className="gnb-user-info">
+                  <span className="user">{userName}</span>님 안녕하세요
+                  
+                </div>
+                <div className="gnb-sesseion-timer">
+                  <div className="timer"><span className="sr-only">남은 시간</span><i className="svg-icon ico-clock"></i> 28: 38</div>
+                  <button type="button" className="krds-btn secondary xsmall">연장</button>
+                </div>
+                <div className="gnb-header-link">
+                  <Link to="#" className="krds-btn large text"><i className="svg-icon ico-my"></i> 마이비즈니스</Link>
+                  <button type="button" className="krds-btn large text"><i className="svg-icon ico-logout"></i> 로그아웃</button>
+                </div>
               </>
             ) : (
-              <button type="button" className="krds-btn large text"><i className="svg-icon ico-log"></i> 로그인을 해주세요</button>
+              <>
+                {/* 로그인 전 */}
+                <button type="button" className="krds-btn large text"><i className="svg-icon ico-log"></i> 로그인</button>
+                <button type="button" className="krds-btn large text"><i className="svg-icon ico-join"></i> 회원가입</button>
+                
+              </>
             )}
           </div>
 
-          {/** HeaderUserMenu.jsx 개인/기업회원전환 디자인 변경 20260219 */}
-          <div className="chip-wrap krds-tag-wrap large">
-            {/* <select
-              className="krds-form-select"
-              style={{ minWidth: '180px' }}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value && onSwitchContext) {
-                  onSwitchContext(Number(value));
-                }
-              }}
-            >
-              <option value="">기업 전환</option>
-              {linkedCompanies.map((company) => (
-                <option key={company.companyId} value={company.companyId}>
-                  {company.companyName}
-                </option>
-              ))}
-            </select> */}
-
-            <button
-              type="button"
-              className="krds-btn-tag"
-              style={{
-                backgroundColor: '#fff',
-                color: '#000',
-                border: '1px solid #ddd',
-                padding: '4px 12px',
-                borderRadius: '20px',
-                fontSize: '13px',
-                cursor: 'pointer',
-              }}
-              // onClick={() => onSwitchContext && onSwitchContext(null)}
-            >
-              개인회원전환
-            </button>
-        </div>
-
-
-          <div className="sch-input">
-            <input type="text" className="krds-input" placeholder="찾고자 하는 메뉴명을 입력해 주세요" title="찾고자 하는 메뉴명 입력"></input>
-            <button type="button" className="krds-btn medium icon ico-search">
-              <span className="sr-only">검색</span>
-              <i className="svg-icon ico-sch"></i>
-            </button>
-          </div>
         </div>
 
         <div className="gnb-body">
