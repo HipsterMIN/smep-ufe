@@ -1024,6 +1024,15 @@
 .svg-icon.ico-build {
   background: url(../src/assets/common/ico_build.svg) no-repeat center / 100% auto;
 }
+.svg-icon.ico-location {
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: contain;
+  mask-image: url(../src/assets/common/ico_location.svg);
+}
 
 .main-container .contents-inner {
   padding: 0 20px;
