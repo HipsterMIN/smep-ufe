@@ -319,7 +319,7 @@ export default function Header() {
   return (
     <>
       <div id="krds-skip-link">
-        <a href="#breadcrumb">본문 바로가기</a>
+        <a href="#container">본문 바로가기</a> {/* 웹접근성 반영 */}
       </div>
       
       <header 

@@ -560,7 +560,19 @@
     min-width: 200px;
 }
 
-/* aichat 관련 스타일이 src/pages/ai/ai.css로 이동되었습니다. */
+.search-top-box .sch-filter-box .filter-sect {
+  padding-bottom: 24px;
+  border-bottom: 1px solid #D6E0EB;
+}
+.search-top-box .filter-sect .filter-chip {
+  margin-top: 0;
+}
+.on-list-btm > span strong {
+  flex-shrink: 0;
+}
+.on-list-btm .max-w {
+  max-width: 72%;
+}
 
 .bg-guide .bg-guide-img {
     width: auto;
@@ -1473,6 +1485,9 @@ button.aichatButton.active {
 .mt-8 {
   margin-top: 8px;
 }
+.pb-0{
+  padding-bottom: 0;
+}
 
 
 /* 반응형*/
@@ -1805,7 +1820,7 @@ button.aichatButton.active {
 
   .main-quick-menu {
     margin-top: 24px;
-    padding: 20px 0 20px 15px;
+    padding: 20px 0 50px 15px;
     border-radius: 0;
   }
   .main-quick-menu .section-tit br {
@@ -1872,10 +1887,18 @@ button.aichatButton.active {
     font-size: 19px;
     text-align: center;
   }
-  .quick-menu-swiper .swiper-nav-wrap .swiper-button-next {
-    left: auto;
+  .quick-menu-swiper .swiper-nav-wrap {
+    position: absolute;
+    bottom: -34px;
+    right: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
+  .quick-menu-swiper .swiper-nav-wrap .swiper-button-prev,
   .quick-menu-swiper .swiper-nav-wrap .swiper-button-next {
-    right: auto;
+    position: static;
+    left: 0;
+    transform: none;
   }
 }

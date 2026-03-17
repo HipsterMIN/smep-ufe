@@ -116,7 +116,7 @@ const UI_USR_L_040 = () => {
 
         <div className="search-top-box mt-48">
           <div className="sch-form-wrap">
-            <select className="krds-form-select">
+            <select className="krds-form-select" title="카테고리 선택"> {/* 웹접근성 반영 */}
               <option value="">카테고리 전체</option>
             </select>
             <div className="sch-input">

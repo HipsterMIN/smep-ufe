@@ -221,7 +221,7 @@ const MainPage = () => {
   return (
     <div id="wrap">
         <Header />{ /* 임시 해더 */}
-        <div id="container" class="main-container">
+        <div id="container"  class="main-container">
           { /*컨텐츠 영역 */}
 
           {/* S - main-totallayout */}
@@ -233,8 +233,10 @@ const MainPage = () => {
                   className={`top-srch sch-input ${isFocused ? "is-focused" : ""}`}
                   >
                   <div className="sch-input-box">
+                    {/* 웹접근성 반영  title*/}
                     <input 
                       type="text" 
+                      title="통합검색" 
                       placeholder='지원사업·정책금융·확인서·사업공고를 검색하세요'
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
@@ -451,7 +453,8 @@ const MainPage = () => {
                                   <p className="c-tit no-icon"><span className="span onellipsis-2">2026년 소공인 복합지원센터 구축ㆍ운영사업 본공모</span></p>
                                   <div className="c-etc">
                                     <p className="c-ico-txt">
-                                      <i className="svg-icon ico-build"></i> 한국산업기술기획평가원
+                                      {/* 웹접근성 반영 */}
+                                      <i className="svg-icon ico-build"></i> <span className="sr-only">기관</span> 한국산업기술기획평가원
                                     </p>
                                     <p className="c-ico-txt">
                                       <i className="svg-icon ico-calendar"></i> 2026.01.19 ~ 2026.02.12  
@@ -511,7 +514,8 @@ const MainPage = () => {
                                 <div className="c-text">
                                   <p className="c-tit no-icon no-link"><span className="span onellipsis-2">벤처기업확인서</span></p>
                                   <p className="c-ico-txt">
-                                    <i className="svg-icon ico-build"></i> 중소벤처기업진흥공단
+                                    {/* 웹접근성 반영 */}
+                                    <i className="svg-icon ico-build"></i><span className="sr-only">기관</span> 중소벤처기업진흥공단
                                   </p>
                                 </div>
                                 <div>
@@ -544,7 +548,8 @@ const MainPage = () => {
                                     <p className="c-tit no-icon"><span className="span onellipsis-2">해외사업자금</span></p>
                                     <div className="c-etc">
                                       <p className="c-ico-txt">
-                                        <i className="svg-icon ico-build"></i> 한국산업기술기획평가원
+                                        {/* 웹접근성 반영 */}
+                                        <i className="svg-icon ico-build"></i><span className="sr-only">기관</span> 한국산업기술기획평가원
                                       </p>
                                       <p className="c-ico-txt">
                                         <i className="svg-icon ico-circlecheck"></i> 업력 7년이상 중소기업
@@ -710,14 +715,14 @@ const MainPage = () => {
                       <SwiperSlide>
                         <div className="main-banner-item">
                           <Link to="#" className="main-banner-link">
-                            <img src={mainBanner} alt="이미지 내용에 맞는 설명 들어가야함" />
+                            <img src={mainBanner} alt="중소벤처 24. 2026년 중소벤처기업부 지원사업 안내. 이제 중소벤처24에서 한 번에 조회하세요." />
                           </Link>
                         </div>
                       </SwiperSlide>
                       <SwiperSlide>
                         <div className="main-banner-item">
                           <Link to="#" className="main-banner-link">
-                            <img src={mainBanner} alt="이미지 내용에 맞는 설명 들어가야함" />
+                            <img src={mainBanner} alt="중소벤처 24. 2026년 중소벤처기업부 지원사업 안내. 이제 중소벤처24에서 한 번에 조회하세요." />
                           </Link>
                         </div>
                       </SwiperSlide>

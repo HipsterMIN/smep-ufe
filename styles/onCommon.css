@@ -1200,7 +1200,7 @@ table tbody tr:hover td {
   gap: var(--krds-gap-7);
   max-width: 100%;
   flex-wrap: wrap;
-  border-bottom: 1px solid #d6e0eb;
+  /* border-bottom: 1px solid #d6e0eb; */
   padding-bottom: 24px;
 }
 .search-top-box .sch-filter-box .filter-form > div {
