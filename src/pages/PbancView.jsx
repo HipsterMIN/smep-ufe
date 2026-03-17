@@ -29,6 +29,7 @@ const PbancView = () => {
   const [bizFieldOptions, setBizFieldOptions] = useState([]);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerError, setViewerError] = useState('');
+  const [expandedRows, setExpandedRows] = useState({});
   const navigate = useNavigate();
   const viewerFrameRef = useRef(null);
   const streamdocsRef = useRef(null);
@@ -144,6 +145,15 @@ const PbancView = () => {
     return textOnly.length > 0;
   };
 
+  const getPlainText = (value) => {
+    if (!value || typeof value !== 'string') return '';
+    return value.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+  };
+
+  const toggleExpandedRow = (key) => {
+    setExpandedRows((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const renderTextRow = (label, value) => {
     if (!value) return null;
     return (
@@ -160,6 +170,63 @@ const PbancView = () => {
       <React.Fragment key={label}>
         <dt>{label}</dt>
         <dd dangerouslySetInnerHTML={{ __html: html }} />
+      </React.Fragment>
+    );
+  };
+
+  const renderExpandableTextRow = (label, value) => {
+    if (!value) return null;
+
+    const canExpand = getPlainText(String(value)).length > 200;
+    const isExpanded = Boolean(expandedRows[label]);
+
+    return (
+      <React.Fragment key={label}>
+        <dt>{label}</dt>
+        <dd>
+          <div className={canExpand ? `onshadow-text${isExpanded ? ' on' : ''}` : undefined}>
+            {value}
+          </div>
+          {canExpand && (
+            <button
+              type="button"
+              className="krds-btn tertiary xsmall ontoggle-textshadow"
+              onClick={() => toggleExpandedRow(label)}
+            >
+              {isExpanded ? '접기' : '전체보기'}
+              <i className="svg-icon ico-angle"></i>
+            </button>
+          )}
+        </dd>
+      </React.Fragment>
+    );
+  };
+
+  const renderExpandableHtmlRow = (label, html) => {
+    if (!isMeaningfulHtml(html)) return null;
+
+    const canExpand = getPlainText(html).length > 200;
+    const isExpanded = Boolean(expandedRows[label]);
+
+    return (
+      <React.Fragment key={label}>
+        <dt>{label}</dt>
+        <dd>
+          <div
+            className={canExpand ? `onshadow-text${isExpanded ? ' on' : ''}` : undefined}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+          {canExpand && (
+            <button
+              type="button"
+              className="krds-btn tertiary xsmall ontoggle-textshadow"
+              onClick={() => toggleExpandedRow(label)}
+            >
+              {isExpanded ? '접기' : '전체보기'}
+              <i className="svg-icon ico-angle"></i>
+            </button>
+          )}
+        </dd>
       </React.Fragment>
     );
   };
@@ -217,10 +284,10 @@ const PbancView = () => {
           <dl className="def-list">
             {renderTextRow('분야', item?.bizPbancClsfCd ? fieldLabelMap[item.bizPbancClsfCd] || item.bizPbancClsfCd : '')}
             {renderTextRow('사업수행기관', item?.bizSprvsnInstNm)}
-            {renderHtmlRow('사업개요', item?.bizPbancOtln)}
-            {renderHtmlRow('지원규모', item?.bizSprtSclCn)}
-            {renderHtmlRow('지원내용', item?.bizSprtCn)}
-            {renderHtmlRow('지원대상', item?.bizSprtTrgtCn)}
+            {renderExpandableHtmlRow('사업개요', item?.bizPbancOtln)}
+            {renderExpandableHtmlRow('지원규모', item?.bizSprtSclCn)}
+            {renderExpandableHtmlRow('지원내용', item?.bizSprtCn)}
+            {renderExpandableHtmlRow('지원대상', item?.bizSprtTrgtCn)}
             {renderTextRow('신청기간', item?.applyPeriodText)}
             {(isMeaningfulHtml(item?.bizAplyMthdCn) || item?.bizAplyUrlAddr) && (
               <>
@@ -246,7 +313,14 @@ const PbancView = () => {
                 </dd>
               </>
             )}
-            {renderHtmlRow('문의처', item?.bizPbancInqplCn)}
+            {renderExpandableHtmlRow('지원자격', item?.bizSprtQlfcRqmtCn)}
+            {renderExpandableHtmlRow('신청제외대상', item?.bizAplyExclTrgtCn)}
+            {renderExpandableHtmlRow('제출서류', item?.bizAplySbmsnDcmntCn)}
+            {renderExpandableTextRow('기업규모', item?.sprtQlfcEntSclNm)}
+            {renderExpandableHtmlRow('기업유형', item?.sprtQlfcEntTypeCn)}
+            {renderExpandableHtmlRow('추진절차', item?.bizPbancPrtrtMttrCn)}
+            {renderExpandableHtmlRow('지원금액', item?.bizPbancSprtAmtCn)}
+            {renderExpandableHtmlRow('문의처', item?.bizPbancInqplCn)}
           </dl>
         </div>
 
