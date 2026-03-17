@@ -120,7 +120,7 @@ const MainPage = () => {
       img: mainIcon01,
       title: (
         <>
-          <span className="mo-hide">신청 가능한</span> <br className="pc-only" /> 
+          신청 가능한 <br/>
           사업공고 찾기
         </>
       ),
@@ -129,7 +129,7 @@ const MainPage = () => {
       img: mainIcon07,
       title: (
         <>
-          <span className="mo-hide">중소벤처기업부</span> <br className="pc-only" /> 
+          중소벤처기업부<br/> 
           지원사업 보기
         </>
       )
@@ -138,7 +138,7 @@ const MainPage = () => {
       img: mainIcon04,
       title: (
         <>
-          <span className="mo-hide">융자 보증 보험</span>
+          융자 보증 보험 <br/>
           정책 금융상품 찾기
         </>
       )
