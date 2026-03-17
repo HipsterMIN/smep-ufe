@@ -749,7 +749,14 @@
     font-size: 19px;
     font-weight: 700;
 }
-
+.select-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.select-list li ~ li {
+  margin-top: 16px;
+}
 /* 메인 */
 /* main 2차 디자인 수정 */
 .main-container{
@@ -1250,19 +1257,6 @@
   color: #fff;
 }
 
-/* #krds-header {
-  position: sticky;
-  top: 0;
-  left: 0;
-  right: 0;
-  transition: transform 0.3s ease;
-} */
-/* .main-container,
-.sub-container {margin-top: 195px;
-}
-.main-container.header-hidden,
-.sub-container.header-hidden {margin-top: 0;} */
-
 /* header - 스크롤할시 show/hide */
 #krds-header {
   position: fixed;
@@ -1280,18 +1274,6 @@
 .sub-container {
   transition: margin-top 0.3s ease;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* AiChat Components */
 .ai-btnBox {
@@ -1691,6 +1673,13 @@ button.aichatButton.active {
     width: 100%;
     align-items: center;
   }
+  .main-quick-menu .quick-menu-item button:hover {
+    background: transparent;
+    box-shadow: none;
+  }
+  .main-quick-menu .quick-menu-item button:hover .quick-menu-tit {
+    color: #fff;
+  }
   
   /* 메인 - 공지사항 */
   .main-notice {
@@ -1820,7 +1809,7 @@ button.aichatButton.active {
 
   .main-quick-menu {
     margin-top: 24px;
-    padding: 20px 0 50px 15px;
+    padding: 20px 0;
     border-radius: 0;
   }
   .main-quick-menu .section-tit br {
@@ -1866,6 +1855,7 @@ button.aichatButton.active {
     margin-top: 20px;
   }
   .main-container .section-tit.white {
+    padding: 0 15px;
     font-size: 17px;
   }
   .main-notice .notice-tab-conts {
@@ -1887,18 +1877,15 @@ button.aichatButton.active {
     font-size: 19px;
     text-align: center;
   }
-  .quick-menu-swiper .swiper-nav-wrap {
-    position: absolute;
-    bottom: -34px;
-    right: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  .quick-menu-swiper .swiper-nav-wrap .swiper-button-prev {
+    left: 15px;
+    z-index: 1;
   }
-  .quick-menu-swiper .swiper-nav-wrap .swiper-button-prev,
   .quick-menu-swiper .swiper-nav-wrap .swiper-button-next {
-    position: static;
-    left: 0;
-    transform: none;
+    right: 15px;
+    z-index: 1;
+  }
+  .on-form-row .form-row-content .w-360 {
+    width: 100%;
   }
 }

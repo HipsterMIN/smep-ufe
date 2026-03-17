@@ -355,11 +355,11 @@ export default function Header() {
               <div className="header-branding">
                 <h2 className="logo sample">
                   <a href={BASE_URL}>
-                    <span className="sr-only">중소벤처24(기업마당)</span>
+                    <span className="sr-only">중소벤처24</span>
                   </a>
                 </h2>
                 <div className="logo-platform">
-                  <span className="sr-only">중소기업 지원의 시작 중소기업 지원 통합 플랫폼 로고</span>
+                  <span className="sr-only">중소기업 성장의 시작, 중소기업 성장지원 플랫폼</span>
                 </div>
                 <div className="header-right">
                   {/* 검색란 */}
