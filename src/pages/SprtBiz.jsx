@@ -198,6 +198,9 @@ const SprtBiz = () => {
   const depth1Menu = getDepth1Parent();
   const currentFilters = activeTabIndex === 0 ? bizFieldOptions : organizationOptions;
   const selectedFilters = activeTabIndex === 0 ? selectedBizTypes : selectedOrgs;
+  const hasDetailedSearchInput = activeTabIndex === 0
+    ? selectedBizTypes.length > 0
+    : selectedOrgs.length > 0;
 
   return (
     <>
@@ -242,7 +245,11 @@ const SprtBiz = () => {
                       <i className="svg-icon ico-sch"></i>
                     </button>
                   </div>
-                  <button type="button" className="krds-btn medium text" onClick={handleToggleFilter}>
+                  <button
+                    type="button"
+                    className={`krds-btn medium text${hasDetailedSearchInput ? ' primary' : ''}`}
+                    onClick={handleToggleFilter}
+                  >
                     <i className="svg-icon ico-sch-plus"></i>
                     상세검색
                     <span className="onfilter-open sr-only">열기</span>
