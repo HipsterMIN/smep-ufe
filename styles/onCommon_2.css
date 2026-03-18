@@ -1471,6 +1471,41 @@ button.aichatButton.active {
 .krds-btn.text .svg-icon.gray {
   background-color: #33363D;
 }
+.form-groupbox {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 48px;
+}
+.form-groupbox .form-question {
+  margin-bottom: 16px;
+  font-size: 17px;
+}
+.form-groupbox .krds-check-area {
+  padding-left: 30px;
+}
+
+.krds-structured-list.type-full .card-body .flex-row {
+  display: flex;
+  gap: 8px;
+}
+.krds-structured-list .card-body .c-tit.small {
+  font-size: 19px;
+}
+.krds-structured-list.type-full .card-body .flex-row .krds-badge-wrap {
+  flex-shrink: 0;
+}
+
+.on-no-data {
+  padding: 14px 0;
+  text-align: center;
+  border-top: 1px solid #B1B8BE;
+  border-bottom: 1px solid #B1B8BE;
+}
+.on-no-data p {
+  color: #464C53;
+}
+
 
 /* util  */
 .mt-8 {
@@ -1896,5 +1931,11 @@ button.aichatButton.active {
   }
   .on-form-row .form-row-content .w-360 {
     width: 100%;
+  }
+  .form-groupbox {
+    margin-top: 24px;
+  }
+  .form-groupbox .krds-check-area {
+    flex-direction: column;
   }
 }
