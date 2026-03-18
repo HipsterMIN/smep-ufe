@@ -66,25 +66,21 @@ const MainPage = () => {
     setSearchQuery("");
   };
 
-
   useEffect(() => {
     const saveOriginTop = () => {
       if (!searchBarRef.current) return;
       
       // 측정 전 is-fixed 잠깐 제거
       searchBarRef.current.classList.remove('is-fixed');
-      document.documentElement.classList.remove('searchbar-fixed');
 
       const headerHeight = document.querySelector('#krds-header')?.offsetHeight || 0;
 
       originTopRef.current = searchBarRef.current.getBoundingClientRect().top + window.scrollY - headerHeight;
       
-      // console.log('originTop 재계산:', originTopRef.current, '헤더높이:', headerHeight);
 
       // 제거했으니 현재 스크롤 상태에 맞게 다시 적용
       const isFixed = window.scrollY >= originTopRef.current + headerHeight;
       searchBarRef.current.classList.toggle('is-fixed', isFixed);
-      document.documentElement.classList.toggle('searchbar-fixed', isFixed);
     };
 
     saveOriginTop();
@@ -101,15 +97,11 @@ const MainPage = () => {
       const isFixed = window.scrollY >= originTopRef.current + headerHeight;
 
       searchBarRef.current.classList.toggle('is-fixed', isFixed);
-      document.documentElement.classList.toggle('searchbar-fixed', isFixed);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-
-
 
   // 자주 찾는 서비스 메뉴 - 슬라이드 처음, 끝 파악
   const [isBeginning, setIsBeginning] = useState(true);
