@@ -4,9 +4,10 @@ import Breadcrumb from '../components/ui/Breadcrumb';
 import SideNavigation from '../components/ui/SideNavigation';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
+import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
 
 const DEFAULT_FILTER_OPTIONS = {
-  searchTypes: [],
+  searchTypes: [{ code: 'ALL', name: '전체' }, { code: '1', name: '상품명' }, { code: '2', name: '해시태그' }],
   supportTypes: [],
   financialInsts: [],
   companySizes: [],
@@ -22,12 +23,49 @@ const DEFAULT_FILTER_OPTIONS = {
   grantRateSummaries: [],
   insuranceRateSummaries: [],
 };
+const POLICY_FINANCE_COMMON_CODE_GROUPS = [
+  'PLCY_FNNC_GDS_TYPE_CD',
+  'PLCY_FNNC_RCPT_STTS_CD',
+  'PLCY_FNNC_ENT_SCL_CD',
+  'PLCY_FNNC_DTL_CND_CD',
+  'PLCY_FNNC_APLY_MTH_CD',
+  'PLCY_FNNC_SPRT_TRGT_FNDS_CD',
+  'PLCY_FNDS_LOAN_MTH_CD',
+  'FLCTN_IRT_TYPE_CD',
+  'LOAN_PRD_SMRY_CD',
+  'PLCY_FNNC_RPMT_MTHD_CD',
+  'PLCY_FNNC_GDS_KND_CD',
+  'PLCY_FNNC_GRNTE_RT_SMRY_CD',
+  'PLCY_FNNC_CMPN_RT_SMRY_CD',
+];
+const toPolicyFilterOptions = (commonCodes = {}) => ({
+  searchTypes: DEFAULT_FILTER_OPTIONS.searchTypes,
+  supportTypes: (commonCodes.PLCY_FNNC_GDS_TYPE_CD || []).map((item) => ({ code: item.value, name: item.label })),
+  companySizes: (commonCodes.PLCY_FNNC_ENT_SCL_CD || []).map((item) => ({ code: item.value, name: item.label })),
+  receptionStatuses: (commonCodes.PLCY_FNNC_RCPT_STTS_CD || []).map((item) => ({ code: item.value, name: item.label })),
+  preferredTypes: (commonCodes.PLCY_FNNC_DTL_CND_CD || []).map((item) => ({ code: item.value, name: item.label })),
+  applicationMethods: (commonCodes.PLCY_FNNC_APLY_MTH_CD || []).map((item) => ({ code: item.value, name: item.label })),
+  repaymentMethods: (commonCodes.PLCY_FNNC_RPMT_MTHD_CD || []).map((item) => ({ code: item.value, name: item.label })),
+  interestChangeTypes: (commonCodes.FLCTN_IRT_TYPE_CD || []).map((item) => ({ code: item.value, name: item.label })),
+  loanMethods: (commonCodes.PLCY_FNDS_LOAN_MTH_CD || []).map((item) => ({ code: item.value, name: item.label })),
+  supportTargetFunds: (commonCodes.PLCY_FNNC_SPRT_TRGT_FNDS_CD || []).map((item) => ({ code: item.value, name: item.label })),
+  loanPeriodSummaries: (commonCodes.LOAN_PRD_SMRY_CD || []).map((item) => ({ code: item.value, name: item.label })),
+  grantKinds: (commonCodes.PLCY_FNNC_GDS_KND_CD || []).map((item) => ({ code: item.value, name: item.label })),
+  grantRateSummaries: (commonCodes.PLCY_FNNC_GRNTE_RT_SMRY_CD || []).map((item) => ({ code: item.value, name: item.label })),
+  insuranceRateSummaries: (commonCodes.PLCY_FNNC_CMPN_RT_SMRY_CD || []).map((item) => ({ code: item.value, name: item.label })),
+});
 
 const unwrapResponse = (response) => response?.data ?? response;
 const tagsFrom = (value) => (value || '').split(',').map((item) => item.trim()).filter(Boolean);
 const splitMultiValue = (value) => String(value || '').split(/\s*,\s*/).map((item) => item.trim()).filter(Boolean);
 const hasValue = (value) => value !== null && value !== undefined && String(value).trim() !== '';
 const asText = (value, fallback = '-') => (hasValue(value) ? value : fallback);
+const ALLOWED_HTML_TAGS = new Set([
+  'A', 'B', 'BLOCKQUOTE', 'BR', 'CAPTION', 'COL', 'COLGROUP', 'DIV', 'EM', 'FIGCAPTION', 'FIGURE',
+  'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'HR', 'I', 'IMG', 'LI', 'OL', 'P', 'PRE', 'S', 'SPAN',
+  'STRONG', 'SUB', 'SUP', 'TABLE', 'TBODY', 'TD', 'TFOOT', 'TH', 'THEAD', 'TR', 'U', 'UL',
+]);
+const ALLOWED_HTML_ATTRS = new Set(['alt', 'colspan', 'href', 'rowspan', 'src', 'target', 'title']);
 
 const pairRows = (items) => {
   const pairs = [];
@@ -36,6 +74,7 @@ const pairRows = (items) => {
   }
   return pairs;
 };
+const groupRows = (...items) => items.filter((item) => hasValue(item?.value));
 
 const toCodeMap = (options = []) => options.reduce((acc, item) => {
   acc[String(item.code).trim()] = item.name;
@@ -55,8 +94,62 @@ const buildIndustryGroupMap = (items = []) => items.reduce((acc, item) => {
   return acc;
 }, {});
 
+const sanitizeHtml = (html) => {
+  if (!hasValue(html) || typeof window === 'undefined') return '';
+
+  const parser = new window.DOMParser();
+  const doc = parser.parseFromString(String(html), 'text/html');
+
+  const cleanNode = (node) => {
+    if (node.nodeType === window.Node.TEXT_NODE) return;
+    if (node.nodeType !== window.Node.ELEMENT_NODE) {
+      node.parentNode?.removeChild(node);
+      return;
+    }
+
+    const element = node;
+    if (!ALLOWED_HTML_TAGS.has(element.tagName)) {
+      const parent = element.parentNode;
+      while (element.firstChild) {
+        parent?.insertBefore(element.firstChild, element);
+      }
+      parent?.removeChild(element);
+      return;
+    }
+
+    [...element.attributes].forEach((attr) => {
+      const name = attr.name.toLowerCase();
+      const value = attr.value || '';
+      const allowedAttr = ALLOWED_HTML_ATTRS.has(name);
+      const eventAttr = name.startsWith('on');
+      const javascriptUrl = (name === 'href' || name === 'src') && /^\s*javascript:/i.test(value);
+
+      if (!allowedAttr || eventAttr || javascriptUrl) {
+        element.removeAttribute(attr.name);
+      }
+    });
+
+    if (element.tagName === 'A' && element.getAttribute('target') === '_blank') {
+      element.setAttribute('rel', 'noreferrer noopener');
+    }
+
+    [...element.childNodes].forEach(cleanNode);
+  };
+
+  [...doc.body.childNodes].forEach(cleanNode);
+  return doc.body.innerHTML;
+};
+
+const renderHtmlValue = (value) => {
+  if (!hasValue(value)) return '-';
+  const sanitized = sanitizeHtml(value);
+  if (!sanitized) return '-';
+  return <div className="editor-view" dangerouslySetInnerHTML={{ __html: sanitized }} />;
+};
+
 const createCodeFormatter = (filterOptions, industryGroups) => {
   const maps = {
+    supportTypes: toCodeMap(filterOptions.supportTypes),
     companySizes: toCodeMap(filterOptions.companySizes),
     preferredTypes: toCodeMap(filterOptions.preferredTypes),
     applicationMethods: toCodeMap(filterOptions.applicationMethods),
@@ -89,7 +182,7 @@ const getTypeConfig = (detail, formatCode) => {
     return {
       typeName: '',
       summaryItems: [],
-      rows: [],
+      groups: [],
     };
   }
 
@@ -102,29 +195,37 @@ const getTypeConfig = (detail, formatCode) => {
         { label: '지원한도', value: detail.plcyFnncSprtLimSmryCn || detail.plcyFnncSprtLimCn },
         { label: '기업규모', value: formatCode(detail.plcyFnncEntSclSmryCn || detail.plcyFnncEntSclNm, 'companySizes') },
       ],
-      rows: [
-        { label: '기업규모', value: formatCode(detail.plcyFnncEntSclNm || detail.plcyFnncEntSclSmryCn, 'companySizes') },
-        { label: '우대기업유형', value: formatCode(detail.plcyFnncAddDtlCndCn, 'preferredTypes') },
-        { label: '신청방식', value: detail.plcyFnncAplyMthNm || formatCode(detail.plcyFnncAplyMthCd, 'applicationMethods') },
-        { label: '융자방식', value: formatCode(detail.plcyFndsLoanMthCn, 'loanMethods') },
-        { label: '지원한도', value: detail.plcyFnncSprtLimCn || detail.plcyFnncSprtLimSmryCn },
-        { label: '대출기간', value: detail.loanPrdCn || detail.loanPrdSmryNm || formatCode(detail.loanPrdSmryCd, 'loanPeriodSummaries') },
-        { label: '업종', value: formatCode(detail.plcyFnncTpbizNm, 'industryGroups') },
-        { label: '업종 세부분류', value: detail.plcyFnncTpbizDtlClsfNm },
-        { label: '지원대상', value: detail.plcyFnncSprtTrgtCn },
-        { label: '자금용도', value: formatCode(detail.plcyFnncSprtTrgtFndsCn || detail.plcyFnncSprtTrgtFndsSmryCn, 'supportTargetFunds') },
-        { label: '추가조건', value: detail.loanPrtrtCndCn || formatCode(detail.plcyFnncAddDtlCndCn, 'preferredTypes') },
-        { label: '지원제외대상', value: detail.plcyFnncSprtExclTrgtCn },
-        { label: '상환방법', value: detail.plcyFnncRpmtMthdNm || formatCode(detail.plcyFnncRpmtMthdCd, 'repaymentMethods') },
-        { label: '금리변동여부', value: formatCode(detail.flctnIrtYnCn, 'interestChangeTypes') },
-        { label: '문의', value: detail.plcyFnncInqCn },
-        { label: '관할지역', value: detail.cmptncRgnNm },
-        { label: '기준금리', value: detail.crtrIrtCn },
-        { label: '대출금리', value: detail.loanIrtCn },
-        { label: '거치기간', value: detail.dfmtPrdCn },
-        { label: '추천기관', value: detail.loanRcmdtnInstNm },
-        { label: '테마업종', value: detail.thmTpbizNm },
-      ],
+      groups: [
+        groupRows(
+          { label: '기업규모', value: formatCode(detail.plcyFnncEntSclNm || detail.plcyFnncEntSclSmryCn, 'companySizes') },
+          { label: '우대기업유형', value: formatCode(detail.plcyFnncAddDtlCndCn, 'preferredTypes') },
+        ),
+        groupRows(
+          { label: '신청방식', value: detail.plcyFnncAplyMthNm || formatCode(detail.plcyFnncAplyMthCd, 'applicationMethods') },
+          { label: '융자방식', value: formatCode(detail.plcyFndsLoanMthCn, 'loanMethods') },
+        ),
+        groupRows(
+          { label: '지원한도', value: detail.plcyFnncSprtLimCn || detail.plcyFnncSprtLimSmryCn },
+          { label: '대출기간', value: detail.loanPrdCn || detail.loanPrdSmryNm || formatCode(detail.loanPrdSmryCd, 'loanPeriodSummaries') },
+        ),
+        groupRows({ label: '지원대상', value: detail.plcyFnncSprtTrgtCn }),
+        groupRows({ label: '업종', value: formatCode(detail.plcyFnncTpbizNm, 'industryGroups') }),
+        groupRows({ label: '업종 세부분류', value: detail.plcyFnncTpbizDtlClsfNm }),
+        groupRows({ label: '자금용도', value: formatCode(detail.plcyFnncSprtTrgtFndsCn || detail.plcyFnncSprtTrgtFndsSmryCn, 'supportTargetFunds') }),
+        groupRows({ label: '추가조건', value: detail.loanPrtrtCndCn || formatCode(detail.plcyFnncAddDtlCndCn, 'preferredTypes') }),
+        groupRows({ label: '지원제외대상', value: detail.plcyFnncSprtExclTrgtCn }),
+        groupRows(
+          { label: '상환방법', value: detail.plcyFnncRpmtMthdNm || formatCode(detail.plcyFnncRpmtMthdCd, 'repaymentMethods') },
+          { label: '금리변동여부', value: formatCode(detail.flctnIrtYnCn, 'interestChangeTypes') },
+        ),
+        groupRows({ label: '문의', value: detail.plcyFnncInqCn }),
+        groupRows({ label: '관할지역', value: detail.cmptncRgnNm }),
+        groupRows({ label: '기준금리', value: detail.crtrIrtCn }),
+        groupRows({ label: '대출금리', value: detail.loanIrtCn }),
+        groupRows({ label: '거치기간', value: detail.dfmtPrdCn }),
+        groupRows({ label: '추천기관', value: detail.loanRcmdtnInstNm }),
+        groupRows({ label: '테마업종', value: detail.thmTpbizNm }),
+      ].filter((group) => group.length > 0),
     };
   case 'FT02':
     return {
@@ -134,24 +235,30 @@ const getTypeConfig = (detail, formatCode) => {
         { label: '보증비율', value: detail.plcyFnncGrnteRtSmryCn || detail.plcyFnncGrnteRtCn },
         { label: '기업규모', value: formatCode(detail.plcyFnncEntSclSmryCn || detail.plcyFnncEntSclNm, 'companySizes') },
       ],
-      rows: [
-        { label: '기업규모', value: formatCode(detail.plcyFnncEntSclNm || detail.plcyFnncEntSclSmryCn, 'companySizes') },
-        { label: '우대기업유형', value: formatCode(detail.plcyFnncAddDtlCndCn, 'preferredTypes') },
-        { label: '신청방식', value: detail.plcyFnncAplyMthNm || formatCode(detail.plcyFnncAplyMthCd, 'applicationMethods') },
-        { label: '지원대상자금', value: formatCode(detail.plcyFnncSprtTrgtFndsUsgCn || detail.plcyFnncSprtTrgtFndsUsgSmryCn, 'supportTargetFunds') },
-        { label: '보증비율', value: detail.plcyFnncGrnteRtCn || detail.plcyFnncGrnteRtSmryCn },
-        { label: '상품종류', value: detail.plcyFnncGdsKndNm || formatCode(detail.plcyFnncGdsKndCd, 'grantKinds') },
-        { label: '업종', value: formatCode(detail.plcyFnncTpbizNm, 'industryGroups') },
-        { label: '업종 세부분류', value: detail.plcyFnncTpbizDtlClsfNm },
-        { label: '지원대상', value: detail.plcyFnncSprtTrgtCn },
-        { label: '추가조건', value: detail.grntePrtrtCndCn || formatCode(detail.plcyFnncAddDtlCndCn, 'preferredTypes') },
-        { label: '보증한도', value: detail.plcyFnncSprtLimCn || detail.plcyFnncSprtLimSmryCn },
-        { label: '지원제외대상', value: detail.plcyFnncSprtExclTrgtCn },
-        { label: '문의', value: detail.plcyFnncInqCn },
-        { label: '보증료', value: detail.plcyFnncGrfeCn },
-        { label: '관할지역', value: detail.cmptncRgnNm },
-        { label: '추천기관', value: detail.grnteRcmdtnInstNm },
-      ],
+      groups: [
+        groupRows(
+          { label: '기업규모', value: formatCode(detail.plcyFnncEntSclNm || detail.plcyFnncEntSclSmryCn, 'companySizes') },
+          { label: '우대기업유형', value: formatCode(detail.plcyFnncAddDtlCndCn, 'preferredTypes') },
+        ),
+        groupRows(
+          { label: '신청방식', value: detail.plcyFnncAplyMthNm || formatCode(detail.plcyFnncAplyMthCd, 'applicationMethods') },
+          { label: '지원대상자금', value: formatCode(detail.plcyFnncSprtTrgtFndsUsgCn || detail.plcyFnncSprtTrgtFndsUsgSmryCn, 'supportTargetFunds') },
+        ),
+        groupRows(
+          { label: '보증비율', value: detail.plcyFnncGrnteRtCn || detail.plcyFnncGrnteRtSmryCn },
+          { label: '상품종류', value: detail.plcyFnncGdsKndNm || formatCode(detail.plcyFnncGdsKndCd, 'grantKinds') },
+        ),
+        groupRows({ label: '업종', value: formatCode(detail.plcyFnncTpbizNm, 'industryGroups') }),
+        groupRows({ label: '업종 세부분류', value: detail.plcyFnncTpbizDtlClsfNm }),
+        groupRows({ label: '지원대상', value: detail.plcyFnncSprtTrgtCn }),
+        groupRows({ label: '추가조건', value: detail.grntePrtrtCndCn || formatCode(detail.plcyFnncAddDtlCndCn, 'preferredTypes') }),
+        groupRows({ label: '보증한도', value: detail.plcyFnncSprtLimCn || detail.plcyFnncSprtLimSmryCn }),
+        groupRows({ label: '지원제외대상', value: detail.plcyFnncSprtExclTrgtCn }),
+        groupRows({ label: '문의', value: detail.plcyFnncInqCn }),
+        groupRows({ label: '보증료', value: detail.plcyFnncGrfeCn }),
+        groupRows({ label: '관할지역', value: detail.cmptncRgnNm }),
+        groupRows({ label: '추천기관', value: detail.grnteRcmdtnInstNm }),
+      ].filter((group) => group.length > 0),
     };
   default:
     return {
@@ -161,23 +268,25 @@ const getTypeConfig = (detail, formatCode) => {
         { label: '부보율(보상비율)', value: detail.plcyFnncCmpnRtSmryCn || detail.plcyFnncCmpnRtCn },
         { label: '기업규모', value: formatCode(detail.plcyFnncEntSclSmryCn || detail.plcyFnncEntSclNm, 'companySizes') },
       ],
-      rows: [
-        { label: '기업규모', value: formatCode(detail.plcyFnncEntSclNm || detail.plcyFnncEntSclSmryCn, 'companySizes') },
-        { label: '우대기업유형', value: formatCode(detail.plcyFnncAddDtlCndCn, 'preferredTypes') },
-        { label: '신청방식', value: detail.plcyFnncAplyMthNm || formatCode(detail.plcyFnncAplyMthCd, 'applicationMethods') },
-        { label: '업종', value: formatCode(detail.plcyFnncTpbizNm, 'industryGroups') },
-        { label: '업종 세부분류', value: detail.plcyFnncTpbizDtlClsfNm },
-        { label: '보험분류', value: detail.plcyFnncGrnteInsrncClsfCn },
-        { label: '부보율(보상비율)', value: detail.plcyFnncCmpnRtCn || detail.plcyFnncCmpnRtSmryCn },
-        { label: '지원대상', value: detail.plcyFnncSprtTrgtCn },
-        { label: '지급보험금', value: detail.plcyFnncGiveInsrncAmtCn || detail.plcyFnncGiveInsrncAmtSmryCn },
-        { label: '지원조건', value: detail.plcyFnncGiveCndCn },
-        { label: '추가조건', value: detail.insrncPrtrtCndCn || detail.plcyFnncIspmPrtrtCndCn || formatCode(detail.plcyFnncAddDtlCndCn, 'preferredTypes') },
-        { label: '보험료', value: detail.ispmCn },
-        { label: '보험증권 유효기간', value: detail.insrncScrtVldPrdCn },
-        { label: '보험기간', value: detail.insrncPrdCn },
-        { label: '문의', value: detail.plcyFnncInqCn },
-      ],
+      groups: [
+        groupRows(
+          { label: '기업규모', value: formatCode(detail.plcyFnncEntSclNm || detail.plcyFnncEntSclSmryCn, 'companySizes') },
+          { label: '우대기업유형', value: formatCode(detail.plcyFnncAddDtlCndCn, 'preferredTypes') },
+        ),
+        groupRows({ label: '신청방식', value: detail.plcyFnncAplyMthNm || formatCode(detail.plcyFnncAplyMthCd, 'applicationMethods') }),
+        groupRows({ label: '업종', value: formatCode(detail.plcyFnncTpbizNm, 'industryGroups') }),
+        groupRows({ label: '업종 세부분류', value: detail.plcyFnncTpbizDtlClsfNm }),
+        groupRows({ label: '보험분류', value: detail.plcyFnncGrnteInsrncClsfCn }),
+        groupRows({ label: '부보율(보상비율)', value: detail.plcyFnncCmpnRtCn || detail.plcyFnncCmpnRtSmryCn }),
+        groupRows({ label: '지원대상', value: detail.plcyFnncSprtTrgtCn }),
+        groupRows({ label: '지급보험금', value: detail.plcyFnncGiveInsrncAmtCn || detail.plcyFnncGiveInsrncAmtSmryCn }),
+        groupRows({ label: '지원조건', value: detail.plcyFnncGiveCndCn }),
+        groupRows({ label: '추가조건', value: detail.insrncPrtrtCndCn || detail.plcyFnncIspmPrtrtCndCn || formatCode(detail.plcyFnncAddDtlCndCn, 'preferredTypes') }),
+        groupRows({ label: '보험료', value: detail.ispmCn }),
+        groupRows({ label: '보험증권 유효기간', value: detail.insrncScrtVldPrdCn }),
+        groupRows({ label: '보험기간', value: detail.insrncPrdCn }),
+        groupRows({ label: '문의', value: detail.plcyFnncInqCn }),
+      ].filter((group) => group.length > 0),
     };
   }
 };
@@ -197,12 +306,12 @@ const UI_USR_R_031 = () => {
   const shadowRefs = useRef({});
 
   useEffect(() => {
-    apiClient.get('/api/v1/finance-policy/filters')
-      .then((response) => {
-        setFilterOptions({ ...DEFAULT_FILTER_OPTIONS, ...(unwrapResponse(response) || {}) });
+    fetchAndConvertCommonCodes(POLICY_FINANCE_COMMON_CODE_GROUPS)
+      .then((commonCodes) => {
+        setFilterOptions(toPolicyFilterOptions(commonCodes));
       })
       .catch((error) => {
-        console.error('Failed to load finance policy filters:', error);
+        console.error('Failed to load finance policy common codes:', error);
         setFilterOptions(DEFAULT_FILTER_OPTIONS);
       });
   }, []);
@@ -231,10 +340,11 @@ const UI_USR_R_031 = () => {
 
   const formatCode = useMemo(() => createCodeFormatter(filterOptions, industryGroups), [filterOptions, industryGroups]);
   const typeConfig = useMemo(() => getTypeConfig(detail, formatCode), [detail, formatCode]);
-  const detailPairs = useMemo(
-    () => pairRows((typeConfig.rows || []).filter((item) => hasValue(item.value))),
-    [typeConfig],
-  );
+  const detailGroups = useMemo(() => {
+    if (typeConfig.groups) return typeConfig.groups;
+    return pairRows((typeConfig.rows || []).filter((item) => hasValue(item.value)));
+  }, [typeConfig]);
+  const showApplyButton = detail?.plcyFnncGdsTypeCd !== 'FT02';
 
   const toggleShadow = (key) => {
     setExpandedRows((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -272,13 +382,13 @@ const UI_USR_R_031 = () => {
         </ul>
 
         <div className="conts-desc">
-          {asText(detail.plcyFnncGdsPrpsCn)}
+          {renderHtmlValue(detail.plcyFnncGdsPrpsCn)}
         </div>
 
         <div className="on-announcement">
           <div className="on-announcement-inner">
             <h4 className="announcement-title">
-              <i className="svg-icon ico-building"></i> {asText(detail.plcyFnncBizFlfmtInstNm)}
+              <i className="svg-icon ico-building"></i> {asText(detail.plcyFnncBizFlfmtInstNm || detail.plcyFnncBizFlfmtInstCd)}
             </h4>
             <div className="announcement-info">
               {typeConfig.summaryItems.map((item) => (
@@ -301,7 +411,7 @@ const UI_USR_R_031 = () => {
                   문의하기
                 </a>
               )}
-              {detail.plcyFnncAplyUrlAddr && (
+              {showApplyButton && detail.plcyFnncAplyUrlAddr && (
                 <a href={detail.plcyFnncAplyUrlAddr} target="_blank" rel="noreferrer" className="krds-btn primary large krds-btn-shadow">
                   신청하기
                 </a>
@@ -327,12 +437,12 @@ const UI_USR_R_031 = () => {
 
         <div className="def-list-wrap">
           <dl className="def-list">
-            {detailPairs.map((pair, pairIndex) => (
+            {detailGroups.map((pair, pairIndex) => (
               <div className="def-list-group" key={`pair-${pairIndex}`}>
                 {pair.map((item, itemIndex) => {
                   const rowKey = `${pairIndex}-${itemIndex}`;
                   const valueText = String(item.value ?? '');
-                  const canExpand = valueText.length > 80;
+                  const canExpand = valueText.length > 200;
                   const isExpanded = Boolean(expandedRows[rowKey]);
 
                   return (
@@ -345,7 +455,7 @@ const UI_USR_R_031 = () => {
                             if (node) shadowRefs.current[rowKey] = node;
                           }}
                         >
-                          {asText(item.value)}
+                          {renderHtmlValue(item.value)}
                         </div>
                         {canExpand && (
                           <button
@@ -385,7 +495,7 @@ const UI_USR_R_031 = () => {
                 <i className="svg-icon ico-link"></i>
               </a>
             )}
-            {detail.plcyFnncAplyUrlAddr && (
+            {showApplyButton && detail.plcyFnncAplyUrlAddr && (
               <a href={detail.plcyFnncAplyUrlAddr} target="_blank" rel="noreferrer" className="krds-btn primary xlarge">
                 신청하기
                 <i className="svg-icon ico-angle right"></i>
