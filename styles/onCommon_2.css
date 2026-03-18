@@ -599,6 +599,10 @@
   background-image: none;
   background-color: #256EF4;
 }
+.guide-txt .important {
+  font-size: 15px;
+  color: #D63D4A;
+}
 .on-boxlist.img-formatlist .on-boxlist-in > div {
   align-items: flex-start;
 }
@@ -1505,7 +1509,55 @@ button.aichatButton.active {
 .on-no-data p {
   color: #464C53;
 }
-
+.graph-box {
+  padding-top: 42px;
+  border: 1px solid #CDD1D5;
+  border-radius: 12px;
+}
+.graph-box .graph-tit {
+  font-size: 24px;
+  font-weight: 700;
+  color:#0B50D0;
+  text-align: center;
+}
+.graph-box .graph-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.graph-box .custom-legend {
+  position: absolute;
+  right: 60px;
+  top: 54px;
+}
+.graph-box .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.graph-box .legend-item ~ .legend-item {
+  margin-top: 18px;
+}
+.graph-box .legend-shape {
+  width: 46px;
+  height: 17px;
+}
+.graph-box .legend-tit {
+  font-size: 15px;
+  color:#464C53;
+}
+.graph-box .tooltip {
+  background: #fff;
+  border: 1px solid #e5e7eb; 
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.graph-box .tooltip-tit {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
 
 /* util  */
 .mt-8 {
@@ -1937,5 +1989,23 @@ button.aichatButton.active {
   }
   .form-groupbox .krds-check-area {
     flex-direction: column;
+  }
+  .graph-box .custom-legend {
+    right: auto;
+    top:auto;
+    bottom: 40px;
+  }
+  .graph-box .legend-item ~ .legend-item {
+    margin-top: 4px;
+  }
+  .graph-box .graph-wrap {
+    padding-bottom: 42px;
+  }
+  .graph-box .legend-shape {
+    width: 24px;
+    height: 10px;
+  }
+  .graph-box .legend-tit {
+    font-size: 12px;
   }
 }
