@@ -4438,6 +4438,15 @@ textarea.krds-input::placeholder {
   #krds-header .header-container .logo-platform {
     display: none;
   }
+  .platform-bi-wrap .default-design-box img {
+    width: 126px;
+  }
+  .platform-bi-wrap .default-design-box.space img.img-vertical {
+    width: 84px;
+  }
+  .platform-bi-wrap .default-design-box.space img.img-horizontal {
+    width: 156px;
+  }
 }
 .on-searchoption-toggle {
   display: flex;

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import SideNavigation from "../components/ui/SideNavigation";
 import Breadcrumb from "../components/ui/Breadcrumb";
 import Datepicker from "../components/ui/Datepicker";
+import Pagination from '@components/ui/Pagination';
 
 const UI_USR_L_520 = () => {
 
@@ -138,32 +139,70 @@ const UI_USR_L_520 = () => {
             <li>검색 결과 <span className="point">0</span>건</li>
           </ul>
           <ul className="sch-sort">
-             <li>
-                <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
-                <select className="krds-form-select-sort" id="search_result_count">
-                  <option>10개</option>
-                </select>
-              </li>
+            <li>
+              <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
+              <select className="krds-form-select-sort" id="search_result_count">
+                <option>10개</option>
+              </select>
+            </li>
           </ul>
-          </div>
-
-        {/* table [S] */}
-        <div className="krds-table-wrap">
-        <table className="tbl col data">
-          <caption>나의 알림 목록 표. 번호, 발송일시, 구분, 내용 정보가 제공됨.</caption>
-          <colgroup>
-            <col />
-          </colgroup>
-          <tbody className="no-data">
-            {/* 데이터 없을 시 */}
-            <tr>
-              <td colSpan={3} className="ac">등록된 데이터가 없습니다.</td>
-            </tr>
-          </tbody>
-          </table>
         </div>
-        {/* table [E] */}
 
+        {/* 2026-03-18 추가 */}
+        {/* 데이터 있을 시 */}
+        <ul className="krds-structured-list type-full">
+          <li className="structured-item">
+            <div className="in">
+              <div className="card-body">
+                <div className="c-text">
+                  <div className="flex-row">
+                    <div className="krds-badge-wrap">
+                      <span className="krds-badge bg-light-danger">신청중</span>
+                    </div>
+                    <p className="c-tit no-icon onellipsis-1 small">2026년 중동 특화 긴급 물류바우처 사업 참여기업 모집 공고</p>
+                  </div>
+                  <p className="on-list-btm">
+                    <span><strong>중소벤처기업진흥공단</strong></span>
+                    <span><strong>기업마당</strong></span>
+                    <span><strong>신청일</strong> 2025-03-35</span>
+                  </p>
+                </div>
+                <div className="c-btn">
+                  <button type="button" className="krds-btn primary medium">상세조회</button>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li className="structured-item">
+            <div className="in">
+              <div className="card-body">
+                <div className="c-text">
+                  <div className="flex-row">
+                    <div className="krds-badge-wrap">
+                      <span className="krds-badge bg-light-primary">신청완료</span>
+                    </div>
+                    <p className="c-tit no-icon onellipsis-1 small">2026년 중동 특화 긴급 물류바우처 사업 참여기업 모집 공고</p>
+                  </div>
+                  <p className="on-list-btm">
+                    <span><strong>중소벤처기업진흥공단</strong></span>
+                    <span><strong>기업마당</strong></span>
+                    <span><strong>신청일</strong> 2025-03-35</span>
+                  </p>
+                </div>
+                <div className="c-btn">
+                  <button type="button" className="krds-btn primary medium">상세조회</button>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+        {/* 데이터 없을 시 */}
+        {/*  <div className="on-no-data">
+          <p>등록된 데이터가 없습니다.</p>
+        </div> */}
+        <Pagination /> 
+        
       </div> 
     </>
   );
