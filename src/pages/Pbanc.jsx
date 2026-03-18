@@ -122,6 +122,7 @@ const Pbanc = () => {
   const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '사업 공고';
 
   const getSortButtonClassName = (value) => (sortType === value ? 'active' : '');
+  const hasDetailedSearchInput = Boolean(bizPbancClsfCd) || applyStatus !== 'AVAILABLE';
 
   return (
     <>
@@ -154,7 +155,11 @@ const Pbanc = () => {
                 <i className="svg-icon ico-sch"></i>
               </button>
             </div>
-            <button type="button" className="krds-btn medium text" onClick={handleToggleFilter}>
+            <button
+              type="button"
+              className={`krds-btn medium text${hasDetailedSearchInput ? ' primary' : ''}`}
+              onClick={handleToggleFilter}
+            >
               <i className="svg-icon ico-sch-plus"></i>
               상세검색
               <span className="onfilter-open sr-only">열기</span>
