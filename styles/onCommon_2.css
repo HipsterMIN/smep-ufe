@@ -1485,6 +1485,28 @@ button.aichatButton.active {
   padding-left: 30px;
 }
 
+.krds-structured-list.type-full .card-body .flex-row {
+  display: flex;
+  gap: 8px;
+}
+.krds-structured-list .card-body .c-tit.small {
+  font-size: 19px;
+}
+.krds-structured-list.type-full .card-body .flex-row .krds-badge-wrap {
+  flex-shrink: 0;
+}
+
+.on-no-data {
+  padding: 14px 0;
+  text-align: center;
+  border-top: 1px solid #B1B8BE;
+  border-bottom: 1px solid #B1B8BE;
+}
+.on-no-data p {
+  color: #464C53;
+}
+
+
 /* util  */
 .mt-8 {
   margin-top: 8px;
