@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 
@@ -12,81 +11,215 @@ import mainIcon04 from '@assets/main/mainIcon_04.svg';
 import mainIcon06 from '@assets/main/mainIcon_06.svg';
 import mainIcon07 from '@assets/main/mainIcon_07.svg';
 import mainBanner from '@assets/temp/main_banner_1.png';
+import { api as apiClient } from '@lib/apiClient.js';
+import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
+import { useUserMenu } from '@context/UserMenuContext.jsx';
+
+const MAIN_MENU_IDS = {
+  notice: 'M_PIIO_00101',
+  faq: 'M_PIIO_00102',
+  adminInfo: 'M_PIIO_00087',
+};
+const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
+const APP_BASE_URL = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+const EMPTY_MAIN_DATA = {
+  pbancs: [],
+  sprtBizs: [],
+  certificates: [],
+  financePolicies: [],
+  notices: [],
+  faqs: [],
+  adminInfos: [],
+  banners: [],
+  popups: [],
+};
+const normalizeResponse = (response) => response?.data || response || {};
+const isNewWindow = (value) => value === 'Y';
+
+const formatDate = (value, separator = '.') => {
+  if (!value) return '';
+  const raw = String(value).trim();
+  if (/^\d{8}$/.test(raw))
+    return `${raw.slice(0, 4)}${separator}${raw.slice(4, 6)}${separator}${raw.slice(6, 8)}`;
+  const datePart = raw.slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(datePart))
+    return datePart.replace(/-/g, separator);
+  return raw;
+};
+
+const formatDateRange = (start, end, separator = ' ~ ') => {
+  const startText = formatDate(start);
+  const endText = formatDate(end);
+  if (startText && endText) return `${startText}${separator}${endText}`;
+  return startText || endText || '';
+};
+
+const getDaysRemaining = (deadline) => {
+  if (!deadline || !/^\d{8}$/.test(String(deadline))) return null;
+  const raw = String(deadline);
+  const target = new Date(
+    Number(raw.slice(0, 4)),
+    Number(raw.slice(4, 6)) - 1,
+    Number(raw.slice(6, 8)),
+  );
+  const today = new Date();
+  target.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  return Math.floor((target.getTime() - today.getTime()) / 86400000);
+};
+
+const getDdayLabel = (deadline) => {
+  //if (!deadline) return '상시';
+  const daysRemaining = getDaysRemaining(deadline);
+  if (daysRemaining === null) return '상시';
+  if (daysRemaining < 0) return '마감';
+  if (daysRemaining === 0) return 'D-Day';
+  return `D-${daysRemaining}`;
+};
+
+const getDdayBadgeClass = (label) => {
+  if (label === 'D-Day') return 'bg-point';
+  if (!label?.startsWith('D-')) return 'bg-primary';
+  const days = Number(label.replace('D-', ''));
+  return Number.isFinite(days) && days <= 10 ? 'bg-point' : 'bg-primary';
+};
+
+const buildMainImageUrl = (type, atchFileId, atchFileSn) => {
+  if (!atchFileId || atchFileSn === null || atchFileSn === undefined)
+    return null;
+  return `${APP_BASE_URL}/api/v1/main/${type}/${atchFileId}/${atchFileSn}/image`.replace(
+    /([^:]\/)\/+/g,
+    '$1',
+  );
+};
+
+const buildBoardLink = (listPath, item, hasDetail = true) => {
+  if (!item) return listPath || '#';
+  if (item.pstUrlAddr) return item.pstUrlAddr;
+  if (hasDetail && listPath && item.pstNo) return `${listPath}/${item.pstNo}`;
+  return listPath || '#';
+};
+
+const stripHtmlTags = (value) => {
+  if (!value) return '';
+  return String(value)
+    .replace(/<[^>]*>/g, '')
+    .trim();
+};
 
 const MainPage = () => {
   const navigate = useNavigate();
+  const { getFullPath } = useUserMenu();
   const [searchQuery, setSearchQuery] = useState('');
-
-  const [isFocused, setIsFocused] = useState(false); //검색바 focus
+  const [isFocused, setIsFocused] = useState(false);
+  const [isBeginning, setIsBeginning] = useState(true);
+  const [isEnd, setIsEnd] = useState(false);
+  const [serviceActiveIndex, setServiceActiveIndex] = useState(0);
+  const [noticeActiveIndex, setNoticeActiveIndex] = useState(0);
+  const [likedAnnounce, setLikedAnnounce] = useState({});
+  const [likedBusiness, setLikedBusiness] = useState({});
+  const [likedPolicy, setLikedPolicy] = useState({});
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [mainData, setMainData] = useState(EMPTY_MAIN_DATA);
+  const [mainLoading, setMainLoading] = useState(true);
+  const [bizFieldOptions, setBizFieldOptions] = useState([]);
+  const [hiddenPopupIds, setHiddenPopupIds] = useState([]);
   const srchInputRef = useRef(null);
+  const searchBarRef = useRef(null);
+  const originTopRef = useRef(0);
+  const swiperRef = useRef(null);
 
-  // 인기 검색어, 자동 완성 layer
   const showPopular = isFocused && searchQuery === '';
   const showAutoComplete = isFocused && searchQuery !== '';
+  const serviceTabMenu = [
+    '사업공고',
+    '지원사업 소개',
+    '증명서 발급',
+    '정책금융',
+  ];
+  const noticeTabMenu = ['공지사항', '자주찾는 질문', '행정정보'];
+  const platformMenus = [
+    {
+      img: mainIcon01,
+      title: (
+        <>
+          <span className="mo-hide">신청 가능한</span>{' '}
+          <br className="pc-only" />
+          사업공고 찾기
+        </>
+      ),
+      path: '/req/pbanc/pbanc',
+    },
+    {
+      img: mainIcon07,
+      title: (
+        <>
+          <span className="mo-hide">중소벤처기업부</span>{' '}
+          <br className="pc-only" />
+          지원사업 보기
+        </>
+      ),
+      path: '/req/sprt',
+    },
+    {
+      img: mainIcon04,
+      title: (
+        <>
+          <span className="mo-hide">융자 보증 보험</span>정책 금융상품 찾기
+        </>
+      ),
+      path: '/req/plcy/UI_USR_L_030',
+    },
+    {
+      img: mainIcon03,
+      title: (
+        <>
+          중소기업 <span className="mo-hide">(소상공인)</span>확인서 발급하기
+        </>
+      ),
+      path: '/crtf/UI_USR_L_040/Y107',
+    },
+    {
+      img: mainIcon03,
+      title: (
+        <>
+          직접생산확인 <br /> 증명서 발급하기
+        </>
+      ),
+      path: '/crtf/UI_USR_L_040/Y101',
+    },
+    {
+      img: mainIcon06,
+      title: '입법행정예고/고시',
+      path: '/plcy/icr/UI_USR_L_110',
+    },
+  ];
 
-  // 검색바 상단 fixed
-  const searchBarRef = useRef(null); // 검색바 ref
-  const originTopRef = useRef(0); // 원래 위치 고정 저장
-
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      // 검색어를 state로 전달하며 이동
-      navigate('/publishing/ai-smart-search', { state: { q: searchQuery.trim() } });
-    } else {
-      navigate('/publishing/ai-smart-search');
-    }
-  };
-
-  // 상단 검색 바 레이어 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (srchInputRef.current && !srchInputRef.current.contains(e.target)) {
+      if (srchInputRef.current && !srchInputRef.current.contains(e.target))
         setIsFocused(false);
-      }
     };
-    const handleScroll = () => setIsFocused(false);
-
     document.addEventListener('mousedown', handleClickOutside);
-    // window.addEventListener("scroll", handleScroll);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      // window.removeEventListener("scroll", handleScroll);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
-
-  const handleClear = () => {
-    setSearchQuery('');
-  };
-
 
   useEffect(() => {
     const saveOriginTop = () => {
       if (!searchBarRef.current) return;
-
-      // 측정 전 is-fixed 잠깐 제거
       searchBarRef.current.classList.remove('is-fixed');
       document.documentElement.classList.remove('searchbar-fixed');
-
-      const headerHeight = document.querySelector('#krds-header')?.offsetHeight || 0;
-
-      originTopRef.current = searchBarRef.current.getBoundingClientRect().top + window.scrollY - headerHeight;
-
-      // console.log('originTop 재계산:', originTopRef.current, '헤더높이:', headerHeight);
-
-      // 제거했으니 현재 스크롤 상태에 맞게 다시 적용
+      const headerHeight =
+        document.querySelector('#krds-header')?.offsetHeight || 0;
+      originTopRef.current =
+        searchBarRef.current.getBoundingClientRect().top +
+        window.scrollY -
+        headerHeight;
       const isFixed = window.scrollY >= originTopRef.current + headerHeight;
       searchBarRef.current.classList.toggle('is-fixed', isFixed);
       document.documentElement.classList.toggle('searchbar-fixed', isFixed);
     };
-
     saveOriginTop();
-
     window.addEventListener('resize', saveOriginTop);
     return () => window.removeEventListener('resize', saveOriginTop);
   }, []);
@@ -94,126 +227,133 @@ const MainPage = () => {
   useEffect(() => {
     const handleScroll = () => {
       if (!searchBarRef.current) return;
-
-      const headerHeight = document.querySelector('#krds-header')?.offsetHeight || 0;
+      const headerHeight =
+        document.querySelector('#krds-header')?.offsetHeight || 0;
       const isFixed = window.scrollY >= originTopRef.current + headerHeight;
-
       searchBarRef.current.classList.toggle('is-fixed', isFixed);
       document.documentElement.classList.toggle('searchbar-fixed', isFixed);
+      setIsFocused(false);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+    const loadMainData = async () => {
+      try {
+        setMainLoading(true);
+        const [mainResponse, codeResponse] = await Promise.all([
+          apiClient.get('/api/v1/main'),
+          fetchAndConvertCommonCodes([BIZ_PBANC_CLSF_GROUP_ID]),
+        ]);
+        if (!isMounted) return;
+        setMainData({ ...EMPTY_MAIN_DATA, ...normalizeResponse(mainResponse) });
+        setBizFieldOptions(
+          normalizeResponse(codeResponse)?.[BIZ_PBANC_CLSF_GROUP_ID] || [],
+        );
+      } catch (error) {
+        if (!isMounted) return;
+        setMainData(EMPTY_MAIN_DATA);
+        setBizFieldOptions([]);
+      } finally {
+        if (isMounted) setMainLoading(false);
+      }
+    };
+    loadMainData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
+  useEffect(() => {
+    const todayKey = new Date().toISOString().slice(0, 10);
+    setHiddenPopupIds(
+      (mainData.popups || [])
+        .filter(
+          (popup) =>
+            window.localStorage.getItem(`main-popup-hide-${popup.popupId}`) ===
+            todayKey,
+        )
+        .map((popup) => popup.popupId),
+    );
+  }, [mainData.popups]);
 
-
-  // 자주 찾는 서비스 메뉴 - 슬라이드 처음, 끝 파악
-  const [isBeginning, setIsBeginning] = useState(true);
-  const [isEnd, setIsEnd] = useState(false);
-
-  const platformMenus = [
-    {
-      img: mainIcon01,
-      title: (
-        <>
-          <span className="mo-hide">신청 가능한</span> <br className="pc-only" />
-            사업공고 찾기
-        </>
+  const bizFieldMap = useMemo(
+    () =>
+      Object.fromEntries(
+        bizFieldOptions.map((item) => [item.value, item.label]),
       ),
-    },
-    {
-      img: mainIcon07,
-      title: (
-        <>
-          <span className="mo-hide">중소벤처기업부</span> <br className="pc-only" />
-            지원사업 보기
-        </>
-      ),
-    },
-    {
-      img: mainIcon04,
-      title: (
-        <>
-          <span className="mo-hide">융자 보증 보험</span>
-            정책 금융상품 찾기
-        </>
-      ),
-    },
-    {
-      img: mainIcon03,
-      title: (
-        <>
-            중소기업 <span className="mo-hide">(소상공인)</span>
-            확인서 발급하기
-        </>
-      ),
-    },
-    {
-      img: mainIcon03,
-      title: (
-        <>
-            직접생산확인 <br /> 증명서 발급하기
-        </>
-      ),
-    },
-    {
-      img: mainIcon06,
-      title: '입법·행정예고/고시',
-    },
-  ];
+    [bizFieldOptions],
+  );
+  const noticeListPath =
+    getFullPath(MAIN_MENU_IDS.notice) || '/csc/UI_USR_L_310';
+  const faqListPath = getFullPath(MAIN_MENU_IDS.faq) || '/csc/UI_USR_L_320';
+  const adminInfoListPath =
+    getFullPath(MAIN_MENU_IDS.adminInfo) || '/plcy/icr/UI_USR_L_110';
+  const pbancItems = mainData.pbancs || [];
+  const sprtBizItems = mainData.sprtBizs || [];
+  const certificateItems = mainData.certificates || [];
+  const financePolicyItems = mainData.financePolicies || [];
+  const noticeItems = mainData.notices || [];
+  const faqItems = mainData.faqs || [];
+  const adminInfoItems = mainData.adminInfos || [];
+  const bannerItems =
+    (mainData.banners || []).length > 0
+      ? mainData.banners
+      : [
+        {
+          bnrId: 'fallback-1',
+          bnrTtl: '메인 배너',
+          imgLnkgUrlAddr: '#',
+          imgLnkgNpagYn: 'N',
+          fallbackImageSrc: mainBanner,
+          fallbackAlt: '메인 배너',
+        },
+        {
+          bnrId: 'fallback-2',
+          bnrTtl: '메인 배너',
+          imgLnkgUrlAddr: '#',
+          imgLnkgNpagYn: 'N',
+          fallbackImageSrc: mainBanner,
+          fallbackAlt: '메인 배너',
+        },
+      ];
+  const visiblePopups = (mainData.popups || []).filter(
+    (popup) => !hiddenPopupIds.includes(popup.popupId),
+  );
 
-
-  //지금 이용 가능한 서비스 Tab
-  const [serviceActiveIndex, setServiceActiveIndex] = useState(0); //기본값 0 (사업공고)
-  const serviceTabMenu = ['사업공고', '지원사업 소개', '증명서 발급', '정책금융'];
-
-  // notice (공지사항, 자주하는 질문, 정책 뉴스)
-  const [noticeActiveIndex, setNoticeActiveIndex] = useState(0); //기본값 0(공지사항)
-  const noticeTabMenu = ['공지사항', '자주찾는 질문', '행정정보'];
-
-  // 지금 이용 가능한 서비스 - 사업공고 좋아요 버튼
-  const [likedAnnounce, setLikedAnnounce] = useState({});
-  // 지금 이용 가능한 서비스 - 지원사업 소개 좋아요 버튼
-  const [likedBusiness, setLikedBusiness] = useState({});
-  // 지금 이용 가능한 서비스 - 정책금융 좋아요 버튼
-  const [likedPolicy, setLikedPolicy] = useState({});
-
-  // 지금 이용 가능한 서비스 - 사업공고 좋아요 toggle
-  const handleToggleLike1 = (index) => {
-    setLikedAnnounce(prev => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      navigate('/publishing/ai-smart-search', {
+        state: { q: searchQuery.trim() },
+      });
+      return;
+    }
+    navigate('/publishing/ai-smart-search');
   };
-  // 지금 이용 가능한 서비스 - 사업공고 좋아요 toggle
-  const handleToggleLike2 = (index) => {
-    setLikedBusiness(prev => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
-  };
-  // 지금 이용 가능한 서비스 - 사업공고 좋아요 toggle
-  const handleToggleLike3 = (index) => {
-    setLikedPolicy(prev => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
-  };
-
-  // 주요 소식 및 안내
-  const [isPlaying, setIsPlaying] = useState(true);
-  const swiperRef = useRef(null);
-
+  const handleKeyDown = (e) => e.key === 'Enter' && handleSearch();
+  const handleClear = () => setSearchQuery('');
+  const handleToggleLike1 = (index) =>
+    setLikedAnnounce((prev) => ({ ...prev, [index]: !prev[index] }));
+  const handleToggleLike2 = (index) =>
+    setLikedBusiness((prev) => ({ ...prev, [index]: !prev[index] }));
+  const handleToggleLike3 = (index) =>
+    setLikedPolicy((prev) => ({ ...prev, [index]: !prev[index] }));
   const toggleAutoplay = () => {
     if (!swiperRef.current) return;
-    if (isPlaying) {
-      swiperRef.current.autoplay.stop();
-    } else {
-      swiperRef.current.autoplay.start();
-    }
+    if (isPlaying) swiperRef.current.autoplay.stop();
+    else swiperRef.current.autoplay.start();
     setIsPlaying(!isPlaying);
+  };
+  const handlePopupClose = (popupId) =>
+    setHiddenPopupIds((prev) => [...new Set([...prev, popupId])]);
+  const handlePopupHideToday = (popupId) => {
+    window.localStorage.setItem(
+      `main-popup-hide-${popupId}`,
+      new Date().toISOString().slice(0, 10),
+    );
+    handlePopupClose(popupId);
   };
 
   return (
@@ -392,8 +532,13 @@ const MainPage = () => {
                     {platformMenus.map((item, index) => (
                       <SwiperSlide key={index}>
                         <div className="quick-menu-item">
-                          <button type="button">
-                            <span className="quick-menu-img"><img src={item.img} alt="" /></span>
+                          <button
+                            type="button"
+                            onClick={() => navigate(item.path)}
+                          >
+                            <span className="quick-menu-img">
+                              <img src={item.img} alt="" />
+                            </span>
                             <span className="quick-menu-tit">{item.title}</span>
                           </button>
                         </div>
@@ -402,8 +547,18 @@ const MainPage = () => {
                   </Swiper>
                   {/* navigation */}
                   <div className="swiper-nav-wrap">
-                    <button type="button" className={`swiper-button-prev ${isBeginning && 'hide'}`}><span className="sr-only">이전</span></button>
-                    <button type="button" className={`swiper-button-next ${isEnd && 'hide'}`}><span className="sr-only">다음</span></button>
+                    <button
+                      type="button"
+                      className={`swiper-button-prev ${isBeginning && 'hide'}`}
+                    >
+                      <span className="sr-only">이전</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`swiper-button-next ${isEnd && 'hide'}`}
+                    >
+                      <span className="sr-only">다음</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -422,7 +577,11 @@ const MainPage = () => {
                         key={index}
                         className={`${serviceActiveIndex === index ? 'is-active' : ''}`}
                       >
-                        <button type="button" className="krds-btn medium text" onClick={() => setServiceActiveIndex(index)}>
+                        <button
+                          type="button"
+                          className="krds-btn medium text"
+                          onClick={() => setServiceActiveIndex(index)}
+                        >
                           {menu}
                         </button>
                       </li>
@@ -436,152 +595,271 @@ const MainPage = () => {
                   {serviceActiveIndex === 0 &&  (
                     <div className="service-tabcont">
                       <ul className="krds-structured-list row-4">
-                        {Array.from({ length: 8 }).map((_, index) => (
-                          <li className="structured-item" key={index}>
-                            <div className="card-top">
-                              <span className="krds-badge bg-point number">D-10</span> {/* D-10 이하일때 class명 bg-point */}
-                              <span className="krds-badge bg-primary number">D-402</span> {/* D-10 초과일때 class명 bg-primary */}
-                              <span className="krds-badge bg-light-primary">인기</span>
-                              <span className="krds-badge">경영</span>
-                            </div>
-                            <div className="card-body">
-                              <a href="#" className="c-text">
-                                <p className="c-tit no-icon"><span className="span onellipsis-2">2026년 소공인 복합지원센터 구축ㆍ운영사업 본공모</span></p>
-                                <div className="c-etc">
-                                  <p className="c-ico-txt">
-                                    <i className="svg-icon ico-build"></i> 한국산업기술기획평가원
+                        {pbancItems.map((item, index) => {
+                          const ddayLabel = getDdayLabel(
+                            item.bizAplyDdlnYmd,
+                          );
+                          const bizFieldLabel =
+                            bizFieldMap[item.bizPbancClsfCd] ||
+                            item.bizPbancClsfCd;
+                          return (
+                            <li className="structured-item" key={index}>
+                              <div className="card-top">
+                                <span
+                                  className={`krds-badge ${getDdayBadgeClass(ddayLabel)} number`}
+                                >
+                                  {ddayLabel}
+                                </span>
+                                {bizFieldLabel && (
+                                  <span className="krds-badge">
+                                    {bizFieldLabel}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="card-body">
+                                <Link
+                                  to={`/req/pbanc/pbanc/${item.bizPbancNo}`}
+                                  className="c-text"
+                                >
+                                  <p className="c-tit no-icon">
+                                    <span className="span onellipsis-2">
+                                      {item.bizPbancNm}
+                                    </span>
                                   </p>
-                                  <p className="c-ico-txt">
-                                    <i className="svg-icon ico-calendar"></i> 2026.01.19 ~ 2026.02.12
-                                  </p>
-                                </div>
-                              </a>
-                            </div>
-                            <div className="card-btn">
-                              <button type="button" className="krds-btn text" aria-label="2026년 중소벤처기업부 소상공인 지원사업 통합 공고 찜하기" onClick={() => handleToggleLike1(index)}> <i className={`svg-icon ico-like on-bgcolorgray ${likedAnnounce[index] ? 'on' : ''}`}></i></button>
-                            </div>
-                          </li>
-                        ))}
+                                  <div className="c-etc">
+                                    <p className="c-ico-txt">
+                                      <i className="svg-icon ico-build"></i>{' '}
+                                      {item.bizSprvsnInstNm}
+                                    </p>
+                                    <p className="c-ico-txt">
+                                      <i className="svg-icon ico-calendar"></i>{' '}
+                                      {item.applyPeriodText}
+                                    </p>
+                                  </div>
+                                </Link>
+                              </div>
+                              <div className="card-btn">
+                                <button
+                                  type="button"
+                                  className="krds-btn text"
+                                  aria-label={`${item.bizPbancNm} 찜하기`}
+                                  onClick={() => handleToggleLike1(index)}
+                                >
+                                  <i
+                                    className={`svg-icon ico-like on-bgcolorgray ${likedAnnounce[index] ? 'on' : ''}`}
+                                  ></i>
+                                </button>
+                              </div>
+                            </li>
+                          );
+                        })}
                       </ul>
                       <div className="more-btn">
-                        <button type="button" className="krds-btn tertiary medium">사업공고 더보기 <i className="svg-icon ico-angle right"></i></button>
+                        <button
+                          type="button"
+                          className="krds-btn tertiary medium"
+                          onClick={() => navigate('/req/pbanc/pbanc')}
+                        >
+                          사업공고 더보기
+                          <i className="svg-icon ico-angle right"></i>
+                        </button>
                       </div>
                     </div>
                   )}
-                  {/* 지원사업 소개 */}
-                  {serviceActiveIndex === 1 &&  (
+                  {serviceActiveIndex === 1 && (
                     <div className="service-tabcont">
                       <ul className="krds-structured-list row-4">
-                        {Array.from({ length: 8 }).map((_, index) => (
-                          <li className="structured-item" key={index}>
-                            <div className="card-top">
-                              <span className="krds-badge bg-light-primary">경영</span>
-                            </div>
-                            <div className="card-body">
-                              <a href="#" className="c-text">
-                                <p className="c-tit no-icon"><span className="span onellipsis-2">2026년 소공인 복합지원센터 구축ㆍ운영사업 본공모</span></p>
-                                <p className="c-txt onellipsis-2">
-                                        소공인 집적지 활성화와 혁신성장 기반 조성을 위한「2026년 소공인 복합지원센터 구축ㆍ운영사업 본공모」를 다음과 같이 공고하오니 참여하고자 하는 지방자치단체는 공고문에 따라 신청하시기 바랍니다.
-                                </p>
-                              </a>
-                            </div>
-                            <div className="card-btn">
-                              <button type="button" className="krds-btn text" aria-label="2026년 소공인 복합지원센터 구축ㆍ운영사업 본공모  찜하기" onClick={() => handleToggleLike2(index)}> <i className={`svg-icon ico-like on-bgcolorgray ${likedBusiness[index] ? 'on' : ''}`}></i></button>
-                            </div>
-                          </li>
-                        ))}
+                        {sprtBizItems.map((item, index) => {
+                          const sprtBizOtln = stripHtmlTags(item.sprtBizOtln);
+                          return (
+                            <li className="structured-item" key={index}>
+                              <div className="card-top">
+                                {item.bizPbancClsfCd && (
+                                  <span className="krds-badge bg-light-primary">
+                                    {bizFieldMap[item.bizPbancClsfCd] ||
+                                      item.bizPbancClsfCd}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="card-body">
+                                <Link
+                                  to={`/req/sprt/${item.sprtBizId}`}
+                                  className="c-text"
+                                >
+                                  <p className="c-tit no-icon">
+                                    <span className="span onellipsis-2">
+                                      {item.sprtBizNm}
+                                    </span>
+                                  </p>
+                                  <p className="c-txt onellipsis-2">
+                                    {sprtBizOtln}
+                                  </p>
+                                </Link>
+                              </div>
+                            </li>
+                          );
+                        })}
                       </ul>
                       <div className="more-btn">
-                        <button type="button" className="krds-btn tertiary medium">지원사업 소개 더보기 <i className="svg-icon ico-angle right"></i></button>
+                        <button
+                          type="button"
+                          className="krds-btn tertiary medium"
+                          onClick={() => navigate('/req/sprt')}
+                        >
+                          지원사업 소개 더보기
+                          <i className="svg-icon ico-angle right"></i>
+                        </button>
                       </div>
                     </div>
                   )}
-                  {/* 증명서 발급 */}
-                  {serviceActiveIndex === 2 &&  (
+                  {serviceActiveIndex === 2 && (
                     <div className="service-tabcont">
                       <ul className="krds-structured-list row-4">
-                        {Array.from({ length: 8 }).map((_, index) => (
+                        {certificateItems.map((item, index) => (
                           <li className="structured-item" key={index}>
                             <div className="card-top">
-                              <span className="krds-badge bg-light-primary">전자증명</span>
+                              {item.elpblYn === 'Y' && (
+                                <span className="krds-badge bg-light-primary">전자증명</span>
+                              )}
                             </div>
                             <div className="card-body">
                               <div className="c-text">
-                                <p className="c-tit no-icon no-link"><span className="span onellipsis-2">벤처기업확인서</span></p>
+                                <p className="c-tit no-icon no-link">
+                                  <span className="span onellipsis-2">
+                                    {item.prdocTtl}
+                                  </span>
+                                </p>
                                 <p className="c-ico-txt">
-                                  <i className="svg-icon ico-build"></i> 중소벤처기업진흥공단
+                                  <i className="svg-icon ico-build"></i>{' '}
+                                  {item.issuInstNm || item.jrsdInstNm}
                                 </p>
                               </div>
                               <div>
-                                <button type="button" className="krds-btn secondary small full">발급받기</button>
+                                <button
+                                  type="button"
+                                  className="krds-btn secondary small full"
+                                  onClick={() =>
+                                    navigate(
+                                      `/crtf/UI_USR_L_040/${item.prdocCd}`,
+                                    )
+                                  }
+                                >
+                                  발급받기
+                                </button>
                               </div>
                             </div>
                           </li>
                         ))}
                       </ul>
                       <div className="more-btn">
-                        <button type="button" className="krds-btn tertiary medium">증명서발급 더보기 <i className="svg-icon ico-angle right"></i></button>
+                        <button
+                          type="button"
+                          className="krds-btn tertiary medium"
+                          onClick={() => navigate('/crtf/UI_USR_L_040')}
+                        >
+                          증명서 더보기
+                          <i className="svg-icon ico-angle right"></i>
+                        </button>
                       </div>
                     </div>
                   )}
-                  {/* 정책금융 */}
-                  {serviceActiveIndex === 3 &&  (
+                  {serviceActiveIndex === 3 && (
                     <div className="service-tabcont">
                       <div className="service-tabcont">
                         <ul className="krds-structured-list row-4">
-                          {Array.from({ length: 8 }).map((_, index) => (
+                          {financePolicyItems.map((item, index) => (
                             <li className="structured-item" key={index}>
                               <div className="card-top">
-                                <span className="krds-badge bg-light-point">인기</span>
-                                {/* 신규 badge case : class명 다름 (bg-light-success) */}
-                                {/* <span className="krds-badge bg-light-success">신규</span> */}
-                                <span className="krds-badge">융자</span>
+                                {item.isHotGod == 'Y' && (
+                                  <span className="krds-badge bg-light-point">
+                                    인기
+                                  </span>
+                                )}
+                                {item.isNewGod == 'Y' && (
+                                  <span className="krds-badge bg-light-success">
+                                    신규
+                                  </span>
+                                )}
+                                {item.plcyFnncGdsTypeNm && (
+                                  <span className="krds-badge">
+                                    {item.plcyFnncGdsTypeNm}
+                                  </span>
+                                )}
                               </div>
                               <div className="card-body">
-                                <a href="#" className="c-text">
-                                  <p className="c-tit no-icon"><span className="span onellipsis-2">해외사업자금</span></p>
+                                <Link
+                                  to={`/req/plcy/UI_USR_L_030/${item.plcyFnncGdsSn}`}
+                                  className="c-text"
+                                >
+                                  <p className="c-tit no-icon">
+                                    <span className="span onellipsis-2">
+                                      {item.plcyFnncGdsNm}
+                                    </span>
+                                  </p>
                                   <div className="c-etc">
                                     <p className="c-ico-txt">
-                                      <i className="svg-icon ico-build"></i> 한국산업기술기획평가원
+                                      <i className="svg-icon ico-build"></i>{' '}
+                                      {item.plcyFnncBizFlfmtInstNm}
                                     </p>
                                     <p className="c-ico-txt">
-                                      <i className="svg-icon ico-circlecheck"></i> 업력 7년이상 중소기업
+                                      <i className="svg-icon ico-circlecheck"></i>{' '}
+                                      {item.plcyFnncSprtTrgtCn ||
+                                        item.plcyFnncSprtLimSmryCn}
                                     </p>
                                   </div>
-                                </a>
+                                </Link>
                               </div>
                               <div className="card-btm no-border">
-                                <span className="tag">무역보험공사</span>
-                                <span className="tag">정책자금</span>
+                                {(item.hashtags || '')
+                                  .split(',')
+                                  .map((tag) => tag.trim())
+                                  .filter(Boolean)
+                                  .slice(0, 2)
+                                  .map((tag) => (
+                                    <span className="tag" key={tag}>
+                                      {tag}
+                                    </span>
+                                  ))}
                               </div>
                               <div className="card-btn">
-                                <button type="button" className="krds-btn text" aria-label="해외사업자금 찜하기" onClick={() => handleToggleLike3(index)}> <i className={`svg-icon ico-like on-bgcolorgray ${likedPolicy[index] ? 'on' : ''}`}></i></button>
+                                <button
+                                  type="button"
+                                  className="krds-btn text"
+                                  aria-label={`${item.plcyFnncGdsNm} 찜하기`}
+                                  onClick={() => handleToggleLike3(index)}
+                                >
+                                  <i
+                                    className={`svg-icon ico-like on-bgcolorgray ${likedPolicy[index] ? 'on' : ''}`}
+                                  ></i>
+                                </button>
                               </div>
                             </li>
                           ))}
                         </ul>
                         <div className="more-btn">
-                          <button type="button" className="krds-btn tertiary medium">정책금융 더보기 <i className="svg-icon ico-angle right"></i></button>
+                          <button
+                            type="button"
+                            className="krds-btn tertiary medium"
+                            onClick={() => navigate('/req/plcy/UI_USR_L_030')}
+                          >
+                            정책금융 더보기
+                            <i className="svg-icon ico-angle right"></i>
+                          </button>
                         </div>
                       </div>
                     </div>
                   )}
-
                 </div>
               </div>
             </section>
-            {/*  E - 지금 이용 가능한 서비스 */}
-
           </div>
         </div>
-        {/* E - main-totallayout */}
 
         {/* S - 주요 소식 및 안내*/}
         <section className="main-section main-notice">
           <div className="contents-inner">
             <h2 className="section-tit">주요 소식 및 안내</h2>
             <div className="notice-wrap">
-              {/* 공지사항 tab */}
               <div className="notice-left">
                 <div className="notice-tab">
                   <ul className="tablist notice-tablist">
@@ -590,104 +868,165 @@ const MainPage = () => {
                         key={index}
                         className={`round-tab-menu ${noticeActiveIndex === index ? 'is-active' : ''}`}
                       >
-                        <button type="button" className="krds-btn medium text" onClick={() => setNoticeActiveIndex(index)}>
+                        <button
+                          type="button"
+                          className="krds-btn medium text"
+                          onClick={() => setNoticeActiveIndex(index)}
+                        >
                           {menu}
                         </button>
                       </li>
                     ))}
                   </ul>
                   <div className="notice-tab-conts">
-                    {/* 공지사항 */}
-                    {noticeActiveIndex === 0 &&  (
+                    {noticeActiveIndex === 0 && (
                       <div className="notice-tab-cont">
                         <ul className="board-list">
-                          <li className="board-list-item">
-                            <Link to="#" className="board-list-link">
-                              <span className="board-list-title onellipsis-1">시스템 점검에 따른 안내</span>
-                              <span className="board-list-date">2026.01.19</span>
-                            </Link>
-                          </li>
-                          <li className="board-list-item">
-                            <Link to="#" className="board-list-link">
-                              <span className="board-list-title onellipsis-1">지능형 분석 서비스 모델 발굴 공모전 심사결과 안내</span>
-                              <span className="board-list-date">2026.01.19</span>
-                            </Link>
-                          </li>
-                          <li className="board-list-item">
-                            <Link to="#" className="board-list-link">
-                              <span className="board-list-title onellipsis-1">시스템 점검에 따른 안내</span>
-                              <span className="board-list-date">2026.01.19</span>
-                            </Link>
-                          </li>
-                          <li className="board-list-item">
-                            <Link to="#" className="board-list-link">
-                              <span className="board-list-title onellipsis-1">UI/UX개선을 위한 시스템 점검 안내</span>
-                              <span className="board-list-date">2026.01.19</span>
-                            </Link>
-                          </li>
+                          {noticeItems.map((item) => {
+                            const href = buildBoardLink(
+                              noticeListPath,
+                              item,
+                              true,
+                            );
+                            const external =
+                              href.startsWith('http://') ||
+                              href.startsWith('https://');
+                            return (
+                              <li
+                                className="board-list-item"
+                                key={String(item.pstNo)}
+                              >
+                                <a
+                                  href={href}
+                                  className="board-list-link"
+                                  target={external ? '_blank' : undefined}
+                                  rel={external ? 'noreferrer' : undefined}
+                                >
+                                  <span className="board-list-title onellipsis-1">
+                                    {item.pstTtl}
+                                  </span>
+                                  <span className="board-list-date">
+                                    {formatDate(
+                                      item.pstgBgngYmd || item.pstRegDt,
+                                    )}
+                                  </span>
+                                </a>
+                              </li>
+                            );
+                          })}
                         </ul>
-                        <button type="button" className="krds-btn medium text more" aria-label="공지사항">더보기<i className="svg-icon ico-plus"></i></button>
+                        <button
+                          type="button"
+                          className="krds-btn medium text more"
+                          aria-label="공지사항"
+                          onClick={() => navigate(noticeListPath)}
+                        >
+                          더보기<i className="svg-icon ico-plus"></i>
+                        </button>
                       </div>
                     )}
-                    {/* 자주찾는 질문 */}
-                    {noticeActiveIndex === 1 &&  (
+                    {noticeActiveIndex === 1 && (
                       <div className="notice-tab-cont">
                         <ul className="board-list faq">
-                          <li className="board-list-item">
-                            <Link to="#" className="board-list-link">
-                              <span className="krds-badge bg-light-primary">거래 공정화</span>
-                              <span className="board-list-title onellipsis-1">대기업이 중소기업에 물품의 판매를 위탁하는 경우에도 수위탁거래에 해당하나요?</span>
-                            </Link>
-                          </li>
-                          <li className="board-list-item">
-                            <Link to="#" className="board-list-link">
-                              <span className="krds-badge bg-light-primary">경영혁신 마일리지 제도</span>
-                              <span className="board-list-title onellipsis-1">마일리지를 활용하여 사업신청을 했지만 지원대상이 되지 못하면(탈락하면) 사용한 마일리지는 어떻게 되나요?</span>
-                            </Link>
-                          </li>
-                          <li className="board-list-item">
-                            <Link to="#" className="board-list-link">
-                              <span className="krds-badge bg-light-primary">거래 공정화</span>
-                              <span className="board-list-title onellipsis-1">대기업이 중소기업에 물품의 판매를 위탁하는 경우에도 수위탁거래에 해당하나요?</span>
-                            </Link>
-                          </li>
-                          <li className="board-list-item">
-                            <Link to="#" className="board-list-link">
-                              <span className="krds-badge bg-light-primary">거래 공정화</span>
-                              <span className="board-list-title onellipsis-1">대기업이 중소기업에 물품의 판매를 위탁하는 경우에도 수위탁거래에 해당하나요?</span>
-                            </Link>
-                          </li>
+                          {faqItems.map((item) => {
+                            const href = buildBoardLink(
+                              faqListPath,
+                              item,
+                              false,
+                            );
+                            const external =
+                              href.startsWith('http://') ||
+                              href.startsWith('https://');
+                            return (
+                              <li
+                                className="board-list-item"
+                                key={String(item.pstNo)}
+                              >
+                                <a
+                                  href={href}
+                                  className="board-list-link"
+                                  target={external ? '_blank' : undefined}
+                                  rel={external ? 'noreferrer' : undefined}
+                                >
+                                  {item.ctgryNm && (
+                                    <span className="krds-badge bg-light-primary">
+                                      {item.ctgryNm}
+                                    </span>
+                                  )}
+                                  <span className="board-list-title onellipsis-1">
+                                    {item.pstTtl}
+                                  </span>
+                                </a>
+                              </li>
+                            );
+                          })}
                         </ul>
-                        <button type="button" className="krds-btn medium text more" aria-label="자주찾는 질문">더보기<i className="svg-icon ico-plus"></i></button>
+                        <button
+                          type="button"
+                          className="krds-btn medium text more"
+                          aria-label="자주찾는 질문"
+                          onClick={() => navigate(faqListPath)}
+                        >
+                          더보기<i className="svg-icon ico-plus"></i>
+                        </button>
                       </div>
                     )}
-                    {/* 행사정보 */}
-                    {noticeActiveIndex === 2 &&  (
+                    {noticeActiveIndex === 2 && (
                       <div className="notice-tab-cont">
                         <ul className="board-list">
-                          <li className="board-list-item">
-                            <Link to="#" className="board-list-link">
-                              <span className="krds-badge bg-light-primary">부산</span>
-                              <span className="board-list-title onellipsis-1">행정뉴스 시스템 점검에 따른 안내</span>
-                              <span className="board-list-date">2026-03-04 ~ 2026-03-04</span>
-                            </Link>
-                          </li>
-                          <li className="board-list-item">
-                            <Link to="#" className="board-list-link">
-                              <span className="krds-badge bg-light-primary">광주</span>
-                              <span className="board-list-title onellipsis-1">지능형 분석 서비스 모델 발굴 공모전 심사결과 안내</span>
-                              <span className="board-list-date">2026-03-04 ~ 2026-03-04</span>
-                            </Link>
-                          </li>
+                          {adminInfoItems.map((item) => {
+                            const href = buildBoardLink(
+                              adminInfoListPath,
+                              item,
+                              true,
+                            );
+                            const external =
+                              href.startsWith('http://') ||
+                              href.startsWith('https://');
+                            return (
+                              <li
+                                className="board-list-item"
+                                key={String(item.pstNo)}
+                              >
+                                <a
+                                  href={href}
+                                  className="board-list-link"
+                                  target={external ? '_blank' : undefined}
+                                  rel={external ? 'noreferrer' : undefined}
+                                >
+                                  {item.ctgryNm && (
+                                    <span className="krds-badge bg-light-primary">
+                                      {item.ctgryNm}
+                                    </span>
+                                  )}
+                                  <span className="board-list-title onellipsis-1">
+                                    {item.pstTtl}
+                                  </span>
+                                  <span className="board-list-date">
+                                    {formatDateRange(
+                                      item.pstgBgngYmd,
+                                      item.pstgEndYmd,
+                                    )}
+                                  </span>
+                                </a>
+                              </li>
+                            );
+                          })}
                         </ul>
-                        <button type="button" className="krds-btn medium text more" aria-label="행사정보">더보기<i className="svg-icon ico-plus"></i></button>
+                        <button
+                          type="button"
+                          className="krds-btn medium text more"
+                          aria-label="행정정보"
+                          onClick={() => navigate(adminInfoListPath)}
+                        >
+                          더보기<i className="svg-icon ico-plus"></i>
+                        </button>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* 지원사업 공고, 행사정보  */}
               <div className="notice-right">
                 <div className="main-banner">
                   <Swiper
@@ -703,29 +1042,47 @@ const MainPage = () => {
                     ref={swiperRef}
                     autoplay={{ delay: 3000, disableOnInteraction: false }}
                     loop={true}
-                    onSwiper={(swiper) => (swiperRef.current = swiper)}
+                    onSwiper={(swiper) => {
+                      swiperRef.current = swiper;
+                    }}
                   >
-                    <SwiperSlide>
-                      <div className="main-banner-item">
-                        <Link to="#" className="main-banner-link">
-                          <img src={mainBanner} alt="이미지 내용에 맞는 설명 들어가야함" />
-                        </Link>
-                      </div>
-                    </SwiperSlide>
-                    <SwiperSlide>
-                      <div className="main-banner-item">
-                        <Link to="#" className="main-banner-link">
-                          <img src={mainBanner} alt="이미지 내용에 맞는 설명 들어가야함" />
-                        </Link>
-                      </div>
-                    </SwiperSlide>
+                    {bannerItems.map((item) => {
+                      const imageSrc =
+                        item.fallbackImageSrc ||
+                        buildMainImageUrl(
+                          'banners',
+                          item.moblImgAtchFileId || item.imgAtchFileId,
+                          item.moblImgAtchFileSn ?? item.imgAtchFileSn,
+                        );
+                      const href = item.imgLnkgUrlAddr || '#';
+                      const external = isNewWindow(item.imgLnkgNpagYn);
+                      return (
+                        <SwiperSlide key={String(item.bnrId)}>
+                          <div className="main-banner-item">
+                            <a
+                              href={href}
+                              className="main-banner-link"
+                              target={external ? '_blank' : undefined}
+                              rel={external ? 'noopener noreferrer' : undefined}
+                            >
+                              <img
+                                src={imageSrc || mainBanner}
+                                alt={
+                                  item.moblImgSbstPhrsCn ||
+                                  item.imgFileSbstPhrsCn ||
+                                  item.fallbackAlt ||
+                                  item.bnrTtl ||
+                                  '메인 배너'
+                                }
+                              />
+                            </a>
+                          </div>
+                        </SwiperSlide>
+                      );
+                    })}
                   </Swiper>
-                  {/* navigation */}
                   <div className="swiper-nav-wrap">
-                    {/* 페이지네이션 */}
                     <div className="swiper-pagination" aria-live="polite"></div>
-
-                    {/* 시작/정지 */}
                     <button
                       type="button"
                       className={`swiper-autoplay-toggle ${isPlaying ? 'play' : 'stop'}`}
@@ -733,9 +1090,10 @@ const MainPage = () => {
                       aria-label={isPlaying ? '슬라이드 정지' : '슬라이드 시작'}
                       aria-pressed={!isPlaying}
                     >
-                      <span className="sr-only">{isPlaying ? '정지' : '시작'}</span>
+                      <span className="sr-only">
+                        {isPlaying ? '정지' : '시작'}
+                      </span>
                     </button>
-
                     <button type="button" className="swiper-button-prev">
                       <span className="sr-only">이전</span>
                     </button>
@@ -748,7 +1106,6 @@ const MainPage = () => {
             </div>
           </div>
         </section>
-        {/* E - main-notice */}
 
         <div className="main-btm-bar">
           <div className="contents-inner">
@@ -756,10 +1113,119 @@ const MainPage = () => {
             <button type="button" className="krds-btn primary">통합회원 가입하기</button>
           </div>
         </div>
-
-        { /*컨텐츠 영역 */}
       </div>
-      <Footer />{ /* 임시 푸터 */}
+      <Footer />
+      {visiblePopups.map((popup) => {
+        const imageSrc = buildMainImageUrl(
+          'popups',
+          popup.imgAtchFileId,
+          popup.imgAtchFileSn,
+        );
+        const href = popup.imgLnkgUrlAddr || '#';
+        const external = isNewWindow(popup.imgLnkgNpagYn);
+
+        return (
+          <div
+            key={popup.popupId}
+            className="main-popup-item"
+            style={{
+              position: 'fixed',
+              top: `${popup.upendPstnNvl || 120}px`,
+              left: `${popup.lfsdPstnNvl || 40}px`,
+              width: `${popup.wdthLen || 360}px`,
+              height: `${popup.vrtcLen || 420}px`,
+              zIndex: 1000,
+              backgroundColor: '#fff',
+              border: '1px solid #d8d8d8',
+              boxShadow: '0 12px 28px rgba(0, 0, 0, 0.18)',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 16px',
+                borderBottom: '1px solid #eee',
+              }}
+            >
+              <strong style={{ fontSize: '16px', lineHeight: 1.4 }}>
+                {popup.popupTtl}
+              </strong>
+              <button
+                type="button"
+                className="krds-btn text small"
+                onClick={() => handlePopupClose(popup.popupId)}
+              >
+                닫기
+              </button>
+            </div>
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <a
+                href={href}
+                target={external ? '_blank' : undefined}
+                rel={external ? 'noreferrer' : undefined}
+                style={{ display: 'block', width: '100%', height: '100%' }}
+              >
+                {imageSrc ? (
+                  <img
+                    src={imageSrc}
+                    alt={popup.imgSbstTxtCn || popup.popupTtl}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '24px',
+                    }}
+                  >
+                    {popup.imgSbstTxtCn || popup.popupTtl}
+                  </div>
+                )}
+              </a>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '12px 16px',
+                borderTop: '1px solid #eee',
+              }}
+            >
+              {popup.vwngStopUseYn === 'Y' ? (
+                <button
+                  type="button"
+                  className="krds-btn tertiary small"
+                  onClick={() => handlePopupHideToday(popup.popupId)}
+                >
+                  오늘 하루 보지 않기
+                </button>
+              ) : (
+                <span></span>
+              )}
+              <button
+                type="button"
+                className="krds-btn secondary small"
+                onClick={() => handlePopupClose(popup.popupId)}
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
