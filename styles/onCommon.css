@@ -3923,9 +3923,6 @@ textarea.krds-input::placeholder {
     width: 65%;
     word-break: keep-all;
   }
-  #wrap.integrated-search .on-gradientpage {
-    padding-top: 89px;
-  }
   #wrap.integrated-search .totalsearch-wrap .page-title-wrap .h-tit {
     text-align: left;
     margin-bottom: 48px;
