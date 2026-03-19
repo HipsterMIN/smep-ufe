@@ -36,7 +36,7 @@ const SEARCHALL = () => {
   return (
     <div id="wrap" className="integrated-search">
       <Header />
-      <div id="container" className="on-gradientpage">
+      <div id="container" className="on-gradientpage sub-container">
         <div className="inner">
           <div className="totalsearch-wrap">
             <Breadcrumb items={breadcrumbItems}/>
