@@ -136,7 +136,7 @@ const UI_USR_R_042 = () => {
                     name="radiogroup"
                     id="radio_01"
                   />
-                  <label htmlFor="radio_01">상품1</label>
+                  <label htmlFor="radio_01"><span className="code">CP2024001</span>상품1</label>
                 </div>
                 <button type="button" className="krds-btn small primary disabled">완료</button>
               </li>
