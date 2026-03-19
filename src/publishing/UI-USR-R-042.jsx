@@ -136,7 +136,7 @@ const UI_USR_R_042 = () => {
                     name="radiogroup"
                     id="radio_01"
                   />
-                  <label htmlFor="radio_01"><span className="code">CP2024001</span>상품1</label>
+                  <label htmlFor="radio_01">상품1</label>
                 </div>
                 <button type="button" className="krds-btn small primary disabled">완료</button>
               </li>
@@ -180,9 +180,24 @@ const UI_USR_R_042 = () => {
                     name="radiogroup"
                     id="radio_05"
                   />
-                  <label htmlFor="radio_05">상품5</label>
+                  <label htmlFor="radio_05">
+                    상품5
+                    <div className="block">
+                      <span className="sub-txt">경쟁제품코드</span>CP2024001
+                    </div>
+                  </label>
                 </div>
                 <button type="button" className="krds-btn small primary">설문조사</button>
+              </li>
+              <li>
+                <div className="krds-form-check medium">
+                  <input
+                    type="radio"
+                    name="radiogroup"
+                    id="radio_06"
+                  />
+                  <label htmlFor="radio_06">방산 총기류 AI합금부품의 내구성 및 색상 품질 만족하는 중은에서의 경질 양극산화 피막기술 개발 오쿠노한국주식회서,삼명청공(주)</label>
+                </div>
               </li>
             </ul>
           </div>

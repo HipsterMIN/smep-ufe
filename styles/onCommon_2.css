@@ -753,6 +753,9 @@
     font-size: 19px;
     font-weight: 700;
 }
+.select-list .krds-form-check input[type=radio] ~ label {
+  flex-wrap: wrap;
+}
 .select-list li {
   display: flex;
   justify-content: space-between;
@@ -760,6 +763,14 @@
 }
 .select-list li ~ li {
   margin-top: 16px;
+}
+.select-list .krds-form-check .block {
+  width: 100%;
+  padding-left: 26px;
+}
+.select-list .krds-form-check .sub-txt {
+  margin-right: 8px;
+  color:#464C53;
 }
 /* 메인 */
 /* main 2차 디자인 수정 */
