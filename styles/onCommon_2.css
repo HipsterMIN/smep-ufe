@@ -1622,7 +1622,7 @@ button.aichatButton.active {
       flex-wrap: wrap;
   }
   .search-top-box.no-details {
-      padding: 30px;
+      padding: 26px 20px;
   }
   .search-top-box .form-row-box {
       align-items: flex-start;
