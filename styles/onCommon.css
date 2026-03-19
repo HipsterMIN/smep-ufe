@@ -2246,7 +2246,6 @@ table tbody tr:hover td {
 /* SEARCH ALL */
 
 #wrap.integrated-search .on-gradientpage {
-  padding-top: 195px;
   padding-bottom: 0;
 }
 #wrap.integrated-search .onsearch-input-box .boxinner {
@@ -3923,9 +3922,6 @@ textarea.krds-input::placeholder {
   .platform-bi-wrap .default-design-box.grid .box-color-inner .color-info dl dd {
     width: 65%;
     word-break: keep-all;
-  }
-  #wrap.integrated-search .on-gradientpage {
-    padding-top: 89px;
   }
   #wrap.integrated-search .totalsearch-wrap .page-title-wrap .h-tit {
     text-align: left;
