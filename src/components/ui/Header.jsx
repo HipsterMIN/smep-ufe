@@ -209,7 +209,6 @@ export default function Header() {
   const lastScrollY = useRef(0);
   const MOBILE_BREAKPOINT = 1024;
   const isLocked = useRef(false); // 상태 변경 쿨다운 lock
-  const LOCK_DURATION = 400; // ms, 필요시 조정
 
   const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
 
@@ -229,32 +228,26 @@ export default function Header() {
         return;
       }
 
-      const currentScrollY = window.scrollY;
+      const currentScrollY = Math.max(0, window.scrollY); // 음수 방지
       const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;
-      const delta = currentScrollY - lastScrollY.current;
 
-      // 항상 lastScrollY 업데이트
+      // 바운스 구간이면 lastScrollY 업데이트도 안 하고 완전 무시
+      if (currentScrollY >= maxScrollY - 5) return;
+
+      const delta = currentScrollY - lastScrollY.current;
       lastScrollY.current = currentScrollY;
 
-      // 바운스 구간 스킵
-      if (currentScrollY < 0 || currentScrollY > maxScrollY) return;
-
-      // 미세 진동 스킵
       if (Math.abs(delta) < 5) return;
 
-      // lock 중이면 아무것도 안 함
-      if (isLocked.current) return;
-
-      if (delta > 0 && currentScrollY > 80) {
-        setIsHeaderVisible(false);
-        // 숨긴 직후 lock 걸기
-        isLocked.current = true;
-        setTimeout(() => { isLocked.current = false; }, LOCK_DURATION);
-      } else if (delta < 0) {
+      if (delta < 0) {
+        // 위로: 즉시 표시, lock 없음
         setIsHeaderVisible(true);
-        // 보인 직후 lock 걸기
+      } else if (delta > 0 && currentScrollY > 80) {
+        // 아래로: lock 적용
+        if (isLocked.current) return;
+        setIsHeaderVisible(false);
         isLocked.current = true;
-        setTimeout(() => { isLocked.current = false; }, LOCK_DURATION);
+        setTimeout(() => { isLocked.current = false; }, 400);
       }
     };
 
