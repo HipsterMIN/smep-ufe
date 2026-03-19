@@ -157,7 +157,7 @@ const UI_USR_L_520 = () => {
                 <div className="c-text">
                   <div className="flex-row">
                     <div className="krds-badge-wrap">
-                      <span className="krds-badge bg-light-danger">신청중</span>
+                      <span className="krds-badge bg-light-primary">접수완료</span>
                     </div>
                     <p className="c-tit no-icon onellipsis-1 small">2026년 중동 특화 긴급 물류바우처 사업 참여기업 모집 공고</p>
                   </div>
@@ -179,7 +179,51 @@ const UI_USR_L_520 = () => {
                 <div className="c-text">
                   <div className="flex-row">
                     <div className="krds-badge-wrap">
-                      <span className="krds-badge bg-light-primary">신청완료</span>
+                      <span className="krds-badge bg-light-secondary">평가중</span>
+                    </div>
+                    <p className="c-tit no-icon onellipsis-1 small">2026년 중동 특화 긴급 물류바우처 사업 참여기업 모집 공고</p>
+                  </div>
+                  <p className="on-list-btm">
+                    <span><strong>중소벤처기업진흥공단</strong></span>
+                    <span><strong>기업마당</strong></span>
+                    <span><strong>신청일</strong> 2025-03-35</span>
+                  </p>
+                </div>
+                <div className="c-btn">
+                  <button type="button" className="krds-btn primary medium">상세조회</button>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li className="structured-item">
+            <div className="in">
+              <div className="card-body">
+                <div className="c-text">
+                  <div className="flex-row">
+                    <div className="krds-badge-wrap">
+                      <span className="krds-badge bg-light-success">선정</span>
+                    </div>
+                    <p className="c-tit no-icon onellipsis-1 small">2026년 중동 특화 긴급 물류바우처 사업 참여기업 모집 공고</p>
+                  </div>
+                  <p className="on-list-btm">
+                    <span><strong>중소벤처기업진흥공단</strong></span>
+                    <span><strong>기업마당</strong></span>
+                    <span><strong>신청일</strong> 2025-03-35</span>
+                  </p>
+                </div>
+                <div className="c-btn">
+                  <button type="button" className="krds-btn primary medium">상세조회</button>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li className="structured-item">
+            <div className="in">
+              <div className="card-body">
+                <div className="c-text">
+                  <div className="flex-row">
+                    <div className="krds-badge-wrap">
+                      <span className="krds-badge bg-light-warning">탈락</span>
                     </div>
                     <p className="c-tit no-icon onellipsis-1 small">2026년 중동 특화 긴급 물류바우처 사업 참여기업 모집 공고</p>
                   </div>
