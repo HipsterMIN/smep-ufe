@@ -231,7 +231,7 @@ export default function Header() {
       const currentScrollY = Math.max(0, window.scrollY); // 음수 방지
       const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;
 
-      // 바운스 구간이면 lastScrollY 업데이트도 안 하고 완전 무시
+      // 바운스 구간(스크롤 끝)이면 lastScrollY 업데이트도 안 하고 완전 무시
       if (currentScrollY >= maxScrollY - 5) return;
 
       const delta = currentScrollY - lastScrollY.current;
