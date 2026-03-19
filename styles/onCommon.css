@@ -1331,9 +1331,10 @@ table tbody tr:hover td {
   flex-direction: row;
 }
 .search-list-top .sch-sort .sort-label {
+  font-size: var(--krds-pc-font-size-body-small);
   font-weight: var(--krds-font-weight-bold);
   white-space: nowrap;
-  margin-right: var(--krds-gap-4);
+  margin-right: var(--krds-gap-3);
 }
 .search-list-top .sch-sort .krds-form-select-sort {
   border: var(--search-list-sort-btn-border);
@@ -1380,7 +1381,7 @@ table tbody tr:hover td {
 }
 .search-list-top .sch-info li:not(:last-child),
 .search-list-top .sch-sort li:not(:last-child) {
-  padding-right: 25px;
+  padding-right: 18px;
 }
 .search-list-top .sch-info li:not(:last-child)::after,
 .search-list-top .sch-sort li:not(:last-child)::after {
@@ -1391,7 +1392,7 @@ table tbody tr:hover td {
   background-color: var(--search-list-color-border);
   position: absolute;
   bottom: 5px;
-  right: 16px;
+  right: 10px;
 }
 .search-list-top .sch-sort {
   flex-shrink: 0;
@@ -4077,12 +4078,10 @@ textarea.krds-input::placeholder {
   /* 공통 - 결과 리스트 상단 */
   .search-list-top {
     flex-direction: column;
-    gap: var(--krds-gap-7);
+    gap: var(--krds-gap-6);
     margin-top: var(--krds-mobile-gap-layout-h2-h3);
   }
-  .search-list-top .sch-info,
-  .search-list-top .sch-left {
-    order: 2;
+  .search-list-top .sch-info {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--krds-gap-4);
@@ -4094,10 +4093,6 @@ textarea.krds-input::placeholder {
     gap: 0;
   }
   .search-list-top .sch-sort {
-    order: 1;
-    margin-left: auto;
-    flex-wrap: wrap;
-    gap: 10px;
   }
   .search-list-top .sch-sort .w-hide {
     display: flex !important;
