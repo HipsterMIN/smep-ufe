@@ -44,8 +44,15 @@ const PbancView = () => {
     window.scrollTo(0, 0);
 
     const detail = async () => {
-      const response = await apiClient.get(`/api/v1/pbanc/${id}?bizPbancTypeCd=${bizPbancTypeCd}`);
-      setItem(response?.data || response);
+      try {
+        const response = await apiClient.get(
+          `/api/v1/pbanc/${id}?bizPbancTypeCd=${bizPbancTypeCd}`,
+          { credentials: 'include' },
+        );
+        setItem(response?.data || response);
+      } catch (error) {
+        console.error('상세 조회 실패:', error);
+      }
     };
 
     detail();
@@ -266,16 +273,16 @@ const PbancView = () => {
           </li>
           <li>
             <span>
-              <span className="sr-only">조회수</span>
+              <span className="sr-only">스크랩수</span>
               <i className="svg-icon ico-scrap"></i>
-              {(item?.bizPbancInqCnt ?? 0).toLocaleString()}
+              {(item?.scrapCnt ?? 0).toLocaleString()}
             </span>
           </li>
           <li>
             <span>
-              <span className="sr-only">스크랩수</span>
+              <span className="sr-only">조회수</span>
               <i className="svg-icon ico-pw-visible-on"></i>
-              {(item?.scrapCnt ?? 0).toLocaleString()}
+              {(item?.bizPbancInqCnt ?? 0).toLocaleString()}
             </span>
           </li>
         </ul>
