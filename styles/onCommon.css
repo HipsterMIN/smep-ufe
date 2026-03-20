@@ -565,7 +565,8 @@ table tbody tr:hover td {
 
 #krds-footer .f-logo {
   background-image: url(../src/assets/common/logo.svg);
-  width: 28.7rem;
+  width: 200px;
+  background-position: 0 50%;
 }
 #container .in-between {
   display: flex;
@@ -4128,7 +4129,7 @@ textarea.krds-input::placeholder {
 }
 @media (max-width: 767px) {
   #krds-header .header-container .logo {
-    width: 180px;
+    width: 132px;
   }
   .search-top-box .sch-form-wrap .krds-form-select {
     width: 100%;
@@ -4164,6 +4165,9 @@ textarea.krds-input::placeholder {
   }
   .search-list-top .sch-ico-box {
     margin: 0;
+  }
+  .search-list-top .sch-sort {
+    width: 100%;
   }
   .search-list-top .sch-sort .w-hide {
     display: flex !important;
@@ -4254,6 +4258,7 @@ textarea.krds-input::placeholder {
   }
     .page-title-wrap .h-tit {
     font-size: var(--krds-mobile-font-size-heading-xlarge);
+    margin-bottom: 32px;
   }
   .page-title-wrap .h-tit .krds-badge-wrap {
       margin-top: var(--krds-mobile-gap-layout-title-body-large);
@@ -4508,6 +4513,13 @@ textarea.krds-input::placeholder {
   }
   .platform-bi-wrap .default-design-box.space img.img-horizontal {
     width: 156px;
+  }
+  .tab + .tab-conts-wrap {
+    margin-top: 24px;
+  }
+  #krds-footer .f-logo {
+    width: 134px;
+    height: 32px;
   }
 }
 .on-searchoption-toggle {
