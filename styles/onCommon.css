@@ -4166,8 +4166,8 @@ textarea.krds-input::placeholder {
   /* 공통 - 결과 리스트 상단 */
   .search-list-top {
     flex-direction: column;
-    gap: var(--krds-gap-6);
-    margin-top: var(--krds-mobile-gap-layout-h2-h3);
+    gap: var(--krds-gap-5);
+    margin: 32px 0 16px;
   }
   .search-list-top .sch-info {
     flex-direction: column;
