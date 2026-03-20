@@ -772,6 +772,7 @@
   align-items: center;
   gap: 24px;
   font-size: 19px;
+  word-break: break-word;
 }
 .select-list .krds-form-check input[type=radio] ~ label::before {
   margin-top: 0;
@@ -1014,9 +1015,6 @@
   color: #0B50D0;
 }
 
-.krds-structured-list:not(.type-full) .card-top:first-child {
-  margin-bottom: 0;
-}
 .krds-structured-list.row-4 {
   grid-template-columns: 1fr 1fr 1fr 1fr;
 }
