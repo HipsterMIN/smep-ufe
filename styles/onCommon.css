@@ -1431,6 +1431,24 @@ table tbody tr:hover td {
   border-bottom: var(--search-list-width-border) solid
     var(--search-list-color-border);
 }
+.search-list-top .sch-ico-box {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1;
+  margin-left: -20px;
+  margin-right: auto;
+  cursor: pointer;
+}
+.search-list-top .sch-ico-box .svg-icon.ico-excel {
+  width: 20px;
+  height: 20px;
+}
+.search-list-top .sch-ico-box span {
+  color: #1E2124;
+  font-size: 17px;
+  font-weight: 400;
+}
 .filter-form .krds-check-area {
   gap: 8px;
 }
@@ -4144,7 +4162,8 @@ textarea.krds-input::placeholder {
     flex-wrap: wrap;
     gap: 0;
   }
-  .search-list-top .sch-sort {
+  .search-list-top .sch-ico-box {
+    margin: 0;
   }
   .search-list-top .sch-sort .w-hide {
     display: flex !important;

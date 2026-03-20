@@ -144,6 +144,10 @@ const UI_USR_L_020 = () => {
           <ul className="sch-info" aria-live="polite">
 						<li>검색 결과 <span className="point">24</span>개</li>
 					</ul>
+          <button className="sch-ico-box">
+            <i className="svg-icon ico-excel"/>
+            <span className="">다운로드</span>
+          </button>
           <ul className="sch-sort">
             <li>
             <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
