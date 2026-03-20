@@ -23,6 +23,9 @@ const UI_USR_R_191 = lazy(() => import('@pages/policy-info/UI_USR_R_191.jsx'));
 const UI_USR_W_130 = lazy(() => import('@pages/policy-info/UI_USR_W_130.jsx'));
 const UI_USR_R_131 = lazy(() => import('@pages/policy-info/UI_USR_R_131.jsx'));
 const UI_USR_L_140 = lazy(() => import('@pages/more-service/UI_USR_L_140.jsx'));
+
+const EntrSpt = lazy(() => import('@pages/more-service/EntrSpt.jsx'));
+const EntrSptDetail = lazy(() => import('@pages/more-service/EntrSptDetail.jsx'));
 const RelatedSystems = lazy(() => import('@pages/more-service/RelatedSystems.jsx'));
 const UI_USR_L_170 = lazy(() => import('@pages/policy-info/UI_USR_L_170.jsx'));
 const UI_USR_L_210 = lazy(() => import('@pages/data-open/UI-USR-L-210.jsx'));
@@ -310,6 +313,18 @@ export const componentMap = {
   'M_PIIO_00090': {
     component: UI_USR_L_140,
     layout: SubpageLayoutWithMenu,
+  },
+
+  // 기업가정신
+  'M_PIIO_00149': {
+    component: EntrSpt,
+    layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: ':id',
+        component: EntrSptDetail,
+      },
+    ],
   },
 
   // 유관시스템 둘러보기
