@@ -136,7 +136,11 @@ const UI_USR_R_042 = () => {
                     name="radiogroup"
                     id="radio_01"
                   />
-                  <label htmlFor="radio_01">상품1</label>
+                  <label htmlFor="radio_01">
+                      <div className="cont-inner">
+                        상품1
+                      </div>
+                  </label>
                 </div>
                 <button type="button" className="krds-btn small primary disabled">완료</button>
               </li>
@@ -147,7 +151,11 @@ const UI_USR_R_042 = () => {
                     name="radiogroup"
                     id="radio_02"
                   />
-                  <label htmlFor="radio_02">상품2</label>
+                  <label htmlFor="radio_02">
+                    <div className="cont-inner">
+                        상품2
+                    </div>
+                  </label>
                 </div>
                 <button type="button" className="krds-btn small primary disabled">완료</button>
               </li>
@@ -158,7 +166,11 @@ const UI_USR_R_042 = () => {
                     name="radiogroup"
                     id="radio_03"
                   />
-                  <label htmlFor="radio_03">상품3</label>
+                  <label htmlFor="radio_03">
+                    <div className="cont-inner">
+                        상품3
+                    </div>
+                  </label>
                 </div>
                 <button type="button" className="krds-btn small primary ">설문조사</button>
               </li>
@@ -169,7 +181,11 @@ const UI_USR_R_042 = () => {
                     name="radiogroup"
                     id="radio_04"
                   />
-                  <label htmlFor="radio_04">상품4</label>
+                  <label htmlFor="radio_04">
+                    <div className="cont-inner">
+                        상품4
+                    </div>
+                  </label>
                 </div>
                 <button type="button" className="krds-btn small primary ">설문조사</button>
               </li>
@@ -181,13 +197,12 @@ const UI_USR_R_042 = () => {
                     id="radio_05"
                   />
                   <label htmlFor="radio_05">
-                    상품5
-                    <div className="block">
-                      <span className="sub-txt">경쟁제품코드</span>CP2024001
+                    <div className="cont-inner">
+                      <span className="sub-txt"><em>경쟁제품코드</em> CP2024001</span>
+                      방산 총기류 AI합금부품의 내구성 및 색상 품질 만족하는 중은에서의 경질 양극산화 피막기술 개발 오쿠노한국주식회서,삼명청공(주)방산 총기류 AI합금부품의 내구성 및 색상 품질 만족하는 중은에서의 경질 양극산화 피막기술 개발 오쿠노한국주식회서,삼명청공(주)
                     </div>
                   </label>
                 </div>
-                <button type="button" className="krds-btn small primary">설문조사</button>
               </li>
               <li>
                 <div className="krds-form-check medium">
@@ -196,7 +211,12 @@ const UI_USR_R_042 = () => {
                     name="radiogroup"
                     id="radio_06"
                   />
-                  <label htmlFor="radio_06">방산 총기류 AI합금부품의 내구성 및 색상 품질 만족하는 중은에서의 경질 양극산화 피막기술 개발 오쿠노한국주식회서,삼명청공(주)</label>
+                  <label htmlFor="radio_06">
+                    <div className="cont-inner">
+                      <span className="sub-txt"><em>경쟁제품코드</em> CP2024001</span>
+                      방산 총기류 AI합금부품의 내구성 및 색상 품질 만족하는 중은에서의 경질 양극산화 피막기술 개발 오쿠노한국주식회서,삼명청공(주)방산 총기류 AI합금부품의 내구성 및 색상 품질 만족하는 중은에서의 경질 양극산화 피막기술 개발 오쿠노한국주식회서,삼명청공(주)
+                    </div>
+                  </label>
                 </div>
               </li>
             </ul>

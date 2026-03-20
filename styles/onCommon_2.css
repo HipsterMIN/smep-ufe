@@ -753,9 +753,6 @@
     font-size: 19px;
     font-weight: 700;
 }
-.select-list .krds-form-check input[type=radio] ~ label {
-  flex-wrap: wrap;
-}
 .select-list li {
   display: flex;
   justify-content: space-between;
@@ -764,12 +761,17 @@
 .select-list li ~ li {
   margin-top: 16px;
 }
-.select-list .krds-form-check .block {
-  width: 100%;
-  padding-left: 26px;
+.select-list .krds-form-check input[type=radio] ~ label {
+  align-items: center;
+  gap: 24px;
+  font-size: 19px;
 }
 .select-list .krds-form-check .sub-txt {
-  margin-right: 8px;
+  display: block;
+  margin-bottom: 4px;
+}
+.select-list .krds-form-check .sub-txt em {
+  margin-right: 4px;
   color:#464C53;
 }
 /* 메인 */
@@ -1576,6 +1578,9 @@ button.aichatButton.active {
 }
 .pb-0{
   padding-bottom: 0;
+}
+.sr-only {
+  left: -9999px; /* 모바일에서 table안에 sr-only 들어가면 가로 스크롤 생김 방지 */
 }
 
 
