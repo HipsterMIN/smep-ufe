@@ -1,4 +1,4 @@
-import React from "react";
+ import React from "react";
 import { useState } from 'react';
 import SideNavigation from "../components/ui/SideNavigation";
 import Breadcrumb from "../components/ui/Breadcrumb";
@@ -168,11 +168,12 @@ const UI_USR_R_042 = () => {
                   />
                   <label htmlFor="radio_03">
                     <div className="cont-inner">
-                        상품3
+                      <span className="sub-txt"><em>경제제품코드</em>CP2024001</span>
+                      스마트 제조 자동화 시스템
                     </div>
                   </label>
                 </div>
-                <button type="button" className="krds-btn small primary ">설문조사</button>
+                <button type="button" className="krds-btn small primary">설문조사</button>
               </li>
               <li>
                 <div className="krds-form-check medium">
@@ -187,7 +188,7 @@ const UI_USR_R_042 = () => {
                     </div>
                   </label>
                 </div>
-                <button type="button" className="krds-btn small primary ">설문조사</button>
+                <button type="button" className="krds-btn small primary">설문조사</button>
               </li>
               <li>
                 <div className="krds-form-check medium">
@@ -198,7 +199,8 @@ const UI_USR_R_042 = () => {
                   />
                   <label htmlFor="radio_05">
                     <div className="cont-inner">
-                      <span className="sub-txt"><em>경쟁제품코드</em> CP2024001</span>
+                      <span className="sub-txt"><em>선정번호</em>C2024-001</span>
+                      <span className="sub-txt"><em>참여기업명</em>(주)디지털솔루션</span>
                       방산 총기류 AI합금부품의 내구성 및 색상 품질 만족하는 중은에서의 경질 양극산화 피막기술 개발 오쿠노한국주식회서,삼명청공(주)방산 총기류 AI합금부품의 내구성 및 색상 품질 만족하는 중은에서의 경질 양극산화 피막기술 개발 오쿠노한국주식회서,삼명청공(주)
                     </div>
                   </label>
@@ -213,7 +215,7 @@ const UI_USR_R_042 = () => {
                   />
                   <label htmlFor="radio_06">
                     <div className="cont-inner">
-                      <span className="sub-txt"><em>경쟁제품코드</em> CP2024001</span>
+                      <span className="sub-txt"><em>경쟁제품코드</em>CP2024001</span>
                       방산 총기류 AI합금부품의 내구성 및 색상 품질 만족하는 중은에서의 경질 양극산화 피막기술 개발 오쿠노한국주식회서,삼명청공(주)방산 총기류 AI합금부품의 내구성 및 색상 품질 만족하는 중은에서의 경질 양극산화 피막기술 개발 오쿠노한국주식회서,삼명청공(주)
                     </div>
                   </label>
