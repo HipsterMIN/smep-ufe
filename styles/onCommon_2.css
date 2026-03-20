@@ -772,7 +772,6 @@
   align-items: center;
   gap: 24px;
   font-size: 19px;
-  word-break: break-word;
 }
 .select-list .krds-form-check input[type=radio] ~ label::before {
   margin-top: 0;
