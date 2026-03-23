@@ -63,7 +63,8 @@ const UI_USR_R_111 = lazy(() => import('@pages/policy-info/UI_USR_R_111.jsx'));
 const UI_USR_L_150 = lazy(() => import('@pages/more-service/UI-USR-L-150.jsx'));
 const UI_USR_L_180 = lazy(() => import('@pages/more-service/UI_USR_L_180.jsx'));
 const UI_USR_R_181 = lazy(() => import('@pages/more-service/UI_USR_R_181.jsx'));
-const UI_Usr_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
+const UI_USR_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
+const UI_USR_R_121 = lazy(() => import('@pages/more-service/UI-USR-R-121.jsx'));
 const UI_USR_R_190 = lazy(() => import('@pages/more-service/UI-USR-R-190.jsx'));
 /**
  * =============================================================================
@@ -305,8 +306,14 @@ export const componentMap = {
 
   // 품목별 법정의무 인증제도
   'M_PIIO_00088': {
-    component: UI_Usr_L_120,
+    component: UI_USR_L_120,
     layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: ':certSystmSn',
+        component: UI_USR_R_121,
+      },
+    ],
   },
 
   // 소재부품장비·뿌리기술·전문연구사업자 조회
