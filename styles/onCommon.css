@@ -4053,6 +4053,7 @@ textarea.krds-input::placeholder {
   .krds-table-wrap .tbl.data.t-block .onellipsis-1.flex-row {
     display: inline-flex;
     flex-direction: column;
+    align-items: flex-start;
   }
   .krds-table-wrap .tbl.data.t-block .onellipsis-1.flex-row .krds-badge {
     order: -1;
@@ -4066,6 +4067,9 @@ textarea.krds-input::placeholder {
   table.t-block tbody tr td a span {
     font-size: 17px;
     color: #1E2124;
+  }
+  table.t-block tbody tr td a .krds-badge {
+    font-size: 15px;
   }
   table.t-block tbody tr td span {
     font-size: 15px;

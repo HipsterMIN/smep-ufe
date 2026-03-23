@@ -444,11 +444,11 @@ const MainPage = () => {
                                 <a href="#" className="c-text">
                                   <p className="c-tit no-icon"><span className="span onellipsis-2">2026년 소공인 복합지원센터 구축ㆍ운영사업 본공모</span></p>
                                   <div className="c-etc">
-                                    <p className="c-ico-txt">
+                                    <p className="c-ico-txt onellipsis-1">
                                       {/* 웹접근성 반영 */}
                                       <i className="svg-icon ico-build"></i> <span className="sr-only">기관</span> 한국산업기술기획평가원
                                     </p>
-                                    <p className="c-ico-txt">
+                                    <p className="c-ico-txt onellipsis-1">
                                       <i className="svg-icon ico-calendar"></i> 2026.01.19 ~ 2026.02.12  
                                     </p>
                                   </div>
@@ -504,10 +504,10 @@ const MainPage = () => {
                               </div>
                               <div className="card-body">
                                 <div className="c-text">
-                                  <p className="c-tit no-icon no-link"><span className="span onellipsis-2">벤처기업확인서</span></p>
-                                  <p className="c-ico-txt">
+                                  <p className="c-tit no-icon no-link"><span className="onellipsis-1">벤처기업확인서</span></p>
+                                  <p className="c-ico-txt onellipsis-1">
                                     {/* 웹접근성 반영 */}
-                                    <i className="svg-icon ico-build"></i><span className="sr-only">기관</span> 중소벤처기업진흥공단
+                                    <i className="svg-icon ico-build"></i><span className="sr-only">기관</span>중소벤처기업진흥공단
                                   </p>
                                 </div>
                                 <div>
@@ -537,14 +537,14 @@ const MainPage = () => {
                                 </div>
                                 <div className="card-body">
                                   <a href="#" className="c-text">
-                                    <p className="c-tit no-icon"><span className="span onellipsis-2">해외사업자금</span></p>
+                                    <p className="c-tit no-icon"><span className="onellipsis-1">해외사업자금</span></p>
                                     <div className="c-etc">
-                                      <p className="c-ico-txt">
+                                      <p className="c-ico-txt onellipsis-1">
                                         {/* 웹접근성 반영 */}
-                                        <i className="svg-icon ico-build"></i><span className="sr-only">기관</span> 한국산업기술기획평가원
+                                        <i className="svg-icon ico-build"></i><span className="sr-only">기관</span>한국산업기술기획평가원
                                       </p>
-                                      <p className="c-ico-txt">
-                                        <i className="svg-icon ico-circlecheck"></i> 업력 7년이상 중소기업
+                                      <p className="c-ico-txt onellipsis-1">
+                                        <i className="svg-icon ico-circlecheck"></i>업력 7년이상 중소기업
                                     </p>
                                     </div>
                                   </a>

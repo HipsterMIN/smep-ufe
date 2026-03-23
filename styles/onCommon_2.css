@@ -865,7 +865,12 @@
 .main-quick-menu .quick-menu-item button:hover .quick-menu-tit {
   color: #0B50D0;
 }
-
+.krds-structured-list:not(.type-full) .card-top:first-child {
+  margin-bottom: 0;
+}
+.krds-structured-list .card-body .c-text .c-tit .onellipsis-2 {
+  min-height: 57px;
+}
 .krds-structured-list.row-4 {
   grid-template-columns: 1fr 1fr 1fr 1fr;
 }
@@ -873,14 +878,14 @@
   margin-left: 4px;
 }
 .krds-structured-list .c-ico-txt {
-  display: flex;
-  align-items: center;
   font-size: 15px;
 }
 .krds-structured-list .c-ico-txt ~ .c-ico-txt {
   margin-top: 4px;
 }
 .krds-structured-list .c-ico-txt .svg-icon {
+  position: relative;
+  top: 2px;
   margin-right: 4px;
   width: 16px;
   height: 16px;
