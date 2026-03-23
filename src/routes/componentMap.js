@@ -309,7 +309,7 @@ export const componentMap = {
     layout: SubpageLayoutWithMenu,
     children: [
       {
-        path: ':certSystmNo',
+        path: ':certSystmSn',
         component: UI_USR_R_121,
       },
     ],

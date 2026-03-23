@@ -48,7 +48,7 @@ const UI_USR_R_121 = () => {
 
   // 인증제도 상세정보 URL 조합
   const detailUrl = certification
-    ? `https://www.standard.go.kr/KSCI/crtfcSystem/searchCrtfcSystemView.do?crtfcstId=${certification.certSystmId}&crtfcstReformNo=${certification.certSystmRvsnHstryNo}`
+    ? `https://www.standard.go.kr/KSCI/crtfcSystem/searchCrtfcSystemView.do?crtfcstId=0000000${certification.certSystmId}&crtfcstReformNo=${certification.certSystmRvsnHstryNo}`
     : null;
 
   const items = certification?.items || [];
