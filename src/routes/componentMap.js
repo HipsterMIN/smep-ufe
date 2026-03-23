@@ -61,8 +61,6 @@ const UI_USR_R_101 = lazy(() => import('@pages/policy-info/UI_USR_R_101.jsx'));
 const UI_USR_L_110 = lazy(() => import('@pages/policy-info/UI_USR_L_110.jsx'));
 const UI_USR_R_111 = lazy(() => import('@pages/policy-info/UI_USR_R_111.jsx'));
 const UI_USR_L_150 = lazy(() => import('@pages/more-service/UI-USR-L-150.jsx'));
-const UI_USR_L_180 = lazy(() => import('@pages/more-service/UI-USR-L-180.jsx'));
-const UI_USR_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
 const UI_USR_L_180 = lazy(() => import('@pages/more-service/UI_USR_L_180.jsx'));
 const UI_USR_R_181 = lazy(() => import('@pages/more-service/UI_USR_R_181.jsx'));
 const UI_USR_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
