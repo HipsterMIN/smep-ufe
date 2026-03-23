@@ -62,7 +62,8 @@ const UI_USR_L_180 = lazy(() => import('@pages/more-service/UI-USR-L-180.jsx'));
 const UI_USR_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
 const UI_USR_L_180 = lazy(() => import('@pages/more-service/UI_USR_L_180.jsx'));
 const UI_USR_R_181 = lazy(() => import('@pages/more-service/UI_USR_R_181.jsx'));
-const UI_Usr_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
+const UI_USR_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
+const UI_USR_R_121 = lazy(() => import('@pages/more-service/UI-USR-R-121.jsx'));
 const UI_USR_R_190 = lazy(() => import('@pages/more-service/UI-USR-R-190.jsx'));
 /**
  * =============================================================================
@@ -260,12 +261,6 @@ export const componentMap = {
     ],
   },
 
-  // 품목별 법정의무 인증제도
-  'M_PIIO_00088': {
-    component: UI_USR_L_120,
-    layout: SubpageLayoutWithMenu,
-  },
-
   // 중소벤처기업부 법정민원신청
   'M_PIIO_00089': {
     component: UI_USR_W_130,
@@ -310,8 +305,14 @@ export const componentMap = {
 
   // 품목별 법정의무 인증제도
   'M_PIIO_00088': {
-    component: UI_Usr_L_120,
+    component: UI_USR_L_120,
     layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: ':certSystmNo',
+        component: UI_USR_R_121,
+      },
+    ],
   },
 
   // 소재부품장비·뿌리기술·전문연구사업자 조회

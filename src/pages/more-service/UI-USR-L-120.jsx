@@ -16,7 +16,14 @@ const UI_USR_L_120 = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [certifications, setCertifications] = useState([]);
-  const pageSize = 10; // 고정값
+  const [pageSize, setPageSize] = useState(20);
+  const sidebarData = getSideNavigationData();
+  const depth1Menu = getDepth1Parent();
+
+  const handlePageSizeChange = (event) => {
+    setPageSize(Number(event.target.value));
+    setCurrentPage(0);
+  };
 
   // 입력용 (화면 표시용)
   const [searchType, setSearchType] = useState('');
@@ -25,13 +32,6 @@ const UI_USR_L_120 = () => {
   // 전송용 (API 파라미터용)
   const [appliedSearchType, setAppliedSearchType] = useState('');
   const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
-
-  // 정렬 (TODO: 백엔드 구현 필요)
-  const [sortType, setSortType] = useState('regDt');
-
-  // ✅ 사이드바 데이터 계산
-  const sidebarData = getSideNavigationData();
-  const depth1Menu = getDepth1Parent();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,9 +47,6 @@ const UI_USR_L_120 = () => {
           params.append('searchKeyword', appliedSearchKeyword);
           params.append('searchType', appliedSearchType);
         }
-
-        // TODO: 정렬 파라미터 추가 (백엔드 구현 후)
-        // params.append('sortType', sortType);
 
         const response = await apiClient.get(
           `/api/v1/product/certification?${params.toString()}`,
@@ -69,7 +66,7 @@ const UI_USR_L_120 = () => {
     };
 
     fetchData();
-  }, [currentPage, appliedSearchType, appliedSearchKeyword]);
+  }, [currentPage, pageSize, appliedSearchType, appliedSearchKeyword]);
 
   // 페이지 변경 핸들러
   const handlePageChange = (page) => {
@@ -93,22 +90,9 @@ const UI_USR_L_120 = () => {
     setCurrentPage(0);
   };
 
-  // 정렬 변경 핸들러 (TODO)
-  const handleSortChange = (type) => {
-    setSortType(type);
-    // TODO: 백엔드 정렬 구현 후 API 재호출
-    console.log('정렬 변경:', type);
-  };
-
   // 상세페이지 핸들러
-  const goToDetail = (certSystmNo) => {
-    navigate(`${certSystmNo}`);
-  };
-
-  // 엑셀 다운로드
-  const handleExcelDownload = () => {
-    // TODO: 엑셀 다운로드 API 구현
-    console.log('엑셀 다운로드');
+  const goToDetail = (certSystmSn) => {
+    navigate(`${certSystmSn}`);
   };
 
   return (
@@ -133,7 +117,7 @@ const UI_USR_L_120 = () => {
             >
               <option value="">전체</option>
               <option value="certSystmNm">인증제도명</option>
-              <option value="itemNm">품목명</option>
+              <option value="certSystmItemNm">품목명</option>
             </select>
             <div className="sch-input">
               <input
@@ -157,50 +141,24 @@ const UI_USR_L_120 = () => {
           </div>
         </div>
 
-        {/* 정렬/다운로드 영역 */}
+        {/* 정렬 영역 */}
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
             <li>검색 결과 <span className="point">{totalElements}</span>개</li>
-            <li>
-              <button
-                type="button"
-                className="krds-btn medium text"
-                onClick={handleExcelDownload}
-              >
-                <i className="svg-icon ico-excel"></i> 다운로드
-              </button>
-            </li>
           </ul>
           <ul className="sch-sort">
             <li>
-              <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
-              <div className="w-sort-btn">
-                <button
-                  type="button"
-                  className={sortType === 'regDt' ? 'active' : ''}
-                  onClick={() => handleSortChange('regDt')}
-                >
-                    등록일순{sortType === 'regDt' && <span className="sr-only">선택됨</span>}
-                </button>
-                <button
-                  type="button"
-                  className={sortType === 'inqCnt' ? 'active' : ''}
-                  onClick={() => handleSortChange('inqCnt')}
-                >
-                    조회수순{sortType === 'inqCnt' && <span className="sr-only">선택됨</span>}
-                </button>
-              </div>
-              <div className="m-sort-btn">
-                <select
-                  className="krds-form-select-sort"
-                  id="sort"
-                  value={sortType}
-                  onChange={(e) => handleSortChange(e.target.value)}
-                >
-                  <option value="regDt">등록일순</option>
-                  <option value="inqCnt">조회수순</option>
-                </select>
-              </div>
+              <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
+              <select
+                className="krds-form-select-sort"
+                id="search_result_count"
+                value={pageSize}
+                onChange={handlePageSizeChange}
+              >
+                <option value={20}>20개</option>
+                <option value={30}>30개</option>
+                <option value={40}>40개</option>
+              </select>
             </li>
           </ul>
         </div>
@@ -208,7 +166,7 @@ const UI_USR_L_120 = () => {
         {/* table [S] */}
         <div className="krds-table-wrap">
           <table className="tbl col data">
-            <caption>품목별 법정의무 인증제도 표. 번호, 분야, 인증제도명, 대상 품목수, 관련법률 소관부처 조회수 정보가 제공됨.</caption>
+            <caption>품목별 법정의무 인증제도 표. 번호, 분야, 인증제도명, 대상 품목수, 관련법률, 소관부처, 조회수 정보가 제공됨.</caption>
             <colgroup>
               <col style={{ width: '5%' }}/>
               <col style={{ width: '5%' }}/>
@@ -240,7 +198,7 @@ const UI_USR_L_120 = () => {
                 </tr>
               ) : (
                 certifications.map((item, index) => (
-                  <tr key={item.certSystmNo || index}>
+                  <tr key={item.certSystmSn || index}>
                     <th scope="row" className="ac">
                       <span>{currentPage * pageSize + index + 1}</span>
                     </th>
@@ -250,7 +208,7 @@ const UI_USR_L_120 = () => {
                     <td className="ac">
                       <a href="#" onClick={(e) => {
                         e.preventDefault();
-                        goToDetail(item.certSystmNo);
+                        goToDetail(item.certSystmSn);
                       }}>
                         <span>{item.certSystmNm}</span>
                       </a>
@@ -262,10 +220,10 @@ const UI_USR_L_120 = () => {
                       <span>{item.lglBssCn || '-'}</span>
                     </td>
                     <td className="ac">
-                      <span>{item.cmptncDept || '-'}</span>
+                      <span>{item.tkcgMaoNm || '-'}</span>
                     </td>
                     <td className="ac">
-                      <span>{item.inqCnt || 0}</span>
+                      <span>{item.tinqCnt || 0}</span>
                     </td>
                   </tr>
                 ))
