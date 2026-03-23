@@ -650,6 +650,12 @@ const UI_USR_L_030 = () => {
                       onReset: resetIndustrySelection,
                       onRemove: removeIndustrySelection,
                     })}
+                    {showLoan && (
+                      <div className="on-mw100p">
+                        <label className="label" htmlFor="thmTpbizNm">테마업종명</label>
+                        <input id="thmTpbizNm" type="text" className="krds-input medium" value={filters.thmTpbizNm} onChange={(e) => updateFilter('thmTpbizNm', e.target.value)} />
+                      </div>
+                    )}
                     {renderSelectField({
                       id: 'plcyFnncRcptSttsCd',
                       label: '접수상태',
@@ -683,10 +689,6 @@ const UI_USR_L_030 = () => {
                       {renderSelectField({ id: 'plcyFndsLoanMthCn', label: '융자방식', value: filters.plcyFndsLoanMthCn, onChange: (value) => updateFilter('plcyFndsLoanMthCn', value), options: filterOptions.loanMethods, placeholder: '전체' })}
                       {renderSelectField({ id: 'plcyFnncSprtTrgtFndsCn', label: '자금용도', value: filters.plcyFnncSprtTrgtFndsCn, onChange: (value) => updateFilter('plcyFnncSprtTrgtFndsCn', value), options: filterOptions.supportTargetFunds, placeholder: '전체' })}
                       {renderSelectField({ id: 'loanPrdSmryCd', label: '대출기간', value: filters.loanPrdSmryCd, onChange: (value) => updateFilter('loanPrdSmryCd', value), options: filterOptions.loanPeriodSummaries, placeholder: '전체' })}
-                      <div>
-                        <label className="label" htmlFor="thmTpbizNm">테마업종명</label>
-                        <input id="thmTpbizNm" type="text" className="krds-input" value={filters.thmTpbizNm} onChange={(e) => updateFilter('thmTpbizNm', e.target.value)} />
-                      </div>
                     </div>
                   )}
 
