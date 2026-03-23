@@ -4038,6 +4038,14 @@ textarea.krds-input::placeholder {
     flex-direction: column;
     gap: 6px;
   }
+  .krds-table-wrap .tbl.t-block tbody tr.flex-row {
+    justify-content: flex-end;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .krds-table-wrap .tbl.t-block tr.flex-row .mo-w100 {
+    flex-basis: 100%;
+  }
   .krds-table-wrap .tbl.data.t-block tbody td {
     padding: 0;
     border-bottom: none;
