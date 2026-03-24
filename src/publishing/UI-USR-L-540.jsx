@@ -119,7 +119,7 @@ const UI_USR_L_530 = () => {
 
         {/* table [S] */}
         <div className="krds-table-wrap">
-        <table className="tbl col data">
+        <table className="tbl col data t-block">
           <caption>나의 알림 목록 표. 번호, 발송일시, 구분, 내용 정보가 제공됨.</caption>
           <colgroup>
             <col style={{width: "7.4%"}} />
@@ -150,7 +150,7 @@ const UI_USR_L_530 = () => {
                   </a>
               </td>
               <td className="ac">
-                <button type="button" className="krds-btn small primary width-auto">자세히 보기</button>
+                <button type="button" className="krds-btn small primary width-auto mo-full">자세히 보기</button>
               </td>
             </tr>
             </tbody>

@@ -2515,7 +2515,6 @@ table tbody tr:hover td {
 }
 .krds-structured-list.small > li {
   padding: var(--krds-pc-padding-card-xsmall);
-  gap: 0;
 }
 .krds-structured-list.small > li:hover {
   border-color: var(--krds-color-light-primary-50); 
@@ -2528,7 +2527,7 @@ table tbody tr:hover td {
 }
 
 .krds-structured-list .bottom-link {
-  margin-top: 64px;
+  margin-top: 46px;
 }
 
 .def-list-wrap .def-list .def-list-group {
@@ -4036,7 +4035,7 @@ textarea.krds-input::placeholder {
     border-bottom: 1px solid var(--color-divider-gray-light, #CDD1D5);
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
   }
   .krds-table-wrap .tbl.t-block tbody tr.flex-row {
     justify-content: flex-end;
@@ -4051,19 +4050,19 @@ textarea.krds-input::placeholder {
     border-bottom: none;
     text-align: left !important;
   }
-  .krds-table-wrap .tbl.data.t-block tbody td a.onellipsis-1 {
+  .krds-table-wrap .tbl.data.t-block a.onellipsis-1 {
     display: block;
   }
   .krds-table-wrap .tbl.data.t-block tbody td.views,
   .krds-table-wrap .tbl.data.t-block tbody td .krds-badge.number {
     display: none;
   }
-  .krds-table-wrap .tbl.data.t-block .onellipsis-1.flex-row {
+  .krds-table-wrap .tbl.data.t-block  tbody .flex-row {
     display: inline-flex;
     flex-direction: column;
     align-items: flex-start;
   }
-  .krds-table-wrap .tbl.data.t-block .onellipsis-1.flex-row .krds-badge {
+  .krds-table-wrap .tbl.data.t-block .flex-row .krds-badge {
     order: -1;
   }
   .krds-table-wrap .tbl.data.t-block .mo-full {
@@ -4154,7 +4153,21 @@ textarea.krds-input::placeholder {
   #krds-header .header-container .logo {
     width: 20rem;
   }
- 
+  .krds-accordion .accordion-title {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-right: 34px;
+  }
+  .krds-accordion.type-line .accordion-item .btn-accordion {
+    padding: 20px 0;
+  }
+  .krds-accordion.type-line .accordion-item .btn-accordion::after {
+    top: 50%;
+    transform:translateY(-50%);
+  }
+  .krds-accordion.type-line .accordion-item.active .btn-accordion::after {
+    transform: translateY(-50%) rotate(-180deg);
+  }
 }
 @media (max-width: 767px) {
   #krds-header .header-container .logo {
@@ -4549,6 +4562,12 @@ textarea.krds-input::placeholder {
   #krds-footer .f-logo {
     width: 134px;
     height: 32px;
+  }
+  .krds-table-wrap .tbl.data.t-block .btn-flex {
+    display: flex;
+  }
+  .krds-table-wrap .tbl.data.t-block .btn-flex .krds-btn:first-of-type {
+    flex: 1;
   }
 }
 .on-searchoption-toggle {
