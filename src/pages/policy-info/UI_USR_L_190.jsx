@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
@@ -68,7 +68,6 @@ const formatEventPeriod = (value) => {
 };
 
 const UI_USR_L_190 = () => {
-  const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [activeTabIndex, setActiveTabIndex] = useState(0);

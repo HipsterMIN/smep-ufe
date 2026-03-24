@@ -564,6 +564,24 @@ const UI_USR_L_030 = () => {
     }
   };
 
+  const buildDetailSearchQuery = () => {
+    const params = new URLSearchParams();
+    const srchText = (appliedFilters.plcyFnncSrchKwdCn || '').trim();
+    if (srchText) {
+      params.set('srchText', srchText);
+    }
+    const reSrchText = new URLSearchParams(window.location.search).get('reSrchText')?.trim();
+    if (reSrchText) {
+      params.set('reSrchText', reSrchText);
+    }
+    return params.toString();
+  };
+
+  const navigateToDetail = (goodsSn) => {
+    const queryString = buildDetailSearchQuery();
+    navigate(queryString ? `${goodsSn}?${queryString}` : `${goodsSn}`);
+  };
+
   return (
     <>
       <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />
@@ -724,7 +742,7 @@ const UI_USR_L_030 = () => {
                     <span className="krds-btn-tag">노출할 상품이 없습니다.</span>
                   ) : (
                     popularItems.map((item) => (
-                      <button type="button" key={`popular-${item.plcyFnncGdsSn}`} className="krds-btn-tag" onClick={() => navigate(`${item.plcyFnncGdsSn}`)}>
+                      <button type="button" key={`popular-${item.plcyFnncGdsSn}`} className="krds-btn-tag" onClick={() => navigateToDetail(item.plcyFnncGdsSn)}>
                         #{item.plcyFnncGdsNm}
                       </button>
                     ))
@@ -798,7 +816,7 @@ const UI_USR_L_030 = () => {
                           </div>
                         </div>
                         <div className="card-body">
-                          <a href="#" className="c-text" onClick={(e) => { e.preventDefault(); navigate(`${item.plcyFnncGdsSn}`); }}>
+                          <a href="#" className="c-text" onClick={(e) => { e.preventDefault(); navigateToDetail(item.plcyFnncGdsSn); }}>
                             <p className="c-tit visited sml no-icon"><span className="span">{item.plcyFnncGdsNm}</span></p>
                             <p className="c-txt onellipsis-2">{asPlainText(item.plcyFnncGdsPrpsCn)}</p>
                             <p className="on-list-btm">

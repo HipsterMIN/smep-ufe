@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import SideNavigation from '../components/ui/SideNavigation';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
@@ -294,6 +294,7 @@ const getTypeConfig = (detail, formatCode) => {
 const UI_USR_R_031 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const { plcyFnncNo } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -329,14 +330,27 @@ const UI_USR_R_031 = () => {
 
   useEffect(() => {
     setLoading(true);
-    apiClient.get(`/api/v1/finance-policy/${plcyFnncNo}`)
+    const detailParams = new URLSearchParams(location.search);
+    const srchText = detailParams.get('srchText')?.trim();
+    const reSrchText = detailParams.get('reSrchText')?.trim();
+    const queryParams = new URLSearchParams();
+    if (srchText) {
+      queryParams.set('srchText', srchText);
+    }
+    if (reSrchText) {
+      queryParams.set('reSrchText', reSrchText);
+    }
+    const detailUrl = queryParams.toString()
+      ? `/api/v1/finance-policy/${plcyFnncNo}?${queryParams.toString()}`
+      : `/api/v1/finance-policy/${plcyFnncNo}`;
+    apiClient.get(detailUrl)
       .then((response) => setDetail(unwrapResponse(response)))
       .catch((error) => {
         console.error('정책금융 상세 조회 실패:', error);
         setDetail(null);
       })
       .finally(() => setLoading(false));
-  }, [plcyFnncNo]);
+  }, [plcyFnncNo, location.search]);
 
   const formatCode = useMemo(() => createCodeFormatter(filterOptions, industryGroups), [filterOptions, industryGroups]);
   const typeConfig = useMemo(() => getTypeConfig(detail, formatCode), [detail, formatCode]);
@@ -349,6 +363,21 @@ const UI_USR_R_031 = () => {
   const toggleShadow = (key) => {
     setExpandedRows((prev) => ({ ...prev, [key]: !prev[key] }));
     shadowRefs.current[key]?.classList.toggle('on');
+  };
+
+  const trackInquiry = (inqireTy) => {
+    if (!plcyFnncNo || !inqireTy) {
+      return;
+    }
+    const params = new URLSearchParams({
+      plcyFnncGdsSn: String(plcyFnncNo),
+      inqireTy: String(inqireTy),
+    });
+    apiClient
+      .post(`/api/v1/finance-policy/inquiry?${params.toString()}`, null, { keepalive: true })
+      .catch((error) => {
+        console.error('Failed to track policy-finance inquiry history:', error);
+      });
   };
 
   if (loading) return <div style={{ padding: 40 }}>로딩 중입니다.</div>;
@@ -400,19 +429,37 @@ const UI_USR_R_031 = () => {
             </div>
             <div className="ac">
               {detail.plcyFnncDtlUrlAddr && (
-                <a href={detail.plcyFnncDtlUrlAddr} target="_blank" rel="noreferrer" className="krds-btn secondary large krds-btn-shadow">
+                <a
+                  href={detail.plcyFnncDtlUrlAddr}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="krds-btn secondary large krds-btn-shadow"
+                  onClick={() => trackInquiry('3')}
+                >
                   <i className="svg-icon ico-information"></i>
                   상세정보
                 </a>
               )}
               {detail.plcyFnncInqplUrlAddr && (
-                <a href={detail.plcyFnncInqplUrlAddr} target="_blank" rel="noreferrer" className="krds-btn secondary large krds-btn-shadow">
+                <a
+                  href={detail.plcyFnncInqplUrlAddr}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="krds-btn secondary large krds-btn-shadow"
+                  onClick={() => trackInquiry('2')}
+                >
                   <i className="svg-icon ico-faq"></i>
                   문의하기
                 </a>
               )}
               {showApplyButton && detail.plcyFnncAplyUrlAddr && (
-                <a href={detail.plcyFnncAplyUrlAddr} target="_blank" rel="noreferrer" className="krds-btn primary large krds-btn-shadow">
+                <a
+                  href={detail.plcyFnncAplyUrlAddr}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="krds-btn primary large krds-btn-shadow"
+                  onClick={() => trackInquiry('4')}
+                >
                   신청하기
                 </a>
               )}
@@ -484,19 +531,37 @@ const UI_USR_R_031 = () => {
           </div>
           <div>
             {detail.plcyFnncInqplUrlAddr && (
-              <a href={detail.plcyFnncInqplUrlAddr} target="_blank" rel="noreferrer" className="krds-btn tertiary xlarge">
+              <a
+                href={detail.plcyFnncInqplUrlAddr}
+                target="_blank"
+                rel="noreferrer"
+                className="krds-btn tertiary xlarge"
+                onClick={() => trackInquiry('2')}
+              >
                 <i className="svg-icon ico-faq"></i>
                 문의하기
               </a>
             )}
             {detail.plcyFnncDtlUrlAddr && (
-              <a href={detail.plcyFnncDtlUrlAddr} target="_blank" rel="noreferrer" className="krds-btn tertiary xlarge">
+              <a
+                href={detail.plcyFnncDtlUrlAddr}
+                target="_blank"
+                rel="noreferrer"
+                className="krds-btn tertiary xlarge"
+                onClick={() => trackInquiry('3')}
+              >
                 상세정보
                 <i className="svg-icon ico-link"></i>
               </a>
             )}
             {showApplyButton && detail.plcyFnncAplyUrlAddr && (
-              <a href={detail.plcyFnncAplyUrlAddr} target="_blank" rel="noreferrer" className="krds-btn primary xlarge">
+              <a
+                href={detail.plcyFnncAplyUrlAddr}
+                target="_blank"
+                rel="noreferrer"
+                className="krds-btn primary xlarge"
+                onClick={() => trackInquiry('4')}
+              >
                 신청하기
                 <i className="svg-icon ico-angle right"></i>
               </a>
