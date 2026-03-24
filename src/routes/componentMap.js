@@ -40,8 +40,8 @@ const UI_USR_R_232 = lazy(() => import('@pages/data-open/UI-USR-R-232.jsx'));
 const UI_USR_W_231 = lazy(() => import('@pages/data-open/UI-USR-W-231.jsx'));
 const BoardResolver = lazy(() => import('@pages/board/BoardResolver.jsx'));
 const BoardPostResolver = lazy(() => import('@pages/board/BoardPostResolver.jsx'));
+const BoardWriteResolver = lazy(() => import('@pages/board/BoardWriteResolver.jsx'));
 const UI_USR_L_070 = lazy(() => import('@pages/policy-info/UI_USR_L_070.jsx')); // image/video 일때 포멧
-const UI_USR_W_332 = lazy(() => import('@pages/customer-support/UI-USR-W-332.jsx'));
 const UI_USR_R_340 = lazy(() => import('@pages/customer-support/UI-USR-R-340.jsx'));
 const UI_USR_R_341 = lazy(() => import('@pages/customer-support/UI-USR-R-341.jsx'));
 const PlatformIntro = lazy(() => import('@pages/customer-support/PlatformIntro.jsx'));
@@ -404,7 +404,7 @@ export const componentMap = {
     children: [
       { path: ':id', component: BoardPostResolver }, // Q&A 상세 (게시물 상세 공통 사용)
       /*{ path: ':id', component: UI_USR_R_331 }, // Q&A 상세*/
-      { path: 'save', component: UI_USR_W_332 }, // Q&A 등록/수정
+      { path: 'save', component: BoardWriteResolver }, // Q&A 등록/수정
     ],
   },
 

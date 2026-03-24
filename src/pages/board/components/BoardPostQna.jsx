@@ -5,6 +5,22 @@ import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 
+const EMPTY_HTML_PATTERNS = new Set([
+  '<p style="text-align: left;"></p>',
+  '<p><br></p>',
+  '<p>&nbsp;</p>',
+]);
+
+const isMeaningfulHtml = (html) => {
+  if (!html || typeof html !== 'string') return false;
+
+  const normalized = html.replace(/\s+/g, ' ').trim().toLowerCase();
+  if (!normalized || EMPTY_HTML_PATTERNS.has(normalized)) return false;
+
+  const textOnly = normalized.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim();
+  return textOnly.length > 0;
+};
+
 const formatDate = (dateString) => {
   if (!dateString) return '-';
 
@@ -71,6 +87,17 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
   const categoryName = useMemo(() => postDetail?.ctgryNm || '-', [postDetail]);
   const regDate = useMemo(() => formatDate(postDetail?.pstRegDt ?? postDetail?.regDt), [postDetail]);
   const writerName = useMemo(() => postDetail?.pstRgtrNm || '-', [postDetail]);
+  const answerHtml = useMemo(() => {
+    const rawAnswer = String(postDetail?.pstAnsCn ?? '').trim();
+    if (!isMeaningfulHtml(rawAnswer)) return '';
+    return rawAnswer;
+  }, [postDetail]);
+  const hasAnswer = useMemo(() => answerHtml.length > 0, [answerHtml]);
+  const answerManagerName = useMemo(() => {
+    const rawManagerName = postDetail?.pstMdfrNm ?? postDetail?.pstRgtrNm;
+    const normalizedManagerName = String(rawManagerName ?? '').trim();
+    return normalizedManagerName || '-';
+  }, [postDetail]);
 
   const contentHtml = useMemo(() => {
     if (loading) return '게시물 상세 정보를 불러오는 중입니다.';
@@ -105,7 +132,7 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
             <span>{regDate}</span>
           </li>
           <li>
-            <span>{writerName}</span>
+            <span>{`작성자 ${writerName}`}</span>
           </li>
         </ul>
 
@@ -119,6 +146,15 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
 
         {/* 하단 버튼 */}
         <div className="onboard-btm-btngroup">
+          {hasAnswer && (
+            <div className="onanswerbox">
+              <dl>
+                <dt>담당자</dt>
+                <dd className="usrNm">{answerManagerName}</dd>
+              </dl>
+              <p className="answer-txt" dangerouslySetInnerHTML={{ __html: answerHtml }} />
+            </div>
+          )}
           <div>
             <button type="button" className="krds-btn tertiary xlarge" onClick={moveToList}>
               목록

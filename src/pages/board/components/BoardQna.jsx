@@ -6,6 +6,22 @@ import Pagination from '@components/ui/Pagination';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 
+const EMPTY_HTML_PATTERNS = new Set([
+  '<p style="text-align: left;"></p>',
+  '<p><br></p>',
+  '<p>&nbsp;</p>',
+]);
+
+const isMeaningfulHtml = (html) => {
+  if (!html || typeof html !== 'string') return false;
+
+  const normalized = html.replace(/\s+/g, ' ').trim().toLowerCase();
+  if (!normalized || EMPTY_HTML_PATTERNS.has(normalized)) return false;
+
+  const textOnly = normalized.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim();
+  return textOnly.length > 0;
+};
+
 const formatDate = (dateString) => {
   if (!dateString) return '-';
 
@@ -20,7 +36,7 @@ const formatDate = (dateString) => {
 };
 
 const getAnswerStatus = (post) => {
-  if (post?.pstAnsCn && String(post.pstAnsCn).trim()) {
+  if (isMeaningfulHtml(String(post?.pstAnsCn ?? ''))) {
     return '답변완료';
   }
 
