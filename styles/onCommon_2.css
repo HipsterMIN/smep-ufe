@@ -1504,10 +1504,18 @@ button.aichatButton.active {
   .on-search-summary .summary-result strong {
     font-size: 30px;
   }
-  .search-top-box .form-row-box .krds-form-select,
-  .datepicker-group .react-datepicker-wrapper {
+  .search-top-box .form-row-box .krds-form-select {
     width: 184px;
   }
+  .datepicker-group .ondatepicker {
+    flex-basis: 100%;
+  }
+  .datepicker-group .ondatepicker:first-of-type {
+    flex-basis: 94%;
+  }
+   .datepicker-group .react-datepicker-wrapper {
+    width: 100%;
+   }
   .certify-cont-box {
     flex-direction: column;
     gap: 40px;
