@@ -328,7 +328,7 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
                               <p>
                                 <span className="sr-only">조회수</span>
                                 <i className="ml-auto svg-icon ico-pw-visible-on"></i>
-                                <span>{item?.inqCnt ?? '-'}</span>
+                                <span>{item?.inqCnt ?? 0}</span>
                               </p>
                             </div>
                           </a>
