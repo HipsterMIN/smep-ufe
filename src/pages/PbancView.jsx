@@ -171,16 +171,6 @@ const PbancView = () => {
     );
   };
 
-  const renderHtmlRow = (label, html) => {
-    if (!isMeaningfulHtml(html)) return null;
-    return (
-      <React.Fragment key={label}>
-        <dt>{label}</dt>
-        <dd dangerouslySetInnerHTML={{ __html: html }} />
-      </React.Fragment>
-    );
-  };
-
   const renderExpandableTextRow = (label, value) => {
     if (!value) return null;
 

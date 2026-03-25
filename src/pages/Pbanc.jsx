@@ -29,6 +29,8 @@ const Pbanc = () => {
   const [sortType, setSortType] = useState(DEFAULT_SORT);
 
   const schFormWrapRef = useRef(null);
+  const latestRequestIdRef = useRef(0);
+  const skipInitialSortEffectRef = useRef(true);
   const bizPbancTypeCd = currentMenu?.menuId === 'M_PIIO_00091' ? 'HSSPLY' : 'BIZPBN';
 
   const fieldLabelMap = useMemo(
@@ -60,7 +62,12 @@ const Pbanc = () => {
 
   const search = useCallback(
     async (pageParam = 1) => {
+      const requestId = ++latestRequestIdRef.current;
       const data = await apiClient.get(`/api/v1/pbanc?${buildParams(pageParam)}`);
+      if (requestId !== latestRequestIdRef.current) {
+        return;
+      }
+
       const pageData = data?.data || data;
       setItems(pageData.content || []);
       setTotalPages(pageData.totalPages || 0);
@@ -107,6 +114,11 @@ const Pbanc = () => {
   }, []);
 
   useEffect(() => {
+    if (skipInitialSortEffectRef.current) {
+      skipInitialSortEffectRef.current = false;
+      return;
+    }
+
     search(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size, sortType]);
