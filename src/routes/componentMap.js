@@ -29,7 +29,7 @@ const UI_USR_L_140 = lazy(() => import('@pages/more-service/UI_USR_L_140.jsx'));
 const EntrSpt = lazy(() => import('@pages/more-service/EntrSpt.jsx'));
 const EntrSptDetail = lazy(() => import('@pages/more-service/EntrSptDetail.jsx'));
 const RelatedSystems = lazy(() => import('@pages/more-service/RelatedSystems.jsx'));
-const UI_USR_L_170 = lazy(() => import('@pages/policy-info/UI_USR_L_170.jsx'));
+const UI_USR_L_170 = lazy(() => import('@pages/more-service/UI_USR_L_170.jsx'));
 const UI_USR_L_210 = lazy(() => import('@pages/data-open/UI-USR-L-210.jsx'));
 const UI_USR_L_220 = lazy(() => import('@pages/data-open/UI-USR-L-220.jsx'));
 const UI_USR_L_230 = lazy(() => import('@pages/data-open/UI-USR-L-230.jsx'));
