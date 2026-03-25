@@ -145,7 +145,7 @@ const UI_USR_L_040 = () => {
                 {item.elpblYn === 'Y' && <span className="krds-badge bg-light-primary">전자증명</span>}
               </div>
               <div className="card-body">
-                <a href="#" className="c-text">
+                <a className="c-text" style={{ cursor: 'pointer' }}>
                   <p className="c-tit no-icon">
                     <span className="span onellipsis-2">{item.prdocTtl}</span>
                   </p>
@@ -265,7 +265,24 @@ const UI_USR_L_040 = () => {
                     </td>
                     <td className="ac"><span>{shortenInstName(item.issuInstNm)}</span></td>
                     <td className="ac"><span>{shortenInstName(item.jrsdInstNm)}</span></td>
-                    <td className="ac"><a className="krds-btn small primary" onClick={() => goToDetail(item.prdocCd)}>발급</a>
+                    <td className="ac">
+                      {item.otsdSiteLnkgYn === 'Y' ? (
+                        <a
+                          className="krds-btn small secondary"
+                          href={item.otsdSiteUrlAddr}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                              발급안내
+                        </a>
+                      ) : (
+                        <a
+                          className="krds-btn small primary"
+                          onClick={() => goToDetail(item.prdocCd)}
+                        >
+                              발급
+                        </a>
+                      )}
                     </td>
                   </tr>
                 ))

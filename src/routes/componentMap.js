@@ -12,6 +12,8 @@ const SprtBizView = lazy(() => import('@pages/SprtBizView.jsx'));
 const UI_USR_L_030 = lazy(() => import('@pages/UI_USR_L_030.jsx'));
 const UI_USR_L_040 = lazy(() => import('@pages/certificate/UI_USR_L_040.jsx'));
 const UI_USR_R_041 = lazy(() => import('@pages/certificate/UI_USR_R_041.jsx'));
+const UI_USR_P_042 = lazy(() => import('@pages/certificate/UI_USR_P_042.jsx'));
+const CbzIssue = lazy(() => import('@pages/certificate/issue-extra/CbzIssue.jsx'));
 const UI_USR_R_031 = lazy(() => import('@pages/UI_USR_R_031.jsx'));
 const UI_USR_R_480 = lazy(() => import('@pages/my-business/UI_USR_R_480.jsx'));
 const UI_USR_L_510 = lazy(() => import('@pages/my-business/UI_USR_L_510.jsx'));
@@ -193,6 +195,14 @@ export const componentMap = {
       {
         path: ':prdocCd',  // 상세 페이지 라우트 추가 /req/crtf/UI_USR_L_040/ABC123
         component: UI_USR_R_041,
+      },
+      {
+        path: ':prdocCd/apply',
+        component: UI_USR_P_042,
+      },
+      {
+        path: 'Y109/cbz-issue',
+        component: CbzIssue,
       },
     ],
   },
