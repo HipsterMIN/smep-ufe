@@ -145,7 +145,7 @@ const UI_USR_L_040 = () => {
                 {item.elpblYn === 'Y' && <span className="krds-badge bg-light-primary">전자증명</span>}
               </div>
               <div className="card-body">
-                <a href="#" className="c-text">
+                <a className="c-text" style={{ cursor: 'pointer' }}>
                   <p className="c-tit no-icon">
                     <span className="span onellipsis-2">{item.prdocTtl}</span>
                   </p>

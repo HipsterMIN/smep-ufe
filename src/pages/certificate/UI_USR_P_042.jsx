@@ -21,7 +21,7 @@ const UI_USR_P_042 = () => {
   const sidebarData = getSideNavigationData();
   const depth1Menu  = getDepth1Parent();
 
-  const brno = '5598803642'; // TODO: 실제 로그인 사용자 사업자번호로 교체
+  const brno = '1378626719'; // TODO: 실제 로그인 사용자 사업자번호로 교체
 
   const goBack = () => navigate(-1);
 
@@ -38,17 +38,8 @@ const UI_USR_P_042 = () => {
       });
       console.log('증명서 발급 완료 - 번호:', prdocIssuAplyNo);
 
-      const { data } = await axios.post('http://localhost:8080/epage/report/certificate', null, {
-        params: { prdocCd, prdocIssuAplyNo },
-      });
-
-      console.log('reportJson:', data.reportJson); // 여기 추가
-      console.log('reportKey:', data.reportKey);
-
       window.open(
-        'http://localhost:8080/viewer.html' +
-          `?reportKey=${data.reportKey}` +
-          `&reportJson=${encodeURIComponent(data.reportJson)}`,
+        `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
         '_blank',
       );
     } catch (e) {

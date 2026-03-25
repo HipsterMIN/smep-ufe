@@ -75,14 +75,14 @@ const UI_USR_R_041 = () => {
         '/api/v1/certificate/eligibility',
         {
           prdocCd,
-          bizNo: '5598803642', // TODO: 로그인 구현 후 Zustand store bizno로 교체
+          bizNo: '1378626719', // TODO: 로그인 구현 후 Zustand store bizno로 교체
         },
       );
 
       // 24시간 내 중복 발급 이력 확인
       if (result.data.isDuplicate) {
-        // setIsDuplicatePopupOpen(true);
-        // return;
+        setIsDuplicatePopupOpen(true);
+        return;
       }
 
       if (!result.data.eligible) {
@@ -91,8 +91,8 @@ const UI_USR_R_041 = () => {
           linkedSystemName: result.data.linkedSystemName,
           linkedSystemUrl: result.data.linkedSystemUrl,
         });
-        // setIsIneligiblePopupOpen(true);
-        // return;
+        setIsIneligiblePopupOpen(true);
+        return;
       }
     } catch (error) {
       console.error('발급 가능 여부 확인 실패:', error);
@@ -100,23 +100,23 @@ const UI_USR_R_041 = () => {
       return;
     }
 
-    if (prdocCd === 'Y109'){
-      navigate(`${getFullPath('M_PIIO_00078')}/Y109/cbz-issue`, {
-        state: {
-          prdocCd,
-          prdocNm: data.prdocTtl,
-          prdocIssuGdCn: data.prdocIssuGdCn,
-        },
-      });
-    } else {
-      navigate(`${getFullPath('M_PIIO_00078')}/${prdocCd}/apply`, {
-        state: {
-          prdocCd,
-          prdocNm: data.prdocTtl,
-          prdocIssuGdCn: data.prdocIssuGdCn,
-        },
-      });
-    }
+    // if (prdocCd === 'Y109'){
+    //   navigate(`${getFullPath('M_PIIO_00078')}/Y109/cbz-issue`, {
+    //     state: {
+    //       prdocCd,
+    //       prdocNm: data.prdocTtl,
+    //       prdocIssuGdCn: data.prdocIssuGdCn,
+    //     },
+    //   });
+    // } else {
+    navigate(`${getFullPath('M_PIIO_00078')}/${prdocCd}/apply`, {
+      state: {
+        prdocCd,
+        prdocNm: data.prdocTtl,
+        prdocIssuGdCn: data.prdocIssuGdCn,
+      },
+    });
+    //}
   };
 
   if (loading) return <div>로딩 중...</div>;
