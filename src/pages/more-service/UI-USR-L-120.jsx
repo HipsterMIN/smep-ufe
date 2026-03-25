@@ -1,15 +1,99 @@
-import React from 'react';
-import SideNavigation from '@components/ui/SideNavigation';
-import Breadcrumb from '@components/ui/Breadcrumb';
-import Pagination from '@components/ui/Pagination';
-import { useUserMenu } from '@context/UserMenuContext';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const UI_USR_L_190 = () => {
+import SideNavigation from '@components/ui/SideNavigation.jsx';
+import Breadcrumb from '@components/ui/Breadcrumb.jsx';
+import Pagination from '@components/ui/Pagination.jsx';
+import { api as apiClient } from '@lib/apiClient.js';
+import { useUserMenu } from '@context/UserMenuContext.jsx';
+
+const UI_USR_L_120 = () => {
+  const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
-  // ✅ 사이드바 데이터 계산
-  const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
-  const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+  const [totalElements, setTotalElements] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [certifications, setCertifications] = useState([]);
+  const [pageSize, setPageSize] = useState(20);
+  const sidebarData = getSideNavigationData();
+  const depth1Menu = getDepth1Parent();
+
+  const handlePageSizeChange = (event) => {
+    setPageSize(Number(event.target.value));
+    setCurrentPage(0);
+  };
+
+  // 입력용 (화면 표시용)
+  const [searchType, setSearchType] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
+
+  // 전송용 (API 파라미터용)
+  const [appliedSearchType, setAppliedSearchType] = useState('');
+  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: currentPage,
+          size: pageSize,
+        });
+
+        // 전송용 state 사용
+        if (appliedSearchKeyword && appliedSearchKeyword.trim()) {
+          params.append('searchKeyword', appliedSearchKeyword);
+          params.append('searchType', appliedSearchType);
+        }
+
+        const response = await apiClient.get(
+          `/api/v1/product/certification?${params.toString()}`,
+        );
+
+        const data = response.data;
+
+        setCertifications(data.content || []);
+        setTotalElements(data.totalElements || 0);
+        setTotalPages(data.totalPages || 0);
+      } catch (error) {
+        console.error('조회 실패:', error);
+        setCertifications([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [currentPage, pageSize, appliedSearchType, appliedSearchKeyword]);
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (page) => {
+    setCurrentPage(page - 1);
+  };
+
+  // 검색 타입 변경 핸들러 (입력용만 업데이트)
+  const handleSearchTypeChange = (e) => {
+    setSearchType(e.target.value);
+  };
+
+  // 검색어 입력 핸들러 (입력용만 업데이트)
+  const handleSearchKeywordChange = (e) => {
+    setSearchKeyword(e.target.value);
+  };
+
+  // 검색 버튼 클릭 핸들러 (입력용 → 전송용)
+  const handleSearch = () => {
+    setAppliedSearchType(searchType);
+    setAppliedSearchKeyword(searchKeyword);
+    setCurrentPage(0);
+  };
+
+  // 상세페이지 핸들러
+  const goToDetail = (certSystmSn) => {
+    navigate(`${certSystmSn}`);
+  };
 
   return (
     <>
@@ -23,15 +107,33 @@ const UI_USR_L_190 = () => {
           <h2 className="h-tit">품목별 법정의무 인증제도</h2>
         </div>
 
+        {/* 검색 영역 */}
         <div className="search-top-box">
           <div className="sch-form-wrap">
-            <select className="krds-form-select">
-              <option value="">품목명</option>
-              <option value="">인증제도명</option>
+            <select
+              className="krds-form-select"
+              value={searchType}
+              onChange={handleSearchTypeChange}
+            >
+              <option value="">전체</option>
+              <option value="certSystmNm">인증제도명</option>
+              <option value="certSystmItemNm">품목명</option>
             </select>
             <div className="sch-input">
-              <input type="text" className="krds-input" placeholder="검색어를 입력해주세요." title="검색어 입력" />
-              <button type="button" className="krds-btn medium icon ico-search" >
+              <input
+                type="text"
+                className="krds-input"
+                placeholder="검색어를 입력해주세요."
+                title="검색어 입력"
+                value={searchKeyword}
+                onChange={handleSearchKeywordChange}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <button
+                type="button"
+                className="krds-btn medium icon ico-search"
+                onClick={handleSearch}
+              >
                 <span className="sr-only">검색</span>
                 <i className="svg-icon ico-sch"></i>
               </button>
@@ -39,27 +141,24 @@ const UI_USR_L_190 = () => {
           </div>
         </div>
 
+        {/* 정렬 영역 */}
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
-            <li>
-              <button type="button" className="krds-btn medium text">
-                <i className="svg-icon ico-excel"></i> 다운로드
-              </button>
-            </li>
+            <li>검색 결과 <span className="point">{totalElements}</span>개</li>
           </ul>
           <ul className="sch-sort">
             <li>
-              <strong className="sort-label"><label for="sort">정렬기준</label></strong>
-              <div className="w-sort-btn">
-                <button type="button" className="active">등록일순<span className="sr-only">선택됨</span></button>
-                <button type="button">마감일순</button>
-              </div>
-              <div className="m-sort-btn">
-                <select className="krds-form-select-sort" id="sort">
-                  <option>등록일순</option>
-                  <option>마감일수</option>
-                </select>
-              </div>
+              <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
+              <select
+                className="krds-form-select-sort"
+                id="search_result_count"
+                value={pageSize}
+                onChange={handlePageSizeChange}
+              >
+                <option value={20}>20개</option>
+                <option value={30}>30개</option>
+                <option value={40}>40개</option>
+              </select>
             </li>
           </ul>
         </div>
@@ -67,7 +166,7 @@ const UI_USR_L_190 = () => {
         {/* table [S] */}
         <div className="krds-table-wrap">
           <table className="tbl col data">
-            <caption>품목별 법정의무 인증제도 표. 번호, 분야, 인증제도명, 대상 품목수, 관련법률 소관부처 조회수 정보가 제공됨.</caption>
+            <caption>품목별 법정의무 인증제도 표. 번호, 분야, 인증제도명, 대상 품목수, 관련법률, 소관부처, 조회수 정보가 제공됨.</caption>
             <colgroup>
               <col style={{ width: '5%' }}/>
               <col style={{ width: '5%' }}/>
@@ -89,33 +188,59 @@ const UI_USR_L_190 = () => {
               </tr>
             </thead>
             <tbody>
-              {Array.from({ length: 10 }).map((_, index) => (
+              {loading ? (
                 <tr>
-                  <th scope="row" className="ac">
-                    <span>123</span>
-                  </th>
-                  <td className="ac"><span>안전</span></td>
-                  <td>
-                    <a href="#">
-                      <span>가스용품검사</span>
-                    </a>
-                  </td>
-                  <td className="ac"><span>2</span></td>
-                  <td className="ac"><span>액화석유가스의 안전관리 및 사업법</span></td>
-                  <td className="ac"><span>산업통상부</span></td>
-                  <td className="ac"><span>87</span></td>
+                  <td colSpan="7" className="ac">로딩 중...</td>
                 </tr>
-              ))}
+              ) : certifications.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="ac">조회된 데이터가 없습니다.</td>
+                </tr>
+              ) : (
+                certifications.map((item, index) => (
+                  <tr key={item.certSystmSn || index}>
+                    <th scope="row" className="ac">
+                      <span>{currentPage * pageSize + index + 1}</span>
+                    </th>
+                    <td className="ac">
+                      <span>{item.certSystmFldNm || '-'}</span>
+                    </td>
+                    <td className="ac">
+                      <a href="#" onClick={(e) => {
+                        e.preventDefault();
+                        goToDetail(item.certSystmSn);
+                      }}>
+                        <span>{item.certSystmNm}</span>
+                      </a>
+                    </td>
+                    <td className="ac">
+                      <span>{item.itemCnt || 0}</span>
+                    </td>
+                    <td className="ac">
+                      <span>{item.lglBssCn || '-'}</span>
+                    </td>
+                    <td className="ac">
+                      <span>{item.tkcgMaoNm || '-'}</span>
+                    </td>
+                    <td className="ac">
+                      <span>{item.tinqCnt || 0}</span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
+
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage + 1}
+            onPageChange={handlePageChange}
+          />
         </div>
         {/* table [E] */}
-
-        <Pagination/>
-
-      </div> 
+      </div>
     </>
   );
 };
 
-export default UI_USR_L_190;
+export default UI_USR_L_120;

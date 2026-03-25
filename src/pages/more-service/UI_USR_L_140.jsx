@@ -13,6 +13,8 @@ const TAB_CLSF_CD = {
   2: 'SC04',
 };
 
+const TAB_COL_COUNT = { 0: 4, 1: 3, 2: 4 };
+
 const UI_USR_L_140 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const tabData = useRef(['소재부품장비 전문기업', '뿌리기술기업', '전문연구사업자']);
@@ -145,6 +147,177 @@ const UI_USR_L_140 = () => {
 
   const isSigunguDisabled = !sdoCd;
 
+  // ────────────────────────────────────────────
+  // 탭별 caption 텍스트
+  const captionMap = {
+    0: '번호, 기업명, 업종명, 만료일자 정보가 제공됨.',
+    1: '번호, 기업명, 핵심기술 정보가 제공됨.',
+    2: '번호, 기업명, 홈페이지, 위치 정보가 제공됨.',
+  };
+
+  // 탭별 thead
+  const renderThead = () => {
+    if (activeTabIndex === 0) {
+      return (
+        <>
+          <colgroup>
+            <col style={{ width: '70px' }} />
+            <col style={{ width: '200px' }} />
+            <col />
+            <col style={{ width: '160px' }} />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col" className="ac">번호</th>
+              <th scope="col" className="ac">기업명</th>
+              <th scope="col" className="ac">업종명</th>
+              <th scope="col" className="ac">만료일자</th>
+            </tr>
+          </thead>
+        </>
+      );
+    }
+    if (activeTabIndex === 1) {
+      return (
+        <>
+          <colgroup>
+            <col style={{ width: '70px' }} />
+            <col style={{ width: '200px' }} />
+            <col />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col" className="ac">번호</th>
+              <th scope="col" className="ac">기업명</th>
+              <th scope="col" className="ac">핵심기술</th>
+            </tr>
+          </thead>
+        </>
+      );
+    }
+    // activeTabIndex === 2
+    return (
+      <>
+        <colgroup>
+          <col style={{ width: '70px' }}/>
+          {/* 번호 */}
+          <col/>
+          {/* 기업명 - 나머지 전부 */}
+          <col style={{ width: '120px' }}/>
+          {/* 홈페이지 */}
+          <col style={{ width: '100px' }}/>
+          {/* 위치 */}
+        </colgroup>
+        <thead>
+          <tr>
+            <th scope="col" className="ac">번호</th>
+            <th scope="col" className="ac">기업명</th>
+            <th scope="col" className="ac">홈페이지</th>
+            <th scope="col" className="ac">위치</th>
+          </tr>
+        </thead>
+      </>
+    );
+  };
+
+  // 탭별 tbody 행
+  const renderRows = () => {
+    const colCount = TAB_COL_COUNT[activeTabIndex];
+
+    if (loading) {
+      return <tr>
+        <td colSpan={colCount} className="ac">로딩 중...</td>
+      </tr>;
+    }
+    if (list.length === 0) {
+      return <tr>
+        <td colSpan={colCount} className="ac">조회된 데이터가 없습니다.</td>
+      </tr>;
+    }
+
+    return list.map((item, index) => {
+      const no = totalCount - (currentPage * 10) - index;
+      const noCell = (
+        <th scope="row" className="ac">
+          <span>{no}</span>
+        </th>
+      );
+      const entNmCell = (
+        <td>
+          <button
+            type="button"
+            className="onellipsis-1 on-colorblue2"
+            onClick={() => handleRowClick(item)}
+          >
+            {item.entNm}
+          </button>
+        </td>
+      );
+
+      if (activeTabIndex === 0) {
+        return (
+          <tr key={item.cstmTelgmEntEntCd}>
+            {noCell}
+            {entNmCell}
+            <td><span>{item.cstmTelgmEntFldNm || '-'}</span></td>
+            <td className="ac"><span>{formatDate(item.expryYmd)}</span></td>
+          </tr>
+        );
+      }
+
+      if (activeTabIndex === 1) {
+        return (
+          <tr key={item.cstmTelgmEntEntCd}>
+            {noCell}
+            {entNmCell}
+            <td><span>{item.fdtnlTechNm || '-'}</span></td>
+          </tr>
+        );
+      }
+
+      // activeTabIndex === 2
+      return (
+        <tr key={item.cstmTelgmEntEntCd}>
+          {noCell}
+          {entNmCell}
+          <td className="ac">
+            {item.urlAddr ? (
+              <button
+                type="button"
+                className="krds-btn tertiary small"
+                onClick={() => {
+                  const url = item.urlAddr.startsWith('http://') || item.urlAddr.startsWith('https://')
+                    ? item.urlAddr
+                    : `https://${item.urlAddr}`;
+                  window.open(url, '_blank', 'noopener,noreferrer');
+                }}
+                title="새 창 열림"
+              >
+                    바로가기 <i className="svg-icon ico-angle right"></i>
+              </button>
+            ) : '-'}
+          </td>
+          <td className="ac">
+            {item.bplcBscAddr ? (
+              <button
+                type="button"
+                className="krds-btn tertiary small"
+                aria-label="지도보기"
+                onClick={() => {
+                  const query = encodeURIComponent(item.bplcBscAddr);
+                  window.open(`https://map.naver.com/v5/search/${query}`, '_blank', 'noopener,noreferrer');
+                }}
+              >
+                <i className="svg-icon ico-location"></i>
+              </button>
+            ) : '-'}
+          </td>
+        </tr>
+      );
+    });
+  };
+  // ────────────────────────────────────────────
+
   const renderTable = () => (
     <>
       <div className="search-top-box mt-40">
@@ -162,7 +335,6 @@ const UI_USR_L_140 = () => {
               </option>
             ))}
           </select>
-
 
           {/* 시군구 선택 */}
           <select
@@ -221,49 +393,16 @@ const UI_USR_L_140 = () => {
 
       <div className="krds-table-wrap">
         <table className="tbl col data">
-          <caption>{tabData.current[activeTabIndex]} 표. 번호, 기업명, 업종명, 만료일자 정보가 제공됨.</caption>
-          <colgroup>
-            <col style={{ width: '70px' }} />
-            <col style={{ width: '200px' }} />
-            <col />
-            <col style={{ width: '160px' }} />
-          </colgroup>
-          <thead>
-            <tr>
-              <th scope="col" className="ac">번호</th>
-              <th scope="col" className="ac">기업명</th>
-              <th scope="col" className="ac">업종명</th>
-              <th scope="col" className="ac">만료일자</th>
-            </tr>
-          </thead>
+          <caption>
+            {tabData.current[activeTabIndex]} 표. {captionMap[activeTabIndex]}
+          </caption>
+          {renderThead()}
           <tbody>
-            {loading ? (
-              <tr><td colSpan={4} className="ac">로딩 중...</td></tr>
-            ) : list.length === 0 ? (
-              <tr><td colSpan={4} className="ac">조회된 데이터가 없습니다.</td></tr>
-            ) : (
-              list.map((item, index) => (
-                <tr key={item.cstmTelgmEntEntCd}>
-                  <th scope="row" className="ac">
-                    <span>{totalCount - (currentPage * 10) - index}</span>
-                  </th>
-                  <td>
-                    <button
-                      type="button"
-                      className="onellipsis-1 on-colorblue2"
-                      onClick={() => handleRowClick(item)}
-                    >
-                      {item.entNm}
-                    </button>
-                  </td>
-                  <td><span>{item.cstmTelgmEntFldNm || '-'}</span></td>
-                  <td className="ac"><span>{formatDate(item.expryYmd)}</span></td>
-                </tr>
-              ))
-            )}
+            {renderRows()}
           </tbody>
         </table>
       </div>
+
       <Pagination
         totalPages={totalPages}
         currentPage={currentPage + 1}
@@ -344,34 +483,130 @@ const UI_USR_L_140 = () => {
           {selectedItem && (
             <div className="detail-list-wrap type2">
               <div className="on-detail-list">
-                <dl>
-                  <dt className="w-100">업체명</dt>
-                  <dd><p>{selectedItem.entNm || '-'}</p></dd>
-                  <dt className="w-100">홈페이지</dt>
-                  <dd>
-                    {selectedItem.urlAddr ? (
-                      <a className="on-linktxt2" href={selectedItem.urlAddr} target="_blank" rel="noopener noreferrer" title="새 창 열림">
-                        {selectedItem.urlAddr}
-                      </a>
-                    ) : '-'}
-                  </dd>
-                </dl>
-                <dl>
-                  <dt className="w-100">신고업종</dt>
-                  <dd><p>{selectedItem.cstmTelgmEntFldNm || '-'}</p></dd>
-                  <dt className="w-100">대표자명</dt>
-                  <dd><p>{selectedItem.rprsvNm || '-'}</p></dd>
-                </dl>
-                <dl>
-                  <dt className="w-100">만료일자</dt>
-                  <dd><p>{formatDate(selectedItem.expryYmd)}</p></dd>
-                  <dt className="w-100">발급일자</dt>
-                  <dd><p>{formatDate(selectedItem.issuYmd)}</p></dd>
-                </dl>
-                <dl>
-                  <dt className="w-100">주소</dt>
-                  <dd><p>{selectedItem.bplcBscAddr || '-'}</p></dd>
-                </dl>
+
+                {/* ────────── 탭 0: 소재부품장비 전문기업 ────────── */}
+                {activeTabIndex === 0 && (
+                  <>
+                    <dl>
+                      <dt className="w-100">업체명</dt>
+                      <dd><p>{selectedItem.entNm || '-'}</p></dd>
+                      <dt className="w-100">홈페이지</dt>
+                      <dd>
+                        {selectedItem.urlAddr ? (
+                          <a
+                            className="on-linktxt2"
+                            href={
+                              selectedItem.urlAddr.startsWith('http://') || selectedItem.urlAddr.startsWith('https://')
+                                ? selectedItem.urlAddr
+                                : `https://${selectedItem.urlAddr}`
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="새 창 열림"
+                          >
+                            {selectedItem.urlAddr}
+                          </a>
+                        ) : '-'}
+                      </dd>
+                    </dl>
+                    <dl>
+                      <dt className="w-100">신고업종</dt>
+                      <dd><p>{selectedItem.cstmTelgmEntFldNm || '-'}</p></dd>
+                      <dt className="w-100">대표자명</dt>
+                      <dd><p>{selectedItem.rprsvNm || '-'}</p></dd>
+                    </dl>
+                    <dl>
+                      <dt className="w-100">만료일자</dt>
+                      <dd><p>{formatDate(selectedItem.expryYmd)}</p></dd>
+                      <dt className="w-100">발급일자</dt>
+                      <dd><p>{formatDate(selectedItem.issuYmd)}</p></dd>
+                    </dl>
+                    <dl>
+                      <dt className="w-100">주소</dt>
+                      <dd><p>{selectedItem.bplcBscAddr || '-'}</p></dd>
+                    </dl>
+                  </>
+                )}
+
+                {/* ────────── 탭 1: 뿌리기술기업 ────────── */}
+                {activeTabIndex === 1 && (
+                  <>
+                    <dl>
+                      <dt className="w-100">업체명</dt>
+                      <dd><p>{selectedItem.entNm || '-'}</p></dd>
+                      <dt className="w-100">홈페이지</dt>
+                      <dd>
+                        {selectedItem.urlAddr ? (
+                          <a
+                            className="on-linktxt2"
+                            href={
+                              selectedItem.urlAddr.startsWith('http://') || selectedItem.urlAddr.startsWith('https://')
+                                ? selectedItem.urlAddr
+                                : `https://${selectedItem.urlAddr}`
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="새 창 열림"
+                          >
+                            {selectedItem.urlAddr}
+                          </a>
+                        ) : '-'}
+                      </dd>
+                    </dl>
+                    <dl>
+                      <dt className="w-100">신고업종</dt>
+                      <dd><p>{selectedItem.cstmTelgmEntFldNm || '-'}</p></dd>
+                      <dt className="w-100">대표자명</dt>
+                      <dd><p>{selectedItem.rprsvNm || '-'}</p></dd>
+                    </dl>
+                    <dl>
+                      <dt className="w-100">핵심기술</dt>
+                      <dd><p>{selectedItem.fdtnlTechNm || '-'}</p></dd>
+                    </dl>
+                  </>
+                )}
+
+                {/* ────────── 탭 2: 전문연구사업자 ────────── */}
+                {activeTabIndex === 2 && (
+                  <>
+                    <dl>
+                      <dt className="w-100">업체명</dt>
+                      <dd><p>{selectedItem.entNm || '-'}</p></dd>
+                      <dt className="w-100">홈페이지</dt>
+                      <dd>
+                        {selectedItem.urlAddr ? (
+                          <a
+                            className="on-linktxt2"
+                            href={
+                              selectedItem.urlAddr.startsWith('http://') || selectedItem.urlAddr.startsWith('https://')
+                                ? selectedItem.urlAddr
+                                : `https://${selectedItem.urlAddr}`
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="새 창 열림"
+                          >
+                            {selectedItem.urlAddr}
+                          </a>
+                        ) : '-'}
+                      </dd>
+                    </dl>
+                    <dl>
+                      <dt className="w-100">신고업종</dt>
+                      <dd><p>{selectedItem.cstmTelgmEntFldNm || '-'}</p></dd>
+                      <dt className="w-100">지역</dt>
+                      <dd><p>{selectedItem.bplcRgnNm || '-'}</p></dd>
+                    </dl>
+                    <dl>
+                      <dt className="w-100">연락처</dt>
+                      <dd><p>{selectedItem.entTelno || '-'}</p></dd>
+                    </dl>
+                    <dl>
+                      <dt className="w-100">주소</dt>
+                      <dd><p>{selectedItem.bplcBscAddr || '-'}</p></dd>
+                    </dl>
+                  </>
+                )}
               </div>
             </div>
           )}

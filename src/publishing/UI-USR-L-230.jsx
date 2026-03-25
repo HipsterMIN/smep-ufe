@@ -140,7 +140,7 @@ const UI_USR_L_230 = () => {
 
         {/* table [S] */}
         <div className="krds-table-wrap">
-        <table className="tbl col data">
+        <table className="tbl col data t-block">
           <caption>API Q&A 정보. 순번, 문의구분, 제목, 작성자, 처리상태, 등록일 정보가 제공됨.</caption>
           <colgroup>
             <col style={{width: "7.4%"}} />
@@ -169,7 +169,7 @@ const UI_USR_L_230 = () => {
               <td className="ac"><span>인증키 관련</span></td>
               <td>
                   <a className="onellipsis-1" href="#">
-                    <span>수출유망중소기업지정증_test</span>
+                    <span className="on-colorblue2">수출유망중소기업지정증_test</span>
                     <i className="svg-icon ico-lock"></i>
                   </a>
               </td>

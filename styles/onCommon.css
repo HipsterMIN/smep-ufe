@@ -565,7 +565,8 @@ table tbody tr:hover td {
 
 #krds-footer .f-logo {
   background-image: url(../src/assets/common/logo.svg);
-  width: 28.7rem;
+  width: 200px;
+  background-position: 0 50%;
 }
 #container .in-between {
   display: flex;
@@ -1111,6 +1112,10 @@ table tbody tr:hover td {
 .krds-table-wrap .tbl td .badge-txt-box {
   margin-bottom: 4px;
 }
+.krds-table-wrap .tbl.data tbody td .flex-row {
+  display: flex;
+  gap: 8px;
+}
 /* krds-tab-area  */
 
 .krds-tab-area {gap: 0px;}
@@ -1430,6 +1435,24 @@ table tbody tr:hover td {
   margin: 0 0 var(--krds-padding-10);
   border-bottom: var(--search-list-width-border) solid
     var(--search-list-color-border);
+}
+.search-list-top .sch-ico-box {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1;
+  margin-left: -20px;
+  margin-right: auto;
+  cursor: pointer;
+}
+.search-list-top .sch-ico-box .svg-icon.ico-excel {
+  width: 20px;
+  height: 20px;
+}
+.search-list-top .sch-ico-box span {
+  color: #1E2124;
+  font-size: 17px;
+  font-weight: 400;
 }
 .filter-form .krds-check-area {
   gap: 8px;
@@ -2492,7 +2515,6 @@ table tbody tr:hover td {
 }
 .krds-structured-list.small > li {
   padding: var(--krds-pc-padding-card-xsmall);
-  gap: 0;
 }
 .krds-structured-list.small > li:hover {
   border-color: var(--krds-color-light-primary-50); 
@@ -2505,7 +2527,7 @@ table tbody tr:hover td {
 }
 
 .krds-structured-list .bottom-link {
-  margin-top: 64px;
+  margin-top: 46px;
 }
 
 .def-list-wrap .def-list .def-list-group {
@@ -3992,6 +4014,83 @@ textarea.krds-input::placeholder {
   .krds-breadcrumb-wrap .breadcrumb li:not(.home):not(:nth-child(2)):last-child::after {
     content: none;
   }
+  .krds-table-wrap .tbl.t-block thead th,
+  .krds-table-wrap .tbl.t-block tbody th {
+    display: none;
+  }
+  .krds-table-wrap .tbl.t-block,
+  .krds-table-wrap .tbl.t-block thead,
+  .krds-table-wrap .tbl.t-block tbody,
+  .krds-table-wrap .tbl.t-block tr,
+  .krds-table-wrap .tbl.t-block th,
+  .krds-table-wrap .tbl.t-block td {
+    display: block;
+  }
+  .krds-table-wrap .tbl.data.t-block {
+    min-width: auto;
+    border-top: 1px solid #1E2124;
+  }
+  .krds-table-wrap .tbl.t-block tbody tr {
+    padding: 16px 10px;
+    border-bottom: 1px solid var(--color-divider-gray-light, #CDD1D5);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .krds-table-wrap .tbl.t-block tbody tr.flex-row {
+    justify-content: flex-end;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .krds-table-wrap .tbl.t-block tr.flex-row .mo-w100 {
+    flex-basis: 100%;
+  }
+  .krds-table-wrap .tbl.data.t-block tbody td {
+    padding: 0;
+    border-bottom: none;
+    text-align: left !important;
+  }
+  .krds-table-wrap .tbl.data.t-block a.onellipsis-1 {
+    display: block;
+  }
+  .krds-table-wrap .tbl.data.t-block tbody td.views,
+  .krds-table-wrap .tbl.data.t-block tbody td .krds-badge.number {
+    display: none;
+  }
+  .krds-table-wrap .tbl.data.t-block  tbody .flex-row {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .krds-table-wrap .tbl.data.t-block .flex-row .krds-badge {
+    order: -1;
+  }
+  .krds-table-wrap .tbl.data.t-block .mo-full {
+    width: 100%;
+  }
+  table.t-block tbody tr:hover th, table.t-block tbody tr:hover td {
+    background: none !important;
+  }
+  table.t-block tbody tr td a span {
+    font-size: 17px;
+    color: #1E2124;
+  }
+  table.t-block tbody tr td a .krds-badge {
+    font-size: 15px;
+  }
+  table.t-block tbody tr td span {
+    font-size: 15px;
+  }
+  table.t-block tbody tr:hover td a {
+    color: #0B50D0;
+    text-decoration: underline;
+    text-underline-position: under;
+    text-decoration-color: #0B50D0;
+  }
+  table.t-block tbody tr:hover td span {
+    color: #0B50D0;
+  }
+
 }
 
 @media (max-width: 1200px) { 
@@ -4054,11 +4153,25 @@ textarea.krds-input::placeholder {
   #krds-header .header-container .logo {
     width: 20rem;
   }
- 
+  .krds-accordion .accordion-title {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-right: 34px;
+  }
+  .krds-accordion.type-line .accordion-item .btn-accordion {
+    padding: 20px 0;
+  }
+  .krds-accordion.type-line .accordion-item .btn-accordion::after {
+    top: 50%;
+    transform:translateY(-50%);
+  }
+  .krds-accordion.type-line .accordion-item.active .btn-accordion::after {
+    transform: translateY(-50%) rotate(-180deg);
+  }
 }
 @media (max-width: 767px) {
   #krds-header .header-container .logo {
-    width: 180px;
+    width: 132px;
   }
   .search-top-box .sch-form-wrap .krds-form-select {
     width: 100%;
@@ -4078,8 +4191,8 @@ textarea.krds-input::placeholder {
   /* 공통 - 결과 리스트 상단 */
   .search-list-top {
     flex-direction: column;
-    gap: var(--krds-gap-6);
-    margin-top: var(--krds-mobile-gap-layout-h2-h3);
+    gap: var(--krds-gap-5);
+    margin: 32px 0 16px;
   }
   .search-list-top .sch-info {
     flex-direction: column;
@@ -4092,7 +4205,11 @@ textarea.krds-input::placeholder {
     flex-wrap: wrap;
     gap: 0;
   }
+  .search-list-top .sch-ico-box {
+    margin: 0;
+  }
   .search-list-top .sch-sort {
+    width: 100%;
   }
   .search-list-top .sch-sort .w-hide {
     display: flex !important;
@@ -4183,6 +4300,7 @@ textarea.krds-input::placeholder {
   }
     .page-title-wrap .h-tit {
     font-size: var(--krds-mobile-font-size-heading-xlarge);
+    margin-bottom: 32px;
   }
   .page-title-wrap .h-tit .krds-badge-wrap {
       margin-top: var(--krds-mobile-gap-layout-title-body-large);
@@ -4403,7 +4521,7 @@ textarea.krds-input::placeholder {
 
   .sch-form-wrap, 
   .search-top-box .sch-filter-box {
-    padding: 20px 26px !important;
+    padding: 26px 20px !important;
   }
 
   .sch-form-wrap,
@@ -4437,6 +4555,19 @@ textarea.krds-input::placeholder {
   }
   .platform-bi-wrap .default-design-box.space img.img-horizontal {
     width: 156px;
+  }
+  .tab + .tab-conts-wrap {
+    margin-top: 24px;
+  }
+  #krds-footer .f-logo {
+    width: 134px;
+    height: 32px;
+  }
+  .krds-table-wrap .tbl.data.t-block .btn-flex {
+    display: flex;
+  }
+  .krds-table-wrap .tbl.data.t-block .btn-flex .krds-btn:first-of-type {
+    flex: 1;
   }
 }
 .on-searchoption-toggle {

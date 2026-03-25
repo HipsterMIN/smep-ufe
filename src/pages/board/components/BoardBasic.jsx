@@ -303,7 +303,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
                       </a>
                     </td>
                     <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
-                    <td className="ac"><span>{item?.inqCnt ?? '-'}</span></td>
+                    <td className="ac"><span>{item?.inqCnt ?? 0}</span></td>
                   </tr>
                 ))
               )}
