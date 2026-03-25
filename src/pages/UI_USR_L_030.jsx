@@ -97,6 +97,18 @@ const DEFAULT_FILTER_OPTIONS = {
   insuranceRateSummaries: [],
 };
 
+const getStoredIndustries = () => {
+  try {
+    const stored = sessionStorage.getItem('policyFinanceIndustries');
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.warn('Failed to restore industry selection:', error);
+    return [];
+  }
+};
+
 const toPolicyFilterOptions = (commonCodes = {}) => ({
   searchTypes: SEARCH_TYPE_OPTIONS,
   supportTypes: (commonCodes.PLCY_FNNC_GDS_TYPE_CD || []).map((item) => ({ code: item.value, name: item.label })),
@@ -275,27 +287,13 @@ const UI_USR_L_030 = () => {
   const [industryKeyword, setIndustryKeyword] = useState({ ksicCd: '', ksicNm: '' });
   const [industryResults, setIndustryResults] = useState([]);
   const [industryDraft, setIndustryDraft] = useState([]);
-  const [selectedIndustries, setSelectedIndustries] = useState([]);
-  const [appliedIndustries, setAppliedIndustries] = useState([]);
+  const [selectedIndustries, setSelectedIndustries] = useState(() => getStoredIndustries());
+  const [appliedIndustries, setAppliedIndustries] = useState(() => getStoredIndustries());
   const [industryMessage, setIndustryMessage] = useState('');
   const [compareIds, setCompareIds] = useState([]);
   const [comparePopupOpen, setComparePopupOpen] = useState(false);
   const [compareItems, setCompareItems] = useState([]);
   const [compareLoading, setCompareLoading] = useState(false);
-
-  useEffect(() => {
-    const stored = sessionStorage.getItem('policyFinanceIndustries');
-    if (!stored) return;
-    try {
-      const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed)) {
-        setSelectedIndustries(parsed);
-        setAppliedIndustries(parsed);
-      }
-    } catch (error) {
-      console.warn('Failed to restore industry selection:', error);
-    }
-  }, []);
 
   useEffect(() => {
     sessionStorage.setItem('policyFinanceIndustries', JSON.stringify(selectedIndustries));
