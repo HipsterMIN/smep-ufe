@@ -244,13 +244,13 @@ const UI_USR_L_110 = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td className="ac" colSpan={6}>
+                  <td className="ac" colSpan={5}>
                     <span>로딩 중입니다.</span>
                   </td>
                 </tr>
               ) : postList.length === 0 ? (
                 <tr>
-                  <td className="ac" colSpan={6}>
+                  <td className="ac" colSpan={5}>
                     <span>조회된 데이터가 없습니다.</span>
                   </td>
                 </tr>
@@ -258,7 +258,7 @@ const UI_USR_L_110 = () => {
                 postList.map((item, index) => (
                   <tr key={item?.pstNo ?? `${item?.pstTtl ?? 'post'}-${index}`}>
                     <th scope="row" className="ac">
-                      <span>{item?.pstNo ?? '-'}</span>
+                      <span>{totalElements - (currentPage * pageSize + index)}</span>
                     </th>
                     <td>
                       <a
@@ -287,7 +287,7 @@ const UI_USR_L_110 = () => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
-          syncUrl
+            syncUrl
           />
         )}
 

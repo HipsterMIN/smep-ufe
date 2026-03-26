@@ -8,17 +8,25 @@ const Pagination = ({
   syncUrl = false,
   pageParam = "page",
 }) => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const lastRequestedPageRef = useRef(null);
+  const previousQueryParamRef = useRef(undefined);
 
   const normalizedTotalPages = Number.isFinite(totalPages)
     ? Math.max(0, Math.floor(totalPages))
     : 0;
 
+  const queryPageParam = syncUrl ? searchParams.get(pageParam) : null;
   const queryPage = syncUrl
-    ? Number.parseInt(searchParams.get(pageParam) || "", 10)
+    ? Number.parseInt(queryPageParam || "", 10)
     : NaN;
   const hasValidQueryPage = Number.isFinite(queryPage) && queryPage > 0;
+  const clampedQueryPage = hasValidQueryPage
+    ? Math.min(
+      Math.max(1, Math.floor(queryPage)),
+      normalizedTotalPages > 0 ? normalizedTotalPages : Number.POSITIVE_INFINITY,
+    )
+    : null;
 
   const resolvedCurrentPage = Number.isFinite(currentPage)
     ? currentPage
@@ -37,16 +45,27 @@ const Pagination = ({
   useEffect(() => {
     // syncUrl=true + controlled currentPage 조합에서 URL의 page 쿼리로
     // 상위 컴포넌트 페이지 상태를 초기/브라우저 내비게이션 시 동기화한다.
+    if (!syncUrl) {
+      return;
+    }
+
+    const isInitialSync = previousQueryParamRef.current === undefined;
+    const hasQueryChanged = previousQueryParamRef.current !== queryPageParam;
+    previousQueryParamRef.current = queryPageParam;
+
+    if (!isInitialSync && !hasQueryChanged) {
+      return;
+    }
+
     if (
-      !syncUrl
-      || !Number.isFinite(currentPage)
+      !Number.isFinite(currentPage)
       || typeof onPageChange !== "function"
       || !hasValidQueryPage
     ) {
       return;
     }
 
-    const targetPage = Math.max(1, Math.floor(queryPage));
+    const targetPage = clampedQueryPage;
     if (targetPage === normalizedCurrentPage) {
       return;
     }
@@ -55,13 +74,15 @@ const Pagination = ({
       return;
     }
 
+    lastRequestedPageRef.current = targetPage;
     onPageChange(targetPage);
   }, [
     syncUrl,
+    queryPageParam,
     currentPage,
     onPageChange,
     hasValidQueryPage,
-    queryPage,
+    clampedQueryPage,
     normalizedCurrentPage,
   ]);
 
@@ -70,7 +91,43 @@ const Pagination = ({
       return;
     }
 
-    if (hasValidQueryPage && queryPage === normalizedCurrentPage) {
+    if (lastRequestedPageRef.current !== null) {
+      return;
+    }
+
+    const expectedPage = Math.max(1, Math.floor(currentPage));
+    const expectedParam = expectedPage <= 1 ? null : String(expectedPage);
+    const currentParam = searchParams.get(pageParam);
+
+    if (
+      (expectedParam === null && (currentParam === null || currentParam === ""))
+      || currentParam === expectedParam
+    ) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams);
+    if (expectedParam === null) {
+      params.delete(pageParam);
+    } else {
+      params.set(pageParam, expectedParam);
+    }
+
+    setSearchParams(params, { replace: true });
+  }, [
+    syncUrl,
+    currentPage,
+    pageParam,
+    searchParams,
+    setSearchParams,
+  ]);
+
+  useEffect(() => {
+    if (!syncUrl || !Number.isFinite(currentPage)) {
+      return;
+    }
+
+    if (hasValidQueryPage && clampedQueryPage === normalizedCurrentPage) {
       lastRequestedPageRef.current = null;
       return;
     }
@@ -78,7 +135,13 @@ const Pagination = ({
     if (!hasValidQueryPage && normalizedCurrentPage <= 1) {
       lastRequestedPageRef.current = null;
     }
-  }, [syncUrl, currentPage, hasValidQueryPage, queryPage, normalizedCurrentPage]);
+  }, [
+    syncUrl,
+    currentPage,
+    hasValidQueryPage,
+    clampedQueryPage,
+    normalizedCurrentPage,
+  ]);
 
   const getPageUrl = (targetPage) => {
     if (!syncUrl) {
