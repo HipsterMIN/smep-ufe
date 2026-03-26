@@ -305,7 +305,7 @@ const Pbanc = () => {
               )}
             </tbody>
           </table>
-          <Pagination totalPages={totalPages} currentPage={page} onPageChange={(p) => search(p)} />
+          <Pagination totalPages={totalPages} currentPage={page} onPageChange={(p) => search(p)} syncUrl />
         </div>
       </div>
     </>

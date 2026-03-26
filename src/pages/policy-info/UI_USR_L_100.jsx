@@ -338,6 +338,7 @@ const UI_USR_L_100 = () => {
                   totalPages={totalPages}
                   currentPage={currentPage + 1}
                   onPageChange={handlePageChange}
+                syncUrl
                 />
               )}
             </section>

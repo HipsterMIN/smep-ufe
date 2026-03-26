@@ -316,6 +316,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
+          syncUrl
           />
         )}
       </div>

@@ -42,6 +42,7 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
   const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
 
   const [categories, setCategories] = useState([]);
+  const [isCategoryLoaded, setIsCategoryLoaded] = useState(false);
   const [postList, setPostList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [totalElements, setTotalElements] = useState(0);
@@ -74,9 +75,16 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
     let isMounted = true;
 
     const fetchCategories = async () => {
+      if (isMounted) {
+        setIsCategoryLoaded(false);
+      }
+
       if (!bbsNo) {
         if (!isMounted) return;
         setCategories([]);
+        setActiveTabIndex(0);
+        setSelectedCategoryNo('');
+        setIsCategoryLoaded(true);
         return;
       }
 
@@ -84,11 +92,29 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
         const response = await apiClient.get(`/api/v1/board/${bbsNo}/categories`);
         const data = response?.data || {};
         if (!isMounted) return;
-        setCategories(Array.isArray(data) ? data : []);
+        const nextCategories = Array.isArray(data) ? data : [];
+        setCategories(nextCategories);
+
+        if (nextCategories.length > 0) {
+          const initialCategoryNo = nextCategories[0]?.ctgryNo != null
+            ? String(nextCategories[0].ctgryNo)
+            : '';
+          setActiveTabIndex(0);
+          setSelectedCategoryNo(initialCategoryNo);
+        } else {
+          setActiveTabIndex(0);
+          setSelectedCategoryNo('');
+        }
       } catch (error) {
         if (!isMounted) return;
         setCategories([]);
+        setActiveTabIndex(0);
+        setSelectedCategoryNo('');
         console.error('썸네일 게시판 카테고리 조회 실패:', error);
+      } finally {
+        if (isMounted) {
+          setIsCategoryLoaded(true);
+        }
       }
     };
 
@@ -100,9 +126,12 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
   }, [bbsNo]);
 
   useEffect(() => {
-    if (activeTabIndex > categories.length) {
+    if (categories.length > 0 && activeTabIndex >= categories.length) {
+      const fallbackCategoryNo = categories[0]?.ctgryNo != null
+        ? String(categories[0].ctgryNo)
+        : '';
       setActiveTabIndex(0);
-      setSelectedCategoryNo('');
+      setSelectedCategoryNo(fallbackCategoryNo);
     }
   }, [categories, activeTabIndex]);
 
@@ -115,6 +144,15 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
         setPostList([]);
         setTotalElements(0);
         setTotalPages(0);
+        return;
+      }
+
+      // 카테고리 로딩/초기 선택값 확정 전에 목록을 조회하면 전체 건수로 먼저 조회되는 문제가 있어 가드한다.
+      if (!isCategoryLoaded) {
+        return;
+      }
+
+      if (categories.length > 0 && !selectedCategoryNo) {
         return;
       }
 
@@ -161,7 +199,7 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
     return () => {
       isMounted = false;
     };
-  }, [bbsNo, currentPage, pageSize, selectedCategoryNo, appliedSearchType, appliedSearchKeyword]);
+  }, [bbsNo, currentPage, pageSize, selectedCategoryNo, appliedSearchType, appliedSearchKeyword, isCategoryLoaded, categories.length]);
 
   const handleSearch = () => {
     setAppliedSearchType(searchType);
@@ -344,6 +382,7 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
                   totalPages={totalPages}
                   currentPage={currentPage + 1}
                   onPageChange={handlePageChange}
+                  syncUrl
                 />
               )}
             </section>

@@ -38,7 +38,7 @@ const UI_USR_L_120 = () => {
       setLoading(true);
       try {
         const params = new URLSearchParams({
-          page: currentPage,
+          page: currentPage + 1,
           size: pageSize,
         });
 
@@ -200,7 +200,7 @@ const UI_USR_L_120 = () => {
                 certifications.map((item, index) => (
                   <tr key={item.certSystmSn || index}>
                     <th scope="row" className="ac">
-                      <span>{currentPage * pageSize + index + 1}</span>
+                      <span>{totalElements - (currentPage * pageSize + index)}</span>
                     </th>
                     <td className="ac">
                       <span>{item.certSystmFldNm || '-'}</span>
@@ -235,6 +235,7 @@ const UI_USR_L_120 = () => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
+          syncUrl
           />
         </div>
         {/* table [E] */}

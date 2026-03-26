@@ -310,6 +310,7 @@ const UI_USR_L_190 = () => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
+          syncUrl
           />
         )}
       </div>
