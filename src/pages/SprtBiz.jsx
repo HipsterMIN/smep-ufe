@@ -360,7 +360,7 @@ const SprtBiz = () => {
                 )}
               </ul>
 
-              <Pagination totalPages={totalPages} currentPage={page} onPageChange={(nextPage) => fetchList(nextPage, appliedCondition, size)} />
+              <Pagination totalPages={totalPages} currentPage={page} onPageChange={(nextPage) => fetchList(nextPage, appliedCondition, size)} syncUrl />
             </section>
           </div>
         </div>

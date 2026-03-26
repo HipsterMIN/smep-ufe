@@ -1,15 +1,40 @@
+import React, { useMemo, useState } from 'react';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
-import Pagination  from '@components/ui/Pagination';
+import Pagination from '@components/ui/Pagination';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
+const PAGE_SIZE = 10;
+
+const MANAGER_LIST_MOCK = Array.from({ length: 13 }, (_, index) => ({
+  id: index + 1,
+  managerName: `담당자${index + 1}`,
+  role: index === 0 ? '기업관리자' : '담당자',
+  deptName: index % 2 === 0 ? '경영지원팀' : '사업운영팀',
+  position: index % 2 === 0 ? '매니저' : '사원',
+  mobilePhone: `010-1234-${String(1000 + index).slice(-4)}`,
+  officePhone: `02-6000-${String(2000 + index).slice(-4)}`,
+  email: `manager${index + 1}@example.com`,
+}));
+
 const UI_USR_L_460 = () => {
-
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const sidebarData = getSideNavigationData();
+  const depth1Menu = getDepth1Parent();
 
-  // ✅ 사이드바 데이터 계산
-  const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
-  const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalElements = MANAGER_LIST_MOCK.length;
+  const totalPages = Math.ceil(totalElements / PAGE_SIZE);
+
+  const pagedRows = useMemo(() => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return MANAGER_LIST_MOCK.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [currentPage]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   return (
     <>
@@ -47,14 +72,14 @@ const UI_USR_L_460 = () => {
           <table className="tbl col data">
             <caption>담당자명 목록 표. 선택 여부, 담당자명, 역할, 부서명, 직위, 휴대전화, 유선전화, 이메일 정보가 제공됨.</caption>
             <colgroup>
-              <col style={{ width: '7.4%' }}/>
-              <col style={{ width: '9.2%' }}/>
-              <col style={{ width: '14%' }}/>
-              <col style={{ width: '16.8%' }}/>
-              <col style={{ width: '9.2%' }}/>
-              <col style={{ width: '13%' }}/>
-              <col style={{ width: '13%' }}/>
-              <col style={{ width: '16.6%' }}/>
+              <col style={{ width: '7.4%' }} />
+              <col style={{ width: '9.2%' }} />
+              <col style={{ width: '14%' }} />
+              <col style={{ width: '16.8%' }} />
+              <col style={{ width: '9.2%' }} />
+              <col style={{ width: '13%' }} />
+              <col style={{ width: '13%' }} />
+              <col style={{ width: '16.6%' }} />
             </colgroup>
             <thead>
               <tr>
@@ -69,23 +94,29 @@ const UI_USR_L_460 = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="ac"><span>-</span></td>
-                <td className="ac"><span>허강일</span></td>
-                <td className="ac"><span>기업관리자</span></td>
-                <td className="ac"><span>스마트공장수준확인서</span></td>
-                <td className="ac"><span>대표</span></td>
-                <td className="ac"><span>2025-08-14</span></td>
-                <td className="ac"><span>2025-08-14</span></td>
-                <td className="ac"><span>-</span></td>
-              </tr>
+              {pagedRows.map((row) => (
+                <tr key={row.id}>
+                  <td className="ac"><span>{row.role === '기업관리자' ? '-' : '선택'}</span></td>
+                  <td className="ac"><span>{row.managerName}</span></td>
+                  <td className="ac"><span>{row.role}</span></td>
+                  <td className="ac"><span>{row.deptName}</span></td>
+                  <td className="ac"><span>{row.position}</span></td>
+                  <td className="ac"><span>{row.mobilePhone}</span></td>
+                  <td className="ac"><span>{row.officePhone}</span></td>
+                  <td className="ac"><span>{row.email}</span></td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
 
-        <Pagination/>
-
-      </div> 
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          syncUrl
+        />
+      </div>
     </>
   );
 };

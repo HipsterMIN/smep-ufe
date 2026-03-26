@@ -407,6 +407,7 @@ const RelatedSystems = () => {
                   totalPages={totalPages}
                   currentPage={currentPage + 1}
                   onPageChange={handlePageChange}
+                syncUrl
                 />
               )}
             </section>

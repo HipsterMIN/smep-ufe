@@ -846,7 +846,7 @@ const UI_USR_L_030 = () => {
                 )}
               </ul>
 
-              {!loading && totalPages > 0 && <Pagination totalPages={totalPages} currentPage={page} onPageChange={setPage} />}
+              {!loading && totalPages > 0 && <Pagination totalPages={totalPages} currentPage={page} onPageChange={setPage} syncUrl />}
             </section>
           </div>
         </div>
