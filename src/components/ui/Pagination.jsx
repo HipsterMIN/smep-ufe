@@ -34,7 +34,10 @@ const Pagination = ({ totalPages = 10, currentPage, onPageChange }) => {
         className={`page-navi prev ${page <= 1 ? 'disabled' : ''}`} 
         to={page > 1 ? getPageUrl(page - 1) : "#"}
         onClick={(e) => {
-          if (page <= 1) e.preventDefault();
+          if (page <= 1) {
+            e.preventDefault();
+            return;
+          }
           handlePageClick(page - 1);
         }}
       >
@@ -69,7 +72,10 @@ const Pagination = ({ totalPages = 10, currentPage, onPageChange }) => {
         className={`page-navi next ${page >= totalPages ? 'disabled' : ''}`} 
         to={page < totalPages ? getPageUrl(page + 1) : "#"}
         onClick={(e) => {
-          if (page >= totalPages) e.preventDefault();
+          if (page >= totalPages) {
+            e.preventDefault();
+            return;
+          }
           handlePageClick(page + 1);
         }}
       >

@@ -38,7 +38,7 @@ const UI_USR_L_120 = () => {
       setLoading(true);
       try {
         const params = new URLSearchParams({
-          page: currentPage,
+          page: currentPage + 1,
           size: pageSize,
         });
 
