@@ -5,7 +5,8 @@ const AccordionContext = createContext();
 // 최상위 부모
 const Accordion = ({ 
     children, 
-    type = 'single' 
+    type = 'single', 
+    shape = 'line' /* 'line' || 'box' */
 }) => {
   const [openState, setOpenState] = useState(type === 'multi' ? [] : null);
 
@@ -23,7 +24,7 @@ const Accordion = ({
 
  return (
     <AccordionContext.Provider value={{ openState, toggleItem, type }}>
-      <div className="krds-accordion type-line">
+      <div className={`krds-accordion ${shape === 'box' ? 'type-box' : 'type-line'}`}>
         {React.Children.map(children, (child, index) => {
           if (React.isValidElement(child)) {
             return React.cloneElement(child, { index });

@@ -1,3 +1,18 @@
+/* util  */
+.mt-8 {
+  margin-top: 8px;
+}
+.pb-0{
+  padding-bottom: 0;
+}
+.sr-only {
+  left: -9999px; /* 모바일에서 table안에 sr-only 들어가면 가로 스크롤 생김 방지 */
+}
+.krds-btn.primary[disabled], 
+.krds-btn.primary.disabled {
+  border:none;
+}
+
 /* swiper css */
 :root {
   --swiper-theme-color: #007aff;
@@ -880,15 +895,41 @@
 .krds-structured-list .c-ico-txt {
   font-size: 15px;
 }
+.krds-structured-list .card-body .c-ico-txt.c-date {
+  gap: 0;
+}
+.krds-structured-list .card-body .c-text .c-date .svg-icon {
+  flex-shrink: 0;
+}
+.krds-structured-list .card-body .c-text .tit { 
+  margin-right: 8px;
+  flex-shrink: 0;
+  color: #464C53;
+}
 .krds-structured-list .c-ico-txt ~ .c-ico-txt {
   margin-top: 4px;
 }
+
 .krds-structured-list .c-ico-txt .svg-icon {
   position: relative;
-  top: 2px;
   margin-right: 4px;
+  top: 3px;
   width: 16px;
   height: 16px;
+}
+.krds-structured-list .c-ico-txt .ico-calendar {
+  width: 16px;
+  background: url(../src/assets/common/ico_oncalendar.svg) no-repeat 50%;
+  background-size: 100% auto;
+  mask:none;
+}
+.krds-structured-list .c-ico-txt .ico-email {
+  background-color: #6D7882;
+}
+.krds-structured-list .c-ico-txt .ico-coin {
+  background: url(../src/assets/common/ico_oncoin.svg) no-repeat 50%;
+  background-size: 100% auto;
+  mask:none;
 }
 .krds-structured-list .card-btm.no-border {
   margin-top: 0;
@@ -1452,17 +1493,202 @@ button.aichatButton.active {
   margin-bottom: 6px;
 }
 
-/* util  */
-.mt-8 {
-  margin-top: 8px;
+/* my dashboard */
+.my-dashboard .my-section ~ .my-section {
+  margin-top: 40px;
 }
-.pb-0{
-  padding-bottom: 0;
+.my-dashboard .sec-header {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.sr-only {
-  left: -9999px; /* 모바일에서 table안에 sr-only 들어가면 가로 스크롤 생김 방지 */
+.my-dashboard .sec-header.align-top {
+  align-items: flex-start;
+}
+.my-dashboard .sec-header .sec-tit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.my-dashboard .sec-header .sec-tit h2 {
+  font-size: 24px;
+  font-weight: 700;
+}
+.my-dashboard .sec-tit h2 .point {
+  color: #0B50D0;
+}
+.my-dashboard .sec-header .krds-btn ~ .krds-btn {
+  margin-left: 10px;
+}
+.my-dashboard .sec-header .sub {
+  font-size: 15px;
+  font-weight: 500;
+  color: #464C53;
+}
+.my-dashboard .my-tit {
+  display: flex;
+  align-items: center;
+  font-size: 32px;
+  font-weight: 700;
+}
+.my-dashboard .access-info {
+  margin-top: 16px;
+  font-size: 15px;
+}
+.my-dashboard .access-info .tit {
+  margin-right: 8px;
+  color: #464C53;
+}
+.my-dashboard .my-tit .krds-badge {
+  margin-right: 8px;
+}
+.krds-badge.bg-purple {
+  background: #5917B8;
+  color: #fff;
+}
+.my-dashboard .flex-box {
+  margin-top: 24px;
+  display: flex;
+  gap: 32px;
+}
+.my-dashboard .mycard {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+.my-dashboard .mycard li {
+  flex: 1 1 calc(50% - 12px);
+}
+.card-info {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 24px;
+  border-radius: 12px;
+  border: 2px solid #256EF4;
+}
+.card-info .card-info-tit {
+  font-size: 19px;
+  font-weight: 700;
+}
+.card-info .card-info-number {
+  margin-top: auto;
+  text-align: right;
+  font-size: 19px;
+  font-weight: 700;
+  color:#464C53;
+}
+.card-info .card-info-number strong {
+  margin-right: 10px;
+  font-size: 40px;
+  font-weight: 700;
+  color: #0B50D0;
+}
+.my-dashboard .myinfo {
+  width: 352px;
+  padding: 32px;
+  border-radius: 12px;
+  background: #F4F5F6;
+}
+.my-dashboard .myinfo-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.my-dashboard .myinfo-top h3 {
+  font-size: 19px;
+  font-weight: 700;
+}
+.my-dashboard  .myinfo .myinfo-conts {
+  margin-top: 16px;
+  padding-top: 20px;
+  border-top: 1px solid #B1B8BE;
+}
+.my-dashboard .myinfo-details dt {
+  font-size: 15px;
+  color: #464C53;
+}
+.my-dashboard .myinfo-details dd {
+  font-size: 19px;
+  margin-top: 4px;
+}
+.my-dashboard .myinfo-details dd ~ dt {
+  margin-top: 16px;
+}
+.my-dashboard .myinfo .round-btn {
+  margin-top: 20px;
+  width: 100%;
+  color: #0B50D0;
+  height: 32px;
+  border-radius: 64px;
+  background: #fff;
+}
+.my-dashboard .menu-list {
+  display: flex;
+  gap: 32px;
+}
+.my-dashboard .menu-list li {
+  flex: 1;
+} 
+.my-dashboard .menu-list .menu-link {
+  display: block;
+  padding: 24px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 12px;
+  text-align: center;
+} 
+.my-dashboard .menu-list .menu-link.blue {background: #D9E5F8;}
+.my-dashboard .menu-list .menu-link.purple {background: #DEDFF8;}
+.my-dashboard .menu-list .menu-link.pink {background: #E3DAF8;}
+
+.krds-structured-list.medium li {
+  padding: 24px;
+}
+.krds-structured-list.medium .card-body .c-text .c-tit {
+  font-size: 17px;
+}
+.krds-structured-list.medium .card-body .c-text .c-tit .onellipsis-2 {
+  min-height: 51px;
+}
+.krds-structured-list.medium .card-body {
+  gap: 10px;
+}
+.my-dashboard .more-btn {
+  margin-top: 24px;
 }
 
+/* accordion type: box  */
+.krds-accordion.type-box {
+  border: 0;
+  padding: 0;
+}
+.krds-accordion.type-box .accordion-item {
+  border: 1px solid  #B1B8BE;
+  border-radius: 12px;
+}
+.krds-accordion.type-box .accordion-item ~ .accordion-item {
+  margin-top: 16px;
+}
+.krds-accordion.type-box .accordion-item.active .accordion-body {
+  background: #fff;
+}
+.krds-accordion.type-box .accordion-item .accordion-panel-box {
+  padding:2px 0 0 0;
+}
+.krds-accordion.type-box .accordion-item.active {
+  padding-bottom: 0;
+}
+.krds-accordion.type-box .accordion-item .accordion-title {
+  align-items: center;
+  font-size: 17px;
+  color: #1e2124;
+}
+.krds-accordion.type-box .accordion-item .accordion-body {
+  padding: 0 32px 24px;
+}
 
 /* 반응형*/
 @media (max-width: 1400px) {
@@ -1923,5 +2149,70 @@ button.aichatButton.active {
   }
   .select-list li .krds-btn {
     margin: 12px 0 0 44px;
+  }
+  .my-dashboard .my-section ~ .my-section {
+    margin-top: 32px;
+  }
+  .my-dashboard .sec-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .my-dashboard .flex-box {
+    flex-direction: column;
+    margin-top: 32px;
+  }
+  .card-info {
+    padding: 16px;
+  }
+  .card-info .card-info-tit {
+    font-size: 17px;
+  }
+  .card-info .card-info-number strong {
+    margin-right: 8px;
+  }
+  .my-dashboard .mycard {
+    gap:8px;
+  }
+  .my-dashboard .mycard li {
+    width: calc(50% - 4px);
+  }
+  .my-dashboard .myinfo {
+    width: 100%;
+    padding-bottom: 76px;
+  }
+  .my-dashboard .sec-header .sec-tit {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .krds-accordion.type-box {
+    border-top: 1px solid #6D7882;
+  }
+  .krds-accordion.type-box .accordion-item {
+    border: 0;
+    border-bottom: 1px solid #CDD1D5;
+    border-radius: 0;
+  }
+  .krds-accordion.type-box .accordion-item ~ .accordion-item {
+    margin-top: 0;
+  }
+  .krds-accordion.type-box .accordion-item .btn-accordion {
+    padding: 22px 0;
+  }
+  .krds-accordion.type-box .accordion-title {
+    flex-direction: row;
+  }
+  .krds-accordion.type-box .accordion-item .btn-accordion::after {
+    top: 24px;
+  }
+  .krds-accordion.type-box .accordion-item .accordion-panel-box {
+    padding-top: 0;
+  }
+  .krds-accordion.type-box .accordion-item .accordion-body {
+    padding: 0 0 24px;
+  }
+  .my-dashboard .menu-list {
+    flex-direction: column;
   }
 }
