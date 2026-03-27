@@ -109,7 +109,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
       ctgryNo: Number.isFinite(parsedCategoryNo) ? parsedCategoryNo : null,
       pstTtl: normalizeText(title),
       pstCn: normalizeText(content),
-      // 공개여부는 현재 UI 상태만 유지하며 저장 페이로드에는 포함하지 않는다.
+      pstRlsYn: visibility === 'PRIVATE' ? 'N' : 'Y',
     };
   };
 

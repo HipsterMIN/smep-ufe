@@ -85,6 +85,10 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
 
   const postTitle = useMemo(() => postDetail?.pstTtl || '-', [postDetail]);
   const categoryName = useMemo(() => postDetail?.ctgryNm || '-', [postDetail]);
+  const visibilityLabel = useMemo(() => {
+    const normalizedVisibility = String(postDetail?.pstRlsYn ?? '').trim().toUpperCase();
+    return normalizedVisibility === 'N' ? '비공개' : '공개';
+  }, [postDetail]);
   const regDate = useMemo(() => formatDate(postDetail?.pstRegDt ?? postDetail?.regDt), [postDetail]);
   const writerName = useMemo(() => postDetail?.pstRgtrNm || '-', [postDetail]);
   const answerHtml = useMemo(() => {
@@ -126,6 +130,10 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
           <li>
             <span className="sr-only">카테고리</span>
             {categoryName}
+          </li>
+          <li>
+            <span className="sr-only">공개여부</span>
+            <span>{visibilityLabel}</span>
           </li>
           <li>
             <span className="sr-only">작성일</span>
