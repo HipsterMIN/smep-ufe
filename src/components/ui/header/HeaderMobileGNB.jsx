@@ -1,6 +1,22 @@
 import React, { useState, forwardRef } from 'react';
 import { Link } from 'react-router-dom';
+import { extractExternalUrl } from '@utils/menuUtils.js';
 
+const resolveMenuLinkAttrs = (fullPath) => {
+  const externalUrl = extractExternalUrl(fullPath);
+
+  if (externalUrl) {
+    return {
+      href: externalUrl,
+      target: '_blank',
+      rel: 'noopener noreferrer',
+    };
+  }
+
+  return {
+    href: fullPath || '#',
+  };
+};
 
 const HeaderMobileGNB = forwardRef(({ menus, onClose, userName, isLogin }, ref) => {
   const [activeMobileTab, setActiveMobileTab] = useState(0);
@@ -88,11 +104,11 @@ const HeaderMobileGNB = forwardRef(({ menus, onClose, userName, isLogin }, ref) 
                   <ul>
                     {menu.children.map((subMenu) => (
                       <li key={subMenu.menuId}>
-                        <a href={subMenu.fullPath} className="gnb-sub-trigger">{subMenu.menuNm}</a>
+                        <a {...resolveMenuLinkAttrs(subMenu.fullPath)} className="gnb-sub-trigger">{subMenu.menuNm}</a>
                         <ul className='subMenuLists'>
                           {(subMenu.children || []).map((depth3Menu) => (
                             <li key={depth3Menu.menuId}>
-                              <a href={depth3Menu.fullPath}>{depth3Menu.menuNm}</a>
+                              <a {...resolveMenuLinkAttrs(depth3Menu.fullPath)}>{depth3Menu.menuNm}</a>
                             </li>
                           ))}
                         </ul>
