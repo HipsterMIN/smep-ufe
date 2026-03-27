@@ -11,12 +11,14 @@ export default function Header() {
           <div className="inner">
             <button type="button" className="link open-modal" title="개인정보처리방침 레이어" data-target="popFootLink">개인정보처리방침
             </button>
-            <button type="button" className="link open-modal" title="이메일주소 무단수집거부안내 레이어" data-target="popFootLink">이메일주소 무단수집거부안내
+            <button type="button" className="link open-modal" title="이메일주소 무단수집거부안내 레이어" data-target="popFootLink" style={{ whiteSpace : 'nowrap' }}>이메일주소 무단수집거부안내
             </button>
             <button type="button" className="link open-modal" title="저작권 정책 레이어" data-target="popFootLink">저작권 정책</button>
             <button type="button" className="link open-modal" title="웹접근성 정책 레이어" data-target="popFootLink">웹접근성 정책
             </button>
             <button type="button" className="link open-modal" title="이용약관 레이어" data-target="popFootLink">이용약관
+            </button>
+            <button type="button" className="link open-modal" title="정책정보 이메일 신청" data-target="popFootLink">정책정보 이메일 신청
             </button>
           </div>
         </div>
