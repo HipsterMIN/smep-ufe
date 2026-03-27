@@ -1333,6 +1333,9 @@ button.aichatButton.active {
 .krds-info-list > li .bold {
   color: #1E2124;
 } 
+.krds-info-list.none > li {
+  padding-left: 0;
+} 
 .conts-desc.on-important {
   color: #052B57;
   font-weight: 700;
@@ -1374,6 +1377,21 @@ button.aichatButton.active {
 }
 .krds-structured-list.type-full .card-body .flex-row .krds-badge-wrap {
   flex-shrink: 0;
+}
+.essential-text {
+  color: #D63D4A;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 150%;
+  letter-spacing: 0;
+}
+.text-info {
+  color: #58616A;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 150%;
+  letter-spacing: 0;
+  margin-top: 8px;
 }
 .on-no-data {
   padding: 14px 0;

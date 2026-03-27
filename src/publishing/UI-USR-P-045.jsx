@@ -4,7 +4,7 @@ import Popup from '../components/ui/Popup';
 
 const UI_USR_P_045 = () => {
   // 팝업 동작
-    const [isPopupOpen, setIsPopupOpen] = useState(false); 
+  const [isPopupOpen, setIsPopupOpen] = useState(false); 
 
   return (
     <>
