@@ -93,11 +93,22 @@ const buildMainImageUrl = (type, atchFileId, atchFileSn) => {
   );
 };
 
-const buildBoardLink = (listPath, item, hasDetail = true) => {
-  if (!item) return listPath || '#';
-  if (item.pstUrlAddr) return item.pstUrlAddr;
-  if (hasDetail && listPath && item.pstNo) return `${listPath}/${item.pstNo}`;
-  return listPath || '#';
+const isAbsoluteHttpUrl = (value) => /^https?:\/\//i.test(String(value || '').trim());
+
+const resolveBoardTarget = (listPath, item, hasDetail = true) => {
+  const fallbackTo =
+    hasDetail && listPath && item?.pstNo ? `${listPath}/${item.pstNo}` : listPath || '#';
+
+  if (!item) {
+    return { kind: 'internal', to: listPath || '#' };
+  }
+
+  const rawUrl = String(item.pstUrlAddr ?? '').trim();
+  if (isAbsoluteHttpUrl(rawUrl)) {
+    return { kind: 'external', href: rawUrl };
+  }
+
+  return { kind: 'internal', to: fallbackTo };
 };
 
 const stripHtmlTags = (value) => {
@@ -883,34 +894,44 @@ const MainPage = () => {
                       <div className="notice-tab-cont">
                         <ul className="board-list">
                           {noticeItems.map((item) => {
-                            const href = buildBoardLink(
+                            const target = resolveBoardTarget(
                               noticeListPath,
                               item,
                               true,
                             );
-                            const external =
-                              href.startsWith('http://') ||
-                              href.startsWith('https://');
                             return (
                               <li
                                 className="board-list-item"
                                 key={String(item.pstNo)}
                               >
-                                <a
-                                  href={href}
-                                  className="board-list-link"
-                                  target={external ? '_blank' : undefined}
-                                  rel={external ? 'noreferrer' : undefined}
-                                >
-                                  <span className="board-list-title onellipsis-1">
-                                    {item.pstTtl}
-                                  </span>
-                                  <span className="board-list-date">
-                                    {formatDate(
-                                      item.pstgBgngYmd || item.pstRegDt,
-                                    )}
-                                  </span>
-                                </a>
+                                {target.kind === 'external' ? (
+                                  <a
+                                    href={target.href}
+                                    className="board-list-link"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <span className="board-list-title onellipsis-1">
+                                      {item.pstTtl}
+                                    </span>
+                                    <span className="board-list-date">
+                                      {formatDate(
+                                        item.pstgBgngYmd || item.pstRegDt,
+                                      )}
+                                    </span>
+                                  </a>
+                                ) : (
+                                  <Link to={target.to} className="board-list-link">
+                                    <span className="board-list-title onellipsis-1">
+                                      {item.pstTtl}
+                                    </span>
+                                    <span className="board-list-date">
+                                      {formatDate(
+                                        item.pstgBgngYmd || item.pstRegDt,
+                                      )}
+                                    </span>
+                                  </Link>
+                                )}
                               </li>
                             );
                           })}
@@ -929,34 +950,44 @@ const MainPage = () => {
                       <div className="notice-tab-cont">
                         <ul className="board-list faq">
                           {faqItems.map((item) => {
-                            const href = buildBoardLink(
+                            const target = resolveBoardTarget(
                               faqListPath,
                               item,
                               false,
                             );
-                            const external =
-                              href.startsWith('http://') ||
-                              href.startsWith('https://');
                             return (
                               <li
                                 className="board-list-item"
                                 key={String(item.pstNo)}
                               >
-                                <a
-                                  href={href}
-                                  className="board-list-link"
-                                  target={external ? '_blank' : undefined}
-                                  rel={external ? 'noreferrer' : undefined}
-                                >
-                                  {item.ctgryNm && (
-                                    <span className="krds-badge bg-light-primary">
-                                      {item.ctgryNm}
+                                {target.kind === 'external' ? (
+                                  <a
+                                    href={target.href}
+                                    className="board-list-link"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    {item.ctgryNm && (
+                                      <span className="krds-badge bg-light-primary">
+                                        {item.ctgryNm}
+                                      </span>
+                                    )}
+                                    <span className="board-list-title onellipsis-1">
+                                      {item.pstTtl}
                                     </span>
-                                  )}
-                                  <span className="board-list-title onellipsis-1">
-                                    {item.pstTtl}
-                                  </span>
-                                </a>
+                                  </a>
+                                ) : (
+                                  <Link to={target.to} className="board-list-link">
+                                    {item.ctgryNm && (
+                                      <span className="krds-badge bg-light-primary">
+                                        {item.ctgryNm}
+                                      </span>
+                                    )}
+                                    <span className="board-list-title onellipsis-1">
+                                      {item.pstTtl}
+                                    </span>
+                                  </Link>
+                                )}
                               </li>
                             );
                           })}
@@ -975,40 +1006,56 @@ const MainPage = () => {
                       <div className="notice-tab-cont">
                         <ul className="board-list">
                           {adminInfoItems.map((item) => {
-                            const href = buildBoardLink(
+                            const target = resolveBoardTarget(
                               adminInfoListPath,
                               item,
                               true,
                             );
-                            const external =
-                              href.startsWith('http://') ||
-                              href.startsWith('https://');
                             return (
                               <li
                                 className="board-list-item"
                                 key={String(item.pstNo)}
                               >
-                                <a
-                                  href={href}
-                                  className="board-list-link"
-                                  target={external ? '_blank' : undefined}
-                                  rel={external ? 'noreferrer' : undefined}
-                                >
-                                  {item.ctgryNm && (
-                                    <span className="krds-badge bg-light-primary">
-                                      {item.ctgryNm}
-                                    </span>
-                                  )}
-                                  <span className="board-list-title onellipsis-1">
-                                    {item.pstTtl}
-                                  </span>
-                                  <span className="board-list-date">
-                                    {formatDateRange(
-                                      item.pstgBgngYmd,
-                                      item.pstgEndYmd,
+                                {target.kind === 'external' ? (
+                                  <a
+                                    href={target.href}
+                                    className="board-list-link"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    {item.ctgryNm && (
+                                      <span className="krds-badge bg-light-primary">
+                                        {item.ctgryNm}
+                                      </span>
                                     )}
-                                  </span>
-                                </a>
+                                    <span className="board-list-title onellipsis-1">
+                                      {item.pstTtl}
+                                    </span>
+                                    <span className="board-list-date">
+                                      {formatDateRange(
+                                        item.pstgBgngYmd,
+                                        item.pstgEndYmd,
+                                      )}
+                                    </span>
+                                  </a>
+                                ) : (
+                                  <Link to={target.to} className="board-list-link">
+                                    {item.ctgryNm && (
+                                      <span className="krds-badge bg-light-primary">
+                                        {item.ctgryNm}
+                                      </span>
+                                    )}
+                                    <span className="board-list-title onellipsis-1">
+                                      {item.pstTtl}
+                                    </span>
+                                    <span className="board-list-date">
+                                      {formatDateRange(
+                                        item.pstgBgngYmd,
+                                        item.pstgEndYmd,
+                                      )}
+                                    </span>
+                                  </Link>
+                                )}
                               </li>
                             );
                           })}
