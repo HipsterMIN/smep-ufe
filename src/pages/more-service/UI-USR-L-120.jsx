@@ -91,8 +91,8 @@ const UI_USR_L_120 = () => {
   };
 
   // 상세페이지 핸들러
-  const goToDetail = (certSystmSn) => {
-    navigate(`${certSystmSn}`);
+  const goToDetail = (certSystmId) => {
+    navigate(`${certSystmId}`);
   };
 
   return (
@@ -198,7 +198,7 @@ const UI_USR_L_120 = () => {
                 </tr>
               ) : (
                 certifications.map((item, index) => (
-                  <tr key={item.certSystmSn || index}>
+                  <tr key={item.certSystmId || index}>
                     <th scope="row" className="ac">
                       <span>{totalElements - (currentPage * pageSize + index)}</span>
                     </th>
@@ -208,7 +208,7 @@ const UI_USR_L_120 = () => {
                     <td className="ac">
                       <a href="#" onClick={(e) => {
                         e.preventDefault();
-                        goToDetail(item.certSystmSn);
+                        goToDetail(item.certSystmId);
                       }}>
                         <span>{item.certSystmNm}</span>
                       </a>
@@ -235,7 +235,7 @@ const UI_USR_L_120 = () => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
-          syncUrl
+            syncUrl
           />
         </div>
         {/* table [E] */}
