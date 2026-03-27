@@ -20,7 +20,7 @@ export const mockMenuData = {
   'children': [
     {
       'menuId': 'M_PIIO_00064',
-      'menuNm': '지원사업-1',
+      'menuNm': '지원사업',
       'intgSysSeCd': 'PIIO',
       'mbrTypeCd': 'USR',
       'upMenuId': 'M_PIIO_00063',
