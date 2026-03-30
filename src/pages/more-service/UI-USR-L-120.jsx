@@ -203,10 +203,10 @@ const UI_USR_L_120 = () => {
                     <th scope="row" className="ac">
                       <span>{totalElements - (currentPage * pageSize + index)}</span>
                     </th>
-                    <td className="ac">
+                    <td className="al">
                       <span>{item.certSystmFldNm || '-'}</span>
                     </td>
-                    <td className="ac">
+                    <td className="al" style={{ wordBreak: 'break-word' }}>
                       <a href="#" onClick={(e) => {
                         e.preventDefault();
                         goToDetail(item.certSystmId);
@@ -217,7 +217,7 @@ const UI_USR_L_120 = () => {
                     <td className="ac">
                       <span>{item.itemCnt || 0}</span>
                     </td>
-                    <td className="ac">
+                    <td className="al" style={{ wordBreak: 'break-word' }}>
                       <span>{item.lglBssCn || '-'}</span>
                     </td>
                     <td className="ac">

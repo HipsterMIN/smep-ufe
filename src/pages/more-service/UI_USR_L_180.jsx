@@ -228,9 +228,9 @@ const UI_USR_L_180 = () => {
             <caption>행사정보 표. 번호, 제목, 출처, 작성일 조회수 정보가 제공됨.</caption>
             <colgroup>
               <col style={{ width: '10px' }} />
-              <col style={{ width: '340px' }} />
+              <col style={{ width: '330px' }} />
               <col style={{ width: '15%' }} />
-              <col style={{ width: '80px' }} />
+              <col style={{ width: '90px' }} />
               <col style={{ width: '10px' }} />
             </colgroup>
             <thead>
@@ -263,6 +263,7 @@ const UI_USR_L_180 = () => {
                     </th>
                     <td>
                       <a
+                        className="onellipsis-1"
                         href="#"
                         onClick={(event) => {
                           event.preventDefault();
