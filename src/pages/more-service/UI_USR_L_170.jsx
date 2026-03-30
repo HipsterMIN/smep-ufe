@@ -1,11 +1,57 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useMatches } from 'react-router-dom';
+import { useMatches } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Pagination from '@components/ui/Pagination.jsx';
 import ImgFormat from '@assets/sub/img_business_format_01.jpg';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
-import { api as apiClient } from '@lib/apiClient.js';
+import { api as apiClient, apiBaseUrl } from '@lib/apiClient.js';
+
+const APP_BASE_URL = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+
+const stripHtmlTags = (value) => {
+  if (!value) return '';
+
+  const noTags = String(value).replace(/<[^>]*>/g, ' ');
+  if (typeof window === 'undefined') {
+    return noTags.replace(/\s+/g, ' ').trim();
+  }
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(noTags, 'text/html');
+  const decodedText = String(doc.documentElement.textContent ?? '');
+  return decodedText.replace(/\s+/g, ' ').trim();
+};
+
+const toDisplayCount = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const buildThumbnailUrl = (item) => {
+  const rprsImgAtchFileId = String(item?.rprsImgAtchFileId ?? item?.rprs_img_atch_file_id ?? '').trim();
+  const atchFileSn = String(item?.atchFileSn ?? '').trim();
+
+  if (!rprsImgAtchFileId || !atchFileSn) return '';
+  return `${APP_BASE_URL}/api/v1/board/thumbnails/${encodeURIComponent(rprsImgAtchFileId)}/${encodeURIComponent(atchFileSn)}`;
+};
+
+const buildDownloadUrl = (item) => {
+  const atchFileId = String(item?.atchFileId ?? '').trim();
+  if (!atchFileId) return '';
+  return `${apiBaseUrl}/api/v1/files/download/${encodeURIComponent(atchFileId)}/1`;
+};
+
+const triggerDownload = (downloadUrl) => {
+  if (!downloadUrl || typeof window === 'undefined' || typeof document === 'undefined') return;
+
+  const anchor = document.createElement('a');
+  anchor.href = downloadUrl;
+  anchor.style.display = 'none';
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+};
 
 const UI_USR_L_170 = () => {
   const matches = useMatches();
@@ -22,9 +68,8 @@ const UI_USR_L_170 = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize] = useState(5);
 
-  // ✅ 사이드바 데이터 계산
-  const sidebarData = getSideNavigationData(); // currentMenu 기준으로 자동 계산
-  const depth1Menu = getDepth1Parent(); // depth1 부모 찾기
+  const sidebarData = getSideNavigationData();
+  const depth1Menu = getDepth1Parent();
 
   const bbsNo = useMemo(() => {
     const currentMatch = matches[matches.length - 1];
@@ -104,6 +149,53 @@ const UI_USR_L_170 = () => {
     window.scrollTo(0, 0);
   };
 
+  const handleDownloadClick = async (event, item) => {
+    event.preventDefault();
+
+    const downloadUrl = buildDownloadUrl(item);
+    if (!downloadUrl) return;
+
+    try {
+      if (bbsNo && item?.pstNo != null) {
+        await apiClient.get(`/api/v1/board/${bbsNo}/posts/${item.pstNo}`);
+        setPostList((previousList) => previousList.map((post) => {
+          if (post?.pstNo !== item?.pstNo) return post;
+          return {
+            ...post,
+            inqCnt: toDisplayCount(post?.inqCnt) + 1,
+          };
+        }));
+      }
+    } catch (error) {
+      // 상세 조회 실패 시에도 다운로드는 진행한다.
+      console.error('다운로드수 증가용 상세 조회 실패:', error);
+    } finally {
+      triggerDownload(downloadUrl);
+    }
+  };
+
+  const renderDisabledActions = () => (
+    <div className="side-btn">
+      <a
+        href="#"
+        className="krds-btn tertiary medium disabled"
+        aria-disabled="true"
+        onClick={(event) => event.preventDefault()}
+      >
+        바로보기
+      </a>
+      <a
+        href="#"
+        className="krds-btn tertiary medium disabled"
+        aria-disabled="true"
+        onClick={(event) => event.preventDefault()}
+      >
+        <i className="svg-icon ico-down"></i>
+        다운로드
+      </a>
+    </div>
+  );
+
   const renderCardList = () => {
     if (loading) {
       return (
@@ -113,18 +205,10 @@ const UI_USR_L_170 = () => {
             <div>
               <div className="page-title-wrap">
                 <p className="h-tit3">로딩 중입니다.</p>
-                <span className="sub-text">다운로드수 0</span>
+                <span className="sub-text">다운로드 수 0</span>
               </div>
               <p className="desc">목록을 불러오는 중입니다.</p>
-              <div className="side-btn">
-                <Link to="#" className="krds-btn tertiary medium">
-                  바로보기
-                </Link>
-                <a href="#" download className="krds-btn tertiary medium">
-                  <i className="svg-icon ico-down"></i>
-                  다운로드
-                </a>
-              </div>
+              {renderDisabledActions()}
             </div>
           </div>
         </li>
@@ -138,15 +222,64 @@ const UI_USR_L_170 = () => {
             <img src={ImgFormat} alt="" />
             <div>
               <div className="page-title-wrap">
-                <p className="h-tit3">조회된 업무용 서식이 없습니다.</p>
-                <span className="sub-text">다운로드수 0</span>
+                <p className="h-tit3">조회된 기업업무용 서식이 없습니다.</p>
+                <span className="sub-text">다운로드 수 0</span>
               </div>
-              <p className="desc">검색 조건을 확인한 뒤 다시 시도해주세요.</p>
+              <p className="desc">검색 조건을 확인 후 다시 시도해 주세요.</p>
+              {renderDisabledActions()}
+            </div>
+          </div>
+        </li>
+      );
+    }
+
+    return postList.map((item, index) => {
+      const thumbnailUrl = buildThumbnailUrl(item);
+      const downloadUrl = buildDownloadUrl(item);
+      const plainDescription = stripHtmlTags(item?.pstCn) || '-';
+      const downloadCount = toDisplayCount(item?.inqCnt);
+
+      return (
+        <li key={item?.pstNo ?? `${item?.pstTtl ?? 'form'}-${index}`}>
+          <div className="on-boxlist-in">
+            <img
+              src={thumbnailUrl || ImgFormat}
+              alt={item?.pstTtl || ''}
+              onError={(event) => {
+                if (event.currentTarget.src !== ImgFormat) {
+                  event.currentTarget.src = ImgFormat;
+                }
+              }}
+            />
+            <div>
+              <div className="page-title-wrap">
+                <a>
+                  <p className="h-tit3">{item?.pstTtl || '-'}</p>
+                  <span className="sub-text">다운로드 수 {downloadCount}</span>
+                </a>
+                <p className="desc">{plainDescription}</p>
+              </div>
               <div className="side-btn">
-                <Link to="#" className="krds-btn tertiary medium">
+                <a
+                  href={thumbnailUrl || '#'}
+                  className={`krds-btn tertiary medium ${thumbnailUrl ? '' : 'disabled'}`}
+                  target={thumbnailUrl ? '_blank' : undefined}
+                  rel={thumbnailUrl ? 'noreferrer' : undefined}
+                  aria-disabled={!thumbnailUrl}
+                  onClick={(event) => {
+                    if (!thumbnailUrl) {
+                      event.preventDefault();
+                    }
+                  }}
+                >
                   바로보기
-                </Link>
-                <a href="#" download className="krds-btn tertiary medium">
+                </a>
+                <a
+                  href={downloadUrl || '#'}
+                  className={`krds-btn tertiary medium ${downloadUrl ? '' : 'disabled'}`}
+                  aria-disabled={!downloadUrl}
+                  onClick={(event) => handleDownloadClick(event, item)}
+                >
                   <i className="svg-icon ico-down"></i>
                   다운로드
                 </a>
@@ -155,33 +288,7 @@ const UI_USR_L_170 = () => {
           </div>
         </li>
       );
-    }
-
-    return postList.map((item, index) => (
-      <li key={item?.pstNo ?? `${item?.pstTtl ?? 'form'}-${index}`}>
-        <div className="on-boxlist-in">
-          <img src={ImgFormat} alt="" />
-          <div>
-            <div className="page-title-wrap">
-              <Link to="/">
-                <p className="h-tit3">{item?.pstTtl || '-'}</p>
-                <span className="sub-text">다운로드수 {item?.inqCnt ?? 0}</span>
-              </Link>
-              <p className="desc">{item?.pstCn || '-'}</p>
-            </div>
-            <div className="side-btn">
-              <Link to="#" className="krds-btn tertiary medium">
-                바로보기
-              </Link>
-              <a href="#" download className="krds-btn tertiary medium">
-                <i className="svg-icon ico-down"></i>
-                다운로드
-              </a>
-            </div>
-          </div>
-        </div>
-      </li>
-    ));
+    });
   };
 
   return (
@@ -237,7 +344,7 @@ const UI_USR_L_170 = () => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
-          syncUrl
+            syncUrl
           />
         )}
       </div>
