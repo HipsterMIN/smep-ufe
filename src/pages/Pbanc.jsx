@@ -5,6 +5,7 @@ import Breadcrumb from '../components/ui/Breadcrumb';
 import Pagination from '../components/ui/Pagination.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
+import { formatNumberWithCommas } from '../utils/numberUtils.js';
 import { useUserMenu } from '../context/UserMenuContext';
 
 const DEFAULT_SIZE = 10;
@@ -216,7 +217,7 @@ const Pbanc = () => {
 
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
-            <li>검색 결과 <span className="point">{(totalElements || 0).toLocaleString()}</span>개</li>
+            <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
           </ul>
           <ul className="sch-sort">
             <li>
@@ -294,7 +295,7 @@ const Pbanc = () => {
                     <td className="ac"><span>{periodText}</span></td>
                     <td className="ac"><span className="onellipsis-1">{item.applyStatusText || '-'}</span></td>
                     <td className="ac"><span className="onellipsis-1">{item.bizSprvsnInstNm || '-'}</span></td>
-                    <td className="ac"><span>{(item.bizPbancInqCnt || 0).toLocaleString()}</span></td>
+                    <td className="ac"><span>{formatNumberWithCommas(item.bizPbancInqCnt || 0)}</span></td>
                   </tr>
                 );
               })}

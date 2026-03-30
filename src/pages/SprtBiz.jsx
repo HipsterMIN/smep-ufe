@@ -7,6 +7,7 @@ import Tab from '../components/ui/Tab';
 import { useUserMenu } from '../context/UserMenuContext';
 import { api as apiClient } from '../lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
+import { formatNumberWithCommas } from '../utils/numberUtils.js';
 
 const DEFAULT_SIZE = 12;
 const DEFAULT_SORT = 'REG';
@@ -294,7 +295,7 @@ const SprtBiz = () => {
 
               <div className="search-list-top">
                 <ul className="sch-info" aria-live="polite">
-                  <li>검색 결과 <span className="point">{(totalElements || 0).toLocaleString()}</span>개</li>
+                  <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
                 </ul>
                 <ul className="sch-sort">
                   <li>
