@@ -5,6 +5,7 @@ import Tab from '@components/ui/Tab.jsx';
 import Pagination from '@components/ui/Pagination.jsx';
 import Popup from '@components/ui/Popup.jsx';
 import http from '@lib/http.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useSearchParams } from 'react-router-dom';
 
@@ -395,7 +396,7 @@ const UI_USR_L_140 = () => {
 
       <div className="search-list-top">
         <ul className="sch-info" aria-live="polite">
-          <li>검색 결과 <span className="point">{totalCount}</span>개</li>
+          <li>검색 결과 <span className="point">{formatNumberWithCommas(totalCount || 0)}</span>개</li>
         </ul>
       </div>
 
