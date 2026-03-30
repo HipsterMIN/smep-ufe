@@ -1107,6 +1107,10 @@ table tbody tr:hover td {
 .page-title-wrap + .krds-table-wrap {
   margin-top: 24px;
 }
+.krds-table-wrap {
+  overflow-x: auto;
+  width: 100% !important;
+}
 .krds-table-wrap .tbl td a:not(.krds-btn) {display: block;}
 .krds-table-wrap .tbl td a[class ^= "onellipsis-"] { display: -webkit-box;}
 .krds-table-wrap .tbl td .badge-txt-box {
