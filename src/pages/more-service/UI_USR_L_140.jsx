@@ -6,6 +6,7 @@ import Pagination from '@components/ui/Pagination.jsx';
 import Popup from '@components/ui/Popup.jsx';
 import http from '@lib/http.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import { useSearchParams } from 'react-router-dom';
 
 const TAB_CLSF_CD = {
   0: 'SC01',
@@ -16,17 +17,23 @@ const TAB_CLSF_CD = {
 const TAB_COL_COUNT = { 0: 4, 1: 3, 2: 4 };
 
 const UI_USR_L_140 = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const tabData = useRef(['소재부품장비 전문기업', '뿌리기술기업', '전문연구사업자']);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [activeTabIndex, setActiveTabIndex] = useState(
+    () => Math.min(2, Math.max(0, Number(searchParams.get('tab') ?? 0))),
+  );
   const [list, setList] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(
+    () => Math.max(0, Number(searchParams.get('page') ?? 1) - 1),
+  );
   const [loading, setLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [pageSize, setPageSize] = useState(20);
 
   const [sidoList, setSidoList] = useState([]);
   const [sigunguList, setSigunguList] = useState([]);
@@ -44,7 +51,6 @@ const UI_USR_L_140 = () => {
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
 
-  // 시도 목록 조회 (최초 1회)
   useEffect(() => {
     const fetchSidoList = async () => {
       try {
@@ -57,7 +63,6 @@ const UI_USR_L_140 = () => {
     fetchSidoList();
   }, []);
 
-  // 시도 변경 시 시군구 목록 조회
   useEffect(() => {
     if (!sdoCd) {
       setSigunguList([]);
@@ -93,6 +98,7 @@ const UI_USR_L_140 = () => {
       setList(res.content ?? []);
       setTotalCount(res.totalElements ?? 0);
       setTotalPages(res.totalPages ?? 0);
+      setPageSize(res.size ?? 20);
     } catch (error) {
       console.error('목록 조회 실패:', error);
     } finally {
@@ -116,6 +122,19 @@ const UI_USR_L_140 = () => {
     setAppliedSearchType('all');
     setAppliedSearchKeyword('');
     setCurrentPage(0);
+    setList([]);
+    setTotalCount(0);
+    setTotalPages(0);
+
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('tab', String(index));
+        next.delete('page');
+        return next;
+      },
+      { replace: true },
+    );
   };
 
   const handleSdoCdChange = (e) => {
@@ -129,10 +148,32 @@ const UI_USR_L_140 = () => {
     setAppliedSearchType(searchType);
     setAppliedSearchKeyword(searchKeyword);
     setCurrentPage(0);
+
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('page');
+        return next;
+      },
+      { replace: true },
+    );
   };
 
   const handlePageChange = (page) => {
     setCurrentPage(page - 1);
+
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (page <= 1) {
+          next.delete('page');
+        } else {
+          next.set('page', String(page));
+        }
+        return next;
+      },
+      { replace: true },
+    );
   };
 
   const handleRowClick = (item) => {
@@ -147,15 +188,12 @@ const UI_USR_L_140 = () => {
 
   const isSigunguDisabled = !sdoCd;
 
-  // ────────────────────────────────────────────
-  // 탭별 caption 텍스트
   const captionMap = {
     0: '번호, 기업명, 업종명, 만료일자 정보가 제공됨.',
     1: '번호, 기업명, 핵심기술 정보가 제공됨.',
     2: '번호, 기업명, 홈페이지, 위치 정보가 제공됨.',
   };
 
-  // 탭별 thead
   const renderThead = () => {
     if (activeTabIndex === 0) {
       return (
@@ -195,18 +233,13 @@ const UI_USR_L_140 = () => {
         </>
       );
     }
-    // activeTabIndex === 2
     return (
       <>
         <colgroup>
-          <col style={{ width: '70px' }}/>
-          {/* 번호 */}
-          <col/>
-          {/* 기업명 - 나머지 전부 */}
-          <col style={{ width: '120px' }}/>
-          {/* 홈페이지 */}
-          <col style={{ width: '100px' }}/>
-          {/* 위치 */}
+          <col style={{ width: '70px' }} />
+          <col />
+          <col style={{ width: '120px' }} />
+          <col style={{ width: '100px' }} />
         </colgroup>
         <thead>
           <tr>
@@ -220,23 +253,18 @@ const UI_USR_L_140 = () => {
     );
   };
 
-  // 탭별 tbody 행
   const renderRows = () => {
     const colCount = TAB_COL_COUNT[activeTabIndex];
 
     if (loading) {
-      return <tr>
-        <td colSpan={colCount} className="ac">로딩 중...</td>
-      </tr>;
+      return <tr><td colSpan={colCount} className="ac">로딩 중...</td></tr>;
     }
     if (list.length === 0) {
-      return <tr>
-        <td colSpan={colCount} className="ac">조회된 데이터가 없습니다.</td>
-      </tr>;
+      return <tr><td colSpan={colCount} className="ac">조회된 데이터가 없습니다.</td></tr>;
     }
 
     return list.map((item, index) => {
-      const no = totalCount - (currentPage * 10) - index;
+      const no = totalCount - (currentPage * pageSize) - index;
       const noCell = (
         <th scope="row" className="ac">
           <span>{no}</span>
@@ -264,7 +292,6 @@ const UI_USR_L_140 = () => {
           </tr>
         );
       }
-
       if (activeTabIndex === 1) {
         return (
           <tr key={item.cstmTelgmEntEntCd}>
@@ -274,8 +301,6 @@ const UI_USR_L_140 = () => {
           </tr>
         );
       }
-
-      // activeTabIndex === 2
       return (
         <tr key={item.cstmTelgmEntEntCd}>
           {noCell}
@@ -316,27 +341,18 @@ const UI_USR_L_140 = () => {
       );
     });
   };
-  // ────────────────────────────────────────────
 
   const renderTable = () => (
     <>
       <div className="search-top-box mt-40">
         <div className="sch-form-wrap">
-          {/* 시도 선택 */}
-          <select
-            className="krds-form-select"
-            value={sdoCd}
-            onChange={handleSdoCdChange}
-          >
+          <select className="krds-form-select" value={sdoCd} onChange={handleSdoCdChange}>
             <option value="">전국</option>
             {sidoList.map((item) => (
-              <option key={item.code} value={item.code}>
-                {item.name}
-              </option>
+              <option key={item.code} value={item.code}>{item.name}</option>
             ))}
           </select>
 
-          {/* 시군구 선택 */}
           <select
             className="krds-form-select"
             value={sigunguCd}
@@ -345,13 +361,10 @@ const UI_USR_L_140 = () => {
           >
             <option value="">시군구선택</option>
             {sigunguList.map((item) => (
-              <option key={item.code} value={item.code}>
-                {item.name}
-              </option>
+              <option key={item.code} value={item.code}>{item.name}</option>
             ))}
           </select>
 
-          {/* 검색 유형 */}
           <select
             className="krds-form-select"
             value={searchType}
@@ -362,7 +375,6 @@ const UI_USR_L_140 = () => {
             <option value="cstmTelgmEntFldNm">업종명</option>
           </select>
 
-          {/* 검색어 */}
           <div className="sch-input">
             <input
               type="text"
@@ -373,11 +385,7 @@ const UI_USR_L_140 = () => {
               onChange={(e) => setSearchKeyword(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
-            <button
-              type="button"
-              className="krds-btn medium icon ico-search"
-              onClick={handleSearch}
-            >
+            <button type="button" className="krds-btn medium icon ico-search" onClick={handleSearch}>
               <span className="sr-only">검색</span>
               <i className="svg-icon ico-sch"></i>
             </button>
@@ -397,27 +405,22 @@ const UI_USR_L_140 = () => {
             {tabData.current[activeTabIndex]} 표. {captionMap[activeTabIndex]}
           </caption>
           {renderThead()}
-          <tbody>
-            {renderRows()}
-          </tbody>
+          <tbody>{renderRows()}</tbody>
         </table>
       </div>
 
       <Pagination
+        key={activeTabIndex}
         totalPages={totalPages}
         currentPage={currentPage + 1}
         onPageChange={handlePageChange}
-      syncUrl
       />
     </>
   );
 
   return (
     <>
-      <SideNavigation
-        pageTitle={depth1Menu?.menuNm || ''}
-        menuItems={sidebarData}
-      />
+      <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
@@ -425,7 +428,11 @@ const UI_USR_L_140 = () => {
         </div>
 
         <div className="krds-tab-area layer">
-          <Tab tabData={tabData.current} onTabChange={handleTabChange}></Tab>
+          <Tab
+            tabData={tabData.current}
+            onTabChange={handleTabChange}
+            activeIndex={activeTabIndex}
+          />
 
           <div className="tab-conts-wrap">
             <section className={`tab-conts ${activeTabIndex === 0 ? 'active' : ''}`}>
@@ -447,15 +454,12 @@ const UI_USR_L_140 = () => {
                 <ul className="check-list">
                   <li>뿌리기술이란? : 주조(鑄造), 금형(金型), 소성가공(塑性加工), 용접(鎔接), 표면처리(表面處理), 열처리(熱處理) 등 제조업 전반에 걸쳐 활용되는 기반 공정기술과 사출(射出)ㆍ프레스, 정밀가공(精密加工), 로봇, 센서 등 제조업의 미래 성장 발전에 핵심적인 차세대 공정기술로서 대통령령으로 정하는 기술</li>
                   <li>뿌리기술 전문기업이란? :<br />
-                      1. 뿌리산업의 범위(*)에 해당하는 기업 - (*)뿌리산업 진흥과 첨단화에 관한 법률 시행령 제2조에 근거한 뿌리산업의 범위<br />
-                      - 공장등록증상의 업종 코드와 뿌리산업 범위에 해당하는 분야별 업종 코드가 일치할 경우만 신청 가능<br />
-                      - 뿌리산업의 범위 확인 방법 : 국가뿌리산업진흥센터 → 정보 안내 → 뿌리산업의 범위<br />
-                      2. 「뿌리산업 진흥과 첨단화에 관한 법률」 제14조 1항 및 「핵심 뿌리기술 고시」에 따라 지정된 핵심 뿌리기술(*)을 보유한 기업<br />
-                      (*)핵심 뿌리기술 확인 방법 : 국가뿌리산업진흥센터 → 정보 안내 → 핵심 뿌리기술 목록<br />
+                      1. 뿌리산업의 범위(*)에 해당하는 기업<br />
+                      2. 핵심 뿌리기술을 보유한 기업<br />
                       3. 총 매출액 중 뿌리기술을 이용한 제품의 매출액이 100분의 50 이상<br />
-                      4. 「독점규제 및 공정거래에 관한 법률」 제14조 제1항에 따른 상호출자제한기업에 속하지 아니하는 기업
+                      4. 상호출자제한기업에 속하지 아니하는 기업
                   </li>
-                  <li>신청방법 : 국가뿌리산업진흥센터(<a className="on-linktxt2" href="https://apply.kpic.re.kr/html/?pmode=guide" target="_blank" title="새 창 열림">https://apply.kpic.re.kr/html/?pmode=guide</a>)에서 뿌리기술 전문기업 온라인 신청ㆍ접수</li>
+                  <li>신청방법 : 국가뿌리산업진흥센터(<a className="on-linktxt2" href="https://apply.kpic.re.kr/html/?pmode=guide" target="_blank" title="새 창 열림">https://apply.kpic.re.kr/html/?pmode=guide</a>)에서 온라인 신청</li>
                 </ul>
               </div>
               {activeTabIndex === 1 && renderTable()}
@@ -484,8 +488,6 @@ const UI_USR_L_140 = () => {
           {selectedItem && (
             <div className="detail-list-wrap type2">
               <div className="on-detail-list">
-
-                {/* ────────── 탭 0: 소재부품장비 전문기업 ────────── */}
                 {activeTabIndex === 0 && (
                   <>
                     <dl>
@@ -496,11 +498,7 @@ const UI_USR_L_140 = () => {
                         {selectedItem.urlAddr ? (
                           <a
                             className="on-linktxt2"
-                            href={
-                              selectedItem.urlAddr.startsWith('http://') || selectedItem.urlAddr.startsWith('https://')
-                                ? selectedItem.urlAddr
-                                : `https://${selectedItem.urlAddr}`
-                            }
+                            href={selectedItem.urlAddr.startsWith('http') ? selectedItem.urlAddr : `https://${selectedItem.urlAddr}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             title="새 창 열림"
@@ -528,8 +526,6 @@ const UI_USR_L_140 = () => {
                     </dl>
                   </>
                 )}
-
-                {/* ────────── 탭 1: 뿌리기술기업 ────────── */}
                 {activeTabIndex === 1 && (
                   <>
                     <dl>
@@ -540,11 +536,7 @@ const UI_USR_L_140 = () => {
                         {selectedItem.urlAddr ? (
                           <a
                             className="on-linktxt2"
-                            href={
-                              selectedItem.urlAddr.startsWith('http://') || selectedItem.urlAddr.startsWith('https://')
-                                ? selectedItem.urlAddr
-                                : `https://${selectedItem.urlAddr}`
-                            }
+                            href={selectedItem.urlAddr.startsWith('http') ? selectedItem.urlAddr : `https://${selectedItem.urlAddr}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             title="새 창 열림"
@@ -566,8 +558,6 @@ const UI_USR_L_140 = () => {
                     </dl>
                   </>
                 )}
-
-                {/* ────────── 탭 2: 전문연구사업자 ────────── */}
                 {activeTabIndex === 2 && (
                   <>
                     <dl>
@@ -578,11 +568,7 @@ const UI_USR_L_140 = () => {
                         {selectedItem.urlAddr ? (
                           <a
                             className="on-linktxt2"
-                            href={
-                              selectedItem.urlAddr.startsWith('http://') || selectedItem.urlAddr.startsWith('https://')
-                                ? selectedItem.urlAddr
-                                : `https://${selectedItem.urlAddr}`
-                            }
+                            href={selectedItem.urlAddr.startsWith('http') ? selectedItem.urlAddr : `https://${selectedItem.urlAddr}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             title="새 창 열림"

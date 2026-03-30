@@ -1,12 +1,12 @@
-import React, { useEffect, useRef } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import React, { useEffect, useRef } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 
 const Pagination = ({
   totalPages = 0,
   currentPage,
   onPageChange,
   syncUrl = false,
-  pageParam = "page",
+  pageParam = 'page',
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const lastRequestedPageRef = useRef(null);
@@ -18,7 +18,7 @@ const Pagination = ({
 
   const queryPageParam = syncUrl ? searchParams.get(pageParam) : null;
   const queryPage = syncUrl
-    ? Number.parseInt(queryPageParam || "", 10)
+    ? Number.parseInt(queryPageParam || '', 10)
     : NaN;
   const hasValidQueryPage = Number.isFinite(queryPage) && queryPage > 0;
   const clampedQueryPage = hasValidQueryPage
@@ -59,7 +59,7 @@ const Pagination = ({
 
     if (
       !Number.isFinite(currentPage)
-      || typeof onPageChange !== "function"
+      || typeof onPageChange !== 'function'
       || !hasValidQueryPage
     ) {
       return;
@@ -100,7 +100,7 @@ const Pagination = ({
     const currentParam = searchParams.get(pageParam);
 
     if (
-      (expectedParam === null && (currentParam === null || currentParam === ""))
+      (expectedParam === null && (currentParam === null || currentParam === ''))
       || currentParam === expectedParam
     ) {
       return;
@@ -145,7 +145,7 @@ const Pagination = ({
 
   const getPageUrl = (targetPage) => {
     if (!syncUrl) {
-      return "#";
+      return '#';
     }
 
     const params = new URLSearchParams(searchParams);
@@ -156,7 +156,7 @@ const Pagination = ({
     }
 
     const nextQuery = params.toString();
-    return nextQuery ? `?${nextQuery}` : "?";
+    return nextQuery ? `?${nextQuery}` : '?';
   };
 
   const handlePageClick = (targetPage, event) => {
@@ -172,7 +172,7 @@ const Pagination = ({
 
     lastRequestedPageRef.current = pageToMove;
 
-    if (typeof onPageChange === "function") {
+    if (typeof onPageChange === 'function') {
       onPageChange(pageToMove);
     }
   };
@@ -202,17 +202,30 @@ const Pagination = ({
   return (
     <div className="krds-pagination">
       <Link
-        className={`page-navi prev ${page <= 1 ? "disabled" : ""}`}
+        className={`page-navi prev ${page <= 1 ? 'disabled' : ''}`}
         to={getPageUrl(page - 1)}
         onClick={(event) => handleBoundaryClick(page - 1, page <= 1, event)}
       >
-        이전
+          이전
       </Link>
       <div className="page-links">
+        {startPage > 1 && (
+          <>
+            <Link
+              className="page-link"
+              to={getPageUrl(1)}
+              onClick={(event) => handlePageClick(1, event)}
+            >
+                  1
+            </Link>
+            <span className="page-link link-dot"></span>
+          </>
+        )}
+
         {pages.map((pageNumber) => (
           <Link
             key={pageNumber}
-            className={`page-link ${pageNumber === page ? "active" : ""}`}
+            className={`page-link ${pageNumber === page ? 'active' : ''}`}
             to={getPageUrl(pageNumber)}
             onClick={(event) => handlePageClick(pageNumber, event)}
           >
@@ -220,15 +233,14 @@ const Pagination = ({
             {pageNumber}
           </Link>
         ))}
+
         {endPage < normalizedTotalPages && (
           <>
             <span className="page-link link-dot"></span>
             <Link
               className="page-link"
               to={getPageUrl(normalizedTotalPages)}
-              onClick={(event) =>
-                handlePageClick(normalizedTotalPages, event)
-              }
+              onClick={(event) => handlePageClick(normalizedTotalPages, event)}
             >
               {normalizedTotalPages}
             </Link>
@@ -236,13 +248,13 @@ const Pagination = ({
         )}
       </div>
       <Link
-        className={`page-navi next ${page >= normalizedTotalPages ? "disabled" : ""}`}
+        className={`page-navi next ${page >= normalizedTotalPages ? 'disabled' : ''}`}
         to={getPageUrl(page + 1)}
         onClick={(event) =>
           handleBoundaryClick(page + 1, page >= normalizedTotalPages, event)
         }
       >
-        다음
+          다음
       </Link>
     </div>
   );
