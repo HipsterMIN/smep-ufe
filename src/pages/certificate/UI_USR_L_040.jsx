@@ -6,6 +6,7 @@ import Pagination from '@components/ui/Pagination.jsx';
 import Popup from '@components/ui/Popup.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { shortenInstName  } from '@utils/stringUtils.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import { useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
@@ -200,7 +201,7 @@ const UI_USR_L_040 = () => {
 
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
-            <li>검색 결과 <span className="point">{totalElements}</span>개</li>
+            <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
           </ul>
           <ul className="sch-sort">
             <li>

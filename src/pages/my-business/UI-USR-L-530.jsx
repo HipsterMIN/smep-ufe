@@ -5,6 +5,7 @@ import Pagination from '@components/ui/Pagination';
 import Tab from '@components/ui/Tab';
 import Datepicker from '@components/ui/Datepicker';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const INTEREST_NOTICE_MOCK = Array.from({ length: 28 }, (_, index) => {
   const categoryList = ['지원사업', '사업공고', '정책금융', '정책정보'];
@@ -154,7 +155,7 @@ const UI_USR_L_530 = () => {
 
         <div className="search-list-top mt-40">
           <ul className="sch-info" aria-live="polite">
-            <li>검색 결과 <span className="point">{totalElements}</span>건</li>
+            <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>건</li>
           </ul>
           <ul className="sch-sort">
             <li>

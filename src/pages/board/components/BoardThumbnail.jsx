@@ -7,6 +7,7 @@ import Pagination from '@components/ui/Pagination';
 import noImg from '@assets/common/noImg.png';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const appBaseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
@@ -232,7 +233,10 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
 
   const moveToDetail = (pstNo) => {
     if (pstNo == null) return;
-    navigate(`${pstNo}`);
+    const queryString = selectedCategoryNo
+      ? `?ctgryNo=${encodeURIComponent(selectedCategoryNo)}`
+      : '';
+    navigate(`${pstNo}${queryString}`);
   };
 
   return (
@@ -284,7 +288,7 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
 
               <div className="search-list-top">
                 <ul className="sch-info" aria-live="polite">
-                  <li>검색 결과 <span className="point">{totalElements}</span>개</li>
+                  <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
                 </ul>
                 <ul className="sch-sort">
                   <li>

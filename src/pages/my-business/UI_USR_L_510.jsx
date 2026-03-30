@@ -5,6 +5,7 @@ import Pagination from '@components/ui/Pagination.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import Datepicker from '@components/ui/Datepicker.jsx';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
  
 const UI_USR_L_510 = () => {
   const [issuanceList, setIssuanceList] = useState([]);
@@ -135,7 +136,7 @@ const UI_USR_L_510 = () => {
 
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
-            <li>검색 결과 <span className="point">{totalElements}</span>개</li>
+            <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
           </ul>
           <ul className="sch-sort">
             <li>

@@ -7,6 +7,7 @@ import noImg from '@assets/common/noImg.png';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const appBaseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
@@ -323,7 +324,7 @@ const RelatedSystems = () => {
               <div className="search-list-top mt-40">
                 <ul className="sch-info" aria-live="polite">
                   <li>
-                    검색 결과 <span className="point">{totalElements}</span>개
+                    검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개
                   </li>
                 </ul>
                 <ul className="sch-sort">

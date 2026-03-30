@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 const PAGE_SIZE = 10;
@@ -92,7 +93,7 @@ const UI_USR_L_220 = () => {
 
           <div className="search-list-top">
             <ul className="sch-info" aria-live="polite">
-              <li>검색 결과 <span className="point">{totalElements}</span>건</li>
+              <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>건</li>
             </ul>
             <ul className="sch-sort">
               <li>

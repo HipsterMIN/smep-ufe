@@ -9,6 +9,7 @@ import Tooltip from '../components/ui/Tooltip';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
+import { formatNumberWithCommas } from '../utils/numberUtils.js';
 
 const TAB_LABELS = ['전체', '융자', '보증', '보험'];
 const TAB_CODES = ['', 'FT01', 'FT02', 'FT03'];
@@ -750,7 +751,7 @@ const UI_USR_L_030 = () => {
 
               <div className="search-list-top">
                 <ul className="sch-info" aria-live="polite">
-                  <li>검색 결과 <span className="point">{totalElements}</span>건</li>
+                  <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>건</li>
                 </ul>
                 <ul className="sch-sort">
                   <li>

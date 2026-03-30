@@ -6,6 +6,7 @@ import Pagination from '@components/ui/Pagination';
 import Tab from '@components/ui/Tab';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const AREA_TABS = [
   { label: '전체', value: 'ALL' },
@@ -209,7 +210,7 @@ const UI_USR_L_190 = () => {
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
             <li>
-              검색 결과 <span className="point">{totalElements}</span>건
+              검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>건
             </li>
           </ul>
           <ul className="sch-sort">

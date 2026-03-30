@@ -3,6 +3,7 @@ import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const OPEN_API_REQUEST_HISTORY_MOCK = Array.from({ length: 12 }, (_, index) => ({
   id: index + 1,
@@ -59,7 +60,7 @@ const UI_USR_L_550 = () => {
 
           <div className="search-list-top">
             <ul className="sch-info" aria-live="polite">
-              <li>검색 결과 <span className="point">{totalElements}</span>건</li>
+              <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>건</li>
             </ul>
             <ul className="sch-sort">
               <li>

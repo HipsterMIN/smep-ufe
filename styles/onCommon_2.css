@@ -664,7 +664,7 @@
 }
 .main-container .main-toplayout {
   padding-top: 64px;
-  background: url(../src/assets/main/mainBg.png) no-repeat 50% 0 / 100% auto;
+  background: linear-gradient(180deg, #ECF2FE -23.63%, #FFF 100%);
 }
 .main-container .main-top-inner {
   max-width: 1600px;
@@ -1062,7 +1062,7 @@
 
 /* 메인 - 공지사항*/
 .main-notice {
-  background: #F1F1FD;
+  background: #ECF2FE;
 }
 .main-notice .notice-wrap {
   margin-top: 24px ;
@@ -1982,7 +1982,6 @@ button.aichatButton.active {
   }
   .main-container .main-toplayout {
     padding-top: 20px;
-    background-image: url(../src/assets/main/mainBg_mo.png);
   }
   .main-container .main-top-inner {
     padding: 0;
