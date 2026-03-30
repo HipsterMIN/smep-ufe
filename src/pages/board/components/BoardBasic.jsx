@@ -167,7 +167,10 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
 
   const moveToDetail = (pstNo) => {
     if (pstNo == null) return;
-    navigate(`${pstNo}`);
+    const queryString = appliedCategoryNo
+      ? `?ctgryNo=${encodeURIComponent(appliedCategoryNo)}`
+      : '';
+    navigate(`${pstNo}${queryString}`);
   };
 
   return (
@@ -316,7 +319,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
-          syncUrl
+            syncUrl
           />
         )}
       </div>
