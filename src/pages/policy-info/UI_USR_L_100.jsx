@@ -221,7 +221,10 @@ const UI_USR_L_100 = () => {
 
   const moveToDetail = (pstNo) => {
     if (pstNo == null) return;
-    navigate(`${pstNo}`);
+    const queryString = selectedCategoryNo
+      ? `?ctgryNo=${encodeURIComponent(selectedCategoryNo)}`
+      : '';
+    navigate(`${pstNo}${queryString}`);
   };
 
   return (
@@ -338,7 +341,7 @@ const UI_USR_L_100 = () => {
                   totalPages={totalPages}
                   currentPage={currentPage + 1}
                   onPageChange={handlePageChange}
-                syncUrl
+                  syncUrl
                 />
               )}
             </section>

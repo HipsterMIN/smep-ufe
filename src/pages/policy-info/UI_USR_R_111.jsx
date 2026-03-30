@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useMatches, useNavigate, useParams } from 'react-router-dom';
+import { Link, useMatches, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
@@ -22,6 +22,7 @@ const formatDate = (dateString) => {
 const UI_USR_R_111 = () => {
   const matches = useMatches();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
@@ -32,6 +33,13 @@ const UI_USR_R_111 = () => {
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
+  const navigationCategoryNo = useMemo(() => {
+    const rawCategoryNo = searchParams.get('ctgryNo');
+    if (rawCategoryNo == null) return '';
+
+    const normalizedCategoryNo = String(rawCategoryNo).trim();
+    return normalizedCategoryNo || '';
+  }, [searchParams]);
 
   const bbsNo = useMemo(() => {
     const currentMatch = matches[matches.length - 1];
@@ -89,7 +97,10 @@ const UI_USR_R_111 = () => {
         setLoading(true);
         setErrorMessage('');
 
-        const response = await apiClient.get(`/api/v1/board/${bbsNo}/posts/${pstNo}`);
+        const queryString = navigationCategoryNo
+          ? `?ctgryNo=${encodeURIComponent(navigationCategoryNo)}`
+          : '';
+        const response = await apiClient.get(`/api/v1/board/${bbsNo}/posts/${pstNo}${queryString}`);
 
         if (!isMounted) return;
         setPostDetail(response?.data ?? null);
@@ -109,7 +120,7 @@ const UI_USR_R_111 = () => {
     return () => {
       isMounted = false;
     };
-  }, [bbsNo, pstNo]);
+  }, [bbsNo, pstNo, navigationCategoryNo]);
 
   const boardTitle = useMemo(() => boardDetail?.bbsNm || depth1Menu?.menuNm || '', [boardDetail, depth1Menu]);
   const postTitle = useMemo(() => postDetail?.pstTtl || '-', [postDetail]);
@@ -182,7 +193,10 @@ const UI_USR_R_111 = () => {
 
   const buildPostLink = (targetPstNo) => {
     if (targetPstNo == null) return '#';
-    return `../${targetPstNo}`;
+    const queryString = navigationCategoryNo
+      ? `?ctgryNo=${encodeURIComponent(navigationCategoryNo)}`
+      : '';
+    return `../${targetPstNo}${queryString}`;
   };
 
   const handleNavigationClick = (event, targetPstNo) => {

@@ -232,7 +232,10 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
 
   const moveToDetail = (pstNo) => {
     if (pstNo == null) return;
-    navigate(`${pstNo}`);
+    const queryString = selectedCategoryNo
+      ? `?ctgryNo=${encodeURIComponent(selectedCategoryNo)}`
+      : '';
+    navigate(`${pstNo}${queryString}`);
   };
 
   return (
