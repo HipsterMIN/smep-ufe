@@ -4,6 +4,7 @@ import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient, apiBaseUrl } from '@lib/apiClient.js';
+import { formatEventRegionForDetail } from '@utils/stringUtils.js';
 
 const STREAMDOCS_VIEWER_URL =
   import.meta.env.VITE_STREAMDOCS_VIEWER_URL
@@ -201,7 +202,7 @@ const UI_USR_R_191 = () => {
             <dt>수행기관</dt>
             <dd>{renderText(item?.evntInfoFlfmtInstNm)}</dd>
             <dt>지역</dt>
-            <dd>{renderText(item?.evntInfoRgnNm)}</dd>
+            <dd>{formatEventRegionForDetail(item?.evntInfoRgnNm)}</dd>
             <dt>접수기간</dt>
             <dd>{renderText(item?.rcptPrdCn)}</dd>
             <dt>행사기간</dt>
