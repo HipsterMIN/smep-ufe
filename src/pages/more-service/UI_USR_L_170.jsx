@@ -6,6 +6,7 @@ import Pagination from '@components/ui/Pagination.jsx';
 import ImgFormat from '@assets/sub/img_business_format_01.jpg';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient, apiBaseUrl } from '@lib/apiClient.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const APP_BASE_URL = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
@@ -331,7 +332,7 @@ const UI_USR_L_170 = () => {
 
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
-            <li>이용가능한 업무용 서식<span className="point">{totalElements}</span>건</li>
+            <li>이용가능한 업무용 서식<span className="point">{formatNumberWithCommas(totalElements || 0)}</span>건</li>
           </ul>
         </div>
 
