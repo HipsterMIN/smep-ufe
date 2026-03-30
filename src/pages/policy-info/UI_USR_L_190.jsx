@@ -7,6 +7,7 @@ import Tab from '@components/ui/Tab';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
+import { formatEventRegionForList } from '@utils/stringUtils.js';
 
 const AREA_TABS = [
   { label: '전체', value: 'ALL' },
@@ -253,8 +254,8 @@ const UI_USR_L_190 = () => {
             <colgroup>
               <col style={{ width: '5%' }} />
               <col style={{ width: '5%' }} />
-              <col style={{ width: '340px' }} />
-              <col style={{ width: '200px' }} />
+              <col />
+              <col style={{ width: '220px' }} />
               <col style={{ width: '15%' }} />
               <col style={{ width: '5%' }} />
               <col style={{ width: '5%' }} />
@@ -289,14 +290,14 @@ const UI_USR_L_190 = () => {
                     <th scope="row" className="ac">
                       <span>{getDisplayNo(index)}</span>
                     </th>
-                    <td className="ac"><span>{item?.evntInfoRgnNm || '-'}</span></td>
+                    <td className="ac"><span>{formatEventRegionForList(item?.evntInfoRgnNm)}</span></td>
                     <td>
-                      <Link to={`${item.evntInfoId}`}>
+                      <Link className="onellipsis-1" to={`${item.evntInfoId}`}>
                         <span>{item?.evntInfoTtlNm || '-'}</span>
                       </Link>
                     </td>
                     <td className="ac"><span>{formatEventPeriod(item?.evntPrdCn || item?.rcptPrdCn)}</span></td>
-                    <td className="ac"><span>{item?.evntInfoFlfmtInstNm || '-'}</span></td>
+                    <td className="ac"><span className="onellipsis-1">{item?.evntInfoFlfmtInstNm || '-'}</span></td>
                     <td className="ac"><span>{formatDateDot(item?.regDt)}</span></td>
                     <td className="ac"><span>{item?.inqCnt ?? 0}</span></td>
                   </tr>
@@ -311,7 +312,7 @@ const UI_USR_L_190 = () => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
-          syncUrl
+            syncUrl
           />
         )}
       </div>
