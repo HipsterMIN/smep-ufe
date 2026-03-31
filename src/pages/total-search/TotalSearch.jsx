@@ -1,37 +1,661 @@
-import React, { useRef, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '@/components/ui/Header.jsx';
 import Footer from '@/components/ui/Footer.jsx';
 import Breadcrumb from '@/components/ui/Breadcrumb.jsx';
+import ResultMenuBreadcrumb from '@/components/ui/ResultMenuBreadcrumb.jsx';
 import Tab from '@/components/ui/Tab';
 import Pagination from '@/components/ui/Pagination.jsx';
-import searchIMG from '@/assets/sub/search_result_img.png';
+import { api as apiClient } from '@/lib/apiClient.js';
+import {
+  preloadIntegratedSearchRouteResources,
+  resolveIntegratedSearchRoute,
+} from '@/utils/integratedSearchRouteResolver.js';
+import { extractExternalUrl } from '@/utils/menuUtils.js';
+
+const SEARCH_TAB_LIST_COUNT = 10;
+const SEARCH_ALL_PREVIEW_COUNT = 3;
+
+const CERT_BUTTON_LABEL_BY_HINT = Object.freeze({
+  ISRH0011: '발급받기',
+  ISRH0012: '발급안내',
+});
+
+// 컬렉션별 필드 매핑은 이 블록만 수정하면 되도록 분리
+const COLLECTION_SECTION_CONFIG = [
+  {
+    collectionKey: 'smep_sprtbiz',
+    tabLabel: '지원사업',
+    defaultDepth1MenuNm: '지원사업',
+    defaultDepth2MenuNm: '지원사업소개',
+  },
+  {
+    collectionKey: 'smep_cert',
+    tabLabel: '증명서발급',
+    defaultDepth1MenuNm: '증명서발급',
+    defaultDepth2MenuNm: '발급',
+  },
+  {
+    collectionKey: 'smep_raw',
+    tabLabel: '정책법령정보',
+    defaultDepth1MenuNm: '정책법령정보',
+    defaultDepth2MenuNm: '정책금융',
+  },
+  {
+    collectionKey: 'smep_more',
+    tabLabel: '더많은서비스',
+    defaultDepth1MenuNm: '더많은서비스',
+    defaultDepth2MenuNm: '공지사항',
+  },
+  {
+    collectionKey: 'smep_cust',
+    tabLabel: '고객지원',
+    defaultDepth1MenuNm: '고객지원',
+    defaultDepth2MenuNm: '자주하는 질문',
+  },
+];
+
+const SEARCH_RESULT_FIELDS = Object.freeze({
+  depth1MenuId: 'depth1_menu_id',
+  depth1MenuNm: 'depth1_menu_nm',
+  depth2MenuId: 'depth2_menu_id',
+  depth2MenuNm: 'depth2_menu_nm',
+  depth3MenuId: 'depth3_menu_id',
+  depth3MenuNm: 'depth3_menu_nm',
+  title: 'title',
+  content: 'cont',
+  dataKey: 'data_key',
+  intgSrchRouteHintCd: 'intg_srch_route_hint_cd',
+  dataCategory: 'data_category',
+});
+
+const createInitialCollectionState = () =>
+  COLLECTION_SECTION_CONFIG.reduce((acc, config) => {
+    acc[config.collectionKey] = { count: 0, items: [] };
+    return acc;
+  }, {});
+
+const createInitialPageState = () =>
+  COLLECTION_SECTION_CONFIG.reduce((acc, config) => {
+    acc[config.collectionKey] = 1;
+    return acc;
+  }, {});
+
+const toTrimmedString = (value) => String(value ?? '').trim();
+
+const normalizeFieldKey = (value) =>
+  toTrimmedString(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+
+const toCount = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const isAbsoluteHttpUrl = (value) => /^https?:\/\//i.test(toTrimmedString(value));
+
+const pickResultFieldValue = (raw, fieldName, fallback = '') => {
+  if (!raw || typeof raw !== 'object') return fallback;
+
+  const directCandidates = [
+    raw?.[fieldName],
+    raw?.[String(fieldName).toLowerCase()],
+    raw?.[String(fieldName).toUpperCase()],
+  ];
+
+  for (const candidate of directCandidates) {
+    const value = toTrimmedString(candidate);
+    if (value) return value;
+  }
+
+  const normalizedTarget = normalizeFieldKey(fieldName);
+  const matchedEntry = Object.entries(raw).find(
+    ([key]) => normalizeFieldKey(key) === normalizedTarget,
+  );
+  const matchedValue = toTrimmedString(matchedEntry?.[1]);
+  return matchedValue || fallback;
+};
+
+const parseSearchPayload = (payload) => {
+  if (!payload) return null;
+  if (typeof payload === 'string') {
+    try {
+      return parseSearchPayload(JSON.parse(payload));
+    } catch (error) {
+      return null;
+    }
+  }
+  if (payload?.data !== undefined && payload?.data !== null) {
+    return parseSearchPayload(payload.data);
+  }
+  return payload;
+};
+
+const normalizeApiPayload = (response) => {
+  const parsed = parseSearchPayload(response);
+  return parsed && typeof parsed === 'object' ? parsed : {};
+};
+
+const formatCount = (value) => toCount(value).toLocaleString('ko-KR');
+
+const HIGHLIGHT_OPEN_TAG = '<!HS>';
+const HIGHLIGHT_CLOSE_TAG = '<!HE>';
+const HIGHLIGHT_OPEN_PLACEHOLDER = '__INTG_HS__';
+const HIGHLIGHT_CLOSE_PLACEHOLDER = '__INTG_HE__';
+
+const stripHtmlExceptHighlight = (value) => {
+  const raw = toTrimmedString(value);
+  if (!raw) return '';
+
+  const protectedHighlight = raw
+    .split(HIGHLIGHT_OPEN_TAG)
+    .join(HIGHLIGHT_OPEN_PLACEHOLDER)
+    .split(HIGHLIGHT_CLOSE_TAG)
+    .join(HIGHLIGHT_CLOSE_PLACEHOLDER);
+
+  const withoutHtml = protectedHighlight
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return withoutHtml
+    .split(HIGHLIGHT_OPEN_PLACEHOLDER)
+    .join(HIGHLIGHT_OPEN_TAG)
+    .split(HIGHLIGHT_CLOSE_PLACEHOLDER)
+    .join(HIGHLIGHT_CLOSE_TAG);
+};
+
+const renderHighlightedText = (value, fallback = '-') => {
+  const rawText = stripHtmlExceptHighlight(value);
+  const normalizedText = rawText || fallback;
+
+  if (
+    !normalizedText.includes(HIGHLIGHT_OPEN_TAG) &&
+    !normalizedText.includes(HIGHLIGHT_CLOSE_TAG)
+  ) {
+    return normalizedText;
+  }
+
+  const nodes = [];
+  let cursor = 0;
+  let highlightedIndex = 0;
+
+  while (cursor < normalizedText.length) {
+    const start = normalizedText.indexOf(HIGHLIGHT_OPEN_TAG, cursor);
+
+    if (start === -1) {
+      const tail = normalizedText.slice(cursor);
+      if (tail) nodes.push(tail);
+      break;
+    }
+
+    if (start > cursor) {
+      nodes.push(normalizedText.slice(cursor, start));
+    }
+
+    const contentStart = start + HIGHLIGHT_OPEN_TAG.length;
+    const end = normalizedText.indexOf(HIGHLIGHT_CLOSE_TAG, contentStart);
+
+    if (end === -1) {
+      nodes.push(normalizedText.slice(start));
+      break;
+    }
+
+    const highlightedText = normalizedText.slice(contentStart, end);
+    nodes.push(
+      <span key={`highlight-${highlightedIndex}`} className="point">
+        {highlightedText}
+      </span>,
+    );
+    highlightedIndex += 1;
+    cursor = end + HIGHLIGHT_CLOSE_TAG.length;
+  }
+
+  return <>{nodes}</>;
+};
+
+const normalizeSearchItem = (rawItem, config) => {
+  const raw = rawItem && typeof rawItem === 'object' ? rawItem : {};
+
+  const depth1MenuId = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.depth1MenuId);
+  const depth1MenuNm = pickResultFieldValue(
+    raw,
+    SEARCH_RESULT_FIELDS.depth1MenuNm,
+    config.defaultDepth1MenuNm || config.tabLabel,
+  );
+  const depth2MenuId = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.depth2MenuId);
+  const depth2MenuNm = pickResultFieldValue(
+    raw,
+    SEARCH_RESULT_FIELDS.depth2MenuNm,
+    config.defaultDepth2MenuNm || config.tabLabel,
+  );
+  const depth3MenuId = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.depth3MenuId);
+  const depth3MenuNm = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.depth3MenuNm);
+  const title = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.title, '-');
+  const content = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.content);
+  const workId = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.dataKey);
+  const intgSrchRouteHintCd = pickResultFieldValue(
+    raw,
+    SEARCH_RESULT_FIELDS.intgSrchRouteHintCd,
+  );
+  const bbsCategoryId = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.dataCategory);
+  const docId = workId;
+
+  return {
+    collectionKey: config.collectionKey,
+    depth1MenuId,
+    depth1MenuNm,
+    depth2MenuId,
+    depth2MenuNm,
+    depth3MenuId,
+    depth3MenuNm,
+    title,
+    content,
+    workId,
+    intgSrchRouteHintCd,
+    bbsCategoryId,
+    linkUrl: '',
+    docId,
+    raw,
+  };
+};
+
+const normalizeCollectionResult = (payload, config, itemLimit = null) => {
+  const node = payload?.[config.collectionKey] || {};
+  const rawItems = Array.isArray(node?.data) ? node.data : [];
+  const items = rawItems.map((item) => normalizeSearchItem(item, config));
+
+  return {
+    count: toCount(node?.count),
+    items: Number.isFinite(itemLimit) ? items.slice(0, itemLimit) : items,
+  };
+};
+
+const buildCollectionResultMap = (payload, itemLimit = null) =>
+  COLLECTION_SECTION_CONFIG.reduce((acc, config) => {
+    acc[config.collectionKey] = normalizeCollectionResult(payload, config, itemLimit);
+    return acc;
+  }, {});
+
+const buildBadgeLabel = (item, config) =>
+  item.depth3MenuNm || item.depth2MenuNm || config.defaultDepth2MenuNm || config.tabLabel;
+
+const getCertificateButtonLabel = (item) => {
+  const hintCode = toTrimmedString(item.intgSrchRouteHintCd).toUpperCase();
+  return CERT_BUTTON_LABEL_BY_HINT[hintCode] || '';
+};
+
+const resolveFallbackNavigation = (item) => {
+  const rawLink = toTrimmedString(item.linkUrl);
+  if (!rawLink) return null;
+
+  const extractedExternalUrl = extractExternalUrl(rawLink);
+  if (extractedExternalUrl) {
+    return { type: 'external', value: extractedExternalUrl };
+  }
+
+  if (isAbsoluteHttpUrl(rawLink)) {
+    return { type: 'external', value: rawLink };
+  }
+
+  if (rawLink.startsWith('/')) {
+    return { type: 'internal', value: rawLink };
+  }
+
+  return null;
+};
 
 const TotalSearch = () => {
-  const tabData = useRef(['전체(2398)', '지원사업(340)', '증명서 발급(3)', '정책‧법령 정보(32)', '더 많은 서비스(2330)', '고객지원(3)']);
-  const schFormWrapRef1 = useRef(null);
-  const schFormWrapRef2 = useRef(null);
-  const searchOptionModalRef = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const allRequestSerialRef = useRef(0);
+  const tabRequestSerialRef = useRef(0);
+
+  const [searchInput, setSearchInput] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [activeTabIndex, setActiveTabIndex] = useState(0);
-  
-  const handleOpenSearchOptionModal = () => {
-    searchOptionModalRef.current.classList.add('on');
-  };
-  const handleCloseSearchOptionModal = () => {
-    searchOptionModalRef.current.classList.remove('on');
+  const [totalCount, setTotalCount] = useState(0);
+  const [allCollections, setAllCollections] = useState(createInitialCollectionState);
+  const [tabCollections, setTabCollections] = useState(createInitialCollectionState);
+  const [tabPageByCollection, setTabPageByCollection] = useState(createInitialPageState);
+  const [isAllLoading, setIsAllLoading] = useState(false);
+  const [isTabLoading, setIsTabLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const breadcrumbItems = useMemo(
+    () => [{ label: '통합 검색', link: '#' }],
+    [],
+  );
+
+  const resetResultState = useCallback(() => {
+    setTotalCount(0);
+    setAllCollections(createInitialCollectionState());
+    setTabCollections(createInitialCollectionState());
+    setErrorMessage('');
+  }, []);
+
+  const fetchAllResults = useCallback(async (keyword) => {
+    const requestSerial = ++allRequestSerialRef.current;
+    setIsAllLoading(true);
+    setErrorMessage('');
+
+    try {
+      const params = new URLSearchParams({
+        query: keyword,
+        collection: 'ALL',
+      });
+      const response = await apiClient.get(`/api/v1/search/totalSearch?${params.toString()}`);
+      if (requestSerial !== allRequestSerialRef.current) return;
+
+      const payload = normalizeApiPayload(response);
+      setTotalCount(toCount(payload?.totalCount));
+      setAllCollections(buildCollectionResultMap(payload, SEARCH_ALL_PREVIEW_COUNT));
+    } catch (error) {
+      if (requestSerial !== allRequestSerialRef.current) return;
+      setTotalCount(0);
+      setAllCollections(createInitialCollectionState());
+      setErrorMessage('통합검색 조회 중 오류가 발생했습니다.');
+    } finally {
+      if (requestSerial === allRequestSerialRef.current) {
+        setIsAllLoading(false);
+      }
+    }
+  }, []);
+
+  const fetchTabResults = useCallback(async ({ keyword, collectionKey, page }) => {
+    const requestSerial = ++tabRequestSerialRef.current;
+    setIsTabLoading(true);
+    setErrorMessage('');
+
+    try {
+      const params = new URLSearchParams({
+        query: keyword,
+        collection: collectionKey,
+        startCount: String(Math.max(0, page - 1)),
+      });
+      const response = await apiClient.get(`/api/v1/search/totalSearch?${params.toString()}`);
+      if (requestSerial !== tabRequestSerialRef.current) return;
+
+      const payload = normalizeApiPayload(response);
+      const config = COLLECTION_SECTION_CONFIG.find((item) => item.collectionKey === collectionKey);
+      if (!config) return;
+
+      const normalized = normalizeCollectionResult(payload, config);
+      setTabCollections((prev) => ({
+        ...prev,
+        [collectionKey]: normalized,
+      }));
+    } catch (error) {
+      if (requestSerial !== tabRequestSerialRef.current) return;
+      setTabCollections((prev) => ({
+        ...prev,
+        [collectionKey]: { count: 0, items: [] },
+      }));
+      setErrorMessage('검색결과 조회 중 오류가 발생했습니다.');
+    } finally {
+      if (requestSerial === tabRequestSerialRef.current) {
+        setIsTabLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    preloadIntegratedSearchRouteResources().catch(() => {
+      // 상세 이동 첫 클릭 지연을 줄이기 위한 사전 로드이므로 실패 시 무시
+    });
+  }, []);
+
+  useEffect(() => {
+    const stateQuery = toTrimmedString(location.state?.q);
+    const queryParam = toTrimmedString(new URLSearchParams(location.search).get('q'));
+    const nextQuery = stateQuery || queryParam;
+
+    setSearchInput(nextQuery);
+    setSearchKeyword(nextQuery);
+    setActiveTabIndex(0);
+    setTabPageByCollection(createInitialPageState());
+  }, [location.key, location.search, location.state]);
+
+  useEffect(() => {
+    if (!searchKeyword) {
+      resetResultState();
+      return;
+    }
+
+    fetchAllResults(searchKeyword);
+  }, [searchKeyword, fetchAllResults, resetResultState]);
+
+  useEffect(() => {
+    if (!searchKeyword || activeTabIndex === 0) return;
+
+    const config = COLLECTION_SECTION_CONFIG[activeTabIndex - 1];
+    if (!config) return;
+
+    const page = tabPageByCollection[config.collectionKey] || 1;
+    fetchTabResults({
+      keyword: searchKeyword,
+      collectionKey: config.collectionKey,
+      page,
+    });
+  }, [activeTabIndex, fetchTabResults, searchKeyword, tabPageByCollection]);
+
+  const handleSearch = () => {
+    const nextKeyword = toTrimmedString(searchInput);
+    setActiveTabIndex(0);
+    setTabPageByCollection(createInitialPageState());
+
+    if (nextKeyword === searchKeyword) {
+      if (!nextKeyword) {
+        resetResultState();
+        return;
+      }
+      fetchAllResults(nextKeyword);
+      return;
+    }
+
+    setSearchKeyword(nextKeyword);
   };
 
-  const handleToggleFilter = (tabIndex) => {
-    const ref = tabIndex === 0 ? schFormWrapRef1 : schFormWrapRef2;
-    ref.current?.classList.toggle('on');
+  const handleInputKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
   };
-  
-  const breadcrumbItems = [
-    { label: '통합 검색', link: '#' },
-  ];
+
+  const handleMoreToTab = (tabIndex) => {
+    setActiveTabIndex(tabIndex);
+  };
+
+  const handleTabPageChange = (collectionKey, page) => {
+    setTabPageByCollection((prev) => ({
+      ...prev,
+      [collectionKey]: page,
+    }));
+  };
+
+  const navigateByItem = useCallback(async (item) => {
+    const hintCode = toTrimmedString(item.intgSrchRouteHintCd);
+    if (hintCode) {
+      try {
+        const resolved = await resolveIntegratedSearchRoute({
+          intgSrchRouteHintCd: hintCode,
+          workId: item.workId,
+          bbsCategoryId: item.bbsCategoryId,
+        });
+
+        if (resolved?.path) {
+          navigate(resolved.path);
+          return;
+        }
+      } catch (error) {
+        // 리졸버 실패 시 아래 fallback 경로를 시도
+      }
+    }
+
+    const fallback = resolveFallbackNavigation(item);
+    if (!fallback) return;
+
+    if (fallback.type === 'internal') {
+      navigate(fallback.value);
+      return;
+    }
+
+    window.open(fallback.value, '_blank', 'noopener,noreferrer');
+  }, [navigate]);
+
+  const handleItemClick = async (event, item) => {
+    event.preventDefault();
+    await navigateByItem(item);
+  };
+
+  const handleCertificateButtonClick = async (event, item) => {
+    event.preventDefault();
+    await navigateByItem(item);
+  };
+
+  const totalCountByCollections = useMemo(
+    () =>
+      COLLECTION_SECTION_CONFIG.reduce((sum, config) => {
+        return sum + toCount(allCollections[config.collectionKey]?.count);
+      }, 0),
+    [allCollections],
+  );
+
+  const displayTotalCount = totalCount > 0 ? totalCount : totalCountByCollections;
+
+  const tabData = useMemo(() => {
+    const labels = [`전체(${formatCount(displayTotalCount)})`];
+    COLLECTION_SECTION_CONFIG.forEach((config) => {
+      labels.push(`${config.tabLabel}(${formatCount(allCollections[config.collectionKey]?.count)})`);
+    });
+    return labels;
+  }, [allCollections, displayTotalCount]);
+
+  const currentResultCount = useMemo(() => {
+    if (activeTabIndex === 0) return displayTotalCount;
+    const config = COLLECTION_SECTION_CONFIG[activeTabIndex - 1];
+    return toCount(allCollections[config?.collectionKey]?.count);
+  }, [activeTabIndex, allCollections, displayTotalCount]);
+
+  const renderBreadcrumb = (item) => {
+    return (
+      <ResultMenuBreadcrumb
+        depth1MenuId={item.depth1MenuId}
+        depth2MenuId={item.depth2MenuId}
+        depth3MenuId={item.depth3MenuId}
+        className="mb-0"
+        ariaLabel="현재 경로"
+      />
+    );
+  };
+
+  const renderCollectionCards = (config, items, { showCertificateButton }) => {
+    if (!items.length) {
+      return (
+        <div className="in">
+          <div className="card-body">
+            <p className="c-txt onellipsis-2">검색 결과가 없습니다.</p>
+          </div>
+        </div>
+      );
+    }
+
+    return items.map((item, index) => {
+      const keyBase = item.docId || item.workId || item.title || 'item';
+      const key = `${config.collectionKey}-${keyBase}-${index}`;
+      const buttonLabel = showCertificateButton ? getCertificateButtonLabel(item) : '';
+
+      return (
+        <div className="in" key={key}>
+          <div className="card-top">
+            <span className="krds-badge bg-light-primary">{buildBadgeLabel(item, config)}</span>
+          </div>
+          <div className="card-body">
+            <a
+              href={item.linkUrl || '#'}
+              className="c-text c-date"
+              onClick={(event) => handleItemClick(event, item)}
+            >
+              <p className="c-tit no-icon">
+                <h4 className="onellipsis-2">{renderHighlightedText(item.title, '-')}</h4>
+              </p>
+              <p className="c-txt onellipsis-2">{renderHighlightedText(item.content, '-')}</p>
+              {!showCertificateButton && renderBreadcrumb(item)}
+            </a>
+          </div>
+          {showCertificateButton && buttonLabel && (
+            <div className="card-btn">
+              <button
+                type="button"
+                className="krds-btn primary xlarge"
+                onClick={(event) => handleCertificateButtonClick(event, item)}
+              >
+                {buttonLabel}
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    });
+  };
+
+  const renderAllTabSection = (config, tabIndex) => {
+    const result = allCollections[config.collectionKey] || { count: 0, items: [] };
+
+    return (
+      <div className="search-result-list-wrap" key={config.collectionKey}>
+        <div className="search-result-caption">
+          <div className="search-title">
+            <h4>
+              {config.tabLabel}
+              <p>
+                <span className="point">{formatCount(result.count)}</span> 건
+              </p>
+            </h4>
+          </div>
+          <button type="button" className="search-more-btn" onClick={() => handleMoreToTab(tabIndex)}>
+            더보기<i className="svg-icon ico-plus" />
+          </button>
+        </div>
+        <ul className="krds-structured-list type-full">
+          <li className="structured-item">
+            {renderCollectionCards(config, result.items, {
+              showCertificateButton: config.collectionKey === 'smep_cert',
+            })}
+          </li>
+        </ul>
+      </div>
+    );
+  };
+
+  const renderIndependentTabSection = (config) => {
+    const result = tabCollections[config.collectionKey] || { count: 0, items: [] };
+    const currentPage = tabPageByCollection[config.collectionKey] || 1;
+    const totalPages = Math.ceil(toCount(result.count) / SEARCH_TAB_LIST_COUNT);
+
+    return (
+      <div className="search-result-list-wrap indep-wrap">
+        <ul className="krds-structured-list type-full">
+          <li className="structured-item indep-item">
+            {renderCollectionCards(config, result.items, {
+              showCertificateButton: config.collectionKey === 'smep_cert',
+            })}
+          </li>
+        </ul>
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={(page) => handleTabPageChange(config.collectionKey, page)}
+        />
+      </div>
+    );
+  };
 
   return (
     <div id="wrap" className="integrated-search">
@@ -39,15 +663,22 @@ const TotalSearch = () => {
       <div id="container" className="on-gradientpage sub-container">
         <div className="inner">
           <div className="totalsearch-wrap">
-            <Breadcrumb items={breadcrumbItems}/>
+            <Breadcrumb items={breadcrumbItems} />
             <div className="page-title-wrap" data-type="responsive">
               <h2 className="h-tit">통합검색</h2>
             </div>
-            
+
             <div className="onsearch-input-box">
               <div className="boxinner">
-                <input type="text" />
-                <button type="button"><i className="svg-icon ico-sch" style={{ backgroundColor: '#256EF4' }}></i></button>
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                  onKeyDown={handleInputKeyDown}
+                />
+                <button type="button" onClick={handleSearch}>
+                  <i className="svg-icon ico-sch" style={{ backgroundColor: '#256EF4' }}></i>
+                </button>
               </div>
             </div>
           </div>
@@ -58,747 +689,69 @@ const TotalSearch = () => {
           <div className="krds-tab-area layer">
             <div className="search-list-top mt-0">
               <ul className="sch-info" aria-live="polite">
-                <li>‘<span className="point">지원</span>’</li>
-                <li>검색 결과 <span className="point">22,459</span> 건</li>
+                <li>
+                  '<span className="point">{searchKeyword || '-'}</span>'
+                </li>
+                <li>
+                  검색 결과 <span className="point">{formatCount(currentResultCount)}</span> 건
+                </li>
               </ul>
             </div>
+
+            {errorMessage && (
+              <div className="search-list-top mt-0" role="alert">
+                <ul className="sch-info">
+                  <li>{errorMessage}</li>
+                </ul>
+              </div>
+            )}
+
             <div className="search-tab-wrap">
-              <Tab tabData={tabData.current} onTabChange={handleTabChange}></Tab>
+              <Tab tabData={tabData} onTabChange={handleTabChange} activeIndex={activeTabIndex} />
             </div>
 
             <div className="tab-conts-wrap">
               <section className={`tab-conts ${activeTabIndex === 0 ? 'active' : ''}`}>
-                <div className="search-result-list-wrap">
-                  <div className="search-result-caption">
-                    <div className="search-title">
-                      <h4>
-                        지원사업{' '}
-                        <p><span className="point">22,459</span> 건</p>
-                      </h4>
-                    </div>
-                    <button className="search-more-btn">더보기 <i className="svg-icon ico-plus" /></button>
+                {isAllLoading && (
+                  <div className="search-result-list-wrap">
+                    <ul className="krds-structured-list type-full">
+                      <li className="structured-item">
+                        <div className="in">
+                          <div className="card-body">
+                            <p className="c-txt onellipsis-2">검색결과 조회 중...</p>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
                   </div>
-                  <ul className="krds-structured-list type-full">
-                    <li className="structured-item">
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">지원사업소개</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">
-                                고용노동부, <span className="point">퇴직</span>정부혁신과 적극행정 우수사례를 확산하고, 일하는 방식 개선을 통해 정부혁신을 속도감 있게 추진
-                              </h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              또 다른 최우수 사례로 선정된 “외국인 근로자 <span className="point">퇴직</span>금 자동환급제”는 외국인 근로자가 최초 입국 시 사전 등록한 계좌에
-                              <span className="point">퇴직</span>금(출국만기보험)을 자동 지급함으로써 송출국가의 열악한 금융환경 등으로
-                              <span className="point">퇴직</span>금(출국만기보험)이 미지급되는 문제점을 개선하여 외국인 근로자의 권리구제에
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">지원사업</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">지원사업소개</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">정책금융</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">혁신성장지원자금</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              사업성과 기술성이 우수한 성장유망 <span className="point">중소기업</span>의 생산성 향상, 고부가가치화 등 경쟁력 강화에 필요한 자금을 지원하여 성장동력을 창출하는 사업입니다.
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">지원사업</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">정책금융</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-                      
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">사업공고</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">2026년 콘텐츠도쿄(CONTENT TOKYO) 한국공동관 참가기업 모집 공고</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              콘텐츠IP 사업권을 보유하고 <span className="point">라이선싱</span>, 기획, 제작, 유통 및 배급 등 해외수출을 원하는 국내 콘텐츠 기업
-                              - 일본을 중심으로 콘텐츠IP 홍보 및 IP 활용 상품 판매 등 일본시장 진출에 대한 참여 목적이 명확한 기업
-                              - 콘텐츠IP 저작권을 소유하거나 절대적 협상권을 보유하여 직접 수출상담이 가능한 기업(플랫폼사, 제작사, 스튜디오, 출판사, 에이전시 등)
-                              - 콘텐츠IP 저작권을 소유하거나 절대적 협상권을 보유하여 직접 수출상담이 가능한 기업(플랫폼사, 제작사, 스튜디오, 출판사, 에이전시 등)
-                              - 콘텐츠IP 저작권을 소유하거나 절대적 협상권을 보유하여 직접 수출상담이 가능한 기업(플랫폼사, 제작사, 스튜디오, 출판사, 에이전시 등)
-                              - 콘텐츠IP 저작권을 소유하거나 절대적 협상권을 보유하여 직접 수출상담이 가능한 기업(플랫폼사, 제작사, 스튜디오, 출판사, 에이전시 등)
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">지원사업</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">사업공고</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="search-result-list-wrap">
-                  <div className="search-result-caption">
-                    <div className="search-title">
-                      <h4>
-                        증명서 발급{' '}
-                        <p><span className="point">22,459</span> 건</p>
-                      </h4>
-                    </div>
-                    <button className="search-more-btn">더보기 <i className="svg-icon ico-plus" /></button>
-                  </div>
-                  <ul className="krds-structured-list type-full">
-                    <li className="structured-item">
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">발급</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">벤처기업확인서</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              「벤처기업육성에 관한 특별조치법」 제2조의2에서 정한 <span className="point">요건</span>을 충족한 벤처기업임을 확인하는 확인서 사본 발급 서비스
-                            </p>
-                          </a>
-                        </div>
-                        <div class="card-btn">
-                          <button type="button" class="krds-btn primary xlarge">발급받기</button>
-                        </div>
-                      </div>
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">발급</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">벤처기업확인서</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              「벤처기업육성에 관한 특별조치법」 제2조의2에서 정한 <span className="point">요건</span>을 충족한 벤처기업임을 확인하는 확인서 사본 발급 서비스
-                            </p>
-                          </a>
-                        </div>
-                        <div class="card-btn">
-                          <button type="button" class="krds-btn primary xlarge">발급받기</button>
-                        </div>
-                      </div>
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">발급</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">벤처기업확인서</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              「벤처기업육성에 관한 특별조치법」 제2조의2에서 정한 <span className="point">요건</span>을 충족한 벤처기업임을 확인하는 확인서 사본 발급 서비스
-                            </p>
-                          </a>
-                        </div>
-                        <div class="card-btn">
-                          <button type="button" class="krds-btn primary xlarge">발급받기</button>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="search-result-list-wrap">
-                  <div className="search-result-caption">
-                    <div className="search-title">
-                      <h4>
-                        정책‧법령 정보{' '}
-                        <p><span className="point">22,459</span> 건</p>
-                      </h4>
-                    </div>
-                    <button className="search-more-btn">더보기 <i className="svg-icon ico-plus" /></button>
-                  </div>
-                  <ul className="krds-structured-list type-full">
-                    <li className="structured-item">
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">뉴스∙소식</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">고용노동부, 정부혁신과 적극행정 우수사례를 확산하고, 일하는 방식 개선을 통해 정부혁신을 속도감 있게 추진</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2 w-82-per">
-                              또 다른 최우수 사례로 선정된 “외국인 근로자 <span className="point">퇴직</span>금 자동환급제”는 외국인 근로자가 최초 입국 시 사전 등록한 계좌에 <span className="point">퇴직</span>금(출국만기보험)을
-                              자동 지급함으로써 송출국가의 열악한 금융환경 등으로 <span className="point">퇴직</span>금(출국만기보험)이 미지급되는 문제점을 개선하여 외국인 근로자의 권리구제에
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">뉴스・소식</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">뉴스소식</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                        <div class="card-imgs">
-                          <img src={searchIMG} alt="갤러리 이미지" />
-                        </div>
-                      </div>
-
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">정책뉴스</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">
-                                <span className="point">퇴직</span>연금복지과, <span className="point">퇴직</span>연금
-                                수수료 부과에 관한 고시제정안 행정예고
-                              </h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              고용노동부 공고 제2023-453호 <span className="point">퇴직</span>연금 수수료 부과에 관한 고시제정안을 행정예고 하는데 있어,
-                              그 이유와 주요내용을 국민에게 미리 알려 이에 대한 의견을 듣기 위하여 「행정절차법」제46조에 따라 다음과 같이 공고합니다. 2023년 9월 13일 고용노동부장관
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">정책‧법령 정보</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">정책정보</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">정책뉴스</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">자주하는 질문</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">중소기업협동조합법 시행령 일부개정령(안) 입법예고</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              고용노동부 공고 제2023-453호 <span className="point">퇴직</span>연금 수수료 부과에 관한 고시제정안을 행정예고 하는데 있어,
-                              그 이유와 주요내용을 국민에게 미리 알려 이에 대한 의견을 듣기 위하여 「행정절차법」제46조에 따라 다음과 같이 공고합니다. 2023년 9월 13일 고용노동부장관
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">정책‧법령 정보</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">법령정보</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">입법·행정예고/고시</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="search-result-list-wrap">
-                  <div className="search-result-caption">
-                    <div className="search-title">
-                      <h4>
-                        더 많은 서비스{' '}
-                        <p><span className="point">22,459</span> 건</p>
-                      </h4>
-                    </div>
-                    <button className="search-more-btn">더보기 <i className="svg-icon ico-plus" /></button>
-                  </div>
-                  <ul className="krds-structured-list type-full">
-                    <li className="structured-item">
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">뉴스∙소식</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">고용노동부, 정부혁신과 적극행정 우수사례를 확산하고, 일하는 방식 개선을 통해 정부혁신을 속도감 있게 추진</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2 w-82-per">
-                              또 다른 최우수 사례로 선정된 “외국인 근로자 퇴직금 자동환급제”는 외국인 근로자가 최초 입국 시 사전 등록한 계좌에 <span className="point">퇴직</span>금(출국만기보험)을 자동 지급함으로써 송출국가의 열악한 금융환경 등으로 <span className="point">퇴직</span>금(출국만기보험)이 미지급되는 문제점을 개선하여 외국인 근로자의 권리구제에
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">뉴스・소식</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">뉴스소식</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                        <div class="card-imgs">
-                          <img src={searchIMG} alt="갤러리 이미지" />
-                        </div>
-                      </div>
-
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">법령정보</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">
-                                <span className="point">지원</span>연금복지과,
-                                <span className="point">지원</span>연금 수수료 부과에 관한 고시제정안 행정예고
-                              </h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              고용노동부 공고 제2023-453호 <span className="point">지원</span>연금 수수료 부과에 관한 고시제정안을 행정예고 하는데 있어,
-                              그 이유와 주요내용을 국민에게 미리 알려 이에 대한 의견을 듣기 위하여 「행정절차법」제46조에 따라 다음과 같이 공고합니다. 2023년 9월 13일 고용노동부장관
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">정보공개</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">법령정보</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">입법・행정예고</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">자주하는 질문</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">임금 및 <span className="point">퇴직</span>금 소멸시효 기산일</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              <span className="point">퇴직</span>금 산정시 산전.후 휴가기간이 포함되는지 여부?
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">민원</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">자주하는 질문</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="search-result-list-wrap mb-60">
-                  <div className="search-result-caption">
-                    <div className="search-title">
-                      <h4>
-                        고객지원{' '}
-                        <p><span className="point">22,459</span> 건</p>
-                      </h4>
-                    </div>
-                    <button className="search-more-btn">더보기 <i className="svg-icon ico-plus" /></button>
-                  </div>
-                  <ul className="krds-structured-list type-full">
-                    <li className="structured-item">
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">뉴스∙소식</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">고용노동부, 정부혁신과 적극행정 우수사례를 확산하고, 일하는 방식 개선을 통해 정부혁신을 속도감 있게 추진</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2 w-82-per">
-                              또 다른 최우수 사례로 선정된 “외국인 근로자 퇴직금 자동환급제”는 외국인 근로자가 최초 입국 시 사전 등록한 계좌에 <span className="point">퇴직</span>금(출국만기보험)을 자동 지급함으로써 송출국가의 열악한 금융환경 등으로 <span className="point">퇴직</span>금(출국만기보험)이 미지급되는 문제점을 개선하여 외국인 근로자의 권리구제에
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">뉴스・소식</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">뉴스소식</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                        <div class="card-imgs">
-                          <img src={searchIMG} alt="갤러리 이미지" />
-                        </div>
-                      </div>
-
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">법령정보</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">
-                                <span className="point">지원</span>연금복지과,
-                                <span className="point">지원</span>연금 수수료 부과에 관한 고시제정안 행정예고
-                              </h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              고용노동부 공고 제2023-453호 <span className="point">지원</span>연금 수수료 부과에 관한 고시제정안을 행정예고 하는데 있어,
-                              그 이유와 주요내용을 국민에게 미리 알려 이에 대한 의견을 듣기 위하여 「행정절차법」제46조에 따라 다음과 같이 공고합니다. 2023년 9월 13일 고용노동부장관
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">정보공개</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">법령정보</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">입법・행정예고</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">자주하는 질문</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">임금 및 <span className="point">퇴직</span>금 소멸시효 기산일</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              <span className="point">퇴직</span>금 산정시 산전.후 휴가기간이 포함되는지 여부?
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">민원</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">자주하는 질문</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
+                )}
+                {COLLECTION_SECTION_CONFIG.map((config, index) =>
+                  renderAllTabSection(config, index + 1),
+                )}
               </section>
-              <section className={`tab-conts ${activeTabIndex === 1 ? 'active' : ''}`}>
-                <div className="search-result-list-wrap indep-wrap">
-                  <ul className="krds-structured-list type-full">
-                    <li className="structured-item indep-item">
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">지원사업소개</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">
-                                고용노동부, 정부혁신과 적극행정 우수사례를 확산하고, 일하는 방식 개선을 통해 정부혁신을 속도감 있게 추진
-                              </h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              또 다른 최우수 사례로 선정된 “외국인 근로자 <span className="point">퇴직</span>금 자동환급제”는 외국인 근로자가 최초 입국 시 사전 등록한 계좌에 <span className="point">퇴직</span>금(출국만기보험)을 자동 지급함으로써 송출국가의 열악한 금융환경 등으로 <span className="point">퇴직</span>금(출국만기보험)이 미지급되는 문제점을 개선하여 외국인 근로자의 권리구제에
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">지원사업</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">지원사업소개</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
 
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">사업공고</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">
-                                2026년 콘텐츠도쿄(CONTENT TOKYO) 한국공동관 참가기업 모집 공고
-                              </h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              콘텐츠IP 사업권을 보유하고 <span className="point">라이선싱</span>, 기획, 제작, 유통 및 배급 등 해외수출을 원하는 국내 콘텐츠 기업<br/>
-                              - 일본을 중심으로 콘텐츠IP 홍보 및 IP 활용 상품 판매 등 일본시장 진출에 대한 참여 목적이 명확한 기업<br/>
-                              - 콘텐츠IP 저작권을 소유하거나 절대적 협상권을 보유하여 직접 수출상담이 가능한 기업(플랫폼사, 제작사, 스튜디오, 출판사, 에이전시 등)
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">지원사업</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">사업공고</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">사업공고</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">
-                                2026년 콘텐츠도쿄(CONTENT TOKYO) 한국공동관 참가기업 모집 공고
-                              </h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              콘텐츠IP 사업권을 보유하고 <span className="point">라이선싱</span>, 기획, 제작, 유통 및 배급 등 해외수출을 원하는 국내 콘텐츠 기업<br/>
-                              - 일본을 중심으로 콘텐츠IP 홍보 및 IP 활용 상품 판매 등 일본시장 진출에 대한 참여 목적이 명확한 기업<br/>
-                              - 콘텐츠IP 저작권을 소유하거나 절대적 협상권을 보유하여 직접 수출상담이 가능한 기업(플랫폼사, 제작사, 스튜디오, 출판사, 에이전시 등)
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">지원사업</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">사업공고</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">정책금융</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">
-                                혁신성장지원자금
-                              </h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              사업성과 기술성이 우수한 성장유망 <span className="point">중소기업</span>의 생산성 향상, 고부가가치화 등 경쟁력 강화에 필요한 자금을 지원하여 성장동력을 창출하는 사업입니다.
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">지원사업</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">정책금융</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">정책금융</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">
-                                혁신성장지원자금
-                              </h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              사업성과 기술성이 우수한 성장유망 <span className="point">중소기업</span>의 생산성 향상, 고부가가치화 등 경쟁력 강화에 필요한 자금을 지원하여 성장동력을 창출하는 사업입니다.
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">지원사업</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">정책금융</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">정책금융</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">
-                                혁신성장지원자금
-                              </h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              사업성과 기술성이 우수한 성장유망 <span className="point">중소기업</span>의 생산성 향상, 고부가가치화 등 경쟁력 강화에 필요한 자금을 지원하여 성장동력을 창출하는 사업입니다.
-                            </p>
-                            <nav class="krds-breadcrumb-wrap mb-0" aria-label="현재 경로" id="breadcrumb">
-                              <ol class="breadcrumb">
-                                <li>
-                                  <a class="txt" href="" data-discover="true">지원사업</a>
-                                </li>
-                                <li>
-                                  <a class="txt" href="" data-discover="true">정책금융</a>
-                                </li>
-                              </ol>
-                            </nav>
-                          </a>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                  <Pagination />
-                </div>
-              </section>
-              <section className={`tab-conts ${activeTabIndex === 2 ? 'active' : ''}`}>
-                <div className="search-result-list-wrap indep-wrap">
-                  <ul className="krds-structured-list type-full">
-                    <li className="structured-item indep-item">
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">발급</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">벤처기업확인서</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              「벤처기업육성에 관한 특별조치법」 제2조의2에서 정한 <span className="point">요건</span>을 충족한 벤처기업임을 확인하는 확인서 사본 발급 서비스
-                            </p>
-                          </a>
-                        </div>
-                        <div class="card-btn">
-                          <button type="button" class="krds-btn primary xlarge">발급받기</button>
-                        </div>
-                      </div>
-
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">발급</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">벤처기업확인서</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              「벤처기업육성에 관한 특별조치법」 제2조의2에서 정한 <span className="point">요건</span>을 충족한 벤처기업임을 확인하는 확인서 사본 발급 서비스
-                            </p>
-                          </a>
-                        </div>
-                        <div class="card-btn">
-                          <button type="button" class="krds-btn primary xlarge">발급받기</button>
-                        </div>
-                      </div>
-
-                      <div className="in">
-                        <div className="card-top">
-                          <span className="krds-badge bg-light-primary">발급</span>
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text c-date">
-                            <p className="c-tit no-icon">
-                              <h4 className="onellipsis-2">벤처기업확인서</h4>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                              「벤처기업육성에 관한 특별조치법」 제2조의2에서 정한 <span className="point">요건</span>을 충족한 벤처기업임을 확인하는 확인서 사본 발급 서비스
-                            </p>
-                          </a>
-                        </div>
-                        <div class="card-btn">
-                          <button type="button" class="krds-btn primary xlarge">발급받기</button>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                  <Pagination />
-                </div>
-              </section>
+              {COLLECTION_SECTION_CONFIG.map((config, index) => (
+                <section
+                  key={config.collectionKey}
+                  className={`tab-conts ${activeTabIndex === index + 1 ? 'active' : ''}`}
+                >
+                  {isTabLoading && activeTabIndex === index + 1 ? (
+                    <div className="search-result-list-wrap indep-wrap">
+                      <ul className="krds-structured-list type-full">
+                        <li className="structured-item indep-item">
+                          <div className="in">
+                            <div className="card-body">
+                              <p className="c-txt onellipsis-2">검색결과 조회 중...</p>
+                            </div>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  ) : (
+                    renderIndependentTabSection(config)
+                  )}
+                </section>
+              ))}
             </div>
           </div>
         </div>
@@ -809,3 +762,6 @@ const TotalSearch = () => {
 };
 
 export default TotalSearch;
+
+
+

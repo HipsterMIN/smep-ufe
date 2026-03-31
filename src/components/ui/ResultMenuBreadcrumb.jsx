@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useMenuStore } from '@/store/useMenuStore.js';
 import { buildFullPath } from '@/utils/menuUtils.js';
 
@@ -61,8 +61,15 @@ const ResultMenuBreadcrumb = ({
   ariaLabel = '현재 경로',
   id,
 }) => {
+  const navigate = useNavigate();
   const flatMenuMap = useMenuStore((state) => state.flatMenuMap);
   const fetchMenuData = useMenuStore((state) => state.fetchMenuData);
+
+  const handleBreadcrumbClick = (event, link) => {
+    event.preventDefault();
+    event.stopPropagation();
+    navigate(link || '/');
+  };
 
   /**
    * 입력된 메뉴 ID를 "표시 순서(depth1 -> depth2 -> depth3)" 그대로 정리한다.
@@ -136,7 +143,11 @@ const ResultMenuBreadcrumb = ({
       <ol className="breadcrumb">
         {items.map((item) => (
           <li key={item.menuId}>
-            <Link className="txt" to={item.link || '/'}>
+            <Link
+              className="txt"
+              to={item.link || '/'}
+              onClick={(event) => handleBreadcrumbClick(event, item.link)}
+            >
               {item.label}
             </Link>
           </li>
