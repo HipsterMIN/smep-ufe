@@ -169,13 +169,13 @@ const UI_USR_L_120 = () => {
           <table className="tbl col data">
             <caption>품목별 법정의무 인증제도 표. 번호, 분야, 인증제도명, 대상 품목수, 관련법률, 소관부처, 조회수 정보가 제공됨.</caption>
             <colgroup>
-              <col style={{ width: '5%' }}/>
-              <col style={{ width: '5%' }}/>
-              <col style={{ width: '340px' }}/>
-              <col style={{ width: '5%' }}/>
-              <col style={{ width: '340px' }}/>
-              <col style={{ width: '15%' }}/>
-              <col style={{ width: '5%' }}/>
+              <col style={{ width: '60px' }}/>
+              <col style={{ width: '90px' }}/>
+              <col/>
+              <col style={{ width: '80px' }}/>
+              <col style={{ width: '180px' }}/>
+              <col style={{ width: '110px' }}/>
+              <col style={{ width: '70px' }}/>
             </colgroup>
             <thead>
               <tr>
@@ -203,22 +203,33 @@ const UI_USR_L_120 = () => {
                     <th scope="row" className="ac">
                       <span>{totalElements - (currentPage * pageSize + index)}</span>
                     </th>
-                    <td className="al">
-                      <span>{item.certSystmFldNm || '-'}</span>
+                    <td className="ac">
+                      <span style={{ whiteSpace: 'nowrap' }}>{item.certSystmFldNm || '-'}</span>
                     </td>
                     <td className="al" style={{ wordBreak: 'break-word' }}>
                       <a href="#" onClick={(e) => {
                         e.preventDefault();
                         goToDetail(item.certSystmId);
                       }}>
-                        <span>{item.certSystmNm}</span>
+                        <span style={{ whiteSpace: 'nowrap' }}>{item.certSystmNm}</span>
                       </a>
                     </td>
                     <td className="ac">
                       <span>{item.itemCnt || 0}</span>
                     </td>
                     <td className="al" style={{ wordBreak: 'break-word' }}>
-                      <span>{item.lglBssCn || '-'}</span>
+                      <span
+                        style={{
+                          display: 'block',
+                          overflow: 'hidden',
+                          whiteSpace: 'nowrap',
+                          textOverflow: 'ellipsis',
+                          maxWidth: '200px',
+                        }}
+                        title={item.lglBssCn || '-'}
+                      >
+                        {item.lglBssCn || '-'}
+                      </span>
                     </td>
                     <td className="ac">
                       <span>{item.tkcgMaoNm || '-'}</span>
