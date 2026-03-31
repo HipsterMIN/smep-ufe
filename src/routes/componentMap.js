@@ -68,6 +68,8 @@ const UI_USR_R_181 = lazy(() => import('@pages/more-service/UI_USR_R_181.jsx'));
 const UI_USR_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
 const UI_USR_R_121 = lazy(() => import('@pages/more-service/UI-USR-R-121.jsx'));
 const UI_USR_R_190 = lazy(() => import('@pages/more-service/UI-USR-R-190.jsx'));
+
+const TotalSearch = lazy(() => import('@pages/total-search/TotalSearch.jsx'));
 /**
  * =============================================================================
  * Component Map - menuId와 실제 컴포넌트 매핑
@@ -134,6 +136,11 @@ export const componentMap = {
   // AI 스마트 검색
   'M_PIIO_00074': {
     component: AiSmartSearch,
+    layout: MenuProviderOnly,
+  },
+  // 통합검색
+  'M_PIIO_00152': {
+    component: TotalSearch,
     layout: MenuProviderOnly,
   },
 
