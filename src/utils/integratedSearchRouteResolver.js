@@ -18,6 +18,7 @@ export const INTG_SRCH_ROUTE_HINT_CD_GROUP_ID = 'INTG_SRCH_ROUTE_HINT_CD';
 export const INTG_SEARCH_ROUTE_CASE = Object.freeze({
   DETAIL_SIMPLE: 'DETAIL_SIMPLE',
   BOARD_POST_DETAIL: 'BOARD_POST_DETAIL',
+  BOARD_LIST_TITLE_SEARCH: 'BOARD_LIST_TITLE_SEARCH',
   BOARD_POST_DETAIL_WITH_BBS_NO: 'BOARD_POST_DETAIL_WITH_BBS_NO',
   EXTERNAL_LINK_ONLY: 'EXTERNAL_LINK_ONLY',
   NOT_SUPPORTED: 'NOT_SUPPORTED',
@@ -40,6 +41,7 @@ export const INTG_SEARCH_NAVIGATION_TYPE = Object.freeze({
  * DB 기준:
  * - (상세) -> DETAIL_SIMPLE
  * - (게시판_상세) -> BOARD_POST_DETAIL
+ * - (게시판_파라미터수신처리) -> BOARD_LIST_TITLE_SEARCH
  * - (게시판1_상세) -> BOARD_POST_DETAIL_WITH_BBS_NO
  * - (외부링크이동) -> EXTERNAL_LINK_ONLY
  *
@@ -64,6 +66,8 @@ export const INTG_SEARCH_ROUTE_CASE_BY_HINT = Object.freeze({
   ISRH0010: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL,
   ISRH0013: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL,
   ISRH0015: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL,
+  ISRH0014: INTG_SEARCH_ROUTE_CASE.BOARD_LIST_TITLE_SEARCH,
+  ISRH0016: INTG_SEARCH_ROUTE_CASE.BOARD_LIST_TITLE_SEARCH,
   ISRH0017: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL_WITH_BBS_NO,
 
   // com_cd_expln에 "(외부링크이동)" 계열로 등록된 코드
@@ -107,6 +111,9 @@ export const INTEGRATED_SEARCH_ROUTE_RESOLVER_EXAMPLE = Object.freeze({
   intgSrchRouteHintCd: 'ISRH0001',
   workId: 'ST_000000000001265',
   bbsCategoryId: '1001',
+  parameter: {
+    title: 'FAQ 검색어',
+  },
 });
 
 // =============================================================================
@@ -138,6 +145,7 @@ export const preloadIntegratedSearchRouteResources = async () => {
  * - intgSrchRouteHintCd: 통합검색 단서코드
  * - workId: 업무ID(=상세 식별자)
  * - bbsCategoryId: 게시판 카테고리 식별자(해당 케이스에서 선택적으로 사용)
+ * - parameter: 케이스별 확장 파라미터 객체(현재는 parameter.title만 사용)
  *
  * 출력:
  * - routeCase/menuId/basePath/path/navigationType/externalUrl/reason/isFallback 포함 결과 객체
@@ -150,6 +158,7 @@ export const resolveIntegratedSearchRoute = async ({
   intgSrchRouteHintCd,
   workId,
   bbsCategoryId,
+  parameter = {},
 }) => {
   const routeHintMap = await ensureIntgSearchRouteHintMap();
 
@@ -157,6 +166,7 @@ export const resolveIntegratedSearchRoute = async ({
     intgSrchRouteHintCd,
     workId,
     bbsCategoryId,
+    parameter,
     routeHintMap,
     useCacheOnly: false,
   });
@@ -169,11 +179,13 @@ export const resolveIntegratedSearchPath = async ({
   intgSrchRouteHintCd,
   workId,
   bbsCategoryId,
+  parameter = {},
 }) => {
   const resolved = await resolveIntegratedSearchRoute({
     intgSrchRouteHintCd,
     workId,
     bbsCategoryId,
+    parameter,
   });
 
   return resolved.path;
@@ -187,11 +199,13 @@ export const resolveSimpleDetailRoute = async ({
   intgSrchRouteHintCd,
   workId,
   bbsCategoryId,
+  parameter = {},
 }) => {
   return resolveIntegratedSearchRoute({
     intgSrchRouteHintCd,
     workId,
     bbsCategoryId,
+    parameter,
   });
 };
 
@@ -210,11 +224,13 @@ export const resolveIntegratedSearchRouteFromCache = async ({
   intgSrchRouteHintCd,
   workId,
   bbsCategoryId,
+  parameter = {},
 }) => {
   return resolveIntegratedSearchRouteByMap({
     intgSrchRouteHintCd,
     workId,
     bbsCategoryId,
+    parameter,
     routeHintMap: getIntgSearchRouteHintMap(),
     useCacheOnly: true,
   });
@@ -228,11 +244,13 @@ export const resolveIntegratedSearchRouteLegacy = async ({
   intgSrchRouteHintCd,
   workId,
   bbsCategoryId,
+  parameter = {},
 }) => {
   const resolved = await resolveIntegratedSearchRoute({
     intgSrchRouteHintCd,
     workId,
     bbsCategoryId,
+    parameter,
   });
 
   return {
@@ -270,6 +288,7 @@ export const toIntegratedSearchRouteDebugMessage = (resolved) => {
     `externalUrl=${resolved.externalUrl ?? '-'}`,
     `bbsNo=${resolved.bbsNo ?? '-'}`,
     `bbsCategoryId=${resolved.bbsCategoryId ?? '-'}`,
+    `title=${resolved.parameterTitle ?? '-'}`,
     `bbsCategoryApplied=${resolved.bbsCategoryApplied ? 'Y' : 'N'}`,
     `fallback=${resolved.isFallback ? 'Y' : 'N'}`,
     `reason=${resolved.reason ?? '-'}`,
@@ -479,6 +498,20 @@ const normalizeBbsNo = (bbsNo) => {
     return '';
   }
   return String(bbsNo).trim();
+};
+
+/**
+ * parameter.title을 쿼리스트링 값으로 사용할 수 있도록 문자열로 정규화한다.
+ */
+const normalizeParameterTitle = (parameter) => {
+  if (!parameter || typeof parameter !== 'object') {
+    return '';
+  }
+  const title = parameter.title;
+  if (title === null || title === undefined) {
+    return '';
+  }
+  return String(title).trim();
 };
 
 /**
@@ -890,10 +923,11 @@ const resolveExternalLinkByProvider = async ({
 /**
  * 통합검색 라우팅 기본 결과 객체를 생성한다.
  */
-const createDefaultResolveResult = ({ intgSrchRouteHintCd, workId, bbsCategoryId }) => ({
+const createDefaultResolveResult = ({ intgSrchRouteHintCd, workId, bbsCategoryId, parameter }) => ({
   intgSrchRouteHintCd: intgSrchRouteHintCd || null,
   workId: normalizeWorkId(workId) || null,
   bbsCategoryId: normalizeBbsCategoryId(bbsCategoryId) || null,
+  parameterTitle: normalizeParameterTitle(parameter) || null,
   bbsCategoryPolicy: INTG_SEARCH_BBS_CATEGORY_POLICY.NONE,
   bbsCategoryApplied: false,
   routeCase: INTG_SEARCH_ROUTE_CASE.NOT_SUPPORTED,
@@ -908,6 +942,253 @@ const createDefaultResolveResult = ({ intgSrchRouteHintCd, workId, bbsCategoryId
 });
 
 /**
+ * DETAIL_SIMPLE 케이스 처리
+ */
+const resolveDetailSimpleCase = ({
+  defaultResult,
+  routeCase,
+  menuId,
+  basePath,
+  workId,
+  bbsCategoryPolicy,
+}) => {
+  const detailPath = buildDetailPath(basePath, workId);
+
+  // 상세키(workId)가 없으면 목록(basePath)으로 폴백
+  if (!detailPath) {
+    return {
+      ...defaultResult,
+      routeCase,
+      menuId,
+      basePath,
+      path: basePath,
+      isFallback: true,
+      reason: 'WORK_ID_MISSING_FALLBACK_TO_BASE',
+    };
+  }
+
+  return {
+    ...defaultResult,
+    routeCase,
+    bbsCategoryPolicy,
+    menuId,
+    basePath,
+    path: detailPath,
+    isFallback: false,
+    reason: 'OK',
+  };
+};
+
+/**
+ * BOARD_POST_DETAIL 케이스 처리
+ */
+const resolveBoardPostDetailCase = ({
+  defaultResult,
+  routeCase,
+  menuId,
+  basePath,
+  workId,
+  bbsCategoryId,
+  bbsCategoryPolicy,
+}) => {
+  const detailPath = buildDetailPath(basePath, workId);
+
+  // 상세키(workId)가 없으면 목록(basePath)으로 폴백
+  if (!detailPath) {
+    return {
+      ...defaultResult,
+      routeCase,
+      bbsCategoryPolicy,
+      menuId,
+      basePath,
+      path: basePath,
+      isFallback: true,
+      reason: 'WORK_ID_MISSING_FALLBACK_TO_BASE',
+    };
+  }
+
+  const categoryAppliedResult = applyBbsCategoryPolicyToPath({
+    detailPath,
+    bbsCategoryId,
+    bbsCategoryPolicy,
+  });
+
+  return {
+    ...defaultResult,
+    routeCase,
+    bbsCategoryPolicy,
+    bbsCategoryId: categoryAppliedResult.normalizedBbsCategoryId || null,
+    bbsCategoryApplied: categoryAppliedResult.bbsCategoryApplied,
+    menuId,
+    basePath,
+    path: categoryAppliedResult.path,
+    isFallback: false,
+    reason: categoryAppliedResult.bbsCategoryMissing
+      ? 'BBS_CATEGORY_ID_REQUIRED_BUT_MISSING'
+      : 'OK',
+  };
+};
+
+/**
+ * BOARD_LIST_TITLE_SEARCH 케이스 처리
+ *
+ * 대상:
+ * - 게시판 목록 화면에서 상세 대신 "제목 검색"으로 랜딩해야 하는 케이스
+ *
+ * 규칙:
+ * - parameter.title이 있으면 `searchType=TITLE&searchKeyword=<title>`을 붙인다.
+ * - title이 비어 있으면 목록(basePath)으로 폴백한다.
+ */
+const resolveBoardListTitleSearchCase = ({
+  defaultResult,
+  routeCase,
+  menuId,
+  basePath,
+  parameter,
+}) => {
+  const parameterTitle = normalizeParameterTitle(parameter);
+  if (!parameterTitle) {
+    return {
+      ...defaultResult,
+      routeCase,
+      menuId,
+      basePath,
+      path: basePath,
+      isFallback: true,
+      reason: 'TITLE_MISSING_FALLBACK_TO_BASE',
+    };
+  }
+
+  const pathWithSearchType = appendQueryParam(basePath, 'searchType', 'TITLE');
+  const pathWithSearchKeyword = appendQueryParam(pathWithSearchType, 'searchKeyword', parameterTitle);
+
+  return {
+    ...defaultResult,
+    routeCase,
+    menuId,
+    basePath,
+    path: pathWithSearchKeyword,
+    parameterTitle,
+    isFallback: false,
+    reason: 'OK',
+  };
+};
+
+/**
+ * BOARD_POST_DETAIL_WITH_BBS_NO 케이스 처리
+ */
+const resolveBoardPostDetailWithBbsNoCase = ({
+  defaultResult,
+  routeCase,
+  menuId,
+  basePath,
+  workId,
+  intgSrchRouteHintCd,
+}) => {
+  const detailPath = buildDetailPath(basePath, workId);
+
+  // 상세키(workId)가 없으면 목록(basePath)으로 폴백
+  if (!detailPath) {
+    return {
+      ...defaultResult,
+      routeCase,
+      menuId,
+      basePath,
+      path: basePath,
+      isFallback: true,
+      reason: 'WORK_ID_MISSING_FALLBACK_TO_BASE',
+    };
+  }
+
+  const boardBbsNoResult = resolveBoardPostDetailBbsNoByProvider({
+    intgSrchRouteHintCd,
+  });
+
+  // bbsNo를 구하지 못하면 잘못된 상세 호출을 피하기 위해 목록으로 폴백
+  if (!boardBbsNoResult.bbsNo) {
+    return {
+      ...defaultResult,
+      routeCase,
+      menuId,
+      basePath,
+      path: basePath,
+      isFallback: true,
+      reason: `${boardBbsNoResult.reason || 'BBS_NO_UNRESOLVED'}_FALLBACK_TO_BASE`,
+    };
+  }
+
+  const pathWithBbsNo = appendQueryParam(detailPath, 'bbsNo', boardBbsNoResult.bbsNo);
+
+  return {
+    ...defaultResult,
+    routeCase,
+    menuId,
+    basePath,
+    path: pathWithBbsNo,
+    bbsNo: boardBbsNoResult.bbsNo,
+    isFallback: false,
+    reason: boardBbsNoResult.reason || 'OK',
+  };
+};
+
+/**
+ * EXTERNAL_LINK_ONLY 케이스 처리
+ */
+const resolveExternalLinkOnlyCase = async ({
+  defaultResult,
+  routeCase,
+  menuId,
+  basePath,
+  intgSrchRouteHintCd,
+  workId,
+  useCacheOnly,
+}) => {
+  // cache-only 모드에서는 네트워크 호출(provider)을 금지하고 목록으로 폴백한다.
+  if (useCacheOnly) {
+    return {
+      ...defaultResult,
+      routeCase,
+      menuId,
+      basePath,
+      path: basePath,
+      isFallback: true,
+      reason: 'EXTERNAL_LINK_PROVIDER_SKIPPED_IN_CACHE_MODE_FALLBACK_TO_BASE',
+    };
+  }
+
+  const externalLinkResult = await resolveExternalLinkByProvider({
+    intgSrchRouteHintCd,
+    workId,
+  });
+
+  if (externalLinkResult.externalUrl) {
+    return {
+      ...defaultResult,
+      routeCase,
+      navigationType: INTG_SEARCH_NAVIGATION_TYPE.EXTERNAL,
+      menuId,
+      basePath,
+      path: null,
+      externalUrl: externalLinkResult.externalUrl,
+      isFallback: false,
+      reason: externalLinkResult.reason || 'OK_EXTERNAL_LINK',
+    };
+  }
+
+  return {
+    ...defaultResult,
+    routeCase,
+    navigationType: INTG_SEARCH_NAVIGATION_TYPE.INTERNAL,
+    menuId,
+    basePath,
+    path: basePath,
+    externalUrl: null,
+    isFallback: true,
+    reason: `${externalLinkResult.reason || 'EXTERNAL_LINK_UNRESOLVED'}_FALLBACK_TO_BASE`,
+  };
+};
+
+/**
  * 내부 전용 resolver
  * - 입력 받은 routeHintMap 기준으로 계산한다.
  * - basePath 계산은 내부 메뉴 store를 사용한다.
@@ -916,6 +1197,7 @@ const resolveIntegratedSearchRouteByMap = async ({
   intgSrchRouteHintCd,
   workId,
   bbsCategoryId,
+  parameter,
   routeHintMap,
   useCacheOnly,
 }) => {
@@ -923,6 +1205,7 @@ const resolveIntegratedSearchRouteByMap = async ({
     intgSrchRouteHintCd,
     workId,
     bbsCategoryId,
+    parameter,
   });
 
   const menuId = routeHintMap?.[intgSrchRouteHintCd] || null;
@@ -945,165 +1228,56 @@ const resolveIntegratedSearchRouteByMap = async ({
   const routeCase = getIntegratedSearchRouteCase(intgSrchRouteHintCd);
   const bbsCategoryPolicy = getIntegratedSearchBbsCategoryPolicy(intgSrchRouteHintCd);
   switch (routeCase) {
-  case INTG_SEARCH_ROUTE_CASE.DETAIL_SIMPLE: {
-    const detailPath = buildDetailPath(basePath, workId);
-
-    // 상세키(workId)가 없으면 목록(basePath)으로 폴백
-    if (!detailPath) {
-      return {
-        ...defaultResult,
-        routeCase,
-        menuId,
-        basePath,
-        path: basePath,
-        isFallback: true,
-        reason: 'WORK_ID_MISSING_FALLBACK_TO_BASE',
-      };
-    }
-
-    return {
-      ...defaultResult,
+  case INTG_SEARCH_ROUTE_CASE.DETAIL_SIMPLE:
+    return resolveDetailSimpleCase({
+      defaultResult,
       routeCase,
-      bbsCategoryPolicy,
       menuId,
       basePath,
-      path: detailPath,
-      isFallback: false,
-      reason: 'OK',
-    };
-  }
+      workId,
+      bbsCategoryPolicy,
+    });
 
-  case INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL: {
-    const detailPath = buildDetailPath(basePath, workId);
-
-    // 상세키(workId)가 없으면 목록(basePath)으로 폴백
-    if (!detailPath) {
-      return {
-        ...defaultResult,
-        routeCase,
-        bbsCategoryPolicy,
-        menuId,
-        basePath,
-        path: basePath,
-        isFallback: true,
-        reason: 'WORK_ID_MISSING_FALLBACK_TO_BASE',
-      };
-    }
-
-    const categoryAppliedResult = applyBbsCategoryPolicyToPath({
-      detailPath,
+  case INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL:
+    return resolveBoardPostDetailCase({
+      defaultResult,
+      routeCase,
+      menuId,
+      basePath,
+      workId,
       bbsCategoryId,
       bbsCategoryPolicy,
     });
 
-    return {
-      ...defaultResult,
+  case INTG_SEARCH_ROUTE_CASE.BOARD_LIST_TITLE_SEARCH:
+    return resolveBoardListTitleSearchCase({
+      defaultResult,
       routeCase,
-      bbsCategoryPolicy,
-      bbsCategoryId: categoryAppliedResult.normalizedBbsCategoryId || null,
-      bbsCategoryApplied: categoryAppliedResult.bbsCategoryApplied,
       menuId,
       basePath,
-      path: categoryAppliedResult.path,
-      isFallback: false,
-      reason: categoryAppliedResult.bbsCategoryMissing
-        ? 'BBS_CATEGORY_ID_REQUIRED_BUT_MISSING'
-        : 'OK',
-    };
-  }
+      parameter,
+    });
 
-  case INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL_WITH_BBS_NO: {
-    const detailPath = buildDetailPath(basePath, workId);
-
-    // 상세키(workId)가 없으면 목록(basePath)으로 폴백
-    if (!detailPath) {
-      return {
-        ...defaultResult,
-        routeCase,
-        menuId,
-        basePath,
-        path: basePath,
-        isFallback: true,
-        reason: 'WORK_ID_MISSING_FALLBACK_TO_BASE',
-      };
-    }
-
-    const boardBbsNoResult = resolveBoardPostDetailBbsNoByProvider({
+  case INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL_WITH_BBS_NO:
+    return resolveBoardPostDetailWithBbsNoCase({
+      defaultResult,
+      routeCase,
+      menuId,
+      basePath,
+      workId,
       intgSrchRouteHintCd,
     });
 
-    // bbsNo를 구하지 못하면 잘못된 상세 호출을 피하기 위해 목록으로 폴백
-    if (!boardBbsNoResult.bbsNo) {
-      return {
-        ...defaultResult,
-        routeCase,
-        menuId,
-        basePath,
-        path: basePath,
-        isFallback: true,
-        reason: `${boardBbsNoResult.reason || 'BBS_NO_UNRESOLVED'}_FALLBACK_TO_BASE`,
-      };
-    }
-
-    const pathWithBbsNo = appendQueryParam(detailPath, 'bbsNo', boardBbsNoResult.bbsNo);
-
-    return {
-      ...defaultResult,
+  case INTG_SEARCH_ROUTE_CASE.EXTERNAL_LINK_ONLY:
+    return resolveExternalLinkOnlyCase({
+      defaultResult,
       routeCase,
       menuId,
       basePath,
-      path: pathWithBbsNo,
-      bbsNo: boardBbsNoResult.bbsNo,
-      isFallback: false,
-      reason: boardBbsNoResult.reason || 'OK',
-    };
-  }
-
-  case INTG_SEARCH_ROUTE_CASE.EXTERNAL_LINK_ONLY: {
-    // cache-only 모드에서는 네트워크 호출(provider)을 금지하고 목록으로 폴백한다.
-    if (useCacheOnly) {
-      return {
-        ...defaultResult,
-        routeCase,
-        menuId,
-        basePath,
-        path: basePath,
-        isFallback: true,
-        reason: 'EXTERNAL_LINK_PROVIDER_SKIPPED_IN_CACHE_MODE_FALLBACK_TO_BASE',
-      };
-    }
-
-    const externalLinkResult = await resolveExternalLinkByProvider({
       intgSrchRouteHintCd,
       workId,
+      useCacheOnly,
     });
-
-    if (externalLinkResult.externalUrl) {
-      return {
-        ...defaultResult,
-        routeCase,
-        navigationType: INTG_SEARCH_NAVIGATION_TYPE.EXTERNAL,
-        menuId,
-        basePath,
-        path: null,
-        externalUrl: externalLinkResult.externalUrl,
-        isFallback: false,
-        reason: externalLinkResult.reason || 'OK_EXTERNAL_LINK',
-      };
-    }
-
-    return {
-      ...defaultResult,
-      routeCase,
-      navigationType: INTG_SEARCH_NAVIGATION_TYPE.INTERNAL,
-      menuId,
-      basePath,
-      path: basePath,
-      externalUrl: null,
-      isFallback: true,
-      reason: `${externalLinkResult.reason || 'EXTERNAL_LINK_UNRESOLVED'}_FALLBACK_TO_BASE`,
-    };
-  }
 
   // 아직 구현되지 않은 힌트코드는 목록(basePath)으로 폴백
   default:

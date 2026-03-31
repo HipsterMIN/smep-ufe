@@ -17,7 +17,8 @@ const TEST_PAGE_STATE_STORAGE_KEY = 'intg-search-route-test-page-state-v1';
  *
  * 목적:
   * - 업무개발자 개발 완료 전, 단서코드 기반 라우팅을 독립적으로 검증한다.
-  * - 입력값 3개(intgSrchRouteHintCd, workId, bbsCategoryId)를 수신/표시한다.
+  * - 기본 입력값 3개(intgSrchRouteHintCd, workId, bbsCategoryId)와
+  *   확장 파라미터(parameter.title)를 함께 검증한다.
  *
  * 참고:
  * - 리졸버는 (상세), (게시판_상세), (외부링크이동) 케이스를 지원한다.
@@ -28,6 +29,7 @@ const IntegratedSearchRouteTest = () => {
   const [intgSrchRouteHintCd, setIntgSrchRouteHintCd] = useState('ISRH0001');
   const [workId, setWorkId] = useState('ST_000000000001265');
   const [bbsCategoryId, setBbsCategoryId] = useState('');
+  const [parameterTitle, setParameterTitle] = useState('');
   const [routeHintCodeOptions, setRouteHintCodeOptions] = useState([]);
   const [isRouteHintOptionsLoading, setIsRouteHintOptionsLoading] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
@@ -38,6 +40,7 @@ const IntegratedSearchRouteTest = () => {
     nextHintCd = intgSrchRouteHintCd,
     nextWorkId = workId,
     nextBbsCategoryId = bbsCategoryId,
+    nextParameterTitle = parameterTitle,
     nextResolved = resolved,
   } = {}) => {
     if (typeof window === 'undefined') {
@@ -48,6 +51,7 @@ const IntegratedSearchRouteTest = () => {
       intgSrchRouteHintCd: nextHintCd || '',
       workId: nextWorkId || '',
       bbsCategoryId: nextBbsCategoryId || '',
+      parameterTitle: nextParameterTitle || '',
       resolved: nextResolved || null,
       savedAt: new Date().toISOString(),
     };
@@ -161,6 +165,9 @@ const IntegratedSearchRouteTest = () => {
       if (typeof saved?.bbsCategoryId === 'string') {
         setBbsCategoryId(saved.bbsCategoryId);
       }
+      if (typeof saved?.parameterTitle === 'string') {
+        setParameterTitle(saved.parameterTitle);
+      }
       if (saved?.resolved) {
         setResolved(saved.resolved);
       }
@@ -178,6 +185,9 @@ const IntegratedSearchRouteTest = () => {
         intgSrchRouteHintCd: intgSrchRouteHintCd.trim(),
         workId: workId.trim(),
         bbsCategoryId: bbsCategoryId.trim(),
+        parameter: {
+          title: parameterTitle.trim(),
+        },
       });
       const preview = buildResolvePreview(result);
 
@@ -231,7 +241,8 @@ const IntegratedSearchRouteTest = () => {
       <div style={{ display: 'grid', gap: '12px', marginBottom: '16px' }}>
         <div style={{ padding: '12px', border: '1px dashed #c8d6ea', borderRadius: '6px', background: '#fbfdff', color: '#2f3b52' }}>
           <p style={{ marginBottom: '8px' }}>
-            사용 순서: 1) 단서코드 선택 2) workId 입력 3) 리졸브 실행 4) <code>reason</code> 확인 5) 결과 경로 이동
+            사용 순서: 1) 단서코드 선택 2) workId/카테고리/title 입력 3) 리졸브 실행
+            4) <code>reason</code> 확인 5) 결과 경로 이동
           </p>
           <p>
             리졸브 결과의 <code>navigationType</code>, <code>path/externalUrl</code>, <code>예상 요청 URL</code>을 확인한 뒤 이동하세요.
@@ -310,6 +321,26 @@ const IntegratedSearchRouteTest = () => {
               persistPageState({ nextBbsCategoryId });
             }}
             placeholder="예: 1001 (게시판_상세에서 선택 반영)"
+            style={{ padding: '10px', border: '1px solid #d9d9d9', borderRadius: '6px' }}
+          />
+        </label>
+
+        <label style={{ display: 'grid', gap: '6px' }}>
+          <span>parameter.title</span>
+          <p style={{ margin: 0, color: '#5d6b82', fontSize: '13px', lineHeight: '1.45' }}>
+            신규 파라미터 수신 케이스에서 사용하는 제목 값입니다.
+            예: <code>ISRH0014</code>는 이 값을 받아 FAQ 목록으로 이동한 뒤
+            <code>searchType=TITLE</code>, <code>searchKeyword</code>로 경로를 계산합니다.
+          </p>
+          <input
+            type="text"
+            value={parameterTitle}
+            onChange={(e) => {
+              const nextParameterTitle = e.target.value;
+              setParameterTitle(nextParameterTitle);
+              persistPageState({ nextParameterTitle });
+            }}
+            placeholder="예: 정책자금 신청 방법"
             style={{ padding: '10px', border: '1px solid #d9d9d9', borderRadius: '6px' }}
           />
         </label>
