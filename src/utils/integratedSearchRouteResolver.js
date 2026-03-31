@@ -1,6 +1,7 @@
 ﻿import { fetchCommonCodes } from './commonCodeUtils.js';
 import { useMenuStore } from '../store/useMenuStore.js';
 import { buildFullPath } from './menuUtils.js';
+import { api as apiClient } from '../lib/apiClient.js';
 
 // =============================================================================
 // Public Constants
@@ -17,7 +18,20 @@ export const INTG_SRCH_ROUTE_HINT_CD_GROUP_ID = 'INTG_SRCH_ROUTE_HINT_CD';
 export const INTG_SEARCH_ROUTE_CASE = Object.freeze({
   DETAIL_SIMPLE: 'DETAIL_SIMPLE',
   BOARD_POST_DETAIL: 'BOARD_POST_DETAIL',
+  BOARD_POST_DETAIL_WITH_BBS_NO: 'BOARD_POST_DETAIL_WITH_BBS_NO',
+  EXTERNAL_LINK_ONLY: 'EXTERNAL_LINK_ONLY',
   NOT_SUPPORTED: 'NOT_SUPPORTED',
+});
+
+/**
+ * 최종 이동 방식
+ *
+ * - INTERNAL: React Router 내부 경로 이동
+ * - EXTERNAL: 외부 URL로 새 창/새 탭 이동
+ */
+export const INTG_SEARCH_NAVIGATION_TYPE = Object.freeze({
+  INTERNAL: 'INTERNAL',
+  EXTERNAL: 'EXTERNAL',
 });
 
 /**
@@ -26,6 +40,8 @@ export const INTG_SEARCH_ROUTE_CASE = Object.freeze({
  * DB 기준:
  * - (상세) -> DETAIL_SIMPLE
  * - (게시판_상세) -> BOARD_POST_DETAIL
+ * - (게시판1_상세) -> BOARD_POST_DETAIL_WITH_BBS_NO
+ * - (외부링크이동) -> EXTERNAL_LINK_ONLY
  *
  * 유지보수 규칙:
  * - 신규 힌트코드가 생기면 여기 먼저 등록한다.
@@ -48,6 +64,12 @@ export const INTG_SEARCH_ROUTE_CASE_BY_HINT = Object.freeze({
   ISRH0010: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL,
   ISRH0013: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL,
   ISRH0015: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL,
+  ISRH0017: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL_WITH_BBS_NO,
+
+  // com_cd_expln에 "(외부링크이동)" 계열로 등록된 코드
+  // - 세부 URL 조회 로직은 external provider 구현체에서 코드별로 분리 관리한다.
+  ISRH0012: INTG_SEARCH_ROUTE_CASE.EXTERNAL_LINK_ONLY,
+  ISRH0018: INTG_SEARCH_ROUTE_CASE.EXTERNAL_LINK_ONLY,
 });
 
 /**
@@ -118,7 +140,7 @@ export const preloadIntegratedSearchRouteResources = async () => {
  * - bbsCategoryId: 게시판 카테고리 식별자(해당 케이스에서 선택적으로 사용)
  *
  * 출력:
- * - routeCase/menuId/basePath/path/reason/isFallback 포함 결과 객체
+ * - routeCase/menuId/basePath/path/navigationType/externalUrl/reason/isFallback 포함 결과 객체
  *
  * 설계 원칙:
  * - 호출부는 getFullPath/menuMap/routeHintMap을 모른다.
@@ -224,7 +246,10 @@ export const resolveIntegratedSearchRouteLegacy = async ({
  * path 존재 여부 헬퍼
  */
 export const canNavigateIntegratedSearchRoute = (resolved) => {
-  return Boolean(resolved?.path);
+  if (!resolved) {
+    return false;
+  }
+  return Boolean(resolved.path || resolved.externalUrl);
 };
 
 /**
@@ -240,7 +265,10 @@ export const toIntegratedSearchRouteDebugMessage = (resolved) => {
     `hint=${resolved.intgSrchRouteHintCd ?? '-'}`,
     `menuId=${resolved.menuId ?? '-'}`,
     `case=${resolved.routeCase ?? '-'}`,
+    `navigationType=${resolved.navigationType ?? '-'}`,
     `path=${resolved.path ?? '-'}`,
+    `externalUrl=${resolved.externalUrl ?? '-'}`,
+    `bbsNo=${resolved.bbsNo ?? '-'}`,
     `bbsCategoryId=${resolved.bbsCategoryId ?? '-'}`,
     `bbsCategoryApplied=${resolved.bbsCategoryApplied ? 'Y' : 'N'}`,
     `fallback=${resolved.isFallback ? 'Y' : 'N'}`,
@@ -444,6 +472,16 @@ const normalizeBbsCategoryId = (bbsCategoryId) => {
 };
 
 /**
+ * 게시판 번호(bbsNo)를 쿼리스트링 값으로 사용할 수 있도록 문자열로 정규화한다.
+ */
+const normalizeBbsNo = (bbsNo) => {
+  if (bbsNo === null || bbsNo === undefined) {
+    return '';
+  }
+  return String(bbsNo).trim();
+};
+
+/**
  * basePath 뒤에 상세 식별자를 붙여 상세 경로를 생성한다.
  */
 const buildDetailPath = (basePath, workId) => {
@@ -513,6 +551,343 @@ const applyBbsCategoryPolicyToPath = ({
 };
 
 /**
+ * 게시판 상세(bbsNo 필요) 제공자 레지스트리(인터페이스/구현체 패턴)
+ *
+ * 설계 의도:
+ * - "하드코딩 위치"를 한 곳으로 모아 변경 비용을 낮춘다.
+ * - route switch는 구현체 세부값을 모르고 provider 결과만 사용한다.
+ */
+const createBoardPostDetailBbsNoProviderRegistry = () => ({
+  // 기업가정신 > 공지사항 탭 고정 게시판 번호
+  ISRH0017: () => ({
+    bbsNo: '15',
+    reason: 'OK_HARDCODED_BBS_NO',
+  }),
+});
+
+const boardPostDetailBbsNoProviderRegistry = createBoardPostDetailBbsNoProviderRegistry();
+
+/**
+ * 힌트코드별 bbsNo 제공자를 실행한다.
+ */
+const resolveBoardPostDetailBbsNoByProvider = ({ intgSrchRouteHintCd }) => {
+  const provider = boardPostDetailBbsNoProviderRegistry[intgSrchRouteHintCd];
+  if (typeof provider !== 'function') {
+    return {
+      bbsNo: null,
+      reason: 'BBS_NO_PROVIDER_NOT_FOUND',
+    };
+  }
+
+  try {
+    const provided = provider({ intgSrchRouteHintCd });
+    const normalizedBbsNo = normalizeBbsNo(provided?.bbsNo);
+
+    if (!normalizedBbsNo) {
+      return {
+        bbsNo: null,
+        reason: provided?.reason || 'BBS_NO_EMPTY',
+      };
+    }
+
+    return {
+      bbsNo: normalizedBbsNo,
+      reason: provided?.reason || 'OK_BBS_NO',
+    };
+  } catch (error) {
+    console.error('[IntegratedSearchRoute] bbsNo provider 실행 실패:', error);
+    return {
+      bbsNo: null,
+      reason: 'BBS_NO_PROVIDER_ERROR',
+    };
+  }
+};
+
+/**
+ * apiClient 응답은 화면별로 response.data / response 형태가 혼재할 수 있어
+ * 이 리졸버에서는 항상 plain object 데이터로 정규화해서 다룬다.
+ */
+const normalizeApiResponseData = (response) => {
+  if (!response || typeof response !== 'object') {
+    return {};
+  }
+  if (response.data && typeof response.data === 'object') {
+    return response.data;
+  }
+  return response;
+};
+
+/**
+ * 문자열이 http/https URL인지 검증한다.
+ */
+const isHttpProtocolUrl = (value) => {
+  if (!value) {
+    return false;
+  }
+
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch (_) {
+    return false;
+  }
+};
+
+/**
+ * 외부링크 URL을 정규화한다.
+ *
+ * 정책:
+ * - 값이 비어 있으면 null
+ * - 프로토콜이 있으면 그대로 사용
+ * - 프로토콜이 없으면 https://를 보완해 1회 검증
+ */
+const normalizeExternalUrl = (externalUrl) => {
+  const raw = String(externalUrl ?? '').trim();
+  if (!raw) {
+    return null;
+  }
+
+  if (isHttpProtocolUrl(raw)) {
+    return raw;
+  }
+
+  const withHttps = `https://${raw}`;
+  if (isHttpProtocolUrl(withHttps)) {
+    return withHttps;
+  }
+
+  return null;
+};
+
+/**
+ * /api/v1/certificate/main 응답에서 증명서 행을 하나의 배열로 합친다.
+ * - topCertificates + allCertificates.content를 dedupe(prdocCd) 처리한다.
+ */
+const extractCertificateRows = (mainPageData) => {
+  const topList = Array.isArray(mainPageData?.topCertificates) ? mainPageData.topCertificates : [];
+  const pagedList = Array.isArray(mainPageData?.allCertificates?.content)
+    ? mainPageData.allCertificates.content
+    : [];
+
+  const merged = [...topList, ...pagedList];
+  const uniqueByPrdocCd = new Map();
+
+  merged.forEach((item) => {
+    const key = String(item?.prdocCd ?? '').trim();
+    if (!key) {
+      return;
+    }
+    if (!uniqueByPrdocCd.has(key)) {
+      uniqueByPrdocCd.set(key, item);
+    }
+  });
+
+  return Array.from(uniqueByPrdocCd.values());
+};
+
+/**
+ * 증명서 목록에서 workId(prdocCd)와 일치하는 행을 찾는다.
+ */
+const findCertificateRowByWorkId = ({ rows, workId }) => {
+  if (!Array.isArray(rows) || rows.length === 0 || !workId) {
+    return null;
+  }
+
+  return rows.find((item) => String(item?.prdocCd ?? '').trim() === workId) || null;
+};
+
+const CERTIFICATE_MAIN_PAGE_SIZE = 200;
+const CERTIFICATE_MAIN_PAGE_MAX_SCAN = 20;
+const ENTRSPT_PRESS_BBS_NO = '21';
+
+/**
+ * ISRH0012 전용 구현체(provider):
+ * - 업무ID(workId=prdocCd) 기준으로 증명서 목록 API에서 대상행을 찾고 외부 URL을 반환한다.
+ */
+const resolveCertificateExternalLinkByWorkId = async ({ workId }) => {
+  const normalizedWorkId = normalizeWorkId(workId);
+  if (!normalizedWorkId) {
+    return {
+      externalUrl: null,
+      reason: 'WORK_ID_MISSING_FOR_EXTERNAL_LINK',
+    };
+  }
+
+  let totalPages = 1;
+  for (let page = 1; page <= totalPages && page <= CERTIFICATE_MAIN_PAGE_MAX_SCAN; page += 1) {
+    const params = new URLSearchParams({
+      page: String(page),
+      size: String(CERTIFICATE_MAIN_PAGE_SIZE),
+    });
+
+    const response = await apiClient.get(`/api/v1/certificate/main?${params.toString()}`);
+    const mainPageData = normalizeApiResponseData(response);
+
+    const scannedRows = extractCertificateRows(mainPageData);
+    const matched = findCertificateRowByWorkId({
+      rows: scannedRows,
+      workId: normalizedWorkId,
+    });
+
+    if (matched) {
+      const isExternalLinkTarget = String(matched?.otsdSiteLnkgYn ?? '').trim().toUpperCase() === 'Y';
+      if (!isExternalLinkTarget) {
+        return {
+          externalUrl: null,
+          reason: 'EXTERNAL_LINK_NOT_ENABLED',
+        };
+      }
+
+      const rawExternalUrl = String(matched?.otsdSiteUrlAddr ?? '').trim();
+      if (!rawExternalUrl) {
+        return {
+          externalUrl: null,
+          reason: 'EXTERNAL_LINK_URL_MISSING',
+        };
+      }
+
+      return {
+        externalUrl: rawExternalUrl,
+        reason: 'OK_EXTERNAL_LINK',
+      };
+    }
+
+    const nextTotalPages = Number(mainPageData?.allCertificates?.totalPages ?? 1);
+    totalPages = Number.isFinite(nextTotalPages) && nextTotalPages > 0
+      ? nextTotalPages
+      : 1;
+  }
+
+  return {
+    externalUrl: null,
+    reason: 'EXTERNAL_LINK_TARGET_NOT_FOUND',
+  };
+};
+
+/**
+ * 게시판 상세 API에서 pstUrlAddr를 조회해 외부 링크를 구한다.
+ *
+ * 대상:
+ * - ISRH0018(기업가정신 > 언론보도 탭)
+ *
+ * 입력 계약:
+ * - workId는 게시물 번호(pstNo)여야 한다.
+ * - bbsNo는 구현체에서 고정값(현재 21)을 사용한다.
+ */
+const resolveBoardExternalLinkByWorkId = async ({ workId, bbsNo }) => {
+  const normalizedWorkId = normalizeWorkId(workId);
+  const normalizedBbsNo = normalizeBbsNo(bbsNo);
+
+  if (!normalizedWorkId) {
+    return {
+      externalUrl: null,
+      reason: 'WORK_ID_MISSING_FOR_EXTERNAL_LINK',
+    };
+  }
+
+  if (!normalizedBbsNo) {
+    return {
+      externalUrl: null,
+      reason: 'BBS_NO_MISSING_FOR_EXTERNAL_LINK',
+    };
+  }
+
+  try {
+    const response = await apiClient.get(
+      `/api/v1/board/${encodeURIComponent(normalizedBbsNo)}/posts/${encodeURIComponent(normalizedWorkId)}`,
+    );
+    const postDetail = normalizeApiResponseData(response);
+    const rawExternalUrl = String(postDetail?.pstUrlAddr ?? '').trim();
+
+    if (!rawExternalUrl) {
+      return {
+        externalUrl: null,
+        reason: 'EXTERNAL_LINK_URL_MISSING',
+      };
+    }
+
+    return {
+      externalUrl: rawExternalUrl,
+      reason: 'OK_EXTERNAL_LINK',
+    };
+  } catch (error) {
+    if (error?.status === 404) {
+      return {
+        externalUrl: null,
+        reason: 'EXTERNAL_LINK_TARGET_NOT_FOUND',
+      };
+    }
+
+    console.error('[IntegratedSearchRoute] 게시판 외부링크 조회 실패:', error);
+    return {
+      externalUrl: null,
+      reason: 'EXTERNAL_LINK_LOOKUP_FAILED',
+    };
+  }
+};
+
+/**
+ * 외부링크 제공자 레지스트리(인터페이스/구현체 패턴)
+ *
+ * 규칙:
+ * - key: intgSrchRouteHintCd
+ * - value: async provider({ workId, intgSrchRouteHintCd }) => { externalUrl, reason }
+ * - 신규 외부링크 케이스는 여기 구현체를 추가한다.
+ */
+const createExternalLinkProviderRegistry = () => ({
+  ISRH0012: resolveCertificateExternalLinkByWorkId,
+  ISRH0018: ({ workId }) => resolveBoardExternalLinkByWorkId({
+    workId,
+    bbsNo: ENTRSPT_PRESS_BBS_NO,
+  }),
+});
+
+const externalLinkProviderRegistry = createExternalLinkProviderRegistry();
+
+/**
+ * 힌트코드별 provider를 실행해 외부 URL을 계산한다.
+ * - provider가 없거나 실패하면 reason만 남기고 null 반환한다.
+ */
+const resolveExternalLinkByProvider = async ({
+  intgSrchRouteHintCd,
+  workId,
+}) => {
+  const provider = externalLinkProviderRegistry[intgSrchRouteHintCd];
+  if (typeof provider !== 'function') {
+    return {
+      externalUrl: null,
+      reason: 'EXTERNAL_LINK_PROVIDER_NOT_FOUND',
+    };
+  }
+
+  try {
+    const provided = await provider({
+      intgSrchRouteHintCd,
+      workId,
+    });
+
+    const normalizedExternalUrl = normalizeExternalUrl(provided?.externalUrl);
+    if (!normalizedExternalUrl) {
+      return {
+        externalUrl: null,
+        reason: provided?.reason || 'EXTERNAL_LINK_URL_NOT_FOUND',
+      };
+    }
+
+    return {
+      externalUrl: normalizedExternalUrl,
+      reason: provided?.reason || 'OK_EXTERNAL_LINK',
+    };
+  } catch (error) {
+    console.error('[IntegratedSearchRoute] 외부링크 provider 실행 실패:', error);
+    return {
+      externalUrl: null,
+      reason: 'EXTERNAL_LINK_PROVIDER_ERROR',
+    };
+  }
+};
+
+/**
  * 통합검색 라우팅 기본 결과 객체를 생성한다.
  */
 const createDefaultResolveResult = ({ intgSrchRouteHintCd, workId, bbsCategoryId }) => ({
@@ -522,9 +897,12 @@ const createDefaultResolveResult = ({ intgSrchRouteHintCd, workId, bbsCategoryId
   bbsCategoryPolicy: INTG_SEARCH_BBS_CATEGORY_POLICY.NONE,
   bbsCategoryApplied: false,
   routeCase: INTG_SEARCH_ROUTE_CASE.NOT_SUPPORTED,
+  navigationType: INTG_SEARCH_NAVIGATION_TYPE.INTERNAL,
   menuId: null,
   basePath: null,
   path: null,
+  bbsNo: null,
+  externalUrl: null,
   isFallback: true,
   reason: 'UNRESOLVED',
 });
@@ -631,6 +1009,99 @@ const resolveIntegratedSearchRouteByMap = async ({
       reason: categoryAppliedResult.bbsCategoryMissing
         ? 'BBS_CATEGORY_ID_REQUIRED_BUT_MISSING'
         : 'OK',
+    };
+  }
+
+  case INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL_WITH_BBS_NO: {
+    const detailPath = buildDetailPath(basePath, workId);
+
+    // 상세키(workId)가 없으면 목록(basePath)으로 폴백
+    if (!detailPath) {
+      return {
+        ...defaultResult,
+        routeCase,
+        menuId,
+        basePath,
+        path: basePath,
+        isFallback: true,
+        reason: 'WORK_ID_MISSING_FALLBACK_TO_BASE',
+      };
+    }
+
+    const boardBbsNoResult = resolveBoardPostDetailBbsNoByProvider({
+      intgSrchRouteHintCd,
+    });
+
+    // bbsNo를 구하지 못하면 잘못된 상세 호출을 피하기 위해 목록으로 폴백
+    if (!boardBbsNoResult.bbsNo) {
+      return {
+        ...defaultResult,
+        routeCase,
+        menuId,
+        basePath,
+        path: basePath,
+        isFallback: true,
+        reason: `${boardBbsNoResult.reason || 'BBS_NO_UNRESOLVED'}_FALLBACK_TO_BASE`,
+      };
+    }
+
+    const pathWithBbsNo = appendQueryParam(detailPath, 'bbsNo', boardBbsNoResult.bbsNo);
+
+    return {
+      ...defaultResult,
+      routeCase,
+      menuId,
+      basePath,
+      path: pathWithBbsNo,
+      bbsNo: boardBbsNoResult.bbsNo,
+      isFallback: false,
+      reason: boardBbsNoResult.reason || 'OK',
+    };
+  }
+
+  case INTG_SEARCH_ROUTE_CASE.EXTERNAL_LINK_ONLY: {
+    // cache-only 모드에서는 네트워크 호출(provider)을 금지하고 목록으로 폴백한다.
+    if (useCacheOnly) {
+      return {
+        ...defaultResult,
+        routeCase,
+        menuId,
+        basePath,
+        path: basePath,
+        isFallback: true,
+        reason: 'EXTERNAL_LINK_PROVIDER_SKIPPED_IN_CACHE_MODE_FALLBACK_TO_BASE',
+      };
+    }
+
+    const externalLinkResult = await resolveExternalLinkByProvider({
+      intgSrchRouteHintCd,
+      workId,
+    });
+
+    if (externalLinkResult.externalUrl) {
+      return {
+        ...defaultResult,
+        routeCase,
+        navigationType: INTG_SEARCH_NAVIGATION_TYPE.EXTERNAL,
+        menuId,
+        basePath,
+        path: null,
+        externalUrl: externalLinkResult.externalUrl,
+        isFallback: false,
+        reason: externalLinkResult.reason || 'OK_EXTERNAL_LINK',
+      };
+    }
+
+    return {
+      ...defaultResult,
+      routeCase,
+      navigationType: INTG_SEARCH_NAVIGATION_TYPE.INTERNAL,
+      menuId,
+      basePath,
+      path: basePath,
+      externalUrl: null,
+      isFallback: true,
+      reason: `${externalLinkResult.reason || 'EXTERNAL_LINK_UNRESOLVED'}_FALLBACK_TO_BASE`,
     };
   }
 
