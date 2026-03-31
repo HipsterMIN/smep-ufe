@@ -20,8 +20,8 @@ const TEST_PAGE_STATE_STORAGE_KEY = 'intg-search-route-test-page-state-v1';
   * - 입력값 3개(intgSrchRouteHintCd, workId, bbsCategoryId)를 수신/표시한다.
  *
  * 참고:
- * - 현재 리졸버는 상세 단순 이동(ISRH0001) 우선 지원 상태다.
- * - bbsCategoryId는 향후 게시판 분기용으로 수신만 하고, 현재 경로 계산에는 사용하지 않는다.
+ * - 리졸버는 (상세), (게시판_상세) 케이스를 우선 지원한다.
+ * - (게시판_상세) 케이스에서는 bbsCategoryId가 있으면 ctgryNo 쿼리로 path에 반영된다.
  */
 const IntegratedSearchRouteTest = () => {
   const navigate = useNavigate();
@@ -164,14 +164,12 @@ const IntegratedSearchRouteTest = () => {
       const result = await resolveIntegratedSearchRoute({
         intgSrchRouteHintCd: intgSrchRouteHintCd.trim(),
         workId: workId.trim(),
+        bbsCategoryId: bbsCategoryId.trim(),
       });
       const preview = buildBrowserPreview(result?.path);
 
-      // 테스트 페이지에서는 수신한 bbsCategoryId를 결과에 함께 표시한다.
       const nextResolved = {
         ...result,
-        bbsCategoryId: bbsCategoryId.trim() || null,
-        bbsCategoryIdUsed: false,
         browserPreview: preview,
       };
 
@@ -278,9 +276,9 @@ const IntegratedSearchRouteTest = () => {
         <label style={{ display: 'grid', gap: '6px' }}>
           <span>bbsCategoryId</span>
           <p style={{ margin: 0, color: '#5d6b82', fontSize: '13px', lineHeight: '1.45' }}>
-            게시판 분기용 확장 입력값입니다(현재 리졸버 경로 계산에는 미사용).
-            향후 게시판 상세/탭 분리/외부링크 분기 시 이 값을 활용할 예정이므로 지금부터 입력을 받아둡니다.
-            현재 단계에서는 결과 JSON에만 표시되며 실제 path 계산에는 반영되지 않습니다.
+            게시판 카테고리 식별자 값입니다.
+            현재 리졸버는 (게시판_상세) 케이스에서 값이 있으면 <code>ctgryNo</code> 쿼리스트링으로 붙입니다.
+            비게시판 상세 케이스에서는 이 값이 있어도 path에 반영되지 않습니다.
           </p>
           <input
             type="text"
@@ -290,7 +288,7 @@ const IntegratedSearchRouteTest = () => {
               setBbsCategoryId(nextBbsCategoryId);
               persistPageState({ nextBbsCategoryId });
             }}
-            placeholder="향후 게시판 분기용 (현재 미사용)"
+            placeholder="예: 1001 (게시판_상세에서 선택 반영)"
             style={{ padding: '10px', border: '1px solid #d9d9d9', borderRadius: '6px' }}
           />
         </label>
