@@ -16,18 +16,66 @@ export const INTG_SRCH_ROUTE_HINT_CD_GROUP_ID = 'INTG_SRCH_ROUTE_HINT_CD';
  */
 export const INTG_SEARCH_ROUTE_CASE = Object.freeze({
   DETAIL_SIMPLE: 'DETAIL_SIMPLE',
+  BOARD_POST_DETAIL: 'BOARD_POST_DETAIL',
   NOT_SUPPORTED: 'NOT_SUPPORTED',
 });
 
 /**
  * 힌트코드별 처리 케이스 매핑
  *
+ * DB 기준:
+ * - (상세) -> DETAIL_SIMPLE
+ * - (게시판_상세) -> BOARD_POST_DETAIL
+ *
  * 유지보수 규칙:
  * - 신규 힌트코드가 생기면 여기 먼저 등록한다.
  * - 그리고 resolveIntegratedSearchRouteByMap switch에 분기 로직을 추가한다.
  */
 export const INTG_SEARCH_ROUTE_CASE_BY_HINT = Object.freeze({
+  // com_cd_expln에 "(상세)"로 등록된 코드
   ISRH0001: INTG_SEARCH_ROUTE_CASE.DETAIL_SIMPLE,
+  ISRH0002: INTG_SEARCH_ROUTE_CASE.DETAIL_SIMPLE,
+  ISRH0003: INTG_SEARCH_ROUTE_CASE.DETAIL_SIMPLE,
+  ISRH0004: INTG_SEARCH_ROUTE_CASE.DETAIL_SIMPLE,
+  ISRH0007: INTG_SEARCH_ROUTE_CASE.DETAIL_SIMPLE,
+  ISRH0009: INTG_SEARCH_ROUTE_CASE.DETAIL_SIMPLE,
+  ISRH0011: INTG_SEARCH_ROUTE_CASE.DETAIL_SIMPLE,
+
+  // com_cd_expln에 "(게시판_상세)"로 등록된 코드
+  ISRH0005: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL,
+  ISRH0006: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL,
+  ISRH0008: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL,
+  ISRH0010: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL,
+  ISRH0013: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL,
+  ISRH0015: INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL,
+});
+
+/**
+ * 게시판 카테고리 ID(ctgryNo) 처리 정책
+ *
+ * - NONE: 항상 쿼리스트링을 붙이지 않는다.
+ * - OPTIONAL: 값이 있을 때만 ctgryNo를 쿼리스트링으로 붙인다.
+ * - REQUIRED: 값이 반드시 필요하다(없으면 reason에 누락 사유 기록).
+ */
+export const INTG_SEARCH_BBS_CATEGORY_POLICY = Object.freeze({
+  NONE: 'NONE',
+  OPTIONAL: 'OPTIONAL',
+  REQUIRED: 'REQUIRED',
+});
+
+/**
+ * 힌트코드별 bbsCategoryId 정책 매핑
+ *
+ * 현재 운영 방침:
+ * - (게시판_상세)는 카테고리 값이 오면 전달하고, 없으면 상세 이동만 수행한다.
+ */
+export const INTG_SEARCH_BBS_CATEGORY_POLICY_BY_HINT = Object.freeze({
+  ISRH0005: INTG_SEARCH_BBS_CATEGORY_POLICY.OPTIONAL,
+  ISRH0006: INTG_SEARCH_BBS_CATEGORY_POLICY.OPTIONAL,
+  ISRH0008: INTG_SEARCH_BBS_CATEGORY_POLICY.OPTIONAL,
+  ISRH0010: INTG_SEARCH_BBS_CATEGORY_POLICY.OPTIONAL,
+  ISRH0013: INTG_SEARCH_BBS_CATEGORY_POLICY.OPTIONAL,
+  ISRH0015: INTG_SEARCH_BBS_CATEGORY_POLICY.OPTIONAL,
 });
 
 /**
@@ -36,6 +84,7 @@ export const INTG_SEARCH_ROUTE_CASE_BY_HINT = Object.freeze({
 export const INTEGRATED_SEARCH_ROUTE_RESOLVER_EXAMPLE = Object.freeze({
   intgSrchRouteHintCd: 'ISRH0001',
   workId: 'ST_000000000001265',
+  bbsCategoryId: '1001',
 });
 
 // =============================================================================
@@ -66,6 +115,7 @@ export const preloadIntegratedSearchRouteResources = async () => {
  * 입력:
  * - intgSrchRouteHintCd: 통합검색 단서코드
  * - workId: 업무ID(=상세 식별자)
+ * - bbsCategoryId: 게시판 카테고리 식별자(해당 케이스에서 선택적으로 사용)
  *
  * 출력:
  * - routeCase/menuId/basePath/path/reason/isFallback 포함 결과 객체
@@ -77,12 +127,14 @@ export const preloadIntegratedSearchRouteResources = async () => {
 export const resolveIntegratedSearchRoute = async ({
   intgSrchRouteHintCd,
   workId,
+  bbsCategoryId,
 }) => {
   const routeHintMap = await ensureIntgSearchRouteHintMap();
 
   return resolveIntegratedSearchRouteByMap({
     intgSrchRouteHintCd,
     workId,
+    bbsCategoryId,
     routeHintMap,
     useCacheOnly: false,
   });
@@ -94,10 +146,12 @@ export const resolveIntegratedSearchRoute = async ({
 export const resolveIntegratedSearchPath = async ({
   intgSrchRouteHintCd,
   workId,
+  bbsCategoryId,
 }) => {
   const resolved = await resolveIntegratedSearchRoute({
     intgSrchRouteHintCd,
     workId,
+    bbsCategoryId,
   });
 
   return resolved.path;
@@ -110,10 +164,12 @@ export const resolveIntegratedSearchPath = async ({
 export const resolveSimpleDetailRoute = async ({
   intgSrchRouteHintCd,
   workId,
+  bbsCategoryId,
 }) => {
   return resolveIntegratedSearchRoute({
     intgSrchRouteHintCd,
     workId,
+    bbsCategoryId,
   });
 };
 
@@ -131,10 +187,12 @@ export const resolveSimpleDetailRoute = async ({
 export const resolveIntegratedSearchRouteFromCache = async ({
   intgSrchRouteHintCd,
   workId,
+  bbsCategoryId,
 }) => {
   return resolveIntegratedSearchRouteByMap({
     intgSrchRouteHintCd,
     workId,
+    bbsCategoryId,
     routeHintMap: getIntgSearchRouteHintMap(),
     useCacheOnly: true,
   });
@@ -147,10 +205,12 @@ export const resolveIntegratedSearchRouteFromCache = async ({
 export const resolveIntegratedSearchRouteLegacy = async ({
   intgSrchRouteHintCd,
   workId,
+  bbsCategoryId,
 }) => {
   const resolved = await resolveIntegratedSearchRoute({
     intgSrchRouteHintCd,
     workId,
+    bbsCategoryId,
   });
 
   return {
@@ -181,6 +241,8 @@ export const toIntegratedSearchRouteDebugMessage = (resolved) => {
     `menuId=${resolved.menuId ?? '-'}`,
     `case=${resolved.routeCase ?? '-'}`,
     `path=${resolved.path ?? '-'}`,
+    `bbsCategoryId=${resolved.bbsCategoryId ?? '-'}`,
+    `bbsCategoryApplied=${resolved.bbsCategoryApplied ? 'Y' : 'N'}`,
     `fallback=${resolved.isFallback ? 'Y' : 'N'}`,
     `reason=${resolved.reason ?? '-'}`,
   ].join(' ');
@@ -217,6 +279,13 @@ export const buildIntgSearchRouteHintMap = (codeList = []) => {
  */
 export const getIntegratedSearchRouteCase = (intgSrchRouteHintCd) => {
   return INTG_SEARCH_ROUTE_CASE_BY_HINT[intgSrchRouteHintCd] || INTG_SEARCH_ROUTE_CASE.NOT_SUPPORTED;
+};
+
+/**
+ * 힌트코드에 대응하는 bbsCategoryId 처리 정책을 반환한다.
+ */
+export const getIntegratedSearchBbsCategoryPolicy = (intgSrchRouteHintCd) => {
+  return INTG_SEARCH_BBS_CATEGORY_POLICY_BY_HINT[intgSrchRouteHintCd] || INTG_SEARCH_BBS_CATEGORY_POLICY.NONE;
 };
 
 /**
@@ -365,6 +434,16 @@ const normalizeWorkId = (workId) => {
 };
 
 /**
+ * bbsCategoryId를 쿼리스트링 값으로 사용할 수 있도록 문자열로 정규화한다.
+ */
+const normalizeBbsCategoryId = (bbsCategoryId) => {
+  if (bbsCategoryId === null || bbsCategoryId === undefined) {
+    return '';
+  }
+  return String(bbsCategoryId).trim();
+};
+
+/**
  * basePath 뒤에 상세 식별자를 붙여 상세 경로를 생성한다.
  */
 const buildDetailPath = (basePath, workId) => {
@@ -377,11 +456,71 @@ const buildDetailPath = (basePath, workId) => {
 };
 
 /**
+ * path 뒤에 단일 쿼리 파라미터를 안전하게 추가한다.
+ */
+const appendQueryParam = (path, key, value) => {
+  if (!path || !key || value === null || value === undefined || value === '') {
+    return path;
+  }
+
+  const prefix = path.includes('?') ? '&' : '?';
+  return `${path}${prefix}${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+};
+
+/**
+ * 게시판 카테고리 정책에 따라 detailPath에 ctgryNo 쿼리를 반영한다.
+ */
+const applyBbsCategoryPolicyToPath = ({
+  detailPath,
+  bbsCategoryId,
+  bbsCategoryPolicy,
+}) => {
+  const normalizedBbsCategoryId = normalizeBbsCategoryId(bbsCategoryId);
+
+  if (!detailPath) {
+    return {
+      path: null,
+      normalizedBbsCategoryId,
+      bbsCategoryApplied: false,
+      bbsCategoryMissing: false,
+    };
+  }
+
+  if (bbsCategoryPolicy === INTG_SEARCH_BBS_CATEGORY_POLICY.NONE) {
+    return {
+      path: detailPath,
+      normalizedBbsCategoryId,
+      bbsCategoryApplied: false,
+      bbsCategoryMissing: false,
+    };
+  }
+
+  if (!normalizedBbsCategoryId) {
+    return {
+      path: detailPath,
+      normalizedBbsCategoryId,
+      bbsCategoryApplied: false,
+      bbsCategoryMissing: bbsCategoryPolicy === INTG_SEARCH_BBS_CATEGORY_POLICY.REQUIRED,
+    };
+  }
+
+  return {
+    path: appendQueryParam(detailPath, 'ctgryNo', normalizedBbsCategoryId),
+    normalizedBbsCategoryId,
+    bbsCategoryApplied: true,
+    bbsCategoryMissing: false,
+  };
+};
+
+/**
  * 통합검색 라우팅 기본 결과 객체를 생성한다.
  */
-const createDefaultResolveResult = ({ intgSrchRouteHintCd, workId }) => ({
+const createDefaultResolveResult = ({ intgSrchRouteHintCd, workId, bbsCategoryId }) => ({
   intgSrchRouteHintCd: intgSrchRouteHintCd || null,
   workId: normalizeWorkId(workId) || null,
+  bbsCategoryId: normalizeBbsCategoryId(bbsCategoryId) || null,
+  bbsCategoryPolicy: INTG_SEARCH_BBS_CATEGORY_POLICY.NONE,
+  bbsCategoryApplied: false,
   routeCase: INTG_SEARCH_ROUTE_CASE.NOT_SUPPORTED,
   menuId: null,
   basePath: null,
@@ -398,12 +537,14 @@ const createDefaultResolveResult = ({ intgSrchRouteHintCd, workId }) => ({
 const resolveIntegratedSearchRouteByMap = async ({
   intgSrchRouteHintCd,
   workId,
+  bbsCategoryId,
   routeHintMap,
   useCacheOnly,
 }) => {
   const defaultResult = createDefaultResolveResult({
     intgSrchRouteHintCd,
     workId,
+    bbsCategoryId,
   });
 
   const menuId = routeHintMap?.[intgSrchRouteHintCd] || null;
@@ -424,6 +565,7 @@ const resolveIntegratedSearchRouteByMap = async ({
   }
 
   const routeCase = getIntegratedSearchRouteCase(intgSrchRouteHintCd);
+  const bbsCategoryPolicy = getIntegratedSearchBbsCategoryPolicy(intgSrchRouteHintCd);
   switch (routeCase) {
   case INTG_SEARCH_ROUTE_CASE.DETAIL_SIMPLE: {
     const detailPath = buildDetailPath(basePath, workId);
@@ -444,6 +586,7 @@ const resolveIntegratedSearchRouteByMap = async ({
     return {
       ...defaultResult,
       routeCase,
+      bbsCategoryPolicy,
       menuId,
       basePath,
       path: detailPath,
@@ -452,11 +595,51 @@ const resolveIntegratedSearchRouteByMap = async ({
     };
   }
 
+  case INTG_SEARCH_ROUTE_CASE.BOARD_POST_DETAIL: {
+    const detailPath = buildDetailPath(basePath, workId);
+
+    // 상세키(workId)가 없으면 목록(basePath)으로 폴백
+    if (!detailPath) {
+      return {
+        ...defaultResult,
+        routeCase,
+        bbsCategoryPolicy,
+        menuId,
+        basePath,
+        path: basePath,
+        isFallback: true,
+        reason: 'WORK_ID_MISSING_FALLBACK_TO_BASE',
+      };
+    }
+
+    const categoryAppliedResult = applyBbsCategoryPolicyToPath({
+      detailPath,
+      bbsCategoryId,
+      bbsCategoryPolicy,
+    });
+
+    return {
+      ...defaultResult,
+      routeCase,
+      bbsCategoryPolicy,
+      bbsCategoryId: categoryAppliedResult.normalizedBbsCategoryId || null,
+      bbsCategoryApplied: categoryAppliedResult.bbsCategoryApplied,
+      menuId,
+      basePath,
+      path: categoryAppliedResult.path,
+      isFallback: false,
+      reason: categoryAppliedResult.bbsCategoryMissing
+        ? 'BBS_CATEGORY_ID_REQUIRED_BUT_MISSING'
+        : 'OK',
+    };
+  }
+
   // 아직 구현되지 않은 힌트코드는 목록(basePath)으로 폴백
   default:
     return {
       ...defaultResult,
       routeCase,
+      bbsCategoryPolicy,
       menuId,
       basePath,
       path: basePath,
