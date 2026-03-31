@@ -336,12 +336,12 @@ const MainPage = () => {
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      navigate('/publishing/ai-smart-search', {
+      navigate('/totalSearch', {
         state: { q: searchQuery.trim() },
       });
       return;
     }
-    navigate('/publishing/ai-smart-search');
+    navigate('/totalSearch');
   };
   const handleKeyDown = (e) => e.key === 'Enter' && handleSearch();
   const handleClear = () => setSearchQuery('');
