@@ -159,7 +159,7 @@ const MainPage = () => {
           사업공고 찾기
         </>
       ),
-      path: '/req/pbanc/pbanc',
+      path: '/req/pbanc',
     },
     {
       img: mainIcon07,
@@ -179,7 +179,7 @@ const MainPage = () => {
           <span className="mo-hide">융자 보증 보험</span>정책 금융상품 찾기
         </>
       ),
-      path: '/req/plcy/UI_USR_L_030',
+      path: '/req/UI_USR_L_030',
     },
     {
       img: mainIcon03,
@@ -629,7 +629,7 @@ const MainPage = () => {
                               </div>
                               <div className="card-body">
                                 <Link
-                                  to={`/req/pbanc/pbanc/${item.bizPbancNo}`}
+                                  to={`/req/pbanc/${item.bizPbancNo}`}
                                   className="c-text"
                                 >
                                   <p className="c-tit no-icon">
@@ -669,7 +669,7 @@ const MainPage = () => {
                         <button
                           type="button"
                           className="krds-btn tertiary medium"
-                          onClick={() => navigate('/req/pbanc/pbanc')}
+                          onClick={() => navigate('/req/pbanc')}
                         >
                           사업공고 더보기
                           <i className="svg-icon ico-angle right"></i>
@@ -799,7 +799,7 @@ const MainPage = () => {
                               </div>
                               <div className="card-body">
                                 <Link
-                                  to={`/req/plcy/UI_USR_L_030/${item.plcyFnncGdsSn}`}
+                                  to={`/req/UI_USR_L_030/${item.plcyFnncGdsSn}`}
                                   className="c-text"
                                 >
                                   <p className="c-tit no-icon">
@@ -851,7 +851,7 @@ const MainPage = () => {
                           <button
                             type="button"
                             className="krds-btn tertiary medium"
-                            onClick={() => navigate('/req/plcy/UI_USR_L_030')}
+                            onClick={() => navigate('/req/UI_USR_L_030')}
                           >
                             정책금융 더보기
                             <i className="svg-icon ico-angle right"></i>
