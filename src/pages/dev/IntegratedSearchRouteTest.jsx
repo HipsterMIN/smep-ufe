@@ -17,10 +17,11 @@ const TEST_PAGE_STATE_STORAGE_KEY = 'intg-search-route-test-page-state-v1';
  *
  * 목적:
   * - 업무개발자 개발 완료 전, 단서코드 기반 라우팅을 독립적으로 검증한다.
-  * - 입력값 3개(intgSrchRouteHintCd, workId, bbsCategoryId)를 수신/표시한다.
+  * - 기본 입력값 3개(intgSrchRouteHintCd, workId, bbsCategoryId)와
+  *   확장 파라미터(parameter.title)를 함께 검증한다.
  *
  * 참고:
- * - 리졸버는 (상세), (게시판_상세) 케이스를 우선 지원한다.
+ * - 리졸버는 (상세), (게시판_상세), (외부링크이동) 케이스를 지원한다.
  * - (게시판_상세) 케이스에서는 bbsCategoryId가 있으면 ctgryNo 쿼리로 path에 반영된다.
  */
 const IntegratedSearchRouteTest = () => {
@@ -28,6 +29,7 @@ const IntegratedSearchRouteTest = () => {
   const [intgSrchRouteHintCd, setIntgSrchRouteHintCd] = useState('ISRH0001');
   const [workId, setWorkId] = useState('ST_000000000001265');
   const [bbsCategoryId, setBbsCategoryId] = useState('');
+  const [parameterTitle, setParameterTitle] = useState('');
   const [routeHintCodeOptions, setRouteHintCodeOptions] = useState([]);
   const [isRouteHintOptionsLoading, setIsRouteHintOptionsLoading] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
@@ -38,6 +40,7 @@ const IntegratedSearchRouteTest = () => {
     nextHintCd = intgSrchRouteHintCd,
     nextWorkId = workId,
     nextBbsCategoryId = bbsCategoryId,
+    nextParameterTitle = parameterTitle,
     nextResolved = resolved,
   } = {}) => {
     if (typeof window === 'undefined') {
@@ -48,6 +51,7 @@ const IntegratedSearchRouteTest = () => {
       intgSrchRouteHintCd: nextHintCd || '',
       workId: nextWorkId || '',
       bbsCategoryId: nextBbsCategoryId || '',
+      parameterTitle: nextParameterTitle || '',
       resolved: nextResolved || null,
       savedAt: new Date().toISOString(),
     };
@@ -87,6 +91,19 @@ const IntegratedSearchRouteTest = () => {
       fullPath,
       url: `${window.location.origin}${fullPath}`,
     };
+  };
+
+  // 결과 타입에 따라 "실제 브라우저가 요청할 URL" 미리보기를 통일해서 만든다.
+  const buildResolvePreview = (result) => {
+    if (result?.navigationType === 'EXTERNAL') {
+      return {
+        basename: null,
+        routerPath: null,
+        fullPath: null,
+        url: result?.externalUrl || null,
+      };
+    }
+    return buildBrowserPreview(result?.path);
   };
 
   useEffect(() => {
@@ -148,6 +165,9 @@ const IntegratedSearchRouteTest = () => {
       if (typeof saved?.bbsCategoryId === 'string') {
         setBbsCategoryId(saved.bbsCategoryId);
       }
+      if (typeof saved?.parameterTitle === 'string') {
+        setParameterTitle(saved.parameterTitle);
+      }
       if (saved?.resolved) {
         setResolved(saved.resolved);
       }
@@ -165,8 +185,11 @@ const IntegratedSearchRouteTest = () => {
         intgSrchRouteHintCd: intgSrchRouteHintCd.trim(),
         workId: workId.trim(),
         bbsCategoryId: bbsCategoryId.trim(),
+        parameter: {
+          title: parameterTitle.trim(),
+        },
       });
-      const preview = buildBrowserPreview(result?.path);
+      const preview = buildResolvePreview(result);
 
       const nextResolved = {
         ...result,
@@ -184,9 +207,17 @@ const IntegratedSearchRouteTest = () => {
   };
 
   const handleMove = () => {
-    if (!resolved?.path) return;
+    if (!resolved) return;
     persistPageState();
-    navigate(resolved.path);
+
+    if (resolved.navigationType === 'EXTERNAL' && resolved.externalUrl) {
+      window.open(resolved.externalUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    if (resolved.path) {
+      navigate(resolved.path);
+    }
   };
 
   return (
@@ -210,10 +241,11 @@ const IntegratedSearchRouteTest = () => {
       <div style={{ display: 'grid', gap: '12px', marginBottom: '16px' }}>
         <div style={{ padding: '12px', border: '1px dashed #c8d6ea', borderRadius: '6px', background: '#fbfdff', color: '#2f3b52' }}>
           <p style={{ marginBottom: '8px' }}>
-            사용 순서: 1) 단서코드 선택 2) workId 입력 3) 리졸브 실행 4) <code>reason=OK</code> 확인 5) 결과 경로 이동
+            사용 순서: 1) 단서코드 선택 2) workId/카테고리/title 입력 3) 리졸브 실행
+            4) <code>reason</code> 확인 5) 결과 경로 이동
           </p>
           <p>
-            리졸브 결과의 <code>path</code>, <code>예상 요청 URL</code>을 확인한 뒤 이동하세요.
+            리졸브 결과의 <code>navigationType</code>, <code>path/externalUrl</code>, <code>예상 요청 URL</code>을 확인한 뒤 이동하세요.
           </p>
         </div>
 
@@ -292,6 +324,26 @@ const IntegratedSearchRouteTest = () => {
             style={{ padding: '10px', border: '1px solid #d9d9d9', borderRadius: '6px' }}
           />
         </label>
+
+        <label style={{ display: 'grid', gap: '6px' }}>
+          <span>parameter.title</span>
+          <p style={{ margin: 0, color: '#5d6b82', fontSize: '13px', lineHeight: '1.45' }}>
+            신규 파라미터 수신 케이스에서 사용하는 제목 값입니다.
+            예: <code>ISRH0014</code>는 이 값을 받아 FAQ 목록으로 이동한 뒤
+            <code>searchType=TITLE</code>, <code>searchKeyword</code>로 경로를 계산합니다.
+          </p>
+          <input
+            type="text"
+            value={parameterTitle}
+            onChange={(e) => {
+              const nextParameterTitle = e.target.value;
+              setParameterTitle(nextParameterTitle);
+              persistPageState({ nextParameterTitle });
+            }}
+            placeholder="예: 정책자금 신청 방법"
+            style={{ padding: '10px', border: '1px solid #d9d9d9', borderRadius: '6px' }}
+          />
+        </label>
       </div>
 
       <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
@@ -307,7 +359,7 @@ const IntegratedSearchRouteTest = () => {
         <button
           type="button"
           onClick={handleMove}
-          disabled={!resolved?.path}
+          disabled={!resolved?.path && !resolved?.externalUrl}
           style={{ padding: '10px 14px', borderRadius: '6px', border: '1px solid #167d3f', background: '#167d3f', color: '#fff' }}
         >
           결과 경로로 이동
@@ -323,7 +375,13 @@ const IntegratedSearchRouteTest = () => {
       {resolved && (
         <div style={{ marginBottom: '14px', padding: '12px', border: '1px solid #d9e2f2', borderRadius: '6px', background: '#f7fbff' }}>
           <div style={{ marginBottom: '6px' }}>
+            이동 타입: <code>{resolved.navigationType || '-'}</code>
+          </div>
+          <div style={{ marginBottom: '6px' }}>
             예상 Router Path: <code>{resolved.path || '-'}</code>
+          </div>
+          <div style={{ marginBottom: '6px' }}>
+            외부 링크 URL: <code>{resolved.externalUrl || '-'}</code>
           </div>
           <div style={{ marginBottom: '6px' }}>
             예상 Full Path: <code>{resolved.browserPreview?.fullPath || '-'}</code>

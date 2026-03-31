@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useMatches } from 'react-router-dom';
+import { useMatches, useSearchParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Pagination from '@components/ui/Pagination.jsx';
@@ -56,6 +56,7 @@ const triggerDownload = (downloadUrl) => {
 
 const UI_USR_L_170 = () => {
   const matches = useMatches();
+  const [searchParams] = useSearchParams();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [searchType, setSearchType] = useState('TITLE');
@@ -68,6 +69,9 @@ const UI_USR_L_170 = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize] = useState(5);
+  const querySearchKeyword = String(searchParams.get('searchKeyword') ?? '').trim();
+  const rawQuerySearchType = String(searchParams.get('searchType') ?? '').trim().toUpperCase();
+  const querySearchType = ['TITLE'].includes(rawQuerySearchType) ? rawQuerySearchType : 'TITLE';
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -78,6 +82,21 @@ const UI_USR_L_170 = () => {
       .reverse()
       .find((match) => match?.handle?.bbsNo != null)?.handle?.bbsNo ?? currentMatch?.handle?.bbsNo;
   }, [matches]);
+
+  /**
+   * 통합검색 랜딩 시 전달된 검색 파라미터를 초기 상태에 반영한다.
+   *
+   * 주의:
+   * - Pagination의 syncUrl(page) 변경과 충돌하지 않도록
+   *   searchType/searchKeyword 변화에만 반응한다.
+   */
+  useEffect(() => {
+    setSearchType(querySearchType);
+    setAppliedSearchType(querySearchType);
+    setSearchKeyword(querySearchKeyword);
+    setAppliedSearchKeyword(querySearchKeyword);
+    setCurrentPage(0);
+  }, [querySearchKeyword, querySearchType]);
 
   useEffect(() => {
     let isMounted = true;
