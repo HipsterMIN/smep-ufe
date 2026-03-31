@@ -118,6 +118,58 @@ const stripHtmlTags = (value) => {
     .trim();
 };
 
+const SEARCH_POPULAR_LIMIT = 5;
+const SEARCH_AUTOCOMPLETE_LIMIT = 8;
+const SEARCH_AUTOCOMPLETE_DEBOUNCE_MS = 250;
+
+const parseSearchPayload = (payload) => {
+  if (!payload) return null;
+  if (typeof payload === 'string') {
+    try {
+      return parseSearchPayload(JSON.parse(payload));
+    } catch (error) {
+      return null;
+    }
+  }
+  if (payload?.data !== undefined && payload?.data !== null) {
+    return parseSearchPayload(payload.data);
+  }
+  return payload;
+};
+
+const extractPopularKeywords = (payload) => {
+  const parsed = parseSearchPayload(payload);
+  const items = Array.isArray(parsed?.result?.Item) ? parsed.result.Item : [];
+  const seen = new Set();
+
+  return items
+    .map((item) => String(item?.Query || '').trim())
+    .filter(Boolean)
+    .filter((keyword) => {
+      if (seen.has(keyword)) return false;
+      seen.add(keyword);
+      return true;
+    });
+};
+
+const extractAutoCompleteKeywords = (payload) => {
+  const parsed = parseSearchPayload(payload);
+  const groups = Array.isArray(parsed?.result) ? parsed.result : [];
+  const items = groups.flatMap((group) =>
+    Array.isArray(group?.items) ? group.items : [],
+  );
+  const seen = new Set();
+
+  return items
+    .map((item) => String(item?.keyword || '').trim())
+    .filter(Boolean)
+    .filter((keyword) => {
+      if (seen.has(keyword)) return false;
+      seen.add(keyword);
+      return true;
+    });
+};
+
 const MainPage = () => {
   const navigate = useNavigate();
   const { getFullPath } = useUserMenu();
@@ -135,13 +187,20 @@ const MainPage = () => {
   const [mainLoading, setMainLoading] = useState(true);
   const [bizFieldOptions, setBizFieldOptions] = useState([]);
   const [hiddenPopupIds, setHiddenPopupIds] = useState([]);
+  const [popularKeywords, setPopularKeywords] = useState([]);
+  const [autoCompleteKeywords, setAutoCompleteKeywords] = useState([]);
+  const [isAutoCompleteEnabled, setIsAutoCompleteEnabled] = useState(true);
+  const [isPopularLoading, setIsPopularLoading] = useState(false);
+  const [isAutoLoading, setIsAutoLoading] = useState(false);
   const srchInputRef = useRef(null);
   const searchBarRef = useRef(null);
   const originTopRef = useRef(0);
   const swiperRef = useRef(null);
+  const latestAutoQueryRef = useRef('');
 
-  const showPopular = isFocused && searchQuery === '';
-  const showAutoComplete = isFocused && searchQuery !== '';
+  const showPopular = isFocused && searchQuery.trim() === '';
+  const showAutoComplete =
+    isFocused && isAutoCompleteEnabled && searchQuery.trim() !== '';
   const serviceTabMenu = [
     '사업공고',
     '지원사업 소개',
@@ -251,6 +310,75 @@ const MainPage = () => {
 
   useEffect(() => {
     let isMounted = true;
+
+    const loadPopularKeywords = async () => {
+      try {
+        setIsPopularLoading(true);
+        const response = await apiClient.get('/api/v1/search/popword');
+        if (!isMounted) return;
+        setPopularKeywords(
+          extractPopularKeywords(response).slice(0, SEARCH_POPULAR_LIMIT),
+        );
+      } catch (error) {
+        if (!isMounted) return;
+        setPopularKeywords([]);
+      } finally {
+        if (isMounted) setIsPopularLoading(false);
+      }
+    };
+
+    loadPopularKeywords();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isFocused || !isAutoCompleteEnabled) {
+      latestAutoQueryRef.current = '';
+      setAutoCompleteKeywords([]);
+      setIsAutoLoading(false);
+      return;
+    }
+
+    const keyword = searchQuery.trim();
+    if (!keyword) {
+      latestAutoQueryRef.current = '';
+      setAutoCompleteKeywords([]);
+      setIsAutoLoading(false);
+      return;
+    }
+
+    latestAutoQueryRef.current = keyword;
+
+    const timerId = window.setTimeout(async () => {
+      try {
+        setIsAutoLoading(true);
+        const params = new URLSearchParams({ query: keyword });
+        const response = await apiClient.get(`/api/v1/search/ark?${params.toString()}`);
+        if (latestAutoQueryRef.current !== keyword) return;
+        setAutoCompleteKeywords(
+          extractAutoCompleteKeywords(response).slice(
+            0,
+            SEARCH_AUTOCOMPLETE_LIMIT,
+          ),
+        );
+      } catch (error) {
+        if (latestAutoQueryRef.current !== keyword) return;
+        setAutoCompleteKeywords([]);
+      } finally {
+        if (latestAutoQueryRef.current === keyword) {
+          setIsAutoLoading(false);
+        }
+      }
+    }, SEARCH_AUTOCOMPLETE_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(timerId);
+  }, [searchQuery, isFocused, isAutoCompleteEnabled]);
+
+  useEffect(() => {
+    let isMounted = true;
     const loadMainData = async () => {
       try {
         setMainLoading(true);
@@ -344,7 +472,29 @@ const MainPage = () => {
     navigate('/totalSearch');
   };
   const handleKeyDown = (e) => e.key === 'Enter' && handleSearch();
-  const handleClear = () => setSearchQuery('');
+  const handleClear = () => {
+    setSearchQuery('');
+    setAutoCompleteKeywords([]);
+    setIsAutoLoading(false);
+  };
+  const handleKeywordSelect = (keyword) => {
+    const nextKeyword = String(keyword || '').trim();
+    if (!nextKeyword) return;
+    setSearchQuery(nextKeyword);
+    setIsFocused(false);
+    navigate('/totalSearch', {
+      state: { q: nextKeyword },
+    });
+  };
+  const handleAutoCompleteToggle = (e) => {
+    const enabled = e.target.checked;
+    setIsAutoCompleteEnabled(enabled);
+    if (!enabled) {
+      latestAutoQueryRef.current = '';
+      setAutoCompleteKeywords([]);
+      setIsAutoLoading(false);
+    }
+  };
   const handleToggleLike1 = (index) =>
     setLikedAnnounce((prev) => ({ ...prev, [index]: !prev[index] }));
   const handleToggleLike2 = (index) =>
@@ -427,38 +577,35 @@ const MainPage = () => {
                         <div className="sch-layer-inner">
                           <strong className="sch-layer-title">인기검색어</strong>
                           <ul className="sch-layer-popular-list">
-                            <li className="sch-popular-item">
-                              <Link to="#" className="item-link">
-                                <em className="rank">
-                                  <span className="sr-only">인기검색어</span>1
-                                </em>
-                                      안전보건교육
-                              </Link>
-                            </li>
-                            <li className="sch-popular-item">
-                              <Link to="#" className="item-link">
-                                <em className="rank">
-                                  <span className="sr-only">인기검색어</span>2
-                                </em>
-                                      안전보건교육
-                              </Link>
-                            </li>
-                            <li className="sch-popular-item">
-                              <Link to="#" className="item-link">
-                                <em className="rank">
-                                  <span className="sr-only">인기검색어</span>3
-                                </em>
-                                      안전보건교육
-                              </Link>
-                            </li>
-                            <li className="sch-popular-item">
-                              <Link to="#" className="item-link">
-                                <em className="rank">
-                                  <span className="sr-only">인기검색어</span>4
-                                </em>
-                                      안전보건교육
-                              </Link>
-                            </li>
+                            {isPopularLoading && (
+                              <li className="sch-popular-item">
+                                <span className="item-link">Loading...</span>
+                              </li>
+                            )}
+                            {!isPopularLoading &&
+                              popularKeywords.map((keyword, index) => (
+                                <li
+                                  className="sch-popular-item"
+                                  key={`popular-${keyword}-${index}`}
+                                >
+                                  <button
+                                    type="button"
+                                    className="item-link"
+                                    onClick={() => handleKeywordSelect(keyword)}
+                                  >
+                                    <em className="rank">
+                                      <span className="sr-only">인기검색어</span>
+                                      {index + 1}
+                                    </em>
+                                    {keyword}
+                                  </button>
+                                </li>
+                              ))}
+                            {!isPopularLoading && popularKeywords.length === 0 && (
+                              <li className="sch-popular-item">
+                                <span className="item-link">No popular keywords.</span>
+                              </li>
+                            )}
                           </ul>
                         </div>
                       </div>
@@ -467,27 +614,36 @@ const MainPage = () => {
                     {showAutoComplete && (
                       <div className="sch-layer-inner">
                         <ul className="sch-layer-auto-list">
-                          <li>
-                            <button type="button">
-                              <i className="ico-keyword"></i>
-                              <em className="keyword">수출입</em> 지원사업
-                            </button>
-                          </li>
-                          <li>
-                            <button type="button">
-                              <i className="ico-keyword"></i>
-                              <em className="keyword">수출입</em> 지원사업
-                            </button>
-                          </li>
-
+                          {isAutoLoading && (
+                            <li>
+                              <span className="item-link">Loading...</span>
+                            </li>
+                          )}
+                          {!isAutoLoading &&
+                            autoCompleteKeywords.map((keyword, index) => (
+                              <li key={`auto-${keyword}-${index}`}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleKeywordSelect(keyword)}
+                                >
+                                  <i className="ico-keyword"></i>
+                                  <em className="keyword">{keyword}</em>
+                                </button>
+                              </li>
+                            ))}
                         </ul>
                       </div>
                     )}
 
                     <div className="sch-layer-footer">
                       <div className="krds-form-toggle-switch">
-                        <input type="checkbox" id="switch" />
-                        <label for="switch"><span className="switch-toggle"><i></i></span>자동완성기능</label>
+                        <input
+                          type="checkbox"
+                          id="main-search-autocomplete-switch"
+                          checked={isAutoCompleteEnabled}
+                          onChange={handleAutoCompleteToggle}
+                        />
+                        <label htmlFor="main-search-autocomplete-switch"><span className="switch-toggle"><i></i></span>자동완성기능</label>
                       </div>
                     </div>
 
@@ -500,11 +656,32 @@ const MainPage = () => {
             <div className="main-top-keyword">
               <h3>인기 검색어</h3>
               <ul className="keyword-list">
-                <li><button type="button" className="word">소상공인지원</button></li>
-                <li><button type="button" className="word">초기창업</button></li>
-                <li><button type="button" className="word">창업지원포털</button></li>
-                <li><button type="button" className="word">지원사업공고</button></li>
-                <li><button type="button" className="word">AP소재정보</button></li>
+                {isPopularLoading && (
+                  <li>
+                    <button type="button" className="word" disabled>
+                      Loading...
+                    </button>
+                  </li>
+                )}
+                {!isPopularLoading &&
+                  popularKeywords.map((keyword, index) => (
+                    <li key={`top-popular-${keyword}-${index}`}>
+                      <button
+                        type="button"
+                        className="word"
+                        onClick={() => handleKeywordSelect(keyword)}
+                      >
+                        {keyword}
+                      </button>
+                    </li>
+                  ))}
+                {!isPopularLoading && popularKeywords.length === 0 && (
+                  <li>
+                    <button type="button" className="word" disabled>
+                      No popular keywords.
+                    </button>
+                  </li>
+                )}
               </ul>
             </div>
 
