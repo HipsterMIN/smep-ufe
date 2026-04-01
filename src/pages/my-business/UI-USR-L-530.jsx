@@ -174,7 +174,7 @@ const UI_USR_L_530 = () => {
         </div>
 
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>관심 공고 검색결과 목록. 번호, 등록일시, 구분, 내용 정보가 제공됨.</caption>
             <colgroup>
               <col style={{ width: '7.4%' }} />
@@ -207,7 +207,7 @@ const UI_USR_L_530 = () => {
                         <span>{row.title}</span>
                       </a>
                     </td>
-                    <td className="ac">
+                    <td className="ac btn-flex">
                       <button
                         type="button"
                         onClick={() => toggleRegister(row.id)}

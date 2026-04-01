@@ -262,7 +262,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
         </div>
         {/* table [S] */}
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>Q & A 목록. 번호, 카테고리, 제목, 작성자, 처리상태, 작성일, 조회수 정보가 제공됩니다.</caption>
             <colgroup>
               <col style={{ width: '7.4%' }} />
@@ -281,7 +281,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
                 <th scope="col" className="ac">작성</th>
                 <th scope="col" className="ac">처리상태</th>
                 <th scope="col" className="ac">작성일</th>
-                <th scope="col" className="ac">조회</th>
+                <th scope="col" className="ac views">조회</th>
               </tr>
             </thead>
             <tbody>
@@ -320,7 +320,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
                     <td className="ac"><span>{item?.pstRgtrNm || '-'}</span></td>
                     <td className="ac"><span>{getAnswerStatus(item)}</span></td>
                     <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
-                    <td className="ac"><span>{item?.inqCnt ?? 0}</span></td>
+                    <td className="ac views"><span>{item?.inqCnt ?? 0}</span></td>
                   </tr>
                 ))
               )}
@@ -333,7 +333,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
-          syncUrl
+            syncUrl
           />
         )}
 

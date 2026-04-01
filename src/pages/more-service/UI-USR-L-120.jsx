@@ -166,7 +166,7 @@ const UI_USR_L_120 = () => {
 
         {/* table [S] */}
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>품목별 법정의무 인증제도 표. 번호, 분야, 인증제도명, 대상 품목수, 관련법률, 소관부처, 조회수 정보가 제공됨.</caption>
             <colgroup>
               <col style={{ width: '60px' }}/>
@@ -214,7 +214,7 @@ const UI_USR_L_120 = () => {
                         <span style={{ whiteSpace: 'nowrap' }}>{item.certSystmNm}</span>
                       </a>
                     </td>
-                    <td className="ac">
+                    <td className="ac views">
                       <span>{item.itemCnt || 0}</span>
                     </td>
                     <td className="al" style={{ wordBreak: 'break-word' }}>
@@ -234,7 +234,7 @@ const UI_USR_L_120 = () => {
                     <td className="ac">
                       <span>{item.tkcgMaoNm || '-'}</span>
                     </td>
-                    <td className="ac">
+                    <td className="ac views">
                       <span>{item.tinqCnt || 0}</span>
                     </td>
                   </tr>

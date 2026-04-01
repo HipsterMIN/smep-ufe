@@ -254,7 +254,7 @@ const Pbanc = () => {
         </div>
 
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>지원사업 공고의 번호, 제목, 신청기간, 신청, 지원기관, 조회수 정보가 제공됩니다.</caption>
             <colgroup>
               <col style={{ width: '5%' }} />
@@ -287,15 +287,19 @@ const Pbanc = () => {
                   <tr key={item.bizPbancNo || index}>
                     <th scope="row" className="ac"><span>{rowNo}</span></th>
                     <td>
+                      {fieldLabel && (
+                        <div className="badge-txt-box">
+                          <span className="krds-badge bg-light-primary">{fieldLabel}</span>
+                        </div>
+                      )}
                       <Link className="onellipsis-1" to={`${item.bizPbancNo}`}>
-                        {fieldLabel && <span className="krds-badge bg-light-primary">{fieldLabel}</span>}
                         <span>{item.bizPbancNm}</span>
                       </Link>
                     </td>
                     <td className="ac"><span>{periodText}</span></td>
                     <td className="ac"><span className="onellipsis-1">{item.applyStatusText || '-'}</span></td>
                     <td className="ac"><span className="onellipsis-1">{item.bizSprvsnInstNm || '-'}</span></td>
-                    <td className="ac"><span>{formatNumberWithCommas(item.bizPbancInqCnt || 0)}</span></td>
+                    <td className="ac views"><span>{formatNumberWithCommas(item.bizPbancInqCnt || 0)}</span></td>
                   </tr>
                 );
               })}

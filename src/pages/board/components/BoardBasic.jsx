@@ -251,7 +251,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
         </div>
         {/* table [S] */}
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>공지사항 목록. 번호, 제목, 등록일, 조회수 정보가 제공됩니다.</caption>
             <colgroup>
               <col style={{ width: '7.4 %' }} />
@@ -295,7 +295,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
                     </th>
                     <td>
                       <a
-                        className={`onellipsis-1 ${item?.upendPstgYn === 'Y' ? 'notice-pinned' : ''}`}
+                        className={`onellipsis-1 ${item?.upendPstgYn === 'Y' ? 'notice-pinned' : ''} flex-row`}
                         href="#"
                         onClick={(event) => {
                           event.preventDefault();
@@ -307,7 +307,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
                       </a>
                     </td>
                     <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
-                    <td className="ac"><span>{item?.inqCnt ?? 0}</span></td>
+                    <td className="ac views"><span>{item?.inqCnt ?? 0}</span></td>
                   </tr>
                 ))
               )}
