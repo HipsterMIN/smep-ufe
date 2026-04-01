@@ -401,7 +401,7 @@ const UI_USR_L_140 = () => {
       </div>
 
       <div className="krds-table-wrap">
-        <table className="tbl col data">
+        <table className="tbl col data t-block">
           <caption>
             {tabData.current[activeTabIndex]} 표. {captionMap[activeTabIndex]}
           </caption>

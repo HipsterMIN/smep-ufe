@@ -224,7 +224,7 @@ const UI_USR_L_180 = () => {
 
         {/* table [S] */}
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>행사정보 표. 번호, 제목, 출처, 작성일 조회수 정보가 제공됨.</caption>
             <colgroup>
               <col style={{ width: '10px' }} />
@@ -275,7 +275,7 @@ const UI_USR_L_180 = () => {
                     </td>
                     <td className="ac"><span>{item?.pstSrcCn || '-'}</span></td>
                     <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
-                    <td className="ac"><span>{item?.inqCnt ?? '-'}</span></td>
+                    <td className="ac views"><span>{item?.inqCnt ?? '-'}</span></td>
                   </tr>
                 ))
               )}

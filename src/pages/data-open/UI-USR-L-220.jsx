@@ -113,7 +113,7 @@ const UI_USR_L_220 = () => {
           </div>
 
           <div className="krds-table-wrap">
-            <table className="tbl col data">
+            <table className="tbl col data t-block">
               <caption>인증키 신청 이력 정보. 순번, 소속기관, 시스템명, 신청API, 신청 이메일, 신청일, 조회 정보가 제공됨.</caption>
               <colgroup>
                 <col style={{ width: '5%' }} />

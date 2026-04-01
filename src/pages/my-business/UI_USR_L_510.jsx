@@ -166,7 +166,7 @@ const UI_USR_L_510 = () => {
 
         {/* table component start */}
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>증명서 발급 조회 표. 순번, 증명(확인)서, 사업자등록번호, 신청일자, 유효기간, 상태, 출력언어, 발급 정보가 제공됨.</caption>
             <colgroup>
               <col style={{ width: '5%' }}/>
@@ -223,7 +223,7 @@ const UI_USR_L_510 = () => {
                       {/*) : (*/}
                       <button
                         type="button"
-                        className="krds-btn small"
+                        className="krds-btn small mo-full"
                         onClick={() => window.open('https://www.smes.go.kr/ClipReport4/commonTibero.jsp?fileName=AA_SME&CRTF_REQST_SNO=20260113620149', '_blank')}
                       >
                             출력
@@ -239,7 +239,7 @@ const UI_USR_L_510 = () => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
-          syncUrl
+            syncUrl
           />
         </div>
         {/* table component end */}

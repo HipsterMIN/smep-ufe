@@ -161,7 +161,7 @@ const UI_USR_L_230 = () => {
                   <td className="ac"><span>{row.inquiryType}</span></td>
                   <td>
                     <a className="onellipsis-1" href="#">
-                      <span>{row.title}</span>
+                      <span className="on-colorblue2">{row.title}</span>
                       {row.isPrivate && <i className="svg-icon ico-lock"></i>}
                     </a>
                   </td>

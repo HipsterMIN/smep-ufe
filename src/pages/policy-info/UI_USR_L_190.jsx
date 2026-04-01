@@ -249,7 +249,7 @@ const UI_USR_L_190 = () => {
         </div>
 
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>행사정보 목록 번호, 지역, 제목, 행사기간, 수행기관, 작성일, 조회수 정보가 제공됩니다.</caption>
             <colgroup>
               <col style={{ width: '5%' }} />
@@ -298,8 +298,8 @@ const UI_USR_L_190 = () => {
                     </td>
                     <td className="ac"><span>{formatEventPeriod(item?.evntPrdCn || item?.rcptPrdCn)}</span></td>
                     <td className="ac"><span className="onellipsis-1">{item?.evntInfoFlfmtInstNm || '-'}</span></td>
-                    <td className="ac"><span>{formatDateDot(item?.regDt)}</span></td>
-                    <td className="ac"><span>{item?.inqCnt ?? 0}</span></td>
+                    <td className="ac views"><span>{formatDateDot(item?.regDt)}</span></td>
+                    <td className="ac views"><span>{item?.inqCnt ?? 0}</span></td>
                   </tr>
                 ))
               )}
