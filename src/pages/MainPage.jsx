@@ -5,6 +5,7 @@ import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 
 import Header from '@components/ui/Header.jsx';
 import Footer from '@components/ui/Footer.jsx';
+import Work24VirtualKeyboard from '@components/ui/work24-keyboard/Work24VirtualKeyboard.jsx';
 import mainIcon01 from '@assets/main/mainIcon_01.svg';
 import mainIcon03 from '@assets/main/mainIcon_03.svg';
 import mainIcon04 from '@assets/main/mainIcon_04.svg';
@@ -192,7 +193,10 @@ const MainPage = () => {
   const [isAutoCompleteEnabled, setIsAutoCompleteEnabled] = useState(true);
   const [isPopularLoading, setIsPopularLoading] = useState(false);
   const [isAutoLoading, setIsAutoLoading] = useState(false);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const srchInputRef = useRef(null);
+  const keyboardButtonRef = useRef(null);
+  const searchInputRef = useRef(null);
   const searchBarRef = useRef(null);
   const originTopRef = useRef(0);
   const swiperRef = useRef(null);
@@ -267,12 +271,19 @@ const MainPage = () => {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
+      const keyboardZone = document.getElementById('HM_keyboardzone');
+      if (keyboardZone?.contains(e.target)) return;
       if (srchInputRef.current && !srchInputRef.current.contains(e.target))
         setIsFocused(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (isFocused) return;
+    setIsKeyboardOpen(false);
+  }, [isFocused]);
 
   useEffect(() => {
     const saveOriginTop = () => {
@@ -463,6 +474,7 @@ const MainPage = () => {
   );
 
   const handleSearch = () => {
+    setIsKeyboardOpen(false);
     if (searchQuery.trim()) {
       navigate('/totalSearch', {
         state: { q: searchQuery.trim() },
@@ -476,12 +488,14 @@ const MainPage = () => {
     setSearchQuery('');
     setAutoCompleteKeywords([]);
     setIsAutoLoading(false);
+    searchInputRef.current?.focus();
   };
   const handleKeywordSelect = (keyword) => {
     const nextKeyword = String(keyword || '').trim();
     if (!nextKeyword) return;
     setSearchQuery(nextKeyword);
     setIsFocused(false);
+    setIsKeyboardOpen(false);
     navigate('/totalSearch', {
       state: { q: nextKeyword },
     });
@@ -533,7 +547,14 @@ const MainPage = () => {
               >
                 <div className="sch-input-box">
                   <input
+                    id="mainTopQuery"
+                    name="mainTopQuery"
+                    ref={searchInputRef}
                     type="text"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
                     placeholder='지원사업·정책금융·확인서·사업공고를 검색하세요'
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -545,6 +566,8 @@ const MainPage = () => {
                     <button
                       type="button"
                       className="krds-btn icon ico-keyboard"
+                      ref={keyboardButtonRef}
+                      onClick={() => setIsKeyboardOpen((prev) => !prev)}
                     >
                       <span className="sr-only">키보드 입력</span>
                       <i className="svg-icon ico-key"></i>
@@ -650,6 +673,16 @@ const MainPage = () => {
                   </div>
                 )}
               </div>
+              <Work24VirtualKeyboard
+                isOpen={isKeyboardOpen}
+                sizeOption="SMALL"
+                triggerRef={keyboardButtonRef}
+                inputRef={searchInputRef}
+                value={searchQuery}
+                onValueChange={setSearchQuery}
+                onEnter={handleSearch}
+                onClose={() => setIsKeyboardOpen(false)}
+              />
 
               {/* 인기 검색어 */}
             </div>
