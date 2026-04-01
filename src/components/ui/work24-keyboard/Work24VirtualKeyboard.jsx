@@ -114,7 +114,7 @@ const Work24VirtualKeyboard = ({
 
     const rect = triggerElement.getBoundingClientRect();
     setPosition({
-      top: rect.top + rect.height + 5,
+      top: rect.top + rect.height + 70,
       left: rect.left,
     });
   }, [triggerRef]);
