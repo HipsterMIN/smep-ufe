@@ -2242,7 +2242,7 @@ table tbody tr:hover td {
 
 /* krds-tag */
 .krds-tag-wrap.bg {background: #F4F5F6; border-radius: 15px; padding: 20px 24px;}
-.krds-tag-wrap.col-3 .krds-btn-tag{width: calc((100% - 16px) / 3); justify-content: center;}
+.krds-tag-wrap.col-3 .krds-btn-tag{justify-content: center;}
 
 /* on-boxlist */
 .on-boxlist {display: flex; flex-direction: column;}
@@ -3001,6 +3001,8 @@ textarea.krds-input::placeholder {
 .krds-table-wrap .tbl.word-break td {
   word-break: break-word;
 }
+.krds-table-wrap .tbl th.word-break,
+.krds-table-wrap .tbl td.word-break {word-break: break-word;}
 
 .search-top-box.no-details {
   padding: 40px;
