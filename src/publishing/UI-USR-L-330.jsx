@@ -53,12 +53,12 @@ const UI_USR_L_330 = () => {
         </div>
 		<div className="search-top-box">
 			<div className="sch-form-wrap">
-				<select className="krds-form-select">
+				<select className="krds-form-select" aria-label="카테고리 선택"> {/* 기술진단보고서 반영 */}
 					<option value="">카테고리 전체</option>
 					<option value="">항목</option>
 					<option value="">항목</option>
 				</select>
-				<select className="krds-form-select">
+				<select className="krds-form-select" aria-label="카테고리 선택"> {/* 기술진단보고서 반영 */}
 					<option value="">제목</option>
 					<option value="">항목</option>
 					<option value="">항목</option>

@@ -283,6 +283,9 @@
     gap: 12px;
     flex-wrap: wrap;
 }
+.on-form-row .select-group .form-wrapper ~ .form-wrapper {
+  margin-top: 0;
+}
 .on-form-row .form-row-content .w-184 {
     width: 184px;
 }

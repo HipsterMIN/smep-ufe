@@ -46,7 +46,7 @@ const SEARCHALL = () => {
             
             <div className="onsearch-input-box">
               <div className="boxinner">
-                <input type="text" />
+                <input type="text" title="검색어 입력"/>{/* 기술진단보고서 반영 */}
                 <button type="button"><i className="svg-icon ico-sch" style={{ backgroundColor : '#256EF4' }}></i></button>
               </div>
               <button type="button" className="krds-btn large text" onClick={handleOpenSearchOptionModal}><i className="svg-icon ico-sch-plus"></i>

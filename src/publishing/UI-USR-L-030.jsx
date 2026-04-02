@@ -95,7 +95,7 @@ const UI_USR_L_030 = () => {
                  <h3 className="sr-only">사업유형별</h3>
                  <div className="search-top-box">
                     <div className="sch-form-wrap" ref={schFormWrapRef1}>
-                      <select className="krds-form-select">
+                      <select className="krds-form-select" aria-label="검색 구분 선택"> {/* 기술진단보고서 반영 */}
                         <option value="">전체</option>
                       </select>
                       <div className="sch-input">
@@ -486,7 +486,7 @@ const UI_USR_L_030 = () => {
                  <h3 className="sr-only">사업유형별</h3>
                  <div className="search-top-box">
                     <div className="sch-form-wrap" ref={schFormWrapRef2}>
-                      <select className="krds-form-select">
+                      <select className="krds-form-select" aria-label="검색구분 선택"> {/* 기술진단보고서 반영 */}
                         <option value="">전체</option>
                       </select>
                       <div className="sch-input">

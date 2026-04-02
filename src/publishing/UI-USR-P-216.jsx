@@ -74,7 +74,7 @@ const UI_USR_P_216 = () => {
                       <label htmlFor="id_04" className="form-label">소속기관 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
                     </div>
                   <div className="form-conts">
-                    <select className="krds-form-select small" >
+                    <select className="krds-form-select small" aria-label="소속기관 선택">{/* 기술진단보고서 반영 */}
                       <option value="">중소벤처기업부</option>
                     </select>
                   </div>
