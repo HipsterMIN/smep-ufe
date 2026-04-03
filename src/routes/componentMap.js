@@ -70,6 +70,11 @@ const UI_USR_R_121 = lazy(() => import('@pages/more-service/UI-USR-R-121.jsx'));
 const UI_USR_R_190 = lazy(() => import('@pages/more-service/UI-USR-R-190.jsx'));
 
 const TotalSearch = lazy(() => import('@pages/total-search/TotalSearch.jsx'));
+
+const EmailRejection = lazy(() => import('@pages/footer/EmailRejection.jsx'));
+const CopyrightPolicy = lazy(() => import('@pages/footer/CopyrightPolicy.jsx'));
+const WebAccessibilityPolicy = lazy(() => import('@pages/footer/WebAccessibilityPolicy.jsx'));
+const TermsOfUse = lazy(() => import('@pages/footer/TermsOfUse.jsx'));
 /**
  * =============================================================================
  * Component Map - menuId와 실제 컴포넌트 매핑
@@ -533,6 +538,31 @@ export const componentMap = {
   'M_PIIO_00125': {
     component: UI_USR_L_550,
     layout: SubpageLayoutWithMenu,
+  },
+
+  // ========== 푸터화면 ==========
+  // 이메일주소 무단수집거부 안내
+  'M_PIIO_00153': {
+    component: EmailRejection,
+    layout: MenuProviderOnly,
+  },
+
+  // 저작권 정책
+  'M_PIIO_00154': {
+    component: CopyrightPolicy,
+    layout: MenuProviderOnly,
+  },
+
+  // 웹접근성 정책
+  'M_PIIO_00155': {
+    component: WebAccessibilityPolicy,
+    layout: MenuProviderOnly,
+  },
+
+  // 이용약관
+  'M_PIIO_00156': {
+    component: TermsOfUse,
+    layout: MenuProviderOnly,
   },
 
 };
