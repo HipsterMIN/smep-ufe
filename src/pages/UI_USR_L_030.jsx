@@ -552,7 +552,10 @@ const UI_USR_L_030 = () => {
 
     try {
       setCompareLoading(true);
-      const responses = await Promise.all(compareIds.map((goodsSn) => apiClient.get(`/api/v1/finance-policy/${goodsSn}`)));
+      const responses = await Promise.all(
+        // 비교 팝업용 상세 조회는 통계 집계(조회수/키워드/이력)에서 제외한다.
+        compareIds.map((goodsSn) => apiClient.get(`/api/v1/finance-policy/${goodsSn}?trackYn=N`))
+      );
       setCompareItems(responses.map((response) => unwrapResponse(response)));
       setComparePopupOpen(true);
     } catch (error) {
