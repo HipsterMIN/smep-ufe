@@ -831,6 +831,7 @@
 .main-container .main-top-keyword .keyword-list {
   display: flex;
   gap: 8px;
+  padding: 4px;
   overflow-x: auto;
   white-space: nowrap;
 }

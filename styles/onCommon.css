@@ -2018,7 +2018,7 @@ table tbody tr:hover td {
   position: relative;
   width: auto;
   height: 320px;
-  gap: 0;
+  gap: 20px;
   text-align: center;
   cursor: pointer;
 }
@@ -2030,13 +2030,14 @@ table tbody tr:hover td {
   align-items: center;
   justify-content: center;
   width: 100%;
+  height: 60px;
 }
 .krds-structured-list.relate .structured-item .card-body {
   gap: 0;
   align-items: center;
   justify-content: center;
 }
-.krds-structured-list.relate .structured-item .card-body p:not(:last-child) {
+.krds-structured-list.relate .structured-item .card-body p:not(:last-of-type) {
   margin-bottom: 8px;
 }
 .hash-box {
@@ -2094,6 +2095,9 @@ table tbody tr:hover td {
   display: flex;
   position: absolute;
   bottom: 32px;
+}
+.krds-structured-list.relate .structured-item:hover .card-body .c-sub-tit {
+  margin-bottom: 14px;
 }
 
 .totalsearch-wrap .krds-structured-list .card-body .c-text {
