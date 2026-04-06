@@ -554,7 +554,7 @@ const UI_USR_L_030 = () => {
       setCompareLoading(true);
       const responses = await Promise.all(
         // 비교 팝업용 상세 조회는 통계 집계(조회수/키워드/이력)에서 제외한다.
-        compareIds.map((goodsSn) => apiClient.get(`/api/v1/finance-policy/${goodsSn}?trackYn=N`))
+        compareIds.map((goodsSn) => apiClient.get(`/api/v1/finance-policy/${goodsSn}?trackYn=N`)),
       );
       setCompareItems(responses.map((response) => unwrapResponse(response)));
       setComparePopupOpen(true);
@@ -605,7 +605,7 @@ const UI_USR_L_030 = () => {
 
               <div className="search-top-box">
                 <div className="sch-form-wrap" ref={filterWrapRef}>
-                  <select className="krds-form-select" value={filters.plcyFnncSrchTypeCd} onChange={(e) => updateFilter('plcyFnncSrchTypeCd', e.target.value)}>
+                  <select className="krds-form-select" aria-label="검색 구분 선택" value={filters.plcyFnncSrchTypeCd} onChange={(e) => updateFilter('plcyFnncSrchTypeCd', e.target.value)}>
                     <option value="ALL">전체</option>
                     {filterOptions.searchTypes.filter((item) => item.code !== 'ALL').map((item) => (
                       <option key={item.code} value={item.code}>{item.name}</option>

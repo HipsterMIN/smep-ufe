@@ -148,7 +148,7 @@ const Pbanc = () => {
 
         <div className="search-top-box">
           <div className="sch-form-wrap" ref={schFormWrapRef}>
-            <select className="krds-form-select" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+            <select className="krds-form-select" aria-label="검색구분 선택" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
               <option value="">전체</option>
               <option value="pbancnm">공고명</option>
               <option value="sprvsnInstNm">사업수행기관</option>
