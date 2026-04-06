@@ -340,7 +340,7 @@ export default function Header() {
                   </a>
                 </h2>
                 <div className="logo-platform">
-                  <span className="sr-only">중소기업 성장의 시작, 중소기업 성장지원 플랫폼</span>
+                  <span className="sr-only">모두의 시작, 모두의 성장</span>
                 </div>
                 <div className="header-right">
                   {/* 검색란 */}
