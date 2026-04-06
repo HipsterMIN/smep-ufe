@@ -1693,6 +1693,79 @@ button.aichatButton.active {
 .krds-accordion.type-box .accordion-item .accordion-body {
   padding: 0 32px 24px;
 }
+/* 이용가이드 */
+.conts-wrap .cont-desc {
+  color: #464C53;
+}
+.main-step {
+  margin-top: 40px;
+}
+.main-step > li ~ li {
+  margin-top: 40px;
+}
+.main-step .main-step-tit {
+  display: flex;
+  align-items: center;
+  font-size: 19px;
+}
+.main-step .main-step-tit strong {
+  font-weight: 700;
+}
+.main-step .main-step-tit .number {
+  margin-right: 10px;
+  font-weight: 700;
+  color: #0B50D0;
+}
+.main-step .main-step-tit p {
+  position: relative;
+  margin-left: 10px;
+  padding-left: 10px;
+  font-size: 17px;
+  font-weight: 400;
+}
+.main-step .main-step-tit p::before {
+  content:'';
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 1px;
+  height: 16px;
+  background-color: #CDD1D5;
+}
+.main-step .img-box {
+  background: #F4F5F6;
+  border-radius: 12px;
+  padding: 32px;
+  margin-top: 24px;
+} 
+.main-step .img-box .img-mo {
+  display: none;
+}
+.sub-step > li {
+  margin-top: 24px;
+}
+.sub-step .sub-step-tit {
+  color: #052B57;
+  font-weight: 700;
+}
+.sub-step .sub-step-tit .number {
+  display: inline-block;
+  text-align: center;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  font-size: 15px;
+  font-weight: 700;
+  margin-right: 10px;
+  border-radius: 4px;
+  color: #fff;
+  background: #063A74;
+}
+.sub-step .sub-step-desc {
+  margin-top: 10px;
+  font-weight: 400;
+  color: #464C53;
+}
 
 /* 반응형*/
 @media (max-width: 1400px) {
@@ -2217,5 +2290,39 @@ button.aichatButton.active {
   }
   .my-dashboard .menu-list {
     flex-direction: column;
+  }
+  .conts-wrap .sec-tit2 {
+    margin-bottom: 24px;
+  }
+  .main-step {
+    margin-top: 24px;
+  }
+  .main-step .img-box .img-mo {
+    display: block;
+  }
+  .main-step .img-box .img-pc {
+    display: none;
+  }
+  .main-step .main-step-tit {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .main-step .main-step-tit p {
+    padding-left: 0;
+    margin-left: 0;
+    margin-top: 10px;
+  }
+  .main-step .main-step-tit p::before {
+    display: none;
+  }
+  .main-step .img-box {
+    margin-top: 24px;
+    padding: 6px;
+  }
+  .sub-step > li {
+    margin-top: 12px;
+  }
+  .main-step > li ~ li {
+    margin-top: 24px;
   }
 }

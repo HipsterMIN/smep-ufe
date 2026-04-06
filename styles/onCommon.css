@@ -513,8 +513,8 @@ table tbody tr:hover td {
 }
 #krds-header .header-container .logo-platform {
   margin-left: 2rem;
-  width: 15rem;
-  height: 3.4rem;
+  width: 20rem;
+  height: 3rem;
   background: url(../src/assets/common/logo_platform.svg) no-repeat 50%/ 100% auto;
 }
 #krds-header .header-search-wrap {
@@ -1128,7 +1128,31 @@ table tbody tr:hover td {
 .tab + .tab-conts-wrap {margin-top: 40px;}
 .tab.full {max-width: calc(100vw - 32px);}
 .tab.full > ul {overflow-y: hidden;}
-
+/* tab sub */
+.tab.small > ul {
+  flex-wrap:nowrap;
+  gap: 8px;
+}
+.tab.small > ul > li {
+  flex: 0 0 auto;
+}
+.tab.small .btn-tab {
+  padding: 0 4px; 
+  height: 40px;
+  font-size: 17px;
+}
+.tab.small > ul > li.active .btn-tab {
+  position: relative;
+  color: #003764;
+}
+.tab.small > ul > li.active .btn-tab::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #063A74;
+}
 /* conts-desc */
 .conts-desc {color: #666; margin-top: 24px; margin-bottom: 48px; width: 100%;}
 
