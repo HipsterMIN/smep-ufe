@@ -9,6 +9,7 @@ import HeaderUserMenu from '@components/ui/header/HeaderUserMenu';
 import HeaderDesktopGNB from '@components/ui/header/HeaderDesktopGNB';
 import HeaderMobileGNB from '@components/ui/header/HeaderMobileGNB';
 import HeaderFontDropdown from '@components/ui/header/HeaderFontDropdown';
+import FullSystemPopup from '@components/ui/FullSystemPopup';
 import { api as apiClient } from '@lib/apiClient.js';
 
 // BASE URL 상수
@@ -296,6 +297,8 @@ export default function Header() {
       handleTotalSearch();
     }
   };
+
+  const [isPopOpen, setPopOpen] = useState(false); // 유관기관 둘러보기 팝업
   
   return (
     <>
@@ -327,7 +330,7 @@ export default function Header() {
                     <HeaderFontDropdown />
                   </li>
                   <li>
-                    <Link to="#" className="krds-btn small text">
+                    <Link onClick={() => setPopOpen(true)} className="krds-btn small text">
                       <i class="svg-icon ico-system"></i> 유관시스템 둘러보기
                     </Link>
                   </li>
@@ -430,6 +433,9 @@ export default function Header() {
           <span className="sr-only">상단으로</span>
         </button>
       </div>
+
+
+      <FullSystemPopup isPopOpen={isPopOpen} setPopOpen={setPopOpen} />
     </>
   );
 }
