@@ -4389,8 +4389,8 @@ textarea.krds-input::placeholder {
     font-size: 15px;
   }
   .onboard-summary { 
-    flex-direction: column;
-    gap: 5px;
+    gap: 16px;
+    flex-wrap: wrap;
   }
   .onboard-summary > li > span:before {
     display: none;
