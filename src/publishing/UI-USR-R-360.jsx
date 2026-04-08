@@ -144,8 +144,8 @@ const UI_USR_R_360 = () => {
                           <li>
                             <strong className="sub-step-tit"><span className="number">1</span>지원사업 신청 화면으로 이동</strong>
                             <ol className="sub-step-desc">
-                              <li>1.사업유형별/지원기관별 아이콘을 선택하고 『검색』버튼을 클릭해서 원하는 분류의 사업을 조회하실 수 있습니다.</li>
-                              <li>2.분류방식에 의한 검색뿐 아니라, 검색어 입력으로 정확도를 높이는 통합검색을 하실 수 있습니다</li>
+                              <li>1.메인 메뉴의 공고 조회·신청 &gt; 사업공고를 선택합니다.</li>
+                              <li>2.메인 화면의 “사업공고현황”를 선택하여 신청을 원하는 공고 정보를 선택합니다.</li>
                             </ol>
                           </li>
                           <li>
@@ -166,7 +166,7 @@ const UI_USR_R_360 = () => {
                           </li>
                           <li>
                             <strong className="sub-step-tit"><span className="number">4</span>공고(지원사업) 신청이력</strong>
-                            <p className="sub-step-desc">마이페이지 > 서비스이용이력 > 지원사업 메뉴 선택 후 지원사업 신청 현황을 확인할 수 있습니다.</p>
+                            <p className="sub-step-desc">마이페이지 &gt; 서비스이용이력 &gt; 지원사업 메뉴 선택 후 지원사업 신청 현황을 확인할 수 있습니다.</p>
                           </li>
                         </ol>
                       </li>
@@ -219,7 +219,7 @@ const UI_USR_R_360 = () => {
                             <strong className="sub-step-tit"><span className="number">4</span>증명/확인서 이력조회</strong>
                             <p className="sub-step-desc">
                               다음 두 가지 방법으로 이력을 확인할 수 있습니다. <br />
-                              1.마이 페이지 > 서비스 이용이력 > 증명서 메뉴에서 발급이력을 확인하고 출력할 수 있습니다.
+                              1.마이 페이지 &gt; 서비스 이용이력 &gt; 증명서 메뉴에서 발급이력을 확인하고 출력할 수 있습니다.
                             </p>
                             <div className="img-box">
                               <img src={GuideTab2_04} alt="" className="img-pc" />
@@ -228,7 +228,7 @@ const UI_USR_R_360 = () => {
                           </li>
                            <li>
                             <strong className="sub-step-tit"><span className="number">5</span>발급 진위확인</strong>
-                            <p className="sub-step-desc">증명서발급 > 발급 진위 확인 메뉴 선택 후 문서종류 및 문서확인번호 입력하여 진위확인을 할 수 있습니다.</p>
+                            <p className="sub-step-desc">증명서발급 &gt; 발급 진위 확인 메뉴 선택 후 문서종류 및 문서확인번호 입력하여 진위확인을 할 수 있습니다.</p>
                           </li>
                         </ol>
                       </li>
@@ -251,7 +251,7 @@ const UI_USR_R_360 = () => {
                         <ol className="sub-step">
                           <li>
                             <strong className="sub-step-tit"><span className="number">1</span>지원기관 화면이동</strong>
-                            <p className="sub-step-desc">메인 메뉴의 더 많은 서비스 > 더 많은 서비스 전체보기 메뉴를 선택합니다.</p>
+                            <p className="sub-step-desc">메인 메뉴의 더 많은 서비스 &gt; 더 많은 서비스 전체보기 메뉴를 선택합니다.</p>
                           </li>
                           <li>
                             <strong className="sub-step-tit"><span className="number">2</span>지원기관 조회</strong>
@@ -278,7 +278,7 @@ const UI_USR_R_360 = () => {
                         <ol className="sub-step">
                           <li>
                             <strong className="sub-step-tit"><span className="number">1</span>전문기업 화면이동</strong>
-                            <p className="sub-step-desc">메인 메뉴의 더 많은 서비스 > 소재부품장비·뿌리기술·전문연구사업자 조회 메뉴를 선택합니다.</p>
+                            <p className="sub-step-desc">메인 메뉴의 더 많은 서비스 &gt; 소재부품장비·뿌리기술·전문연구사업자 조회 메뉴를 선택합니다.</p>
                             <div className="img-box">
                               <img src={GuideTab3_02} alt="" className="img-pc" />
                               <img src="" alt="" className="img-mo" />
@@ -325,7 +325,7 @@ const UI_USR_R_360 = () => {
                         <ol className="sub-step">
                           <li>
                             <strong className="sub-step-tit"><span className="number">1</span>정책금융 화면으로 이동</strong>
-                            <p className="sub-step-desc">메인 및 상단 메뉴를 통해 지원사업 > 정책금융 메뉴를 선택합니다.</p>
+                            <p className="sub-step-desc">메인 및 상단 메뉴를 통해 지원사업 &gt; 정책금융 메뉴를 선택합니다.</p>
                             <div className="img-box">
                               <img src={GuideTab5_02} alt="" className="img-pc" />
                               <img src="" alt="" className="img-mo" />

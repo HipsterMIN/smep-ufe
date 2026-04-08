@@ -759,7 +759,7 @@ table tbody tr:hover td {
   height: 14px;
 }
 .svg-icon.ico-help-gray {
-   -webkit-mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center center;
   -webkit-mask-size: contain;
   mask-repeat: no-repeat;
@@ -1059,20 +1059,6 @@ table tbody tr:hover td {
 .krds-side-navigation .lnb-list .lnb-item .lnb-submenu > ul li:last-child {
   padding-bottom: 16px;
 }
-
-/* .krds-side-navigation .lnb-list .lnb-item .lnb-btn.active + .lnb-submenu > ul {
-  padding-bottom: 16px;
-} */
-/* .krds-side-navigation .lnb-list .lnb-item .lnb-submenu > ul:before {
-  content: "";
-  position: absolute;
-  width: calc(100% - 24px);
-  height: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 0;
-  border-bottom: 1px dashed #d9d9d9;
-} */
 .krds-side-navigation .lnb-list .lnb-item .lnb-submenu .lnb-btn::before {
   display: none;
 }
@@ -4450,7 +4436,6 @@ textarea.krds-input::placeholder {
   }
   .on-announcement .ac {
     gap: 12px;
-    flex-direction: column;
   }
   .on-announcement .krds-btn.large {
     height: 48px;
