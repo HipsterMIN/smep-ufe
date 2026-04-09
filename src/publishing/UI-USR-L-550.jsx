@@ -74,7 +74,7 @@ const UI_USR_L_550 = () => {
           </div>
 
           <div className="krds-table-wrap">
-            <table className="tbl col data">
+            <table className="tbl col data t-block">
               <caption>인증키 신청 이력 표. 순번, 소속기관, 시스템명, 신청API, 신청 이메일, 신청일, 사용여부 정보가 제공됨.</caption>
               <colgroup>
                 <col style={{width: "7.4%"}}/>
@@ -98,7 +98,7 @@ const UI_USR_L_550 = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td className="ac"><span>2</span></td>
+                  <th className="ac"><span>2</span></th>
                   <td className="ac"><span>중소벤처기업부</span></td>
                   <td className="ac"><span>스마트공장수준확인서</span></td>
                   <td className="ac"><span className="txt-point">성과공유기업확인서</span></td>

@@ -121,7 +121,7 @@ const UI_USR_P_042 = () => {
               <button type="button" className="krds-btn primary xlarge">
                 전자문서지갑
               </button>
-               <button type="button" className="krds-btn tertiary xlarge" onClick={() => setIsPopupOpen(true)} >
+               <button type="button" className="krds-btn primary xlarge" onClick={() => setIsPopupOpen(true)} >
                 <i className="svg-icon ico-print"></i> 출력 
               </button>
           </div>

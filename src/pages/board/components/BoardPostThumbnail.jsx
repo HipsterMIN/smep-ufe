@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 
 import SideNavigation from '@components/ui/SideNavigation';
@@ -24,6 +24,7 @@ const appBaseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 const BoardPostThumbnail = ({ boardDetail, bbsNo, pstNo }) => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [postDetail, setPostDetail] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -31,6 +32,13 @@ const BoardPostThumbnail = ({ boardDetail, bbsNo, pstNo }) => {
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
+  const navigationCategoryNo = useMemo(() => {
+    const rawCategoryNo = searchParams.get('ctgryNo');
+    if (rawCategoryNo == null) return '';
+
+    const normalizedCategoryNo = String(rawCategoryNo).trim();
+    return normalizedCategoryNo || '';
+  }, [searchParams]);
 
   useEffect(() => {
     let isMounted = true;
@@ -48,7 +56,10 @@ const BoardPostThumbnail = ({ boardDetail, bbsNo, pstNo }) => {
         setLoading(true);
         setErrorMessage('');
 
-        const response = await apiClient.get(`/api/v1/board/${bbsNo}/posts/${pstNo}`);
+        const queryString = navigationCategoryNo
+          ? `?ctgryNo=${encodeURIComponent(navigationCategoryNo)}`
+          : '';
+        const response = await apiClient.get(`/api/v1/board/${bbsNo}/posts/${pstNo}${queryString}`);
 
         if (!isMounted) return;
         setPostDetail(response?.data ?? null);
@@ -68,7 +79,7 @@ const BoardPostThumbnail = ({ boardDetail, bbsNo, pstNo }) => {
     return () => {
       isMounted = false;
     };
-  }, [bbsNo, pstNo]);
+  }, [bbsNo, pstNo, navigationCategoryNo]);
 
   const boardTitle = useMemo(() => boardDetail?.bbsNm || '', [boardDetail]);
   const postTitle = useMemo(() => postDetail?.pstTtl || '-', [postDetail]);
@@ -95,24 +106,21 @@ const BoardPostThumbnail = ({ boardDetail, bbsNo, pstNo }) => {
   };
 
   const buildAttachmentDownloadUrl = (file) => {
+    const atchFileId = String(file?.atchFileId ?? '').trim();
     const atchFileSn = file?.atchFileSn;
-    if (!bbsNo || !pstNo || atchFileSn == null) {
+    if (!atchFileId || atchFileSn == null) {
       return '#';
     }
 
-    const params = new URLSearchParams();
-    const fileName = String(file?.orgnlFileNm ?? '').trim();
-    if (fileName) {
-      params.append('fileName', fileName);
-    }
-
-    const query = params.toString();
-    return `${appBaseUrl}/api/v1/board/${bbsNo}/posts/${pstNo}/attachments/${atchFileSn}/download${query ? `?${query}` : ''}`;
+    return `${appBaseUrl}/api/v1/files/download/${encodeURIComponent(atchFileId)}/${encodeURIComponent(atchFileSn)}`;
   };
 
   const buildPostLink = (targetPstNo) => {
     if (targetPstNo == null) return '#';
-    return `../${targetPstNo}`;
+    const queryString = navigationCategoryNo
+      ? `?ctgryNo=${encodeURIComponent(navigationCategoryNo)}`
+      : '';
+    return `../${targetPstNo}${queryString}`;
   };
 
   const handleNavigationClick = (event, targetPstNo) => {

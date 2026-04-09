@@ -95,7 +95,7 @@ const UI_USR_L_030 = () => {
                  <h3 className="sr-only">사업유형별</h3>
                  <div className="search-top-box">
                     <div className="sch-form-wrap" ref={schFormWrapRef1}>
-                      <select className="krds-form-select">
+                      <select className="krds-form-select" aria-label="검색 구분 선택"> {/* 기술진단보고서 반영 */}
                         <option value="">전체</option>
                       </select>
                       <div className="sch-input">
@@ -136,10 +136,37 @@ const UI_USR_L_030 = () => {
                             <option value="">항목</option>
                             <option value="">항목</option>
                           </select>
-                          <button type="button" className="krds-btn medium text" onClick={() => setIsPopupOpen02(true)} >
-                            업종<i className="svg-icon ico-go"></i>
-                          </button>
                         </div>
+                        {/* S: 2026-03-17 업종 선택 ui 변경 */}
+                        <div className="on-mw100p filter-sect">
+                          <span className="label">업종</span>
+                          <button type="button" className="krds-btn small primary">
+                            선택
+                          </button>
+                          <dl className="filter-chip">
+                            <dd>
+                              <button type="button" className="krds-btn xlarge icon border">
+                                <span className="sr-only">새로고침</span>
+                                <i className="svg-icon ico-refresh"></i>
+                              </button>
+                              <div className="chip-wrap krds-tag-wrap large">
+                                <span className="krds-btn-tag">
+                                  금융
+                                  <button type="button" className="btn-delete">
+                                    <span className="sr-only">삭제</span>
+                                  </button>
+                                </span>
+                                <span className="krds-btn-tag">
+                                  서울
+                                  <button type="button" className="btn-delete">
+                                    <span className="sr-only">삭제</span>
+                                  </button>
+                                </span>
+                              </div>
+                            </dd>
+                          </dl>
+                        </div>
+                        {/* E: 2026-03-17 업종 선택 ui 변경 */}
                         <div>
                           <label className="label" htmlFor="appl-sch-sel4">접수상황</label>
                           <select id="appl-sch-sel4" className="krds-form-select medium">
@@ -165,29 +192,6 @@ const UI_USR_L_030 = () => {
                           </select>
                         </div>
                       </div>
-                      <dl className="filter-chip">
-                        <dt>선택된 필터 <span className="num">2</span></dt>
-                        <dd>
-                          <button type="button" className="krds-btn xlarge icon border">
-                            <span className="sr-only">새로고침</span>
-                            <i className="svg-icon ico-refresh"></i>
-                          </button>
-                          <div className="chip-wrap krds-tag-wrap large">
-                            <span className="krds-btn-tag">
-                              금융
-                              <button type="button" className="btn-delete">
-                                <span className="sr-only">삭제</span>
-                              </button>
-                            </span>
-                            <span className="krds-btn-tag">
-                              서울
-                              <button type="button" className="btn-delete">
-                                <span className="sr-only">삭제</span>
-                              </button>
-                            </span>
-                          </div>
-                        </dd>
-                      </dl>
                     </div>
                 </div>
 
@@ -482,7 +486,7 @@ const UI_USR_L_030 = () => {
                  <h3 className="sr-only">사업유형별</h3>
                  <div className="search-top-box">
                     <div className="sch-form-wrap" ref={schFormWrapRef2}>
-                      <select className="krds-form-select">
+                      <select className="krds-form-select" aria-label="검색구분 선택"> {/* 기술진단보고서 반영 */}
                         <option value="">전체</option>
                       </select>
                       <div className="sch-input">
@@ -523,15 +527,42 @@ const UI_USR_L_030 = () => {
                             <option value="">항목</option>
                             <option value="">항목</option>
                           </select>
-                          <a href="#" className="krds-btn medium text" target="_blank" title="새 창 열림">
-                            업종 <i className="svg-icon ico-go"></i>
-                          </a>
                         </div>
+                        {/* S: 2026-03-17 업종 선택 ui 변경 */}
+                        <div className="on-mw100p filter-sect">
+                          <span className="label">업종</span>
+                          <button type="button" className="krds-btn small primary">
+                            선택
+                          </button>
+                          <dl className="filter-chip">
+                            <dd>
+                              <button type="button" className="krds-btn xlarge icon border">
+                                <span className="sr-only">새로고침</span>
+                                <i className="svg-icon ico-refresh"></i>
+                              </button>
+                              <div className="chip-wrap krds-tag-wrap large">
+                                <span className="krds-btn-tag">
+                                  금융
+                                  <button type="button" className="btn-delete">
+                                    <span className="sr-only">삭제</span>
+                                  </button>
+                                </span>
+                                <span className="krds-btn-tag">
+                                  서울
+                                  <button type="button" className="btn-delete">
+                                    <span className="sr-only">삭제</span>
+                                  </button>
+                                </span>
+                              </div>
+                            </dd>
+                          </dl>
+                        </div>
+                        {/* E: 2026-03-17 업종 선택 ui 변경 */}
                         <div className="on-mw100p">
                           <label className="label" htmlFor="appl-sch-txt1">테마업종명</label>
                           <input type="text" id="appl-sch-txt1" className="krds-input medium" placeholder="내용을 입력하세요" title="테마업종명" />
                         </div>
-
+                        {/* 모든 케이스 */}
                         <div>
                           <label className="label" htmlFor="appl-sch-sel4">접수상황</label>
                           <select id="appl-sch-sel4" className="krds-form-select medium">
@@ -556,30 +587,48 @@ const UI_USR_L_030 = () => {
                             <option value="">항목</option>
                           </select>
                         </div>
+                        <div>
+                          <label className="label" htmlFor="appl-sch-sel6">상환방법</label>
+                          <select id="appl-sch-sel6" className="krds-form-select medium">
+                            <option value="">전체</option>
+                            <option value="">항목</option>
+                            <option value="">항목</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="label" htmlFor="appl-sch-sel6">금리변동여부</label>
+                          <select id="appl-sch-sel6" className="krds-form-select medium">
+                            <option value="">전체</option>
+                            <option value="">항목</option>
+                            <option value="">항목</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="label" htmlFor="appl-sch-sel6">융자방식(대출방식)전체</label>
+                          <select id="appl-sch-sel6" className="krds-form-select medium">
+                            <option value="">전체</option>
+                            <option value="">항목</option>
+                            <option value="">항목</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="label" htmlFor="appl-sch-sel6">자금용도 전체</label>
+                          <select id="appl-sch-sel6" className="krds-form-select medium">
+                            <option value="">전체</option>
+                            <option value="">항목</option>
+                            <option value="">항목</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="label" htmlFor="appl-sch-sel6">대출기간 전체</label>
+                          <select id="appl-sch-sel6" className="krds-form-select medium">
+                            <option value="">전체</option>
+                            <option value="">항목</option>
+                            <option value="">항목</option>
+                          </select>
+                        </div>
+
                       </div>
-                      <dl className="filter-chip">
-                        <dt>선택된 필터 <span className="num">2</span></dt>
-                        <dd>
-                          <button type="button" className="krds-btn xlarge icon border">
-                            <span className="sr-only">새로고침</span>
-                            <i className="svg-icon ico-refresh"></i>
-                          </button>
-                          <div className="chip-wrap krds-tag-wrap large">
-                            <span className="krds-btn-tag">
-                              금융
-                              <button type="button" className="btn-delete">
-                                <span className="sr-only">삭제</span>
-                              </button>
-                            </span>
-                            <span className="krds-btn-tag">
-                              서울
-                              <button type="button" className="btn-delete">
-                                <span className="sr-only">삭제</span>
-                              </button>
-                            </span>
-                          </div>
-                        </dd>
-                      </dl>
                     </div>
                 </div>
 
@@ -690,6 +739,7 @@ const UI_USR_L_030 = () => {
                     </ul>
                 </div>
                 <ul className="krds-structured-list type-full">
+                  {/* 융자 케이스 */}
                   <li className="structured-item">
                     <div className="in">
                       <div className="card-top">
@@ -714,7 +764,13 @@ const UI_USR_L_030 = () => {
                               <strong className="on-colorblue">접수중</strong>
                             </span>
                             <span><strong>중소벤처기업진흥공단</strong></span>
-                            <span><strong>지원대상</strong> 업력 7년 이상 중소기업</span>
+                            <span className="max-w"><strong>지원대상</strong> <span className="onellipsis-1">업력 7년 이상 중소기업</span></span>
+                          </p>
+                          {/* 밑으로 떨어짐 */}
+                          <p className="on-list-btm">
+                            <span><strong>용도</strong>시설자금, 운전자금</span>
+                            <span><strong>금리변동여부</strong>변동</span>
+                            <span><strong>대출한도</strong>시설 60억원/ 운전 5억원</span>
                           </p>
                         </a>
                       </div>
@@ -734,6 +790,7 @@ const UI_USR_L_030 = () => {
                       </div>
                     </div>
                   </li>
+                  {/* 융자 case */}
                   <li className="structured-item">
                     <div className="in">
                       <div className="card-top">
@@ -743,7 +800,7 @@ const UI_USR_L_030 = () => {
                         </div>
                         <div className="krds-badge-wrap">
                           <span className="krds-badge bg-light-success">신규</span>
-                          <span className="krds-badge bg-light-primary">융자</span>
+                          <span className="krds-badge bg-light-primary">보증</span>
                         </div>
                       </div>
                       <div className="card-body">
@@ -758,7 +815,11 @@ const UI_USR_L_030 = () => {
                               <strong className="on-colorblue">접수중</strong>
                             </span>
                             <span><strong>중소벤처기업진흥공단</strong></span>
-                            <span><strong>지원대상</strong> 업력 7년 이상 중소기업</span>
+                            <span className="max-w"><strong>지원대상</strong> <span className="onellipsis-1">혁신스타트업 성장지원 프로그램 대상기업 사업 개시일로부터 퍼스트펭귄기업 추천 결재 승인일까지의 기간이 7년 이하인 기업 성장단계 구분이</span></span>
+                          </p>
+                          <p className="on-list-btm">
+                            <span><strong>용도</strong>시설자금, 운전자금</span>
+                            <span><strong>보증비율</strong>85%~100%</span>
                           </p>
                         </a>
                       </div>
@@ -778,6 +839,7 @@ const UI_USR_L_030 = () => {
                       </div>
                     </div>
                   </li>
+                  {/* 보험 case */}
                   <li className="structured-item">
                     <div className="in">
                       <div className="card-top">
@@ -787,7 +849,7 @@ const UI_USR_L_030 = () => {
                         </div>
                         <div className="krds-badge-wrap">
                           <span className="krds-badge bg-light-danger">인기</span>
-                          <span className="krds-badge bg-light-primary">융자</span>
+                          <span className="krds-badge bg-light-primary">보험</span>
                         </div>
                       </div>
                       <div className="card-body">
@@ -802,7 +864,14 @@ const UI_USR_L_030 = () => {
                               <strong className="on-colorblue">접수중</strong>
                             </span>
                             <span><strong>중소벤처기업진흥공단</strong></span>
-                            <span><strong>지원대상</strong> 업력 7년 이상 중소기업</span>
+                            <span className="max-w"><strong>지원대상</strong> <span className="onellipsis-1">중소중견 수출입기업</span></span>
+                          </p>
+                          {/* 한 줄 full로 찰 경우 case */}
+                          <p className="on-list-btm">
+                            <span><strong>지급보험금</strong><span className="onellipsis-1">* 완전보장옵션 : 외화부보금액에 대해 보장환율과 결제환율의 차액만큼 보험금 지급 * 부분보장옵션 : 외화부보금액에 대해 보장환율 또는  .</span> </span>
+                          </p>
+                          <p className="on-list-btm">
+                            <span><strong>보험료</strong><span className="onellipsis-1">기본요율(0.005%)에 통화 및 결제기간에 따른 추가보험요율(옵션 프리미엄)을 가산해서 보험료 책정</span></span>
                           </p>
                         </a>
                       </div>

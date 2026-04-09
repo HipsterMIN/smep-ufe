@@ -1,18 +1,20 @@
-import React, { useMemo, useEffect, useRef } from 'react';
-import arrowIcon from '../../assets/main/icon-arrow.svg';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import arrowIcon from '@assets/main/icon-arrow.svg';
 import { useAuthStore } from '@store/useAuthStore.jsx';
-import { useNavigate } from 'react-router-dom';
 import { useMenuStore } from '@store/useMenuStore.js';
 import { buildFullPath } from '@utils/menuUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
-import HeaderDesktopGNB from './header/HeaderDesktopGNB';
-import HeaderMobileGNB from './header/HeaderMobileGNB';
-import HeaderUserMenu from './header/HeaderUserMenu';
-import HeaderSearch from './header/HeaderSearch';
-import { api as apiClient } from '../../lib/apiClient.js';
+import HeaderUserMenu from '@components/ui/header/HeaderUserMenu';
+import HeaderDesktopGNB from '@components/ui/header/HeaderDesktopGNB';
+import HeaderMobileGNB from '@components/ui/header/HeaderMobileGNB';
+import HeaderFontDropdown from '@components/ui/header/HeaderFontDropdown';
+import FullSystemPopup from '@components/ui/FullSystemPopup';
+import { api as apiClient } from '@lib/apiClient.js';
 
 // BASE URL 상수
 const BASE_URL = import.meta.env.VITE_BASE || '/';
+const TOTAL_SEARCH_MENU_ID = 'M_PIIO_00152';
 
 // JWT 디코딩 함수 (간단한 구현)
 function parseJwt(token) {
@@ -20,7 +22,7 @@ function parseJwt(token) {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
 
     return JSON.parse(jsonPayload);
@@ -46,6 +48,8 @@ export default function Header() {
   const mobGnbRef = useRef(null);
   const { getFullPath } = useUserMenu();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMainPage = location.pathname === '/';
   
   // 메뉴 데이터 로드
   useEffect(() => {
@@ -116,7 +120,7 @@ export default function Header() {
             const response = await apiClient.get('/api/v1/account/me', { token: receivedToken });
             const userInfo = response.data || response;
             if (userInfo) {
-              console.log("userInfo: ", userInfo)
+              console.log('userInfo: ', userInfo);
               login({ token: receivedToken, profile: userInfo });
               return;
             }
@@ -200,68 +204,208 @@ export default function Header() {
     document.body.classList.remove('is-gnb-mobile');
   };
 
+  // S - 헤더 버그 수정(2026-03-19)
+  //  스크롤 시 header 숨김/ 보임
+  const headerRef = useRef(null);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [headerSearchQuery, setHeaderSearchQuery] = useState('');
+  const lastScrollY = useRef(0);
+  const MOBILE_BREAKPOINT = 1024;
+  const isLocked = useRef(false); // 상태 변경 쿨다운 lock
+
+  const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
+
+  const updateContainerMargin = (visible) => {
+    const container = document.querySelector('.main-container, .sub-container');
+    if (container) {
+      container.style.marginTop = visible
+        ? `${headerRef.current?.offsetHeight || 0}px`
+        : '0px';
+    }
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isMobile()) {
+        setIsHeaderVisible(true);
+        return;
+      }
+
+      const currentScrollY = Math.max(0, window.scrollY); // 음수 방지
+      const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;
+
+      // 바운스 구간(스크롤 끝)이면 lastScrollY 업데이트도 안 하고 완전 무시
+      if (currentScrollY >= maxScrollY - 5) return;
+
+      const delta = currentScrollY - lastScrollY.current;
+      lastScrollY.current = currentScrollY;
+
+      if (Math.abs(delta) < 5) return;
+
+      if (delta < 0) {
+        // 위로: 즉시 표시, lock 없음
+        setIsHeaderVisible(true);
+      } else if (delta > 0 && currentScrollY > 80) {
+        // 아래로: lock 적용
+        if (isLocked.current) return;
+        setIsHeaderVisible(false);
+        isLocked.current = true;
+        setTimeout(() => { isLocked.current = false; }, 400);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (isMobile()) setIsHeaderVisible(true);
+      updateContainerMargin(isHeaderVisible);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isHeaderVisible]);
+
+  useEffect(() => {
+    updateContainerMargin(isHeaderVisible);
+  }, [isHeaderVisible]);
+  // E - 헤더 버그 수정(2026-03-19)
+
+  const getTotalSearchPath = () => {
+    const pathFromMenu = String(getFullPath(TOTAL_SEARCH_MENU_ID) || '').trim();
+    return pathFromMenu || '/totalSearch';
+  };
+
+  const handleTotalSearch = () => {
+    const keyword = String(headerSearchQuery || '').trim();
+    const totalSearchPath = getTotalSearchPath();
+
+    if (!keyword) {
+      navigate(totalSearchPath);
+      return;
+    }
+
+    const params = new URLSearchParams({ q: keyword });
+    navigate(`${totalSearchPath}?${params.toString()}`, {
+      state: { q: keyword },
+    });
+  };
+
+  const handleTotalSearchKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleTotalSearch();
+    }
+  };
+
+  const [isPopOpen, setPopOpen] = useState(false); // 유관기관 둘러보기 팝업
+  
   return (
     <>
       <div id="krds-skip-link">
-        <a href="#breadcrumb">본문 바로가기</a>
+        <a href="#container">본문 바로가기</a> {/* 웹접근성 반영 */}
       </div>
       
-      <div id="krds-masthead">
-        <div className="toggle-wrap">
-          <div className="toggle-head">
-            <div className="inner">
-              <span className="nuri-txt">이 누리집은 대한민국 공식 전자정부 누리집입니다.</span>
+      <header 
+        ref={headerRef}
+        id="krds-header"
+        className={isHeaderVisible ? '' : 'is-hidden'}
+      >
+        <div id="krds-masthead">
+          <div className="toggle-wrap">
+            <div className="toggle-head">
+              <div className="inner">
+                <span className="nuri-txt">이 누리집은 대한민국 공식 전자정부 누리집입니다.</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      
-      <header id="krds-header">
         <div className="header-in">
           <div className="header-container">
             <div className="inner">
+              <div className="header-utility">
+                <ul className="utility-list">
+                  {/* 글자 설정 dropdown */}
+                  <li>
+                    <HeaderFontDropdown />
+                  </li>
+                  <li>
+                    <Link onClick={() => setPopOpen(true)} className="krds-btn small text">
+                      <i class="svg-icon ico-system"></i> 유관시스템 둘러보기
+                    </Link>
+                  </li>
+                </ul>
+              </div>
               <div className="header-branding">
                 <h2 className="logo sample">
                   <a href={BASE_URL}>
-                    <span className="sr-only">중소기업통합플랫폼</span>
+                    <span className="sr-only">중소벤처24</span>
                   </a>
                 </h2>
-                <div className="header-actions">
-                  <HeaderUserMenu
-                    isLogin={isLogin}
-                    currentMode={currentMode}
-                    currentCompany={currentCompany}
-                    linkedCompanies={linkedCompanies}
-                    user={user}
-                    onLogin={handleLogin}
-                    onLogout={logout}
-                    onMyPage={handleMyPage}
-                    onSwitchContext={async (companyId) => {
-                      if (!token) {
-                        return;
-                      }
-                      try {
-                        const response = await apiClient.post(
-                          '/api/v1/auth/switch-context',
-                          { targetCompanyId: companyId },
-                          { token },
-                        );
-                        const newToken = response.accessToken || response.data?.accessToken;
-                        if (!newToken) {
-                          throw new Error('Missing access token');
+                <div className="logo-platform">
+                  <span className="sr-only">모두의 시작, 모두의 성장</span>
+                </div>
+                <div className="header-right">
+                  {/* 검색란 */}
+                  {!isMainPage && (
+                    <div className="sch-input">
+                      <input
+                        type="text"
+                        className="krds-input"
+                        placeholder="검색어를 입력하세요"
+                        title="검색어 입력"
+                        value={headerSearchQuery}
+                        onChange={(event) => setHeaderSearchQuery(event.target.value)}
+                        onKeyDown={handleTotalSearchKeyDown}
+                      />
+                      <button
+                        type="button"
+                        className="krds-btn medium icon ico-search"
+                        onClick={handleTotalSearch}
+                      >
+                        <span className="sr-only">검색</span>
+                        <i className="svg-icon ico-sch"></i>
+                      </button>
+                    </div>
+                  )}
+                  <div className="header-actions">
+                    <HeaderUserMenu
+                      isLogin={isLogin}
+                      currentMode={currentMode}
+                      currentCompany={currentCompany}
+                      linkedCompanies={linkedCompanies}
+                      user={user}
+                      onLogin={handleLogin}
+                      onLogout={logout}
+                      onMyPage={handleMyPage}
+                      onSwitchContext={async (companyId) => {
+                        if (!token) {
+                          return;
                         }
-                        const profileResponse = await apiClient.get('/api/v1/account/me', {
-                          token: newToken,
-                        });
-                        const profile = profileResponse.data || profileResponse;
-                        login({ token: newToken, profile });
-                      } catch (error) {
-                        console.error('Failed to switch context:', error);
-                      }
-                    }}
-                  />
-                  <HeaderSearch />
-                  <button type="button" onClick={handleOpenMobGnb} className="btn-navi all" aria-controls="mobile-nav">전체메뉴</button>
+                        try {
+                          const response = await apiClient.post(
+                            '/api/v1/auth/switch-context',
+                            { targetCompanyId: companyId },
+                            { token },
+                          );
+                          const newToken = response.accessToken || response.data?.accessToken;
+                          if (!newToken) {
+                            throw new Error('Missing access token');
+                          }
+                          const profileResponse = await apiClient.get('/api/v1/account/me', {
+                            token: newToken,
+                          });
+                          const profile = profileResponse.data || profileResponse;
+                          login({ token: newToken, profile });
+                        } catch (error) {
+                          console.error('Failed to switch context:', error);
+                        }
+                      }}
+                    />
+                    {/* <HeaderSearch /> */}
+                    <button type="button" className="btn-navi sch open-modal"><span className="sr-only">검색</span></button>
+                    <button type="button" onClick={handleOpenMobGnb} className="btn-navi all" aria-controls="mobile-nav"><span className="sr-only">전체메뉴</span></button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -277,7 +421,7 @@ export default function Header() {
           isLogin={isLogin}
           userName={currentCompany?.companyName || user?.name}
         />
-      </header>
+      </header> 
       
       <div className="quickbox">
         <button
@@ -289,6 +433,9 @@ export default function Header() {
           <span className="sr-only">상단으로</span>
         </button>
       </div>
+
+
+      <FullSystemPopup isPopOpen={isPopOpen} setPopOpen={setPopOpen} />
     </>
   );
 }

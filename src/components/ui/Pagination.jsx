@@ -1,79 +1,260 @@
-import React from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import React, { useEffect, useRef } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 
-const Pagination = ({ totalPages = 10, currentPage, onPageChange }) => {
-  const [searchParams] = useSearchParams();
-  
-  // currentPage가 전달되지 않으면 URL 쿼리 파라미터에서 가져옴
-  const page = currentPage || parseInt(searchParams.get("page") || "1");
+const Pagination = ({
+  totalPages = 0,
+  currentPage,
+  onPageChange,
+  syncUrl = false,
+  pageParam = 'page',
+}) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const lastRequestedPageRef = useRef(null);
+  const previousQueryParamRef = useRef(undefined);
+
+  const normalizedTotalPages = Number.isFinite(totalPages)
+    ? Math.max(0, Math.floor(totalPages))
+    : 0;
+
+  const queryPageParam = syncUrl ? searchParams.get(pageParam) : null;
+  const queryPage = syncUrl
+    ? Number.parseInt(queryPageParam || '', 10)
+    : NaN;
+  const hasValidQueryPage = Number.isFinite(queryPage) && queryPage > 0;
+  const clampedQueryPage = hasValidQueryPage
+    ? Math.min(
+      Math.max(1, Math.floor(queryPage)),
+      normalizedTotalPages > 0 ? normalizedTotalPages : Number.POSITIVE_INFINITY,
+    )
+    : null;
+
+  const resolvedCurrentPage = Number.isFinite(currentPage)
+    ? currentPage
+    : hasValidQueryPage
+      ? queryPage
+      : 1;
+
+  const normalizedCurrentPage = Number.isFinite(resolvedCurrentPage)
+    ? Math.floor(resolvedCurrentPage)
+    : 1;
+  const page = Math.min(
+    Math.max(normalizedCurrentPage, 1),
+    normalizedTotalPages || 1,
+  );
+
+  useEffect(() => {
+    // syncUrl=true + controlled currentPage 조합에서 URL의 page 쿼리로
+    // 상위 컴포넌트 페이지 상태를 초기/브라우저 내비게이션 시 동기화한다.
+    if (!syncUrl) {
+      return;
+    }
+
+    const isInitialSync = previousQueryParamRef.current === undefined;
+    const hasQueryChanged = previousQueryParamRef.current !== queryPageParam;
+    previousQueryParamRef.current = queryPageParam;
+
+    if (!isInitialSync && !hasQueryChanged) {
+      return;
+    }
+
+    if (
+      !Number.isFinite(currentPage)
+      || typeof onPageChange !== 'function'
+      || !hasValidQueryPage
+    ) {
+      return;
+    }
+
+    const targetPage = clampedQueryPage;
+    if (targetPage === normalizedCurrentPage) {
+      return;
+    }
+
+    if (lastRequestedPageRef.current !== null) {
+      return;
+    }
+
+    lastRequestedPageRef.current = targetPage;
+    onPageChange(targetPage);
+  }, [
+    syncUrl,
+    queryPageParam,
+    currentPage,
+    onPageChange,
+    hasValidQueryPage,
+    clampedQueryPage,
+    normalizedCurrentPage,
+  ]);
+
+  useEffect(() => {
+    if (!syncUrl || !Number.isFinite(currentPage)) {
+      return;
+    }
+
+    if (lastRequestedPageRef.current !== null) {
+      return;
+    }
+
+    const expectedPage = Math.max(1, Math.floor(currentPage));
+    const expectedParam = expectedPage <= 1 ? null : String(expectedPage);
+    const currentParam = searchParams.get(pageParam);
+
+    if (
+      (expectedParam === null && (currentParam === null || currentParam === ''))
+      || currentParam === expectedParam
+    ) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams);
+    if (expectedParam === null) {
+      params.delete(pageParam);
+    } else {
+      params.set(pageParam, expectedParam);
+    }
+
+    setSearchParams(params, { replace: true });
+  }, [
+    syncUrl,
+    currentPage,
+    pageParam,
+    searchParams,
+    setSearchParams,
+  ]);
+
+  useEffect(() => {
+    if (!syncUrl || !Number.isFinite(currentPage)) {
+      return;
+    }
+
+    if (hasValidQueryPage && clampedQueryPage === normalizedCurrentPage) {
+      lastRequestedPageRef.current = null;
+      return;
+    }
+
+    if (!hasValidQueryPage && normalizedCurrentPage <= 1) {
+      lastRequestedPageRef.current = null;
+    }
+  }, [
+    syncUrl,
+    currentPage,
+    hasValidQueryPage,
+    clampedQueryPage,
+    normalizedCurrentPage,
+  ]);
+
+  const getPageUrl = (targetPage) => {
+    if (!syncUrl) {
+      return '#';
+    }
+
+    const params = new URLSearchParams(searchParams);
+    if (targetPage <= 1) {
+      params.delete(pageParam);
+    } else {
+      params.set(pageParam, String(targetPage));
+    }
+
+    const nextQuery = params.toString();
+    return nextQuery ? `?${nextQuery}` : '?';
+  };
+
+  const handlePageClick = (targetPage, event) => {
+    if (!syncUrl) {
+      event.preventDefault();
+    }
+
+    const pageToMove = Math.min(Math.max(targetPage, 1), normalizedTotalPages);
+    if (pageToMove === page) {
+      event.preventDefault();
+      return;
+    }
+
+    lastRequestedPageRef.current = pageToMove;
+
+    if (typeof onPageChange === 'function') {
+      onPageChange(pageToMove);
+    }
+  };
+
+  if (normalizedTotalPages <= 1) {
+    return null;
+  }
 
   const visiblePages = 10;
   const startPage = Math.floor((page - 1) / visiblePages) * visiblePages + 1;
-  const endPage = Math.min(startPage + visiblePages - 1, totalPages);
+  const endPage = Math.min(startPage + visiblePages - 1, normalizedTotalPages);
 
   const pages = [];
   for (let i = startPage; i <= endPage; i++) {
     pages.push(i);
   }
 
-  const getPageUrl = (p) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("page", p.toString());
-    return `?${params.toString()}`;
-  };
-
-  const handlePageClick = (p) => {
-    if (onPageChange) {
-      onPageChange(p);
+  const handleBoundaryClick = (targetPage, isDisabled, event) => {
+    if (isDisabled) {
+      event.preventDefault();
+      return;
     }
+
+    handlePageClick(targetPage, event);
   };
 
   return (
     <div className="krds-pagination">
-      <Link 
-        className={`page-navi prev ${page <= 1 ? 'disabled' : ''}`} 
-        to={page > 1 ? getPageUrl(page - 1) : "#"}
-        onClick={(e) => {
-          if (page <= 1) e.preventDefault();
-          handlePageClick(page - 1);
-        }}
+      <Link
+        className={`page-navi prev ${page <= 1 ? 'disabled' : ''}`}
+        to={getPageUrl(page - 1)}
+        onClick={(event) => handleBoundaryClick(page - 1, page <= 1, event)}
       >
-        이전
+          이전
       </Link>
       <div className="page-links">
-        {pages.map((p) => (
+        {startPage > 1 && (
+          <>
+            <Link
+              className="page-link"
+              to={getPageUrl(1)}
+              onClick={(event) => handlePageClick(1, event)}
+            >
+                  1
+            </Link>
+            <span className="page-link link-dot"></span>
+          </>
+        )}
+
+        {pages.map((pageNumber) => (
           <Link
-            key={p}
-            className={`page-link ${p === page ? "active" : ""}`}
-            to={getPageUrl(p)}
-            onClick={() => handlePageClick(p)}
+            key={pageNumber}
+            className={`page-link ${pageNumber === page ? 'active' : ''}`}
+            to={getPageUrl(pageNumber)}
+            onClick={(event) => handlePageClick(pageNumber, event)}
           >
-            {p === page && <span className="sr-only">현재페이지 </span>}
-            {p}
+            {pageNumber === page && <span className="sr-only">현재페이지 </span>}
+            {pageNumber}
           </Link>
         ))}
-        {endPage < totalPages && (
+
+        {endPage < normalizedTotalPages && (
           <>
             <span className="page-link link-dot"></span>
-            <Link 
-              className="page-link" 
-              to={getPageUrl(totalPages)}
-              onClick={() => handlePageClick(totalPages)}
+            <Link
+              className="page-link"
+              to={getPageUrl(normalizedTotalPages)}
+              onClick={(event) => handlePageClick(normalizedTotalPages, event)}
             >
-              {totalPages}
+              {normalizedTotalPages}
             </Link>
           </>
         )}
       </div>
-      <Link 
-        className={`page-navi next ${page >= totalPages ? 'disabled' : ''}`} 
-        to={page < totalPages ? getPageUrl(page + 1) : "#"}
-        onClick={(e) => {
-          if (page >= totalPages) e.preventDefault();
-          handlePageClick(page + 1);
-        }}
+      <Link
+        className={`page-navi next ${page >= normalizedTotalPages ? 'disabled' : ''}`}
+        to={getPageUrl(page + 1)}
+        onClick={(event) =>
+          handleBoundaryClick(page + 1, page >= normalizedTotalPages, event)
+        }
       >
-        다음
+          다음
       </Link>
     </div>
   );

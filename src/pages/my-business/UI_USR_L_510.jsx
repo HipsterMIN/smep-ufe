@@ -5,6 +5,7 @@ import Pagination from '@components/ui/Pagination.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import Datepicker from '@components/ui/Datepicker.jsx';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
  
 const UI_USR_L_510 = () => {
   const [issuanceList, setIssuanceList] = useState([]);
@@ -135,7 +136,7 @@ const UI_USR_L_510 = () => {
 
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
-            <li>검색 결과 <span className="point">{totalElements}</span>개</li>
+            <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
           </ul>
           <ul className="sch-sort">
             <li>
@@ -165,7 +166,7 @@ const UI_USR_L_510 = () => {
 
         {/* table component start */}
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>증명서 발급 조회 표. 순번, 증명(확인)서, 사업자등록번호, 신청일자, 유효기간, 상태, 출력언어, 발급 정보가 제공됨.</caption>
             <colgroup>
               <col style={{ width: '5%' }}/>
@@ -222,7 +223,7 @@ const UI_USR_L_510 = () => {
                       {/*) : (*/}
                       <button
                         type="button"
-                        className="krds-btn small"
+                        className="krds-btn small mo-full"
                         onClick={() => window.open('https://www.smes.go.kr/ClipReport4/commonTibero.jsp?fileName=AA_SME&CRTF_REQST_SNO=20260113620149', '_blank')}
                       >
                             출력
@@ -238,6 +239,7 @@ const UI_USR_L_510 = () => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
+            syncUrl
           />
         </div>
         {/* table component end */}

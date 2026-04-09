@@ -54,7 +54,7 @@ const UI_USR_L_190 = () => {
 
         <div className="search-top-box">
           <div className="sch-form-wrap">
-            <select className="krds-form-select">
+            <select className="krds-form-select" aria-label="검색구분 선택">{/* 기술진단보고서 반영 */}
               <option value="">행사명</option>
             </select>
             <div className="sch-input">
@@ -103,7 +103,7 @@ const UI_USR_L_190 = () => {
 
         {/* table [S] */}
 				 <div className="krds-table-wrap">
-					<table className="tbl col data">
+					<table className="tbl col data t-block">
             <caption>행사정보 표. 번호, 지역, 제목, 행사기간, 수행기관, 작성일 조회수 정보가 제공됨.</caption>
 						<colgroup>
 							<col style={{width: "5%"}} />
@@ -123,7 +123,7 @@ const UI_USR_L_190 = () => {
 								<th scope="col" className="ac">수행기관</th>
 								<th scope="col" className="ac">작성일</th>
 								<th scope="col" className="ac">조회수</th>
-				            </tr>
+				      </tr>
 						</thead>
 						<tbody>
               {Array.from({ length: 10 }).map((_, index) => (
@@ -139,8 +139,8 @@ const UI_USR_L_190 = () => {
 								</td>
 								<td className="ac"><span>25-12-24 ~ 26-02-06</span></td>
 								<td className="ac"><span>스마트제조혁신추진단</span></td>
-								<td className="ac"><span>2025.04.16</span></td>
-								<td className="ac"><span>87</span></td>
+								<td className="ac views"><span>2025.04.16</span></td>
+								<td className="ac views"><span>87</span></td>
 							</tr>
               ))}
 						  </tbody>

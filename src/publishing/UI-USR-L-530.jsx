@@ -135,7 +135,7 @@ const UI_USR_L_530 = () => {
 
         {/* table [S] */}
         <div className="krds-table-wrap">
-        <table className="tbl col data">
+        <table className="tbl col data t-block">
           <caption>관심 공고 검색결과 목록. 번호, 등록일시, 구분, 내용 정보가 제공됨.</caption>
           <colgroup>
             <col style={{width: "7.4%"}} />
@@ -165,7 +165,7 @@ const UI_USR_L_530 = () => {
                     <span>[경북] 안동시 2025년 1차 북부권 친환경 섬유산업 육성...</span>
                   </a>
               </td>
-              <td className="ac">
+              <td className="ac btn-flex">
                   <button
                     type="button"
                     onClick={toggleRegister}

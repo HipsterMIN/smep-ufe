@@ -116,7 +116,7 @@ const UI_USR_L_040 = () => {
 
         <div className="search-top-box mt-48">
           <div className="sch-form-wrap">
-            <select className="krds-form-select">
+            <select className="krds-form-select" title="카테고리 선택"> {/* 웹접근성 반영 */}
               <option value="">카테고리 전체</option>
             </select>
             <div className="sch-input">
@@ -148,7 +148,7 @@ const UI_USR_L_040 = () => {
 
         {/* table [S] */}
 			  <div className="krds-table-wrap">
-					<table className="tbl col data">
+					<table className="tbl col data t-block">
             <caption>증명 확인서 목록. 번호, 증명(확인)서, 발급기관, 소관기관 정보가 제공됨.</caption>
 						<colgroup>
 							<col style={{width: "7.4%%"}} />
@@ -172,13 +172,14 @@ const UI_USR_L_040 = () => {
 									<span>1</span>
 								</th>
 								<td className="ac">
-						 			<div className="title-box">
-									  <span className="krds-badge bg-light-primary">전자증명</span>
-									</div>
+                  <a className="onellipsis-1 flex-row" href="#">
+                    <span>벤처기업확인서</span>
+                    <span className="krds-badge bg-light-primary">전자증명</span> 
+                  </a>
 								</td>
 								<td className="ac"><span>(사)벤처기업협회</span></td>
 								<td className="ac"><span>중소벤처기업부 벤처혁신정책과</span></td>
-								<td className="ac"><a href="#" className="krds-btn small primary">발급</a></td>
+								<td className="ac"><a href="#" className="krds-btn small primary mo-full">발급</a></td>
 							</tr>
 						</tbody>
 			    </table>

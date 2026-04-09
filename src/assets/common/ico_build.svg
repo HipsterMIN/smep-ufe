@@ -1,0 +1,16 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="mask0_2431_69236" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
+<rect x="0.75" y="0.75" width="14.5" height="14.5" fill="#D9D9D9" stroke="#33363D" stroke-width="1.5"/>
+</mask>
+<g mask="url(#mask0_2431_69236)">
+<path d="M14.3337 4.99951H7.66699V14.3328H14.3337V4.99951Z" fill="white" stroke="#6D7882" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M10.9997 2.3335H2.33301V14.3335H10.9997V2.3335Z" fill="white" stroke="#6D7882" stroke-width="1.5" stroke-linejoin="round"/>
+<line x1="4.41699" y1="3.66553" x2="4.41699" y2="5.66553" stroke="#6D7882" stroke-width="1.5" stroke-linejoin="round"/>
+<line x1="6.74805" y1="3.66553" x2="6.74805" y2="5.66553" stroke="#6D7882" stroke-width="1.5" stroke-linejoin="round"/>
+<line x1="9.08301" y1="3.66553" x2="9.08301" y2="5.66553" stroke="#6D7882" stroke-width="1.5" stroke-linejoin="round"/>
+<line x1="4.41699" y1="6.99951" x2="4.41699" y2="8.99951" stroke="#6D7882" stroke-width="1.5" stroke-linejoin="round"/>
+<line x1="6.74805" y1="6.99951" x2="6.74805" y2="8.99951" stroke="#6D7882" stroke-width="1.5" stroke-linejoin="round"/>
+<line x1="9.08301" y1="6.99951" x2="9.08301" y2="8.99951" stroke="#6D7882" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M8.33138 10.9995H4.99805V14.3328H8.33138V10.9995Z" stroke="#6D7882" stroke-width="1.5" stroke-linejoin="round"/>
+</g>
+</svg>

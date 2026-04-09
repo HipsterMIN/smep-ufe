@@ -78,6 +78,104 @@ const UI_USR_L_140 = () => {
                 </div>
                 <div className="search-top-box mt-40">
                   <div className="sch-form-wrap">
+                    <select className="krds-form-select" aria-label="시도 선택">{/* 기술진단보고서 반영 */}
+                      <option value="">시도선택</option>
+                      <option value="">항목</option>
+                    </select>
+                    <select className="krds-form-select" aria-label="시군구 선택">{/* 기술진단보고서 반영 */}
+                      <option value="">시군구선택</option>
+                      <option value="">항목</option>
+                    </select>
+                    <select className="krds-form-select" aria-label="검색구분 선택">{/* 기술진단보고서 반영 */}
+                      <option value="">전체</option>
+                      <option value="">항목</option>
+                    </select>
+                    <div className="sch-input">
+                      <input type="text" className="krds-input" placeholder="검색어를 입력해주세요." title="검색어 입력" />
+                      <button type="button" className="krds-btn medium icon ico-search" >
+                        <span className="sr-only">검색</span>
+                        <i className="svg-icon ico-sch"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+								<div className="search-list-top">
+									<ul className="sch-info" aria-live="polite">
+										<li>검색 결과 <span className="point">15,210</span>개</li>
+									</ul>
+									<ul className="sch-sort">
+										<li>
+											<strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
+											<select className="krds-form-select-sort" id="search_result_count">
+												<option>12개</option>
+												<option>9개</option>
+											</select>
+										</li>
+									</ul>
+								</div>
+                 {/* table [S] */}
+                <div className="krds-table-wrap">
+                  <table className="tbl col data t-block">
+                    <caption>소재부품장비 전문기업 표. 번호, 기업명, 업종명,만료일자 정보가 제공됨.</caption>
+                    <colgroup>
+                      <col style={{width: "8%"}} />
+                      <col style={{width: "28%"}}/>
+                      <col style={{width: "50%"}} />
+                      <col />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th scope="col" className="ac">번호</th>
+                        <th scope="col" className="ac">기업명</th>
+                        <th scope="col" className="ac">업종명</th>
+                        <th scope="col" className="ac">만료일자</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th scope="row" className="ac">
+                          <span>123</span>
+                        </th>
+                        <td>
+                          <button type="button" className="onellipsis-1 on-colorblue2" onClick={() => setIsOpen(true)}>
+                            (주)쓰리워터
+                          </button>
+                        </td>
+                        <td><span>금속 탱크 및 저장 용기 제조업</span></td>
+                        <td className="ac"><span>2025-04-16</span></td>
+                      </tr>
+                      <tr>
+                        <th scope="row" className="ac">
+                          <span>123</span>
+                        </th>
+                        <td>
+                          <button type="button" className="onellipsis-1 on-colorblue2" onClick={() => setIsOpen(true)}>
+                            (주)쓰리워터
+                          </button>
+                        </td>
+                        <td><span>금속 탱크 및 저장 용기 제조업</span></td>
+                        <td className="ac"><span>2025-04-16</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                {/* table [E] */}
+                <Pagination /> 
+              </section>
+
+              <section className={`tab-conts ${activeTabIndex === 1 ? 'active' : ''}`}>
+                <h3 className="sr-only">뿌리기술기업</h3>
+                <div className="txt-box outline">
+                  <h4 className="outline-tit">소재부품장비 전문기업</h4>
+                  <ul className="check-list">
+                    <li>전문기업 확인 제도란? : 소재부품장비산업 기술경쟁력 제고를 위해 소재 부품 또는 장비 개발, 제조를 주된 사업으로 영위하는 기업을 전문기업으로 추천 확인하는 제도</li>
+                    <li>
+                      신청방법 : 소부장넷(<a className="on-linktxt2" href="https://www.sobujang.net/index.do#S22010" target="_blank" title="새 창 열림">https://www.sobujang.net/index.do#S22010</a>)에서 온라인 신청
+                    </li>
+                  </ul>
+                </div>
+                <div className="search-top-box mt-40">
+                  <div className="sch-form-wrap">
                     <select className="krds-form-select">
                       <option value="">시도선택</option>
                       <option value="">항목</option>
@@ -115,13 +213,13 @@ const UI_USR_L_140 = () => {
 								</div>
                  {/* table [S] */}
                 <div className="krds-table-wrap">
-                  <table className="tbl col data">
+                  <table className="tbl col data t-block">
                     <caption>소재부품장비 전문기업 표. 번호, 기업명, 업종명,만료일자 정보가 제공됨.</caption>
                     <colgroup>
                       <col style={{width: "8%"}} />
+                      <col style={{width: "28%"}}/>
+                      <col style={{width: "50%"}} />
                       <col />
-                      <col style={{width: "26%"}} />
-                      <col style={{width: "12%"}} />
                     </colgroup>
                     <thead>
                       <tr>
@@ -141,7 +239,7 @@ const UI_USR_L_140 = () => {
                             쓰리워터
                           </button>
                         </td>
-                        <td className="ac"><span>금속 탱크 및 저장 용기 제조업</span></td>
+                        <td><span>금속 탱크 및 저장 용기 제조업</span></td>
                         <td className="ac"><span>2025-04-16</span></td>
                       </tr>
                       <tr>
@@ -149,12 +247,102 @@ const UI_USR_L_140 = () => {
                           <span>123</span>
                         </th>
                         <td>
-                           <button type="button" className="onellipsis-1 on-colorblue2" onClick={() => setIsOpen(true)}>
+                          <button type="button" className="onellipsis-1 on-colorblue2" onClick={() => setIsOpen(true)}>
                             쓰리워터
                           </button>
                         </td>
-                        <td className="ac"><span>금속 탱크 및 저장 용기 제조업</span></td>
+                        <td><span>금속 탱크 및 저장 용기 제조업</span></td>
                         <td className="ac"><span>2025-04-16</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                {/* table [E] */}
+                <Pagination /> 
+              </section>
+
+              <section className={`tab-conts ${activeTabIndex === 2 ? 'active' : ''}`}>
+                <h3 className="sr-only">전문연구사업자</h3>
+                <div className="txt-box outline">
+                  <h4 className="outline-tit">전문연구사업자</h4>
+                  <ul className="check-list">
+                    <li>전문기업 확인 제도란? : 소재부품장비산업 기술경쟁력 제고를 위해 소재 부품 또는 장비 개발, 제조를 주된 사업으로 영위하는 기업을 전문기업으로 추천 확인하는 제도</li>
+                    <li>
+                      신청방법 : 소부장넷(<a className="on-linktxt2" href="https://www.sobujang.net/index.do#S22010" target="_blank" title="새 창 열림">https://www.sobujang.net/index.do#S22010</a>)에서 온라인 신청
+                    </li>
+                  </ul>
+                </div>
+                <div className="search-top-box mt-40">
+                  <div className="sch-form-wrap">
+                    <select className="krds-form-select">
+                      <option value="">시도선택</option>
+                      <option value="">항목</option>
+                    </select>
+                    <select className="krds-form-select">
+                      <option value="">시군구선택</option>
+                      <option value="">항목</option>
+                    </select>
+                    <select className="krds-form-select">
+                      <option value="">전체</option>
+                      <option value="">항목</option>
+                    </select>
+                    <div className="sch-input">
+                      <input type="text" className="krds-input" placeholder="검색어를 입력해주세요." title="검색어 입력" />
+                      <button type="button" className="krds-btn medium icon ico-search" >
+                        <span className="sr-only">검색</span>
+                        <i className="svg-icon ico-sch"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+								<div className="search-list-top">
+									<ul className="sch-info" aria-live="polite">
+										<li>검색 결과 <span className="point">15,210</span>개</li>
+									</ul>
+									<ul className="sch-sort">
+										<li>
+											<strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
+											<select className="krds-form-select-sort" id="search_result_count">
+												<option>12개</option>
+												<option>9개</option>
+											</select>
+										</li>
+									</ul>
+								</div>
+                {/* table [S] */}
+                <div className="krds-table-wrap">
+                  <table className="tbl col data t-block">
+                    <caption>소재부품장비 전문기업 표. 번호, 기업명, 홈페이지, 위치 정보가 제공됨.</caption>
+                    <colgroup>
+                      <col style={{width: "8%"}} />
+                      <col />
+                      <col style={{width: "128px"}} />
+                      <col style={{width: "110px"}} />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th scope="col" className="ac">번호</th>
+                        <th scope="col" className="ac">기업명</th>
+                        <th scope="col" className="ac">홈페이지</th>
+                        <th scope="col" className="ac">위치</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="flex-row">
+                        <th scope="row" className="ac">
+                          <span>123</span>
+                        </th>
+                        <td className="mo-w100">
+                          <button type="button" className="onellipsis-1 on-colorblue2" onClick={() => setIsOpen(true)}>
+                            쓰리워터
+                          </button>
+                        </td>
+                        <td className="ac">
+                          <button type="button" className="krds-btn tertiary small">바로가기 <i className="svg-icon ico-angle right"></i></button>
+                        </td>
+                        <td className="ac">
+                          <button type="button" className="krds-btn tertiary small" ariaLabel="지도보기"><i className="svg-icon ico-location"></i></button>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
