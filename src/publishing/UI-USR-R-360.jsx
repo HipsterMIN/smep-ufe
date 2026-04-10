@@ -4,29 +4,48 @@ import Breadcrumb from "../components/ui/Breadcrumb";
 import Tab from "../components/ui/Tab";
 
 // tab1
+import GuideTab1_01 from '@assets/sub/guide_tab1_01_pc.png';
 import GuideTab1_02 from '@assets/sub/guide_tab1_02_pc.png';
 import GuideTab1_03 from '@assets/sub/guide_tab1_03_pc.png';
+import GuideTab1_04 from '@assets/sub/guide_tab1_04_pc.png';
 import GuideTab1_05 from '@assets/sub/guide_tab1_05_pc.png';
 import GuideTab1_06 from '@assets/sub/guide_tab1_06_pc.png';
 /* mo img */
+import GuideTab1_01_Mo from '@assets/sub/guide_tab1_01_mo.png';
 import GuideTab1_02_Mo from '@assets/sub/guide_tab1_02_mo.png';
 import GuideTab1_03_Mo from '@assets/sub/guide_tab1_03_mo.png';
+import GuideTab1_04_Mo from '@assets/sub/guide_tab1_04_mo.png';
 import GuideTab1_05_Mo from '@assets/sub/guide_tab1_05_mo.png';
 import GuideTab1_06_Mo from '@assets/sub/guide_tab1_06_mo.png';
 
 // tab2
+import GuideTab2_01 from '@assets/sub/guide_tab2_01_pc.png';
 import GuideTab2_02 from '@assets/sub/guide_tab2_02_pc.png';
 import GuideTab2_03 from '@assets/sub/guide_tab2_03_pc.png';
 import GuideTab2_04 from '@assets/sub/guide_tab2_04_pc.png';
+/* mo img */
+import GuideTab2_01_Mo from '@assets/sub/guide_tab2_01_mo.png';
+import GuideTab2_02_Mo from '@assets/sub/guide_tab2_02_mo.png';
+import GuideTab2_03_Mo from '@assets/sub/guide_tab2_03_mo.png';
+import GuideTab2_04_Mo from '@assets/sub/guide_tab2_04_mo.png';
 
 ///tab3
 import GuideTab3_01 from '@assets/sub/guide_tab3_01_pc.png'
 import GuideTab3_02 from '@assets/sub/guide_tab3_02_pc.png'
 import GuideTab3_03 from '@assets/sub/guide_tab3_03_pc.png'
+/* mo img */
+import GuideTab3_01_Mo from '@assets/sub/guide_tab3_01_mo.png'
+import GuideTab3_02_Mo from '@assets/sub/guide_tab3_02_mo.png'
+import GuideTab3_03_Mo from '@assets/sub/guide_tab3_03_mo.png'
 
 // tab5
+import GuideTab5_01 from '@assets/sub/guide_tab5_01_pc.png'
 import GuideTab5_02 from '@assets/sub/guide_tab5_02_pc.png'
 import GuideTab5_03 from '@assets/sub/guide_tab5_03_pc.png'
+/* mo img */
+import GuideTab5_01_Mo from '@assets/sub/guide_tab5_01_mo.png'
+import GuideTab5_02_Mo from '@assets/sub/guide_tab5_02_mo.png'
+import GuideTab5_03_Mo from '@assets/sub/guide_tab5_03_mo.png'
 
 
 
@@ -101,8 +120,8 @@ const UI_USR_R_360 = () => {
                           <p>중소벤처기업부에서 제공하는 정책정보를 조회할 수 있습니다.</p>
                         </div>
                         <div className="img-box">
-                          <img src="" alt="" className="img-pc" />
-                          <img src="" alt="" className="img-mo" />
+                          <img src={GuideTab1_01} alt="" className="img-pc" />
+                          <img src={GuideTab1_01_Mo} alt="" className="img-mo" />
                         </div>
                         <ol className="sub-step">
                           <li>
@@ -137,8 +156,8 @@ const UI_USR_R_360 = () => {
                           <p>중소벤처기업부 운영 6개 분야별 사이트(소상공인, 기술, 창업, 경영, 보증, 정책자금)에서 제공하는 공고정보입니다.</p>
                         </div>
                         <div className="img-box">
-                          <img src="" alt="" className="img-pc" />
-                          <img src="" alt="" className="img-mo" />
+                          <img src={GuideTab1_04} alt="" className="img-pc" />
+                          <img src={GuideTab1_04_Mo} alt="" className="img-mo" />
                         </div>  
                         <ol className="sub-step">
                           <li>
@@ -190,8 +209,8 @@ const UI_USR_R_360 = () => {
                             <strong className="sub-step-tit"><span className="number">1</span>기업회원 로그인</strong>
                             <p className="sub-step-desc">인증/확인서는 기업회원만 신청/출력 가능하므로 중소벤처24에 기업회원으로 가입 후 로그인하시기 바랍니다.</p>
                             <div className="img-box">
-                              <img src="" alt="" className="img-pc" />
-                              <img src="" alt="" className="img-mo" />
+                              <img src={GuideTab2_01} alt="" className="img-pc" />
+                              <img src={GuideTab2_01_Mo} alt="" className="img-mo" />
                             </div>
                           </li>
                           <li>
@@ -204,7 +223,7 @@ const UI_USR_R_360 = () => {
                             </ol>
                             <div className="img-box">
                               <img src={GuideTab2_02} alt="" className="img-pc" />
-                              <img src="" alt="" className="img-mo" />
+                              <img src={GuideTab2_02_Mo} alt="" className="img-mo" />
                             </div>
                           </li>
                           <li>
@@ -212,7 +231,7 @@ const UI_USR_R_360 = () => {
                             <p className="sub-step-desc">기업정보 확인 후 『증명서 발급』 버튼을 클릭하여 발급기관 사이트로 이동 후 증명/확인서 발급 신청을 합니다. <br />발급 대상이 확인되면, 발급 완료 후 하루 동안 출력할 수 있으며, 익일 이후에는 다시 발급 신청을 해야 출력이 가능합니다. <br />모바일에서는 PDF 파일 다운로드만 가능하므로, 인쇄를 원하실 경우 PC로 접속하여 출력을 진행해주시기 바랍니다.</p>
                             <div className="img-box">
                               <img src={GuideTab2_03} alt="" className="img-pc" />
-                              <img src="" alt="" className="img-mo" />
+                              <img src={GuideTab2_03_Mo} alt="" className="img-mo" />
                             </div>
                           </li>
                           <li>
@@ -223,7 +242,7 @@ const UI_USR_R_360 = () => {
                             </p>
                             <div className="img-box">
                               <img src={GuideTab2_04} alt="" className="img-pc" />
-                              <img src="" alt="" className="img-mo" />
+                              <img src={GuideTab2_04_Mo} alt="" className="img-mo" />
                             </div>
                           </li>
                            <li>
@@ -261,7 +280,7 @@ const UI_USR_R_360 = () => {
                             </ol>
                             <div className="img-box">
                               <img src={GuideTab3_01} alt="" className="img-pc" />
-                              <img src="" alt="" className="img-mo" />
+                              <img src={GuideTab3_01_Mo} alt="" className="img-mo" />
                             </div>
                           </li>
                           <li>
@@ -281,7 +300,7 @@ const UI_USR_R_360 = () => {
                             <p className="sub-step-desc">메인 메뉴의 더 많은 서비스 &gt; 소재부품장비·뿌리기술·전문연구사업자 조회 메뉴를 선택합니다.</p>
                             <div className="img-box">
                               <img src={GuideTab3_02} alt="" className="img-pc" />
-                              <img src="" alt="" className="img-mo" />
+                              <img src={GuideTab3_02_Mo} alt="" className="img-mo" />
                             </div>
                           </li>
                           <li>
@@ -292,7 +311,7 @@ const UI_USR_R_360 = () => {
                             </ol>
                             <div className="img-box">
                               <img src={GuideTab3_03} alt="" className="img-pc" />
-                              <img src="" alt="" className="img-mo" />
+                              <img src={GuideTab3_03_Mo} alt="" className="img-mo" />
                             </div>
                           </li>
                           <li>
@@ -305,7 +324,7 @@ const UI_USR_R_360 = () => {
                   </div>
                   <div className={`tab-conts ${activeSubTabIndex === 3 ? 'active' : ''}`}>
 								    <h4 className="sr-only">유관시스템</h4>
-                    4
+                    
                   </div>
                   <div className={`tab-conts ${activeSubTabIndex === 4 ? 'active' : ''}`}>
 								    <h4 className="sr-only">정책금융안내</h4>
@@ -319,8 +338,8 @@ const UI_USR_R_360 = () => {
                           <strong><span className="number">1.</span>정책금융안내 이용 방법</strong>
                         </div>
                         <div className="img-box">
-                          <img src="" alt="" className="img-pc" />
-                          <img src="" alt="" className="img-mo" />
+                          <img src={GuideTab5_01} alt="" className="img-pc" />
+                          <img src={GuideTab5_01_Mo} alt="" className="img-mo" />
                         </div>
                         <ol className="sub-step">
                           <li>
@@ -328,7 +347,7 @@ const UI_USR_R_360 = () => {
                             <p className="sub-step-desc">메인 및 상단 메뉴를 통해 지원사업 &gt; 정책금융 메뉴를 선택합니다.</p>
                             <div className="img-box">
                               <img src={GuideTab5_02} alt="" className="img-pc" />
-                              <img src="" alt="" className="img-mo" />
+                              <img src={GuideTab5_02_Mo} alt="" className="img-mo" />
                             </div>
                           </li>
                           <li>
@@ -339,7 +358,7 @@ const UI_USR_R_360 = () => {
                             </ol>
                             <div className="img-box">
                               <img src={GuideTab5_03} alt="" className="img-pc" />
-                              <img src="" alt="" className="img-mo" />
+                              <img src={GuideTab5_03_Mo} alt="" className="img-mo" />
                             </div>
                           </li>
                           <li>
