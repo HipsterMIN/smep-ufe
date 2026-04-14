@@ -5,6 +5,7 @@ import SideNavigation from '../components/ui/SideNavigation';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
+import { useAuthStore } from '../store/useAuthStore.jsx';
 
 const DEFAULT_FILTER_OPTIONS = {
   searchTypes: [{ code: 'ALL', name: '전체' }, { code: '1', name: '상품명' }, { code: '2', name: '해시태그' }],
@@ -56,6 +57,11 @@ const toPolicyFilterOptions = (commonCodes = {}) => ({
 });
 
 const unwrapResponse = (response) => response?.data ?? response;
+const resolveApiErrorMessage = (error, fallbackMessage) =>
+  error?.data?.message || error?.message || fallbackMessage;
+const SCRAP_TEST_SHORTCUT_KEY = 'x';
+// TODO: 임시 테스트 기능 삭제 시 고정 회원번호 상수도 함께 제거해야 한다.
+const SCRAP_TEST_MEMBER_NO = '2025120500136492';
 const tagsFrom = (value) => (value || '').split(',').map((item) => item.trim()).filter(Boolean);
 const splitMultiValue = (value) => String(value || '').split(/\s*,\s*/).map((item) => item.trim()).filter(Boolean);
 const hasValue = (value) => value !== null && value !== undefined && String(value).trim() !== '';
@@ -304,7 +310,42 @@ const UI_USR_R_031 = () => {
   const [industryGroups, setIndustryGroups] = useState({});
   const [loading, setLoading] = useState(true);
   const [expandedRows, setExpandedRows] = useState({});
+  const [isScrapped, setIsScrapped] = useState(false);
+  const [isScrapTestMode, setIsScrapTestMode] = useState(false);
+  const [isScrappedForTest, setIsScrappedForTest] = useState(false);
   const shadowRefs = useRef({});
+  const authToken = useAuthStore((state) => state.token);
+  const isLoggedIn = Boolean(authToken);
+
+  useEffect(() => {
+    // TODO: 임시 테스트 기능 삭제 시 단축키 리스너도 함께 제거해야 한다.
+    const handleShortcut = (event) => {
+      const isTargetShortcut =
+        event.ctrlKey
+        && event.shiftKey
+        && String(event.key || '').toLowerCase() === SCRAP_TEST_SHORTCUT_KEY;
+      if (!isTargetShortcut) {
+        return;
+      }
+
+      const eventTarget = event.target;
+      const tagName = eventTarget?.tagName?.toLowerCase();
+      const isTypingElement =
+        tagName === 'input'
+        || tagName === 'textarea'
+        || tagName === 'select'
+        || eventTarget?.isContentEditable;
+      if (isTypingElement) {
+        return;
+      }
+
+      event.preventDefault();
+      setIsScrapTestMode((prev) => !prev);
+    };
+
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, []);
 
   useEffect(() => {
     fetchAndConvertCommonCodes(POLICY_FINANCE_COMMON_CODE_GROUPS)
@@ -352,6 +393,66 @@ const UI_USR_R_031 = () => {
       .finally(() => setLoading(false));
   }, [plcyFnncNo, location.search]);
 
+  useEffect(() => {
+    const targetId = Number(plcyFnncNo);
+    if (!isLoggedIn || !Number.isFinite(targetId) || targetId < 1) {
+      setIsScrapped(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadScrapStatus = async () => {
+      try {
+        const response = await apiClient.get(
+          `/api/v1/scraps/status?scrapTypeCd=PLCF&targetId=${targetId}`,
+        );
+        if (!isMounted) return;
+        const payload = unwrapResponse(response);
+        setIsScrapped(Boolean(payload.scrapped));
+      } catch (error) {
+        if (!isMounted) return;
+        setIsScrapped(false);
+      }
+    };
+
+    loadScrapStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isLoggedIn, plcyFnncNo]);
+
+  useEffect(() => {
+    const targetId = Number(plcyFnncNo);
+    if (!isScrapTestMode || !Number.isFinite(targetId) || targetId < 1) {
+      setIsScrappedForTest(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadScrapStatusForTest = async () => {
+      try {
+        const response = await apiClient.get(
+          `/api/v1/scraps/status?scrapTypeCd=PLCF&targetId=${targetId}&testMbrNo=${SCRAP_TEST_MEMBER_NO}`,
+        );
+        if (!isMounted) return;
+        const payload = unwrapResponse(response);
+        setIsScrappedForTest(Boolean(payload.scrapped));
+      } catch (error) {
+        if (!isMounted) return;
+        setIsScrappedForTest(false);
+      }
+    };
+
+    loadScrapStatusForTest();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isScrapTestMode, plcyFnncNo]);
+
   const formatCode = useMemo(() => createCodeFormatter(filterOptions, industryGroups), [filterOptions, industryGroups]);
   const typeConfig = useMemo(() => getTypeConfig(detail, formatCode), [detail, formatCode]);
   const detailGroups = useMemo(() => {
@@ -378,6 +479,60 @@ const UI_USR_R_031 = () => {
       .catch((error) => {
         console.error('Failed to track policy-finance inquiry history:', error);
       });
+  };
+
+  const handleToggleScrap = async () => {
+    const targetId = Number(plcyFnncNo);
+    if (!isLoggedIn || !Number.isFinite(targetId) || targetId < 1) {
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/api/v1/scraps/toggle', {
+        scrapTypeCd: 'PLCF',
+        targetId,
+      });
+      const payload = unwrapResponse(response);
+      const nextScrapped = Boolean(payload.scrapped);
+      setIsScrapped(nextScrapped);
+      window.alert(
+        nextScrapped
+          ? '관심공고에 등록되었습니다.'
+          : '관심공고가 해제되었습니다.',
+      );
+    } catch (error) {
+      window.alert(
+        resolveApiErrorMessage(error, '관심공고 처리 중 오류가 발생했습니다.'),
+      );
+    }
+  };
+
+  // TODO: 임시 테스트 기능 삭제 시 테스트 토글 핸들러도 함께 제거해야 한다.
+  const handleToggleScrapForTest = async () => {
+    const targetId = Number(plcyFnncNo);
+    if (!isScrapTestMode || !Number.isFinite(targetId) || targetId < 1) {
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/api/v1/scraps/toggle', {
+        scrapTypeCd: 'PLCF',
+        targetId,
+        testMbrNo: SCRAP_TEST_MEMBER_NO,
+      });
+      const payload = unwrapResponse(response);
+      const nextScrapped = Boolean(payload.scrapped);
+      setIsScrappedForTest(nextScrapped);
+      window.alert(
+        nextScrapped
+          ? '[테스트] 관심공고에 등록되었습니다.'
+          : '[테스트] 관심공고가 해제되었습니다.',
+      );
+    } catch (error) {
+      window.alert(
+        resolveApiErrorMessage(error, '[테스트] 관심공고 처리 중 오류가 발생했습니다.'),
+      );
+    }
   };
 
   if (loading) return <div style={{ padding: 40 }}>로딩 중입니다.</div>;
@@ -530,6 +685,26 @@ const UI_USR_R_031 = () => {
             </button>
           </div>
           <div>
+            {isScrapTestMode && (
+              <button
+                type="button"
+                className="krds-btn tertiary xlarge"
+                onClick={handleToggleScrapForTest}
+              >
+                <i className={`svg-icon ico-like${isScrappedForTest ? ' on' : ''}`}></i>
+                스크랩 테스트
+              </button>
+            )}
+            {isLoggedIn && (
+              <button
+                type="button"
+                className="krds-btn tertiary xlarge"
+                onClick={handleToggleScrap}
+              >
+                <i className={`svg-icon ico-like${isScrapped ? ' on' : ''}`}></i>
+                관심공고
+              </button>
+            )}
             {detail.plcyFnncInqplUrlAddr && (
               <a
                 href={detail.plcyFnncInqplUrlAddr}
