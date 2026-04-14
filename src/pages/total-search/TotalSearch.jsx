@@ -167,6 +167,14 @@ const stripHtmlExceptHighlight = (value) => {
     .join(HIGHLIGHT_CLOSE_TAG);
 };
 
+const normalizeTitleForRouteParameter = (value) =>
+  stripHtmlExceptHighlight(value)
+    .split(HIGHLIGHT_OPEN_TAG)
+    .join('')
+    .split(HIGHLIGHT_CLOSE_TAG)
+    .join('')
+    .trim();
+
 const renderHighlightedText = (value, fallback = '-') => {
   const rawText = stripHtmlExceptHighlight(value);
   const normalizedText = rawText || fallback;
@@ -480,14 +488,22 @@ const TotalSearch = () => {
   };
 
   const navigateByItem = useCallback(async (item) => {
-    const hintCode = toTrimmedString(item.intgSrchRouteHintCd);
+    const hintCode = toTrimmedString(item.intgSrchRouteHintCd).toUpperCase();
     if (hintCode) {
       try {
         const resolved = await resolveIntegratedSearchRoute({
           intgSrchRouteHintCd: hintCode,
           workId: item.workId,
           bbsCategoryId: item.bbsCategoryId,
+          parameter: {
+            title: normalizeTitleForRouteParameter(item.title),
+          },
         });
+
+        if (resolved?.navigationType === 'EXTERNAL' && resolved?.externalUrl) {
+          window.open(resolved.externalUrl, '_blank', 'noopener,noreferrer');
+          return;
+        }
 
         if (resolved?.path) {
           navigate(resolved.path);
