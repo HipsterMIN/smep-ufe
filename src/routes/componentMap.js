@@ -47,11 +47,12 @@ const UI_USR_L_070 = lazy(() => import('@pages/policy-info/UI_USR_L_070.jsx')); 
 const UI_USR_R_340 = lazy(() => import('@pages/customer-support/UI-USR-R-340.jsx'));
 const UI_USR_R_341 = lazy(() => import('@pages/customer-support/UI-USR-R-341.jsx'));
 const PlatformIntro = lazy(() => import('@pages/customer-support/PlatformIntro.jsx'));
-const UI_USR_R_451 = lazy(() => import('@pages/UI-USR-R-451.jsx'));
+const VerifyPassword = lazy(() => import('@pages/my-business/VerifyPassword.jsx'));
 const UI_USR_R_420 = lazy(() => import('@pages/my-business/UI-USR-R-420.jsx'));
 const UI_USR_W_430 = lazy(() => import('@pages/my-business/UI-USR-W-430.jsx'));
 const UI_USR_R_440 = lazy(() => import('@pages/my-business/UI-USR-R-440.jsx'));
-const UI_USR_R_450 = lazy(() => import('@pages/my-business/UI-USR-R-450.jsx'));
+const UI_USR_R_450 = lazy(() => import('@pages/my-business/company/CompanyDetail.jsx'));
+const UI_USR_W_452 = lazy(() => import('@pages/my-business/company/CompanyEdit.jsx'));
 const UI_USR_L_460 = lazy(() => import('@pages/my-business/UI-USR-L-460.jsx'));
 const UI_USR_L_020 = lazy(() => import('@pages/UI-USR-L-020.jsx'));
 const UI_USR_L_520 = lazy(() => import('@pages/my-business/UI-USR-L-520.jsx'));
@@ -476,7 +477,7 @@ export const componentMap = {
 
   // 회원정보변경
   'M_PIIO_00115': {
-    component: UI_USR_R_451, //from UI_USR_R_410
+    component: VerifyPassword, //from UI_USR_R_410
     layout: SubpageLayoutWithMenu,
   },
 
@@ -502,6 +503,12 @@ export const componentMap = {
   'M_PIIO_00119': {
     component: UI_USR_R_450,
     layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: 'edit',
+        component: UI_USR_W_452,
+      },
+    ],
   },
 
   // 경영현황 분석
