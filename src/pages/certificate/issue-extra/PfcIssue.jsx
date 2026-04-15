@@ -6,34 +6,34 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 
-const CbzIssue = () => {
-  const navigate  = useNavigate();
-  const location  = useLocation();
+const PfcIssue = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
 
-  const [records, setRecords]           = useState([]);
-  const [selectedCmpId1, setSelectedCmpId1] = useState(null);
-  const [isPopupOpen, setIsPopupOpen]   = useState(false);
-  const [isLoading, setIsLoading]       = useState(false);
-  const [isFetching, setIsFetching]     = useState(false);
+  const [records, setRecords]             = useState([]);
+  const [selectedRecord, setSelectedRecord] = useState(null); // { reqstNo, crtfctTyCode, reqstOdr }
+  const [isPopupOpen, setIsPopupOpen]     = useState(false);
+  const [isLoading, setIsLoading]         = useState(false);
+  const [isFetching, setIsFetching]       = useState(false);
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
   const depth1Menu  = getDepth1Parent();
 
   const goBack = () => navigate(-1);
-  const brno   = '6090499481'; // TODO: 실제 로그인 사용자 사업자번호로 교체
+  const brno   = '1378604388'; // TODO: 실제 로그인 사용자 사업자번호로 교체
 
-  // 목록 조회
+  // 제품 목록 조회
   useEffect(() => {
     const fetchRecords = async () => {
       setIsFetching(true);
       try {
-        const data = await apiClient.get(`/api/v1/certificate/cbz/records?brno=${brno}`);
+        const data = await apiClient.get(`/api/v1/certificate/pfc/records?brno=${brno}`);
         setRecords(data?.data?.records || []);
       } catch (e) {
-        console.error('CBZ 목록 조회 실패:', e);
-        alert('협업기업선정확인서 목록 조회 중 오류가 발생했습니다.');
+        console.error('PFC 목록 조회 실패:', e);
+        alert('성능인증서 제품목록 조회 중 오류가 발생했습니다.');
       } finally {
         setIsFetching(false);
       }
@@ -41,9 +41,12 @@ const CbzIssue = () => {
     fetchRecords();
   }, []);
 
-  // 발급 공통 (출력/전자문서지갑 모두 사용)
+  // record 식별키: reqstNo + reqstOdr 조합 (reqstNo가 같고 reqstOdr가 다를 수 있음)
+  const getRecordKey = (rec) => `${rec.reqstNo}_${rec.reqstOdr}`;
+
+  // 발급 공통
   const handleIssue = async (issuTypeCd) => {
-    if (!selectedCmpId1) { alert('발급할 항목을 선택해주세요.'); return; }
+    if (!selectedRecord) { alert('발급할 제품을 선택해주세요.'); return; }
     if (!prdocCd)        { alert('증명서 코드가 없습니다.');      return; }
 
     try {
@@ -52,7 +55,11 @@ const CbzIssue = () => {
         prdocCd,
         brno,
         prdocIssuTypeCd: issuTypeCd,
-        extraParams: { cmpId1: selectedCmpId1 },
+        extraParams: {
+          reqstNo: selectedRecord.reqstNo,
+          crtfctTyCode: selectedRecord.crtfctTyCode,
+          reqstOdr: selectedRecord.reqstOdr,
+        },
       });
 
       if (issuTypeCd === 'Y301') {
@@ -73,7 +80,7 @@ const CbzIssue = () => {
   const handlePrint = () => handleIssue('Y301');
 
   const handleWalletClick = () => {
-    if (!selectedCmpId1) { alert('발급할 항목을 선택해주세요.'); return; }
+    if (!selectedRecord) { alert('발급할 제품을 선택해주세요.'); return; }
     setIsPopupOpen(true);
   };
 
@@ -147,29 +154,41 @@ const CbzIssue = () => {
             {isFetching ? (
               <p className="txt-center">목록을 불러오는 중입니다...</p>
             ) : records.length === 0 ? (
-              <p className="txt-center">조회된 협업기업선정확인서가 없습니다.</p>
+              <p className="txt-center">조회된 성능인증서가 없습니다.</p>
             ) : (
               <ul className="select-list">
-                {records.map((rec, idx) => (
-                  <li key={rec.CMP_ID_1}>
-                    <div className="krds-form-check medium">
-                      <input
-                        type="radio"
-                        name="radiogroup"
-                        id={`radio_cbz_${idx}`}
-                        checked={selectedCmpId1 === rec.CMP_ID_1}
-                        onChange={() => setSelectedCmpId1(rec.CMP_ID_1)}
-                      />
-                      <label htmlFor={`radio_cbz_${idx}`}>
-                        <div className="cont-inner">
-                          <span className="sub-txt"><em>선정번호</em>{rec.CMP_ID_1}</span>
-                          <span className="sub-txt"><em>참여기업명</em>{rec.PRTCPN_CMP_NM}</span>
-                          {rec.PRJCT_NM}
-                        </div>
-                      </label>
-                    </div>
-                  </li>
-                ))}
+                {records.map((rec, idx) => {
+                  const key        = getRecordKey(rec);
+                  const isSelected = selectedRecord && getRecordKey(selectedRecord) === key;
+                  const isDisabled = rec.evlsWritingYn !== 'Y';   // ← Y 아니면 disabled
+
+                  return (
+                    <li key={key}>
+                      <div className={`krds-form-check medium${isDisabled ? ' disabled' : ''}`}>
+                        <input
+                          type="radio"
+                          name="radiogroup"
+                          id={`radio_pfc_${idx}`}
+                          checked={isSelected}
+                          onChange={() => setSelectedRecord(rec)}
+                          disabled={isDisabled}
+                        />
+                        <label htmlFor={`radio_pfc_${idx}`}>
+                          <div className="cont-inner">
+                            {rec.crtfcPrdlst}
+                          </div>
+                        </label>
+                      </div>
+                      <button
+                        type="button"
+                        className={`krds-btn small${rec.evlsWritingYn === 'Y' ? ' primary' : ' primary disabled'}`}
+                        disabled={rec.evlsWritingYn !== 'Y'}
+                      >
+                        {rec.evlsWritingYn === 'Y' ? '완료' : '미완료'}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
@@ -178,12 +197,12 @@ const CbzIssue = () => {
         <div className="onboard-btm-btngroup bt-0">
           <div>
             <button type="button" className="krds-btn tertiary xlarge" onClick={goBack}>
-                취소
+              취소
             </button>
           </div>
           <div>
             <button type="button" className="krds-btn primary xlarge" onClick={handleWalletClick}>
-                전자문서지갑
+              전자문서지갑
             </button>
             <button
               type="button"
@@ -219,4 +238,4 @@ const CbzIssue = () => {
   );
 };
 
-export default CbzIssue;
+export default PfcIssue;

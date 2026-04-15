@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 
@@ -8,11 +7,13 @@ import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Popup from '@components/ui/Popup.jsx';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const UI_USR_P_042 = () => {
+const SmtcIssue = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
 
+  const [lginId, setLginId]           = useState('');
+  const [sbjtId, setSbjtId]           = useState('');
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isLoading, setIsLoading]     = useState(false);
 
@@ -20,12 +21,19 @@ const UI_USR_P_042 = () => {
   const sidebarData = getSideNavigationData();
   const depth1Menu  = getDepth1Parent();
 
-  const brno = '2288105280'; // TODO: 실제 로그인 사용자 사업자번호로 교체
+  const brno = '1378626719'; // TODO: 실제 로그인 사용자 사업자번호로 교체
 
   const goBack = () => navigate(-1);
 
-  const handlePrint = async () => {
-    if (!prdocCd) { alert('증명서 코드가 없습니다.'); return; }
+  const validate = () => {
+    if (!prdocCd)           { alert('증명서 코드가 없습니다.');        return false; }
+    if (!lginId.trim())     { alert('SMTECH 아이디를 입력해주세요.');   return false; }
+    if (!sbjtId.trim())     { alert('과제번호를 입력해주세요.');         return false; }
+    return true;
+  };
+
+  const handleIssue = async (issuTypeCd) => {
+    if (!validate()) return;
 
     try {
       setIsLoading(true);
@@ -33,29 +41,38 @@ const UI_USR_P_042 = () => {
       const prdocIssuAplyNo = await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
         brno,
-        prdocIssuTypeCd: 'Y301',
+        prdocIssuTypeCd: issuTypeCd,
+        extraParams: {
+          lginId: lginId.trim(),
+          sbjtId: sbjtId.trim(),
+        },
       });
 
-      window.open(
-        `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
-        '_blank',
-      );
-
-      navigate('/mb/dash/UI_USR_L_510');
+      if (issuTypeCd === 'Y301') {
+        window.open(
+          `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
+          '_blank',
+        );
+      }
+      setIsPopupOpen(false);
     } catch (e) {
       console.error('증명서 발급 실패:', e);
-      alert('증명서 발급 중 오류가 발생했습니다.');
+      alert('조회된 데이터가 없습니다. SMTECH 홈페이지에 문의해주세요.(https://www.smtech.go.kr)');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handlePrint = () => handleIssue('Y301');
+
+  const handleWalletClick = () => {
+    if (!validate()) return;
+    setIsPopupOpen(true);
+  };
+
   return (
     <>
-      <SideNavigation
-        pageTitle={depth1Menu?.menuNm || ''}
-        menuItems={sidebarData}
-      />
+      <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
@@ -70,9 +87,7 @@ const UI_USR_P_042 = () => {
                 ? prdocIssuGdCn
                   .split('\n')
                   .filter((line) => line.trim() !== '')
-                  .map((line, index) => (
-                    <li key={index}>{line.trim()}</li>
-                  ))
+                  .map((line, index) => <li key={index}>{line.trim()}</li>)
                 : null}
             </ul>
           </div>
@@ -81,42 +96,40 @@ const UI_USR_P_042 = () => {
             <div className="form-row-item">
               <dt className="form-row-label">
                 <label htmlFor="id_01" className="form-label">
-                    사업자등록번호
+                    SMTECH 아이디
                   <span className="on-required"><span className="sr-only">필수입력</span></span>
                 </label>
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
-                  <input type="text" id="id_01" className="krds-input small"
-                    placeholder="사업자등록번호를 입력해주세요" value={brno} disabled />
+                  <input
+                    type="text"
+                    id="id_01"
+                    className="krds-input small"
+                    placeholder="SMTECH 아이디를 입력해주세요"
+                    value={lginId}
+                    onChange={(e) => setLginId(e.target.value)}
+                  />
                 </div>
               </dd>
             </div>
             <div className="form-row-item">
               <dt className="form-row-label">
                 <label htmlFor="id_02" className="form-label">
-                    상호
+                    과제번호
                   <span className="on-required"><span className="sr-only">필수입력</span></span>
                 </label>
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
-                  <input type="text" id="id_02" className="krds-input small"
-                    placeholder="상호를 입력해주세요" value="주식회사 중소벤처" disabled />
-                </div>
-              </dd>
-            </div>
-            <div className="form-row-item">
-              <dt className="form-row-label">
-                <label htmlFor="id_03" className="form-label">
-                    대표자명
-                  <span className="on-required"><span className="sr-only">필수입력</span></span>
-                </label>
-              </dt>
-              <dd className="form-row-content">
-                <div className="form-wrapper w-220">
-                  <input type="text" id="id_03" className="krds-input small"
-                    placeholder="대표자명을 입력해주세요" value="홍길동" disabled />
+                  <input
+                    type="text"
+                    id="id_02"
+                    className="krds-input small"
+                    placeholder="과제번호를 입력해주세요"
+                    value={sbjtId}
+                    onChange={(e) => setSbjtId(e.target.value)}
+                  />
                 </div>
               </dd>
             </div>
@@ -133,7 +146,8 @@ const UI_USR_P_042 = () => {
             <button
               type="button"
               className="krds-btn primary xlarge"
-              onClick={() => setIsPopupOpen(true)}
+              onClick={handleWalletClick}
+              disabled={isLoading}
             >
                 전자문서지갑
             </button>
@@ -160,11 +174,11 @@ const UI_USR_P_042 = () => {
           <span className="sub-title">용도 확인</span>
           <p className="main-title">전자증명서 발급 용도를 선택해주세요</p>
           <div className="purpose-selection">
-            <button type="button" className="btn-purpose">
+            <button type="button" className="btn-purpose" onClick={() => handleIssue('Y302')}>
               <i className="ico-public"></i>
               <span>공공기관 입찰용</span>
             </button>
-            <button type="button" className="btn-purpose">
+            <button type="button" className="btn-purpose" onClick={() => handleIssue('Y303')}>
               <i className="ico-other"></i>
               <span>공공기관 입찰 이외의 용도</span>
             </button>
@@ -175,4 +189,4 @@ const UI_USR_P_042 = () => {
   );
 };
 
-export default UI_USR_P_042;
+export default SmtcIssue;
