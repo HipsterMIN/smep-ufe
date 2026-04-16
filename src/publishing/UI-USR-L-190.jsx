@@ -54,7 +54,7 @@ const UI_USR_L_190 = () => {
 
         <div className="search-top-box">
           <div className="sch-form-wrap">
-            <select className="krds-form-select">
+            <select className="krds-form-select" aria-label="검색구분 선택">{/* 기술진단보고서 반영 */}
               <option value="">행사명</option>
             </select>
             <div className="sch-input">

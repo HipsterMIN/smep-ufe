@@ -58,7 +58,7 @@ const UI_USR_L_020 = () => {
         </div>
 				<div className="search-top-box">
 				<div className="sch-form-wrap" ref={schFormWrapRef}>
-					<select className="krds-form-select">
+					<select className="krds-form-select" aria-label="검색구분 선택"> {/* 기술진단보고서 반영 */}
 						<option value="">전체</option>
 						<option value="">항목</option>
 						<option value="">항목</option>

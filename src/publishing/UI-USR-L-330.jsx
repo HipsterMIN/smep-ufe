@@ -53,12 +53,12 @@ const UI_USR_L_330 = () => {
         </div>
 		<div className="search-top-box">
 			<div className="sch-form-wrap">
-				<select className="krds-form-select">
+				<select className="krds-form-select" aria-label="카테고리 선택"> {/* 기술진단보고서 반영 */}
 					<option value="">카테고리 전체</option>
 					<option value="">항목</option>
 					<option value="">항목</option>
 				</select>
-				<select className="krds-form-select">
+				<select className="krds-form-select" aria-label="카테고리 선택"> {/* 기술진단보고서 반영 */}
 					<option value="">제목</option>
 					<option value="">항목</option>
 					<option value="">항목</option>
@@ -88,7 +88,7 @@ const UI_USR_L_330 = () => {
         </div>
         {/* table [S] */}
 		<div className="krds-table-wrap">
-			<table className="tbl col data">
+			<table className="tbl col data t-block">
 				<caption>Q & A 목록. 번호, 카테고리, 제목, 작성자, 처리상태, 작성일, 조회수 정보가 제공됨.</caption>
 						<colgroup>
 							<col style={{width: "7.4%"}} />
@@ -118,14 +118,13 @@ const UI_USR_L_330 = () => {
 								<td className="ac"><span>비지니스지원단</span></td>
 								<td>
 									<a className="onellipsis-1" href="#">
-									  <span className="krds-badge bg-light-primary">공지</span>
 										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
 								<td className="ac"><span>홍*동</span></td>
 								<td className="ac"><span>답변완료</span></td>
 								<td className="ac"><span>2025-04-16</span></td>
-								<td className="ac"><span>4323</span></td>
+								<td className="ac views"><span>4323</span></td>
 							</tr>
 							<tr>
 								<th scope="row" className="ac">
@@ -134,14 +133,13 @@ const UI_USR_L_330 = () => {
 								<td className="ac"><span>비지니스지원단</span></td>
 								<td>
 									<a className="onellipsis-1" href="#">
-									  <span className="krds-badge bg-light-primary">공지</span>
 										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
 								<td className="ac"><span>홍*동</span></td>
 								<td className="ac"><span>답변완료</span></td>
 								<td className="ac"><span>2025-04-16</span></td>
-								<td className="ac"><span>4323</span></td>
+								<td className="ac views"><span>4323</span></td>
 							</tr>
 						</tbody>
 			        </table>

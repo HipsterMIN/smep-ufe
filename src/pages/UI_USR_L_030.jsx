@@ -9,6 +9,7 @@ import Tooltip from '../components/ui/Tooltip';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
+import { formatNumberWithCommas } from '../utils/numberUtils.js';
 
 const TAB_LABELS = ['전체', '융자', '보증', '보험'];
 const TAB_CODES = ['', 'FT01', 'FT02', 'FT03'];
@@ -95,6 +96,18 @@ const DEFAULT_FILTER_OPTIONS = {
   grantKinds: [],
   grantRateSummaries: [],
   insuranceRateSummaries: [],
+};
+
+const getStoredIndustries = () => {
+  try {
+    const stored = sessionStorage.getItem('policyFinanceIndustries');
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.warn('Failed to restore industry selection:', error);
+    return [];
+  }
 };
 
 const toPolicyFilterOptions = (commonCodes = {}) => ({
@@ -258,6 +271,8 @@ const UI_USR_L_030 = () => {
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
   const filterWrapRef = useRef(null);
+  const filtersRef = useRef(EMPTY_FILTERS);
+  const listRequestSeqRef = useRef(0);
 
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [filters, setFilters] = useState(EMPTY_FILTERS);
@@ -275,8 +290,8 @@ const UI_USR_L_030 = () => {
   const [industryKeyword, setIndustryKeyword] = useState({ ksicCd: '', ksicNm: '' });
   const [industryResults, setIndustryResults] = useState([]);
   const [industryDraft, setIndustryDraft] = useState([]);
-  const [selectedIndustries, setSelectedIndustries] = useState([]);
-  const [appliedIndustries, setAppliedIndustries] = useState([]);
+  const [selectedIndustries, setSelectedIndustries] = useState(() => getStoredIndustries());
+  const [appliedIndustries, setAppliedIndustries] = useState(() => getStoredIndustries());
   const [industryMessage, setIndustryMessage] = useState('');
   const [compareIds, setCompareIds] = useState([]);
   const [comparePopupOpen, setComparePopupOpen] = useState(false);
@@ -284,18 +299,8 @@ const UI_USR_L_030 = () => {
   const [compareLoading, setCompareLoading] = useState(false);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem('policyFinanceIndustries');
-    if (!stored) return;
-    try {
-      const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed)) {
-        setSelectedIndustries(parsed);
-        setAppliedIndustries(parsed);
-      }
-    } catch (error) {
-      console.warn('Failed to restore industry selection:', error);
-    }
-  }, []);
+    filtersRef.current = filters;
+  }, [filters]);
 
   useEffect(() => {
     sessionStorage.setItem('policyFinanceIndustries', JSON.stringify(selectedIndustries));
@@ -370,9 +375,13 @@ const UI_USR_L_030 = () => {
       params.set('plcyFnncTpbizNm', appliedIndustries.map((item) => item.upperKsicCd).join(','));
     }
 
+    const requestSeq = ++listRequestSeqRef.current;
     setLoading(true);
     apiClient.get(`/api/v1/finance-policy/list?${params.toString()}`)
       .then((response) => {
+        if (requestSeq !== listRequestSeqRef.current) {
+          return;
+        }
         const data = unwrapResponse(response);
         const content = data?.content || [];
         setItems(content);
@@ -380,12 +389,19 @@ const UI_USR_L_030 = () => {
         setTotalPages(data?.totalPages || 0);
       })
       .catch((error) => {
+        if (requestSeq !== listRequestSeqRef.current) {
+          return;
+        }
         console.error('Failed to load finance policy list:', error);
         setItems([]);
         setTotalElements(0);
         setTotalPages(0);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (requestSeq === listRequestSeqRef.current) {
+          setLoading(false);
+        }
+      });
   }, [activeTabIndex, appliedFilters, appliedIndustries, page, size, sortType]);
 
   useEffect(() => {
@@ -408,9 +424,42 @@ const UI_USR_L_030 = () => {
 
   const updateFilter = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
 
+  const applyDetailFilter = (key, value) => {
+    const nextFilters = { ...filtersRef.current, [key]: value };
+    filtersRef.current = nextFilters;
+    setFilters(nextFilters);
+    setAppliedFilters(nextFilters);
+    setCompareIds([]);
+    setPage(1);
+  };
+
+  const applyIndustrySelection = (nextIndustries) => {
+    setSelectedIndustries(nextIndustries);
+    setAppliedIndustries(nextIndustries);
+    setCompareIds([]);
+    setPage(1);
+  };
+
   const applyFilters = () => {
     setAppliedFilters(filters);
     setAppliedIndustries(selectedIndustries);
+    setCompareIds([]);
+    setPage(1);
+  };
+
+  const applyHashtagFilter = (tag) => {
+    const keyword = String(tag || '').trim();
+    if (!keyword) return;
+
+    const nextFilters = {
+      ...filtersRef.current,
+      plcyFnncSrchTypeCd: '2',
+      plcyFnncSrchKwdCn: keyword,
+    };
+
+    filtersRef.current = nextFilters;
+    setFilters(nextFilters);
+    setAppliedFilters(nextFilters);
     setCompareIds([]);
     setPage(1);
   };
@@ -500,6 +549,7 @@ const UI_USR_L_030 = () => {
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
     setFilterOptions((prev) => ({ ...prev, financialInsts: [] }));
+    filtersRef.current = EMPTY_FILTERS;
     setFilters(EMPTY_FILTERS);
     setAppliedFilters(EMPTY_FILTERS);
     setSelectedIndustries([]);
@@ -515,18 +565,14 @@ const UI_USR_L_030 = () => {
   };
 
   const resetIndustrySelection = () => {
-    setSelectedIndustries([]);
-    setAppliedIndustries([]);
+    applyIndustrySelection([]);
     setIndustryDraft([]);
-    setPage(1);
   };
 
   const removeIndustrySelection = (upperKsicCd) => {
     const next = selectedIndustries.filter((item) => item.upperKsicCd !== upperKsicCd);
-    setSelectedIndustries(next);
-    setAppliedIndustries(next);
+    applyIndustrySelection(next);
     setIndustryDraft((prev) => prev.filter((item) => item.upperKsicCd !== upperKsicCd));
-    setPage(1);
   };
 
   const toggleCompare = (goodsSn, checked) => {
@@ -553,7 +599,10 @@ const UI_USR_L_030 = () => {
 
     try {
       setCompareLoading(true);
-      const responses = await Promise.all(compareIds.map((goodsSn) => apiClient.get(`/api/v1/finance-policy/${goodsSn}`)));
+      const responses = await Promise.all(
+        // 비교 팝업용 상세 조회는 통계 집계(조회수/키워드/이력)에서 제외한다.
+        compareIds.map((goodsSn) => apiClient.get(`/api/v1/finance-policy/${goodsSn}?trackYn=N`)),
+      );
       setCompareItems(responses.map((response) => unwrapResponse(response)));
       setComparePopupOpen(true);
     } catch (error) {
@@ -562,6 +611,24 @@ const UI_USR_L_030 = () => {
     } finally {
       setCompareLoading(false);
     }
+  };
+
+  const buildDetailSearchQuery = () => {
+    const params = new URLSearchParams();
+    const srchText = (appliedFilters.plcyFnncSrchKwdCn || '').trim();
+    if (srchText) {
+      params.set('srchText', srchText);
+    }
+    const reSrchText = new URLSearchParams(window.location.search).get('reSrchText')?.trim();
+    if (reSrchText) {
+      params.set('reSrchText', reSrchText);
+    }
+    return params.toString();
+  };
+
+  const navigateToDetail = (goodsSn) => {
+    const queryString = buildDetailSearchQuery();
+    navigate(queryString ? `${goodsSn}?${queryString}` : `${goodsSn}`);
   };
 
   return (
@@ -585,7 +652,7 @@ const UI_USR_L_030 = () => {
 
               <div className="search-top-box">
                 <div className="sch-form-wrap" ref={filterWrapRef}>
-                  <select className="krds-form-select" value={filters.plcyFnncSrchTypeCd} onChange={(e) => updateFilter('plcyFnncSrchTypeCd', e.target.value)}>
+                  <select className="krds-form-select" aria-label="검색 구분 선택" value={filters.plcyFnncSrchTypeCd} onChange={(e) => updateFilter('plcyFnncSrchTypeCd', e.target.value)}>
                     <option value="ALL">전체</option>
                     {filterOptions.searchTypes.filter((item) => item.code !== 'ALL').map((item) => (
                       <option key={item.code} value={item.code}>{item.name}</option>
@@ -595,7 +662,7 @@ const UI_USR_L_030 = () => {
                     <input
                       type="text"
                       className="krds-input"
-                      placeholder="금융상품 조회를 위한 검색어를 입력해 주세요"
+                      placeholder="금융상품 검색어를 입력해 주세요"
                       title="검색어 입력"
                       value={filters.plcyFnncSrchKwdCn}
                       onChange={(e) => updateFilter('plcyFnncSrchKwdCn', e.target.value)}
@@ -624,7 +691,7 @@ const UI_USR_L_030 = () => {
                       id: 'plcyFnncGdsTypeCd',
                       label: '상품유형',
                       value: filters.plcyFnncGdsTypeCd,
-                      onChange: (value) => updateFilter('plcyFnncGdsTypeCd', value),
+                      onChange: (value) => applyDetailFilter('plcyFnncGdsTypeCd', value),
                       options: filterOptions.supportTypes,
                       placeholder: '전체',
                     })}
@@ -632,7 +699,7 @@ const UI_USR_L_030 = () => {
                       id: `plcyFnncBizFlfmtInstNm-${activeTabIndex}`,
                       label: '금융기관',
                       value: filters.plcyFnncBizFlfmtInstNm,
-                      onChange: (value) => updateFilter('plcyFnncBizFlfmtInstNm', value),
+                      onChange: (value) => applyDetailFilter('plcyFnncBizFlfmtInstNm', value),
                       options: filterOptions.financialInsts,
                       placeholder: '전체',
                     })}
@@ -640,7 +707,7 @@ const UI_USR_L_030 = () => {
                       id: 'plcyFnncEntSclCd',
                       label: '기업규모',
                       value: filters.plcyFnncEntSclCd,
-                      onChange: (value) => updateFilter('plcyFnncEntSclCd', value),
+                      onChange: (value) => applyDetailFilter('plcyFnncEntSclCd', value),
                       options: filterOptions.companySizes,
                       placeholder: '전체',
                     })}
@@ -660,7 +727,7 @@ const UI_USR_L_030 = () => {
                       id: 'plcyFnncRcptSttsCd',
                       label: '접수상태',
                       value: filters.plcyFnncRcptSttsCd,
-                      onChange: (value) => updateFilter('plcyFnncRcptSttsCd', value),
+                      onChange: (value) => applyDetailFilter('plcyFnncRcptSttsCd', value),
                       options: filterOptions.receptionStatuses,
                       placeholder: '전체',
                     })}
@@ -668,7 +735,7 @@ const UI_USR_L_030 = () => {
                       id: 'plcyFnncAddDtlCndCn',
                       label: '우대기업',
                       value: filters.plcyFnncAddDtlCndCn,
-                      onChange: (value) => updateFilter('plcyFnncAddDtlCndCn', value),
+                      onChange: (value) => applyDetailFilter('plcyFnncAddDtlCndCn', value),
                       options: filterOptions.preferredTypes,
                       placeholder: '전체',
                     })}
@@ -676,7 +743,7 @@ const UI_USR_L_030 = () => {
                       id: 'plcyFnncAplyMthCd',
                       label: '신청방식',
                       value: filters.plcyFnncAplyMthCd,
-                      onChange: (value) => updateFilter('plcyFnncAplyMthCd', value),
+                      onChange: (value) => applyDetailFilter('plcyFnncAplyMthCd', value),
                       options: filterOptions.applicationMethods,
                       placeholder: '전체',
                     })}
@@ -684,25 +751,25 @@ const UI_USR_L_030 = () => {
 
                   {showLoan && (
                     <div className="filter-form">
-                      {renderSelectField({ id: 'plcyFnncRpmtMthdCd', label: '상환방법', value: filters.plcyFnncRpmtMthdCd, onChange: (value) => updateFilter('plcyFnncRpmtMthdCd', value), options: filterOptions.repaymentMethods, placeholder: '전체' })}
-                      {renderSelectField({ id: 'flctnIrtYnCn', label: '금리변동여부', value: filters.flctnIrtYnCn, onChange: (value) => updateFilter('flctnIrtYnCn', value), options: filterOptions.interestChangeTypes, placeholder: '전체' })}
-                      {renderSelectField({ id: 'plcyFndsLoanMthCn', label: '융자방식', value: filters.plcyFndsLoanMthCn, onChange: (value) => updateFilter('plcyFndsLoanMthCn', value), options: filterOptions.loanMethods, placeholder: '전체' })}
-                      {renderSelectField({ id: 'plcyFnncSprtTrgtFndsCn', label: '자금용도', value: filters.plcyFnncSprtTrgtFndsCn, onChange: (value) => updateFilter('plcyFnncSprtTrgtFndsCn', value), options: filterOptions.supportTargetFunds, placeholder: '전체' })}
-                      {renderSelectField({ id: 'loanPrdSmryCd', label: '대출기간', value: filters.loanPrdSmryCd, onChange: (value) => updateFilter('loanPrdSmryCd', value), options: filterOptions.loanPeriodSummaries, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncRpmtMthdCd', label: '상환방법', value: filters.plcyFnncRpmtMthdCd, onChange: (value) => applyDetailFilter('plcyFnncRpmtMthdCd', value), options: filterOptions.repaymentMethods, placeholder: '전체' })}
+                      {renderSelectField({ id: 'flctnIrtYnCn', label: '금리변동여부', value: filters.flctnIrtYnCn, onChange: (value) => applyDetailFilter('flctnIrtYnCn', value), options: filterOptions.interestChangeTypes, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFndsLoanMthCn', label: '융자방식', value: filters.plcyFndsLoanMthCn, onChange: (value) => applyDetailFilter('plcyFndsLoanMthCn', value), options: filterOptions.loanMethods, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncSprtTrgtFndsCn', label: '자금용도', value: filters.plcyFnncSprtTrgtFndsCn, onChange: (value) => applyDetailFilter('plcyFnncSprtTrgtFndsCn', value), options: filterOptions.supportTargetFunds, placeholder: '전체' })}
+                      {renderSelectField({ id: 'loanPrdSmryCd', label: '대출기간', value: filters.loanPrdSmryCd, onChange: (value) => applyDetailFilter('loanPrdSmryCd', value), options: filterOptions.loanPeriodSummaries, placeholder: '전체' })}
                     </div>
                   )}
 
                   {showGrant && (
                     <div className="filter-form">
-                      {renderSelectField({ id: 'plcyFnncSprtTrgtFndsCn', label: '지원대상 자금', value: filters.plcyFnncSprtTrgtFndsCn, onChange: (value) => updateFilter('plcyFnncSprtTrgtFndsCn', value), options: filterOptions.supportTargetFunds, placeholder: '전체' })}
-                      {renderSelectField({ id: 'plcyFnncGdsKndCd', label: '상품종류', value: filters.plcyFnncGdsKndCd, onChange: (value) => updateFilter('plcyFnncGdsKndCd', value), options: filterOptions.grantKinds, placeholder: '전체' })}
-                      {renderSelectField({ id: 'plcyFnncGrnteRtSmryCn', label: '보증비율', value: filters.plcyFnncGrnteRtSmryCn, onChange: (value) => updateFilter('plcyFnncGrnteRtSmryCn', value), options: filterOptions.grantRateSummaries, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncSprtTrgtFndsCn', label: '지원대상 자금', value: filters.plcyFnncSprtTrgtFndsCn, onChange: (value) => applyDetailFilter('plcyFnncSprtTrgtFndsCn', value), options: filterOptions.supportTargetFunds, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncGdsKndCd', label: '상품종류', value: filters.plcyFnncGdsKndCd, onChange: (value) => applyDetailFilter('plcyFnncGdsKndCd', value), options: filterOptions.grantKinds, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncGrnteRtSmryCn', label: '보증비율', value: filters.plcyFnncGrnteRtSmryCn, onChange: (value) => applyDetailFilter('plcyFnncGrnteRtSmryCn', value), options: filterOptions.grantRateSummaries, placeholder: '전체' })}
                     </div>
                   )}
 
                   {showInsurance && (
                     <div className="filter-form">
-                      {renderSelectField({ id: 'plcyFnncCmpnRtSmryCn', label: '보상비율', value: filters.plcyFnncCmpnRtSmryCn, onChange: (value) => updateFilter('plcyFnncCmpnRtSmryCn', value), options: filterOptions.insuranceRateSummaries, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncCmpnRtSmryCn', label: '보상비율', value: filters.plcyFnncCmpnRtSmryCn, onChange: (value) => applyDetailFilter('plcyFnncCmpnRtSmryCn', value), options: filterOptions.insuranceRateSummaries, placeholder: '전체' })}
                     </div>
                   )}
                 </div>
@@ -724,7 +791,7 @@ const UI_USR_L_030 = () => {
                     <span className="krds-btn-tag">노출할 상품이 없습니다.</span>
                   ) : (
                     popularItems.map((item) => (
-                      <button type="button" key={`popular-${item.plcyFnncGdsSn}`} className="krds-btn-tag" onClick={() => navigate(`${item.plcyFnncGdsSn}`)}>
+                      <button type="button" key={`popular-${item.plcyFnncGdsSn}`} className="krds-btn-tag" onClick={() => navigateToDetail(item.plcyFnncGdsSn)}>
                         #{item.plcyFnncGdsNm}
                       </button>
                     ))
@@ -734,7 +801,7 @@ const UI_USR_L_030 = () => {
 
               <div className="search-list-top">
                 <ul className="sch-info" aria-live="polite">
-                  <li>검색 결과 <span className="point">{totalElements}</span>건</li>
+                  <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>건</li>
                 </ul>
                 <ul className="sch-sort">
                   <li>
@@ -760,8 +827,8 @@ const UI_USR_L_030 = () => {
                     </div>
                   </li>
                   {showCompare && (
-                    <li>
-                      <button type="button" className="krds-btn medium primary" onClick={openComparePopup} disabled={compareLoading}>
+                    <li className="margin-top13">
+                      <button type="button" className="krds-btn small primary" onClick={openComparePopup} disabled={compareLoading}>
                         <i className="svg-icon ico-round-check"></i>
                         상품비교
                       </button>
@@ -798,7 +865,7 @@ const UI_USR_L_030 = () => {
                           </div>
                         </div>
                         <div className="card-body">
-                          <a href="#" className="c-text" onClick={(e) => { e.preventDefault(); navigate(`${item.plcyFnncGdsSn}`); }}>
+                          <a href="#" className="c-text" onClick={(e) => { e.preventDefault(); navigateToDetail(item.plcyFnncGdsSn); }}>
                             <p className="c-tit visited sml no-icon"><span className="span">{item.plcyFnncGdsNm}</span></p>
                             <p className="c-txt onellipsis-2">{asPlainText(item.plcyFnncGdsPrpsCn)}</p>
                             <p className="on-list-btm">
@@ -814,7 +881,21 @@ const UI_USR_L_030 = () => {
                         </div>
                         <div className="card-btm">
                           {tagList(item.hashtags).slice(0, 4).map((tag) => (
-                            <span className="tag" key={`${item.plcyFnncGdsSn}-${tag}`}>{tag}</span>
+                            <span
+                              className="tag"
+                              key={`${item.plcyFnncGdsSn}-${tag}`}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => applyHashtagFilter(tag)}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                  event.preventDefault();
+                                  applyHashtagFilter(tag);
+                                }
+                              }}
+                            >
+                              {tag}
+                            </span>
                           ))}
                         </div>
                         <div className="card-btn">
@@ -830,7 +911,7 @@ const UI_USR_L_030 = () => {
                 )}
               </ul>
 
-              {!loading && totalPages > 0 && <Pagination totalPages={totalPages} currentPage={page} onPageChange={setPage} />}
+              {!loading && totalPages > 0 && <Pagination totalPages={totalPages} currentPage={page} onPageChange={setPage} syncUrl />}
             </section>
           </div>
         </div>
@@ -843,7 +924,7 @@ const UI_USR_L_030 = () => {
         footer={(
           <>
             <button type="button" className="krds-btn tertiary medium" onClick={() => setPopupOpen(false)}>닫기</button>
-            <button type="button" className="krds-btn primary medium" onClick={() => { setSelectedIndustries(industryDraft); setPopupOpen(false); }}>적용</button>
+            <button type="button" className="krds-btn primary medium" onClick={() => { applyIndustrySelection(industryDraft); setPopupOpen(false); }}>적용</button>
           </>
         )}
       >

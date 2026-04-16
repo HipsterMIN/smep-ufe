@@ -4,6 +4,7 @@ import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
 import Tab from '@components/ui/Tab';
 import { api as apiClient, apiBaseUrl } from '@lib/apiClient.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import { useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
@@ -373,7 +374,7 @@ const UI_USR_L_200 = () => {
             <div className="search-list-top">
               <ul className="sch-info" aria-live="polite">
                 <li>
-                  검색 결과 <span className="point">{noticeBoard.totalElements}</span>건
+                  검색 결과 <span className="point">{formatNumberWithCommas(noticeBoard.totalElements || 0)}</span>건
                 </li>
               </ul>
               <ul className="sch-sort">
@@ -524,7 +525,7 @@ const UI_USR_L_200 = () => {
             <div className="search-list-top">
               <ul className="sch-info" aria-live="polite">
                 <li>
-                  검색 결과 <span className="point">{pressBoard.totalElements}</span>건
+                  검색 결과 <span className="point">{formatNumberWithCommas(pressBoard.totalElements || 0)}</span>건
                 </li>
               </ul>
               <ul className="sch-sort">

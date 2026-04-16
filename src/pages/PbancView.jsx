@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api as apiClient, apiBaseUrl } from '../lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
+import { useAuthStore } from '../store/useAuthStore.jsx';
 
 const EMPTY_HTML_PATTERNS = new Set([
   '<p style="text-align: left;"></p>',
@@ -21,6 +22,11 @@ const STREAMDOCS_ADAPTER_URL =
   || 'http://192.168.16.82:8088/venturein-pdf/adapter.js';
 
 const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
+const SCRAP_TEST_SHORTCUT_KEY = 'x';
+// TODO: 임시 테스트 기능 삭제 시 고정 회원번호 상수도 함께 제거해야 한다.
+const SCRAP_TEST_MEMBER_NO = '2025120500136492';
+const resolveApiErrorMessage = (error, fallbackMessage) =>
+  error?.data?.message || error?.message || fallbackMessage;
 
 const PbancView = () => {
   const { breadcrumbItems, currentMenu, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -30,9 +36,14 @@ const PbancView = () => {
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerError, setViewerError] = useState('');
   const [expandedRows, setExpandedRows] = useState({});
+  const [isScrapped, setIsScrapped] = useState(false);
+  const [isScrapTestMode, setIsScrapTestMode] = useState(false);
+  const [isScrappedForTest, setIsScrappedForTest] = useState(false);
   const navigate = useNavigate();
   const viewerFrameRef = useRef(null);
   const streamdocsRef = useRef(null);
+  const authToken = useAuthStore((state) => state.token);
+  const isLoggedIn = Boolean(authToken);
   const bizPbancTypeCd = currentMenu?.menuId === 'M_PIIO_00091' ? 'HSSPLY' : 'BIZPBN';
 
   const fieldLabelMap = useMemo(
@@ -137,6 +148,96 @@ const PbancView = () => {
     };
   }, [viewerVisible, item?.strmdcsId]);
 
+  useEffect(() => {
+    // TODO: 임시 테스트 기능 삭제 시 단축키 리스너도 함께 제거해야 한다.
+    const handleShortcut = (event) => {
+      const isTargetShortcut =
+        event.ctrlKey
+        && event.shiftKey
+        && String(event.key || '').toLowerCase() === SCRAP_TEST_SHORTCUT_KEY;
+      if (!isTargetShortcut) {
+        return;
+      }
+
+      const eventTarget = event.target;
+      const tagName = eventTarget?.tagName?.toLowerCase();
+      const isTypingElement =
+        tagName === 'input'
+        || tagName === 'textarea'
+        || tagName === 'select'
+        || eventTarget?.isContentEditable;
+      if (isTypingElement) {
+        return;
+      }
+
+      event.preventDefault();
+      setIsScrapTestMode((prev) => !prev);
+    };
+
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, []);
+
+  useEffect(() => {
+    const targetId = Number(item?.bizPbancNo);
+    if (!isLoggedIn || !Number.isFinite(targetId) || targetId < 1) {
+      setIsScrapped(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadScrapStatus = async () => {
+      try {
+        const response = await apiClient.get(
+          `/api/v1/scraps/status?scrapTypeCd=BIZP&targetId=${targetId}`,
+        );
+        if (!isMounted) return;
+        const payload = response?.data || response;
+        setIsScrapped(Boolean(payload.scrapped));
+      } catch (error) {
+        if (!isMounted) return;
+        setIsScrapped(false);
+      }
+    };
+
+    loadScrapStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isLoggedIn, item?.bizPbancNo]);
+
+  useEffect(() => {
+    const targetId = Number(item?.bizPbancNo);
+    if (!isScrapTestMode || !Number.isFinite(targetId) || targetId < 1) {
+      setIsScrappedForTest(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadScrapStatusForTest = async () => {
+      try {
+        const response = await apiClient.get(
+          `/api/v1/scraps/status?scrapTypeCd=BIZP&targetId=${targetId}&testMbrNo=${SCRAP_TEST_MEMBER_NO}`,
+        );
+        if (!isMounted) return;
+        const payload = response?.data || response;
+        setIsScrappedForTest(Boolean(payload.scrapped));
+      } catch (error) {
+        if (!isMounted) return;
+        setIsScrappedForTest(false);
+      }
+    };
+
+    loadScrapStatusForTest();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isScrapTestMode, item?.bizPbancNo]);
+
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
   const pbancMtxtFiles = item?.pbancMtxtFiles || [];
@@ -167,16 +268,6 @@ const PbancView = () => {
       <React.Fragment key={label}>
         <dt>{label}</dt>
         <dd>{value}</dd>
-      </React.Fragment>
-    );
-  };
-
-  const renderHtmlRow = (label, html) => {
-    if (!isMeaningfulHtml(html)) return null;
-    return (
-      <React.Fragment key={label}>
-        <dt>{label}</dt>
-        <dd dangerouslySetInnerHTML={{ __html: html }} />
       </React.Fragment>
     );
   };
@@ -253,6 +344,60 @@ const PbancView = () => {
     const mm = String(date.getMonth() + 1).padStart(2, '0');
     const dd = String(date.getDate()).padStart(2, '0');
     return `${yyyy.slice(2)}-${mm}-${dd}`;
+  };
+
+  const handleToggleScrap = async () => {
+    const targetId = Number(item?.bizPbancNo);
+    if (!isLoggedIn || !Number.isFinite(targetId) || targetId < 1) {
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/api/v1/scraps/toggle', {
+        scrapTypeCd: 'BIZP',
+        targetId,
+      });
+      const payload = response?.data || response;
+      const nextScrapped = Boolean(payload.scrapped);
+      setIsScrapped(nextScrapped);
+      window.alert(
+        nextScrapped
+          ? '관심공고에 등록되었습니다.'
+          : '관심공고가 해제되었습니다.',
+      );
+    } catch (error) {
+      window.alert(
+        resolveApiErrorMessage(error, '관심공고 처리 중 오류가 발생했습니다.'),
+      );
+    }
+  };
+
+  // TODO: 임시 테스트 기능 삭제 시 테스트 토글 핸들러도 함께 제거해야 한다.
+  const handleToggleScrapForTest = async () => {
+    const targetId = Number(item?.bizPbancNo);
+    if (!isScrapTestMode || !Number.isFinite(targetId) || targetId < 1) {
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/api/v1/scraps/toggle', {
+        scrapTypeCd: 'BIZP',
+        targetId,
+        testMbrNo: SCRAP_TEST_MEMBER_NO,
+      });
+      const payload = response?.data || response;
+      const nextScrapped = Boolean(payload.scrapped);
+      setIsScrappedForTest(nextScrapped);
+      window.alert(
+        nextScrapped
+          ? '[테스트] 관심공고에 등록되었습니다.'
+          : '[테스트] 관심공고가 해제되었습니다.',
+      );
+    } catch (error) {
+      window.alert(
+        resolveApiErrorMessage(error, '[테스트] 관심공고 처리 중 오류가 발생했습니다.'),
+      );
+    }
   };
 
   return (
@@ -420,6 +565,26 @@ const PbancView = () => {
             </button>
           </div>
           <div>
+            {isScrapTestMode && (
+              <button
+                type="button"
+                className="krds-btn tertiary xlarge"
+                onClick={handleToggleScrapForTest}
+              >
+                <i className={`svg-icon ico-like${isScrappedForTest ? ' on' : ''}`}></i>
+                스크랩 테스트
+              </button>
+            )}
+            {isLoggedIn && (
+              <button
+                type="button"
+                className="krds-btn tertiary xlarge"
+                onClick={handleToggleScrap}
+              >
+                <i className={`svg-icon ico-like${isScrapped ? ' on' : ''}`}></i>
+                관심
+              </button>
+            )}
             {item?.bizDtlUrlAddr && (
               <button
                 type="button"

@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
 import Tab from '@components/ui/Tab';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
+import { formatEventRegionForList } from '@utils/stringUtils.js';
 
 const AREA_TABS = [
   { label: '전체', value: 'ALL' },
@@ -68,7 +70,6 @@ const formatEventPeriod = (value) => {
 };
 
 const UI_USR_L_190 = () => {
-  const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [activeTabIndex, setActiveTabIndex] = useState(0);
@@ -210,7 +211,7 @@ const UI_USR_L_190 = () => {
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
             <li>
-              검색 결과 <span className="point">{totalElements}</span>건
+              검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>건
             </li>
           </ul>
           <ul className="sch-sort">
@@ -248,13 +249,13 @@ const UI_USR_L_190 = () => {
         </div>
 
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>행사정보 목록 번호, 지역, 제목, 행사기간, 수행기관, 작성일, 조회수 정보가 제공됩니다.</caption>
             <colgroup>
               <col style={{ width: '5%' }} />
               <col style={{ width: '5%' }} />
-              <col style={{ width: '340px' }} />
-              <col style={{ width: '200px' }} />
+              <col />
+              <col style={{ width: '220px' }} />
               <col style={{ width: '15%' }} />
               <col style={{ width: '5%' }} />
               <col style={{ width: '5%' }} />
@@ -289,16 +290,16 @@ const UI_USR_L_190 = () => {
                     <th scope="row" className="ac">
                       <span>{getDisplayNo(index)}</span>
                     </th>
-                    <td className="ac"><span>{item?.evntInfoRgnNm || '-'}</span></td>
+                    <td className="ac"><span>{formatEventRegionForList(item?.evntInfoRgnNm)}</span></td>
                     <td>
-                      <Link to={`${item.evntInfoId}`}>
+                      <Link className="onellipsis-1" to={`${item.evntInfoId}`}>
                         <span>{item?.evntInfoTtlNm || '-'}</span>
                       </Link>
                     </td>
                     <td className="ac"><span>{formatEventPeriod(item?.evntPrdCn || item?.rcptPrdCn)}</span></td>
-                    <td className="ac"><span>{item?.evntInfoFlfmtInstNm || '-'}</span></td>
-                    <td className="ac"><span>{formatDateDot(item?.regDt)}</span></td>
-                    <td className="ac"><span>{item?.inqCnt ?? 0}</span></td>
+                    <td className="ac"><span className="onellipsis-1">{item?.evntInfoFlfmtInstNm || '-'}</span></td>
+                    <td className="ac views"><span>{formatDateDot(item?.regDt)}</span></td>
+                    <td className="ac views"><span>{item?.inqCnt ?? 0}</span></td>
                   </tr>
                 ))
               )}
@@ -311,6 +312,7 @@ const UI_USR_L_190 = () => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
+            syncUrl
           />
         )}
       </div>

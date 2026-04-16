@@ -1,4 +1,21 @@
 import React, { useState, useRef } from 'react';
+import { extractExternalUrl } from '@utils/menuUtils.js';
+
+const resolveMenuLinkAttrs = (fullPath) => {
+  const externalUrl = extractExternalUrl(fullPath);
+
+  if (externalUrl) {
+    return {
+      href: externalUrl,
+      target: '_blank',
+      rel: 'noopener noreferrer',
+    };
+  }
+
+  return {
+    href: fullPath || '#',
+  };
+};
 
 const HeaderDesktopGNB = ({ menus }) => {
   const [openIndex, setOpenIndex] = useState(null);
@@ -25,7 +42,7 @@ const HeaderDesktopGNB = ({ menus }) => {
     clearTimeout(closeTimeoutRef.current);
     clearTimeout(openTimeoutRef.current);
     setOpenIndex(menuId);
-  }
+  };
 
   // tab 키로 메뉴 탐색하다 esc 눌러서 닫고, 다시 메뉴 탐색할때 active 버튼으로 돌아가기
   const handleKeyDown = (e) => {
@@ -74,14 +91,14 @@ const HeaderDesktopGNB = ({ menus }) => {
                         <ul>
                           {menu.children.map((subMenu) => (
                             <li key={subMenu.menuId}>
-                              <a href={subMenu.fullPath}>
+                              <a {...resolveMenuLinkAttrs(subMenu.fullPath)}>
                                 {subMenu.menuNm}
                                 <i className="svg-icon ico-angle right sm"></i>
                               </a>
                               <ul className='subMenuLists'>
                                 {(subMenu.children || []).map((depth3Menu) => (
                                   <li key={depth3Menu.menuId}>
-                                    <a href={depth3Menu.fullPath}>{depth3Menu.menuNm}</a>
+                                    <a {...resolveMenuLinkAttrs(depth3Menu.fullPath)}>{depth3Menu.menuNm}</a>
                                   </li>
                                 ))}
                               </ul>

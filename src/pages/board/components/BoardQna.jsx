@@ -5,6 +5,23 @@ import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
+
+const EMPTY_HTML_PATTERNS = new Set([
+  '<p style="text-align: left;"></p>',
+  '<p><br></p>',
+  '<p>&nbsp;</p>',
+]);
+
+const isMeaningfulHtml = (html) => {
+  if (!html || typeof html !== 'string') return false;
+
+  const normalized = html.replace(/\s+/g, ' ').trim().toLowerCase();
+  if (!normalized || EMPTY_HTML_PATTERNS.has(normalized)) return false;
+
+  const textOnly = normalized.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim();
+  return textOnly.length > 0;
+};
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -20,7 +37,7 @@ const formatDate = (dateString) => {
 };
 
 const getAnswerStatus = (post) => {
-  if (post?.pstAnsCn && String(post.pstAnsCn).trim()) {
+  if (isMeaningfulHtml(String(post?.pstAnsCn ?? ''))) {
     return '답변완료';
   }
 
@@ -224,7 +241,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
         </div>
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
-            <li>검색 결과 <span className="point">{totalElements}</span>개</li>
+            <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
           </ul>
           <ul className="sch-sort">
             <li>
@@ -245,7 +262,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
         </div>
         {/* table [S] */}
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>Q & A 목록. 번호, 카테고리, 제목, 작성자, 처리상태, 작성일, 조회수 정보가 제공됩니다.</caption>
             <colgroup>
               <col style={{ width: '7.4%' }} />
@@ -264,7 +281,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
                 <th scope="col" className="ac">작성</th>
                 <th scope="col" className="ac">처리상태</th>
                 <th scope="col" className="ac">작성일</th>
-                <th scope="col" className="ac">조회</th>
+                <th scope="col" className="ac views">조회</th>
               </tr>
             </thead>
             <tbody>
@@ -303,7 +320,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
                     <td className="ac"><span>{item?.pstRgtrNm || '-'}</span></td>
                     <td className="ac"><span>{getAnswerStatus(item)}</span></td>
                     <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
-                    <td className="ac"><span>{item?.inqCnt ?? '-'}</span></td>
+                    <td className="ac views"><span>{item?.inqCnt ?? 0}</span></td>
                   </tr>
                 ))
               )}
@@ -316,6 +333,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
+            syncUrl
           />
         )}
 

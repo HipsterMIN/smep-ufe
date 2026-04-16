@@ -5,6 +5,7 @@ import Breadcrumb from '../components/ui/Breadcrumb';
 import Pagination from '../components/ui/Pagination.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
+import { formatNumberWithCommas } from '../utils/numberUtils.js';
 import { useUserMenu } from '../context/UserMenuContext';
 
 const DEFAULT_SIZE = 10;
@@ -29,6 +30,8 @@ const Pbanc = () => {
   const [sortType, setSortType] = useState(DEFAULT_SORT);
 
   const schFormWrapRef = useRef(null);
+  const latestRequestIdRef = useRef(0);
+  const skipInitialSortEffectRef = useRef(true);
   const bizPbancTypeCd = currentMenu?.menuId === 'M_PIIO_00091' ? 'HSSPLY' : 'BIZPBN';
 
   const fieldLabelMap = useMemo(
@@ -41,17 +44,22 @@ const Pbanc = () => {
   };
 
   const buildParams = useCallback(
-    (pageParam) => {
+    (pageParam, overrides = {}) => {
       const params = new URLSearchParams();
+      const nextSearchText = overrides.searchText ?? searchText;
+      const nextSearchType = overrides.searchType ?? searchType;
+      const nextBizPbancClsfCd = overrides.bizPbancClsfCd ?? bizPbancClsfCd;
+      const nextApplyStatus = overrides.applyStatus ?? applyStatus;
+
       params.set('page', String(pageParam));
       params.set('size', String(size));
       params.set('sortType', sortType);
       params.set('bizPbancTypeCd', bizPbancTypeCd);
 
-      if (searchText.trim()) params.set('searchText', searchText.trim());
-      if (searchType) params.set('searchType', searchType);
-      if (bizPbancClsfCd) params.set('bizPbancClsfCd', bizPbancClsfCd);
-      if (applyStatus) params.set('applyStatus', applyStatus);
+      if (nextSearchText.trim()) params.set('searchText', nextSearchText.trim());
+      if (nextSearchType) params.set('searchType', nextSearchType);
+      if (nextBizPbancClsfCd) params.set('bizPbancClsfCd', nextBizPbancClsfCd);
+      if (nextApplyStatus) params.set('applyStatus', nextApplyStatus);
 
       return params.toString();
     },
@@ -59,8 +67,13 @@ const Pbanc = () => {
   );
 
   const search = useCallback(
-    async (pageParam = 1) => {
-      const data = await apiClient.get(`/api/v1/pbanc?${buildParams(pageParam)}`);
+    async (pageParam = 1, overrides = {}) => {
+      const requestId = ++latestRequestIdRef.current;
+      const data = await apiClient.get(`/api/v1/pbanc?${buildParams(pageParam, overrides)}`);
+      if (requestId !== latestRequestIdRef.current) {
+        return;
+      }
+
       const pageData = data?.data || data;
       setItems(pageData.content || []);
       setTotalPages(pageData.totalPages || 0);
@@ -72,6 +85,16 @@ const Pbanc = () => {
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') search(1);
+  };
+
+  const handleBizFieldChange = (nextBizPbancClsfCd) => {
+    setBizPbancClsfCd(nextBizPbancClsfCd);
+    search(1, { bizPbancClsfCd: nextBizPbancClsfCd });
+  };
+
+  const handleApplyStatusChange = (nextApplyStatus) => {
+    setApplyStatus(nextApplyStatus);
+    search(1, { applyStatus: nextApplyStatus });
   };
 
   useEffect(() => {
@@ -107,6 +130,11 @@ const Pbanc = () => {
   }, []);
 
   useEffect(() => {
+    if (skipInitialSortEffectRef.current) {
+      skipInitialSortEffectRef.current = false;
+      return;
+    }
+
     search(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size, sortType]);
@@ -135,7 +163,7 @@ const Pbanc = () => {
 
         <div className="search-top-box">
           <div className="sch-form-wrap" ref={schFormWrapRef}>
-            <select className="krds-form-select" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+            <select className="krds-form-select" aria-label="검색구분 선택" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
               <option value="">전체</option>
               <option value="pbancnm">공고명</option>
               <option value="sprvsnInstNm">사업수행기관</option>
@@ -175,7 +203,7 @@ const Pbanc = () => {
                   id="appl-sch-sel1"
                   className="krds-form-select medium"
                   value={bizPbancClsfCd}
-                  onChange={(e) => setBizPbancClsfCd(e.target.value)}
+                  onChange={(e) => handleBizFieldChange(e.target.value)}
                 >
                   <option value="">전체</option>
                   {bizFieldOptions.map((option) => (
@@ -190,7 +218,7 @@ const Pbanc = () => {
                   id="appl-sch-sel2"
                   className="krds-form-select medium"
                   value={applyStatus}
-                  onChange={(e) => setApplyStatus(e.target.value)}
+                  onChange={(e) => handleApplyStatusChange(e.target.value)}
                 >
                   <option value="">전체</option>
                   <option value="AVAILABLE">신청가능</option>
@@ -204,7 +232,7 @@ const Pbanc = () => {
 
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
-            <li>검색 결과 <span className="point">{(totalElements || 0).toLocaleString()}</span>개</li>
+            <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
           </ul>
           <ul className="sch-sort">
             <li>
@@ -241,7 +269,7 @@ const Pbanc = () => {
         </div>
 
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>지원사업 공고의 번호, 제목, 신청기간, 신청, 지원기관, 조회수 정보가 제공됩니다.</caption>
             <colgroup>
               <col style={{ width: '5%' }} />
@@ -274,15 +302,19 @@ const Pbanc = () => {
                   <tr key={item.bizPbancNo || index}>
                     <th scope="row" className="ac"><span>{rowNo}</span></th>
                     <td>
+                      {fieldLabel && (
+                        <div className="badge-txt-box">
+                          <span className="krds-badge bg-light-primary">{fieldLabel}</span>
+                        </div>
+                      )}
                       <Link className="onellipsis-1" to={`${item.bizPbancNo}`}>
-                        {fieldLabel && <span className="krds-badge bg-light-primary">{fieldLabel}</span>}
                         <span>{item.bizPbancNm}</span>
                       </Link>
                     </td>
                     <td className="ac"><span>{periodText}</span></td>
                     <td className="ac"><span className="onellipsis-1">{item.applyStatusText || '-'}</span></td>
                     <td className="ac"><span className="onellipsis-1">{item.bizSprvsnInstNm || '-'}</span></td>
-                    <td className="ac"><span>{(item.bizPbancInqCnt || 0).toLocaleString()}</span></td>
+                    <td className="ac views"><span>{formatNumberWithCommas(item.bizPbancInqCnt || 0)}</span></td>
                   </tr>
                 );
               })}
@@ -293,7 +325,7 @@ const Pbanc = () => {
               )}
             </tbody>
           </table>
-          <Pagination totalPages={totalPages} currentPage={page} onPageChange={(p) => search(p)} />
+          <Pagination totalPages={totalPages} currentPage={page} onPageChange={(p) => search(p)} syncUrl />
         </div>
       </div>
     </>

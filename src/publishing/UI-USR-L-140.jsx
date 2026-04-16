@@ -78,15 +78,15 @@ const UI_USR_L_140 = () => {
                 </div>
                 <div className="search-top-box mt-40">
                   <div className="sch-form-wrap">
-                    <select className="krds-form-select">
+                    <select className="krds-form-select" aria-label="시도 선택">{/* 기술진단보고서 반영 */}
                       <option value="">시도선택</option>
                       <option value="">항목</option>
                     </select>
-                    <select className="krds-form-select">
+                    <select className="krds-form-select" aria-label="시군구 선택">{/* 기술진단보고서 반영 */}
                       <option value="">시군구선택</option>
                       <option value="">항목</option>
                     </select>
-                    <select className="krds-form-select">
+                    <select className="krds-form-select" aria-label="검색구분 선택">{/* 기술진단보고서 반영 */}
                       <option value="">전체</option>
                       <option value="">항목</option>
                     </select>
@@ -213,13 +213,13 @@ const UI_USR_L_140 = () => {
 								</div>
                  {/* table [S] */}
                 <div className="krds-table-wrap">
-                  <table className="tbl col data">
+                  <table className="tbl col data t-block">
                     <caption>소재부품장비 전문기업 표. 번호, 기업명, 업종명,만료일자 정보가 제공됨.</caption>
                     <colgroup>
                       <col style={{width: "8%"}} />
+                      <col style={{width: "28%"}}/>
+                      <col style={{width: "50%"}} />
                       <col />
-                      <col style={{width: "26%"}} />
-                      <col style={{width: "12%"}} />
                     </colgroup>
                     <thead>
                       <tr>
@@ -239,7 +239,7 @@ const UI_USR_L_140 = () => {
                             쓰리워터
                           </button>
                         </td>
-                        <td className="ac"><span>금속 탱크 및 저장 용기 제조업</span></td>
+                        <td><span>금속 탱크 및 저장 용기 제조업</span></td>
                         <td className="ac"><span>2025-04-16</span></td>
                       </tr>
                       <tr>
@@ -247,11 +247,11 @@ const UI_USR_L_140 = () => {
                           <span>123</span>
                         </th>
                         <td>
-                           <button type="button" className="onellipsis-1 on-colorblue2" onClick={() => setIsOpen(true)}>
+                          <button type="button" className="onellipsis-1 on-colorblue2" onClick={() => setIsOpen(true)}>
                             쓰리워터
                           </button>
                         </td>
-                        <td className="ac"><span>금속 탱크 및 저장 용기 제조업</span></td>
+                        <td><span>금속 탱크 및 저장 용기 제조업</span></td>
                         <td className="ac"><span>2025-04-16</span></td>
                       </tr>
                     </tbody>
@@ -311,7 +311,7 @@ const UI_USR_L_140 = () => {
 								</div>
                 {/* table [S] */}
                 <div className="krds-table-wrap">
-                  <table className="tbl col data">
+                  <table className="tbl col data t-block">
                     <caption>소재부품장비 전문기업 표. 번호, 기업명, 홈페이지, 위치 정보가 제공됨.</caption>
                     <colgroup>
                       <col style={{width: "8%"}} />
@@ -328,11 +328,11 @@ const UI_USR_L_140 = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
+                      <tr className="flex-row">
                         <th scope="row" className="ac">
                           <span>123</span>
                         </th>
-                        <td>
+                        <td className="mo-w100">
                           <button type="button" className="onellipsis-1 on-colorblue2" onClick={() => setIsOpen(true)}>
                             쓰리워터
                           </button>

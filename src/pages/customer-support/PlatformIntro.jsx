@@ -16,11 +16,20 @@ import logoImgsBi from '@assets/sub/bi_logo.svg';
 import logoVertical from '@assets/sub/logo_vertical.svg';
 import logoHorizontal from '@assets/sub/logo_horizontal.svg';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
-import { useMatches } from 'react-router-dom';
+import { useMatches, useNavigate } from 'react-router-dom';
+
+const PLATFORM_INTRO_LINKS = {
+  supportBusiness: '/req/sprt',
+  businessAnnouncement: '/req/pbanc',
+  policyFinance: '/req/UI_USR_L_030',
+  certificateIssue: '/crtf/UI_USR_L_040',
+  relatedSystems: '/cs/UI_USR_L_160',
+};
 
 const UI_USR_R_350 = () => {
 
   const matches = useMatches();
+  const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -34,6 +43,19 @@ const UI_USR_R_350 = () => {
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
   };
+
+  const getInteractiveItemProps = (path, label) => ({
+    role: 'link',
+    tabIndex: 0,
+    'aria-label': label,
+    onClick: () => navigate(path),
+    onKeyDown: (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        navigate(path);
+      }
+    },
+  });
 
   const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '사업 공고';
 
@@ -108,37 +130,37 @@ const UI_USR_R_350 = () => {
                   </p>
                   <div className="cert-list">
                     <ul>
-                      <li>
+                      <li {...getInteractiveItemProps(PLATFORM_INTRO_LINKS.certificateIssue + '/Y106', '벤처기업 확인서 발급')}>
                         <div className="cert-imgs">
                           <img src={certImgs1} alt="벤처기업 확인서 발급 아이콘 이미지" />
                         </div>
                         <h2>벤처기업<br className="mob_none" />확인서 발급</h2>
                       </li>
-                      <li>
+                      <li {...getInteractiveItemProps(PLATFORM_INTRO_LINKS.certificateIssue + '/Y104', '메인비즈 확인서 발급')}>
                         <div className="cert-imgs">
                           <img src={certImgs2} alt="벤처기업 확인서 발급 아이콘 이미지" />
                         </div>
                         <h2>메인비즈<br className="mob_none" />확인서 발급</h2>
                       </li>
-                      <li>
+                      <li {...getInteractiveItemProps(PLATFORM_INTRO_LINKS.certificateIssue + '/Y107', '중소기업(소상공인) 확인서 발급')}>
                         <div className="cert-imgs">
                           <img src={certImgs3} alt="벤처기업 확인서 발급 아이콘 이미지" />
                         </div>
                         <h2>중소기업(소상공인)<br className="mob_none" />확인서 발급</h2>
                       </li>
-                      <li>
+                      <li {...getInteractiveItemProps(PLATFORM_INTRO_LINKS.certificateIssue + '/Y105', '이노비즈 확인서 발급')}>
                         <div className="cert-imgs">
                           <img src={certImgs4} alt="벤처기업 확인서 발급 아이콘 이미지" />
                         </div>
                         <h2>이노비즈<br className="mob_none" />확인서 발급</h2>
                       </li>
-                      <li>
+                      <li {...getInteractiveItemProps(PLATFORM_INTRO_LINKS.certificateIssue + '/Y102', '여성기업 확인서 발급')}>
                         <div className="cert-imgs">
                           <img src={certImgs5} alt="벤처기업 확인서 발급 아이콘 이미지" />
                         </div>
                         <h2>여성기업<br className="mob_none" />확인서 발급</h2>
                       </li>
-                      <li>
+                      <li {...getInteractiveItemProps(PLATFORM_INTRO_LINKS.certificateIssue + '/Y121', '스마트공장수준 확인서 발급')}>
                         <div className="cert-imgs">
                           <img src={certImgs6} alt="벤처기업 확인서 발급 아이콘 이미지" />
                         </div>
@@ -156,9 +178,9 @@ const UI_USR_R_350 = () => {
                   </p>
                   <div className="policy-list">
                     <ul>
-                      <li><h2>지원사업 조회</h2></li>
-                      <li><h2>사업공고 조회</h2></li>
-                      <li><h2>정책금융 안내</h2></li>
+                      <li {...getInteractiveItemProps(PLATFORM_INTRO_LINKS.supportBusiness, '지원사업 조회')}><h2>지원사업 조회</h2></li>
+                      <li {...getInteractiveItemProps(PLATFORM_INTRO_LINKS.businessAnnouncement, '사업공고 조회')}><h2>사업공고 조회</h2></li>
+                      <li {...getInteractiveItemProps(PLATFORM_INTRO_LINKS.policyFinance, '정책금융 안내')}><h2>정책금융 안내</h2></li>
                     </ul>
                   </div>
                 </div>
@@ -170,7 +192,7 @@ const UI_USR_R_350 = () => {
                   </p>
                   <div className="policy-list">
                     <ul>
-                      <li><h2>유관시스템 알아보기</h2></li>
+                      <li {...getInteractiveItemProps(PLATFORM_INTRO_LINKS.relatedSystems, '유관시스템 알아보기')}><h2>유관시스템 알아보기</h2></li>
                     </ul>
                   </div>
                 </div>

@@ -12,6 +12,8 @@ const SprtBizView = lazy(() => import('@pages/SprtBizView.jsx'));
 const UI_USR_L_030 = lazy(() => import('@pages/UI_USR_L_030.jsx'));
 const UI_USR_L_040 = lazy(() => import('@pages/certificate/UI_USR_L_040.jsx'));
 const UI_USR_R_041 = lazy(() => import('@pages/certificate/UI_USR_R_041.jsx'));
+const UI_USR_P_042 = lazy(() => import('@pages/certificate/UI_USR_P_042.jsx'));
+const CbzIssue = lazy(() => import('@pages/certificate/issue-extra/CbzIssue.jsx'));
 const UI_USR_R_031 = lazy(() => import('@pages/UI_USR_R_031.jsx'));
 const UI_USR_R_480 = lazy(() => import('@pages/my-business/UI_USR_R_480.jsx'));
 const UI_USR_L_510 = lazy(() => import('@pages/my-business/UI_USR_L_510.jsx'));
@@ -27,7 +29,7 @@ const UI_USR_L_140 = lazy(() => import('@pages/more-service/UI_USR_L_140.jsx'));
 const EntrSpt = lazy(() => import('@pages/more-service/EntrSpt.jsx'));
 const EntrSptDetail = lazy(() => import('@pages/more-service/EntrSptDetail.jsx'));
 const RelatedSystems = lazy(() => import('@pages/more-service/RelatedSystems.jsx'));
-const UI_USR_L_170 = lazy(() => import('@pages/policy-info/UI_USR_L_170.jsx'));
+const UI_USR_L_170 = lazy(() => import('@pages/more-service/UI_USR_L_170.jsx'));
 const UI_USR_L_210 = lazy(() => import('@pages/data-open/UI-USR-L-210.jsx'));
 const UI_USR_L_220 = lazy(() => import('@pages/data-open/UI-USR-L-220.jsx'));
 const UI_USR_L_230 = lazy(() => import('@pages/data-open/UI-USR-L-230.jsx'));
@@ -40,16 +42,17 @@ const UI_USR_R_232 = lazy(() => import('@pages/data-open/UI-USR-R-232.jsx'));
 const UI_USR_W_231 = lazy(() => import('@pages/data-open/UI-USR-W-231.jsx'));
 const BoardResolver = lazy(() => import('@pages/board/BoardResolver.jsx'));
 const BoardPostResolver = lazy(() => import('@pages/board/BoardPostResolver.jsx'));
+const BoardWriteResolver = lazy(() => import('@pages/board/BoardWriteResolver.jsx'));
 const UI_USR_L_070 = lazy(() => import('@pages/policy-info/UI_USR_L_070.jsx')); // image/video 일때 포멧
-const UI_USR_W_332 = lazy(() => import('@pages/customer-support/UI-USR-W-332.jsx'));
 const UI_USR_R_340 = lazy(() => import('@pages/customer-support/UI-USR-R-340.jsx'));
 const UI_USR_R_341 = lazy(() => import('@pages/customer-support/UI-USR-R-341.jsx'));
 const PlatformIntro = lazy(() => import('@pages/customer-support/PlatformIntro.jsx'));
-const UI_USR_R_451 = lazy(() => import('@pages/UI-USR-R-451.jsx'));
+const VerifyPassword = lazy(() => import('@pages/my-business/VerifyPassword.jsx'));
 const UI_USR_R_420 = lazy(() => import('@pages/my-business/UI-USR-R-420.jsx'));
 const UI_USR_W_430 = lazy(() => import('@pages/my-business/UI-USR-W-430.jsx'));
 const UI_USR_R_440 = lazy(() => import('@pages/my-business/UI-USR-R-440.jsx'));
-const UI_USR_R_450 = lazy(() => import('@pages/my-business/UI-USR-R-450.jsx'));
+const UI_USR_R_450 = lazy(() => import('@pages/my-business/company/CompanyDetail.jsx'));
+const UI_USR_W_452 = lazy(() => import('@pages/my-business/company/CompanyEdit.jsx'));
 const UI_USR_L_460 = lazy(() => import('@pages/my-business/UI-USR-L-460.jsx'));
 const UI_USR_L_020 = lazy(() => import('@pages/UI-USR-L-020.jsx'));
 const UI_USR_L_520 = lazy(() => import('@pages/my-business/UI-USR-L-520.jsx'));
@@ -66,6 +69,13 @@ const UI_USR_R_181 = lazy(() => import('@pages/more-service/UI_USR_R_181.jsx'));
 const UI_USR_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
 const UI_USR_R_121 = lazy(() => import('@pages/more-service/UI-USR-R-121.jsx'));
 const UI_USR_R_190 = lazy(() => import('@pages/more-service/UI-USR-R-190.jsx'));
+
+const TotalSearch = lazy(() => import('@pages/total-search/TotalSearch.jsx'));
+
+const EmailRejection = lazy(() => import('@pages/footer/EmailRejection.jsx'));
+const CopyrightPolicy = lazy(() => import('@pages/footer/CopyrightPolicy.jsx'));
+const WebAccessibilityPolicy = lazy(() => import('@pages/footer/WebAccessibilityPolicy.jsx'));
+const TermsOfUse = lazy(() => import('@pages/footer/TermsOfUse.jsx'));
 /**
  * =============================================================================
  * Component Map - menuId와 실제 컴포넌트 매핑
@@ -134,6 +144,11 @@ export const componentMap = {
     component: AiSmartSearch,
     layout: MenuProviderOnly,
   },
+  // 통합검색
+  'M_PIIO_00152': {
+    component: TotalSearch,
+    layout: MenuProviderOnly,
+  },
 
   // 지원사업
   'M_PIIO_00075': {
@@ -193,6 +208,14 @@ export const componentMap = {
       {
         path: ':prdocCd',  // 상세 페이지 라우트 추가 /req/crtf/UI_USR_L_040/ABC123
         component: UI_USR_R_041,
+      },
+      {
+        path: ':prdocCd/apply',
+        component: UI_USR_P_042,
+      },
+      {
+        path: 'Y109/cbz-issue',
+        component: CbzIssue,
       },
     ],
   },
@@ -404,7 +427,7 @@ export const componentMap = {
     children: [
       { path: ':id', component: BoardPostResolver }, // Q&A 상세 (게시물 상세 공통 사용)
       /*{ path: ':id', component: UI_USR_R_331 }, // Q&A 상세*/
-      { path: 'save', component: UI_USR_W_332 }, // Q&A 등록/수정
+      { path: 'save', component: BoardWriteResolver }, // Q&A 등록/수정
     ],
   },
 
@@ -454,7 +477,7 @@ export const componentMap = {
 
   // 회원정보변경
   'M_PIIO_00115': {
-    component: UI_USR_R_451, //from UI_USR_R_410
+    component: VerifyPassword, //from UI_USR_R_410
     layout: SubpageLayoutWithMenu,
   },
 
@@ -480,6 +503,12 @@ export const componentMap = {
   'M_PIIO_00119': {
     component: UI_USR_R_450,
     layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: 'edit',
+        component: UI_USR_W_452,
+      },
+    ],
   },
 
   // 경영현황 분석
@@ -516,6 +545,31 @@ export const componentMap = {
   'M_PIIO_00125': {
     component: UI_USR_L_550,
     layout: SubpageLayoutWithMenu,
+  },
+
+  // ========== 푸터화면 ==========
+  // 이메일주소 무단수집거부 안내
+  'M_PIIO_00153': {
+    component: EmailRejection,
+    layout: MenuProviderOnly,
+  },
+
+  // 저작권 정책
+  'M_PIIO_00154': {
+    component: CopyrightPolicy,
+    layout: MenuProviderOnly,
+  },
+
+  // 웹접근성 정책
+  'M_PIIO_00155': {
+    component: WebAccessibilityPolicy,
+    layout: MenuProviderOnly,
+  },
+
+  // 이용약관
+  'M_PIIO_00156': {
+    component: TermsOfUse,
+    layout: MenuProviderOnly,
   },
 
 };

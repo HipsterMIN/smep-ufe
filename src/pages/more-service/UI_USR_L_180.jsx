@@ -5,6 +5,7 @@ import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -202,7 +203,7 @@ const UI_USR_L_180 = () => {
 
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
-            <li>검색 결과 <span className="point">{totalElements}</span>개</li>
+            <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
           </ul>
           <ul className="sch-sort">
             <li>
@@ -223,13 +224,13 @@ const UI_USR_L_180 = () => {
 
         {/* table [S] */}
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>행사정보 표. 번호, 제목, 출처, 작성일 조회수 정보가 제공됨.</caption>
             <colgroup>
               <col style={{ width: '10px' }} />
-              <col style={{ width: '340px' }} />
+              <col style={{ width: '330px' }} />
               <col style={{ width: '15%' }} />
-              <col style={{ width: '80px' }} />
+              <col style={{ width: '90px' }} />
               <col style={{ width: '10px' }} />
             </colgroup>
             <thead>
@@ -244,13 +245,13 @@ const UI_USR_L_180 = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td className="ac" colSpan={6}>
+                  <td className="ac" colSpan={5}>
                     <span>로딩 중입니다.</span>
                   </td>
                 </tr>
               ) : postList.length === 0 ? (
                 <tr>
-                  <td className="ac" colSpan={6}>
+                  <td className="ac" colSpan={5}>
                     <span>조회된 데이터가 없습니다.</span>
                   </td>
                 </tr>
@@ -258,10 +259,11 @@ const UI_USR_L_180 = () => {
                 postList.map((item, index) => (
                   <tr key={item?.pstNo ?? `${item?.pstTtl ?? 'post'}-${index}`}>
                     <th scope="row" className="ac">
-                      <span>{item?.pstNo ?? '-'}</span>
+                      <span>{totalElements - (currentPage * pageSize + index)}</span>
                     </th>
                     <td>
                       <a
+                        className="onellipsis-1"
                         href="#"
                         onClick={(event) => {
                           event.preventDefault();
@@ -273,7 +275,7 @@ const UI_USR_L_180 = () => {
                     </td>
                     <td className="ac"><span>{item?.pstSrcCn || '-'}</span></td>
                     <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
-                    <td className="ac"><span>{item?.inqCnt ?? '-'}</span></td>
+                    <td className="ac views"><span>{item?.inqCnt ?? '-'}</span></td>
                   </tr>
                 ))
               )}
@@ -287,6 +289,7 @@ const UI_USR_L_180 = () => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
+            syncUrl
           />
         )}
 

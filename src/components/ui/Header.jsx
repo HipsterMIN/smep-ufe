@@ -9,10 +9,12 @@ import HeaderUserMenu from '@components/ui/header/HeaderUserMenu';
 import HeaderDesktopGNB from '@components/ui/header/HeaderDesktopGNB';
 import HeaderMobileGNB from '@components/ui/header/HeaderMobileGNB';
 import HeaderFontDropdown from '@components/ui/header/HeaderFontDropdown';
+import FullSystemPopup from '@components/ui/FullSystemPopup';
 import { api as apiClient } from '@lib/apiClient.js';
 
 // BASE URL 상수
 const BASE_URL = import.meta.env.VITE_BASE || '/';
+const TOTAL_SEARCH_MENU_ID = 'M_PIIO_00152';
 
 // JWT 디코딩 함수 (간단한 구현)
 function parseJwt(token) {
@@ -206,6 +208,7 @@ export default function Header() {
   //  스크롤 시 header 숨김/ 보임
   const headerRef = useRef(null);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [headerSearchQuery, setHeaderSearchQuery] = useState('');
   const lastScrollY = useRef(0);
   const MOBILE_BREAKPOINT = 1024;
   const isLocked = useRef(false); // 상태 변경 쿨다운 lock
@@ -268,6 +271,34 @@ export default function Header() {
     updateContainerMargin(isHeaderVisible);
   }, [isHeaderVisible]);
   // E - 헤더 버그 수정(2026-03-19)
+
+  const getTotalSearchPath = () => {
+    const pathFromMenu = String(getFullPath(TOTAL_SEARCH_MENU_ID) || '').trim();
+    return pathFromMenu || '/totalSearch';
+  };
+
+  const handleTotalSearch = () => {
+    const keyword = String(headerSearchQuery || '').trim();
+    const totalSearchPath = getTotalSearchPath();
+
+    if (!keyword) {
+      navigate(totalSearchPath);
+      return;
+    }
+
+    const params = new URLSearchParams({ q: keyword });
+    navigate(`${totalSearchPath}?${params.toString()}`, {
+      state: { q: keyword },
+    });
+  };
+
+  const handleTotalSearchKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleTotalSearch();
+    }
+  };
+
+  const [isPopOpen, setPopOpen] = useState(false); // 유관기관 둘러보기 팝업
   
   return (
     <>
@@ -299,7 +330,7 @@ export default function Header() {
                     <HeaderFontDropdown />
                   </li>
                   <li>
-                    <Link to="#" className="krds-btn small text">
+                    <Link onClick={() => setPopOpen(true)} className="krds-btn small text">
                       <i class="svg-icon ico-system"></i> 유관시스템 둘러보기
                     </Link>
                   </li>
@@ -312,14 +343,26 @@ export default function Header() {
                   </a>
                 </h2>
                 <div className="logo-platform">
-                  <span className="sr-only">중소기업 성장의 시작, 중소기업 성장지원 플랫폼</span>
+                  <span className="sr-only">모두의 시작, 모두의 성장</span>
                 </div>
                 <div className="header-right">
                   {/* 검색란 */}
                   {!isMainPage && (
                     <div className="sch-input">
-                      <input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력"></input>
-                      <button type="button" className="krds-btn medium icon ico-search">
+                      <input
+                        type="text"
+                        className="krds-input"
+                        placeholder="검색어를 입력하세요"
+                        title="검색어 입력"
+                        value={headerSearchQuery}
+                        onChange={(event) => setHeaderSearchQuery(event.target.value)}
+                        onKeyDown={handleTotalSearchKeyDown}
+                      />
+                      <button
+                        type="button"
+                        className="krds-btn medium icon ico-search"
+                        onClick={handleTotalSearch}
+                      >
                         <span className="sr-only">검색</span>
                         <i className="svg-icon ico-sch"></i>
                       </button>
@@ -390,6 +433,9 @@ export default function Header() {
           <span className="sr-only">상단으로</span>
         </button>
       </div>
+
+
+      <FullSystemPopup isPopOpen={isPopOpen} setPopOpen={setPopOpen} />
     </>
   );
 }

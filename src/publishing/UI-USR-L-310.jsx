@@ -82,8 +82,9 @@ const UI_USR_L_310 = () => {
           </ul>
         </div>
         {/* table [S] */}
+		{/* 모바일 table 반영 */}
 		<div className="krds-table-wrap">
-			<table className="tbl col data">
+			<table className="tbl col data t-block">
 				<caption>공지사항 목록. 번호, 제목, 등록일, 조회수 정보가 제공됨.</caption>
 						<colgroup>
 							<col style={{width: "7.4 %"}} />
@@ -107,26 +108,26 @@ const UI_USR_L_310 = () => {
 									<span className="sr-only">고정 게시글</span>
 								</th>
 								<td>
-						 			<a className="onellipsis-1 notice-pinned" href="#">
-									  <span className="krds-badge bg-light-primary">공지</span>
-										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
+						 			<a className="notice-pinned flex-row" href="#">
+									  	<span className="krds-badge bg-light-primary">공지</span>
+										<span className="onellipsis-1">2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
 								<td className="ac"><span>2025-04-16</span></td>
-								<td className="ac"><span>433</span></td>
+								<td className="ac views"><span>433</span></td>
 							</tr>
 							<tr>
 								<th scope="row" className="ac">
 									<span>1444</span>
 								</th>
 								<td>
-						 			<a className="onellipsis-1" href="#">
-									  <span className="krds-badge bg-light-primary">공지</span>
-										<span>2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
+						 			<a className="onellipsis-1 flex-row" href="#">
+									  	<span className="krds-badge bg-light-primary">공지</span>
+										<span className="onellipsis-1">2026년 국산의료기기 사용자(의료기관) 임상평가 지원 사업 모집 공고</span>
 									</a>
 								</td>
 								<td className="ac"><span>2025-04-16</span></td>
-								<td className="ac"><span>433</span></td>
+								<td className="ac views"><span>433</span></td>
 							</tr>
 						</tbody>
 			        </table>

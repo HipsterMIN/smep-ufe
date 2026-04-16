@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
@@ -6,11 +7,15 @@ import Tab from '@components/ui/Tab';
 import Accordion from '@components/ui/Accordion';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const BoardFaq = ({ boardDetail, bbsNo }) => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const [searchParams] = useSearchParams();
 
+  const [searchType, setSearchType] = useState('ALL');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [appliedSearchType, setAppliedSearchType] = useState('ALL');
   const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
 
   const [categories, setCategories] = useState([]);
@@ -22,6 +27,11 @@ const BoardFaq = ({ boardDetail, bbsNo }) => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const querySearchKeyword = String(searchParams.get('searchKeyword') ?? '').trim();
+  const rawQuerySearchType = String(searchParams.get('searchType') ?? '').trim().toUpperCase();
+  const querySearchType = ['TITLE', 'CONTENT'].includes(rawQuerySearchType)
+    ? rawQuerySearchType
+    : 'ALL';
 
   // 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();
@@ -33,6 +43,14 @@ const BoardFaq = ({ boardDetail, bbsNo }) => {
     () => ['전체', ...categories.map((category) => category?.ctgryNm || '-')],
     [categories],
   );
+
+  useEffect(() => {
+    setSearchType(querySearchType);
+    setAppliedSearchType(querySearchType);
+    setSearchKeyword(querySearchKeyword);
+    setAppliedSearchKeyword(querySearchKeyword);
+    setCurrentPage(0);
+  }, [querySearchKeyword, querySearchType]);
 
   useEffect(() => {
     let isMounted = true;
@@ -89,6 +107,9 @@ const BoardFaq = ({ boardDetail, bbsNo }) => {
         }
 
         if (appliedSearchKeyword.trim()) {
+          if (appliedSearchType && appliedSearchType !== 'ALL') {
+            params.append('searchType', appliedSearchType);
+          }
           params.append('searchKeyword', appliedSearchKeyword.trim());
         }
 
@@ -117,7 +138,7 @@ const BoardFaq = ({ boardDetail, bbsNo }) => {
     return () => {
       isMounted = false;
     };
-  }, [bbsNo, currentPage, pageSize, selectedCategoryNo, appliedSearchKeyword]);
+  }, [bbsNo, currentPage, pageSize, selectedCategoryNo, appliedSearchType, appliedSearchKeyword]);
 
   const handleTabChange = (index) => {
     if (index === 0) {
@@ -130,6 +151,7 @@ const BoardFaq = ({ boardDetail, bbsNo }) => {
   };
 
   const handleSearch = () => {
+    setAppliedSearchType(searchType);
     setAppliedSearchKeyword(searchKeyword);
     setCurrentPage(0);
   };
@@ -164,10 +186,14 @@ const BoardFaq = ({ boardDetail, bbsNo }) => {
 
         <div className="search-top-box">
           <div className="sch-form-wrap">
-            <select className="krds-form-select">
-              <option value="">전체</option>
-              <option value="">제목</option>
-              <option value="">내용</option>
+            <select
+              className="krds-form-select"
+              value={searchType}
+              onChange={(event) => setSearchType(event.target.value)}
+            >
+              <option value="ALL">전체</option>
+              <option value="TITLE">제목</option>
+              <option value="CONTENT">내용</option>
             </select>
             <div className="sch-input">
               <input
@@ -193,7 +219,7 @@ const BoardFaq = ({ boardDetail, bbsNo }) => {
 
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
-            <li>검색 결과 <span className="point">{totalElements}</span>개</li>
+            <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
           </ul>
           <ul className="sch-sort">
             <li>
@@ -266,6 +292,7 @@ const BoardFaq = ({ boardDetail, bbsNo }) => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
+            syncUrl
           />
         )}
 

@@ -5,6 +5,7 @@ import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 
 import Header from '@components/ui/Header.jsx';
 import Footer from '@components/ui/Footer.jsx';
+import Work24VirtualKeyboard from '@components/ui/work24-keyboard/Work24VirtualKeyboard.jsx';
 import mainIcon01 from '@assets/main/mainIcon_01.svg';
 import mainIcon03 from '@assets/main/mainIcon_03.svg';
 import mainIcon04 from '@assets/main/mainIcon_04.svg';
@@ -14,6 +15,7 @@ import mainBanner from '@assets/temp/main_banner_1.png';
 import { api as apiClient } from '@lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 
 const MAIN_MENU_IDS = {
   notice: 'M_PIIO_00101',
@@ -35,6 +37,8 @@ const EMPTY_MAIN_DATA = {
 };
 const normalizeResponse = (response) => response?.data || response || {};
 const isNewWindow = (value) => value === 'Y';
+const resolveApiErrorMessage = (error, fallbackMessage) =>
+  error?.data?.message || error?.message || fallbackMessage;
 
 const formatDate = (value, separator = '.') => {
   if (!value) return '';
@@ -93,11 +97,22 @@ const buildMainImageUrl = (type, atchFileId, atchFileSn) => {
   );
 };
 
-const buildBoardLink = (listPath, item, hasDetail = true) => {
-  if (!item) return listPath || '#';
-  if (item.pstUrlAddr) return item.pstUrlAddr;
-  if (hasDetail && listPath && item.pstNo) return `${listPath}/${item.pstNo}`;
-  return listPath || '#';
+const isAbsoluteHttpUrl = (value) => /^https?:\/\//i.test(String(value || '').trim());
+
+const resolveBoardTarget = (listPath, item, hasDetail = true) => {
+  const fallbackTo =
+    hasDetail && listPath && item?.pstNo ? `${listPath}/${item.pstNo}` : listPath || '#';
+
+  if (!item) {
+    return { kind: 'internal', to: listPath || '#' };
+  }
+
+  const rawUrl = String(item.pstUrlAddr ?? '').trim();
+  if (isAbsoluteHttpUrl(rawUrl)) {
+    return { kind: 'external', href: rawUrl };
+  }
+
+  return { kind: 'internal', to: fallbackTo };
 };
 
 const stripHtmlTags = (value) => {
@@ -105,6 +120,58 @@ const stripHtmlTags = (value) => {
   return String(value)
     .replace(/<[^>]*>/g, '')
     .trim();
+};
+
+const SEARCH_POPULAR_LIMIT = 5;
+const SEARCH_AUTOCOMPLETE_LIMIT = 8;
+const SEARCH_AUTOCOMPLETE_DEBOUNCE_MS = 250;
+
+const parseSearchPayload = (payload) => {
+  if (!payload) return null;
+  if (typeof payload === 'string') {
+    try {
+      return parseSearchPayload(JSON.parse(payload));
+    } catch (error) {
+      return null;
+    }
+  }
+  if (payload?.data !== undefined && payload?.data !== null) {
+    return parseSearchPayload(payload.data);
+  }
+  return payload;
+};
+
+const extractPopularKeywords = (payload) => {
+  const parsed = parseSearchPayload(payload);
+  const items = Array.isArray(parsed?.result?.Item) ? parsed.result.Item : [];
+  const seen = new Set();
+
+  return items
+    .map((item) => String(item?.Query || '').trim())
+    .filter(Boolean)
+    .filter((keyword) => {
+      if (seen.has(keyword)) return false;
+      seen.add(keyword);
+      return true;
+    });
+};
+
+const extractAutoCompleteKeywords = (payload) => {
+  const parsed = parseSearchPayload(payload);
+  const groups = Array.isArray(parsed?.result) ? parsed.result : [];
+  const items = groups.flatMap((group) =>
+    Array.isArray(group?.items) ? group.items : [],
+  );
+  const seen = new Set();
+
+  return items
+    .map((item) => String(item?.keyword || '').trim())
+    .filter(Boolean)
+    .filter((keyword) => {
+      if (seen.has(keyword)) return false;
+      seen.add(keyword);
+      return true;
+    });
 };
 
 const MainPage = () => {
@@ -117,20 +184,31 @@ const MainPage = () => {
   const [serviceActiveIndex, setServiceActiveIndex] = useState(0);
   const [noticeActiveIndex, setNoticeActiveIndex] = useState(0);
   const [likedAnnounce, setLikedAnnounce] = useState({});
-  const [likedBusiness, setLikedBusiness] = useState({});
   const [likedPolicy, setLikedPolicy] = useState({});
   const [isPlaying, setIsPlaying] = useState(true);
   const [mainData, setMainData] = useState(EMPTY_MAIN_DATA);
   const [mainLoading, setMainLoading] = useState(true);
   const [bizFieldOptions, setBizFieldOptions] = useState([]);
   const [hiddenPopupIds, setHiddenPopupIds] = useState([]);
+  const [popularKeywords, setPopularKeywords] = useState([]);
+  const [autoCompleteKeywords, setAutoCompleteKeywords] = useState([]);
+  const [isAutoCompleteEnabled, setIsAutoCompleteEnabled] = useState(true);
+  const [isPopularLoading, setIsPopularLoading] = useState(false);
+  const [isAutoLoading, setIsAutoLoading] = useState(false);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const srchInputRef = useRef(null);
+  const keyboardButtonRef = useRef(null);
+  const searchInputRef = useRef(null);
   const searchBarRef = useRef(null);
   const originTopRef = useRef(0);
   const swiperRef = useRef(null);
+  const latestAutoQueryRef = useRef('');
+  const authToken = useAuthStore((state) => state.token);
+  const isLoggedIn = Boolean(authToken);
 
-  const showPopular = isFocused && searchQuery === '';
-  const showAutoComplete = isFocused && searchQuery !== '';
+  const showPopular = isFocused && searchQuery.trim() === '';
+  const showAutoComplete =
+    isFocused && isAutoCompleteEnabled && searchQuery.trim() !== '';
   const serviceTabMenu = [
     '사업공고',
     '지원사업 소개',
@@ -148,7 +226,7 @@ const MainPage = () => {
           사업공고 찾기
         </>
       ),
-      path: '/req/pbanc/pbanc',
+      path: '/req/pbanc',
     },
     {
       img: mainIcon07,
@@ -168,7 +246,7 @@ const MainPage = () => {
           <span className="mo-hide">융자 보증 보험</span>정책 금융상품 찾기
         </>
       ),
-      path: '/req/plcy/UI_USR_L_030',
+      path: '/req/UI_USR_L_030',
     },
     {
       img: mainIcon03,
@@ -197,12 +275,19 @@ const MainPage = () => {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
+      const keyboardZone = document.getElementById('HM_keyboardzone');
+      if (keyboardZone?.contains(e.target)) return;
       if (srchInputRef.current && !srchInputRef.current.contains(e.target))
         setIsFocused(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (isFocused) return;
+    setIsKeyboardOpen(false);
+  }, [isFocused]);
 
   useEffect(() => {
     const saveOriginTop = () => {
@@ -237,6 +322,75 @@ const MainPage = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadPopularKeywords = async () => {
+      try {
+        setIsPopularLoading(true);
+        const response = await apiClient.get('/api/v1/search/popword');
+        if (!isMounted) return;
+        setPopularKeywords(
+          extractPopularKeywords(response).slice(0, SEARCH_POPULAR_LIMIT),
+        );
+      } catch (error) {
+        if (!isMounted) return;
+        setPopularKeywords([]);
+      } finally {
+        if (isMounted) setIsPopularLoading(false);
+      }
+    };
+
+    loadPopularKeywords();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isFocused || !isAutoCompleteEnabled) {
+      latestAutoQueryRef.current = '';
+      setAutoCompleteKeywords([]);
+      setIsAutoLoading(false);
+      return;
+    }
+
+    const keyword = searchQuery.trim();
+    if (!keyword) {
+      latestAutoQueryRef.current = '';
+      setAutoCompleteKeywords([]);
+      setIsAutoLoading(false);
+      return;
+    }
+
+    latestAutoQueryRef.current = keyword;
+
+    const timerId = window.setTimeout(async () => {
+      try {
+        setIsAutoLoading(true);
+        const params = new URLSearchParams({ query: keyword });
+        const response = await apiClient.get(`/api/v1/search/ark?${params.toString()}`);
+        if (latestAutoQueryRef.current !== keyword) return;
+        setAutoCompleteKeywords(
+          extractAutoCompleteKeywords(response).slice(
+            0,
+            SEARCH_AUTOCOMPLETE_LIMIT,
+          ),
+        );
+      } catch (error) {
+        if (latestAutoQueryRef.current !== keyword) return;
+        setAutoCompleteKeywords([]);
+      } finally {
+        if (latestAutoQueryRef.current === keyword) {
+          setIsAutoLoading(false);
+        }
+      }
+    }, SEARCH_AUTOCOMPLETE_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(timerId);
+  }, [searchQuery, isFocused, isAutoCompleteEnabled]);
 
   useEffect(() => {
     let isMounted = true;
@@ -322,24 +476,161 @@ const MainPage = () => {
   const visiblePopups = (mainData.popups || []).filter(
     (popup) => !hiddenPopupIds.includes(popup.popupId),
   );
+  const pbancScrapTargetIds = useMemo(
+    () =>
+      pbancItems
+        .map((item) => Number(item.bizPbancNo))
+        .filter((value) => Number.isFinite(value) && value > 0),
+    [pbancItems],
+  );
+  const policyScrapTargetIds = useMemo(
+    () =>
+      financePolicyItems
+        .map((item) => Number(item.plcyFnncGdsSn))
+        .filter((value) => Number.isFinite(value) && value > 0),
+    [financePolicyItems],
+  );
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setLikedAnnounce({});
+      setLikedPolicy({});
+      return;
+    }
+
+    if (pbancScrapTargetIds.length === 0 && policyScrapTargetIds.length === 0) {
+      setLikedAnnounce({});
+      setLikedPolicy({});
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadScrapStatuses = async () => {
+      try {
+        const response = await apiClient.post('/api/v1/scraps/status/batch', {
+          pbancIds: pbancScrapTargetIds,
+          policyFinanceIds: policyScrapTargetIds,
+        });
+        if (!isMounted) return;
+
+        const payload = normalizeResponse(response);
+        const pbancStatusMap = Object.fromEntries(
+          (payload.pbanc || []).map((id) => [String(id), true]),
+        );
+        const policyStatusMap = Object.fromEntries(
+          (payload.policyFinance || []).map((id) => [String(id), true]),
+        );
+
+        setLikedAnnounce(pbancStatusMap);
+        setLikedPolicy(policyStatusMap);
+      } catch (error) {
+        if (!isMounted) return;
+        setLikedAnnounce({});
+        setLikedPolicy({});
+      }
+    };
+
+    loadScrapStatuses();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isLoggedIn, pbancScrapTargetIds, policyScrapTargetIds]);
 
   const handleSearch = () => {
+    setIsKeyboardOpen(false);
     if (searchQuery.trim()) {
-      navigate('/publishing/ai-smart-search', {
+      navigate('/totalSearch', {
         state: { q: searchQuery.trim() },
       });
       return;
     }
-    navigate('/publishing/ai-smart-search');
+    navigate('/totalSearch');
   };
   const handleKeyDown = (e) => e.key === 'Enter' && handleSearch();
-  const handleClear = () => setSearchQuery('');
-  const handleToggleLike1 = (index) =>
-    setLikedAnnounce((prev) => ({ ...prev, [index]: !prev[index] }));
-  const handleToggleLike2 = (index) =>
-    setLikedBusiness((prev) => ({ ...prev, [index]: !prev[index] }));
-  const handleToggleLike3 = (index) =>
-    setLikedPolicy((prev) => ({ ...prev, [index]: !prev[index] }));
+  const handleClear = () => {
+    setSearchQuery('');
+    setAutoCompleteKeywords([]);
+    setIsAutoLoading(false);
+    searchInputRef.current?.focus();
+  };
+  const handleKeywordSelect = (keyword) => {
+    const nextKeyword = String(keyword || '').trim();
+    if (!nextKeyword) return;
+    setSearchQuery(nextKeyword);
+    setIsFocused(false);
+    setIsKeyboardOpen(false);
+    navigate('/totalSearch', {
+      state: { q: nextKeyword },
+    });
+  };
+  const handleAutoCompleteToggle = (e) => {
+    const enabled = e.target.checked;
+    setIsAutoCompleteEnabled(enabled);
+    if (!enabled) {
+      latestAutoQueryRef.current = '';
+      setAutoCompleteKeywords([]);
+      setIsAutoLoading(false);
+    }
+  };
+  const requestLoginForScrap = () => {
+    const moveToLogin = window.confirm('로그인 후 스크랩 가능합니다. 로그인 하시겠습니까?');
+    if (moveToLogin) {
+      //todo 로그인생기면 링크걸기
+      //navigate('/service/login');
+    }
+  };
+  const handleToggleLike1 = async (targetId) => {
+    const numericTargetId = Number(targetId);
+    if (!Number.isFinite(numericTargetId) || numericTargetId < 1) return;
+
+    if (!isLoggedIn) {
+      requestLoginForScrap();
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/api/v1/scraps/toggle', {
+        scrapTypeCd: 'BIZP',
+        targetId: numericTargetId,
+      });
+      const payload = normalizeResponse(response);
+      setLikedAnnounce((prev) => ({
+        ...prev,
+        [String(numericTargetId)]: Boolean(payload.scrapped),
+      }));
+    } catch (error) {
+      window.alert(
+        resolveApiErrorMessage(error, '사업공고 스크랩 처리 중 오류가 발생했습니다.'),
+      );
+    }
+  };
+  const handleToggleLike3 = async (targetId) => {
+    const numericTargetId = Number(targetId);
+    if (!Number.isFinite(numericTargetId) || numericTargetId < 1) return;
+
+    if (!isLoggedIn) {
+      requestLoginForScrap();
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/api/v1/scraps/toggle', {
+        scrapTypeCd: 'PLCF',
+        targetId: numericTargetId,
+      });
+      const payload = normalizeResponse(response);
+      setLikedPolicy((prev) => ({
+        ...prev,
+        [String(numericTargetId)]: Boolean(payload.scrapped),
+      }));
+    } catch (error) {
+      window.alert(
+        resolveApiErrorMessage(error, '정책금융 스크랩 처리 중 오류가 발생했습니다.'),
+      );
+    }
+  };
   const toggleAutoplay = () => {
     if (!swiperRef.current) return;
     if (isPlaying) swiperRef.current.autoplay.stop();
@@ -372,7 +663,14 @@ const MainPage = () => {
               >
                 <div className="sch-input-box">
                   <input
+                    id="mainTopQuery"
+                    name="mainTopQuery"
+                    ref={searchInputRef}
                     type="text"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
                     placeholder='지원사업·정책금융·확인서·사업공고를 검색하세요'
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -384,6 +682,8 @@ const MainPage = () => {
                     <button
                       type="button"
                       className="krds-btn icon ico-keyboard"
+                      ref={keyboardButtonRef}
+                      onClick={() => setIsKeyboardOpen((prev) => !prev)}
                     >
                       <span className="sr-only">키보드 입력</span>
                       <i className="svg-icon ico-key"></i>
@@ -416,38 +716,35 @@ const MainPage = () => {
                         <div className="sch-layer-inner">
                           <strong className="sch-layer-title">인기검색어</strong>
                           <ul className="sch-layer-popular-list">
-                            <li className="sch-popular-item">
-                              <Link to="#" className="item-link">
-                                <em className="rank">
-                                  <span className="sr-only">인기검색어</span>1
-                                </em>
-                                      안전보건교육
-                              </Link>
-                            </li>
-                            <li className="sch-popular-item">
-                              <Link to="#" className="item-link">
-                                <em className="rank">
-                                  <span className="sr-only">인기검색어</span>2
-                                </em>
-                                      안전보건교육
-                              </Link>
-                            </li>
-                            <li className="sch-popular-item">
-                              <Link to="#" className="item-link">
-                                <em className="rank">
-                                  <span className="sr-only">인기검색어</span>3
-                                </em>
-                                      안전보건교육
-                              </Link>
-                            </li>
-                            <li className="sch-popular-item">
-                              <Link to="#" className="item-link">
-                                <em className="rank">
-                                  <span className="sr-only">인기검색어</span>4
-                                </em>
-                                      안전보건교육
-                              </Link>
-                            </li>
+                            {isPopularLoading && (
+                              <li className="sch-popular-item">
+                                <span className="item-link">Loading...</span>
+                              </li>
+                            )}
+                            {!isPopularLoading &&
+                              popularKeywords.map((keyword, index) => (
+                                <li
+                                  className="sch-popular-item"
+                                  key={`popular-${keyword}-${index}`}
+                                >
+                                  <button
+                                    type="button"
+                                    className="item-link"
+                                    onClick={() => handleKeywordSelect(keyword)}
+                                  >
+                                    <em className="rank">
+                                      <span className="sr-only">인기검색어</span>
+                                      {index + 1}
+                                    </em>
+                                    {keyword}
+                                  </button>
+                                </li>
+                              ))}
+                            {!isPopularLoading && popularKeywords.length === 0 && (
+                              <li className="sch-popular-item">
+                                <span className="item-link">No popular keywords.</span>
+                              </li>
+                            )}
                           </ul>
                         </div>
                       </div>
@@ -456,44 +753,84 @@ const MainPage = () => {
                     {showAutoComplete && (
                       <div className="sch-layer-inner">
                         <ul className="sch-layer-auto-list">
-                          <li>
-                            <button type="button">
-                              <i className="ico-keyword"></i>
-                              <em className="keyword">수출입</em> 지원사업
-                            </button>
-                          </li>
-                          <li>
-                            <button type="button">
-                              <i className="ico-keyword"></i>
-                              <em className="keyword">수출입</em> 지원사업
-                            </button>
-                          </li>
-
+                          {isAutoLoading && (
+                            <li>
+                              <span className="item-link">Loading...</span>
+                            </li>
+                          )}
+                          {!isAutoLoading &&
+                            autoCompleteKeywords.map((keyword, index) => (
+                              <li key={`auto-${keyword}-${index}`}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleKeywordSelect(keyword)}
+                                >
+                                  <i className="ico-keyword"></i>
+                                  <em className="keyword">{keyword}</em>
+                                </button>
+                              </li>
+                            ))}
                         </ul>
                       </div>
                     )}
 
                     <div className="sch-layer-footer">
                       <div className="krds-form-toggle-switch">
-                        <input type="checkbox" id="switch" />
-                        <label for="switch"><span className="switch-toggle"><i></i></span>자동완성기능</label>
+                        <input
+                          type="checkbox"
+                          id="main-search-autocomplete-switch"
+                          checked={isAutoCompleteEnabled}
+                          onChange={handleAutoCompleteToggle}
+                        />
+                        <label htmlFor="main-search-autocomplete-switch"><span className="switch-toggle"><i></i></span>자동완성기능</label>
                       </div>
                     </div>
 
                   </div>
                 )}
               </div>
+              <Work24VirtualKeyboard
+                isOpen={isKeyboardOpen}
+                sizeOption="SMALL"
+                triggerRef={keyboardButtonRef}
+                inputRef={searchInputRef}
+                value={searchQuery}
+                onValueChange={setSearchQuery}
+                onEnter={handleSearch}
+                onClose={() => setIsKeyboardOpen(false)}
+              />
 
               {/* 인기 검색어 */}
             </div>
             <div className="main-top-keyword">
               <h3>인기 검색어</h3>
               <ul className="keyword-list">
-                <li><button type="button" className="word">소상공인지원</button></li>
-                <li><button type="button" className="word">초기창업</button></li>
-                <li><button type="button" className="word">창업지원포털</button></li>
-                <li><button type="button" className="word">지원사업공고</button></li>
-                <li><button type="button" className="word">AP소재정보</button></li>
+                {isPopularLoading && (
+                  <li>
+                    <button type="button" className="word" disabled>
+                      Loading...
+                    </button>
+                  </li>
+                )}
+                {!isPopularLoading &&
+                  popularKeywords.map((keyword, index) => (
+                    <li key={`top-popular-${keyword}-${index}`}>
+                      <button
+                        type="button"
+                        className="word"
+                        onClick={() => handleKeywordSelect(keyword)}
+                      >
+                        {keyword}
+                      </button>
+                    </li>
+                  ))}
+                {!isPopularLoading && popularKeywords.length === 0 && (
+                  <li>
+                    <button type="button" className="word" disabled>
+                      No popular keywords.
+                    </button>
+                  </li>
+                )}
               </ul>
             </div>
 
@@ -618,7 +955,7 @@ const MainPage = () => {
                               </div>
                               <div className="card-body">
                                 <Link
-                                  to={`/req/pbanc/pbanc/${item.bizPbancNo}`}
+                                  to={`/req/pbanc/${item.bizPbancNo}`}
                                   className="c-text"
                                 >
                                   <p className="c-tit no-icon">
@@ -643,10 +980,10 @@ const MainPage = () => {
                                   type="button"
                                   className="krds-btn text"
                                   aria-label={`${item.bizPbancNm} 찜하기`}
-                                  onClick={() => handleToggleLike1(index)}
+                                  onClick={() => handleToggleLike1(item.bizPbancNo)}
                                 >
                                   <i
-                                    className={`svg-icon ico-like on-bgcolorgray ${likedAnnounce[index] ? 'on' : ''}`}
+                                    className={`svg-icon ico-like on-bgcolorgray ${likedAnnounce[String(item.bizPbancNo)] ? 'on' : ''}`}
                                   ></i>
                                 </button>
                               </div>
@@ -658,7 +995,7 @@ const MainPage = () => {
                         <button
                           type="button"
                           className="krds-btn tertiary medium"
-                          onClick={() => navigate('/req/pbanc/pbanc')}
+                          onClick={() => navigate('/req/pbanc')}
                         >
                           사업공고 더보기
                           <i className="svg-icon ico-angle right"></i>
@@ -788,7 +1125,7 @@ const MainPage = () => {
                               </div>
                               <div className="card-body">
                                 <Link
-                                  to={`/req/plcy/UI_USR_L_030/${item.plcyFnncGdsSn}`}
+                                  to={`/req/UI_USR_L_030/${item.plcyFnncGdsSn}`}
                                   className="c-text"
                                 >
                                   <p className="c-tit no-icon">
@@ -826,10 +1163,10 @@ const MainPage = () => {
                                   type="button"
                                   className="krds-btn text"
                                   aria-label={`${item.plcyFnncGdsNm} 찜하기`}
-                                  onClick={() => handleToggleLike3(index)}
+                                  onClick={() => handleToggleLike3(item.plcyFnncGdsSn)}
                                 >
                                   <i
-                                    className={`svg-icon ico-like on-bgcolorgray ${likedPolicy[index] ? 'on' : ''}`}
+                                    className={`svg-icon ico-like on-bgcolorgray ${likedPolicy[String(item.plcyFnncGdsSn)] ? 'on' : ''}`}
                                   ></i>
                                 </button>
                               </div>
@@ -840,7 +1177,7 @@ const MainPage = () => {
                           <button
                             type="button"
                             className="krds-btn tertiary medium"
-                            onClick={() => navigate('/req/plcy/UI_USR_L_030')}
+                            onClick={() => navigate('/req/UI_USR_L_030')}
                           >
                             정책금융 더보기
                             <i className="svg-icon ico-angle right"></i>
@@ -883,34 +1220,44 @@ const MainPage = () => {
                       <div className="notice-tab-cont">
                         <ul className="board-list">
                           {noticeItems.map((item) => {
-                            const href = buildBoardLink(
+                            const target = resolveBoardTarget(
                               noticeListPath,
                               item,
                               true,
                             );
-                            const external =
-                              href.startsWith('http://') ||
-                              href.startsWith('https://');
                             return (
                               <li
                                 className="board-list-item"
                                 key={String(item.pstNo)}
                               >
-                                <a
-                                  href={href}
-                                  className="board-list-link"
-                                  target={external ? '_blank' : undefined}
-                                  rel={external ? 'noreferrer' : undefined}
-                                >
-                                  <span className="board-list-title onellipsis-1">
-                                    {item.pstTtl}
-                                  </span>
-                                  <span className="board-list-date">
-                                    {formatDate(
-                                      item.pstgBgngYmd || item.pstRegDt,
-                                    )}
-                                  </span>
-                                </a>
+                                {target.kind === 'external' ? (
+                                  <a
+                                    href={target.href}
+                                    className="board-list-link"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <span className="board-list-title onellipsis-1">
+                                      {item.pstTtl}
+                                    </span>
+                                    <span className="board-list-date">
+                                      {formatDate(
+                                        item.pstgBgngYmd || item.pstRegDt,
+                                      )}
+                                    </span>
+                                  </a>
+                                ) : (
+                                  <Link to={target.to} className="board-list-link">
+                                    <span className="board-list-title onellipsis-1">
+                                      {item.pstTtl}
+                                    </span>
+                                    <span className="board-list-date">
+                                      {formatDate(
+                                        item.pstgBgngYmd || item.pstRegDt,
+                                      )}
+                                    </span>
+                                  </Link>
+                                )}
                               </li>
                             );
                           })}
@@ -929,34 +1276,44 @@ const MainPage = () => {
                       <div className="notice-tab-cont">
                         <ul className="board-list faq">
                           {faqItems.map((item) => {
-                            const href = buildBoardLink(
+                            const target = resolveBoardTarget(
                               faqListPath,
                               item,
                               false,
                             );
-                            const external =
-                              href.startsWith('http://') ||
-                              href.startsWith('https://');
                             return (
                               <li
                                 className="board-list-item"
                                 key={String(item.pstNo)}
                               >
-                                <a
-                                  href={href}
-                                  className="board-list-link"
-                                  target={external ? '_blank' : undefined}
-                                  rel={external ? 'noreferrer' : undefined}
-                                >
-                                  {item.ctgryNm && (
-                                    <span className="krds-badge bg-light-primary">
-                                      {item.ctgryNm}
+                                {target.kind === 'external' ? (
+                                  <a
+                                    href={target.href}
+                                    className="board-list-link"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    {item.ctgryNm && (
+                                      <span className="krds-badge bg-light-primary">
+                                        {item.ctgryNm}
+                                      </span>
+                                    )}
+                                    <span className="board-list-title onellipsis-1">
+                                      {item.pstTtl}
                                     </span>
-                                  )}
-                                  <span className="board-list-title onellipsis-1">
-                                    {item.pstTtl}
-                                  </span>
-                                </a>
+                                  </a>
+                                ) : (
+                                  <Link to={target.to} className="board-list-link">
+                                    {item.ctgryNm && (
+                                      <span className="krds-badge bg-light-primary">
+                                        {item.ctgryNm}
+                                      </span>
+                                    )}
+                                    <span className="board-list-title onellipsis-1">
+                                      {item.pstTtl}
+                                    </span>
+                                  </Link>
+                                )}
                               </li>
                             );
                           })}
@@ -975,40 +1332,56 @@ const MainPage = () => {
                       <div className="notice-tab-cont">
                         <ul className="board-list">
                           {adminInfoItems.map((item) => {
-                            const href = buildBoardLink(
+                            const target = resolveBoardTarget(
                               adminInfoListPath,
                               item,
                               true,
                             );
-                            const external =
-                              href.startsWith('http://') ||
-                              href.startsWith('https://');
                             return (
                               <li
                                 className="board-list-item"
                                 key={String(item.pstNo)}
                               >
-                                <a
-                                  href={href}
-                                  className="board-list-link"
-                                  target={external ? '_blank' : undefined}
-                                  rel={external ? 'noreferrer' : undefined}
-                                >
-                                  {item.ctgryNm && (
-                                    <span className="krds-badge bg-light-primary">
-                                      {item.ctgryNm}
-                                    </span>
-                                  )}
-                                  <span className="board-list-title onellipsis-1">
-                                    {item.pstTtl}
-                                  </span>
-                                  <span className="board-list-date">
-                                    {formatDateRange(
-                                      item.pstgBgngYmd,
-                                      item.pstgEndYmd,
+                                {target.kind === 'external' ? (
+                                  <a
+                                    href={target.href}
+                                    className="board-list-link"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    {item.ctgryNm && (
+                                      <span className="krds-badge bg-light-primary">
+                                        {item.ctgryNm}
+                                      </span>
                                     )}
-                                  </span>
-                                </a>
+                                    <span className="board-list-title onellipsis-1">
+                                      {item.pstTtl}
+                                    </span>
+                                    <span className="board-list-date">
+                                      {formatDateRange(
+                                        item.pstgBgngYmd,
+                                        item.pstgEndYmd,
+                                      )}
+                                    </span>
+                                  </a>
+                                ) : (
+                                  <Link to={target.to} className="board-list-link">
+                                    {item.ctgryNm && (
+                                      <span className="krds-badge bg-light-primary">
+                                        {item.ctgryNm}
+                                      </span>
+                                    )}
+                                    <span className="board-list-title onellipsis-1">
+                                      {item.pstTtl}
+                                    </span>
+                                    <span className="board-list-date">
+                                      {formatDateRange(
+                                        item.pstgBgngYmd,
+                                        item.pstgEndYmd,
+                                      )}
+                                    </span>
+                                  </Link>
+                                )}
                               </li>
                             );
                           })}

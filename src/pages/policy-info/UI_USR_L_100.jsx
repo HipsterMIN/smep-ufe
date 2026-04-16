@@ -7,6 +7,7 @@ import Pagination from '@components/ui/Pagination';
 import noImg from '@assets/common/noImg.png';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const appBaseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
@@ -221,7 +222,10 @@ const UI_USR_L_100 = () => {
 
   const moveToDetail = (pstNo) => {
     if (pstNo == null) return;
-    navigate(`${pstNo}`);
+    const queryString = selectedCategoryNo
+      ? `?ctgryNo=${encodeURIComponent(selectedCategoryNo)}`
+      : '';
+    navigate(`${pstNo}${queryString}`);
   };
 
   return (
@@ -245,7 +249,7 @@ const UI_USR_L_100 = () => {
 
               <div className="search-list-top">
                 <ul className="sch-info" aria-live="polite">
-                  <li>검색 결과 <span className="point">{totalElements}</span>개</li>
+                  <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
                 </ul>
                 <ul className="sch-sort">
                   <li>
@@ -322,7 +326,7 @@ const UI_USR_L_100 = () => {
                               <p>
                                 <span className="sr-only">조회수</span>
                                 <i className="ml-auto svg-icon ico-pw-visible-on"></i>
-                                <span>{item?.inqCnt ?? '-'}</span>
+                                <span>{item?.inqCnt ?? 0}</span>
                               </p>
                             </div>
                           </a>
@@ -338,6 +342,7 @@ const UI_USR_L_100 = () => {
                   totalPages={totalPages}
                   currentPage={currentPage + 1}
                   onPageChange={handlePageChange}
+                  syncUrl
                 />
               )}
             </section>

@@ -5,6 +5,7 @@ import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Pagination from '@components/ui/Pagination.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -167,7 +168,10 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
 
   const moveToDetail = (pstNo) => {
     if (pstNo == null) return;
-    navigate(`${pstNo}`);
+    const queryString = appliedCategoryNo
+      ? `?ctgryNo=${encodeURIComponent(appliedCategoryNo)}`
+      : '';
+    navigate(`${pstNo}${queryString}`);
   };
 
   return (
@@ -226,7 +230,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
         </div>
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
-            <li>검색 결과 <span className="point">{totalElements}</span>개</li>
+            <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
           </ul>
           <ul className="sch-sort">
             <li>
@@ -247,7 +251,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
         </div>
         {/* table [S] */}
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>공지사항 목록. 번호, 제목, 등록일, 조회수 정보가 제공됩니다.</caption>
             <colgroup>
               <col style={{ width: '7.4 %' }} />
@@ -291,7 +295,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
                     </th>
                     <td>
                       <a
-                        className={`onellipsis-1 ${item?.upendPstgYn === 'Y' ? 'notice-pinned' : ''}`}
+                        className={`onellipsis-1 ${item?.upendPstgYn === 'Y' ? 'notice-pinned' : ''} flex-row`}
                         href="#"
                         onClick={(event) => {
                           event.preventDefault();
@@ -303,7 +307,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
                       </a>
                     </td>
                     <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
-                    <td className="ac"><span>{item?.inqCnt ?? '-'}</span></td>
+                    <td className="ac views"><span>{item?.inqCnt ?? 0}</span></td>
                   </tr>
                 ))
               )}
@@ -316,6 +320,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
+            syncUrl
           />
         )}
       </div>

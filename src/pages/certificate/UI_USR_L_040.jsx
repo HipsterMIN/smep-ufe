@@ -6,6 +6,7 @@ import Pagination from '@components/ui/Pagination.jsx';
 import Popup from '@components/ui/Popup.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { shortenInstName  } from '@utils/stringUtils.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import { useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
@@ -145,7 +146,7 @@ const UI_USR_L_040 = () => {
                 {item.elpblYn === 'Y' && <span className="krds-badge bg-light-primary">전자증명</span>}
               </div>
               <div className="card-body">
-                <a href="#" className="c-text">
+                <a className="c-text" style={{ cursor: 'pointer' }}>
                   <p className="c-tit no-icon">
                     <span className="span onellipsis-2">{item.prdocTtl}</span>
                   </p>
@@ -200,7 +201,7 @@ const UI_USR_L_040 = () => {
 
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
-            <li>검색 결과 <span className="point">{totalElements}</span>개</li>
+            <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
           </ul>
           <ul className="sch-sort">
             <li>
@@ -222,7 +223,7 @@ const UI_USR_L_040 = () => {
 
         {/* table [S] */}
         <div className="krds-table-wrap">
-          <table className="tbl col data">
+          <table className="tbl col data t-block">
             <caption>증명 확인서 목록. 번호, 증명(확인)서, 발급기관, 소관기관 정보가 제공됨.</caption>
             <colgroup>
               <col style={{ width: '7.4%%' }}/>
@@ -257,7 +258,7 @@ const UI_USR_L_040 = () => {
                     </th>
 
                     <td className="ac">
-                      <div className="title-box"><span>{item.prdocTtl}</span>
+                      <div className="title-box span-margin"><span>{item.prdocTtl}</span>
                         {item.elpblYn === 'Y' && (
                           <span className="krds-badge bg-light-primary">전자증명</span>
                         )}
@@ -265,7 +266,24 @@ const UI_USR_L_040 = () => {
                     </td>
                     <td className="ac"><span>{shortenInstName(item.issuInstNm)}</span></td>
                     <td className="ac"><span>{shortenInstName(item.jrsdInstNm)}</span></td>
-                    <td className="ac"><a className="krds-btn small primary" onClick={() => goToDetail(item.prdocCd)}>발급</a>
+                    <td className="ac">
+                      {item.otsdSiteLnkgYn === 'Y' ? (
+                        <a
+                          className="krds-btn small secondary mo-full"
+                          href={item.otsdSiteUrlAddr}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                              발급안내
+                        </a>
+                      ) : (
+                        <a
+                          className="krds-btn small primary mo-full"
+                          onClick={() => goToDetail(item.prdocCd)}
+                        >
+                              발급
+                        </a>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -277,6 +295,7 @@ const UI_USR_L_040 = () => {
             totalPages={totalPages}
             currentPage={currentPage + 1}
             onPageChange={handlePageChange}
+            syncUrl
           />
         </div>
         {/* table [E] */}

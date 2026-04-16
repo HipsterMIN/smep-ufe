@@ -3,6 +3,7 @@ import MainPage from '../pages/MainPage.jsx';
 import Login from '../pages/Login.jsx';
 import SSOLogin from '../pages/SSOLogin.jsx';
 import AiChat from '../pages/ai/AiChat.jsx';
+import IntegratedSearchRouteTest from '../pages/dev/IntegratedSearchRouteTest.jsx';
 import PublishingList from '../publishing/PublishingList.jsx';
 import SubpageLayout from '../layouts/SubpageLayout.jsx';
 import { autoPublishingRoutesWithLayout, autoPublishingRoutesWithoutLayout } from './autoRoutes.jsx';
@@ -42,6 +43,10 @@ export const staticRoutes = [
       {
         path: '/service/SSO-login', // 로그인 페이지
         element: <SSOLogin/>,
+      },
+      {
+        path: '/service/intg-search-route-test', // 통합검색 라우팅 테스트 페이지
+        element: <IntegratedSearchRouteTest/>,
       },
     ],
   },

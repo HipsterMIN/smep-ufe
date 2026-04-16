@@ -7,6 +7,7 @@ import Tab from '../components/ui/Tab';
 import { useUserMenu } from '../context/UserMenuContext';
 import { api as apiClient } from '../lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
+import { formatNumberWithCommas } from '../utils/numberUtils.js';
 
 const DEFAULT_SIZE = 12;
 const DEFAULT_SORT = 'REG';
@@ -40,11 +41,19 @@ const stripHtml = (html) => {
     .trim();
 };
 
+const toggleSelection = (values, target) => (
+  values.includes(target)
+    ? values.filter((item) => item !== target)
+    : [...values, target]
+);
+
 const SprtBiz = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const tabData = useRef(['사업유형별', '지원기관별']);
   const schFormWrapRef = useRef(null);
   const prevSizeRef = useRef(DEFAULT_SIZE);
+  const requestSequenceRef = useRef(0);
+  const appliedConditionRef = useRef(INITIAL_CONDITION);
 
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [selectedBizTypes, setSelectedBizTypes] = useState([]);
@@ -78,6 +87,35 @@ const SprtBiz = () => {
     return textOnly.length > 0;
   };
 
+  const buildManualCondition = useCallback(() => ({
+    activeTabIndex,
+    selectedBizTypes,
+    selectedOrgs,
+    searchStts,
+    searchType,
+    searchText,
+  }), [
+    activeTabIndex,
+    selectedBizTypes,
+    selectedOrgs,
+    searchStts,
+    searchType,
+    searchText,
+  ]);
+
+  const buildAutoCondition = useCallback((overrides = {}) => ({
+    ...appliedConditionRef.current,
+    activeTabIndex: overrides.activeTabIndex ?? activeTabIndex,
+    selectedBizTypes: overrides.selectedBizTypes ?? selectedBizTypes,
+    selectedOrgs: overrides.selectedOrgs ?? selectedOrgs,
+    searchStts: overrides.searchStts ?? searchStts,
+  }), [
+    activeTabIndex,
+    selectedBizTypes,
+    selectedOrgs,
+    searchStts,
+  ]);
+
   const buildParams = useCallback((pageParam, condition, sizeValue) => {
     const params = new URLSearchParams();
     params.set('page', String(pageParam));
@@ -98,7 +136,11 @@ const SprtBiz = () => {
   }, []);
 
   const fetchList = useCallback(async (pageParam, condition, sizeValue) => {
+    const requestSequence = ++requestSequenceRef.current;
     const response = await apiClient.get(`/api/v1/sprtBiz?${buildParams(pageParam, condition, sizeValue)}`);
+    if (requestSequence !== requestSequenceRef.current) {
+      return;
+    }
     const pageData = response?.data || response;
 
     setItems(pageData?.content || []);
@@ -155,41 +197,51 @@ const SprtBiz = () => {
     schFormWrapRef.current?.classList.toggle('on');
   };
 
-  const executeSearch = () => {
-    const nextCondition = {
-      activeTabIndex,
-      selectedBizTypes,
-      selectedOrgs,
-      searchStts,
-      searchType,
-      searchText,
-    };
-
+  const manualSearch = useCallback(() => {
+    const nextCondition = buildManualCondition();
+    appliedConditionRef.current = nextCondition;
     setAppliedCondition(nextCondition);
     fetchList(1, nextCondition, size);
-  };
+  }, [buildManualCondition, fetchList, size]);
+
+  const autoSearch = useCallback((overrides = {}) => {
+    const nextCondition = buildAutoCondition(overrides);
+    appliedConditionRef.current = nextCondition;
+    setAppliedCondition(nextCondition);
+    fetchList(1, nextCondition, size);
+  }, [buildAutoCondition, fetchList, size]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      executeSearch();
+      manualSearch();
     }
   };
 
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
-    setPage(1);
+    autoSearch({ activeTabIndex: index });
   };
 
   const handleBizTypeChange = (value) => {
-    setSelectedBizTypes((prev) => (
-      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
-    ));
+    const nextSelectedBizTypes = toggleSelection(selectedBizTypes, value);
+    setSelectedBizTypes(nextSelectedBizTypes);
+    autoSearch({
+      activeTabIndex: 0,
+      selectedBizTypes: nextSelectedBizTypes,
+    });
   };
 
   const handleOrgChange = (value) => {
-    setSelectedOrgs((prev) => (
-      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
-    ));
+    const nextSelectedOrgs = toggleSelection(selectedOrgs, value);
+    setSelectedOrgs(nextSelectedOrgs);
+    autoSearch({
+      activeTabIndex: 1,
+      selectedOrgs: nextSelectedOrgs,
+    });
+  };
+
+  const handleSearchSttsChange = (nextSearchStts) => {
+    setSearchStts(nextSearchStts);
   };
 
   const getFieldLabel = (code) => fieldLabelMap[code] || code;
@@ -220,7 +272,7 @@ const SprtBiz = () => {
 
               <div className="search-top-box">
                 <div className="sch-form-wrap" ref={schFormWrapRef}>
-                  <select className="krds-form-select" value={searchStts} onChange={(e) => setSearchStts(e.target.value)}>
+                  <select className="krds-form-select" value={searchStts} onChange={(e) => handleSearchSttsChange(e.target.value)}>
                     <option value="">공고상태 전체</option>
                     <option value="ONGOING">진행중</option>
                     <option value="PLANNED">진행예정</option>
@@ -240,7 +292,7 @@ const SprtBiz = () => {
                       onChange={(e) => setSearchText(e.target.value)}
                       onKeyDown={handleKeyDown}
                     />
-                    <button type="button" className="krds-btn medium icon ico-search" onClick={executeSearch}>
+                    <button type="button" className="krds-btn medium icon ico-search" onClick={manualSearch}>
                       <span className="sr-only">검색</span>
                       <i className="svg-icon ico-sch"></i>
                     </button>
@@ -294,7 +346,7 @@ const SprtBiz = () => {
 
               <div className="search-list-top">
                 <ul className="sch-info" aria-live="polite">
-                  <li>검색 결과 <span className="point">{(totalElements || 0).toLocaleString()}</span>개</li>
+                  <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
                 </ul>
                 <ul className="sch-sort">
                   <li>
@@ -360,7 +412,7 @@ const SprtBiz = () => {
                 )}
               </ul>
 
-              <Pagination totalPages={totalPages} currentPage={page} onPageChange={(nextPage) => fetchList(nextPage, appliedCondition, size)} />
+              <Pagination totalPages={totalPages} currentPage={page} onPageChange={(nextPage) => fetchList(nextPage, appliedCondition, size)} syncUrl />
             </section>
           </div>
         </div>
