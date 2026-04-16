@@ -15,6 +15,7 @@ import mainBanner from '@assets/temp/main_banner_1.png';
 import { api as apiClient } from '@lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 
 const MAIN_MENU_IDS = {
   notice: 'M_PIIO_00101',
@@ -36,6 +37,8 @@ const EMPTY_MAIN_DATA = {
 };
 const normalizeResponse = (response) => response?.data || response || {};
 const isNewWindow = (value) => value === 'Y';
+const resolveApiErrorMessage = (error, fallbackMessage) =>
+  error?.data?.message || error?.message || fallbackMessage;
 
 const formatDate = (value, separator = '.') => {
   if (!value) return '';
@@ -181,7 +184,6 @@ const MainPage = () => {
   const [serviceActiveIndex, setServiceActiveIndex] = useState(0);
   const [noticeActiveIndex, setNoticeActiveIndex] = useState(0);
   const [likedAnnounce, setLikedAnnounce] = useState({});
-  const [likedBusiness, setLikedBusiness] = useState({});
   const [likedPolicy, setLikedPolicy] = useState({});
   const [isPlaying, setIsPlaying] = useState(true);
   const [mainData, setMainData] = useState(EMPTY_MAIN_DATA);
@@ -201,6 +203,8 @@ const MainPage = () => {
   const originTopRef = useRef(0);
   const swiperRef = useRef(null);
   const latestAutoQueryRef = useRef('');
+  const authToken = useAuthStore((state) => state.token);
+  const isLoggedIn = Boolean(authToken);
 
   const showPopular = isFocused && searchQuery.trim() === '';
   const showAutoComplete =
@@ -472,6 +476,67 @@ const MainPage = () => {
   const visiblePopups = (mainData.popups || []).filter(
     (popup) => !hiddenPopupIds.includes(popup.popupId),
   );
+  const pbancScrapTargetIds = useMemo(
+    () =>
+      pbancItems
+        .map((item) => Number(item.bizPbancNo))
+        .filter((value) => Number.isFinite(value) && value > 0),
+    [pbancItems],
+  );
+  const policyScrapTargetIds = useMemo(
+    () =>
+      financePolicyItems
+        .map((item) => Number(item.plcyFnncGdsSn))
+        .filter((value) => Number.isFinite(value) && value > 0),
+    [financePolicyItems],
+  );
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setLikedAnnounce({});
+      setLikedPolicy({});
+      return;
+    }
+
+    if (pbancScrapTargetIds.length === 0 && policyScrapTargetIds.length === 0) {
+      setLikedAnnounce({});
+      setLikedPolicy({});
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadScrapStatuses = async () => {
+      try {
+        const response = await apiClient.post('/api/v1/scraps/status/batch', {
+          pbancIds: pbancScrapTargetIds,
+          policyFinanceIds: policyScrapTargetIds,
+        });
+        if (!isMounted) return;
+
+        const payload = normalizeResponse(response);
+        const pbancStatusMap = Object.fromEntries(
+          (payload.pbanc || []).map((id) => [String(id), true]),
+        );
+        const policyStatusMap = Object.fromEntries(
+          (payload.policyFinance || []).map((id) => [String(id), true]),
+        );
+
+        setLikedAnnounce(pbancStatusMap);
+        setLikedPolicy(policyStatusMap);
+      } catch (error) {
+        if (!isMounted) return;
+        setLikedAnnounce({});
+        setLikedPolicy({});
+      }
+    };
+
+    loadScrapStatuses();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isLoggedIn, pbancScrapTargetIds, policyScrapTargetIds]);
 
   const handleSearch = () => {
     setIsKeyboardOpen(false);
@@ -509,12 +574,63 @@ const MainPage = () => {
       setIsAutoLoading(false);
     }
   };
-  const handleToggleLike1 = (index) =>
-    setLikedAnnounce((prev) => ({ ...prev, [index]: !prev[index] }));
-  const handleToggleLike2 = (index) =>
-    setLikedBusiness((prev) => ({ ...prev, [index]: !prev[index] }));
-  const handleToggleLike3 = (index) =>
-    setLikedPolicy((prev) => ({ ...prev, [index]: !prev[index] }));
+  const requestLoginForScrap = () => {
+    const moveToLogin = window.confirm('로그인 후 스크랩 가능합니다. 로그인 하시겠습니까?');
+    if (moveToLogin) {
+      //todo 로그인생기면 링크걸기
+      //navigate('/service/login');
+    }
+  };
+  const handleToggleLike1 = async (targetId) => {
+    const numericTargetId = Number(targetId);
+    if (!Number.isFinite(numericTargetId) || numericTargetId < 1) return;
+
+    if (!isLoggedIn) {
+      requestLoginForScrap();
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/api/v1/scraps/toggle', {
+        scrapTypeCd: 'BIZP',
+        targetId: numericTargetId,
+      });
+      const payload = normalizeResponse(response);
+      setLikedAnnounce((prev) => ({
+        ...prev,
+        [String(numericTargetId)]: Boolean(payload.scrapped),
+      }));
+    } catch (error) {
+      window.alert(
+        resolveApiErrorMessage(error, '사업공고 스크랩 처리 중 오류가 발생했습니다.'),
+      );
+    }
+  };
+  const handleToggleLike3 = async (targetId) => {
+    const numericTargetId = Number(targetId);
+    if (!Number.isFinite(numericTargetId) || numericTargetId < 1) return;
+
+    if (!isLoggedIn) {
+      requestLoginForScrap();
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/api/v1/scraps/toggle', {
+        scrapTypeCd: 'PLCF',
+        targetId: numericTargetId,
+      });
+      const payload = normalizeResponse(response);
+      setLikedPolicy((prev) => ({
+        ...prev,
+        [String(numericTargetId)]: Boolean(payload.scrapped),
+      }));
+    } catch (error) {
+      window.alert(
+        resolveApiErrorMessage(error, '정책금융 스크랩 처리 중 오류가 발생했습니다.'),
+      );
+    }
+  };
   const toggleAutoplay = () => {
     if (!swiperRef.current) return;
     if (isPlaying) swiperRef.current.autoplay.stop();
@@ -864,10 +980,10 @@ const MainPage = () => {
                                   type="button"
                                   className="krds-btn text"
                                   aria-label={`${item.bizPbancNm} 찜하기`}
-                                  onClick={() => handleToggleLike1(index)}
+                                  onClick={() => handleToggleLike1(item.bizPbancNo)}
                                 >
                                   <i
-                                    className={`svg-icon ico-like on-bgcolorgray ${likedAnnounce[index] ? 'on' : ''}`}
+                                    className={`svg-icon ico-like on-bgcolorgray ${likedAnnounce[String(item.bizPbancNo)] ? 'on' : ''}`}
                                   ></i>
                                 </button>
                               </div>
@@ -1047,10 +1163,10 @@ const MainPage = () => {
                                   type="button"
                                   className="krds-btn text"
                                   aria-label={`${item.plcyFnncGdsNm} 찜하기`}
-                                  onClick={() => handleToggleLike3(index)}
+                                  onClick={() => handleToggleLike3(item.plcyFnncGdsSn)}
                                 >
                                   <i
-                                    className={`svg-icon ico-like on-bgcolorgray ${likedPolicy[index] ? 'on' : ''}`}
+                                    className={`svg-icon ico-like on-bgcolorgray ${likedPolicy[String(item.plcyFnncGdsSn)] ? 'on' : ''}`}
                                   ></i>
                                 </button>
                               </div>

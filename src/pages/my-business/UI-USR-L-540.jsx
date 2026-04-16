@@ -1,55 +1,93 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
 import Datepicker from '@components/ui/Datepicker';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
-
-const NOTICE_MOCK = Array.from({ length: 22 }, (_, index) => {
-  const categoryList = ['사업공고', '지원사업', '정책금융', '정책정보'];
-  const category = categoryList[index % categoryList.length];
-
-  return {
-    id: index + 1,
-    category,
-    sentAt: `2025-12-${String((index % 28) + 1).padStart(2, '0')} 10:${String((index * 5) % 60).padStart(2, '0')}`,
-    title: `${category} 알림 샘플 ${index + 1}`,
-  };
-});
+import { api as apiClient } from '@lib/apiClient.js';
+import { useNavigate } from 'react-router-dom';
 
 const UI_USR_L_540 = () => {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [appliedKeyword, setAppliedKeyword] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12);
-
+  const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
 
-  const filteredRows = useMemo(() => {
-    const normalizedKeyword = appliedKeyword.trim();
+  // 검색 조건 (입력용)
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
 
-    return NOTICE_MOCK.filter((row) => {
-      const isSameCategory = !selectedCategory || row.category === selectedCategory;
-      const isKeywordMatched = !normalizedKeyword || row.title.includes(normalizedKeyword);
-      return isSameCategory && isKeywordMatched;
-    });
-  }, [selectedCategory, appliedKeyword]);
+  // 검색 조건 (전송용)
+  const [appliedStartDate, setAppliedStartDate] = useState(null);
+  const [appliedEndDate, setAppliedEndDate] = useState(null);
+  const [appliedCategory, setAppliedCategory] = useState('');
+  const [appliedKeyword, setAppliedKeyword] = useState('');
 
-  const totalElements = filteredRows.length;
-  const totalPages = Math.ceil(totalElements / pageSize);
+  // 목록 데이터
+  const [notificationList, setNotificationList] = useState([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [loading, setLoading] = useState(false);
 
-  const pagedRows = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredRows.slice(startIndex, startIndex + pageSize);
-  }, [currentPage, pageSize, filteredRows]);
+  // Date → YYYY-MM-DD 포맷
+  const formatDate = (date) => {
+    if (!date) return null;
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // LocalDateTime → 화면 표시용 포맷 (2025-12-11T10:04:00 → 2025-12-11 10:04)
+  const formatDateTime = (dateTime) => {
+    if (!dateTime) return '-';
+    return dateTime.replace('T', ' ').substring(0, 16);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: currentPage,
+          size: pageSize,
+        });
+
+        if (appliedStartDate) params.append('srchFrDt', formatDate(appliedStartDate));
+        if (appliedEndDate) params.append('srchToDt', formatDate(appliedEndDate));
+        if (appliedCategory) params.append('pbancTypeSeCd', appliedCategory);
+        if (appliedKeyword?.trim()) params.append('srchTtl', appliedKeyword.trim());
+
+        const response = await apiClient.get(`/api/v1/scrap/notifications?${params.toString()}`);
+        const data = response.data;
+
+        setNotificationList(data.content);
+        setTotalElements(data.totalElements);
+        setTotalPages(data.totalPages);
+      } catch (error) {
+        console.error('알림 목록 조회 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [currentPage, pageSize, appliedStartDate, appliedEndDate, appliedCategory, appliedKeyword]);
 
   const handleSearch = () => {
+    if (startDate && endDate && startDate > endDate) {
+      alert('조회 종료일은 시작일보다 이후여야 합니다.');
+      return;
+    }
+    setAppliedStartDate(startDate);
+    setAppliedEndDate(endDate);
+    setAppliedCategory(selectedCategory);
     setAppliedKeyword(searchKeyword);
     setCurrentPage(1);
   };
@@ -61,6 +99,15 @@ const UI_USR_L_540 = () => {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };
+
+  // 자세히보기 - 공고 유형에 따라 라우팅
+  const handleDetail = (item) => {
+    if (item.pbancTypeSeCd === 'BIZP') {
+      navigate(`/req/pbanc/${item.bizPbancNo}`);
+    } else if (item.pbancTypeSeCd === 'PLCF') {
+      navigate(`/req/UI_USR_L_030/${item.plcyFnncNo}`);
+    }
   };
 
   return (
@@ -76,8 +123,8 @@ const UI_USR_L_540 = () => {
         </div>
 
         <p className="guide-txt">
-          최근 1년 동안 받은 알림만 확인하실 수 있습니다. <br />
-          알림을 받고자 하시면 마이페이지 &gt; 회원정보 에서 알림 수신에 동의해 주세요.
+            최근 1년 동안 받은 알림만 확인하실 수 있습니다. <br />
+            알림을 받고자 하시면 마이페이지 &gt; 회원정보 에서 알림 수신에 동의해 주세요.
         </p>
 
         <div className="search-top-box no-details mt-40">
@@ -102,18 +149,13 @@ const UI_USR_L_540 = () => {
               <label className="label" htmlFor="select_01">구분</label>
               <select
                 id="select_01"
-                className="krds-form-select medium "
+                className="krds-form-select medium"
                 value={selectedCategory}
-                onChange={(event) => {
-                  setSelectedCategory(event.target.value);
-                  setCurrentPage(1);
-                }}
+                onChange={(event) => setSelectedCategory(event.target.value)}
               >
                 <option value="">전체</option>
-                <option value="지원사업">지원사업</option>
-                <option value="사업공고">사업공고</option>
-                <option value="정책금융">정책금융</option>
-                <option value="정책정보">정책정보</option>
+                <option value="BIZP">사업공고</option>
+                <option value="PLCF">정책금융</option>
               </select>
             </div>
             <div className="input-group-box">
@@ -128,9 +170,7 @@ const UI_USR_L_540 = () => {
                   value={searchKeyword}
                   onChange={(event) => setSearchKeyword(event.target.value)}
                   onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      handleSearch();
-                    }
+                    if (event.key === 'Enter') handleSearch();
                   }}
                 />
                 <button type="button" className="krds-btn medium icon ico-search" onClick={handleSearch}>
@@ -156,8 +196,8 @@ const UI_USR_L_540 = () => {
                 value={String(pageSize)}
                 onChange={handlePageSizeChange}
               >
-                <option value="12">12개</option>
-                <option value="9">9개</option>
+                <option value="10">10개</option>
+                <option value="20">20개</option>
               </select>
             </li>
           </ul>
@@ -183,23 +223,41 @@ const UI_USR_L_540 = () => {
               </tr>
             </thead>
             <tbody>
-              {pagedRows.map((row, index) => (
-                <tr key={row.id}>
-                  <th scope="row" className="ac">
-                    <span>{totalElements - ((currentPage - 1) * pageSize + index)}</span>
-                  </th>
-                  <td className="ac"><span>{row.sentAt}</span></td>
-                  <td className="ac"><span>{row.category}</span></td>
-                  <td>
-                    <a className="onellipsis-1" href="#">
-                      <span>{row.title}</span>
-                    </a>
-                  </td>
-                  <td className="ac">
-                    <button type="button" className="krds-btn small primary width-auto mo-full">자세히 보기</button>
-                  </td>
+              {loading ? (
+                <tr>
+                  <td colSpan="5" className="ac">로딩 중...</td>
                 </tr>
-              ))}
+              ) : notificationList.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="ac">조회된 데이터가 없습니다.</td>
+                </tr>
+              ) : (
+                notificationList.map((item, index) => (
+                  <tr key={`${item.pbancScrpSn}-${item.pbancScrpNtcSn}`}>
+                    <th scope="row" className="ac">
+                      <span>{totalElements - ((currentPage - 1) * pageSize + index)}</span>
+                    </th>
+                    <td className="ac">
+                      <span>{formatDateTime(item.ntcDt)}</span>
+                    </td>
+                    <td className="ac">
+                      <span>{item.pbancTypeSeNm}</span>
+                    </td>
+                    <td>
+                      <span className="onellipsis-1">{item.gdPhrsCn}</span>
+                    </td>
+                    <td className="ac">
+                      <button
+                        type="button"
+                        className="krds-btn small primary width-auto mo-full"
+                        onClick={() => handleDetail(item)}
+                      >
+                            자세히 보기
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
