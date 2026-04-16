@@ -10,12 +10,14 @@ import {
   buildCompanyAddress,
   fetchCorporateMemberCodeOptions,
   fetchCorporateMemberDetail,
+  fetchKsicTopLevelOptions,
   formatBusinessRegNo,
   formatCorporationRegNo,
   formatDateTime,
   formatPhoneNumber,
   formatYmd,
   getCodeLabel,
+  getKsicTopLevelLabel,
 } from './companyMemberUtils.js';
 
 // 로그인/store 정리 전까지 기업정보 화면은 전달된 회원번호가 없으면 임시 폴백 회원번호로 진입을 보장한다.
@@ -42,16 +44,20 @@ const UI_USR_R_450 = () => {
       setErrorMessage('');
 
       try {
-        const [memberDetail, commonCodes] = await Promise.all([
+        const [memberDetail, commonCodes, ksicTopLevelOptions] = await Promise.all([
           fetchCorporateMemberDetail(apiClient, effectiveMemberNo),
           fetchCorporateMemberCodeOptions(),
+          fetchKsicTopLevelOptions(apiClient),
         ]);
 
         if (!active) {
           return;
         }
 
-        setCodeOptions(commonCodes);
+        setCodeOptions({
+          ...commonCodes,
+          KSIC_TOP_LEVEL: ksicTopLevelOptions,
+        });
         setDetail(memberDetail);
       } catch (error) {
         if (!active) {
@@ -171,7 +177,7 @@ const UI_USR_R_450 = () => {
                   <th scope="row" className="ac">주요사업분야</th>
                   <td>{loading ? '로딩 중...' : renderValue(detail?.mainBizFldNm)}</td>
                   <th scope="row" className="ac">산업구분</th>
-                  <td>{loading ? '로딩 중...' : HELD_FIELD_PENDING_TEXT}</td>
+                  <td>{loading ? '로딩 중...' : getKsicTopLevelLabel(codeOptions.KSIC_TOP_LEVEL, detail?.ksicCd)}</td>
                 </tr>
                 <tr>
                   <th scope="row" className="ac">소재지</th>
