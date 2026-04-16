@@ -53,7 +53,7 @@ const UI_USR_W_430 = lazy(() => import('@pages/my-business/UI-USR-W-430.jsx'));
 const UI_USR_R_440 = lazy(() => import('@pages/my-business/UI-USR-R-440.jsx'));
 const UI_USR_R_450 = lazy(() => import('@pages/my-business/company/CompanyDetail.jsx'));
 const UI_USR_W_452 = lazy(() => import('@pages/my-business/company/CompanyEdit.jsx'));
-const UI_USR_L_460 = lazy(() => import('@pages/my-business/UI-USR-L-460.jsx'));
+const UI_USR_L_460 = lazy(() => import('@pages/my-business/company/ReassignOwner.jsx'));
 const UI_USR_L_020 = lazy(() => import('@pages/UI-USR-L-020.jsx'));
 const UI_USR_L_520 = lazy(() => import('@pages/my-business/UI-USR-L-520.jsx'));
 const UI_USR_L_530 = lazy(() => import('@pages/my-business/UI-USR-L-530.jsx'));

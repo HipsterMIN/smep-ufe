@@ -10,6 +10,8 @@ import {
   HELD_FIELD_PENDING_TEXT,
   fetchCorporateMemberCodeOptions,
   fetchCorporateMemberDetail,
+  fetchKsicTopLevelOptions,
+  extractTopLevelKsicCd,
   parseDateFromYmd,
   toYmd,
   updateCorporateMemberDetail,
@@ -27,12 +29,14 @@ const UI_USR_W_452 = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [initialKsicCd, setInitialKsicCd] = useState('');
   const [form, setForm] = useState({
     entSclCd: '',
     fndnDate: null,
     wrkrCntClsfCd: '',
     slsAmtClsfCd: '',
     mainBizFldNm: '',
+    ksicCd: '',
     etcExpln: '',
     entExpln: '',
   });
@@ -48,22 +52,29 @@ const UI_USR_W_452 = () => {
       setErrorMessage('');
 
       try {
-        const [detail, commonCodes] = await Promise.all([
+        const [detail, commonCodes, ksicTopLevelOptions] = await Promise.all([
           fetchCorporateMemberDetail(apiClient, memberNo),
           fetchCorporateMemberCodeOptions(),
+          fetchKsicTopLevelOptions(apiClient),
         ]);
 
         if (!active) {
           return;
         }
 
-        setCodeOptions(commonCodes);
+        setCodeOptions({
+          ...commonCodes,
+          KSIC_TOP_LEVEL: ksicTopLevelOptions,
+        });
+        const topLevelKsicCd = extractTopLevelKsicCd(detail?.ksicCd);
+        setInitialKsicCd(topLevelKsicCd);
         setForm({
           entSclCd: detail?.entSclCd || '',
           fndnDate: parseDateFromYmd(detail?.fndnYmd),
           wrkrCntClsfCd: detail?.wrkrCntClsfCd || '',
           slsAmtClsfCd: detail?.slsAmtClsfCd || '',
           mainBizFldNm: detail?.mainBizFldNm || '',
+          ksicCd: topLevelKsicCd,
           etcExpln: detail?.etcExpln || '',
           entExpln: detail?.entExpln || '',
         });
@@ -106,6 +117,7 @@ const UI_USR_W_452 = () => {
       !form.wrkrCntClsfCd ||
       !form.slsAmtClsfCd ||
       !form.mainBizFldNm.trim() ||
+      !form.ksicCd ||
       !form.etcExpln.trim()
     ) {
       alert('필수 입력 항목을 확인해주세요.');
@@ -116,12 +128,15 @@ const UI_USR_W_452 = () => {
     setErrorMessage('');
 
     try {
+      const nextKsicCd = form.ksicCd.trim();
       await updateCorporateMemberDetail(apiClient, memberNo, {
         entSclCd: form.entSclCd,
         fndnYmd: toYmd(form.fndnDate),
         wrkrCntClsfCd: form.wrkrCntClsfCd,
         slsAmtClsfCd: form.slsAmtClsfCd,
         mainBizFldNm: form.mainBizFldNm.trim(),
+        // 사용자가 산업구분을 실제로 바꾼 경우에만 1레벨 코드를 보내 기존 세분류 값을 무의식적으로 축소하지 않게 한다.
+        ksicCd: nextKsicCd && nextKsicCd !== initialKsicCd ? nextKsicCd : undefined,
         etcExpln: form.etcExpln.trim(),
         entExpln: form.entExpln.trim(),
       });
@@ -266,8 +281,17 @@ const UI_USR_W_452 = () => {
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
-                  <select id="select_04" className="krds-form-select small" disabled>
-                    <option value="">{HELD_FIELD_PENDING_TEXT}</option>
+                  <select
+                    id="select_04"
+                    className="krds-form-select small"
+                    value={form.ksicCd}
+                    onChange={(event) => handleFieldChange('ksicCd', event.target.value)}
+                    disabled={loading || saving}
+                  >
+                    <option value="">선택</option>
+                    {(codeOptions.KSIC_TOP_LEVEL || []).map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
                   </select>
                 </div>
               </dd>
