@@ -271,6 +271,8 @@ const UI_USR_L_030 = () => {
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
   const filterWrapRef = useRef(null);
+  const filtersRef = useRef(EMPTY_FILTERS);
+  const listRequestSeqRef = useRef(0);
 
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [filters, setFilters] = useState(EMPTY_FILTERS);
@@ -295,6 +297,10 @@ const UI_USR_L_030 = () => {
   const [comparePopupOpen, setComparePopupOpen] = useState(false);
   const [compareItems, setCompareItems] = useState([]);
   const [compareLoading, setCompareLoading] = useState(false);
+
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
 
   useEffect(() => {
     sessionStorage.setItem('policyFinanceIndustries', JSON.stringify(selectedIndustries));
@@ -369,9 +375,13 @@ const UI_USR_L_030 = () => {
       params.set('plcyFnncTpbizNm', appliedIndustries.map((item) => item.upperKsicCd).join(','));
     }
 
+    const requestSeq = ++listRequestSeqRef.current;
     setLoading(true);
     apiClient.get(`/api/v1/finance-policy/list?${params.toString()}`)
       .then((response) => {
+        if (requestSeq !== listRequestSeqRef.current) {
+          return;
+        }
         const data = unwrapResponse(response);
         const content = data?.content || [];
         setItems(content);
@@ -379,12 +389,19 @@ const UI_USR_L_030 = () => {
         setTotalPages(data?.totalPages || 0);
       })
       .catch((error) => {
+        if (requestSeq !== listRequestSeqRef.current) {
+          return;
+        }
         console.error('Failed to load finance policy list:', error);
         setItems([]);
         setTotalElements(0);
         setTotalPages(0);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (requestSeq === listRequestSeqRef.current) {
+          setLoading(false);
+        }
+      });
   }, [activeTabIndex, appliedFilters, appliedIndustries, page, size, sortType]);
 
   useEffect(() => {
@@ -406,6 +423,22 @@ const UI_USR_L_030 = () => {
   }, [activeTabIndex]);
 
   const updateFilter = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
+
+  const applyDetailFilter = (key, value) => {
+    const nextFilters = { ...filtersRef.current, [key]: value };
+    filtersRef.current = nextFilters;
+    setFilters(nextFilters);
+    setAppliedFilters(nextFilters);
+    setCompareIds([]);
+    setPage(1);
+  };
+
+  const applyIndustrySelection = (nextIndustries) => {
+    setSelectedIndustries(nextIndustries);
+    setAppliedIndustries(nextIndustries);
+    setCompareIds([]);
+    setPage(1);
+  };
 
   const applyFilters = () => {
     setAppliedFilters(filters);
@@ -499,6 +532,7 @@ const UI_USR_L_030 = () => {
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
     setFilterOptions((prev) => ({ ...prev, financialInsts: [] }));
+    filtersRef.current = EMPTY_FILTERS;
     setFilters(EMPTY_FILTERS);
     setAppliedFilters(EMPTY_FILTERS);
     setSelectedIndustries([]);
@@ -514,18 +548,14 @@ const UI_USR_L_030 = () => {
   };
 
   const resetIndustrySelection = () => {
-    setSelectedIndustries([]);
-    setAppliedIndustries([]);
+    applyIndustrySelection([]);
     setIndustryDraft([]);
-    setPage(1);
   };
 
   const removeIndustrySelection = (upperKsicCd) => {
     const next = selectedIndustries.filter((item) => item.upperKsicCd !== upperKsicCd);
-    setSelectedIndustries(next);
-    setAppliedIndustries(next);
+    applyIndustrySelection(next);
     setIndustryDraft((prev) => prev.filter((item) => item.upperKsicCd !== upperKsicCd));
-    setPage(1);
   };
 
   const toggleCompare = (goodsSn, checked) => {
@@ -644,7 +674,7 @@ const UI_USR_L_030 = () => {
                       id: 'plcyFnncGdsTypeCd',
                       label: '상품유형',
                       value: filters.plcyFnncGdsTypeCd,
-                      onChange: (value) => updateFilter('plcyFnncGdsTypeCd', value),
+                      onChange: (value) => applyDetailFilter('plcyFnncGdsTypeCd', value),
                       options: filterOptions.supportTypes,
                       placeholder: '전체',
                     })}
@@ -652,7 +682,7 @@ const UI_USR_L_030 = () => {
                       id: `plcyFnncBizFlfmtInstNm-${activeTabIndex}`,
                       label: '금융기관',
                       value: filters.plcyFnncBizFlfmtInstNm,
-                      onChange: (value) => updateFilter('plcyFnncBizFlfmtInstNm', value),
+                      onChange: (value) => applyDetailFilter('plcyFnncBizFlfmtInstNm', value),
                       options: filterOptions.financialInsts,
                       placeholder: '전체',
                     })}
@@ -660,7 +690,7 @@ const UI_USR_L_030 = () => {
                       id: 'plcyFnncEntSclCd',
                       label: '기업규모',
                       value: filters.plcyFnncEntSclCd,
-                      onChange: (value) => updateFilter('plcyFnncEntSclCd', value),
+                      onChange: (value) => applyDetailFilter('plcyFnncEntSclCd', value),
                       options: filterOptions.companySizes,
                       placeholder: '전체',
                     })}
@@ -680,7 +710,7 @@ const UI_USR_L_030 = () => {
                       id: 'plcyFnncRcptSttsCd',
                       label: '접수상태',
                       value: filters.plcyFnncRcptSttsCd,
-                      onChange: (value) => updateFilter('plcyFnncRcptSttsCd', value),
+                      onChange: (value) => applyDetailFilter('plcyFnncRcptSttsCd', value),
                       options: filterOptions.receptionStatuses,
                       placeholder: '전체',
                     })}
@@ -688,7 +718,7 @@ const UI_USR_L_030 = () => {
                       id: 'plcyFnncAddDtlCndCn',
                       label: '우대기업',
                       value: filters.plcyFnncAddDtlCndCn,
-                      onChange: (value) => updateFilter('plcyFnncAddDtlCndCn', value),
+                      onChange: (value) => applyDetailFilter('plcyFnncAddDtlCndCn', value),
                       options: filterOptions.preferredTypes,
                       placeholder: '전체',
                     })}
@@ -696,7 +726,7 @@ const UI_USR_L_030 = () => {
                       id: 'plcyFnncAplyMthCd',
                       label: '신청방식',
                       value: filters.plcyFnncAplyMthCd,
-                      onChange: (value) => updateFilter('plcyFnncAplyMthCd', value),
+                      onChange: (value) => applyDetailFilter('plcyFnncAplyMthCd', value),
                       options: filterOptions.applicationMethods,
                       placeholder: '전체',
                     })}
@@ -704,25 +734,25 @@ const UI_USR_L_030 = () => {
 
                   {showLoan && (
                     <div className="filter-form">
-                      {renderSelectField({ id: 'plcyFnncRpmtMthdCd', label: '상환방법', value: filters.plcyFnncRpmtMthdCd, onChange: (value) => updateFilter('plcyFnncRpmtMthdCd', value), options: filterOptions.repaymentMethods, placeholder: '전체' })}
-                      {renderSelectField({ id: 'flctnIrtYnCn', label: '금리변동여부', value: filters.flctnIrtYnCn, onChange: (value) => updateFilter('flctnIrtYnCn', value), options: filterOptions.interestChangeTypes, placeholder: '전체' })}
-                      {renderSelectField({ id: 'plcyFndsLoanMthCn', label: '융자방식', value: filters.plcyFndsLoanMthCn, onChange: (value) => updateFilter('plcyFndsLoanMthCn', value), options: filterOptions.loanMethods, placeholder: '전체' })}
-                      {renderSelectField({ id: 'plcyFnncSprtTrgtFndsCn', label: '자금용도', value: filters.plcyFnncSprtTrgtFndsCn, onChange: (value) => updateFilter('plcyFnncSprtTrgtFndsCn', value), options: filterOptions.supportTargetFunds, placeholder: '전체' })}
-                      {renderSelectField({ id: 'loanPrdSmryCd', label: '대출기간', value: filters.loanPrdSmryCd, onChange: (value) => updateFilter('loanPrdSmryCd', value), options: filterOptions.loanPeriodSummaries, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncRpmtMthdCd', label: '상환방법', value: filters.plcyFnncRpmtMthdCd, onChange: (value) => applyDetailFilter('plcyFnncRpmtMthdCd', value), options: filterOptions.repaymentMethods, placeholder: '전체' })}
+                      {renderSelectField({ id: 'flctnIrtYnCn', label: '금리변동여부', value: filters.flctnIrtYnCn, onChange: (value) => applyDetailFilter('flctnIrtYnCn', value), options: filterOptions.interestChangeTypes, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFndsLoanMthCn', label: '융자방식', value: filters.plcyFndsLoanMthCn, onChange: (value) => applyDetailFilter('plcyFndsLoanMthCn', value), options: filterOptions.loanMethods, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncSprtTrgtFndsCn', label: '자금용도', value: filters.plcyFnncSprtTrgtFndsCn, onChange: (value) => applyDetailFilter('plcyFnncSprtTrgtFndsCn', value), options: filterOptions.supportTargetFunds, placeholder: '전체' })}
+                      {renderSelectField({ id: 'loanPrdSmryCd', label: '대출기간', value: filters.loanPrdSmryCd, onChange: (value) => applyDetailFilter('loanPrdSmryCd', value), options: filterOptions.loanPeriodSummaries, placeholder: '전체' })}
                     </div>
                   )}
 
                   {showGrant && (
                     <div className="filter-form">
-                      {renderSelectField({ id: 'plcyFnncSprtTrgtFndsCn', label: '지원대상 자금', value: filters.plcyFnncSprtTrgtFndsCn, onChange: (value) => updateFilter('plcyFnncSprtTrgtFndsCn', value), options: filterOptions.supportTargetFunds, placeholder: '전체' })}
-                      {renderSelectField({ id: 'plcyFnncGdsKndCd', label: '상품종류', value: filters.plcyFnncGdsKndCd, onChange: (value) => updateFilter('plcyFnncGdsKndCd', value), options: filterOptions.grantKinds, placeholder: '전체' })}
-                      {renderSelectField({ id: 'plcyFnncGrnteRtSmryCn', label: '보증비율', value: filters.plcyFnncGrnteRtSmryCn, onChange: (value) => updateFilter('plcyFnncGrnteRtSmryCn', value), options: filterOptions.grantRateSummaries, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncSprtTrgtFndsCn', label: '지원대상 자금', value: filters.plcyFnncSprtTrgtFndsCn, onChange: (value) => applyDetailFilter('plcyFnncSprtTrgtFndsCn', value), options: filterOptions.supportTargetFunds, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncGdsKndCd', label: '상품종류', value: filters.plcyFnncGdsKndCd, onChange: (value) => applyDetailFilter('plcyFnncGdsKndCd', value), options: filterOptions.grantKinds, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncGrnteRtSmryCn', label: '보증비율', value: filters.plcyFnncGrnteRtSmryCn, onChange: (value) => applyDetailFilter('plcyFnncGrnteRtSmryCn', value), options: filterOptions.grantRateSummaries, placeholder: '전체' })}
                     </div>
                   )}
 
                   {showInsurance && (
                     <div className="filter-form">
-                      {renderSelectField({ id: 'plcyFnncCmpnRtSmryCn', label: '보상비율', value: filters.plcyFnncCmpnRtSmryCn, onChange: (value) => updateFilter('plcyFnncCmpnRtSmryCn', value), options: filterOptions.insuranceRateSummaries, placeholder: '전체' })}
+                      {renderSelectField({ id: 'plcyFnncCmpnRtSmryCn', label: '보상비율', value: filters.plcyFnncCmpnRtSmryCn, onChange: (value) => applyDetailFilter('plcyFnncCmpnRtSmryCn', value), options: filterOptions.insuranceRateSummaries, placeholder: '전체' })}
                     </div>
                   )}
                 </div>
@@ -863,7 +893,7 @@ const UI_USR_L_030 = () => {
         footer={(
           <>
             <button type="button" className="krds-btn tertiary medium" onClick={() => setPopupOpen(false)}>닫기</button>
-            <button type="button" className="krds-btn primary medium" onClick={() => { setSelectedIndustries(industryDraft); setPopupOpen(false); }}>적용</button>
+            <button type="button" className="krds-btn primary medium" onClick={() => { applyIndustrySelection(industryDraft); setPopupOpen(false); }}>적용</button>
           </>
         )}
       >
