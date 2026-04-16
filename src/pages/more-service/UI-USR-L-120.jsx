@@ -26,14 +26,40 @@ const UI_USR_L_120 = () => {
     setCurrentPage(0);
   };
 
+  // 드롭박스 옵션
+  const [certSystmFldNmList, setCertSystmFldNmList] = useState([]);
+  const [tkcgMaoNmList, setTkcgMaoNmList] = useState([]);
+
   // 입력용 (화면 표시용)
   const [searchType, setSearchType] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [certSystmFldNm, setCertSystmFldNm] = useState('');
+  const [tkcgMaoNm, setTkcgMaoNm] = useState('');
 
   // 전송용 (API 파라미터용)
   const [appliedSearchType, setAppliedSearchType] = useState('');
   const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
+  const [appliedCertSystmFldNm, setAppliedCertSystmFldNm] = useState('');
+  const [appliedTkcgMaoNm, setAppliedTkcgMaoNm] = useState('');
 
+  // 드롭박스 옵션 초기 로드
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      try {
+        const [fldRes, maoRes] = await Promise.all([
+          apiClient.get('/api/v1/product/certification/fld-nm-list'),
+          apiClient.get('/api/v1/product/certification/tkcg-mao-nm-list'),
+        ]);
+        setCertSystmFldNmList(fldRes.data || []);
+        setTkcgMaoNmList(maoRes.data || []);
+      } catch (error) {
+        console.error('필터 옵션 조회 실패:', error);
+      }
+    };
+    fetchFilterOptions();
+  }, []);
+
+  // 목록 조회
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -43,18 +69,18 @@ const UI_USR_L_120 = () => {
           size: pageSize,
         });
 
-        // 전송용 state 사용
         if (appliedSearchKeyword && appliedSearchKeyword.trim()) {
           params.append('searchKeyword', appliedSearchKeyword);
           params.append('searchType', appliedSearchType);
         }
+        if (appliedCertSystmFldNm) params.append('certSystmFldNm', appliedCertSystmFldNm);
+        if (appliedTkcgMaoNm) params.append('tkcgMaoNm', appliedTkcgMaoNm);
 
         const response = await apiClient.get(
           `/api/v1/product/certification?${params.toString()}`,
         );
 
         const data = response.data;
-
         setCertifications(data.content || []);
         setTotalElements(data.totalElements || 0);
         setTotalPages(data.totalPages || 0);
@@ -67,7 +93,7 @@ const UI_USR_L_120 = () => {
     };
 
     fetchData();
-  }, [currentPage, pageSize, appliedSearchType, appliedSearchKeyword]);
+  }, [currentPage, pageSize, appliedSearchType, appliedSearchKeyword, appliedCertSystmFldNm, appliedTkcgMaoNm]);
 
   // 페이지 변경 핸들러
   const handlePageChange = (page) => {
@@ -88,6 +114,8 @@ const UI_USR_L_120 = () => {
   const handleSearch = () => {
     setAppliedSearchType(searchType);
     setAppliedSearchKeyword(searchKeyword);
+    setAppliedCertSystmFldNm(certSystmFldNm);
+    setAppliedTkcgMaoNm(tkcgMaoNm);
     setCurrentPage(0);
   };
 
@@ -111,6 +139,26 @@ const UI_USR_L_120 = () => {
         {/* 검색 영역 */}
         <div className="search-top-box">
           <div className="sch-form-wrap">
+            <select
+              className="krds-form-select"
+              value={certSystmFldNm}
+              onChange={(e) => setCertSystmFldNm(e.target.value)}
+            >
+              <option value="">분야 전체</option>
+              {certSystmFldNmList.map((nm) => (
+                <option key={nm} value={nm}>{nm}</option>
+              ))}
+            </select>
+            <select
+              className="krds-form-select"
+              value={tkcgMaoNm}
+              onChange={(e) => setTkcgMaoNm(e.target.value)}
+            >
+              <option value="">소관부처 전체</option>
+              {tkcgMaoNmList.map((nm) => (
+                <option key={nm} value={nm}>{nm}</option>
+              ))}
+            </select>
             <select
               className="krds-form-select"
               value={searchType}
@@ -207,12 +255,15 @@ const UI_USR_L_120 = () => {
                       <span style={{ whiteSpace: 'nowrap' }}>{item.certSystmFldNm || '-'}</span>
                     </td>
                     <td className="al" style={{ wordBreak: 'break-word' }}>
-                      <a href="#" onClick={(e) => {
-                        e.preventDefault();
-                        goToDetail(item.certSystmId);
-                      }}>
-                        <span style={{ whiteSpace: 'nowrap' }}>{item.certSystmNm}</span>
-                      </a>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        style={{ whiteSpace: 'nowrap', cursor: 'pointer' }}
+                        onClick={() => goToDetail(item.certSystmId)}
+                        onKeyDown={(e) => e.key === 'Enter' && goToDetail(item.certSystmId)}
+                      >
+                        {item.certSystmNm}
+                      </span>
                     </td>
                     <td className="ac views">
                       <span>{item.itemCnt || 0}</span>
