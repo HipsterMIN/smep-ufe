@@ -447,6 +447,23 @@ const UI_USR_L_030 = () => {
     setPage(1);
   };
 
+  const applyHashtagFilter = (tag) => {
+    const keyword = String(tag || '').trim();
+    if (!keyword) return;
+
+    const nextFilters = {
+      ...filtersRef.current,
+      plcyFnncSrchTypeCd: '2',
+      plcyFnncSrchKwdCn: keyword,
+    };
+
+    filtersRef.current = nextFilters;
+    setFilters(nextFilters);
+    setAppliedFilters(nextFilters);
+    setCompareIds([]);
+    setPage(1);
+  };
+
   const searchIndustries = async () => {
     const ksicCd = industryKeyword.ksicCd.trim();
     const ksicNm = industryKeyword.ksicNm.trim();
@@ -864,7 +881,21 @@ const UI_USR_L_030 = () => {
                         </div>
                         <div className="card-btm">
                           {tagList(item.hashtags).slice(0, 4).map((tag) => (
-                            <span className="tag" key={`${item.plcyFnncGdsSn}-${tag}`}>{tag}</span>
+                            <span
+                              className="tag"
+                              key={`${item.plcyFnncGdsSn}-${tag}`}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => applyHashtagFilter(tag)}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                  event.preventDefault();
+                                  applyHashtagFilter(tag);
+                                }
+                              }}
+                            >
+                              {tag}
+                            </span>
                           ))}
                         </div>
                         <div className="card-btn">
