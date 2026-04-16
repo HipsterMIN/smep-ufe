@@ -108,8 +108,35 @@ export const getCodeLabel = (options, value) => {
   return matched?.label || value;
 };
 
+// 기업회원 ksic_cd는 기존 데이터에 5~6자리 세분류가 많아, 화면에서는 1자리 대분류를 파생해 레거시 select 계약과 맞춘다.
+export const extractTopLevelKsicCd = (value) => {
+  const normalized = String(value ?? '').trim().toUpperCase();
+  return normalized ? normalized.charAt(0) : '';
+};
+
+export const getKsicTopLevelLabel = (options, value) => {
+  const topLevelKsicCd = extractTopLevelKsicCd(value);
+  if (!topLevelKsicCd) {
+    return '-';
+  }
+  const matched = Array.isArray(options)
+    ? options.find((option) => option.value === topLevelKsicCd)
+    : null;
+  return matched?.label || topLevelKsicCd;
+};
+
 export const fetchCorporateMemberCodeOptions = async () =>
   fetchAndConvertCommonCodes(CORPORATE_MEMBER_COMMON_CODE_GROUPS);
+
+export const fetchKsicTopLevelOptions = async (apiClient) => {
+  const response = normalizeApiPayload(await apiClient.get('/api/v1/ksic/top-level'));
+  return Array.isArray(response)
+    ? response.map((item) => ({
+      value: item.ksicCd,
+      label: item.ksicNm,
+    }))
+    : [];
+};
 
 export const resolveCorporateMemberNo = async (apiClient, businessRegNo) => {
   const normalizedBusinessRegNo = normalizeDigits(businessRegNo);
