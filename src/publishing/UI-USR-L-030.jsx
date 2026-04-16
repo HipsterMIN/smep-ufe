@@ -675,8 +675,8 @@ const UI_USR_L_030 = () => {
                           </select>
                         </div>
                       </li>
-                      <li>
-                        <button type="button" className="krds-btn medium primary" onClick={() => setIsPopupOpen(true)} >
+                      <li className="margin-top13">
+                        <button type="button" className="krds-btn small primary" onClick={() => setIsPopupOpen(true)} >
                           <i className="svg-icon ico-round-check"></i>
                           상품비교
                         </button>

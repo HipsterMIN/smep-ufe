@@ -258,7 +258,7 @@ const UI_USR_L_040 = () => {
                     </th>
 
                     <td className="ac">
-                      <div className="title-box"><span>{item.prdocTtl}</span>
+                      <div className="title-box span-margin"><span>{item.prdocTtl}</span>
                         {item.elpblYn === 'Y' && (
                           <span className="krds-badge bg-light-primary">전자증명</span>
                         )}

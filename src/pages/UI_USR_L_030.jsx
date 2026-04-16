@@ -615,7 +615,7 @@ const UI_USR_L_030 = () => {
                     <input
                       type="text"
                       className="krds-input"
-                      placeholder="금융상품 조회를 위한 검색어를 입력해 주세요"
+                      placeholder="금융상품 검색어를 입력해 주세요"
                       title="검색어 입력"
                       value={filters.plcyFnncSrchKwdCn}
                       onChange={(e) => updateFilter('plcyFnncSrchKwdCn', e.target.value)}
@@ -780,8 +780,8 @@ const UI_USR_L_030 = () => {
                     </div>
                   </li>
                   {showCompare && (
-                    <li>
-                      <button type="button" className="krds-btn medium primary" onClick={openComparePopup} disabled={compareLoading}>
+                    <li className="margin-top13">
+                      <button type="button" className="krds-btn small primary" onClick={openComparePopup} disabled={compareLoading}>
                         <i className="svg-icon ico-round-check"></i>
                         상품비교
                       </button>
