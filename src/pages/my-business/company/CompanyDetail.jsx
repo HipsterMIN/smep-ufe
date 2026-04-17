@@ -6,7 +6,6 @@ import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import {
-  HELD_FIELD_PENDING_TEXT,
   buildCompanyAddress,
   fetchCorporateMemberCodeOptions,
   fetchCorporateMemberDetail,
@@ -181,7 +180,7 @@ const UI_USR_R_450 = () => {
                 </tr>
                 <tr>
                   <th scope="row" className="ac">소재지</th>
-                  <td colSpan="3">{loading ? '로딩 중...' : HELD_FIELD_PENDING_TEXT}</td>
+                  <td colSpan="3">{loading ? '로딩 중...' : '-'}</td>
                 </tr>
                 <tr>
                   <th scope="row" className="ac">간단설명</th>

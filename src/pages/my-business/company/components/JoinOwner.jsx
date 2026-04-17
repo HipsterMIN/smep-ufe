@@ -10,6 +10,8 @@ const renderValue = (value) => {
 const JoinOwner = ({
   isOpen,
   onClose,
+  searchName,
+  onSearchNameChange,
   searchLgnId,
   onSearchLgnIdChange,
   candidate,
@@ -39,7 +41,7 @@ const JoinOwner = ({
   >
     <div className="txt-box small bg-white gap-16">
       <h3 className="box-tit2">담당자 조회</h3>
-      <p className="box-sub">조회하실 담당자의 개인ID를 입력해 주세요.</p>
+      <p className="box-sub">조회하실 담당자의 개인ID를 입력하고, 필요 시 이름으로 한 번 더 좁혀 주세요.</p>
       <div className="box-cnt gap-8">
         <div className="form-group row-sm">
           <div className="form-tit">
@@ -50,8 +52,9 @@ const JoinOwner = ({
               type="text"
               id="join-owner-name"
               className="krds-input small w-260"
-              value={renderValue(candidate?.mbrNm)}
-              readOnly
+              value={searchName}
+              onChange={(event) => onSearchNameChange(event.target.value)}
+              placeholder="담당자 이름을 입력하세요"
             />
           </div>
         </div>

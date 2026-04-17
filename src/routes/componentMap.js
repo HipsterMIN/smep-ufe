@@ -48,6 +48,8 @@ const UI_USR_R_340 = lazy(() => import('@pages/customer-support/UI-USR-R-340.jsx
 const UI_USR_R_341 = lazy(() => import('@pages/customer-support/UI-USR-R-341.jsx'));
 const PlatformIntro = lazy(() => import('@pages/customer-support/PlatformIntro.jsx'));
 const VerifyPassword = lazy(() => import('@pages/my-business/VerifyPassword.jsx'));
+const UI_USR_W_411 = lazy( () => import('@pages/my-business/UI-USR-W-411.jsx'));
+
 const UI_USR_R_420 = lazy(() => import('@pages/my-business/UI-USR-R-420.jsx'));
 const UI_USR_W_430 = lazy(() => import('@pages/my-business/UI-USR-W-430.jsx'));
 const UI_USR_R_440 = lazy(() => import('@pages/my-business/UI-USR-R-440.jsx'));
@@ -477,7 +479,7 @@ export const componentMap = {
 
   // 회원정보변경
   'M_PIIO_00115': {
-    component: VerifyPassword, //from UI_USR_R_410
+    component: UI_USR_W_411, //from VerifyPassword UI-USR-W-411.jsx
     layout: SubpageLayoutWithMenu,
   },
 

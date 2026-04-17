@@ -23,12 +23,19 @@ const fetchCorporateContacts = async (mbrNo) => {
   return Array.isArray(response) ? response : [];
 };
 
-const fetchCorporateContactCandidate = async (mbrNo, lgnId) =>
-  normalizeApiPayload(
+const fetchCorporateContactCandidate = async (mbrNo, lgnId, mbrNm) => {
+  const query = new URLSearchParams();
+  if (mbrNm) {
+    query.set('mbrNm', mbrNm);
+  }
+
+  const suffix = query.size > 0 ? `?${query.toString()}` : '';
+  return normalizeApiPayload(
     await apiClient.get(
-      `/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/contacts/candidates/${encodeURIComponent(lgnId)}`,
+      `/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/contacts/candidates/${encodeURIComponent(lgnId)}${suffix}`,
     ),
   );
+};
 
 const createCorporateContact = async (mbrNo, entPicMbrNo) =>
   normalizeApiPayload(
@@ -82,6 +89,7 @@ const UI_USR_L_460 = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [joinPopupOpen, setJoinPopupOpen] = useState(false);
+  const [joinSearchName, setJoinSearchName] = useState('');
   const [joinSearchLgnId, setJoinSearchLgnId] = useState('');
   const [joinSearching, setJoinSearching] = useState(false);
   const [joinSubmitting, setJoinSubmitting] = useState(false);
@@ -158,6 +166,7 @@ const UI_USR_L_460 = () => {
 
   const resetJoinPopupState = () => {
     setJoinPopupOpen(false);
+    setJoinSearchName('');
     setJoinSearchLgnId('');
     setJoinCandidate(null);
     setJoinErrorMessage('');
@@ -180,6 +189,18 @@ const UI_USR_L_460 = () => {
     setFeedbackMessage('');
   };
 
+  const handleJoinSearchNameChange = (value) => {
+    setJoinSearchName(value);
+    setJoinCandidate(null);
+    setJoinErrorMessage('');
+  };
+
+  const handleJoinSearchLgnIdChange = (value) => {
+    setJoinSearchLgnId(value);
+    setJoinCandidate(null);
+    setJoinErrorMessage('');
+  };
+
   const handleOpenJoinPopup = () => {
     setFeedbackMessage('');
     resetJoinPopupState();
@@ -197,6 +218,7 @@ const UI_USR_L_460 = () => {
 
   const handleSearchCandidate = async () => {
     const normalizedLgnId = joinSearchLgnId.trim();
+    const normalizedName = joinSearchName.trim();
     if (!normalizedLgnId) {
       setJoinErrorMessage('개인회원 아이디를 입력해주세요.');
       setJoinCandidate(null);
@@ -208,7 +230,11 @@ const UI_USR_L_460 = () => {
     setJoinCandidate(null);
 
     try {
-      const candidate = await fetchCorporateContactCandidate(effectiveMemberNo, normalizedLgnId);
+      const candidate = await fetchCorporateContactCandidate(
+        effectiveMemberNo,
+        normalizedLgnId,
+        normalizedName,
+      );
       setJoinCandidate(candidate);
     } catch (error) {
       console.error('기업담당자 등록 후보 조회 실패:', error);
@@ -273,6 +299,11 @@ const UI_USR_L_460 = () => {
 
   const handleDeleteContacts = async () => {
     if (selectedContacts.length < 1) {
+      return;
+    }
+
+    const shouldDelete = window.confirm('선택하신 담당자를 삭제하시겠습니까?');
+    if (!shouldDelete) {
       return;
     }
 
@@ -440,8 +471,10 @@ const UI_USR_L_460 = () => {
       <JoinOwner
         isOpen={joinPopupOpen}
         onClose={resetJoinPopupState}
+        searchName={joinSearchName}
+        onSearchNameChange={handleJoinSearchNameChange}
         searchLgnId={joinSearchLgnId}
-        onSearchLgnIdChange={setJoinSearchLgnId}
+        onSearchLgnIdChange={handleJoinSearchLgnIdChange}
         candidate={joinCandidate}
         searching={joinSearching}
         submitting={joinSubmitting}
