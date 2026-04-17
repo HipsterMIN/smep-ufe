@@ -134,10 +134,8 @@ const UI_USR_L_040 = () => {
         </p>
 
         {/* guide */}
-        <ul className="krds-info-list decimal mt-24" role="list">
-          <li role="listitem"><strong>자주 찾는 증명(확인)서</strong></li>
-          <li role="listitem">아래 증명(확인서)는 <strong>최근 누적 발급건수가 많은 증명(확인서)</strong>목록입니다.</li>
-        </ul>
+        <div class="conts-wrap mt-40"><h3 class="sec-tit">자주 찾는 증명(확인)서</h3>
+        <p class="conts-desc">아래 증명(확인서)는 <strong>최근 누적 발급건수가 많은 증명(확인서)</strong>목록입니다.</p></div>
 
         <ul className="krds-structured-list small mt-24">
           {topCertificateList.map((item, index) => (

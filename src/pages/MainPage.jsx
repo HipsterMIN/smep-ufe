@@ -7,10 +7,17 @@ import Header from '@components/ui/Header.jsx';
 import Footer from '@components/ui/Footer.jsx';
 import Work24VirtualKeyboard from '@components/ui/work24-keyboard/Work24VirtualKeyboard.jsx';
 import mainIcon01 from '@assets/main/mainIcon_01.svg';
+import mainIcon02 from '@assets/main/mainIcon_02.svg';
 import mainIcon03 from '@assets/main/mainIcon_03.svg';
 import mainIcon04 from '@assets/main/mainIcon_04.svg';
+import mainIcon05 from '@assets/main/mainIcon_05.svg';
 import mainIcon06 from '@assets/main/mainIcon_06.svg';
 import mainIcon07 from '@assets/main/mainIcon_07.svg';
+import mainIcon08 from '@assets/main/mainIcon_08.svg';
+import mainIcon09 from '@assets/main/mainIcon_09.svg';
+import mainIcon10 from '@assets/main/mainIcon_10.svg';
+import mainIcon11 from '@assets/main/mainIcon_11.svg';
+import mainIcon12 from '@assets/main/mainIcon_12.svg';
 import mainBanner from '@assets/temp/main_banner_1.png';
 import { api as apiClient } from '@lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
@@ -219,57 +226,54 @@ const MainPage = () => {
   const platformMenus = [
     {
       img: mainIcon01,
-      title: (
-        <>
-          <span className="mo-hide">신청 가능한</span>{' '}
-          <br className="pc-only" />
-          사업공고 찾기
-        </>
-      ),
+      title: '사업공고',
       path: '/req/pbanc',
     },
     {
-      img: mainIcon07,
-      title: (
-        <>
-          <span className="mo-hide">중소벤처기업부</span>{' '}
-          <br className="pc-only" />
-          지원사업 보기
-        </>
-      ),
-      path: '/req/sprt',
+      img: mainIcon03,
+      title: '증명서 발급',
+      path: '/crtf/UI_USR_L_040',
+    },
+    {
+      img: mainIcon09,
+      title: '정책뉴스',
+      path: '/plcy/reprt/plcyNews',
     },
     {
       img: mainIcon04,
-      title: (
-        <>
-          <span className="mo-hide">융자 보증 보험</span>정책 금융상품 찾기
-        </>
-      ),
+      title: '정책금융상품',
       path: '/req/UI_USR_L_030',
     },
     {
-      img: mainIcon03,
-      title: (
-        <>
-          중소기업 <span className="mo-hide">(소상공인)</span>확인서 발급하기
-        </>
-      ),
-      path: '/crtf/UI_USR_L_040/Y107',
+      img: mainIcon11,
+      title: '행사정보',
+      path: '/plcy/reprt/UI_USR_L_190',
     },
     {
-      img: mainIcon03,
-      title: (
-        <>
-          직접생산확인 <br /> 증명서 발급하기
-        </>
-      ),
-      path: '/crtf/UI_USR_L_040/Y101',
+      img: mainIcon07,
+      title: '지원사업 소개',
+      path: '/req/sprt',
     },
     {
-      img: mainIcon06,
-      title: '입법행정예고/고시',
+      img: mainIcon08,
+      title: '입법·행정예고/고시',
       path: '/plcy/icr/UI_USR_L_110',
+    },
+     {
+      img: mainIcon06,
+      title: '입주기업 모집공고 ',
+      path: '/req/UI_USR_L_180',
+    },
+    {
+      img: mainIcon10,
+      title: '공지사항',
+      path: '/cs/csc/notice',
+    },
+
+    {
+      img: mainIcon12, 
+      title: '자주하는 질문',
+      path: '/cs/csc/faq',
     },
   ];
 
