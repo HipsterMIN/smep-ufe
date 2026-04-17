@@ -52,8 +52,8 @@ export async function apiFetch(path, { method = 'GET', headers = {}, body, token
     delete init.headers['Content-Type'];
     init.body = body;
   }
-
-  const res = await fetch(buildUrl(path), init);
+  //todo 임시로 /home-dev 붙여놈
+  const res = await fetch('/home-dev'+buildUrl(path), init);
   if (!raw) {
     const contentType = res.headers.get('content-type') || '';
     if (contentType.includes('application/json')) {
