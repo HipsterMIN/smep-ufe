@@ -51,13 +51,16 @@ const UI_USR_L_050 = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // 숫자만 허용 (숫자 외 문자 자동 제거)
+    const sanitized = name === 'prdocIssuAplyNo' ? value.replace(/\D/g, '') : value;
+
     setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: sanitized,
     }));
-    setError(''); // 입력 시 에러 초기화
+    setError('');
   };
-
   const handleVerify = async () => {
     // 유효성 검증
     if (!formData.prdocCd) {

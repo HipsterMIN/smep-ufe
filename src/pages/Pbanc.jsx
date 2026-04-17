@@ -44,17 +44,22 @@ const Pbanc = () => {
   };
 
   const buildParams = useCallback(
-    (pageParam) => {
+    (pageParam, overrides = {}) => {
       const params = new URLSearchParams();
+      const nextSearchText = overrides.searchText ?? searchText;
+      const nextSearchType = overrides.searchType ?? searchType;
+      const nextBizPbancClsfCd = overrides.bizPbancClsfCd ?? bizPbancClsfCd;
+      const nextApplyStatus = overrides.applyStatus ?? applyStatus;
+
       params.set('page', String(pageParam));
       params.set('size', String(size));
       params.set('sortType', sortType);
       params.set('bizPbancTypeCd', bizPbancTypeCd);
 
-      if (searchText.trim()) params.set('searchText', searchText.trim());
-      if (searchType) params.set('searchType', searchType);
-      if (bizPbancClsfCd) params.set('bizPbancClsfCd', bizPbancClsfCd);
-      if (applyStatus) params.set('applyStatus', applyStatus);
+      if (nextSearchText.trim()) params.set('searchText', nextSearchText.trim());
+      if (nextSearchType) params.set('searchType', nextSearchType);
+      if (nextBizPbancClsfCd) params.set('bizPbancClsfCd', nextBizPbancClsfCd);
+      if (nextApplyStatus) params.set('applyStatus', nextApplyStatus);
 
       return params.toString();
     },
@@ -62,9 +67,9 @@ const Pbanc = () => {
   );
 
   const search = useCallback(
-    async (pageParam = 1) => {
+    async (pageParam = 1, overrides = {}) => {
       const requestId = ++latestRequestIdRef.current;
-      const data = await apiClient.get(`/api/v1/pbanc?${buildParams(pageParam)}`);
+      const data = await apiClient.get(`/api/v1/pbanc?${buildParams(pageParam, overrides)}`);
       if (requestId !== latestRequestIdRef.current) {
         return;
       }
@@ -80,6 +85,16 @@ const Pbanc = () => {
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') search(1);
+  };
+
+  const handleBizFieldChange = (nextBizPbancClsfCd) => {
+    setBizPbancClsfCd(nextBizPbancClsfCd);
+    search(1, { bizPbancClsfCd: nextBizPbancClsfCd });
+  };
+
+  const handleApplyStatusChange = (nextApplyStatus) => {
+    setApplyStatus(nextApplyStatus);
+    search(1, { applyStatus: nextApplyStatus });
   };
 
   useEffect(() => {
@@ -188,7 +203,7 @@ const Pbanc = () => {
                   id="appl-sch-sel1"
                   className="krds-form-select medium"
                   value={bizPbancClsfCd}
-                  onChange={(e) => setBizPbancClsfCd(e.target.value)}
+                  onChange={(e) => handleBizFieldChange(e.target.value)}
                 >
                   <option value="">전체</option>
                   {bizFieldOptions.map((option) => (
@@ -203,7 +218,7 @@ const Pbanc = () => {
                   id="appl-sch-sel2"
                   className="krds-form-select medium"
                   value={applyStatus}
-                  onChange={(e) => setApplyStatus(e.target.value)}
+                  onChange={(e) => handleApplyStatusChange(e.target.value)}
                 >
                   <option value="">전체</option>
                   <option value="AVAILABLE">신청가능</option>

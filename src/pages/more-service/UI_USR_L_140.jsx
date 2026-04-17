@@ -34,7 +34,7 @@ const UI_USR_L_140 = () => {
   );
   const [loading, setLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
 
   const [sidoList, setSidoList] = useState([]);
   const [sigunguList, setSigunguList] = useState([]);
@@ -93,23 +93,23 @@ const UI_USR_L_140 = () => {
           searchType: appliedSearchType,
           searchKeyword: appliedSearchKeyword,
           page: currentPage + 1,
+          size: pageSize,
         },
       });
       const res = response.data.data;
       setList(res.content ?? []);
       setTotalCount(res.totalElements ?? 0);
       setTotalPages(res.totalPages ?? 0);
-      setPageSize(res.size ?? 20);
     } catch (error) {
       console.error('목록 조회 실패:', error);
     } finally {
       setLoading(false);
     }
-  }, [activeTabIndex, appliedSdoCd, appliedSigunguCd, appliedSearchType, appliedSearchKeyword, currentPage]);
+  }, [activeTabIndex, appliedSdoCd, appliedSigunguCd, appliedSearchType, appliedSearchKeyword, currentPage, pageSize]); // ← pageSize 추가
 
   useEffect(() => {
     fetchList();
-  }, [activeTabIndex, appliedSdoCd, appliedSigunguCd, appliedSearchType, appliedSearchKeyword, currentPage]);
+  }, [activeTabIndex, appliedSdoCd, appliedSigunguCd, appliedSearchType, appliedSearchKeyword, currentPage, pageSize]); // ← pageSize 추가
 
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
@@ -177,7 +177,17 @@ const UI_USR_L_140 = () => {
     );
   };
 
+  // ← 추가
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setCurrentPage(0);
+  };
+
   const handleRowClick = (item) => {
+    // ← 포커스 버그 수정: 팝업 열기 전 현재 포커스 해제
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     setSelectedItem(item);
     setIsOpen(true);
   };
@@ -397,6 +407,22 @@ const UI_USR_L_140 = () => {
       <div className="search-list-top">
         <ul className="sch-info" aria-live="polite">
           <li>검색 결과 <span className="point">{formatNumberWithCommas(totalCount || 0)}</span>개</li>
+        </ul>
+        {/* ← 목록 표시 개수 추가 */}
+        <ul className="sch-sort">
+          <li>
+            <strong className="sort-label"><label htmlFor="sort_page_size">목록 표시 개수</label></strong>
+            <select
+              className="krds-form-select-sort"
+              id="sort_page_size"
+              value={String(pageSize)}
+              onChange={handlePageSizeChange}
+            >
+              <option value="10">10개</option>
+              <option value="20">20개</option>
+              <option value="50">50개</option>
+            </select>
+          </li>
         </ul>
       </div>
 
