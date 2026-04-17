@@ -10,7 +10,8 @@ const API_CONTEXT = (import.meta.env.VITE_API_CONTEXT || '').replace(/^\/?/, '/'
 const APP_BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
 // 모든 API 호출은 /home-dev/api/... 또는 /home/api/... 형태로 시작하도록 구성
-export const apiBaseUrl = `${APP_BASE}${API_CONTEXT}`.replace(/\/$/, '');
+//todo 임시로 /home-dev 붙여놈
+export const apiBaseUrl = `/home-dev${APP_BASE}${API_CONTEXT}`.replace(/\/$/, '');
 
 function buildUrl(path) {
   if (!path) return apiBaseUrl;
@@ -52,8 +53,8 @@ export async function apiFetch(path, { method = 'GET', headers = {}, body, token
     delete init.headers['Content-Type'];
     init.body = body;
   }
-  //todo 임시로 /home-dev 붙여놈
-  const res = await fetch('/home-dev'+buildUrl(path), init);
+
+  const res = await fetch(buildUrl(path), init);
   if (!raw) {
     const contentType = res.headers.get('content-type') || '';
     if (contentType.includes('application/json')) {
