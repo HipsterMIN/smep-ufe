@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Popup from '@components/ui/Popup';
 
-const UI_USR_P_216 = () => {
+const ApiKeyForm = () => {
   // 팝업 동작
   const [isPopupOpen, setIsPopupOpen] = useState(false); 
 
@@ -194,4 +194,4 @@ const UI_USR_P_216 = () => {
   );
 };
 
-export default UI_USR_P_216;
+export default ApiKeyForm;

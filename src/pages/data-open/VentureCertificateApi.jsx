@@ -1,14 +1,53 @@
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import ApiKeyForm from './ApiKeyForm';
+import {useState} from "react"; // 팝업 컴포넌트
 
-const UI_USR_R_214 = () => {
+const VentureCertificateApi = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+
+  // 팝업 관련 상태 관리 (UI_USR_L_460 방식)
+  const [applyPopupOpen, setApplyPopupOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // ✅ 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+
+  // 팝업 열기 핸들러
+  const handleOpenApplyPopup = () => {
+    setErrorMessage('');
+    setApplyPopupOpen(true);
+  };
+
+  // 팝업 닫기(초기화) 핸들러
+  const resetApplyPopupState = () => {
+    setApplyPopupOpen(false);
+    setSubmitting(false);
+    setErrorMessage('');
+  };
+
+  // 실제 신청 처리 핸들러
+  const handleApplySubmit = async () => {
+    setSubmitting(true);
+    setErrorMessage('');
+
+    try {
+      // 여기에 API 호출 로직 추가 (예: await apiClient.post(...))
+      console.log("신청 로직 실행");
+
+      // 성공 시 팝업 닫기
+      resetApplyPopupState();
+      alert('인증키 신청이 완료되었습니다.');
+    } catch (error) {
+      setErrorMessage(error?.message || '신청 중 오류가 발생했습니다.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -199,16 +238,16 @@ const UI_USR_R_214 = () => {
             </button>
           </div>
           <div> 
-            <button type="button" className="krds-btn primary xlarge">
+            <button type="button" className="krds-btn primary xlarge"
+                    onClick={handleOpenApplyPopup}>
               신청하기
               <i className="svg-icon ico-angle right"></i>
             </button>
           </div>
         </div>
-
       </div> 
     </>
   );
 };
 
-export default UI_USR_R_214;
+export default VentureCertificateApi;

@@ -30,14 +30,14 @@ const EntrSpt = lazy(() => import('@pages/more-service/EntrSpt.jsx'));
 const EntrSptDetail = lazy(() => import('@pages/more-service/EntrSptDetail.jsx'));
 const RelatedSystems = lazy(() => import('@pages/more-service/RelatedSystems.jsx'));
 const UI_USR_L_170 = lazy(() => import('@pages/more-service/UI_USR_L_170.jsx'));
-const UI_USR_L_210 = lazy(() => import('@pages/data-open/UI-USR-L-210.jsx'));
+const ApiInfo = lazy(() => import('@pages/data-open/ApiInfo.jsx'));
 const UI_USR_L_220 = lazy(() => import('@pages/data-open/UI-USR-L-220.jsx'));
 const UI_USR_L_230 = lazy(() => import('@pages/data-open/UI-USR-L-230.jsx'));
-const UI_USR_R_211 = lazy(() => import('@pages/data-open/UI-USR-R-211.jsx'));
-const UI_USR_R_212 = lazy(() => import('@pages/data-open/UI-USR-R-212.jsx'));
-const UI_USR_R_213 = lazy(() => import('@pages/data-open/UI-USR-R-213.jsx'));
-const UI_USR_R_214 = lazy(() => import('@pages/data-open/UI-USR-R-214.jsx'));
-const UI_USR_R_215 = lazy(() => import('@pages/data-open/UI-USR-R-215.jsx'));
+const SupportBusinessInfoApi = lazy(() => import('@pages/data-open/SupportBusinessInfoApi.jsx'));
+const EventInfoApi = lazy(() => import('@pages/data-open/EventInfoApi.jsx'));
+const InnoBizCertificateApi = lazy(() => import('@pages/data-open/InnoBizCertificateApi.jsx'));
+const VentureCertificateApi = lazy(() => import('@pages/data-open/VentureCertificateApi.jsx'));
+const MainBizCertificateApi = lazy(() => import('@pages/data-open/MainBizCertificateApi.jsx'));
 const UI_USR_R_232 = lazy(() => import('@pages/data-open/UI-USR-R-232.jsx'));
 const UI_USR_W_231 = lazy(() => import('@pages/data-open/UI-USR-W-231.jsx'));
 const BoardResolver = lazy(() => import('@pages/board/BoardResolver.jsx'));
@@ -58,9 +58,9 @@ const UI_USR_W_452 = lazy(() => import('@pages/my-business/company/CompanyEdit.j
 const UI_USR_L_460 = lazy(() => import('@pages/my-business/company/ReassignOwner.jsx'));
 const UI_USR_L_020 = lazy(() => import('@pages/UI-USR-L-020.jsx'));
 const UI_USR_L_520 = lazy(() => import('@pages/my-business/UI-USR-L-520.jsx'));
-const UI_USR_L_530 = lazy(() => import('@pages/my-business/UI-USR-L-530.jsx'));
+const ScrapList = lazy(() => import('@pages/my-business/ScrapList.jsx'));
 const UI_USR_L_540 = lazy(() => import('@pages/my-business/UI-USR-L-540.jsx'));
-const UI_USR_L_550 = lazy(() => import('@pages/my-business/UI-USR-L-550.jsx'));
+const MyApiRequestList = lazy(() => import('@pages/my-business/MyApiRequestList.jsx'));
 const UI_USR_L_100 = lazy(() => import('@pages/policy-info/UI_USR_L_100.jsx'));
 const UI_USR_R_101 = lazy(() => import('@pages/policy-info/UI_USR_R_101.jsx'));
 const UI_USR_L_110 = lazy(() => import('@pages/policy-info/UI_USR_L_110.jsx'));
@@ -375,14 +375,14 @@ export const componentMap = {
 
   // API 안내
   'M_PIIO_00096': {
-    component: UI_USR_L_210,
+    component: ApiInfo,
     layout: SubpageLayoutWithMenu,
     children: [
-      { path: 'a', component: UI_USR_R_211 }, // API_지원사업정보 상세
-      { path: 'b', component: UI_USR_R_212 }, // API_행사정보 API 상세
-      { path: 'c', component: UI_USR_R_213 }, // API_이노비즈확인서 상세
-      { path: 'd', component: UI_USR_R_214 }, // API_벤처기업확인서 상세
-      { path: 'e', component: UI_USR_R_215 }, // API_메인비즈확인서 상세
+      { path: 'supportBusinessInfoApi', component: SupportBusinessInfoApi }, // API_지원사업정보 상세
+      { path: 'eventInfoApi', component: EventInfoApi }, // API_행사정보 API 상세
+      { path: 'innoBizCertificateApi', component: InnoBizCertificateApi }, // API_이노비즈확인서 상세
+      { path: 'ventureCertificateApi', component: VentureCertificateApi }, // API_벤처기업확인서 상세
+      { path: 'mainBizCertificateApi', component: MainBizCertificateApi }, // API_메인비즈확인서 상세
     ],
   },
 
@@ -533,7 +533,7 @@ export const componentMap = {
 
   // 관심 공고
   'M_PIIO_00123': {
-    component: UI_USR_L_530,
+    component: ScrapList,
     layout: SubpageLayoutWithMenu,
   },
 
@@ -545,7 +545,7 @@ export const componentMap = {
 
   // 나의 Open API 신청내역
   'M_PIIO_00125': {
-    component: UI_USR_L_550,
+    component: MyApiRequestList,
     layout: SubpageLayoutWithMenu,
   },
 

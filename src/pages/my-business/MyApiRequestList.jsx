@@ -15,7 +15,7 @@ const OPEN_API_REQUEST_HISTORY_MOCK = Array.from({ length: 12 }, (_, index) => (
   useYn: index % 3 === 0 ? 'N' : 'Y',
 }));
 
-const UI_USR_L_550 = () => {
+const MyApiRequestList = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -131,4 +131,4 @@ const UI_USR_L_550 = () => {
   );
 };
 
-export default UI_USR_L_550;
+export default MyApiRequestList;
