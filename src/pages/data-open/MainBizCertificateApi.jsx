@@ -1,7 +1,7 @@
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 
-const UI_USR_R_215 = () => {
+const MainBizCertificateApi = () => {
 
   const navigationData = {
     depth1Title: '신청·발급',
@@ -239,4 +239,4 @@ const UI_USR_R_215 = () => {
   );
 };
 
-export default UI_USR_R_215;
+export default MainBizCertificateApi;

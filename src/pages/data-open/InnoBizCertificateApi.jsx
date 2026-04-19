@@ -2,7 +2,7 @@ import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
-const UI_USR_R_213 = () => {
+const InnoBizCertificateApi = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
@@ -211,4 +211,4 @@ const UI_USR_R_213 = () => {
   );
 };
 
-export default UI_USR_R_213;
+export default InnoBizCertificateApi;
