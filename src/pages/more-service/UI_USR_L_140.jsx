@@ -74,9 +74,9 @@ const UI_USR_L_140 = () => {
     }
     const fetchSigunguList = async () => {
       try {
-        const response = await apiClient.get('/api/v1/stdg/sigungu', {
-          params: { sidoCd: sdoCd },
-        });
+        const response = await apiClient.get(
+          `/api/v1/stdg/sigungu?sidoCd=${encodeURIComponent(sdoCd)}`,
+        );
         setSigunguList(response.data ?? []);
         setSigunguCd('');
       } catch (error) {
@@ -104,7 +104,7 @@ const UI_USR_L_140 = () => {
         params.append('searchType', appliedSearchType);
       }
 
-      const response = await apiClient.get(           // ← 교체
+      const response = await apiClient.get(
         `/api/v1/bizm/cstm-spcltyent/list?${params.toString()}`,
       );
 
