@@ -9,6 +9,11 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
+const stripHtmlTags = (value) => {
+  if (!value) return '';
+  return String(value).replace(/<[^>]*>/g, '').trim();
+};
+
 const BoardFaq = ({ boardDetail, bbsNo }) => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const [searchParams] = useSearchParams();
@@ -274,7 +279,7 @@ const BoardFaq = ({ boardDetail, bbsNo }) => {
                 <Accordion.Header>
                   <div className="accordion-title">
                     <span className="krds-badge bg-light-primary">{item?.ctgryNm || 'FAQ'}</span>
-                    <p className="onellipsis-1">{item?.pstTtl || '-'}</p>
+                    <p className="onellipsis-1">{stripHtmlTags(item?.pstTtl) || '-'}</p>
                   </div>
                 </Accordion.Header>
                 <Accordion.Panel>
