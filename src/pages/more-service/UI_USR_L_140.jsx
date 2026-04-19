@@ -4,7 +4,7 @@ import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Tab from '@components/ui/Tab.jsx';
 import Pagination from '@components/ui/Pagination.jsx';
 import Popup from '@components/ui/Popup.jsx';
-import http from '@lib/http.js';
+import { api as apiClient } from '@lib/apiClient.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useSearchParams } from 'react-router-dom';
@@ -52,11 +52,12 @@ const UI_USR_L_140 = () => {
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
 
+  // 시도 목록 조회
   useEffect(() => {
     const fetchSidoList = async () => {
       try {
-        const response = await http.get('/api/v1/stdg/sido');
-        setSidoList(response.data.data ?? []);
+        const response = await apiClient.get('/api/v1/stdg/sido');
+        setSidoList(response.data ?? []);
       } catch (error) {
         console.error('시도 목록 조회 실패:', error);
       }
@@ -64,6 +65,7 @@ const UI_USR_L_140 = () => {
     fetchSidoList();
   }, []);
 
+  // 시군구 목록 조회
   useEffect(() => {
     if (!sdoCd) {
       setSigunguList([]);
@@ -72,8 +74,10 @@ const UI_USR_L_140 = () => {
     }
     const fetchSigunguList = async () => {
       try {
-        const response = await http.get('/api/v1/stdg/sigungu', { params: { sidoCd: sdoCd } });
-        setSigunguList(response.data.data ?? []);
+        const response = await apiClient.get('/api/v1/stdg/sigungu', {
+          params: { sidoCd: sdoCd },
+        });
+        setSigunguList(response.data ?? []);
         setSigunguCd('');
       } catch (error) {
         console.error('시군구 목록 조회 실패:', error);
@@ -82,34 +86,43 @@ const UI_USR_L_140 = () => {
     fetchSigunguList();
   }, [sdoCd]);
 
+  // 목록 조회
   const fetchList = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await http.get('/api/v1/bizm/cstm-spcltyent/list', {
-        params: {
-          cstmTelgmEntClsfCd: TAB_CLSF_CD[activeTabIndex],
-          sdoCd: appliedSdoCd,
-          sigunguCd: appliedSigunguCd,
-          searchType: appliedSearchType,
-          searchKeyword: appliedSearchKeyword,
-          page: currentPage + 1,
-          size: pageSize,
-        },
+
+      const params = new URLSearchParams({
+        cstmTelgmEntClsfCd: TAB_CLSF_CD[activeTabIndex],
+        page: currentPage + 1,
+        size: pageSize,
       });
-      const res = response.data.data;
+
+      if (appliedSdoCd) params.append('sdoCd', appliedSdoCd);
+      if (appliedSigunguCd) params.append('sigunguCd', appliedSigunguCd);
+      if (appliedSearchKeyword && appliedSearchKeyword.trim()) {
+        params.append('searchKeyword', appliedSearchKeyword);
+        params.append('searchType', appliedSearchType);
+      }
+
+      const response = await apiClient.get(           // ← 교체
+        `/api/v1/bizm/cstm-spcltyent/list?${params.toString()}`,
+      );
+
+      const res = response.data;
       setList(res.content ?? []);
       setTotalCount(res.totalElements ?? 0);
       setTotalPages(res.totalPages ?? 0);
     } catch (error) {
       console.error('목록 조회 실패:', error);
+      setList([]);
     } finally {
       setLoading(false);
     }
-  }, [activeTabIndex, appliedSdoCd, appliedSigunguCd, appliedSearchType, appliedSearchKeyword, currentPage, pageSize]); // ← pageSize 추가
+  }, [activeTabIndex, appliedSdoCd, appliedSigunguCd, appliedSearchType, appliedSearchKeyword, currentPage, pageSize]);
 
   useEffect(() => {
     fetchList();
-  }, [activeTabIndex, appliedSdoCd, appliedSigunguCd, appliedSearchType, appliedSearchKeyword, currentPage, pageSize]); // ← pageSize 추가
+  }, [fetchList]);
 
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
@@ -177,14 +190,12 @@ const UI_USR_L_140 = () => {
     );
   };
 
-  // ← 추가
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
     setCurrentPage(0);
   };
 
   const handleRowClick = (item) => {
-    // ← 포커스 버그 수정: 팝업 열기 전 현재 포커스 해제
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
@@ -408,19 +419,18 @@ const UI_USR_L_140 = () => {
         <ul className="sch-info" aria-live="polite">
           <li>검색 결과 <span className="point">{formatNumberWithCommas(totalCount || 0)}</span>개</li>
         </ul>
-        {/* ← 목록 표시 개수 추가 */}
         <ul className="sch-sort">
           <li>
             <strong className="sort-label"><label htmlFor="sort_page_size">목록 표시 개수</label></strong>
             <select
               className="krds-form-select-sort"
               id="sort_page_size"
-              value={String(pageSize)}
+              value={pageSize}
               onChange={handlePageSizeChange}
             >
-              <option value="10">10개</option>
-              <option value="20">20개</option>
-              <option value="50">50개</option>
+              <option value={10}>10개</option>
+              <option value={20}>20개</option>
+              <option value={50}>50개</option>
             </select>
           </li>
         </ul>
