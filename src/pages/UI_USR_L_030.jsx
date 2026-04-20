@@ -136,6 +136,24 @@ const asPlainText = (value, fallback = '-') => {
   const text = stripHtml(value);
   return text || fallback;
 };
+const stripHtmlKeepLineBreaks = (value) => {
+  const text = String(value || '')
+    .replace(/&lt;\s*br\s*\/?\s*&gt;/gi, '\n')
+    .replace(/<\s*br\s*\/?\s*>/gi, '\n')
+    .replace(/&nbsp;|&#160;|&#xA0;/gi, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\u00a0/g, ' ');
+
+  return text
+    .split('\n')
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join('\n');
+};
+const asPlainTextWithLineBreaks = (value, fallback = '-') => {
+  const text = stripHtmlKeepLineBreaks(value);
+  return text || fallback;
+};
 const splitMultiValue = (value) => String(value || '').split(/\s*,\s*/).map((item) => item.trim()).filter(Boolean);
 const toCodeMap = (options = []) => options.reduce((acc, item) => {
   acc[String(item.code).trim()] = item.name;
@@ -245,14 +263,14 @@ const getCompareValue = (item, row, filterOptions) => {
   if (!item) return '-';
   const codeMap = row.format ? toCodeMap(filterOptions[row.format] || []) : null;
   if (row.key) {
-    if (codeMap && hasValue(item[row.key])) return decodeByMap(item[row.key], codeMap);
-    return asText(item[row.key]);
+    if (codeMap && hasValue(item[row.key])) return asPlainTextWithLineBreaks(decodeByMap(item[row.key], codeMap));
+    return asPlainTextWithLineBreaks(item[row.key]);
   }
   if (row.values) {
     const matched = row.values.find((key) => hasValue(item[key]));
     if (!matched) return '-';
-    if (codeMap) return decodeByMap(item[matched], codeMap);
-    return asText(item[matched]);
+    if (codeMap) return asPlainTextWithLineBreaks(decodeByMap(item[matched], codeMap));
+    return asPlainTextWithLineBreaks(item[matched]);
   }
   return '-';
 };
@@ -1084,8 +1102,8 @@ const UI_USR_L_030 = () => {
                 {compareRows.map((row) => (
                   <tr key={row.label}>
                     <th scope="row" className="ac">{row.label}</th>
-                    <td>{getCompareValue(compareItems[0], row, filterOptions)}</td>
-                    <td>{getCompareValue(compareItems[1], row, filterOptions)}</td>
+                    <td style={{ whiteSpace: 'pre-line' }}>{getCompareValue(compareItems[0], row, filterOptions)}</td>
+                    <td style={{ whiteSpace: 'pre-line' }}>{getCompareValue(compareItems[1], row, filterOptions)}</td>
                   </tr>
                 ))}
               </tbody>
