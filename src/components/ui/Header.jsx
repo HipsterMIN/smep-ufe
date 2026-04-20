@@ -87,7 +87,17 @@ export default function Header() {
       }));
   }, [menuTree, flatMenuMap]);
 
-  const handleLogin = () => {
+  const handleServiceLogin = () => {
+    navigate('/service/login');
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  // 기존 로그인 버튼에서는 분리했고, 추후 통합로그인 버튼이 생기면 이 함수에 연결한다.
+  const handleIntegratedLogin = () => {
     const loginWindow = window.open('about:blank', 'login-popup', 'width=1050,height=1000');
     const allowedOrigins = new Set([window.location.origin]);
 
@@ -186,7 +196,6 @@ export default function Header() {
         openFallback(`${basePath}service/SSO-login`);
       }
     };
-
     void openLoginPopup();
   };
 
@@ -375,8 +384,8 @@ export default function Header() {
                       currentCompany={currentCompany}
                       linkedCompanies={linkedCompanies}
                       user={user}
-                      onLogin={handleLogin}
-                      onLogout={logout}
+                      onLogin={handleServiceLogin}
+                      onLogout={handleLogout}
                       onMyPage={handleMyPage}
                       onSwitchContext={async (companyId) => {
                         if (!token) {
@@ -418,6 +427,8 @@ export default function Header() {
           ref={mobGnbRef} 
           menus={dynamicMenus} 
           onClose={handleCloseMobGnb} 
+          onLogin={handleServiceLogin}
+          onLogout={handleLogout}
           isLogin={isLogin}
           userName={currentCompany?.companyName || user?.name}
         />
