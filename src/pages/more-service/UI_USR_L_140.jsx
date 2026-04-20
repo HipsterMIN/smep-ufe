@@ -44,10 +44,21 @@ const UI_USR_L_140 = () => {
   const [searchType, setSearchType] = useState('all');
   const [searchKeyword, setSearchKeyword] = useState('');
 
+  // 뿌리기술 전문기업 핵심기술 드롭다운
+  const [fdtnlTechList, setFdtnlTechList] = useState([]);
+  const [fdtnlTechNm, setFdtnlTechNm] = useState('');
+
+  // 전문연구사업자 업종명 드롭다운
+  const [fldNmList, setFldNmList] = useState([]);
+  const [fldNm, setFldNm] = useState('');
+
   const [appliedSdoCd, setAppliedSdoCd] = useState('');
   const [appliedSigunguCd, setAppliedSigunguCd] = useState('');
   const [appliedSearchType, setAppliedSearchType] = useState('all');
   const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
+
+  const [appliedFdtnlTechNm, setAppliedFdtnlTechNm] = useState('');
+  const [appliedFldNm, setAppliedFldNm] = useState('');
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -67,7 +78,7 @@ const UI_USR_L_140 = () => {
 
   // 시군구 목록 조회
   useEffect(() => {
-    if (!sdoCd) {
+    if (!sdoCd || activeTabIndex === 1 || activeTabIndex === 2) {
       setSigunguList([]);
       setSigunguCd('');
       return;
@@ -84,9 +95,37 @@ const UI_USR_L_140 = () => {
       }
     };
     fetchSigunguList();
-  }, [sdoCd]);
+  }, [sdoCd, activeTabIndex]);
 
-  // 목록 조회
+  // 뿌리기술 전문기업 핵심기술 목록 조회
+  useEffect(() => {
+    if (activeTabIndex !== 1) return;
+    const fetchFdtnlTechList = async () => {
+      try {
+        const response = await apiClient.get('/api/v1/bizm/cstm-spcltyent/fdtnl-tech-list');
+        setFdtnlTechList(response.data ?? []);
+      } catch (error) {
+        console.error('핵심기술 목록 조회 실패:', error);
+      }
+    };
+    fetchFdtnlTechList();
+  }, [activeTabIndex]);
+
+  // 전문연구사업자 업종명 목록 조회
+  useEffect(() => {
+    if (activeTabIndex !== 2) return;
+    const fetchFldNmList = async () => {
+      try {
+        const response = await apiClient.get('/api/v1/bizm/cstm-spcltyent/fld-nm-list');
+        setFldNmList(response.data ?? []);
+      } catch (error) {
+        console.error('업종명 목록 조회 실패:', error);
+      }
+    };
+    fetchFldNmList();
+  }, [activeTabIndex]);
+
+  // 목록 조회 - 탭별 파라미터 분기 추가
   const fetchList = useCallback(async () => {
     try {
       setLoading(true);
@@ -97,8 +136,21 @@ const UI_USR_L_140 = () => {
         size: pageSize,
       });
 
+      // 공통 - 시도
       if (appliedSdoCd) params.append('sdoCd', appliedSdoCd);
-      if (appliedSigunguCd) params.append('sigunguCd', appliedSigunguCd);
+
+      if (activeTabIndex === 0) {
+        // 탭0 전용 - 시군구
+        if (appliedSigunguCd) params.append('sigunguCd', appliedSigunguCd);
+      } else if (activeTabIndex === 1) {
+        // 탭1 전용 - 핵심기술
+        if (appliedFdtnlTechNm) params.append('fdtnlTechNm', appliedFdtnlTechNm);
+      } else if (activeTabIndex === 2) {
+        // 탭2 전용 - 업종명
+        if (appliedFldNm) params.append('cstmTelgmEntFldNm', appliedFldNm);
+      }
+
+      // 공통 - 검색어
       if (appliedSearchKeyword && appliedSearchKeyword.trim()) {
         params.append('searchKeyword', appliedSearchKeyword);
         params.append('searchType', appliedSearchType);
@@ -118,7 +170,17 @@ const UI_USR_L_140 = () => {
     } finally {
       setLoading(false);
     }
-  }, [activeTabIndex, appliedSdoCd, appliedSigunguCd, appliedSearchType, appliedSearchKeyword, currentPage, pageSize]);
+  }, [
+    activeTabIndex,
+    appliedSdoCd,
+    appliedSigunguCd,
+    appliedFdtnlTechNm,
+    appliedFldNm,
+    appliedSearchType,
+    appliedSearchKeyword,
+    currentPage,
+    pageSize,
+  ]);
 
   useEffect(() => {
     fetchList();
@@ -131,10 +193,14 @@ const UI_USR_L_140 = () => {
     setSigunguList([]);
     setSearchType('all');
     setSearchKeyword('');
+    setFdtnlTechNm('');
+    setFldNm('');
     setAppliedSdoCd('');
     setAppliedSigunguCd('');
     setAppliedSearchType('all');
     setAppliedSearchKeyword('');
+    setAppliedFdtnlTechNm('');
+    setAppliedFldNm('');
     setCurrentPage(0);
     setList([]);
     setTotalCount(0);
@@ -158,9 +224,19 @@ const UI_USR_L_140 = () => {
 
   const handleSearch = () => {
     setAppliedSdoCd(sdoCd);
-    setAppliedSigunguCd(sigunguCd);
     setAppliedSearchType(searchType);
     setAppliedSearchKeyword(searchKeyword);
+
+    if (activeTabIndex === 0) {
+      setAppliedSigunguCd(sigunguCd);
+    } else if (activeTabIndex === 1) {
+      setAppliedSigunguCd('');
+      setAppliedFdtnlTechNm(fdtnlTechNm);
+    } else if (activeTabIndex === 2) {
+      setAppliedSigunguCd('');
+      setAppliedFldNm(fldNm);
+    }
+
     setCurrentPage(0);
 
     setSearchParams(
@@ -214,6 +290,140 @@ const UI_USR_L_140 = () => {
     0: '번호, 기업명, 업종명, 만료일자 정보가 제공됨.',
     1: '번호, 기업명, 핵심기술 정보가 제공됨.',
     2: '번호, 기업명, 홈페이지, 위치 정보가 제공됨.',
+  };
+
+  const renderSearchForm = () => {
+    // 탭0: 시도 + 시군구 + 검색어
+    if (activeTabIndex === 0) {
+      return (
+        <div className="sch-form-wrap">
+          <select className="krds-form-select" value={sdoCd} onChange={handleSdoCdChange}>
+            <option value="">전국</option>
+            {sidoList.map((item) => (
+              <option key={item.code} value={item.code}>{item.name}</option>
+            ))}
+          </select>
+
+          <select
+            className="krds-form-select"
+            value={sigunguCd}
+            onChange={(e) => setSigunguCd(e.target.value)}
+            disabled={isSigunguDisabled}
+          >
+            <option value="">시군구선택</option>
+            {sigunguList.map((item) => (
+              <option key={item.code} value={item.code}>{item.name}</option>
+            ))}
+          </select>
+
+          <select
+            className="krds-form-select"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
+            <option value="all">전체</option>
+            <option value="entNm">기업명</option>
+            <option value="cstmTelgmEntFldNm">업종명</option>
+          </select>
+
+          <div className="sch-input">
+            <input
+              type="text"
+              className="krds-input"
+              placeholder="검색어를 입력해주세요."
+              title="검색어 입력"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <button type="button" className="krds-btn medium icon ico-search" onClick={handleSearch}>
+              <span className="sr-only">검색</span>
+              <i className="svg-icon ico-sch"></i>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // 탭1: 시도 + 핵심기술 드롭다운 + 검색어 (시군구 없음)
+    if (activeTabIndex === 1) {
+      return (
+        <div className="sch-form-wrap">
+          <select className="krds-form-select" value={sdoCd} onChange={handleSdoCdChange}>
+            <option value="">전국</option>
+            {sidoList.map((item) => (
+              <option key={item.code} value={item.code}>{item.name}</option>
+            ))}
+          </select>
+
+          <select
+            className="krds-form-select"
+            value={fdtnlTechNm}
+            onChange={(e) => setFdtnlTechNm(e.target.value)}
+          >
+            <option value="">핵심기술 전체</option>
+            {fdtnlTechList.map((item) => (
+              <option key={item} value={item}>{item}</option>
+            ))}
+          </select>
+
+          <div className="sch-input">
+            <input
+              type="text"
+              className="krds-input"
+              placeholder="검색어를 입력해주세요."
+              title="검색어 입력"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <button type="button" className="krds-btn medium icon ico-search" onClick={handleSearch}>
+              <span className="sr-only">검색</span>
+              <i className="svg-icon ico-sch"></i>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // 탭2: 시도 + 시군구 + 업종명 드롭다운 + 검색어
+    return (
+      <div className="sch-form-wrap">
+        <select className="krds-form-select" value={sdoCd} onChange={handleSdoCdChange}>
+          <option value="">전국</option>
+          {sidoList.map((item) => (
+            <option key={item.code} value={item.code}>{item.name}</option>
+          ))}
+        </select>
+
+        <select
+          className="krds-form-select"
+          value={fldNm}
+          onChange={(e) => setFldNm(e.target.value)}
+        >
+          <option value="">업종 전체</option>
+          {fldNmList.map((item) => (
+            <option key={item} value={item}>{item}</option>
+          ))}
+        </select>
+
+        <div className="sch-input">
+          <input
+            type="text"
+            className="krds-input"
+            placeholder="검색어를 입력해주세요."
+            title="검색어 입력"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          />
+          <button type="button" className="krds-btn medium icon ico-search" onClick={handleSearch}>
+            <span className="sr-only">검색</span>
+            <i className="svg-icon ico-sch"></i>
+          </button>
+        </div>
+      </div>
+    );
   };
 
   const renderThead = () => {
@@ -367,52 +577,7 @@ const UI_USR_L_140 = () => {
   const renderTable = () => (
     <>
       <div className="search-top-box mt-40">
-        <div className="sch-form-wrap">
-          <select className="krds-form-select" value={sdoCd} onChange={handleSdoCdChange}>
-            <option value="">전국</option>
-            {sidoList.map((item) => (
-              <option key={item.code} value={item.code}>{item.name}</option>
-            ))}
-          </select>
-
-          <select
-            className="krds-form-select"
-            value={sigunguCd}
-            onChange={(e) => setSigunguCd(e.target.value)}
-            disabled={isSigunguDisabled}
-          >
-            <option value="">시군구선택</option>
-            {sigunguList.map((item) => (
-              <option key={item.code} value={item.code}>{item.name}</option>
-            ))}
-          </select>
-
-          <select
-            className="krds-form-select"
-            value={searchType}
-            onChange={(e) => setSearchType(e.target.value)}
-          >
-            <option value="all">전체</option>
-            <option value="entNm">기업명</option>
-            <option value="cstmTelgmEntFldNm">업종명</option>
-          </select>
-
-          <div className="sch-input">
-            <input
-              type="text"
-              className="krds-input"
-              placeholder="검색어를 입력해주세요."
-              title="검색어 입력"
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-            <button type="button" className="krds-btn medium icon ico-search" onClick={handleSearch}>
-              <span className="sr-only">검색</span>
-              <i className="svg-icon ico-sch"></i>
-            </button>
-          </div>
-        </div>
+        {renderSearchForm()}
       </div>
 
       <div className="search-list-top">
