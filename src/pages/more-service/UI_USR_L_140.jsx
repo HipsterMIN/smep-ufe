@@ -144,7 +144,7 @@ const UI_USR_L_140 = () => {
         if (appliedSigunguCd) params.append('sigunguCd', appliedSigunguCd);
       } else if (activeTabIndex === 1) {
         // 탭1 전용 - 핵심기술
-        if (appliedFdtnlTechNm) params.append('fdtnlTechNm', appliedFdtnlTechNm);
+        if (appliedFdtnlTechNm) params.append('cstmTelgmEntFldNm', appliedFdtnlTechNm);
       } else if (activeTabIndex === 2) {
         // 탭2 전용 - 업종명
         if (appliedFldNm) params.append('cstmTelgmEntFldNm', appliedFldNm);
@@ -361,7 +361,7 @@ const UI_USR_L_140 = () => {
             value={fdtnlTechNm}
             onChange={(e) => setFdtnlTechNm(e.target.value)}
           >
-            <option value="">핵심기술 전체</option>
+            <option value="">전체</option>
             {fdtnlTechList.map((item) => (
               <option key={item} value={item}>{item}</option>
             ))}
@@ -401,7 +401,7 @@ const UI_USR_L_140 = () => {
           value={fldNm}
           onChange={(e) => setFldNm(e.target.value)}
         >
-          <option value="">업종 전체</option>
+          <option value="">전체</option>
           {fldNmList.map((item) => (
             <option key={item} value={item}>{item}</option>
           ))}
