@@ -367,7 +367,7 @@ const UI_USR_L_140 = () => {
             ))}
           </select>
 
-          <div className="sch-input">
+          <div className="sch-input w-322">
             <input
               type="text"
               className="krds-input"

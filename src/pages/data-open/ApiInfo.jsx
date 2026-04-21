@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
 
+import { Link, useLocation } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext';
@@ -37,18 +37,18 @@ const ApiInfo = () => {
         <div className="tab fill full mt-48">
           <ul>
             <li className="active">
-              <Link to="#" className="btn-tab">
+              <Link to="/cs/opndata/UI_USR_L_210" className="btn-tab">
                     API 소개
                 <span className="sr-only">현재 페이지</span>
               </Link>
             </li>
             <li>
-              <Link to="#" className="btn-tab">
+              <Link to="/cs/opndata/UI_USR_L_220" className="btn-tab">
                    인증키 신청
               </Link>
             </li>
             <li>
-              <Link to="#" className="btn-tab">
+              <Link to="/cs/opndata/UI_USR_L_230" className="btn-tab">
                     API Q&A
               </Link>
             </li>
@@ -227,7 +227,7 @@ const ApiInfo = () => {
                     <p className="c-tit">
                       <span className="span">행사정보 API</span>
                     </p>
-                    <p className="c-txt">기관별, 분야별 최신 지원사업 공고 정보 제공</p>
+                    <p className="c-txt">중소기업이 참여 가능한 교육, 세미나, 전시회 정보 제공</p>
                     <div className="c-txt">
                       <ul className="c-txt-ul no-dash">
                         <li className="c-date">
