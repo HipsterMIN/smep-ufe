@@ -120,7 +120,7 @@ const UI_USR_L_120 = () => {
               <option value="certSystmNm">인증제도명</option>
               <option value="certSystmItemNm">품목명</option>
             </select>
-            <div className="sch-input">
+            <div className="sch-input w-322">
               <input
                 type="text"
                 className="krds-input"
