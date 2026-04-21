@@ -237,8 +237,8 @@ const UI_USR_L_510 = () => {
               <col/>
               <col style={{ width: '150px' }}/>
               <col/>
-              <col/>
-              <col style={{ width: '100px' }}/>
+              <col style={{ width: '150px' }}/>
+              <col style={{ width: '90px' }}/>
               <col style={{ width: '130px' }}/>
               <col/>
             </colgroup>
