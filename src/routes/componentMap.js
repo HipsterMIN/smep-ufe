@@ -50,7 +50,7 @@ const PlatformIntro = lazy(() => import('@pages/customer-support/PlatformIntro.j
 const VerifyPassword = lazy(() => import('@pages/my-business/VerifyPassword.jsx'));
 const UI_USR_W_411 = lazy( () => import('@pages/my-business/UI-USR-W-411.jsx'));
 
-const UI_USR_R_420 = lazy(() => import('@pages/my-business/UI-USR-R-420.jsx'));
+const UI_USR_R_420 = lazy(() => import('@pages/my-business/PasswordChange.jsx'));
 const UI_USR_W_430 = lazy(() => import('@pages/my-business/UI-USR-W-430.jsx'));
 const UI_USR_R_440 = lazy(() => import('@pages/my-business/UI-USR-R-440.jsx'));
 const UI_USR_R_450 = lazy(() => import('@pages/my-business/company/CompanyDetail.jsx'));
