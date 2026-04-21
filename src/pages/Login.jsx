@@ -37,6 +37,15 @@ const UI_USR_R_002 = () => {
     }
   };
 
+  const handleEnterSubmit = (event) => {
+    if (event.key !== 'Enter' || event.nativeEvent?.isComposing) {
+      return;
+    }
+
+    event.preventDefault();
+    handleClick();
+  };
+
   return (
     <>
       <div className="contents">
@@ -78,6 +87,7 @@ const UI_USR_R_002 = () => {
                       className="krds-input"
                       value={loginId}
                       onChange={(e) => setLoginId(e.target.value)}
+                      onKeyDown={handleEnterSubmit}
                       placeholder={loginType === 'INDIVIDUAL' ? '개인 로그인 ID' : '기업 로그인 ID'}
                     />
                   </div>
@@ -92,6 +102,7 @@ const UI_USR_R_002 = () => {
                         className="krds-input"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        onKeyDown={handleEnterSubmit}
                         placeholder="비밀번호를 입력하세요"
                       />
                     </div>
