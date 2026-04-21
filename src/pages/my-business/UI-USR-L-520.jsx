@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Datepicker from '@components/ui/Datepicker';
@@ -203,6 +203,10 @@ const UI_USR_L_520 = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [sourceOptionsByCategory, setSourceOptionsByCategory] = useState(DEFAULT_SOURCE_OPTIONS_BY_CATEGORY);
+  // 연속 조회(필터/페이지 변경) 시 이전 요청을 중단하기 위한 AbortController 보관.
+  const requestAbortControllerRef = useRef(null);
+  // 최신 요청만 화면 상태를 갱신하도록 sequence 값을 관리한다.
+  const requestSequenceRef = useRef(0);
 
   useEffect(() => {
     let mounted = true;
@@ -289,6 +293,16 @@ const UI_USR_L_520 = () => {
 
   useEffect(() => {
     const fetchSupportApplications = async () => {
+      // 새 요청이 시작되면 이전 in-flight 요청을 취소해 불필요한 대기를 줄인다.
+      if (requestAbortControllerRef.current) {
+        requestAbortControllerRef.current.abort();
+      }
+
+      const requestAbortController = new AbortController();
+      requestAbortControllerRef.current = requestAbortController;
+      const requestSequence = requestSequenceRef.current + 1;
+      requestSequenceRef.current = requestSequence;
+
       setLoading(true);
       setErrorMessage('');
 
@@ -323,8 +337,14 @@ const UI_USR_L_520 = () => {
 
         const data = await apiClient.get(
           `/api/v1/pbanc/support-applications?${params.toString()}`,
+          { signal: requestAbortController.signal },
         );
         const payload = data?.data ?? data;
+
+        // 느린 이전 요청 응답이 뒤늦게 도착해도 최신 요청 결과를 덮어쓰지 않도록 방어.
+        if (requestSequence !== requestSequenceRef.current) {
+          return;
+        }
 
         setSummary(payload?.summary || DEFAULT_SUMMARY);
         setPageData({
@@ -332,16 +352,35 @@ const UI_USR_L_520 = () => {
           ...(payload?.page || {}),
         });
       } catch (error) {
+        // 사용자가 새로운 조회를 시작해서 발생한 AbortError는 정상 흐름으로 간주한다.
+        if (error?.name === 'AbortError') {
+          return;
+        }
+
+        // 최신 요청이 아니면 에러 상태도 반영하지 않는다.
+        if (requestSequence !== requestSequenceRef.current) {
+          return;
+        }
+
         console.error('Failed to load support application status list:', error);
         setSummary(DEFAULT_SUMMARY);
         setPageData(DEFAULT_PAGE);
         setErrorMessage(error?.message || '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
       } finally {
-        setLoading(false);
+        // 최신 요청일 때만 loading을 내려서 로딩 상태 경합을 방지한다.
+        if (requestSequence === requestSequenceRef.current) {
+          setLoading(false);
+        }
       }
     };
 
     fetchSupportApplications();
+    return () => {
+      // effect 재실행/언마운트 시 잔여 요청 취소.
+      if (requestAbortControllerRef.current) {
+        requestAbortControllerRef.current.abort();
+      }
+    };
   }, [appliedFilters, currentPage, pageSize]);
 
   const totalPages = useMemo(() => {
