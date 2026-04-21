@@ -688,6 +688,21 @@ table tbody tr:hover td {
   color: #052B57;
   border: 1px solid #052B57;
 }
+
+.krds-structured-list.type-full .card-form,
+.krds-structured-list.type2 .card-form {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: var(--krds-structured-list--card-bottom-padding-top);
+  border-top: var(--krds-structured-list--border-width) solid var(--krds-structured-list--card-bottom-color-border);
+}
+.krds-structured-list .card-form .card-btm {
+  padding-top: 0;
+  border-top: none;
+}
+
 .on-linktxt {
   color: var(--blue-color1);
   text-decoration: underline;
@@ -1192,6 +1207,9 @@ table tbody tr:hover td {
 }
 .search-top-box .sch-form-wrap .sch-input {
   width: 392px;
+}
+.search-top-box .sch-form-wrap .sch-input.w-322 {
+  width: 322px;
 }
 .search-top-box .sch-form-wrap.flex-inline {
   display: inline-flex;
@@ -3001,7 +3019,7 @@ textarea.krds-input::placeholder {
   padding-top: 20px;
 }
 .on-subtitle-box.pre .subtitle-boxcon {
-  height: 104px;
+  height: 250px;
   margin-top: 0;
 }
 .on-subtitle-box.pre .subtitle-boxtit {
