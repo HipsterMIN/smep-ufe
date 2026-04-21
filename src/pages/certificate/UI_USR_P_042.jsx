@@ -10,7 +10,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const UI_USR_P_042 = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
+  const { prdocNm, prdocCd, prdocIssuGdCn, elpblYn } = location.state || {};
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -82,7 +82,6 @@ const UI_USR_P_042 = () => {
         <div className="page-title-wrap" data-type="responsive">
           <h2 className="h-tit">{prdocNm}발급</h2>
         </div>
-
         <div className="conts-wrap">
           <div className="txt-box outline">
             <h4 className="outline-tit">알려드립니다.</h4>
@@ -123,7 +122,7 @@ const UI_USR_P_042 = () => {
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
                   <input type="text" id="id_02" className="krds-input small"
-                    placeholder="상호를 입력해주세요" value="주식회사 중소벤처" disabled />
+                    placeholder="상호를 입력해주세요" value="유큐브" disabled />
                 </div>
               </dd>
             </div>
@@ -137,7 +136,7 @@ const UI_USR_P_042 = () => {
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
                   <input type="text" id="id_03" className="krds-input small"
-                    placeholder="대표자명을 입력해주세요" value="홍길동" disabled />
+                    placeholder="대표자명을 입력해주세요" value="김정범" disabled />
                 </div>
               </dd>
             </div>
@@ -151,17 +150,19 @@ const UI_USR_P_042 = () => {
             </button>
           </div>
           <div>
+            {elpblYn === 'Y' && (
+              <button
+                type="button"
+                className="krds-btn primary xlarge"
+                onClick={handleWalletClick}
+                disabled={isLoading}
+              >
+                  전자문서지갑
+              </button>
+            )}
             <button
               type="button"
               className="krds-btn primary xlarge"
-              onClick={handleWalletClick}
-              disabled={isLoading}
-            >
-                전자문서지갑
-            </button>
-            <button
-              type="button"
-              className="krds-btn tertiary xlarge"
               onClick={handlePrint}
               disabled={isLoading}
             >
