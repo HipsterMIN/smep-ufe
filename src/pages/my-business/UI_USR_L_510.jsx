@@ -34,19 +34,19 @@ const isExpired = (aplyDt) => {
 
 // prdocCd 별 출력언어 옵션
 const getLanguageOptions = (prdocCd) => {
-  if (prdocCd === 'Y104' || prdocCd === 'Y105') {
-    return [
-      { value: '',    label: '한국어' },
-      { value: '_CN', label: '중국어' },
-      { value: '_EN', label: '영어'   },
-    ];
-  }
-  if (prdocCd === 'Y120') {
-    return [
-      { value: '',    label: '한국어' },
-      { value: '_EN', label: '영어'   },
-    ];
-  }
+  // if (prdocCd === 'Y104' || prdocCd === 'Y105') {
+  //   return [
+  //     { value: '',    label: '한국어' },
+  //     { value: '_CN', label: '중국어' },
+  //     { value: '_EN', label: '영어'   },
+  //   ];
+  // }
+  // if (prdocCd === 'Y120') {
+  //   return [
+  //     { value: '',    label: '한국어' },
+  //     { value: '_EN', label: '영어'   },
+  //   ];
+  // }
   return [{ value: '', label: '한국어' }];
 };
 
@@ -58,6 +58,7 @@ const IssuanceTableRow = ({ item, totalElements, currentPage, pageSize, index, o
   const isMultiLang = langOptions.length > 1;
   const effectivePrdocCd = item.prdocCd + selectedSuffix;
   const expired = isExpired(item.aplyDt);
+  const isDpaper = item.prdocIssuTypeCd === 'Y302';
 
   return (
     <tr>
@@ -80,7 +81,7 @@ const IssuanceTableRow = ({ item, totalElements, currentPage, pageSize, index, o
       <td className="ac">
         <select
           className="krds-form-select small"
-          disabled={!isMultiLang || expired}
+          disabled={!isMultiLang || expired || isDpaper}
           value={selectedSuffix}
           onChange={(e) => setSelectedSuffix(e.target.value)}
         >
@@ -92,7 +93,9 @@ const IssuanceTableRow = ({ item, totalElements, currentPage, pageSize, index, o
         </select>
       </td>
       <td className="ac">
-        {expired ? (
+        {isDpaper ? (
+          <span>정부전자문서지갑</span>
+        ) : expired ? (
           <button type="button" className="krds-btn small" disabled>출력</button>
         ) : (
           <button
@@ -178,6 +181,7 @@ const UI_USR_L_510 = () => {
   };
 
   const selectedExpired = selectedItem ? isExpired(selectedItem.aplyDt) : true;
+  const selectedIsDpaper = selectedItem?.prdocIssuTypeCd === 'Y302';
 
   return (
     <>
@@ -299,19 +303,21 @@ const UI_USR_L_510 = () => {
               >
                       닫기
               </button>
-              <button
-                type="button"
-                className="krds-btn primary medium"
-                disabled={selectedExpired}
-                onClick={() =>
-                  window.open(
-                    `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${selectedItem.prdocCd}&prdocIssuAplyNo=${selectedItem.prdocIssuAplyNo}`,
-                    '_blank',
-                  )
-                }
-              >
-                      출력
-              </button>
+              {!selectedIsDpaper && (
+                <button
+                  type="button"
+                  className="krds-btn primary medium"
+                  disabled={selectedExpired}
+                  onClick={() =>
+                    window.open(
+                      `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${selectedItem.prdocCd}&prdocIssuAplyNo=${selectedItem.prdocIssuAplyNo}`,
+                      '_blank',
+                    )
+                  }
+                >
+                          출력
+                </button>
+              )}
             </>
           }
         >
@@ -378,9 +384,11 @@ const UI_USR_L_510 = () => {
                     <tr>
                       <th scope="row" className="ac">출력여부</th>
                       <td>
-                        {selectedExpired
-                          ? '출력완료 (출력 가능 기간 경과)'
-                          : '출력 가능'}
+                        {selectedIsDpaper
+                          ? '정부전자문서지갑'
+                          : selectedExpired
+                            ? '출력완료 (출력 가능 기간 경과)'
+                            : '출력 가능'}
                       </td>
                     </tr>
                   </tbody>

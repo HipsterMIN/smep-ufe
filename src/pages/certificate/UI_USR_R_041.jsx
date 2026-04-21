@@ -106,6 +106,7 @@ const UI_USR_R_041 = () => {
       prdocCd,
       prdocNm: data.prdocTtl,
       prdocIssuGdCn: data.prdocIssuGdCn,
+      elpblYn: data.elpblYn,
     };
 
     if (prdocCd === 'Y101') {
