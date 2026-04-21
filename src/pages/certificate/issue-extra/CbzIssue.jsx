@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SideNavigation from '@/components/ui/SideNavigation';
 import Breadcrumb from '@/components/ui/Breadcrumb';
-import Popup from '@/components/ui/Popup';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
@@ -11,11 +10,10 @@ const CbzIssue = () => {
   const location  = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
 
-  const [records, setRecords]           = useState([]);
+  const [records, setRecords]               = useState([]);
   const [selectedCmpId1, setSelectedCmpId1] = useState(null);
-  const [isPopupOpen, setIsPopupOpen]   = useState(false);
-  const [isLoading, setIsLoading]       = useState(false);
-  const [isFetching, setIsFetching]     = useState(false);
+  const [isLoading, setIsLoading]           = useState(false);
+  const [isFetching, setIsFetching]         = useState(false);
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
@@ -24,7 +22,6 @@ const CbzIssue = () => {
   const goBack = () => navigate(-1);
   const brno   = '6090499481'; // TODO: 실제 로그인 사용자 사업자번호로 교체
 
-  // 목록 조회
   useEffect(() => {
     const fetchRecords = async () => {
       setIsFetching(true);
@@ -41,27 +38,31 @@ const CbzIssue = () => {
     fetchRecords();
   }, []);
 
-  // 발급 공통 (출력/전자문서지갑 모두 사용)
-  const handleIssue = async (issuTypeCd) => {
-    if (!selectedCmpId1) { alert('발급할 항목을 선택해주세요.'); return; }
-    if (!prdocCd)        { alert('증명서 코드가 없습니다.');      return; }
+  const validate = () => {
+    if (!selectedCmpId1) { alert('발급할 항목을 선택해주세요.'); return false; }
+    if (!prdocCd)        { alert('증명서 코드가 없습니다.');      return false; }
+    return true;
+  };
+
+  const handlePrint = async () => {
+    if (!validate()) return;
+    if (!window.confirm('증명서를 출력하시겠습니까?')) return;
 
     try {
       setIsLoading(true);
       const prdocIssuAplyNo = await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
         brno,
-        prdocIssuTypeCd: issuTypeCd,
+        prdocIssuTypeCd: 'Y301',
         extraParams: { cmpId1: selectedCmpId1 },
       });
 
-      if (issuTypeCd === 'Y301') {
-        window.open(
-          `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
-          '_blank',
-        );
-      }
-      setIsPopupOpen(false);
+      window.open(
+        `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
+        '_blank',
+      );
+
+      navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
       console.error('증명서 발급 실패:', e);
       alert('증명서 발급 중 오류가 발생했습니다.');
@@ -70,11 +71,26 @@ const CbzIssue = () => {
     }
   };
 
-  const handlePrint = () => handleIssue('Y301');
+  const handleWalletClick = async () => {
+    if (!validate()) return;
+    if (!window.confirm('전자증명서 발급을 신청하시겠습니까?')) return;
 
-  const handleWalletClick = () => {
-    if (!selectedCmpId1) { alert('발급할 항목을 선택해주세요.'); return; }
-    setIsPopupOpen(true);
+    try {
+      setIsLoading(true);
+      await apiClient.post('/api/v1/certificate/issue', {
+        prdocCd,
+        brno,
+        prdocIssuTypeCd: 'Y302',
+        extraParams: { cmpId1: selectedCmpId1 },
+      });
+
+      navigate('/mb/dash/UI_USR_L_510');
+    } catch (e) {
+      console.error('증명서 발급 실패:', e);
+      alert('증명서 발급 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -86,7 +102,6 @@ const CbzIssue = () => {
           <h2 className="h-tit">{prdocNm}발급</h2>
         </div>
 
-        {/* 안내문구 */}
         <div className="conts-wrap">
           <div className="txt-box outline">
             <h4 className="outline-tit">알려드립니다.</h4>
@@ -99,7 +114,6 @@ const CbzIssue = () => {
             </ul>
           </div>
 
-          {/* 기업 기본정보 */}
           <dl className="on-form-row mt-24 large">
             <div className="form-row-item">
               <dt className="form-row-label">
@@ -140,7 +154,6 @@ const CbzIssue = () => {
           </dl>
         </div>
 
-        {/* 발급 선택 목록 */}
         <div className="conts-wrap mt-24">
           <h3 className="sec-tit">발급선택</h3>
           <div className="txt-box bg-white small">
@@ -182,7 +195,12 @@ const CbzIssue = () => {
             </button>
           </div>
           <div>
-            <button type="button" className="krds-btn primary xlarge" onClick={handleWalletClick}>
+            <button
+              type="button"
+              className="krds-btn primary xlarge"
+              onClick={handleWalletClick}
+              disabled={isLoading}
+            >
                 전자문서지갑
             </button>
             <button
@@ -198,23 +216,6 @@ const CbzIssue = () => {
         </div>
       </div>
 
-      {/* 전자문서지갑 용도 선택 팝업 */}
-      <Popup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} size="small" noBottomBtn>
-        <div className="confirm-guide">
-          <span className="sub-title">용도 확인</span>
-          <p className="main-title">전자증명서 발급 용도를 선택해주세요</p>
-          <div className="purpose-selection">
-            <button type="button" className="btn-purpose" onClick={() => handleIssue('Y302')}>
-              <i className="ico-public"></i>
-              <span>공공기관 입찰용</span>
-            </button>
-            <button type="button" className="btn-purpose" onClick={() => handleIssue('Y303')}>
-              <i className="ico-other"></i>
-              <span>공공기관 입찰 이외의 용도</span>
-            </button>
-          </div>
-        </div>
-      </Popup>
     </>
   );
 };

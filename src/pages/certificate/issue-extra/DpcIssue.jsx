@@ -16,7 +16,6 @@ const DpcIssue = () => {
   const [isFetching, setIsFetching]           = useState(true);
   const [isIneligible, setIsIneligible]       = useState(false);
   const [isLoading, setIsLoading]             = useState(false);
-  const [isPopupOpen, setIsPopupOpen]         = useState(false);
 
   const [isSurveyOpen, setIsSurveyOpen]       = useState(false);
   const [isSurveyLoading, setIsSurveyLoading] = useState(false);
@@ -60,25 +59,26 @@ const DpcIssue = () => {
     return true;
   };
 
-  const handleIssue = async (issuTypeCd) => {
+  const handlePrint = async () => {
     if (!validate()) return;
+    if (!window.confirm('증명서를 출력하시겠습니까?')) return;
+    if (!prdocCd) { alert('증명서 코드가 없습니다.'); return; }
 
     try {
       setIsLoading(true);
       const prdocIssuAplyNo = await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
         brno,
-        prdocIssuTypeCd: issuTypeCd,
+        prdocIssuTypeCd: 'Y301',
         extraParams: { cmpetPrductCode: selectedCode },
       });
 
-      if (issuTypeCd === 'Y301') {
-        window.open(
-          `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
-          '_blank',
-        );
-      }
-      setIsPopupOpen(false);
+      window.open(
+        `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
+        '_blank',
+      );
+
+      navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
       console.error('증명서 발급 실패:', e);
       alert('증명서 발급 중 오류가 발생했습니다.');
@@ -87,9 +87,27 @@ const DpcIssue = () => {
     }
   };
 
-  const handlePrint = () => handleIssue('Y301');
-  const handleWalletClick = () => {
-    if (validate()) setIsPopupOpen(true);
+  const handleWalletClick = async () => {
+    if (!validate()) return;
+    if (!window.confirm('전자증명서 발급을 신청하시겠습니까?')) return;
+    if (!prdocCd) { alert('증명서 코드가 없습니다.'); return; }
+
+    try {
+      setIsLoading(true);
+      await apiClient.post('/api/v1/certificate/issue', {
+        prdocCd,
+        brno,
+        prdocIssuTypeCd: 'Y302',
+        extraParams: { cmpetPrductCode: selectedCode },
+      });
+
+      navigate('/mb/dash/UI_USR_L_510');
+    } catch (e) {
+      console.error('증명서 발급 실패:', e);
+      alert('증명서 발급 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleOpenSurvey = async (item) => {
@@ -109,17 +127,11 @@ const DpcIssue = () => {
   };
 
   const handleChangeObjective = (iemSn, exSn) => {
-    setSurveyAnswers((prev) => ({
-      ...prev,
-      [iemSn]: exSn,
-    }));
+    setSurveyAnswers((prev) => ({ ...prev, [iemSn]: exSn }));
   };
 
   const handleChangeSubjective = (iemSn, value) => {
-    setSurveyAnswers((prev) => ({
-      ...prev,
-      [iemSn]: value,
-    }));
+    setSurveyAnswers((prev) => ({ ...prev, [iemSn]: value }));
   };
 
   const handleSubmitSurvey = async () => {
@@ -127,42 +139,30 @@ const DpcIssue = () => {
       alert('설문조사 정보가 없습니다.');
       return;
     }
-
-    if (!validateSurveyAnswers()) {
-      return;
-    }
+    if (!validateSurveyAnswers()) return;
 
     try {
       setIsSurveySubmitting(true);
 
       const survey = (surveyData.evlsList || []).map((question) => {
         const answer = surveyAnswers[question.iemSn];
-
         if (question.objctYn === 'Y') {
-          return {
-            iemSn: question.iemSn,
-            objctChoiseInfo: String(answer),
-          };
+          return { iemSn: question.iemSn, objctChoiseInfo: String(answer) };
         }
-
-        return {
-          iemSn: question.iemSn,
-          sbjctInputInfo: String(answer).trim(),
-        };
+        return { iemSn: question.iemSn, sbjctInputInfo: String(answer).trim() };
       });
 
       await apiClient.post('/api/v1/certificate/dpc/survey', {
         bsnmNo: brno,
         bizCrtfcSeReq: prdocCd,
         cmpetPrductCode: surveyProduct.cmpetPrductCode,
-        cmpMbrId: 'ddtile', // TODO: 로그인 사용자 ID로 교체
+        cmpMbrId: 'ucube', // TODO: 로그인 사용자 ID로 교체
         survey,
       });
 
       alert('설문조사가 정상적으로 제출되었습니다.');
       setIsSurveyOpen(false);
 
-      // 임시 화면 반영 - 설문 완료 처리
       setProductList((prev) =>
         prev.map((item) =>
           item.cmpetPrductCode === surveyProduct.cmpetPrductCode
@@ -176,10 +176,8 @@ const DpcIssue = () => {
       setSurveyAnswers({});
     } catch (e) {
       console.error('설문조사 제출 실패:', e);
-
       const status = e?.response?.status;
       const message = e?.response?.data?.message;
-
       if (status === 400 && message) {
         alert(message);
       } else {
@@ -192,10 +190,8 @@ const DpcIssue = () => {
 
   const validateSurveyAnswers = () => {
     const questions = surveyData?.evlsList || [];
-
     for (const question of questions) {
       const answer = surveyAnswers[question.iemSn];
-
       if (question.objctYn === 'Y') {
         if (!answer) {
           alert(`${question.iemNm} 문항에 응답해주세요.`);
@@ -208,7 +204,6 @@ const DpcIssue = () => {
         }
       }
     }
-
     return true;
   };
 
@@ -316,22 +311,7 @@ const DpcIssue = () => {
         </div>
       </div>
 
-      <Popup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} size="small" noBottomBtn>
-        <div className="confirm-guide">
-          <span className="sub-title">용도 확인</span>
-          <p className="main-title">전자증명서 발급 용도를 선택해주세요</p>
-          <div className="purpose-selection">
-            <button type="button" className="btn-purpose" onClick={() => handleIssue('Y302')}>
-              <i className="ico-public"></i>
-              <span>공공기관 입찰용</span>
-            </button>
-            <button type="button" className="btn-purpose" onClick={() => handleIssue('Y303')}>
-              <i className="ico-other"></i>
-              <span>공공기관 입찰 이외의 용도</span>
-            </button>
-          </div>
-        </div>
-      </Popup>
+      {/* ← 발급 유형 팝업 제거 */}
 
       <Popup
         isOpen={isSurveyOpen}
@@ -345,7 +325,7 @@ const DpcIssue = () => {
               onClick={() => setIsSurveyOpen(false)}
               disabled={isSurveySubmitting}
             >
-                취소
+                    취소
             </button>
             <button
               type="button"
@@ -387,10 +367,7 @@ const DpcIssue = () => {
                   role={question.objctYn === 'Y' ? 'group' : undefined}
                   aria-labelledby={question.objctYn === 'Y' ? `question_${question.iemSn}` : undefined}
                 >
-                  <p
-                    className="form-question"
-                    id={`question_${question.iemSn}`}
-                  >
+                  <p className="form-question" id={`question_${question.iemSn}`}>
                     <span>{idx + 1}.</span> {question.iemNm}
                   </p>
 

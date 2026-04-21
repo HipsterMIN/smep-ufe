@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SideNavigation from '@/components/ui/SideNavigation';
 import Breadcrumb from '@/components/ui/Breadcrumb';
-import Popup from '@/components/ui/Popup';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
@@ -11,20 +10,18 @@ const PfcIssue = () => {
   const location = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
 
-  const [records, setRecords]             = useState([]);
-  const [selectedRecord, setSelectedRecord] = useState(null); // { reqstNo, crtfctTyCode, reqstOdr }
-  const [isPopupOpen, setIsPopupOpen]     = useState(false);
-  const [isLoading, setIsLoading]         = useState(false);
-  const [isFetching, setIsFetching]       = useState(false);
+  const [records, setRecords]               = useState([]);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [isLoading, setIsLoading]           = useState(false);
+  const [isFetching, setIsFetching]         = useState(false);
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
   const depth1Menu  = getDepth1Parent();
 
   const goBack = () => navigate(-1);
-  const brno   = '1378604388'; // TODO: 실제 로그인 사용자 사업자번호로 교체
+  const brno   = '1378604388';
 
-  // 제품 목록 조회
   useEffect(() => {
     const fetchRecords = async () => {
       setIsFetching(true);
@@ -41,20 +38,24 @@ const PfcIssue = () => {
     fetchRecords();
   }, []);
 
-  // record 식별키: reqstNo + reqstOdr 조합 (reqstNo가 같고 reqstOdr가 다를 수 있음)
   const getRecordKey = (rec) => `${rec.reqstNo}_${rec.reqstOdr}`;
 
-  // 발급 공통
-  const handleIssue = async (issuTypeCd) => {
-    if (!selectedRecord) { alert('발급할 제품을 선택해주세요.'); return; }
-    if (!prdocCd)        { alert('증명서 코드가 없습니다.');      return; }
+  const validate = () => {
+    if (!selectedRecord) { alert('발급할 제품을 선택해주세요.'); return false; }
+    if (!prdocCd)        { alert('증명서 코드가 없습니다.');      return false; }
+    return true;
+  };
+
+  const handlePrint = async () => {
+    if (!validate()) return;
+    if (!window.confirm('증명서를 출력하시겠습니까?')) return;
 
     try {
       setIsLoading(true);
       const prdocIssuAplyNo = await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
         brno,
-        prdocIssuTypeCd: issuTypeCd,
+        prdocIssuTypeCd: 'Y301',
         extraParams: {
           reqstNo: selectedRecord.reqstNo,
           crtfctTyCode: selectedRecord.crtfctTyCode,
@@ -62,13 +63,12 @@ const PfcIssue = () => {
         },
       });
 
-      if (issuTypeCd === 'Y301') {
-        window.open(
-          `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
-          '_blank',
-        );
-      }
-      setIsPopupOpen(false);
+      window.open(
+        `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
+        '_blank',
+      );
+
+      navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
       console.error('증명서 발급 실패:', e);
       alert('증명서 발급 중 오류가 발생했습니다.');
@@ -77,11 +77,30 @@ const PfcIssue = () => {
     }
   };
 
-  const handlePrint = () => handleIssue('Y301');
+  const handleWalletClick = async () => {
+    if (!validate()) return;
+    if (!window.confirm('전자증명서 발급을 신청하시겠습니까?')) return;
 
-  const handleWalletClick = () => {
-    if (!selectedRecord) { alert('발급할 제품을 선택해주세요.'); return; }
-    setIsPopupOpen(true);
+    try {
+      setIsLoading(true);
+      await apiClient.post('/api/v1/certificate/issue', {
+        prdocCd,
+        brno,
+        prdocIssuTypeCd: 'Y302',
+        extraParams: {
+          reqstNo: selectedRecord.reqstNo,
+          crtfctTyCode: selectedRecord.crtfctTyCode,
+          reqstOdr: selectedRecord.reqstOdr,
+        },
+      });
+
+      navigate('/mb/dash/UI_USR_L_510');
+    } catch (e) {
+      console.error('증명서 발급 실패:', e);
+      alert('증명서 발급 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -93,7 +112,6 @@ const PfcIssue = () => {
           <h2 className="h-tit">{prdocNm}발급</h2>
         </div>
 
-        {/* 안내문구 */}
         <div className="conts-wrap">
           <div className="txt-box outline">
             <h4 className="outline-tit">알려드립니다.</h4>
@@ -106,7 +124,6 @@ const PfcIssue = () => {
             </ul>
           </div>
 
-          {/* 기업 기본정보 */}
           <dl className="on-form-row mt-24 large">
             <div className="form-row-item">
               <dt className="form-row-label">
@@ -147,7 +164,6 @@ const PfcIssue = () => {
           </dl>
         </div>
 
-        {/* 발급 선택 목록 */}
         <div className="conts-wrap mt-24">
           <h3 className="sec-tit">발급선택</h3>
           <div className="txt-box bg-white small">
@@ -160,7 +176,7 @@ const PfcIssue = () => {
                 {records.map((rec, idx) => {
                   const key        = getRecordKey(rec);
                   const isSelected = selectedRecord && getRecordKey(selectedRecord) === key;
-                  const isDisabled = rec.evlsWritingYn !== 'Y';   // ← Y 아니면 disabled
+                  const isDisabled = rec.evlsWritingYn !== 'Y';
 
                   return (
                     <li key={key}>
@@ -197,12 +213,17 @@ const PfcIssue = () => {
         <div className="onboard-btm-btngroup bt-0">
           <div>
             <button type="button" className="krds-btn tertiary xlarge" onClick={goBack}>
-              취소
+                취소
             </button>
           </div>
           <div>
-            <button type="button" className="krds-btn primary xlarge" onClick={handleWalletClick}>
-              전자문서지갑
+            <button
+              type="button"
+              className="krds-btn primary xlarge"
+              onClick={handleWalletClick}
+              disabled={isLoading}
+            >
+                전자문서지갑
             </button>
             <button
               type="button"
@@ -216,24 +237,6 @@ const PfcIssue = () => {
           </div>
         </div>
       </div>
-
-      {/* 전자문서지갑 용도 선택 팝업 */}
-      <Popup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} size="small" noBottomBtn>
-        <div className="confirm-guide">
-          <span className="sub-title">용도 확인</span>
-          <p className="main-title">전자증명서 발급 용도를 선택해주세요</p>
-          <div className="purpose-selection">
-            <button type="button" className="btn-purpose" onClick={() => handleIssue('Y302')}>
-              <i className="ico-public"></i>
-              <span>공공기관 입찰용</span>
-            </button>
-            <button type="button" className="btn-purpose" onClick={() => handleIssue('Y303')}>
-              <i className="ico-other"></i>
-              <span>공공기관 입찰 이외의 용도</span>
-            </button>
-          </div>
-        </div>
-      </Popup>
     </>
   );
 };

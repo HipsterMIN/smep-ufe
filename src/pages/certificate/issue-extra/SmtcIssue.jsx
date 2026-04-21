@@ -4,7 +4,6 @@ import { api as apiClient } from '@lib/apiClient.js';
 
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
-import Popup from '@components/ui/Popup.jsx';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const SmtcIssue = () => {
@@ -12,10 +11,9 @@ const SmtcIssue = () => {
   const location = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
 
-  const [lginId, setLginId]           = useState('');
-  const [sbjtId, setSbjtId]           = useState('');
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [isLoading, setIsLoading]     = useState(false);
+  const [lginId, setLginId]       = useState('');
+  const [sbjtId, setSbjtId]       = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
@@ -32,8 +30,9 @@ const SmtcIssue = () => {
     return true;
   };
 
-  const handleIssue = async (issuTypeCd) => {
+  const handlePrint = async () => {
     if (!validate()) return;
+    if (!window.confirm('증명서를 출력하시겠습니까?')) return;
 
     try {
       setIsLoading(true);
@@ -41,20 +40,19 @@ const SmtcIssue = () => {
       const prdocIssuAplyNo = await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
         brno,
-        prdocIssuTypeCd: issuTypeCd,
+        prdocIssuTypeCd: 'Y301',
         extraParams: {
           lginId: lginId.trim(),
           sbjtId: sbjtId.trim(),
         },
       });
 
-      if (issuTypeCd === 'Y301') {
-        window.open(
-          `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
-          '_blank',
-        );
-      }
-      setIsPopupOpen(false);
+      window.open(
+        `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
+        '_blank',
+      );
+
+      navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
       console.error('증명서 발급 실패:', e);
       alert('조회된 데이터가 없습니다. SMTECH 홈페이지에 문의해주세요.(https://www.smtech.go.kr)');
@@ -63,11 +61,30 @@ const SmtcIssue = () => {
     }
   };
 
-  const handlePrint = () => handleIssue('Y301');
-
-  const handleWalletClick = () => {
+  const handleWalletClick = async () => {
     if (!validate()) return;
-    setIsPopupOpen(true);
+    if (!window.confirm('전자증명서 발급을 신청하시겠습니까?')) return;
+
+    try {
+      setIsLoading(true);
+
+      await apiClient.post('/api/v1/certificate/issue', {
+        prdocCd,
+        brno,
+        prdocIssuTypeCd: 'Y302',
+        extraParams: {
+          lginId: lginId.trim(),
+          sbjtId: sbjtId.trim(),
+        },
+      });
+
+      navigate('/mb/dash/UI_USR_L_510');
+    } catch (e) {
+      console.error('증명서 발급 실패:', e);
+      alert('조회된 데이터가 없습니다. SMTECH 홈페이지에 문의해주세요.(https://www.smtech.go.kr)');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -163,28 +180,6 @@ const SmtcIssue = () => {
           </div>
         </div>
       </div>
-
-      <Popup
-        isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-        size="small"
-        noBottomBtn
-      >
-        <div className="confirm-guide">
-          <span className="sub-title">용도 확인</span>
-          <p className="main-title">전자증명서 발급 용도를 선택해주세요</p>
-          <div className="purpose-selection">
-            <button type="button" className="btn-purpose" onClick={() => handleIssue('Y302')}>
-              <i className="ico-public"></i>
-              <span>공공기관 입찰용</span>
-            </button>
-            <button type="button" className="btn-purpose" onClick={() => handleIssue('Y303')}>
-              <i className="ico-other"></i>
-              <span>공공기관 입찰 이외의 용도</span>
-            </button>
-          </div>
-        </div>
-      </Popup>
     </>
   );
 };

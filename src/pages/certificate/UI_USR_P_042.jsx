@@ -5,7 +5,6 @@ import { api as apiClient } from '@lib/apiClient.js';
 
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
-import Popup from '@components/ui/Popup.jsx';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const UI_USR_P_042 = () => {
@@ -13,8 +12,7 @@ const UI_USR_P_042 = () => {
   const location = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
 
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [isLoading, setIsLoading]     = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
@@ -26,6 +24,7 @@ const UI_USR_P_042 = () => {
 
   const handlePrint = async () => {
     if (!prdocCd) { alert('증명서 코드가 없습니다.'); return; }
+    if (!window.confirm('증명서를 출력하시겠습니까?')) return;
 
     try {
       setIsLoading(true);
@@ -40,6 +39,28 @@ const UI_USR_P_042 = () => {
         `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
         '_blank',
       );
+
+      navigate('/mb/dash/UI_USR_L_510');
+    } catch (e) {
+      console.error('증명서 발급 실패:', e);
+      alert('증명서 발급 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleWalletClick = async () => {
+    if (!prdocCd) { alert('증명서 코드가 없습니다.'); return; }
+    if (!window.confirm('전자증명서 발급을 신청하시겠습니까?')) return;
+
+    try {
+      setIsLoading(true);
+
+      await apiClient.post('/api/v1/certificate/issue', {
+        prdocCd,
+        brno,
+        prdocIssuTypeCd: 'Y302',
+      });
 
       navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
@@ -133,7 +154,8 @@ const UI_USR_P_042 = () => {
             <button
               type="button"
               className="krds-btn primary xlarge"
-              onClick={() => setIsPopupOpen(true)}
+              onClick={handleWalletClick}
+              disabled={isLoading}
             >
                 전자문서지갑
             </button>
@@ -149,28 +171,6 @@ const UI_USR_P_042 = () => {
           </div>
         </div>
       </div>
-
-      <Popup
-        isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-        size="small"
-        noBottomBtn
-      >
-        <div className="confirm-guide">
-          <span className="sub-title">용도 확인</span>
-          <p className="main-title">전자증명서 발급 용도를 선택해주세요</p>
-          <div className="purpose-selection">
-            <button type="button" className="btn-purpose">
-              <i className="ico-public"></i>
-              <span>공공기관 입찰용</span>
-            </button>
-            <button type="button" className="btn-purpose">
-              <i className="ico-other"></i>
-              <span>공공기관 입찰 이외의 용도</span>
-            </button>
-          </div>
-        </div>
-      </Popup>
     </>
   );
 };
