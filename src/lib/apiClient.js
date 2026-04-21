@@ -11,7 +11,7 @@ const APP_BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
 // 모든 API 호출은 /home-dev/api/... 또는 /home/api/... 형태로 시작하도록 구성
 //todo 임시로 /home-dev 붙여놈
-export const apiBaseUrl = `/home-dev${APP_BASE}${API_CONTEXT}`.replace(/\/$/, '');
+export const apiBaseUrl = `${APP_BASE}${API_CONTEXT}`.replace(/\/$/, '');
 
 function buildUrl(path) {
   if (!path) return apiBaseUrl;
