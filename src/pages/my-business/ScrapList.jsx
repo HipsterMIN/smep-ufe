@@ -6,7 +6,7 @@ import Tab from '@components/ui/Tab';
 import Datepicker from '@components/ui/Datepicker';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
-import http from '@lib/http.js';
+import { api as apiClient } from '@lib/apiClient.js';
 import { useNavigate } from 'react-router-dom';
 
 function ScrapToggleButton({ row, onToggle }) {
@@ -94,12 +94,13 @@ const ScrapList = () => {
   };
   const toggleScrap = async (targetId) => {
     try {
-      const res = await http.post('/api/v1/scraps/toggle', {
+      const res = await apiClient.post('/api/v1/scraps/toggle', {
         scrapTypeCd: categoryMap[activeCategory],
         targetId: targetId,
-        testMbrNo: '2025120500136492'
       });
-      alert(res.data.data.scrapped ? '등록되었습니다.' : '해제되었습니다.');
+      const payload = res?.data ?? res;
+      const result = payload?.data ?? payload;
+      alert(result?.scrapped ? '등록되었습니다.' : '해제되었습니다.');
       return true; // 성공 시 true 반환
     } catch (error) {
       alert('요청 처리에 실패했습니다.');
@@ -118,15 +119,23 @@ const ScrapList = () => {
         size: pageSize,
         keyword: appliedKeyword,
         srchFrDt: formatDate(startDate),
-        srchToDt: formatDate(endDate),
-        testMbrNo: '2025120500136492'
+        srchToDt: formatDate(endDate)
       };
 
 
-      const res = await http.get('/api/v1/scraps/scrapsList', { params });
-      const items = res.data.data.content || [];
+      const query = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && String(value).trim() !== '') {
+          query.set(key, String(value));
+        }
+      });
+
+      const res = await apiClient.get(`/api/v1/scraps/scrapsList?${query.toString()}`);
+      const payload = res?.data ?? res;
+      const result = payload?.data ?? payload;
+      const items = result?.content || [];
       setRows(items);
-      setTotalElements(res.data.data.totalElements || 0);
+      setTotalElements(result?.totalElements || 0);
 
 
     } catch (error) {
@@ -145,10 +154,9 @@ const ScrapList = () => {
 
     try {
       // API 경로는 프로젝트 설계에 맞춰 수정하세요 (예: /api/v1/scraps/delete)
-      await http.post('/api/v1/scraps/delete', {
+      await apiClient.post('/api/v1/scraps/delete', {
         scrapTypeCd: categoryMap[activeCategory],
-        pbancScrpSn: pbancScrpSn,
-        testMbrNo: '2025120500136492'
+        pbancScrpSn: pbancScrpSn
       });
 
       alert('삭제되었습니다.');
