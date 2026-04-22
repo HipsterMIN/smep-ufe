@@ -32,24 +32,45 @@ function parseJwt(token) {
   }
 }
 
+function getTokenExpirationTime(token) {
+  const claims = parseJwt(token);
+  return typeof claims?.exp === 'number' ? claims.exp : null;
+}
+
+function formatSessionTimer(remainingSeconds) {
+  if (typeof remainingSeconds !== 'number' || remainingSeconds < 0) {
+    return '';
+  }
+
+  const minutes = Math.floor(remainingSeconds / 60);
+  const seconds = remainingSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}: ${String(seconds).padStart(2, '0')}`;
+}
+
 // 관리자 - 상단 메뉴
 export default function Header() {
   const {
     isLogin,
     token,
+    refreshToken,
     user,
     currentMode,
     currentCompany,
     linkedCompanies,
     logout,
     login,
+    setToken,
+    setRefreshToken,
   } = useAuthStore();
   const { menuTree, flatMenuMap, fetchMenuData } = useMenuStore();
   const mobGnbRef = useRef(null);
+  const sessionExpiryHandledRef = useRef(false);
   const { getFullPath } = useUserMenu();
   const navigate = useNavigate();
   const location = useLocation();
   const isMainPage = location.pathname === '/';
+  const [remainingSeconds, setRemainingSeconds] = useState(null);
+  const [isExtendingSession, setIsExtendingSession] = useState(false);
   
   // 메뉴 데이터 로드
   useEffect(() => {
@@ -87,7 +108,87 @@ export default function Header() {
       }));
   }, [menuTree, flatMenuMap]);
 
-  const handleLogin = () => {
+  // 타이머는 우리 관리 범위가 확정된 ID/PW 세션(access + refresh 보유)에만 노출한다.
+  const showSessionTimer = Boolean(token && refreshToken && remainingSeconds !== null);
+  const sessionTimerLabel = useMemo(
+    () => formatSessionTimer(remainingSeconds),
+    [remainingSeconds],
+  );
+  const canExtendSession = showSessionTimer && remainingSeconds > 0 && !isExtendingSession;
+
+  useEffect(() => {
+    sessionExpiryHandledRef.current = false;
+
+    if (!token || !refreshToken) {
+      setRemainingSeconds(null);
+      return;
+    }
+
+    const updateRemainingSeconds = () => {
+      const expirationTime = getTokenExpirationTime(token);
+      if (!expirationTime) {
+        setRemainingSeconds(null);
+        return;
+      }
+
+      const nextRemainingSeconds = Math.max(expirationTime - Math.floor(Date.now() / 1000), 0);
+      setRemainingSeconds(nextRemainingSeconds);
+
+      if (nextRemainingSeconds > 0 || sessionExpiryHandledRef.current) {
+        return;
+      }
+
+      // 이번 단계의 만료 처리는 client-side expiry 로만 보고 로그인 페이지로 복귀시킨다.
+      sessionExpiryHandledRef.current = true;
+      logout();
+      alert('로그인 유효시간이 만료되었습니다. 다시 로그인해주세요.');
+      navigate('/service/login');
+    };
+
+    updateRemainingSeconds();
+    const timerId = window.setInterval(updateRemainingSeconds, 1000);
+
+    return () => {
+      window.clearInterval(timerId);
+    };
+  }, [token, refreshToken, logout, navigate]);
+
+  const handleServiceLogin = () => {
+    navigate('/service/login');
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  const handleExtendSession = async () => {
+    if (!token || !refreshToken || isExtendingSession) {
+      return;
+    }
+
+    setIsExtendingSession(true);
+    try {
+      const response = await apiClient.post('/api/v1/account/refresh', { refreshToken });
+      const newAccessToken = response.accessToken || response.data?.accessToken;
+      const newRefreshToken = response.refreshToken || response.data?.refreshToken;
+      if (!newAccessToken || !newRefreshToken) {
+        throw new Error('Refresh token response is incomplete');
+      }
+      setToken(newAccessToken);
+      setRefreshToken(newRefreshToken);
+    } catch (error) {
+      console.error('Failed to extend session:', error);
+      logout();
+      alert('로그인 유효시간 연장에 실패했습니다. 다시 로그인해주세요.');
+      navigate('/service/login');
+    } finally {
+      setIsExtendingSession(false);
+    }
+  };
+
+  // 기존 로그인 버튼에서는 분리했고, 추후 통합로그인 버튼이 생기면 이 함수에 연결한다.
+  const handleIntegratedLogin = () => {
     const loginWindow = window.open('about:blank', 'login-popup', 'width=1050,height=1000');
     const allowedOrigins = new Set([window.location.origin]);
 
@@ -186,12 +287,11 @@ export default function Header() {
         openFallback(`${basePath}service/SSO-login`);
       }
     };
-
     void openLoginPopup();
   };
 
   const handleMyPage = () => {
-    navigate(getFullPath('M_PIIO_00113'));
+    navigate(getFullPath('M_PIIO_00114'));
   };
 
   const handleOpenMobGnb = () => {
@@ -375,8 +475,13 @@ export default function Header() {
                       currentCompany={currentCompany}
                       linkedCompanies={linkedCompanies}
                       user={user}
-                      onLogin={handleLogin}
-                      onLogout={logout}
+                      showSessionTimer={showSessionTimer}
+                      sessionTimerLabel={sessionTimerLabel}
+                      canExtendSession={canExtendSession}
+                      isExtendingSession={isExtendingSession}
+                      onExtendSession={handleExtendSession}
+                      onLogin={handleServiceLogin}
+                      onLogout={handleLogout}
                       onMyPage={handleMyPage}
                       onSwitchContext={async (companyId) => {
                         if (!token) {
@@ -418,8 +523,15 @@ export default function Header() {
           ref={mobGnbRef} 
           menus={dynamicMenus} 
           onClose={handleCloseMobGnb} 
+          onLogin={handleServiceLogin}
+          onLogout={handleLogout}
           isLogin={isLogin}
           userName={currentCompany?.companyName || user?.name}
+          showSessionTimer={showSessionTimer}
+          sessionTimerLabel={sessionTimerLabel}
+          canExtendSession={canExtendSession}
+          isExtendingSession={isExtendingSession}
+          onExtendSession={handleExtendSession}
         />
       </header> 
       

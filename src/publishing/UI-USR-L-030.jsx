@@ -265,11 +265,16 @@ const UI_USR_L_030 = () => {
                           </p>
                         </a>
                       </div>
-                      <div className="card-btm">
-                        <span className="tag">혁신성장</span>
-                        <span className="tag">정책자금</span>
-                        <span className="tag">중소기업</span>
-                        <span className="tag">기업자금</span>
+                      <div className="card-form">
+                        <div className="card-btm">
+                          <span className="tag">혁신성장</span>
+                          <span className="tag">정책자금</span>
+                          <span className="tag">중소기업</span>
+                          <span className="tag">기업자금</span>
+                        </div>
+                        <div className="regist-date">
+                          등록일 : <b>2026.04.21</b>
+                        </div>
                       </div>
                       <div className="card-btn">
                         <span className="krds-btn text">
@@ -305,11 +310,16 @@ const UI_USR_L_030 = () => {
                           </p>
                         </a>
                       </div>
-                      <div className="card-btm">
-                        <span className="tag">혁신성장</span>
-                        <span className="tag">정책자금</span>
-                        <span className="tag">중소기업</span>
-                        <span className="tag">기업자금</span>
+                      <div className="card-form">
+                        <div className="card-btm">
+                          <span className="tag">혁신성장</span>
+                          <span className="tag">정책자금</span>
+                          <span className="tag">중소기업</span>
+                          <span className="tag">기업자금</span>
+                        </div>
+                        <div className="regist-date">
+                          등록일 : <b>2026.04.21</b>
+                        </div>
                       </div>
                       <div className="card-btn">
                         <span className="krds-btn text">
@@ -345,11 +355,16 @@ const UI_USR_L_030 = () => {
                           </p>
                         </a>
                       </div>
-                      <div className="card-btm">
-                        <span className="tag">혁신성장</span>
-                        <span className="tag">정책자금</span>
-                        <span className="tag">중소기업</span>
-                        <span className="tag">기업자금</span>
+                      <div className="card-form">
+                        <div className="card-btm">
+                          <span className="tag">혁신성장</span>
+                          <span className="tag">정책자금</span>
+                          <span className="tag">중소기업</span>
+                          <span className="tag">기업자금</span>
+                        </div>
+                        <div className="regist-date">
+                          등록일 : <b>2026.04.21</b>
+                        </div>
                       </div>
                       <div className="card-btn">
                         <span className="krds-btn text">
@@ -385,11 +400,16 @@ const UI_USR_L_030 = () => {
                           </p>
                         </a>
                       </div>
-                      <div className="card-btm">
-                        <span className="tag">혁신성장</span>
-                        <span className="tag">정책자금</span>
-                        <span className="tag">중소기업</span>
-                        <span className="tag">기업자금</span>
+                      <div className="card-form">
+                        <div className="card-btm">
+                          <span className="tag">혁신성장</span>
+                          <span className="tag">정책자금</span>
+                          <span className="tag">중소기업</span>
+                          <span className="tag">기업자금</span>
+                        </div>
+                        <div className="regist-date">
+                          등록일 : <b>2026.04.21</b>
+                        </div>
                       </div>
                       <div className="card-btn">
                         <span className="krds-btn text">
@@ -425,11 +445,16 @@ const UI_USR_L_030 = () => {
                           </p>
                         </a>
                       </div>
-                      <div className="card-btm">
-                        <span className="tag">혁신성장</span>
-                        <span className="tag">정책자금</span>
-                        <span className="tag">중소기업</span>
-                        <span className="tag">기업자금</span>
+                      <div className="card-form">
+                        <div className="card-btm">
+                          <span className="tag">혁신성장</span>
+                          <span className="tag">정책자금</span>
+                          <span className="tag">중소기업</span>
+                          <span className="tag">기업자금</span>
+                        </div>
+                        <div className="regist-date">
+                          등록일 : <b>2026.04.21</b>
+                        </div>
                       </div>
                       <div className="card-btn">
                         <span className="krds-btn text">
@@ -462,11 +487,16 @@ const UI_USR_L_030 = () => {
                           </p>
                         </a>
                       </div>
-                      <div className="card-btm">
-                        <span className="tag">혁신성장</span>
-                        <span className="tag">정책자금</span>
-                        <span className="tag">중소기업</span>
-                        <span className="tag">기업자금</span>
+                      <div className="card-form">
+                        <div className="card-btm">
+                          <span className="tag">혁신성장</span>
+                          <span className="tag">정책자금</span>
+                          <span className="tag">중소기업</span>
+                          <span className="tag">기업자금</span>
+                        </div>
+                        <div className="regist-date">
+                          등록일 : <b>2026.04.21</b>
+                        </div>
                       </div>
                       <div className="card-btn">
                         <span className="krds-btn text">
@@ -675,8 +705,8 @@ const UI_USR_L_030 = () => {
                           </select>
                         </div>
                       </li>
-                      <li>
-                        <button type="button" className="krds-btn medium primary" onClick={() => setIsPopupOpen(true)} >
+                      <li className="margin-top13">
+                        <button type="button" className="krds-btn small primary" onClick={() => setIsPopupOpen(true)} >
                           <i className="svg-icon ico-round-check"></i>
                           상품비교
                         </button>
@@ -774,11 +804,16 @@ const UI_USR_L_030 = () => {
                           </p>
                         </a>
                       </div>
-                      <div className="card-btm">
-                        <span className="tag">혁신성장</span>
-                        <span className="tag">정책자금</span>
-                        <span className="tag">중소기업</span>
-                        <span className="tag">기업자금</span>
+                      <div className="card-form">
+                        <div className="card-btm">
+                          <span className="tag">혁신성장</span>
+                          <span className="tag">정책자금</span>
+                          <span className="tag">중소기업</span>
+                          <span className="tag">기업자금</span>
+                        </div>
+                        <div className="regist-date">
+                          등록일 : <b>2026.04.21</b>
+                        </div>
                       </div>
                       <div className="card-btn">
                         <span className="krds-btn text">
@@ -823,11 +858,16 @@ const UI_USR_L_030 = () => {
                           </p>
                         </a>
                       </div>
-                      <div className="card-btm">
-                        <span className="tag">혁신성장</span>
-                        <span className="tag">정책자금</span>
-                        <span className="tag">중소기업</span>
-                        <span className="tag">기업자금</span>
+                      <div className="card-form">
+                        <div className="card-btm">
+                          <span className="tag">혁신성장</span>
+                          <span className="tag">정책자금</span>
+                          <span className="tag">중소기업</span>
+                          <span className="tag">기업자금</span>
+                        </div>
+                        <div className="regist-date">
+                          등록일 : <b>2026.04.21</b>
+                        </div>
                       </div>
                       <div className="card-btn">
                         <span className="krds-btn text">
@@ -875,11 +915,16 @@ const UI_USR_L_030 = () => {
                           </p>
                         </a>
                       </div>
-                      <div className="card-btm">
-                        <span className="tag">혁신성장</span>
-                        <span className="tag">정책자금</span>
-                        <span className="tag">중소기업</span>
-                        <span className="tag">기업자금</span>
+                      <div className="card-form">
+                        <div className="card-btm">
+                          <span className="tag">혁신성장</span>
+                          <span className="tag">정책자금</span>
+                          <span className="tag">중소기업</span>
+                          <span className="tag">기업자금</span>
+                        </div>
+                        <div className="regist-date">
+                          등록일 : <b>2026.04.21</b>
+                        </div>
                       </div>
                       <div className="card-btn">
                         <span className="krds-btn text">
@@ -919,11 +964,16 @@ const UI_USR_L_030 = () => {
                           </p>
                         </a>
                       </div>
-                      <div className="card-btm">
-                        <span className="tag">혁신성장</span>
-                        <span className="tag">정책자금</span>
-                        <span className="tag">중소기업</span>
-                        <span className="tag">기업자금</span>
+                      <div className="card-form">
+                        <div className="card-btm">
+                          <span className="tag">혁신성장</span>
+                          <span className="tag">정책자금</span>
+                          <span className="tag">중소기업</span>
+                          <span className="tag">기업자금</span>
+                        </div>
+                        <div className="regist-date">
+                          등록일 : <b>2026.04.21</b>
+                        </div>
                       </div>
                       <div className="card-btn">
                         <span className="krds-btn text">
@@ -963,11 +1013,16 @@ const UI_USR_L_030 = () => {
                           </p>
                         </a>
                       </div>
-                      <div className="card-btm">
-                        <span className="tag">혁신성장</span>
-                        <span className="tag">정책자금</span>
-                        <span className="tag">중소기업</span>
-                        <span className="tag">기업자금</span>
+                      <div className="card-form">
+                        <div className="card-btm">
+                          <span className="tag">혁신성장</span>
+                          <span className="tag">정책자금</span>
+                          <span className="tag">중소기업</span>
+                          <span className="tag">기업자금</span>
+                        </div>
+                        <div className="regist-date">
+                          등록일 : <b>2026.04.21</b>
+                        </div>
                       </div>
                       <div className="card-btn">
                         <span className="krds-btn text">
@@ -1004,11 +1059,16 @@ const UI_USR_L_030 = () => {
                           </p>
                         </a>
                       </div>
-                      <div className="card-btm">
-                        <span className="tag">혁신성장</span>
-                        <span className="tag">정책자금</span>
-                        <span className="tag">중소기업</span>
-                        <span className="tag">기업자금</span>
+                      <div className="card-form">
+                        <div className="card-btm">
+                          <span className="tag">혁신성장</span>
+                          <span className="tag">정책자금</span>
+                          <span className="tag">중소기업</span>
+                          <span className="tag">기업자금</span>
+                        </div>
+                        <div className="regist-date">
+                          등록일 : <b>2026.04.21</b>
+                        </div>
                       </div>
                       <div className="card-btn">
                         <span className="krds-btn text">

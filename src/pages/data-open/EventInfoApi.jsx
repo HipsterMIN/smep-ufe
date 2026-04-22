@@ -1,15 +1,68 @@
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import {useState} from "react";
+import { useNavigate } from 'react-router-dom';
+import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
+import ApiKeyForm from './ApiKeyForm';
 
-const UI_USR_R_212 = () => {
+const EventInfoApi = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const mbrNo = "2025120500381316";
+  const {
+    isOpen,
+    submitting,
+    errorMessage,
+    memberInfo,
+    openPopup,
+    closePopup,
+    submitApply
+  } = useApiKeyApply();
 
+// 1. 상태 관리 정의
+  const [formData, setFormData] = useState({
+    dataType: 'rss',
+    searchCnt: '',
+    hashtags: []
+  });
+  const [sampleUrl, setSampleUrl] = useState('');
+
+  // 2. 입력값 핸들러
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    if (id === 'select_01') setFormData(prev => ({ ...prev, dataType: value }));
+    if (id === 'input_02') setFormData(prev => ({ ...prev, searchCnt: value }));
+  };
+
+  // 3. 해시태그 핸들러
+  const handleHashtagChange = (e) => {
+    const { checked, nextSibling } = e.target;
+    const tagName = nextSibling.innerText; // 라벨의 텍스트(금융, 서울 등)
+
+    setFormData(prev => {
+      if (checked) {
+        return { ...prev, hashtags: [...prev.hashtags, tagName] };
+      } else {
+        return { ...prev, hashtags: prev.hashtags.filter(tag => tag !== tagName) };
+      }
+    });
+  };
+
+  // 4. 샘플 파라미터 생성 로직
+  const generateSample = () => {
+    const { dataType, searchCnt, hashtags } = formData;
+    let params = `&dataType=${dataType}`;
+
+    if (searchCnt) params += `&searchCnt=${searchCnt}`;
+    if (hashtags.length > 0) params += `&hashtags=${hashtags.join(',')}`;
+
+    setSampleUrl(params);
+  };
   // ✅ 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
-
+  const navigate = useNavigate();
   return (
     <>
       <SideNavigation
@@ -27,74 +80,61 @@ const UI_USR_R_212 = () => {
           <div className="sch-filter-box">
             <div className="filter-form">
               <div>
-                <label className="label" htmlFor="select_01">데이터타입</label>
-                <select id="select_01" className="krds-form-select medium ">
-                  <option value="">XML(RSS)</option>
+                <label className="label" htmlFor="select_01" >데이터타입</label>
+                <select id="select_01" className="krds-form-select medium " value={formData.dataType}
+                        onChange={handleInputChange}>
+                  <option value="rss">XML(RSS)</option>
+                  <option value="json">JSON</option>
                 </select>
               </div>
               <div>
-                <label className="label" htmlFor="select_02">조회건수</label>
-                <select id="select_02" className="krds-form-select medium">
-                  <option value="">전체</option>
-                </select>
+                <label className="label" htmlFor="input_02">조회건수</label>
+                <input
+                    type="text"
+                    id="input_02"
+                    className="krds-form-input medium" value={formData.searchCnt} onChange={handleInputChange}/>
               </div>
             </div>
             <dl className="filter-chip align-center">
               <dt>해시태그</dt>
               <dd>
-                <button type="button" className="krds-btn xlarge icon border">
+                <button type="button" className="krds-btn xlarge icon border"
+                        onClick={() => {
+                          setFormData({dataType: 'rss', searchCnt: '', hashtags: []});
+                          setSampleUrl('');
+                        }}>
                   <span className="sr-only">새로고침</span>
                   <i className="svg-icon ico-refresh"></i>
                 </button>
                 <div className="filter-check-box">
                   <div className="krds-check-area">
-                    <div className="krds-form-chip round">
-                      <input type="checkbox" className="checkbox" id="chk1_1" />
-                      <label className="krds-form-chip-outline" htmlFor="chk1_1">금융</label>
-                    </div>
-                    <div className="krds-form-chip round">
-                      <input type="checkbox" className="checkbox" id="chk1_2" />
-                      <label className="krds-form-chip-outline" htmlFor="chk1_2">기술</label>
-                    </div>
-                    <div className="krds-form-chip round">
-                      <input type="checkbox" className="checkbox" id="chk1_3" />
-                      <label className="krds-form-chip-outline" htmlFor="chk1_3">인력</label>
-                    </div>
-                    <div className="krds-form-chip round">
-                      <input type="checkbox" className="checkbox" id="chk1_4" />
-                      <label className="krds-form-chip-outline" htmlFor="chk1_4">수출</label>
-                    </div>
-                    <div className="krds-form-chip round">
-                      <input type="checkbox" className="checkbox" id="chk1_5" />
-                      <label className="krds-form-chip-outline" htmlFor="chk1_5">내수</label>
-                    </div>
-                    <div className="krds-form-chip round">
-                      <input type="checkbox" className="checkbox" id="chk1_6" />
-                      <label className="krds-form-chip-outline" htmlFor="chk1_6">창업</label>
-                    </div>
-                    <div className="krds-form-chip round">
-                      <input type="checkbox" className="checkbox" id="chk1_7" />
-                      <label className="krds-form-chip-outline" htmlFor="chk1_7">경영</label>
-                    </div>
-                    <div className="krds-form-chip round">
-                      <input type="checkbox" className="checkbox" id="chk1_8" />
-                      <label className="krds-form-chip-outline" htmlFor="chk1_8">기타</label>
-                    </div>
+                    {['금융', '기술', '인력', '수출', '내수', '창업', '경영', '기타'].map((tag, idx) => (
+                        <div className="krds-form-chip round" key={`field-${idx}`}>
+                          <input
+                              type="checkbox"
+                              className="checkbox"
+                              id={`chk1_${idx + 1}`}
+                              onChange={handleHashtagChange}
+                              checked={formData.hashtags.includes(tag)}
+                          />
+                          <label className="krds-form-chip-outline" htmlFor={`chk1_${idx + 1}`}>{tag}</label>
+                        </div>
+                    ))}
                   </div>
                   {/* 지역 */}
                   <div className="krds-check-area">
-                    <div className="krds-form-chip round">
-                      <input type="checkbox" className="checkbox" id="chk1_9" />
-                      <label className="krds-form-chip-outline" htmlFor="chk1_9">서울</label>
-                    </div>
-                    <div className="krds-form-chip round">
-                      <input type="checkbox" className="checkbox" id="chk1_10" />
-                      <label className="krds-form-chip-outline" htmlFor="chk1_10">부산</label>
-                    </div>
-                    <div className="krds-form-chip round">
-                      <input type="checkbox" className="checkbox" id="chk1_11" />
-                      <label className="krds-form-chip-outline" htmlFor="chk1_11">대구</label>
-                    </div>
+                    {['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'].map((tag, idx) => (
+                        <div className="krds-form-chip round" key={`loc-${idx}`}>
+                          <input
+                              type="checkbox"
+                              className="checkbox"
+                              id={`chk1_${idx + 9}`}
+                              onChange={handleHashtagChange}
+                              checked={formData.hashtags.includes(tag)}
+                          />
+                          <label className="krds-form-chip-outline" htmlFor={`chk1_${idx + 9}`}>{tag}</label>
+                        </div>
+                    ))}
                   </div>
                 </div>
               </dd>
@@ -102,9 +142,13 @@ const UI_USR_R_212 = () => {
             <div className="form-box">
               <label className="label sr-only" htmlFor="appl-sch-sel4">샘플 파라미터</label>
               <div className="input-box">
-                <input type="text" className="krds-input medium" placeholder="&dataType=rss&hashtags=서울,부산,대구,인천,광주,대전,울산,세종,경기,강원,충북,충남,전북,전남,경북,경남,제주" title="생성된 샘플 파라미터" id="appl-sch-sel4" />
+                <input type="text" className="krds-input medium"
+                       placeholder="&dataType=rss&hashtags=서울,부산,대구,인천,광주,대전,울산,세종,경기,강원,충북,충남,전북,전남,경북,경남,제주"
+                       value={sampleUrl}
+                       readOnly={true}
+                       title="생성된 샘플 파라미터" id="appl-sch-sel4"/>
               </div>
-              <button type="button" className="krds-btn medium primary">샘플 파라미터 생성</button>
+              <button type="button" className="krds-btn medium primary" onClick={generateSample}>샘플 파라미터 생성</button>
             </div>
           </div>
         </div>
@@ -124,7 +168,7 @@ const UI_USR_R_212 = () => {
               <dt>등록일</dt>
               <dd>2023.08.02</dd>
               <dt>수정일</dt>
-              <dd>2025.11.14</dd>
+              <dd>2025.09.08</dd>
             </dl>
           </div>
         </div>
@@ -136,9 +180,9 @@ const UI_USR_R_212 = () => {
             <table className="tbl col data word-break">
               <caption>요청메시지. 파라미터명, 항목명, 타입, 필수여부, 샘플데이터, 설명 정보가 제공됨.</caption>
               <colgroup>
-                <col style={{ width: '16%' }} />
-                <col style={{ width: '12%' }}/>
-                <col style={{ width: '12%' }}/>
+                <col style={{width: '16%'}}/>
+                <col style={{width: '12%'}}/>
+                <col style={{width: '12%' }}/>
                 <col style={{ width: '12%' }}/>
                 <col style={{ width: '12%' }} />
                 <col style={{ width: '36%' }}/>
@@ -250,7 +294,7 @@ const UI_USR_R_212 = () => {
                 <tr>
                   <th className="ac" scope="row"><span>조회건수</span></th>
                   <td className="ac br-1"><span>searchCnt</span></td>
-                  <td className="ac" colspan="2"><span className="ac">최대 500건 제한 <br />※ 값이 없을 경우 500건 데이터 제공 <br />항목명 데이터개수가 있을 경우 데이터개수 만큼 제공</span></td>
+                  <td className="ac" colspan="2"><span className="ac">숫자 입력 제한 없음 <br />※ 0 또는 값이 없을 경우 전체 데이터 제공 <br /></span></td>
                 </tr>
 
                 <tr>
@@ -419,104 +463,279 @@ const UI_USR_R_212 = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="ac"><span>title</span></td>
-                  <td className="ac"><span>데이터 제목</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>기업마당 지원사업정보</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>link</span></td>
-                  <td className="ac"><span>공고목록URL</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>https://www.bizinfo.go.kr/web/lay1/bbs/S1T122C128/AS/74/list.do</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>description</span></td>
-                  <td className="ac"><span>데이터 설명</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>최신 행사 정보를 구독하세요</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>language</span></td>
-                  <td className="ac"><span>언어</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>ko-kr</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>copyright</span></td>
-                  <td className="ac"><span>출처</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>bizinfo</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>managingEditor</span></td>
-                  <td className="ac"><span>담당자</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>develover@smba.go.kr</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>webMaster</span></td>
-                  <td className="ac"><span>관리자</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>kosi@bizinfo.go.kr</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>pubDate</span></td>
-                  <td className="ac"><span>배포 일자</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span></span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>lastBuildDate</span></td>
-                  <td className="ac"><span>마지막수정 일자</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span></span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>category</span></td>
-                  <td className="ac"><span>제공구분</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>bizinfo</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>ttl</span></td>
-                  <td className="ac"><span>유효시간</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>60</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>item</span></td>
-                  <td className="ac"><span>아이템</span></td>
-                  <td className="ac"><span>Object</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>-</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>seq</span></td>
-                  <td className="ac"><span>행사정보 ID</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>EVEN_000000000058642</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>title</span></td>
-                  <td className="ac"><span>제목</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>[전국] 2022년 4월 (예비)사회적기업 상시설명회 개최 안내</span></td>
-                </tr>
+              <tr>
+                <td className="ac"><span>title</span></td>
+                <td className="ac"><span>데이터 제목</span></td>
+                <td className="ac"><span>String</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span>기업마당 지원사업정보</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>link</span></td>
+                <td className="ac"><span>공고목록URL</span></td>
+                <td className="ac"><span>String</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span>https://www.bizinfo.go.kr/web/lay1/bbs/S1T122C128/AS/74/list.do</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>description</span></td>
+                <td className="ac"><span>데이터 설명</span></td>
+                <td className="ac"><span>String</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span>최신 행사 정보를 구독하세요</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>language</span></td>
+                <td className="ac"><span>언어</span></td>
+                <td className="ac"><span>String</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span>ko-kr</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>copyright</span></td>
+                <td className="ac"><span>출처</span></td>
+                <td className="ac"><span>String</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span>bizinfo</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>managingEditor</span></td>
+                <td className="ac"><span>담당자</span></td>
+                <td className="ac"><span>String</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span>develover@smba.go.kr</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>webMaster</span></td>
+                <td className="ac"><span>관리자</span></td>
+                <td className="ac"><span>String</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span>kosi@bizinfo.go.kr</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>pubDate</span></td>
+                <td className="ac"><span>배포 일자</span></td>
+                <td className="ac"><span>String</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span></span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>lastBuildDate</span></td>
+                <td className="ac"><span>마지막수정 일자</span></td>
+                <td className="ac"><span>String</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span></span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>category</span></td>
+                <td className="ac"><span>제공구분</span></td>
+                <td className="ac"><span>String</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span>bizinfo</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>ttl</span></td>
+                <td className="ac"><span>유효시간</span></td>
+                <td className="ac"><span>String</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span>60</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>item</span></td>
+                <td className="ac"><span>아이템</span></td>
+                <td className="ac"><span>Object</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span>-</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>seq</span></td>
+                <td className="ac"><span>행사정보 ID</span></td>
+                <td className="ac"><span>String</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span>EVEN_000000000058642</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>title</span></td>
+                <td className="ac"><span>제목</span></td>
+                <td className="ac"><span>String</span></td>
+                <td className="ac"><span>Y</span></td>
+                <td className="ac"><span>[전국] 2022년 4월 (예비)사회적기업 상시설명회 개최 안내</span></td>
+              </tr>
+              <tr>
+                <td className="ac">areaNm</td>
+                <td className="ac">지역</td>
+                <td className="ac">String</td>
+                <td className="ac">Y</td>
+                <td className="ac">전국</td>
+              </tr>
+              <tr>
+                <td className="ac">eventType</td>
+                <td className="ac">행사유형</td>
+                <td className="ac">String</td>
+                <td className="ac">Y</td>
+                <td className="ac">사업설명회</td>
+              </tr>
+              <tr>
+                <td className="ac">description</td>
+                <td className="ac">행사정보 내용</td>
+                <td className="ac">String</td>
+                <td className="ac">Y</td>
+                <td className="ac">커뮤니티와 경제에서는 사회적기업에 관심있는 개인을 대상으로 상시설명회를 개최합니다.</td>
+              </tr>
+              <tr>
+                <td className="ac">originOrg</td>
+                <td className="ac">출처기관</td>
+                <td className="ac">String</td>
+                <td className="ac">N</td>
+                <td className="ac">커뮤니티와 경제</td>
+              </tr>
+              <tr>
+                <td className="ac">rceptPd</td>
+                <td className="ac">접수기간</td>
+                <td className="ac">String</td>
+                <td className="ac">N</td>
+                <td className="ac">2022-03-16 ~ 2022-04-13</td>
+              </tr>
+              <tr>
+                <td className="ac">originUrl</td>
+                <td className="ac">출처URL</td>
+                <td className="ac">String</td>
+                <td className="ac">N</td>
+                <td className="ac">http://www.cne.or.kr/bbs/board.php?bo_table=notice&wr_id=1839</td>
+              </tr>
+              <tr>
+                <td className="ac">eventPeriod</td>
+                <td className="ac">행사기간</td>
+                <td className="ac">String</td>
+                <td className="ac">Y</td>
+                <td className="ac">20220413 ~ 20220413</td>
+              </tr>
+              <tr>
+                <td className="ac">inqireCo</td>
+                <td className="ac">조회수</td>
+                <td className="ac">String</td>
+                <td className="ac">Y</td>
+                <td className="ac">1</td>
+              </tr>
+              <tr>
+                <td className="ac">lcategory</td>
+                <td className="ac">지원분야대분류명</td>
+                <td className="ac">String</td>
+                <td className="ac">Y</td>
+                <td className="ac">경영@창업</td>
+              </tr>
+              <tr>
+                <td className="ac">bizinfoUrl</td>
+                <td className="ac">기업마당URL</td>
+                <td className="ac">String</td>
+                <td className="ac">Y</td>
+                <td className="ac">https://www.bizinfo.go.kr/web/lay1/bbs/S1T122C127/AX/210/view.do?eventInfoId=?eventInfoId=EVEN_000000000053154</td>
+              </tr>
+              <tr>
+                <td className="ac">registDe</td>
+                <td className="ac">등록일자</td>
+                <td className="ac">String</td>
+                <td className="ac">Y</td>
+                <td className="ac">20220316</td>
+              </tr>
+              <tr>
+                <td className="ac">flpthNm</td>
+                <td className="ac">파일경로명</td>
+                <td className="ac">String</td>
+                <td className="ac">N</td>
+                <td className="ac">https://www.bizinfo.go.kr/cmm/fms/getImageFile.do?atchFileId=FILE_000000000613657&fileSn=0</td>
+              </tr>
+              <tr>
+                <td className="ac">fileNm</td>
+                <td className="ac">파일명</td>
+                <td className="ac">String</td>
+                <td className="ac">N</td>
+                <td className="ac">세미나 포스터.jpg</td>
+              </tr>
+              <tr>
+                <td className="ac">printFlpthNm</td>
+                <td className="ac">본문출력파일경로명</td>
+                <td className="ac">String</td>
+                <td className="ac">Y</td>
+                <td className="ac">https://www.bizinfo.go.kr/cmm/fms/getImageFile.do?atchFileId=FILE_000000000613654&fileSn=4</td>
+              </tr>
+              <tr>
+                <td className="ac">printFileNm</td>
+                <td className="ac">본문출력파일명</td>
+                <td className="ac">String</td>
+                <td className="ac">Y</td>
+                <td className="ac">일본 이커머스 진출 및 해상 신루트 활용지원 세미나(공고문&참가신청서).hwp</td>
+              </tr>
+              <tr>
+                <td className="ac">hashTags</td>
+                <td className="ac">해시태그</td>
+                <td className="ac">String</td>
+                <td className="ac">Y</td>
+                <td className="ac">2022,금융,충북,대전,중소벤처기업부</td>
+              </tr>
+              <tr>
+                <td className="ac">totCnt</td>
+                <td className="ac">전체건수</td>
+                <td className="ac">String</td>
+                <td className="ac">Y</td>
+                <td className="ac">1435</td>
+              </tr>
+              <tr>
+                <td className="ac">eventInfoId</td>
+                <td className="ac">행사정보 ID</td>
+                <td className="ac">String</td>
+                <td className="ac">N</td>
+                <td className="ac">EVEN_000000000058642</td>
+              </tr>
+              <tr>
+                <td className="ac">nttNm</td>
+                <td className="ac">제목</td>
+                <td className="ac">String</td>
+                <td className="ac">N</td>
+                <td className="ac">[전국] 2022년 4월 (예비)사회적기업 상시설명회 개최 안</td>
+              </tr>
+              <tr>
+                <td className="ac">eventInfoTyNm</td>
+                <td className="ac">행사유형</td>
+                <td className="ac">String</td>
+                <td className="ac">N</td>
+                <td className="ac">사업설명회</td>
+              </tr>
+              <tr>
+                <td className="ac">nttCn</td>
+                <td className="ac">행사정보 내용</td>
+                <td className="ac">String</td>
+                <td className="ac">N</td>
+                <td className="ac">커뮤니티와 경제에서는 사회적기업에 관심있는 개인을 대상으로 상시설명회를 개최합니다.</td>
+              </tr>
+              <tr>
+                <td className="ac">originEngnNm</td>
+                <td className="ac">출처기관</td>
+                <td className="ac">String</td>
+                <td className="ac">N</td>
+                <td className="ac">커뮤니티와 경제</td>
+              </tr>
+              <tr>
+                <td className="ac">originUrlAdres</td>
+                <td className="ac">출처URL</td>
+                <td className="ac">String</td>
+                <td className="ac">N</td>
+                <td className="ac">http://www.cne.or.kr/bbs/board.php?bo_table=notice&wr_id=1839</td>
+              </tr>
+              <tr>
+                <td className="ac">BeginEndDe</td>
+                <td className="ac">행사기간</td>
+                <td className="ac">String</td>
+                <td className="ac">N</td>
+                <td className="ac">20220413 ~ 20220413</td>
+              </tr>
+              <tr>
+                <td className="ac">pldirSportRealmLclasCodeNm</td>
+                <td className="ac">지원분야 대분류명</td>
+                <td className="ac">String</td>
+                <td className="ac">N</td>
+                <td className="ac">경영@창업</td>
+              </tr>
               </tbody>
             </table>
           </div>
@@ -696,26 +915,35 @@ public class ApiExplorer {
             </div>
           </div>
         </div>
-      
+
 
         {/* bottom btn */}
         <div className="onboard-btm-btngroup bt-0 ">
           <div> 
-            <button type="button" className="krds-btn tertiary xlarge">
+            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate('..')}>
               목록
             </button>
           </div>
           <div> 
-            <button type="button" className="krds-btn primary xlarge">
+            <button type="button" className="krds-btn primary xlarge"
+                    onClick={() => openPopup(mbrNo)}>
               신청하기
               <i className="svg-icon ico-angle right"></i>
             </button>
           </div>
         </div>
-
-      </div> 
+      </div>
+      <ApiKeyForm
+          isOpen={isOpen}
+          onClose={closePopup}
+          submitting={submitting}
+          errorMessage={errorMessage}
+          memberInfo={memberInfo}
+          mbrNo={mbrNo}
+          onSubmit={(formData) => submitApply(mbrNo, formData)}
+      />
     </>
   );
 };
 
-export default UI_USR_R_212;
+export default EventInfoApi;

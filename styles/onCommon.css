@@ -688,6 +688,21 @@ table tbody tr:hover td {
   color: #052B57;
   border: 1px solid #052B57;
 }
+
+.krds-structured-list.type-full .card-form,
+.krds-structured-list.type2 .card-form {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: var(--krds-structured-list--card-bottom-padding-top);
+  border-top: var(--krds-structured-list--border-width) solid var(--krds-structured-list--card-bottom-color-border);
+}
+.krds-structured-list .card-form .card-btm {
+  padding-top: 0;
+  border-top: none;
+}
+
 .on-linktxt {
   color: var(--blue-color1);
   text-decoration: underline;
@@ -958,12 +973,12 @@ table tbody tr:hover td {
 }
 /* SideNavigation */
 .krds-side-navigation .lnb-tit {
-  background: #7742d9;
-  background: linear-gradient(
+  background: #1877F2;
+  /*background: linear-gradient(
     135deg,
     rgba(119, 66, 217, 1) 0%,
     rgba(50, 140, 223, 1) 100%
-  );
+  );*/
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -1193,6 +1208,9 @@ table tbody tr:hover td {
 .search-top-box .sch-form-wrap .sch-input {
   width: 392px;
 }
+.search-top-box .sch-form-wrap .sch-input.w-322 {
+  width: 322px;
+}
 .search-top-box .sch-form-wrap.flex-inline {
   display: inline-flex;
 }
@@ -1204,6 +1222,9 @@ table tbody tr:hover td {
   align-items: flex-start;
 }
 .search-top-box .sch-form-wrap.flex-inline .krds-btn.medium {
+  flex-shrink: 0;
+}
+.search-top-box .sch-form-wrap.flex-inline .krds-btn.small {
   flex-shrink: 0;
 }
 .search-top-box .sch-filter-box {
@@ -1367,6 +1388,8 @@ table tbody tr:hover td {
   flex-direction: row;
   gap: var(--krds-gap-3);
 }
+.search-list-top .sch-sort  .margin-top13 {margin-top: -13px;}
+
 .search-list-top .sch-sort .w-sort-btn button {
   transition: var(--krds-transition-base);
   color: var(--search-list-sort-btn-color);
@@ -1377,6 +1400,7 @@ table tbody tr:hover td {
 .search-list-top .sch-sort .w-sort-btn button.active {
   text-decoration: underline;
   text-underline-offset: var(--krds-font-underline-offset);
+  color: var(--blue-color1);
 }
 .search-list-top .sch-sort .w-sort-btn button:hover {
   border-radius: var(--krds-radius-medium1);
@@ -2132,6 +2156,22 @@ table tbody tr:hover td {
   gap: 64px;
   align-items: center;
 }
+.krds-structured-list .mh-250 {
+  min-height: 250px;
+}
+.krds-structured-list .mh-250 .c-ico-txt.onellipsis-2 {
+  word-break: unset;
+}
+.krds-structured-list .card-body {
+  position: relative;
+  height: 100%;
+}
+
+.krds-structured-list .card-body .c-btn-pos {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+}
 .totalsearch-wrap .krds-structured-list .card-body .c-btn {
   position: relative;
 }
@@ -2551,7 +2591,10 @@ table tbody tr:hover td {
 .def-list-wrap .def-list .def-list-group {
   width: 100%;
   display: flex;
+  flex-direction: column;
+  gap: var(--krds-gap-4) 0;
 }
+
 .def-list-wrap .def-list dt {
   width: 12.5rem;
   margin-right: var(--krds-gap-7);
@@ -2995,7 +3038,7 @@ textarea.krds-input::placeholder {
   padding-top: 20px;
 }
 .on-subtitle-box.pre .subtitle-boxcon {
-  height: 104px;
+  height: 250px;
   margin-top: 0;
 }
 .on-subtitle-box.pre .subtitle-boxtit {
@@ -3213,6 +3256,7 @@ textarea.krds-input::placeholder {
 .service-guide .guide-cont-list li {
   flex: 1;
   display: flex;
+  gap: 20px;
   flex-direction: column;
   padding: 40px 30px;
   background-color: #fff;
@@ -3237,15 +3281,15 @@ textarea.krds-input::placeholder {
   text-align: center;
 }
 .service-guide .guide-cont-list .detail-info {
-  margin-top: 28px;
-  padding: 20px; 
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F4F5F6;
-  border-radius: 8px;
   font-size: 19px;
   font-weight: 700;
+  padding: 20px; 
+  margin-top: auto;
+  background: #F4F5F6;
+  border-radius: 8px;
 }
 .service-guide .guide-cont-list .kakao-link {
   display: flex;
@@ -4330,11 +4374,6 @@ textarea.krds-input::placeholder {
     align-items: flex-start;
   }
 
-  .def-list-wrap .def-list .def-list-group  {
-    flex-direction: column;
-    gap: var(--krds-gap-4) 0;
-  }
-
   .on-form-row .form-row-item {
     flex-direction: column;
     gap: 12px;
@@ -4587,6 +4626,10 @@ textarea.krds-input::placeholder {
   }
   .krds-table-wrap .tbl.data.t-block .btn-flex .krds-btn:first-of-type {
     flex: 1;
+  }
+
+  .krds-structured-list .card-body .c-btn-pos {
+    bottom: 30px;
   }
 }
 .on-searchoption-toggle {

@@ -6,21 +6,24 @@ import Pagination from '@components/ui/Pagination.jsx';
 import Popup from '@components/ui/Popup.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { shortenInstName  } from '@utils/stringUtils.js';
+import { useNavigate, useSearchParams  } from 'react-router-dom';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
-import { useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 const UI_USR_L_040 = () => {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+
+  const initialPage = Math.max(0, parseInt(searchParams.get('page') || '1', 10) - 1);
 
   // 증명서 발급 안내 팝업 동작
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [totalPages, setTotalPages] = useState(0);
   const [topCertificateList, setTopCertificateList] = useState([]);
   const [certificateList, setCertificateList] = useState([]);
@@ -134,10 +137,8 @@ const UI_USR_L_040 = () => {
         </p>
 
         {/* guide */}
-        <ul className="krds-info-list decimal mt-24" role="list">
-          <li role="listitem"><strong>자주 찾는 증명(확인)서</strong></li>
-          <li role="listitem">아래 증명(확인서)는 <strong>최근 누적 발급건수가 많은 증명(확인서)</strong>목록입니다.</li>
-        </ul>
+        <div class="conts-wrap mt-40"><h3 class="sec-tit">자주 찾는 증명(확인)서</h3>
+        <p class="conts-desc">아래 증명(확인서)는 <strong>최근 누적 발급건수가 많은 증명(확인서)</strong>목록입니다.</p></div>
 
         <ul className="krds-structured-list small mt-24">
           {topCertificateList.map((item, index) => (
@@ -181,7 +182,7 @@ const UI_USR_L_040 = () => {
               <input
                 type="text"
                 className="krds-input"
-                placeholder="검색어를 입력해주세요."
+                placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}
                 onChange={handleSearchKeywordChange}
@@ -258,7 +259,7 @@ const UI_USR_L_040 = () => {
                     </th>
 
                     <td className="ac">
-                      <div className="title-box"><span>{item.prdocTtl}</span>
+                      <div className="title-box span-margin"><span>{item.prdocTtl}</span>
                         {item.elpblYn === 'Y' && (
                           <span className="krds-badge bg-light-primary">전자증명</span>
                         )}

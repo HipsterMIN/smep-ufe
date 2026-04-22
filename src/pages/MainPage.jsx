@@ -7,15 +7,23 @@ import Header from '@components/ui/Header.jsx';
 import Footer from '@components/ui/Footer.jsx';
 import Work24VirtualKeyboard from '@components/ui/work24-keyboard/Work24VirtualKeyboard.jsx';
 import mainIcon01 from '@assets/main/mainIcon_01.svg';
+import mainIcon02 from '@assets/main/mainIcon_02.svg';
 import mainIcon03 from '@assets/main/mainIcon_03.svg';
 import mainIcon04 from '@assets/main/mainIcon_04.svg';
+import mainIcon05 from '@assets/main/mainIcon_05.svg';
 import mainIcon06 from '@assets/main/mainIcon_06.svg';
 import mainIcon07 from '@assets/main/mainIcon_07.svg';
+import mainIcon08 from '@assets/main/mainIcon_08.svg';
+import mainIcon09 from '@assets/main/mainIcon_09.svg';
+import mainIcon10 from '@assets/main/mainIcon_10.svg';
+import mainIcon11 from '@assets/main/mainIcon_11.svg';
+import mainIcon12 from '@assets/main/mainIcon_12.svg';
 import mainBanner from '@assets/temp/main_banner_1.png';
 import { api as apiClient } from '@lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useAuthStore } from '@store/useAuthStore.jsx';
+import OnepassLoginConversionModal from '@pages/onepass/OnepassLoginConversionModal.jsx';
 
 const MAIN_MENU_IDS = {
   notice: 'M_PIIO_00101',
@@ -125,6 +133,8 @@ const stripHtmlTags = (value) => {
 const SEARCH_POPULAR_LIMIT = 5;
 const SEARCH_AUTOCOMPLETE_LIMIT = 8;
 const SEARCH_AUTOCOMPLETE_DEBOUNCE_MS = 250;
+const ONEPASS_CONVERSION_MODAL_DISMISSED_KEY =
+  '__onepass_conversion_modal_dismissed__';
 
 const parseSearchPayload = (payload) => {
   if (!payload) return null;
@@ -196,6 +206,7 @@ const MainPage = () => {
   const [isPopularLoading, setIsPopularLoading] = useState(false);
   const [isAutoLoading, setIsAutoLoading] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [isOnepassModalOpen, setIsOnepassModalOpen] = useState(false);
   const srchInputRef = useRef(null);
   const keyboardButtonRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -204,6 +215,8 @@ const MainPage = () => {
   const swiperRef = useRef(null);
   const latestAutoQueryRef = useRef('');
   const authToken = useAuthStore((state) => state.token);
+  const isLogin = useAuthStore((state) => state.isLogin);
+  const intgMbrSwtcYn = useAuthStore((state) => state.intgMbrSwtcYn);
   const isLoggedIn = Boolean(authToken);
 
   const showPopular = isFocused && searchQuery.trim() === '';
@@ -219,57 +232,54 @@ const MainPage = () => {
   const platformMenus = [
     {
       img: mainIcon01,
-      title: (
-        <>
-          <span className="mo-hide">신청 가능한</span>{' '}
-          <br className="pc-only" />
-          사업공고 찾기
-        </>
-      ),
+      title: '사업공고',
       path: '/req/pbanc',
     },
     {
-      img: mainIcon07,
-      title: (
-        <>
-          <span className="mo-hide">중소벤처기업부</span>{' '}
-          <br className="pc-only" />
-          지원사업 보기
-        </>
-      ),
-      path: '/req/sprt',
+      img: mainIcon03,
+      title: '증명서 발급',
+      path: '/crtf/UI_USR_L_040',
+    },
+    {
+      img: mainIcon09,
+      title: '정책뉴스',
+      path: '/plcy/reprt/plcyNews',
     },
     {
       img: mainIcon04,
-      title: (
-        <>
-          <span className="mo-hide">융자 보증 보험</span>정책 금융상품 찾기
-        </>
-      ),
+      title: '정책금융상품',
       path: '/req/UI_USR_L_030',
     },
     {
-      img: mainIcon03,
-      title: (
-        <>
-          중소기업 <span className="mo-hide">(소상공인)</span>확인서 발급하기
-        </>
-      ),
-      path: '/crtf/UI_USR_L_040/Y107',
+      img: mainIcon11,
+      title: '행사정보',
+      path: '/plcy/reprt/UI_USR_L_190',
     },
     {
-      img: mainIcon03,
-      title: (
-        <>
-          직접생산확인 <br /> 증명서 발급하기
-        </>
-      ),
-      path: '/crtf/UI_USR_L_040/Y101',
+      img: mainIcon07,
+      title: '지원사업 소개',
+      path: '/req/sprt',
+    },
+    {
+      img: mainIcon08,
+      title: '입법·행정예고/고시',
+      path: '/plcy/icr/UI_USR_L_110',
     },
     {
       img: mainIcon06,
-      title: '입법행정예고/고시',
-      path: '/plcy/icr/UI_USR_L_110',
+      title: '입주기업 모집공고 ',
+      path: '/req/UI_USR_L_180',
+    },
+    {
+      img: mainIcon10,
+      title: '공지사항',
+      path: '/cs/csc/notice',
+    },
+
+    {
+      img: mainIcon12, 
+      title: '자주하는 질문',
+      path: '/cs/csc/faq',
     },
   ];
 
@@ -538,6 +548,30 @@ const MainPage = () => {
     };
   }, [isLoggedIn, pbancScrapTargetIds, policyScrapTargetIds]);
 
+  useEffect(() => {
+    if (!isLogin) {
+      window.sessionStorage.removeItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY);
+      setIsOnepassModalOpen(false);
+      return;
+    }
+
+    if (intgMbrSwtcYn !== 'N') {
+      setIsOnepassModalOpen(false);
+      return;
+    }
+
+    const isDismissed =
+      window.sessionStorage.getItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY) ===
+      '1';
+
+    if (isDismissed) {
+      setIsOnepassModalOpen(false);
+      return;
+    }
+
+    setIsOnepassModalOpen(true);
+  }, [isLogin, intgMbrSwtcYn]);
+
   const handleSearch = () => {
     setIsKeyboardOpen(false);
     if (searchQuery.trim()) {
@@ -574,11 +608,18 @@ const MainPage = () => {
       setIsAutoLoading(false);
     }
   };
+  const handleOnepassModalDismiss = () => {
+    window.sessionStorage.setItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY, '1');
+    setIsOnepassModalOpen(false);
+  };
+  // 실제 전환 동선은 후속 계약 전까지 연결하지 않고, 현재는 노출/세션 제어까지만 수행한다.
+  const handleOnepassModalConvert = () => {
+    handleOnepassModalDismiss();
+  };
   const requestLoginForScrap = () => {
     const moveToLogin = window.confirm('로그인 후 스크랩 가능합니다. 로그인 하시겠습니까?');
     if (moveToLogin) {
-      //todo 로그인생기면 링크걸기
-      //navigate('/service/login');
+      navigate('/service/login');
     }
   };
   const handleToggleLike1 = async (targetId) => {
@@ -1053,7 +1094,7 @@ const MainPage = () => {
                     <div className="service-tabcont">
                       <ul className="krds-structured-list row-4">
                         {certificateItems.map((item, index) => (
-                          <li className="structured-item" key={index}>
+                          <li className="structured-item mh-250" key={index}>
                             <div className="card-top">
                               {item.elpblYn === 'Y' && (
                                 <span className="krds-badge bg-light-primary">전자증명</span>
@@ -1071,7 +1112,7 @@ const MainPage = () => {
                                   {item.issuInstNm || item.jrsdInstNm}
                                 </p>
                               </div>
-                              <div>
+                              <div className="c-btn-pos">
                                 <button
                                   type="button"
                                   className="krds-btn secondary small full"
@@ -1081,7 +1122,7 @@ const MainPage = () => {
                                     )
                                   }
                                 >
-                                  발급받기
+                                  발급받기11
                                 </button>
                               </div>
                             </div>
@@ -1487,6 +1528,12 @@ const MainPage = () => {
           </div>
         </div>
       </div>
+      <OnepassLoginConversionModal
+        isOpen={isOnepassModalOpen}
+        onConvert={handleOnepassModalConvert}
+        onLater={handleOnepassModalDismiss}
+        onClose={handleOnepassModalDismiss}
+      />
       <Footer />
       {visiblePopups.map((popup) => {
         const imageSrc = buildMainImageUrl(

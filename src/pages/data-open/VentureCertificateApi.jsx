@@ -1,14 +1,28 @@
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import ApiKeyForm from './ApiKeyForm';
+import { useNavigate } from 'react-router-dom';
+import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
 
-const UI_USR_R_213 = () => {
+const VentureCertificateApi = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const mbrNo = "2025120500381316";
+  const {
+    isOpen,
+    submitting,
+    errorMessage,
+    memberInfo,
+    openPopup,
+    closePopup,
+    submitApply
+  } = useApiKeyApply();
 
   // ✅ 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+  const navigate = useNavigate();
 
   return (
     <>
@@ -20,17 +34,17 @@ const UI_USR_R_213 = () => {
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
           <p className="on-p1 on-colorblue">API안내</p>
-          <h2 className="h-tit">이노비즈확인서 API</h2>
+          <h2 className="h-tit">벤처기업확인서 API</h2>
         </div>
 
         <div className="conts-wrap mt-40">
-          <h3 className="sec-tit">이노비즈확인서 API</h3>
+          <h3 className="sec-tit">벤처기업확인서 API</h3>
           <div className="def-list-wrap border">
             <dl className="def-list">
               <dt>URL</dt>
               <dd>https://www.smes.go.kr/api/certificates/증명서코드</dd>
               <dt>설명</dt>
-              <dd>이노비즈 확인서 API</dd>
+              <dd>벤처기업확인서 API</dd>
               <dt>호출방식</dt>
               <dd>GET</dd>
               <dt>데이터형식</dt>
@@ -101,58 +115,63 @@ const UI_USR_R_213 = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="ac"><span>0</span></td>
-                  <td><span>정상적으로 조회 되었습니다.</span></td>
-                  <td className="ac"><span>정상</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>2</span></td>
-                  <td><span>데이터가 없습니다.</span></td>
-                  <td className="ac"><span>정상</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>3</span></td>
-                  <td><span>확인서 발급기관과 연계 실패</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>5</span></td>
-                  <td><span>기타 메세지 오류</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>9</span></td>
-                  <td><span>인증키 오류 오류</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>10</span></td>
-                  <td><span>인증키 오류 해당 API의 인증키가 아닙니다.</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>11</span></td>
-                  <td><span>인증키 오류 존재하지 않는 인증키입니다.</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>12</span></td>
-                  <td><span>인증키가 필요합니다.</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>99</span></td>
-                  <td><span>기타 오류 발생</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
+              <tr>
+                <td className="ac"><span>0</span></td>
+                <td><span>정상적으로 조회 되었습니다.</span></td>
+                <td className="ac"><span>정상</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>2</span></td>
+                <td><span>데이터가 없습니다.</span></td>
+                <td className="ac"><span>정상</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>3</span></td>
+                <td><span>확인서 발급기관과 연계 실패</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>5</span></td>
+                <td><span>기타 메세지</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>9</span></td>
+                <td><span>인증키 오류</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>10</span></td>
+                <td><span>인증키 오류. 해당 API의 인증키가 아닙니다.</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>11</span></td>
+                <td><span>인증키 오류. 존재하지 않는 인증키입니다.</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>12</span></td>
+                <td><span>인증키가 필요합니다.</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>99</span></td>
+                <td><span>기타 오류 발생</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>429</span></td>
+                <td><span>사용량이 많습니다. 잠시 후 이용해 주세요</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
               </tbody>
             </table>
           </div>
         </div>
 
         <div className="conts-wrap mt-40">
-          <h3 className="sec-tit">이노비즈 확인서 [증명서코드:y105]</h3>
+          <h3 className="sec-tit">벤처기업 확인서 [증명서코드:y106]</h3>
           <div className="on-subtitle-box pre">
             <div className="subtitle-boxtit">요청메시지</div>
             <div className="subtitle-boxcon ">
@@ -160,7 +179,7 @@ const UI_USR_R_213 = () => {
                 <code>
                   {`{
   "bizno" : "", // 사업자번호
-  "token" : "" // 인증키
+  "token" : "" // 인증키(header token 사용 권장)
 }`}
                 </code>
               </pre>
@@ -173,18 +192,26 @@ const UI_USR_R_213 = () => {
               <pre className="code-pre">
                 <code>
                   {`{
-  "bizno": "",
-  "resultCd": "0",
-  "data": {
-    "score": "A",
-    "ceo_name": "",       // 대표자명
-    "innobiz_num": "",    // 확인서 번호
-    "co_name": "",        // 회사명
-    "co_addr": "",        // 주소
-    "inno_valday": "2017-11-21",     // 유효시작일
-    "inno_valday_end": "2020-11-20"  // 유효종료일
-  }
-}`}
+    "bizno": "",
+    "resultCd": "0",
+    "data": {
+    "vnti_ymd": "", // 벤처확인일자    
+    "vnia_sn": , // 벤처확인일렬번호      
+    "vnti_typ_nm": "",  // 밴처투자유형   
+    "rprsv_nm": "",  // 대표자명 
+    "hdofc_dtl_addr": "", // 본사상세주소    
+    "vntr_end_vld_ymd": "2024년 06월 02일 ", //벤처유효종료일자    
+    "vntr_bgng_vld_ymd": "2021년 06월 03일 ", //벤처유효시작일자    
+    "cnfmt_issu_no": "", // 확인서발급번호
+    "bizrno": "", // 사업자등록번호
+    "cmp_nm": "" // 기업명 
+    },
+    "crtfNm": " ",벤처기업확인서
+    "crtfCd": "Y106",
+   "resultMsg": " .",정상적으로 조회되었습니다 
+    "url": "www.smes.go.kr/ClipReport4/commonTibero.jsp?fileName=abc&CRTF_REQST_SNO=12341234", // 증명서 리포트 URL
+}
+`}
                 </code>
               </pre>
             </div>
@@ -194,21 +221,30 @@ const UI_USR_R_213 = () => {
         {/* bottom btn */}
         <div className="onboard-btm-btngroup bt-0 ">
           <div> 
-            <button type="button" className="krds-btn tertiary xlarge">
+            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate('..')}>
               목록
             </button>
           </div>
           <div> 
-            <button type="button" className="krds-btn primary xlarge">
+            <button type="button" className="krds-btn primary xlarge"
+                    onClick={() => openPopup(mbrNo)}>
               신청하기
               <i className="svg-icon ico-angle right"></i>
             </button>
           </div>
         </div>
-
-      </div> 
+      </div>
+      <ApiKeyForm
+          isOpen={isOpen}
+          onClose={closePopup}
+          submitting={submitting}
+          errorMessage={errorMessage}
+          memberInfo={memberInfo}
+          mbrNo={mbrNo}
+          onSubmit={(formData) => submitApply(mbrNo, formData)}
+      />
     </>
   );
 };
 
-export default UI_USR_R_213;
+export default VentureCertificateApi;

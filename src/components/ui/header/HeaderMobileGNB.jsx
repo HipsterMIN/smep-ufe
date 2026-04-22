@@ -19,7 +19,19 @@ const resolveMenuLinkAttrs = (fullPath) => {
   };
 };
 
-const HeaderMobileGNB = forwardRef(({ menus, onClose, userName, isLogin }, ref) => {
+const HeaderMobileGNB = forwardRef(({
+  menus,
+  onClose,
+  onLogin,
+  onLogout,
+  userName,
+  isLogin,
+  showSessionTimer,
+  sessionTimerLabel,
+  canExtendSession,
+  isExtendingSession,
+  onExtendSession,
+}, ref) => {
   const [activeMobileTab, setActiveMobileTab] = useState(0);
 
   const handleMobileTabClick = (e, index) => {
@@ -33,6 +45,18 @@ const HeaderMobileGNB = forwardRef(({ menus, onClose, userName, isLogin }, ref) 
   };
 
   const [isPopOpen, setPopOpen] = useState(false); // 유관기관 둘러보기 팝업
+
+  const handleLoginClick = () => {
+    // 모바일 GNB 오버레이가 열린 채로 route 이동하지 않도록 먼저 닫는다.
+    onClose?.();
+    onLogin?.();
+  };
+
+  const handleLogoutClick = () => {
+    // 모바일 GNB 오버레이가 열린 채로 로그아웃 상태 전환하지 않도록 먼저 닫는다.
+    onClose?.();
+    onLogout?.();
+  };
 
   return (
     <>
@@ -58,19 +82,28 @@ const HeaderMobileGNB = forwardRef(({ menus, onClose, userName, isLogin }, ref) 
                     <span className="user">{userName}</span>님 안녕하세요
                     
                   </div>
-                  <div className="gnb-sesseion-timer">
-                    <div className="timer"><span className="sr-only">남은 시간</span><i className="svg-icon ico-clock"></i> 28: 38</div>
-                    <button type="button" className="krds-btn secondary xsmall">연장</button>
-                  </div>
+                  {showSessionTimer ? (
+                    <div className="gnb-sesseion-timer">
+                      <div className="timer"><span className="sr-only">남은 시간</span><i className="svg-icon ico-clock"></i> {sessionTimerLabel}</div>
+                      <button
+                        type="button"
+                        className="krds-btn secondary xsmall"
+                        onClick={onExtendSession}
+                        disabled={!canExtendSession || isExtendingSession}
+                      >
+                        연장
+                      </button>
+                    </div>
+                  ) : null}
                   <div className="gnb-header-link">
                     <Link to="#" className="krds-btn large text"><i className="svg-icon ico-my"></i> 마이비즈니스</Link>
-                    <button type="button" className="krds-btn large text"><i className="svg-icon ico-logout"></i> 로그아웃</button>
+                    <button type="button" className="krds-btn large text" onClick={handleLogoutClick}><i className="svg-icon ico-logout"></i> 로그아웃</button>
                   </div>
                 </>
               ) : (
                 <>
                   {/* 로그인 전 */}
-                  <button type="button" className="krds-btn large text"><i className="svg-icon ico-log"></i> 로그인</button>
+                  <button type="button" className="krds-btn large text" onClick={handleLoginClick}><i className="svg-icon ico-log"></i> 로그인</button>
                   <button type="button" className="krds-btn large text"><i className="svg-icon ico-join"></i> 회원가입</button>
                   
                 </>

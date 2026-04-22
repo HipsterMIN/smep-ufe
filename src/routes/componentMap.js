@@ -13,7 +13,11 @@ const UI_USR_L_030 = lazy(() => import('@pages/UI_USR_L_030.jsx'));
 const UI_USR_L_040 = lazy(() => import('@pages/certificate/UI_USR_L_040.jsx'));
 const UI_USR_R_041 = lazy(() => import('@pages/certificate/UI_USR_R_041.jsx'));
 const UI_USR_P_042 = lazy(() => import('@pages/certificate/UI_USR_P_042.jsx'));
+const DpcIssue = lazy(() => import('@pages/certificate/issue-extra/DpcIssue.jsx'));
 const CbzIssue = lazy(() => import('@pages/certificate/issue-extra/CbzIssue.jsx'));
+const PfcIssue = lazy(() => import('@pages/certificate/issue-extra/PfcIssue.jsx'));
+const SmtcIssue = lazy(() => import('@pages/certificate/issue-extra/SmtcIssue.jsx'));
+const SmftIssue = lazy(() => import('@pages/certificate/issue-extra/SmftIssue.jsx'));
 const UI_USR_R_031 = lazy(() => import('@pages/UI_USR_R_031.jsx'));
 const UI_USR_R_480 = lazy(() => import('@pages/my-business/UI_USR_R_480.jsx'));
 const UI_USR_L_510 = lazy(() => import('@pages/my-business/UI_USR_L_510.jsx'));
@@ -30,14 +34,14 @@ const EntrSpt = lazy(() => import('@pages/more-service/EntrSpt.jsx'));
 const EntrSptDetail = lazy(() => import('@pages/more-service/EntrSptDetail.jsx'));
 const RelatedSystems = lazy(() => import('@pages/more-service/RelatedSystems.jsx'));
 const UI_USR_L_170 = lazy(() => import('@pages/more-service/UI_USR_L_170.jsx'));
-const UI_USR_L_210 = lazy(() => import('@pages/data-open/UI-USR-L-210.jsx'));
+const ApiInfo = lazy(() => import('@pages/data-open/ApiInfo.jsx'));
 const UI_USR_L_220 = lazy(() => import('@pages/data-open/UI-USR-L-220.jsx'));
 const UI_USR_L_230 = lazy(() => import('@pages/data-open/UI-USR-L-230.jsx'));
-const UI_USR_R_211 = lazy(() => import('@pages/data-open/UI-USR-R-211.jsx'));
-const UI_USR_R_212 = lazy(() => import('@pages/data-open/UI-USR-R-212.jsx'));
-const UI_USR_R_213 = lazy(() => import('@pages/data-open/UI-USR-R-213.jsx'));
-const UI_USR_R_214 = lazy(() => import('@pages/data-open/UI-USR-R-214.jsx'));
-const UI_USR_R_215 = lazy(() => import('@pages/data-open/UI-USR-R-215.jsx'));
+const SupportBusinessInfoApi = lazy(() => import('@pages/data-open/SupportBusinessInfoApi.jsx'));
+const EventInfoApi = lazy(() => import('@pages/data-open/EventInfoApi.jsx'));
+const InnoBizCertificateApi = lazy(() => import('@pages/data-open/InnoBizCertificateApi.jsx'));
+const VentureCertificateApi = lazy(() => import('@pages/data-open/VentureCertificateApi.jsx'));
+const MainBizCertificateApi = lazy(() => import('@pages/data-open/MainBizCertificateApi.jsx'));
 const UI_USR_R_232 = lazy(() => import('@pages/data-open/UI-USR-R-232.jsx'));
 const UI_USR_W_231 = lazy(() => import('@pages/data-open/UI-USR-W-231.jsx'));
 const BoardResolver = lazy(() => import('@pages/board/BoardResolver.jsx'));
@@ -47,17 +51,20 @@ const UI_USR_L_070 = lazy(() => import('@pages/policy-info/UI_USR_L_070.jsx')); 
 const UI_USR_R_340 = lazy(() => import('@pages/customer-support/UI-USR-R-340.jsx'));
 const UI_USR_R_341 = lazy(() => import('@pages/customer-support/UI-USR-R-341.jsx'));
 const PlatformIntro = lazy(() => import('@pages/customer-support/PlatformIntro.jsx'));
-const UI_USR_R_451 = lazy(() => import('@pages/UI-USR-R-451.jsx'));
-const UI_USR_R_420 = lazy(() => import('@pages/my-business/UI-USR-R-420.jsx'));
+const VerifyPassword = lazy(() => import('@pages/my-business/VerifyPassword.jsx'));
+const UI_USR_W_411 = lazy( () => import('@pages/my-business/UI-USR-W-411.jsx'));
+
+const UI_USR_R_420 = lazy(() => import('@pages/my-business/PasswordChange.jsx'));
 const UI_USR_W_430 = lazy(() => import('@pages/my-business/UI-USR-W-430.jsx'));
 const UI_USR_R_440 = lazy(() => import('@pages/my-business/UI-USR-R-440.jsx'));
-const UI_USR_R_450 = lazy(() => import('@pages/my-business/UI-USR-R-450.jsx'));
-const UI_USR_L_460 = lazy(() => import('@pages/my-business/UI-USR-L-460.jsx'));
+const UI_USR_R_450 = lazy(() => import('@pages/my-business/company/CompanyDetail.jsx'));
+const UI_USR_W_452 = lazy(() => import('@pages/my-business/company/CompanyEdit.jsx'));
+const UI_USR_L_460 = lazy(() => import('@pages/my-business/company/ReassignOwner.jsx'));
 const UI_USR_L_020 = lazy(() => import('@pages/UI-USR-L-020.jsx'));
 const UI_USR_L_520 = lazy(() => import('@pages/my-business/UI-USR-L-520.jsx'));
-const UI_USR_L_530 = lazy(() => import('@pages/my-business/UI-USR-L-530.jsx'));
+const ScrapList = lazy(() => import('@pages/my-business/ScrapList.jsx'));
 const UI_USR_L_540 = lazy(() => import('@pages/my-business/UI-USR-L-540.jsx'));
-const UI_USR_L_550 = lazy(() => import('@pages/my-business/UI-USR-L-550.jsx'));
+const MyApiRequestList = lazy(() => import('@pages/my-business/MyApiRequestList.jsx'));
 const UI_USR_L_100 = lazy(() => import('@pages/policy-info/UI_USR_L_100.jsx'));
 const UI_USR_R_101 = lazy(() => import('@pages/policy-info/UI_USR_R_101.jsx'));
 const UI_USR_L_110 = lazy(() => import('@pages/policy-info/UI_USR_L_110.jsx'));
@@ -213,8 +220,24 @@ export const componentMap = {
         component: UI_USR_P_042,
       },
       {
+        path: 'Y101/dpc-issue',
+        component: DpcIssue,
+      },
+      {
         path: 'Y109/cbz-issue',
         component: CbzIssue,
+      },
+      {
+        path: 'Y113/pfc-issue',
+        component: PfcIssue,
+      },
+      {
+        path: ':prdocCd/smtc-issue',
+        component: SmtcIssue,
+      },
+      {
+        path: ':prdocCd/smft-issue',
+        component: SmftIssue,
       },
     ],
   },
@@ -372,14 +395,14 @@ export const componentMap = {
 
   // API 안내
   'M_PIIO_00096': {
-    component: UI_USR_L_210,
+    component: ApiInfo,
     layout: SubpageLayoutWithMenu,
     children: [
-      { path: 'a', component: UI_USR_R_211 }, // API_지원사업정보 상세
-      { path: 'b', component: UI_USR_R_212 }, // API_행사정보 API 상세
-      { path: 'c', component: UI_USR_R_213 }, // API_이노비즈확인서 상세
-      { path: 'd', component: UI_USR_R_214 }, // API_벤처기업확인서 상세
-      { path: 'e', component: UI_USR_R_215 }, // API_메인비즈확인서 상세
+      { path: 'supportBusinessInfoApi', component: SupportBusinessInfoApi }, // API_지원사업정보 상세
+      { path: 'eventInfoApi', component: EventInfoApi }, // API_행사정보 API 상세
+      { path: 'innoBizCertificateApi', component: InnoBizCertificateApi }, // API_이노비즈확인서 상세
+      { path: 'ventureCertificateApi', component: VentureCertificateApi }, // API_벤처기업확인서 상세
+      { path: 'mainBizCertificateApi', component: MainBizCertificateApi }, // API_메인비즈확인서 상세
     ],
   },
 
@@ -476,7 +499,7 @@ export const componentMap = {
 
   // 회원정보변경
   'M_PIIO_00115': {
-    component: UI_USR_R_451, //from UI_USR_R_410
+    component: UI_USR_W_411, //from VerifyPassword UI-USR-W-411.jsx
     layout: SubpageLayoutWithMenu,
   },
 
@@ -502,6 +525,12 @@ export const componentMap = {
   'M_PIIO_00119': {
     component: UI_USR_R_450,
     layout: SubpageLayoutWithMenu,
+    children: [
+      {
+        path: 'edit',
+        component: UI_USR_W_452,
+      },
+    ],
   },
 
   // 경영현황 분석
@@ -524,7 +553,7 @@ export const componentMap = {
 
   // 관심 공고
   'M_PIIO_00123': {
-    component: UI_USR_L_530,
+    component: ScrapList,
     layout: SubpageLayoutWithMenu,
   },
 
@@ -536,7 +565,7 @@ export const componentMap = {
 
   // 나의 Open API 신청내역
   'M_PIIO_00125': {
-    component: UI_USR_L_550,
+    component: MyApiRequestList,
     layout: SubpageLayoutWithMenu,
   },
 

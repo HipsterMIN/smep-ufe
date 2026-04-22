@@ -5,28 +5,26 @@ import { api as apiClient } from '@lib/apiClient.js';
 
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
-import Popup from '@components/ui/Popup.jsx';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
 
 const UI_USR_P_042 = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
+  const { prdocNm, prdocCd, prdocIssuGdCn, elpblYn } = location.state || {};
 
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [isLoading, setIsLoading]     = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
   const depth1Menu  = getDepth1Parent();
 
-  const brno = '1378626719'; // TODO: 실제 로그인 사용자 사업자번호로 교체
+  const brno = '2288105280'; // TODO: 실제 로그인 사용자 사업자번호로 교체
 
   const goBack = () => navigate(-1);
 
   const handlePrint = async () => {
     if (!prdocCd) { alert('증명서 코드가 없습니다.'); return; }
+    if (!window.confirm('증명서를 출력하시겠습니까?')) return;
 
     try {
       setIsLoading(true);
@@ -36,12 +34,35 @@ const UI_USR_P_042 = () => {
         brno,
         prdocIssuTypeCd: 'Y301',
       });
-      console.log('증명서 발급 완료 - 번호:', prdocIssuAplyNo);
 
       window.open(
         `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
         '_blank',
       );
+
+      navigate('/mb/dash/UI_USR_L_510');
+    } catch (e) {
+      console.error('증명서 발급 실패:', e);
+      alert('증명서 발급 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleWalletClick = async () => {
+    if (!prdocCd) { alert('증명서 코드가 없습니다.'); return; }
+    if (!window.confirm('전자증명서 발급을 신청하시겠습니까?')) return;
+
+    try {
+      setIsLoading(true);
+
+      await apiClient.post('/api/v1/certificate/issue', {
+        prdocCd,
+        brno,
+        prdocIssuTypeCd: 'Y302',
+      });
+
+      navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
       console.error('증명서 발급 실패:', e);
       alert('증명서 발급 중 오류가 발생했습니다.');
@@ -61,7 +82,6 @@ const UI_USR_P_042 = () => {
         <div className="page-title-wrap" data-type="responsive">
           <h2 className="h-tit">{prdocNm}발급</h2>
         </div>
-
         <div className="conts-wrap">
           <div className="txt-box outline">
             <h4 className="outline-tit">알려드립니다.</h4>
@@ -102,7 +122,7 @@ const UI_USR_P_042 = () => {
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
                   <input type="text" id="id_02" className="krds-input small"
-                    placeholder="상호를 입력해주세요" value="주식회사 중소벤처" disabled />
+                    placeholder="상호를 입력해주세요" value="유큐브" disabled />
                 </div>
               </dd>
             </div>
@@ -116,7 +136,7 @@ const UI_USR_P_042 = () => {
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
                   <input type="text" id="id_03" className="krds-input small"
-                    placeholder="대표자명을 입력해주세요" value="홍길동" disabled />
+                    placeholder="대표자명을 입력해주세요" value="김정범" disabled />
                 </div>
               </dd>
             </div>
@@ -130,16 +150,19 @@ const UI_USR_P_042 = () => {
             </button>
           </div>
           <div>
+            {elpblYn === 'Y' && (
+              <button
+                type="button"
+                className="krds-btn primary xlarge"
+                onClick={handleWalletClick}
+                disabled={isLoading}
+              >
+                  전자문서지갑
+              </button>
+            )}
             <button
               type="button"
               className="krds-btn primary xlarge"
-              onClick={() => setIsPopupOpen(true)}
-            >
-                전자문서지갑
-            </button>
-            <button
-              type="button"
-              className="krds-btn tertiary xlarge"
               onClick={handlePrint}
               disabled={isLoading}
             >
@@ -149,28 +172,6 @@ const UI_USR_P_042 = () => {
           </div>
         </div>
       </div>
-
-      <Popup
-        isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-        size="small"
-        noBottomBtn
-      >
-        <div className="confirm-guide">
-          <span className="sub-title">용도 확인</span>
-          <p className="main-title">전자증명서 발급 용도를 선택해주세요</p>
-          <div className="purpose-selection">
-            <button type="button" className="btn-purpose">
-              <i className="ico-public"></i>
-              <span>공공기관 입찰용</span>
-            </button>
-            <button type="button" className="btn-purpose">
-              <i className="ico-other"></i>
-              <span>공공기관 입찰 이외의 용도</span>
-            </button>
-          </div>
-        </div>
-      </Popup>
     </>
   );
 };

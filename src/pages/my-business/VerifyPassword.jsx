@@ -1,5 +1,5 @@
-import SideNavigation from '@components/ui/SideNavigation';
-import Breadcrumb from '@components/ui/Breadcrumb';
+import SideNavigation from '@components/ui/SideNavigation.jsx';
+import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 

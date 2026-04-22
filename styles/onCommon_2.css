@@ -8,6 +8,8 @@
 .sr-only {
   left: -9999px; /* 모바일에서 table안에 sr-only 들어가면 가로 스크롤 생김 방지 */
 }
+
+.tbl .title-box {display: flex; gap: 8px;}
 .krds-btn.primary[disabled], 
 .krds-btn.primary.disabled {
   border:none;
@@ -667,8 +669,9 @@
 }
 .main-container .main-toplayout {
   padding-top: 64px;
-  background: linear-gradient(180deg, #ECF2FE -23.63%, #FFF 100%);
 }
+
+.main-container .main-toplayout::before {content:""; position: absolute; left:0px; top:0px; right:0px;  height:387px; background: #F4F9FF; z-index: -1;}
 .main-container .main-top-inner {
   max-width: 1600px;
   margin: 0 auto;
@@ -838,9 +841,14 @@
 .main-container .main-top-keyword .word {
   padding: 0 12px;
   height: 32px;
-  background-color: #D6E0EB;
+  background-color: #CDE7FF;
   border-radius: 44px;
 }
+.main-container .main-top-keyword .word:hover {
+  background-color: #B5D8FF;
+}
+
+
 
 /* 메인 - 자주 찾는 서비스 */
 .main-quick-menu {
@@ -848,7 +856,7 @@
   border-radius: 20px;
   margin-top: 64px;
   padding:  32px 12.6% 32px 6.3%;
-  background: linear-gradient(286deg, #7742D9 -1.35%, #328CDF 100.25%);
+  background: #1877F2; /*linear-gradient(286deg, #7742D9 -1.35%, #328CDF 100.25%);*/
   backdrop-filter: blur(15px);
 }
 .main-quick-menu .section-tit {
@@ -924,6 +932,12 @@
 .krds-structured-list .c-ico-txt .ico-calendar {
   width: 16px;
   background: url(../src/assets/common/ico_oncalendar.svg) no-repeat 50%;
+  background-size: 100% auto;
+  mask:none;
+}
+.krds-structured-list .c-ico-txt .ico-alarm {
+  width: 16px;
+  background: url(../src/assets/common/ico_alarm.svg) no-repeat 50%;
   background-size: 100% auto;
   mask:none;
 }
@@ -1274,7 +1288,7 @@
 
 /* 메인 - 공지사항*/
 .main-notice {
-  background: #ECF2FE;
+  background: #F4F9FF;
 }
 .main-notice .notice-wrap {
   margin-top: 24px ;
@@ -1387,7 +1401,7 @@
 }
 .main-container .main-btm-bar {
   padding: 42px 0;
-  background: #063A74;
+  background: #D9EBFF;
 }
 .main-btm-bar .contents-inner {
   display: flex;
@@ -1398,7 +1412,7 @@
 .main-btm-bar .title {
   font-size: 24px;
   font-weight: 700;
-  color: #fff;
+  color: #131416;
 }
 
 /* header - 스크롤할시 show/hide */
@@ -1773,6 +1787,53 @@ button.aichatButton.active {
 .my-dashboard .mycard li {
   flex: 1 1 calc(50% - 12px);
 }
+.my-dashboard .krds-btn.w-full {
+  width: 100%;
+}
+.my-dashboard .krds-btn.mt-20 {
+  margin-top: 20px;
+}
+.my-dashboard .noneBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  padding: 27.5px 0px;
+  background: #F4F5F6;
+}
+.my-dashboard .noneBox h4 {
+  color: #1E2124;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 150%;
+  letter-spacing: 0;
+  margin-bottom: 4px;
+}
+.my-dashboard .noneBox p {
+  color: #464C53;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 150%;
+  letter-spacing: 0;
+  margin-bottom: 12px;
+}
+.my-dashboard .noneBox a {
+  display: inline-flex;
+  align-items: center;
+  color: #0B50D0;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 150%;
+  letter-spacing: 0;
+}
+.my-dashboard .svg-icon.ico-angle.blue-right {
+  width: 16px;
+  height: 16px;
+  background: url(../src/assets/common/ico_arrow-blue-right.svg) no-repeat 50%;
+  background-size: 100% auto;
+  mask:none;
+}
 .card-info {
   display: flex;
   flex-direction: column;
@@ -1973,6 +2034,24 @@ button.aichatButton.active {
   margin-top: 10px;
   font-weight: 400;
   color: #464C53;
+}
+
+.sys-con .main-step {
+  margin-top: 0;
+}
+.sys-con .img-box {
+  margin-bottom: 24px;
+}
+.sys-con .sec-tit2 {
+  color: #052B57;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 150%;
+  letter-spacing: 0;
+  margin-bottom: 10px;
+}
+.sys-con .cont-desc.mb-10 {
+  margin-bottom: 10px;
 }
 
 /* 반응형*/
@@ -2526,6 +2605,9 @@ button.aichatButton.active {
   .main-step .img-box {
     margin-top: 24px;
     padding: 0;
+  }
+  .sys-con .main-step .img-box {
+    padding: 20px;
   }
   .sub-step > li {
     margin-top: 12px;

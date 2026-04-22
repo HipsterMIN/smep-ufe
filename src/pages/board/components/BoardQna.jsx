@@ -4,6 +4,7 @@ import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
@@ -63,12 +64,14 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const authToken = useAuthStore((state) => state.token);
 
   // 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
 
   const boardTitle = useMemo(() => boardDetail?.bbsNm || 'Q&A', [boardDetail]);
+  const isLoggedIn = Boolean(authToken);
 
   useEffect(() => {
     let isMounted = true;
@@ -226,7 +229,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
               <input
                 type="text"
                 className="krds-input"
-                placeholder="검색어를 입력해 주세요."
+                placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}
                 onChange={(event) => setSearchKeyword(event.target.value)}
@@ -337,13 +340,15 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
           />
         )}
 
-        <div className="onboard-btm-btngroup btn-single bt-0">
-          <div>
-            <button type="button" className="krds-btn primary xlarge" onClick={moveToWrite}>
-              문의하기
-            </button>
+        {isLoggedIn && (
+          <div className="onboard-btm-btngroup btn-single bt-0">
+            <div>
+              <button type="button" className="krds-btn primary xlarge" onClick={moveToWrite}>
+                문의하기
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

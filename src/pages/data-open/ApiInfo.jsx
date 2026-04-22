@@ -1,11 +1,12 @@
-import { Link } from 'react-router-dom';
 
+import { Link, useLocation } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext';
 import React from 'react';
+import {apiBaseUrl} from "@lib/apiClient.js";
 
-const UI_USR_L_210 = () => {
+const ApiInfo = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
@@ -37,18 +38,18 @@ const UI_USR_L_210 = () => {
         <div className="tab fill full mt-48">
           <ul>
             <li className="active">
-              <Link to="#" className="btn-tab">
+              <Link to="/cs/opndata/UI_USR_L_210" className="btn-tab">
                     API 소개
                 <span className="sr-only">현재 페이지</span>
               </Link>
             </li>
             <li>
-              <Link to="#" className="btn-tab">
+              <Link to="/cs/opndata/UI_USR_L_220" className="btn-tab">
                    인증키 신청
               </Link>
             </li>
             <li>
-              <Link to="#" className="btn-tab">
+              <Link to="/cs/opndata/UI_USR_L_230" className="btn-tab">
                     API Q&A
               </Link>
             </li>
@@ -95,7 +96,7 @@ const UI_USR_L_210 = () => {
             <li className="structured-item">
               <div  className="in">
                 <div className="card-body">
-                  <Link to="#" className="c-text">
+                  <Link to="innoBizCertificateApi" className="c-text">
                     <p className="c-tit">
                       <span className="span">이노비즈확인서</span>
                     </p>
@@ -113,7 +114,7 @@ const UI_USR_L_210 = () => {
                     </div>
                   </Link>
                   <div className="c-btn">
-                    <Link to="#" className="krds-btn secondary">신청하기</Link>
+                    <Link to="innoBizCertificateApi" className="krds-btn secondary">신청하기</Link>
                   </div>
                 </div>
               </div>
@@ -122,7 +123,7 @@ const UI_USR_L_210 = () => {
             <li className="structured-item">
               <div  className="in">
                 <div className="card-body">
-                  <Link to="#" className="c-text">
+                  <Link to="ventureCertificateApi" className="c-text">
                     <p className="c-tit">
                       <span className="span">벤처기업확인서</span>
                     </p>
@@ -140,7 +141,7 @@ const UI_USR_L_210 = () => {
                     </div>
                   </Link>
                   <div className="c-btn">
-                    <Link to="#" className="krds-btn secondary">신청하기</Link>
+                    <Link to="ventureCertificateApi" className="krds-btn secondary">신청하기</Link>
                   </div>
                 </div>
               </div>
@@ -149,7 +150,7 @@ const UI_USR_L_210 = () => {
             <li className="structured-item">
               <div  className="in">
                 <div className="card-body">
-                  <Link to="#" className="c-text">
+                  <Link to="mainBizCertificateApi" className="c-text">
                     <p className="c-tit">
                       <span className="span">메인비즈확인서</span>
                     </p>
@@ -167,7 +168,7 @@ const UI_USR_L_210 = () => {
                     </div>
                   </Link>
                   <div className="c-btn">
-                    <Link to="#" className="krds-btn secondary">신청하기</Link>
+                    <Link to="mainBizCertificateApi" className="krds-btn secondary">신청하기</Link>
                   </div>
                 </div>
               </div>
@@ -191,7 +192,7 @@ const UI_USR_L_210 = () => {
                   <span className="krds-badge bg-light-primary">JSON/XML</span>
                 </div>
                 <div className="card-body">
-                  <Link to="#" className="c-text">
+                  <Link to="supportBusinessInfoApi" className="c-text">
                     <p className="c-tit">
                       <span className="span">지원사업정보 API</span>
                     </p>
@@ -210,7 +211,7 @@ const UI_USR_L_210 = () => {
                     </div>
                   </Link>
                   <div className="c-btn">
-                    <Link to="#" className="krds-btn secondary">신청하기</Link>
+                    <Link to="supportBusinessInfoApi" className="krds-btn secondary">신청하기</Link>
                   </div>
                 </div>
               </div>
@@ -223,11 +224,11 @@ const UI_USR_L_210 = () => {
                   <span className="krds-badge bg-light-primary">JSON/XML</span>
                 </div>
                 <div className="card-body">
-                  <Link to="#" className="c-text">
+                  <Link to="eventInfoApi" className="c-text">
                     <p className="c-tit">
                       <span className="span">행사정보 API</span>
                     </p>
-                    <p className="c-txt">기관별, 분야별 최신 지원사업 공고 정보 제공</p>
+                    <p className="c-txt">중소기업이 참여 가능한 교육, 세미나, 전시회 정보 제공</p>
                     <div className="c-txt">
                       <ul className="c-txt-ul no-dash">
                         <li className="c-date">
@@ -242,7 +243,7 @@ const UI_USR_L_210 = () => {
                     </div>
                   </Link>
                   <div className="c-btn">
-                    <Link to="#" className="krds-btn secondary">신청하기</Link>
+                    <Link to="eventInfoApi" className="krds-btn secondary">신청하기</Link>
                   </div>
                 </div>
               </div>
@@ -253,7 +254,8 @@ const UI_USR_L_210 = () => {
         {/* bottom btn */}
         <div className="onboard-btm-btngroup bt-0 btn-single">
           <div> 
-            <button type="button" className="krds-btn xlarge">
+            <button type="button" className="krds-btn xlarge" onClick={() => window.location.href = '/main/user/file/중소벤처24_API개발가이드_V2.zip'}>
+            {/*<button type="button" className="krds-btn xlarge" onClick={() => window.location.href = `${apiBaseUrl}/api/v1/files/download/${file.atchFileId}/${file.atchFileSn}`}>*/}
               API 가이드
             </button>
           </div>
@@ -266,4 +268,4 @@ const UI_USR_L_210 = () => {
   );
 };
 
-export default UI_USR_L_210;
+export default ApiInfo;
