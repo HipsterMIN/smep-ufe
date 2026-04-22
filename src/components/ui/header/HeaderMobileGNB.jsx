@@ -23,6 +23,7 @@ const HeaderMobileGNB = forwardRef(({
   menus,
   onClose,
   onLogin,
+  onOnePassLogin,
   onLogout,
   userName,
   isLogin,
@@ -56,6 +57,12 @@ const HeaderMobileGNB = forwardRef(({
     // 모바일 GNB 오버레이가 열린 채로 로그아웃 상태 전환하지 않도록 먼저 닫는다.
     onClose?.();
     onLogout?.();
+  };
+
+  const handleOnePassLoginClick = () => {
+    // 통합로그인 이동 전 모바일 GNB 오버레이를 먼저 닫아 배경 상태를 정리한다.
+    onClose?.();
+    onOnePassLogin?.();
   };
 
   return (
@@ -96,6 +103,7 @@ const HeaderMobileGNB = forwardRef(({
                     </div>
                   ) : null}
                   <div className="gnb-header-link">
+                    <button type="button" className="krds-btn large text" onClick={handleOnePassLoginClick}><i className="svg-icon ico-onepass"></i> 중기원패스</button>
                     <Link to="#" className="krds-btn large text"><i className="svg-icon ico-my"></i> 마이비즈니스</Link>
                     <button type="button" className="krds-btn large text" onClick={handleLogoutClick}><i className="svg-icon ico-logout"></i> 로그아웃</button>
                   </div>
@@ -103,6 +111,7 @@ const HeaderMobileGNB = forwardRef(({
               ) : (
                 <>
                   {/* 로그인 전 */}
+                  <button type="button" className="krds-btn large text" onClick={handleOnePassLoginClick}><i className="svg-icon ico-onepass"></i> 중기원패스</button>
                   <button type="button" className="krds-btn large text" onClick={handleLoginClick}><i className="svg-icon ico-log"></i> 로그인</button>
                   <button type="button" className="krds-btn large text"><i className="svg-icon ico-join"></i> 회원가입</button>
                   

@@ -11,6 +11,7 @@ import HeaderMobileGNB from '@components/ui/header/HeaderMobileGNB';
 import HeaderFontDropdown from '@components/ui/header/HeaderFontDropdown';
 import FullSystemPopup from '@components/ui/FullSystemPopup';
 import { api as apiClient } from '@lib/apiClient.js';
+import { onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
 
 // BASE URL 상수
 const BASE_URL = import.meta.env.VITE_BASE || '/';
@@ -155,6 +156,10 @@ export default function Header() {
 
   const handleServiceLogin = () => {
     navigate('/service/login');
+  };
+
+  const handleOnePassIntegratedLogin = () => {
+    onePassGetAuthCode();
   };
 
   const handleLogout = () => {
@@ -481,6 +486,7 @@ export default function Header() {
                       isExtendingSession={isExtendingSession}
                       onExtendSession={handleExtendSession}
                       onLogin={handleServiceLogin}
+                      onOnePassLogin={handleOnePassIntegratedLogin}
                       onLogout={handleLogout}
                       onMyPage={handleMyPage}
                       onSwitchContext={async (companyId) => {
@@ -524,6 +530,7 @@ export default function Header() {
           menus={dynamicMenus} 
           onClose={handleCloseMobGnb} 
           onLogin={handleServiceLogin}
+          onOnePassLogin={handleOnePassIntegratedLogin}
           onLogout={handleLogout}
           isLogin={isLogin}
           userName={currentCompany?.companyName || user?.name}

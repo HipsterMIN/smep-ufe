@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './OnepassLoginConversionModal.module.css';
-import { keycloakGetAuthCode } from '../../utils/keycloakGetAuthCode';
+import { onePassJoin } from '../../utils/keycloakGetAuthCode';
 
 function SwitchVisual() {
   return (
@@ -86,7 +86,7 @@ export default function OnepassLoginConversionModal({
 
   const handleConvertClick = () => {
     onConvert();
-    keycloakGetAuthCode();
+    onePassJoin();
   };
 
   return (
