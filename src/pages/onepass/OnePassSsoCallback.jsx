@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api as apiClient } from '../../lib/apiClient.js';
+import { useAuthStore } from '../../store/useAuthStore.jsx';
 
 const KEYCLOAK_STATE_KEY = 'keycloak_state';
 const LOG_PREFIX = '[OnePassSsoCallback]';
@@ -57,19 +58,24 @@ const OnePassSsoCallback = () => {
 
     // warn 레벨을 쓰는 이유는 "실패"라기보다 검증 탈락(branch reject)임을 구분하기 위해서다.
     // 여기선 missingState 와 mismatchedState 를 먼저 보면 된다.
-    console.warn(`${LOG_PREFIX} invalid state branch`, {
-    ...callbackState,
-    action: 'clear-session-state-and-redirect-login',
-    });
-    console.log(`${LOG_PREFIX} session state removed`, {
-    key: KEYCLOAK_STATE_KEY,
-    });
-    console.log(`${LOG_PREFIX} navigate login`, {
-    to: '/service/login',
-    reason: 'invalid-state',
-    });
-    navigate('/service/login', { replace: true });
+    if (!state || state !== savedState) {
+      console.warn(`${LOG_PREFIX} invalid state branch`, {
+        ...callbackState,
+        action: 'clear-session-state-and-redirect-login',
+      });
+      window.sessionStorage.removeItem(KEYCLOAK_STATE_KEY);
+      console.log(`${LOG_PREFIX} session state removed`, {
+        key: KEYCLOAK_STATE_KEY,
+      });
+      console.log(`${LOG_PREFIX} navigate login`, {
+        to: '/service/login',
+        reason: 'invalid-state',
+      });
+      navigate('/service/login', { replace: true });
+      return;
+    }
 
+    window.sessionStorage.removeItem(KEYCLOAK_STATE_KEY);
     console.log(`${LOG_PREFIX} session state removed`, {
       key: KEYCLOAK_STATE_KEY,
     });
@@ -88,8 +94,8 @@ const OnePassSsoCallback = () => {
       return;
     }
 
-    // 이번 1차는 원본 의도대로 code 를 백엔드에 넘겨 raw Keycloak token 교환 성공만 확인하고 홈으로 이동한다.
-    // 내부 SMEP 로그인/authStore 저장은 아직 후속 정책 미정이라 여기서 수행하지 않는다.
+    // callback 1단계는 여전히 raw Keycloak token exchange 와 세션 저장이다.
+    // 단, 케이스1(로컬 비로그인)에서는 이어서 local-login 브리지와 /account/me 저장 흐름까지 바로 수행한다.
     const exchangeCode = async () => {
       // backend 호출 시작 로그다. 현재 어떤 endpoint 로 code 교환을 시도했는지, code 존재 여부가 맞는지 보는 용도다.
       console.log(`${LOG_PREFIX} exchange start`, {
@@ -113,23 +119,84 @@ const OnePassSsoCallback = () => {
           expiresIn: response?.expiresIn ?? null,
           tokenType: response?.tokenType ?? null,
         });
+        const authState = useAuthStore.getState();
+        const hasLocalLogin = Boolean(authState?.isLogin && authState?.token);
+        console.log(`${LOG_PREFIX} local login decision`, {
+          hasLocalLogin,
+          hasStoredToken: Boolean(authState?.token),
+        });
+
+        // 케이스2(이미 로컬 로그인된 상태의 연결 플로우)는 아직 별도 구현 범위가 아니다.
+        // 따라서 현재 로컬 로그인이 이미 있으면 raw callback 성공만 확인하고 홈으로 복귀한다.
+        if (hasLocalLogin) {
+          console.log(`${LOG_PREFIX} navigate home`, {
+            to: '/',
+            reason: 'callback-success-existing-local-login',
+          });
+          navigate('/', { replace: true });
+          return;
+        }
+
+        console.log(`${LOG_PREFIX} local login bridge start`, {
+          endpoint: '/api/v1/auth/keycloak/local-login',
+        });
+        // local-login 응답도 일반 로그인과 동일하게 GlobalApiResponseAdvice 를 거쳐 data 안에 TokenResponse 가 들어올 수 있다.
+        const localLoginResponse = await apiClient.post('/api/v1/auth/keycloak/local-login', null);
+        const localLoginData = localLoginResponse?.data || localLoginResponse;
+        console.log(`${LOG_PREFIX} local login bridge success`, {
+          responseKeys:
+            localLoginResponse && typeof localLoginResponse === 'object'
+              ? Object.keys(localLoginResponse)
+              : [],
+          dataKeys:
+            localLoginData && typeof localLoginData === 'object'
+              ? Object.keys(localLoginData)
+              : [],
+          hasAccessToken: Boolean(localLoginData?.accessToken),
+          accessTokenLength: localLoginData?.accessToken?.length ?? 0,
+          hasRefreshToken: Boolean(localLoginData?.refreshToken),
+          refreshTokenLength: localLoginData?.refreshToken?.length ?? 0,
+        });
+
+        const accessToken = localLoginData?.accessToken;
+        const refreshToken = localLoginData?.refreshToken;
+        if (!accessToken || !refreshToken) {
+          throw new Error('Local login token response is incomplete');
+        }
+
+        console.log(`${LOG_PREFIX} account me start`, {
+          endpoint: '/api/v1/account/me',
+          hasAccessToken: Boolean(accessToken),
+        });
+        const profileResponse = await apiClient.get('/api/v1/account/me', { token: accessToken });
+        const profile = profileResponse?.data || profileResponse;
+        console.log(`${LOG_PREFIX} account me success`, {
+          hasProfile: Boolean(profile),
+          profileKeys: profile && typeof profile === 'object' ? Object.keys(profile) : [],
+        });
+
+        useAuthStore.getState().login({ token: accessToken, refreshToken, profile });
+        console.log(`${LOG_PREFIX} auth store login saved`, {
+          hasToken: Boolean(useAuthStore.getState().token),
+          isLogin: Boolean(useAuthStore.getState().isLogin),
+        });
         console.log(`${LOG_PREFIX} navigate home`, {
           to: '/',
-          reason: 'callback-success',
+          reason: 'case1-local-login-success',
         });
         navigate('/', { replace: true });
       } catch (error) {
-        // 이 단계의 실패는 code 교환 자체가 실패했다는 뜻이므로, 현재 프런트는 사용자 세션을 만들지 않고 로그인 화면으로 복귀시킨다.
-        // 여기서는 message/status/hasData 를 보면 네트워크 실패인지, 백엔드 4xx/5xx 인지, 본문이 실려왔는지 구분할 수 있다.
+        // 이 단계는 raw callback 교환, local-login 브리지, /account/me 저장까지 한 덩어리다.
+        // 여기서는 어느 단계에서든 실패하면 현재 케이스1 로컬 로그인 생성은 중단하고 로그인 화면으로 복귀시킨다.
         console.error(`${LOG_PREFIX} exchange failed`, {
           message: error?.message ?? 'unknown-error',
           status: error?.status ?? null,
           hasData: Boolean(error?.data),
         });
-        alert('api/v1/auth/keycloak/callback 호출에 실패했습니다. 다시 시도해 주세요.');
+        alert('중기원패스 로그인 처리에 실패했습니다. 다시 시도해 주세요.');
         console.log(`${LOG_PREFIX} navigate login`, {
           to: '/service/login',
-          reason: 'callback-api-failed',
+          reason: 'keycloak-case1-flow-failed',
         });
         navigate('/service/login', { replace: true });
       }
