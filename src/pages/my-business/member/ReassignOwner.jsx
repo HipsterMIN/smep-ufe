@@ -1,19 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import {useEffect, useMemo, useState} from 'react';
 
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Pagination from '@components/ui/Pagination.jsx';
 import SideNavigation from '@components/ui/SideNavigation.jsx';
-import { useUserMenu } from '@context/UserMenuContext.jsx';
-import { api as apiClient } from '@lib/apiClient.js';
-import {
-  normalizeApiPayload,
-} from '@/pages/my-business/member/memberUtils.js';
-import {
-  formatPhoneNumber,
-} from '@utils/commonUtils.js';
+import {useUserMenu} from '@context/UserMenuContext.jsx';
+import {api as apiClient} from '@lib/apiClient.js';
+import {normalizeApiPayload,} from '@/pages/my-business/member/memberUtils.js';
+import {decodeJwtPayload, formatPhoneNumber,} from '@utils/commonUtils.js';
 import ChangeManager from './components/ChangeManager.jsx';
 import JoinOwner from './components/JoinOwner.jsx';
+import {useAuthStore} from '@store/useAuthStore.jsx';
 
 const PAGE_SIZE = 10;
 const TEMP_FALLBACK_MBR_NO = '2025120500136492';
@@ -76,12 +72,13 @@ const renderValue = (value) => {
 const getRoleLabel = (entMngPicYn) => (entMngPicYn === 'Y' ? '기업관리자' : '담당자');
 
 const UI_USR_L_460 = () => {
-  const location = useLocation();
+  const authToken = useAuthStore((state) => state.token);
+  const tokenPayload = decodeJwtPayload(authToken);
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
   // 기업 기본정보 화면과 같은 임시 경로를 따라, 전달값이 없으면 동일 폴백 회원번호로 담당자 관리 진입을 보장한다.
-  const effectiveMemberNo = location.state?.mbrNo || TEMP_FALLBACK_MBR_NO;
+  const effectiveMemberNo = tokenPayload?.member_no || TEMP_FALLBACK_MBR_NO;
 
   const [contacts, setContacts] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);

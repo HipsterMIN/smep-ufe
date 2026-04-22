@@ -16,6 +16,9 @@ import {
   updateCorporateMemberInfo,
   updateIndividualMemberInfo,
 } from '@/pages/my-business/member/memberUtils.js';
+import {
+  decodeJwtPayload,
+} from '@utils/commonUtils.js';
 
 const INFO_RECEPTION_MNS_CODES = {
   message: 'A211',
@@ -53,33 +56,6 @@ const EMPTY_FORM_VALUES = {
   entAddr: '',
   entDaddr: '',
   hmpgAddr: '',
-};
-
-
-
-// JWT payload를 디코딩해 회원번호와 로그인 아이디 claim을 읽는다.
-const decodeJwtPayload = (token) => {
-  if (!token) {
-    return null;
-  }
-
-  try {
-    const payload = token.split('.')[1];
-    if (!payload) {
-      return null;
-    }
-
-    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const paddedPayload = normalizedPayload.padEnd(
-      normalizedPayload.length + ((4 - normalizedPayload.length % 4) % 4),
-      '=',
-    );
-
-    return JSON.parse(atob(paddedPayload));
-  } catch (error) {
-    console.warn('Failed to decode access token payload.', error);
-    return null;
-  }
 };
 
 // 전화번호 문자열을 화면의 세 칸 입력값으로 분리한다.
@@ -219,8 +195,9 @@ const buildIndividualMemberInfoUpdatePayload = (values, agreements) => ({
 const UI_USR_W_411 = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-  const authToken = useAuthStore((state) => state.token);
   const currentMode = useAuthStore((state) => state.currentMode);
+  const authToken = useAuthStore((state) => state.token);
+  const tokenPayload = decodeJwtPayload(authToken);
   const [memberNo, setMemberNo] = useState('');
   const [formValues, setFormValues] = useState(EMPTY_FORM_VALUES);
   const [managerContact, setManagerContact] = useState(null);
@@ -237,7 +214,6 @@ const UI_USR_W_411 = () => {
   const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '회원정보변경';
 
   useEffect(() => {
-    const tokenPayload = decodeJwtPayload(authToken);
     const mbrNo = tokenPayload?.member_no || tokenPayload?.sub;
 
     if (!mbrNo || !currentMode) {
@@ -362,7 +338,6 @@ const UI_USR_W_411 = () => {
 
     setSaving(true);
     try {
-      const tokenPayload = decodeJwtPayload(authToken);
       if (currentMode === 'CORPORATE') {
         const payload = buildCorporateMemberInfoUpdatePayload(formValues, infoReceptionAgreements);
         const detail = await updateCorporateMemberInfo(apiClient, memberNo, payload);

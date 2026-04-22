@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
-import { useUserMenu } from '@context/UserMenuContext.jsx';
-import { api as apiClient } from '@lib/apiClient.js';
+import {useUserMenu} from '@context/UserMenuContext.jsx';
+import {api as apiClient} from '@lib/apiClient.js';
+import {useAuthStore} from '@store/useAuthStore.jsx';
+
 import {
   buildCompanyAddress,
   fetchCorporateMemberCodeOptions,
@@ -15,20 +17,16 @@ import {
   getCodeLabel,
   getKsicTopLevelLabel,
 } from '@/pages/my-business/member/memberUtils.js';
-import {
-  formatPhoneNumber,
-  formatDateTime,
-  formatYmd,
-} from '@utils/commonUtils.js';
-
+import {decodeJwtPayload, formatDateTime, formatPhoneNumber, formatYmd,} from '@utils/commonUtils.js';
 // 로그인/store 정리 전까지 기업정보 화면은 전달된 회원번호가 없으면 임시 폴백 회원번호로 진입을 보장한다.
 const TEMP_FALLBACK_MBR_NO = '2025120500136492';
 
 const UI_USR_R_450 = () => {
-  const location = useLocation();
+  const authToken = useAuthStore((state) => state.token);
+  const tokenPayload = decodeJwtPayload(authToken);
   const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-  const effectiveMemberNo = location.state?.mbrNo || TEMP_FALLBACK_MBR_NO;
+  const effectiveMemberNo = tokenPayload?.member_no || TEMP_FALLBACK_MBR_NO;
   const [detail, setDetail] = useState(null);
   const [codeOptions, setCodeOptions] = useState({});
   const [loading, setLoading] = useState(true);
@@ -182,7 +180,7 @@ const UI_USR_R_450 = () => {
                 </tr>
                 <tr>
                   <th scope="row" className="ac">소재지</th>
-                  <td colSpan="3">{loading ? '로딩 중...' : '-'}</td>
+                  <td colSpan="3">{loading ? '로딩 중...' : detail?.stdgNm}</td>
                 </tr>
                 <tr>
                   <th scope="row" className="ac">간단설명</th>

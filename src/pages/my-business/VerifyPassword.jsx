@@ -6,6 +6,9 @@ import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { useAuthStore } from '@store/useAuthStore.jsx';
+import {
+  decodeJwtPayload,
+} from '@utils/commonUtils.js';
 
 const DEFAULT_VERIFY_ENDPOINT = '/api/v1/account/password/verify';
 const VERIFICATION_STORAGE_PREFIX = 'verify-password:';
@@ -47,30 +50,6 @@ const clearStoredVerificationStatus = (storageKey) => {
   }
 };
 
-const decodeJwtPayload = (token) => {
-  if (!token) {
-    return null;
-  }
-
-  try {
-    const payload = token.split('.')[1];
-    if (!payload) {
-      return null;
-    }
-
-    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const paddedPayload = normalizedPayload.padEnd(
-      normalizedPayload.length + ((4 - normalizedPayload.length % 4) % 4),
-      '=',
-    );
-
-    return JSON.parse(atob(paddedPayload));
-  } catch (error) {
-    console.warn('Failed to decode access token payload.', error);
-    return null;
-  }
-};
-
 const normalizeVerifyResult = (result) => {
   if (typeof result === 'boolean') {
     return result;
@@ -90,8 +69,9 @@ const VerifyPassword = ({
   const location = useLocation();
   const navigate = useNavigate();
   const matches = useMatches();
-  const authToken = useAuthStore((state) => state.token);
   const authUser = useAuthStore((state) => state.user);
+  const authToken = useAuthStore((state) => state.token);
+  const tokenPayload = decodeJwtPayload(authToken);
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '비밀번호 확인';
@@ -99,7 +79,6 @@ const VerifyPassword = ({
   const depth1Menu = getDepth1Parent();
 
   const defaultLoginId = useMemo(() => {
-    const tokenPayload = decodeJwtPayload(authToken);
     return tokenPayload?.login_id || authUser?.loginId || authUser?.username || '';
   }, [authToken, authUser]);
 

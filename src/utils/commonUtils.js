@@ -84,3 +84,28 @@ export const toYmd = (date) => {
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}${month}${day}`;
 };
+
+// JWT payload를 디코딩해 회원번호와 로그인 아이디 claim을 읽는다.
+export const decodeJwtPayload = (token) => {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) {
+      return null;
+    }
+
+    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const paddedPayload = normalizedPayload.padEnd(
+        normalizedPayload.length + ((4 - normalizedPayload.length % 4) % 4),
+        '=',
+    );
+
+    return JSON.parse(atob(paddedPayload));
+  } catch (error) {
+    console.warn('Failed to decode access token payload.', error);
+    return null;
+  }
+};

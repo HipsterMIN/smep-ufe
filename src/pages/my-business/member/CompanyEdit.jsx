@@ -6,8 +6,8 @@ import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Datepicker from '@components/ui/Datepicker.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 import {
-  HELD_FIELD_PENDING_TEXT,
   fetchCorporateMemberCodeOptions,
   fetchCorporateMemberDetail,
   fetchKsicTopLevelOptions,
@@ -17,16 +17,18 @@ import {
 import {
   parseDateFromYmd,
   toYmd,
+  decodeJwtPayload,
 } from '@utils/commonUtils.js';
 
 // 로그인/store 정리 전까지 기업정보 수정 화면은 전달된 회원번호가 없으면 임시 폴백 회원번호를 그대로 사용한다.
 const TEMP_FALLBACK_MBR_NO = '2025120500136492';
 
 const UI_USR_W_452 = () => {
+  const authToken = useAuthStore((state) => state.token);
+  const tokenPayload = decodeJwtPayload(authToken);
   const navigate = useNavigate();
-  const location = useLocation();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-  const memberNo = location.state?.mbrNo || TEMP_FALLBACK_MBR_NO;
+  const memberNo = tokenPayload?.member_no || TEMP_FALLBACK_MBR_NO;
   const [codeOptions, setCodeOptions] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -39,9 +41,14 @@ const UI_USR_W_452 = () => {
     slsAmtClsfCd: '',
     mainBizFldNm: '',
     ksicCd: '',
+    stdgCtpvCd: '',
+    stdgSggCd: '',
     etcExpln: '',
     entExpln: '',
   });
+  const [sidoList, setSidoList] = useState([]);
+  const [sigunguList, setSigunguList] = useState([]);
+  const [sigunguLoading, setSigunguLoading] = useState(false);
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -77,6 +84,8 @@ const UI_USR_W_452 = () => {
           slsAmtClsfCd: detail?.slsAmtClsfCd || '',
           mainBizFldNm: detail?.mainBizFldNm || '',
           ksicCd: topLevelKsicCd,
+          stdgCtpvCd: String(detail?.stdgCtpvCd || '').trim(),
+          stdgSggCd: String(detail?.stdgSggCd || '').trim(),
           etcExpln: detail?.etcExpln || '',
           entExpln: detail?.entExpln || '',
         });
@@ -100,10 +109,86 @@ const UI_USR_W_452 = () => {
     };
   }, [memberNo]);
 
+  useEffect(() => {
+    let active = true;
+
+    const fetchSidoList = async () => {
+      try {
+        const response = await apiClient.get('/api/v1/stdg/sido');
+        const responseData = response?.data ?? response;
+        if (active) {
+          setSidoList(Array.isArray(responseData) ? responseData : []);
+        }
+      } catch (error) {
+        console.error('시도 목록 조회 실패:', error);
+      }
+    };
+
+    fetchSidoList();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const stdgCtpvCd = String(form.stdgCtpvCd || '').trim();
+    if (!stdgCtpvCd) {
+      setSigunguList([]);
+      setSigunguLoading(false);
+      return undefined;
+    }
+
+    let active = true;
+    const fetchSigunguList = async () => {
+      setSigunguLoading(true);
+      try {
+        const response = await apiClient.get(
+          `/api/v1/stdg/sigungu?sidoCd=${encodeURIComponent(stdgCtpvCd)}`,
+        );
+        const responseData = response?.data ?? response;
+        if (active) {
+          setSigunguList(Array.isArray(responseData) ? responseData : []);
+        }
+      } catch (error) {
+        console.error('시군구 목록 조회 실패:', error);
+        if (active) {
+          setSigunguList([]);
+        }
+      } finally {
+        if (active) {
+          setSigunguLoading(false);
+        }
+      }
+    };
+
+    fetchSigunguList();
+
+    return () => {
+      active = false;
+    };
+  }, [form.stdgCtpvCd]);
+
   const handleFieldChange = (fieldName, value) => {
     setForm((prev) => ({
       ...prev,
       [fieldName]: value,
+    }));
+  };
+
+  const handleSidoChange = (value) => {
+    setForm((prev) => ({
+      ...prev,
+      stdgCtpvCd: value,
+      stdgSggCd: '',
+    }));
+  };
+
+  const handleSigunguChange = (value) => {
+    setForm((prev) => ({
+      ...prev,
+      stdgCtpvCd: value ? value.slice(0, 2) : prev.stdgCtpvCd,
+      stdgSggCd: value ? value.slice(2, 5) : '',
     }));
   };
 
@@ -120,6 +205,8 @@ const UI_USR_W_452 = () => {
       !form.slsAmtClsfCd ||
       !form.mainBizFldNm.trim() ||
       !form.ksicCd ||
+      !form.stdgCtpvCd ||
+      !form.stdgSggCd ||
       !form.etcExpln.trim()
     ) {
       alert('필수 입력 항목을 확인해주세요.');
@@ -139,6 +226,8 @@ const UI_USR_W_452 = () => {
         mainBizFldNm: form.mainBizFldNm.trim(),
         // 사용자가 산업구분을 실제로 바꾼 경우에만 1레벨 코드를 보내 기존 세분류 값을 무의식적으로 축소하지 않게 한다.
         ksicCd: nextKsicCd && nextKsicCd !== initialKsicCd ? nextKsicCd : undefined,
+        stdgCtpvCd: form.stdgCtpvCd,
+        stdgSggCd: form.stdgSggCd,
         etcExpln: form.etcExpln.trim(),
         entExpln: form.entExpln.trim(),
       });
@@ -151,6 +240,11 @@ const UI_USR_W_452 = () => {
       setSaving(false);
     }
   };
+
+  const selectedSigunguCd = form.stdgCtpvCd && form.stdgSggCd
+    ? `${form.stdgCtpvCd}${form.stdgSggCd}`
+    : '';
+  const isSigunguDisabled = loading || saving || sigunguLoading || !form.stdgCtpvCd;
 
   return (
     <>
@@ -307,13 +401,32 @@ const UI_USR_W_452 = () => {
               <dd className="form-row-content">
                 <div className="select-group">
                   <div className="form-wrapper w-184">
-                    <select id="select_05" className="krds-form-select small" disabled>
-                      <option value="">{HELD_FIELD_PENDING_TEXT}</option>
+                    <select
+                      id="select_05"
+                      className="krds-form-select small"
+                      title="소재지 선택"
+                      value={form.stdgCtpvCd}
+                      onChange={(event) => handleSidoChange(event.target.value)}
+                      disabled={loading || saving}
+                    >
+                      <option value="">시도선택</option>
+                      {sidoList.map((item) => (
+                        <option key={item.code} value={item.code}>{item.name}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="form-wrapper w-184">
-                    <select className="krds-form-select small" title="상세 소재지 선택" disabled>
-                      <option value="">{HELD_FIELD_PENDING_TEXT}</option>
+                    <select
+                      className="krds-form-select small"
+                      title="상세 소재지 선택"
+                      value={selectedSigunguCd}
+                      onChange={(event) => handleSigunguChange(event.target.value)}
+                      disabled={isSigunguDisabled}
+                    >
+                      <option value="">{sigunguLoading ? '조회 중' : '시군구선택'}</option>
+                      {sigunguList.map((item) => (
+                        <option key={item.code} value={item.code}>{item.name}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
