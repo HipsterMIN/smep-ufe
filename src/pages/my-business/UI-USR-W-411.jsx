@@ -1,24 +1,24 @@
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
-import JusoAddressSearchButton from '@components/ui/JusoAddressSearchButton';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useEffect, useState } from 'react';
 import { useMatches } from 'react-router-dom';
 import { api as apiClient } from '@lib/apiClient.js';
 import { useAuthStore } from '@store/useAuthStore.jsx';
-import {
-  keepDigitsOnly,
-  removeDigits,
-  removeKoreanCharacters,
-} from '@utils/commonUtils.js';
+import CorporateMemberInfo from '@pages/my-business/member/components/CorporateMemberInfo.jsx';
+import IndividualMemberInfo from '@pages/my-business/member/components/IndividualMemberInfo.jsx';
 import {
   fetchCorporateManagerContact,
-  fetchCorporateMemberInfoReceptionAgreements,
   fetchCorporateMemberDetail,
-  formatPhoneNumber,
+  fetchIndividualMemberDetail,
+  fetchMemberInfoReceptionAgreements,
   normalizeDigits,
   updateCorporateMemberInfo,
-} from './company/companyMemberUtils.js';
+  updateIndividualMemberInfo,
+} from '@/pages/my-business/member/memberUtils.js';
+import {
+  decodeJwtPayload,
+} from '@utils/commonUtils.js';
 
 const INFO_RECEPTION_MNS_CODES = {
   message: 'A211',
@@ -44,6 +44,10 @@ const EMPTY_FORM_VALUES = {
   brno: '',
   crno: '',
   rprsvNm: '',
+  rprsTelno: '',
+  indvMblTelno: '',
+  indvGnrlTelno: '',
+  indvGnrlTelnoParts: ['', '', ''],
   rprsTelnoParts: ['', '', ''],
   rprsFxnoParts: ['', '', ''],
   emailLocal: '',
@@ -52,31 +56,6 @@ const EMPTY_FORM_VALUES = {
   entAddr: '',
   entDaddr: '',
   hmpgAddr: '',
-};
-
-// JWT payload를 디코딩해 회원번호와 로그인 아이디 claim을 읽는다.
-const decodeJwtPayload = (token) => {
-  if (!token) {
-    return null;
-  }
-
-  try {
-    const payload = token.split('.')[1];
-    if (!payload) {
-      return null;
-    }
-
-    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const paddedPayload = normalizedPayload.padEnd(
-      normalizedPayload.length + ((4 - normalizedPayload.length % 4) % 4),
-      '=',
-    );
-
-    return JSON.parse(atob(paddedPayload));
-  } catch (error) {
-    console.warn('Failed to decode access token payload.', error);
-    return null;
-  }
 };
 
 // 전화번호 문자열을 화면의 세 칸 입력값으로 분리한다.
@@ -119,18 +98,8 @@ const splitEmail = (value) => {
   return [localPart || '', domainParts.join('@') || ''];
 };
 
-const renderManagerValue = (value) => {
-  const normalized = String(value ?? '').trim();
-  return normalized || '--';
-};
-
-const renderManagerPhoneNumber = (value) => {
-  const formatted = formatPhoneNumber(value);
-  return formatted === '-' ? '--' : formatted;
-};
-
-// 회원 상세 응답을 화면 입력값 상태로 변환한다.
-const buildFormValues = (detail, tokenPayload) => {
+// 기업회원 상세 응답을 화면 입력값 상태로 변환한다.
+const buildCorporateFormValues = (detail, tokenPayload) => {
   const [emailLocal, emailDomain] = splitEmail(detail?.emlAddr);
   return {
     ...EMPTY_FORM_VALUES,
@@ -139,6 +108,7 @@ const buildFormValues = (detail, tokenPayload) => {
     brno: detail?.brno || '',
     crno: detail?.crno || '',
     rprsvNm: detail?.rprsvNm || '',
+    rprsTelno: detail?.rprsTelno || '',
     rprsTelnoParts: splitPhoneNumber(detail?.rprsTelno),
     rprsFxnoParts: splitPhoneNumber(detail?.rprsFxno),
     emailLocal,
@@ -147,6 +117,20 @@ const buildFormValues = (detail, tokenPayload) => {
     entAddr: detail?.entAddr || '',
     entDaddr: detail?.entDaddr || '',
     hmpgAddr: detail?.hmpgAddr || '',
+  };
+};
+
+// 개인회원 상세 응답을 화면 입력값 상태로 변환한다.
+const buildIndividualFormValues = (detail, tokenPayload) => {
+  const [emailLocal, emailDomain] = splitEmail(detail?.indvEmlAddr);
+  return {
+    ...EMPTY_FORM_VALUES,
+    loginId: tokenPayload?.login_id || '',
+    mbrNm: detail?.mbrNm || '',
+    indvMblTelno: detail?.indvMblTelno || '',
+    indvGnrlTelnoParts: splitPhoneNumber(detail?.indvGnrlTelno),
+    emailLocal,
+    emailDomain,
   };
 };
 
@@ -186,7 +170,7 @@ const buildInfoReceptionAgreementPayload = (agreements) =>
   }));
 
 // 화면 입력값을 기업회원 정보 저장 payload로 변환한다.
-const buildMemberInfoUpdatePayload = (values, agreements) => ({
+const buildCorporateMemberInfoUpdatePayload = (values, agreements) => ({
   rprsvNm: values.rprsvNm,
   rprsTelno: joinPhoneNumberParts(values.rprsTelnoParts),
   rprsFxno: joinPhoneNumberParts(values.rprsFxnoParts),
@@ -198,11 +182,22 @@ const buildMemberInfoUpdatePayload = (values, agreements) => ({
   infoReceptionAgreements: buildInfoReceptionAgreementPayload(agreements),
 });
 
+// 화면 입력값을 개인회원 정보 저장 payload로 변환한다.
+const buildIndividualMemberInfoUpdatePayload = (values, agreements) => ({
+  indvGnrlTelno: joinPhoneNumberParts(values.indvGnrlTelnoParts),
+  indvEmlAddr: joinEmailParts(values.emailLocal, values.emailDomain),
+  zip: values.zip,
+  mbrAddr: values.mbrAddr || values.entAddr,
+  mbrDaddr: values.mbrDaddr || values.entDaddr,
+  infoReceptionAgreements: buildInfoReceptionAgreementPayload(agreements),
+});
+
 const UI_USR_W_411 = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const currentMode = useAuthStore((state) => state.currentMode);
   const authToken = useAuthStore((state) => state.token);
-  const [memberNo, setMemberNo] = useState('');
+  const tokenPayload = decodeJwtPayload(authToken);
   const [formValues, setFormValues] = useState(EMPTY_FORM_VALUES);
   const [managerContact, setManagerContact] = useState(null);
   const [infoReceptionAgreements, setInfoReceptionAgreements] = useState(
@@ -218,42 +213,52 @@ const UI_USR_W_411 = () => {
   const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '회원정보변경';
 
   useEffect(() => {
-    const tokenPayload = decodeJwtPayload(authToken);
-    const mbrNo = tokenPayload?.member_no || tokenPayload?.sub;
+    const currentTokenPayload = decodeJwtPayload(authToken);
 
-    if (!mbrNo) {
-      setMemberNo('');
-      setFormValues((currentValues) => ({
-        ...currentValues,
-        loginId: tokenPayload?.login_id || '',
-      }));
+    if (!authToken || !currentMode) {
+      setFormValues({
+        ...EMPTY_FORM_VALUES,
+        loginId: currentTokenPayload?.login_id || '',
+      });
       setManagerContact(null);
       setInfoReceptionAgreements(DEFAULT_INFO_RECEPTION_AGREEMENTS);
       return;
     }
 
     let active = true;
-    setMemberNo(mbrNo);
     setManagerContact(null);
     setInfoReceptionAgreements(DEFAULT_INFO_RECEPTION_AGREEMENTS);
 
     // 회원번호로 기업회원 상세정보를 조회한다.
     const loadCorporateMemberDetail = async () => {
       try {
-        const detail = await fetchCorporateMemberDetail(apiClient, mbrNo);
+        const detail = await fetchCorporateMemberDetail(apiClient);
         if (!active) {
           return;
         }
-        setFormValues(buildFormValues(detail, tokenPayload));
+        setFormValues(buildCorporateFormValues(detail, currentTokenPayload));
       } catch (error) {
         console.error('Failed to load corporate member detail:', error);
+      }
+    };
+
+    // 회원번호로 개인회원 상세정보를 조회한다.
+    const loadIndividualMemberDetail = async () => {
+      try {
+        const detail = await fetchIndividualMemberDetail(apiClient);
+        if (!active) {
+          return;
+        }
+        setFormValues(buildIndividualFormValues(detail, currentTokenPayload));
+      } catch (error) {
+        console.error('Failed to load individual member detail:', error);
       }
     };
 
     // 회원번호로 기업관리자정보를 조회한다.
     const loadCorporateManagerContact = async () => {
       try {
-        const contact = await fetchCorporateManagerContact(apiClient, mbrNo);
+        const contact = await fetchCorporateManagerContact(apiClient);
         if (!active) {
           return;
         }
@@ -268,9 +273,9 @@ const UI_USR_W_411 = () => {
     };
 
     // 회원번호로 정보수신 동의값을 조회한다.
-    const loadCorporateMemberInfoReceptionAgreements = async () => {
+    const loadMemberInfoReceptionAgreements = async () => {
       try {
-        const agreements = await fetchCorporateMemberInfoReceptionAgreements(apiClient, mbrNo);
+        const agreements = await fetchMemberInfoReceptionAgreements(apiClient);
         if (!active) {
           return;
         }
@@ -279,53 +284,24 @@ const UI_USR_W_411 = () => {
         if (!active) {
           return;
         }
-        console.error('Failed to load corporate member info reception agreements:', error);
+        console.error('Failed to load member info reception agreements:', error);
         setInfoReceptionAgreements(DEFAULT_INFO_RECEPTION_AGREEMENTS);
       }
     };
 
-    loadCorporateMemberDetail();
-    loadCorporateManagerContact();
-    loadCorporateMemberInfoReceptionAgreements();
+    if (currentMode === 'CORPORATE') {
+      loadCorporateMemberDetail();
+      loadCorporateManagerContact();
+    }
+    if (currentMode === 'INDIVIDUAL') {
+      loadIndividualMemberDetail();
+    }
+    loadMemberInfoReceptionAgreements();
 
     return () => {
       active = false;
     };
-  }, [authToken]);
-
-  // 입력값 상태를 단일 필드 기준으로 갱신한다.
-  const setFormValue = (field, value) => {
-    setFormValues((currentValues) => ({
-      ...currentValues,
-      [field]: value,
-    }));
-  };
-
-  // 전화번호와 팩스번호 입력값을 지정한 칸만 갱신한다.
-  const setPhonePartValue = (field, index, value) => {
-    setFormValues((currentValues) => {
-      const nextParts = [...currentValues[field]];
-      nextParts[index] = value;
-      return {
-        ...currentValues,
-        [field]: nextParts,
-      };
-    });
-  };
-
-  const handleSelectAddress = (payload) => {
-    setFormValues((currentValues) => ({
-      ...currentValues,
-      zip: payload.zipNo || '',
-      entAddr: payload.baseAddress || payload.roadFullAddress || '',
-      entDaddr: payload.detailAddress || '',
-    }));
-  };
-
-  const handleAddressSearchError = (error) => {
-    console.error('Failed to search address:', error);
-    window.alert(error?.message || '주소검색 중 오류가 발생했습니다.');
-  };
+  }, [authToken, currentMode]);
 
   // 단일 정보수신 동의 radio 값을 갱신한다.
   const setInfoReceptionAgreement = (infoRcptnMnsCd, infoRcptnAgreYn) => {
@@ -346,21 +322,33 @@ const UI_USR_W_411 = () => {
     }));
   };
 
-  // 저장 버튼 클릭 시 기업회원 정보와 정보수신 동의를 저장한다.
+  // 저장 버튼 클릭 시 현재 회원유형에 맞는 회원정보와 정보수신 동의를 저장한다.
   const handleSave = async () => {
-    if (!memberNo) {
+    if (!authToken) {
       window.alert('회원번호를 확인할 수 없습니다.');
+      return;
+    }
+    if (!currentMode) {
+      window.alert('회원유형을 확인할 수 없습니다.');
       return;
     }
 
     setSaving(true);
     try {
-      const payload = buildMemberInfoUpdatePayload(formValues, infoReceptionAgreements);
-      const detail = await updateCorporateMemberInfo(apiClient, memberNo, payload);
-      setFormValues(buildFormValues(detail, decodeJwtPayload(authToken)));
+      if (currentMode === 'CORPORATE') {
+        const payload = buildCorporateMemberInfoUpdatePayload(formValues, infoReceptionAgreements);
+        const detail = await updateCorporateMemberInfo(apiClient, payload);
+        setFormValues(buildCorporateFormValues(detail, tokenPayload));
+      } else if (currentMode === 'INDIVIDUAL') {
+        const payload = buildIndividualMemberInfoUpdatePayload(formValues, infoReceptionAgreements);
+        const detail = await updateIndividualMemberInfo(apiClient, payload);
+        setFormValues(buildIndividualFormValues(detail, tokenPayload));
+      } else {
+        throw new Error('지원하지 않는 회원유형입니다.');
+      }
       window.alert('저장되었습니다.');
     } catch (error) {
-      console.error('Failed to update corporate member info:', error);
+      console.error('Failed to update member info:', error);
       window.alert(error?.message || '저장에 실패했습니다.');
     } finally {
       setSaving(false);
@@ -384,255 +372,28 @@ const UI_USR_W_411 = () => {
             <i className="svg-icon ico-checkbox"></i>
           </span>
           회원정보는 개인정보처리방침에 따라 안전하게 보호되며, 회원님의 명백한 동의 없이 공개 또는 제 3자에게 제공되지 않습니다.</p>
+        {currentMode === 'CORPORATE' && (
+          <CorporateMemberInfo
+            formValues={formValues}
+            setFormValues={setFormValues}
+            managerContact={managerContact}
+          />
+        )}
+        {currentMode === 'INDIVIDUAL' && (
+          <IndividualMemberInfo
+            formValues={formValues}
+            setFormValues={setFormValues}
+          />
+        )}
 
-        <div className="conts-wrap mt-64">
-          <div className="on-form-register">
-            <h3 className="form-title">회원정보 변경</h3>
-            <dl className="on-form-row large">
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <span className="form-tit">아이디</span>
-                </dt>
-                <dd className="form-row-content">
-                  <span className="text-value">{formValues.loginId}</span>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <label htmlFor="input_01">기업명</label>
-                </dt>
-                <dd className="form-row-content">
-                  <div className="form-wrapper w-220">
-                    <input type="text" id="input_01" className="krds-input small" maxLength={100} value={formValues.mbrNm} disabled></input>
-                  </div>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <label htmlFor="input_02">사업자등록번호</label>
-                </dt>
-                <dd className="form-row-content">
-                  <div className="form-wrapper w-220">
-                    <input type="text" id="input_02" className="krds-input small" maxLength={10} value={formValues.brno} disabled></input>
-                  </div>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <label htmlFor="input_03">법인등록번호</label>
-                </dt>
-                <dd className="form-row-content">
-                  <div className="form-wrapper w-220">
-                    <input type="text" id="input_03" className="krds-input small" maxLength={13} value={formValues.crno} disabled></input>
-                  </div>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <label htmlFor="input_04">대표자 이름</label>
-                </dt>
-                <dd className="form-row-content">
-                  <div className="form-wrapper w-220">
-                    <input type="text" id="input_04" className="krds-input small" maxLength={100} value={formValues.rprsvNm} onChange={(event) => setFormValue('rprsvNm', removeDigits(event.target.value))} />
-                  </div>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <label htmlFor="select_01">대표 전화</label>
-                </dt>
-                <dd className="form-row-content">
-                  <div className="form-wrapper row-small">
-                    <select className="krds-form-select small w-120" id="select_01" value={formValues.rprsTelnoParts[0]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 0, event.target.value)}>
-                      <option value="">선택</option>
-                      <option value="02">서울 02</option>
-                      <option value="051">부산 051</option>
-                      <option value="053">대구 053</option>
-                      <option value="032">인천 032</option>
-                      <option value="062">광주 062</option>
-                      <option value="042">대전 042</option>
-                      <option value="052">울산 052</option>
-                      <option value="044">세종 044</option>
-                      <option value="031">경기 031</option>
-                      <option value="033">강원 033</option>
-                      <option value="043">충북 043</option>
-                      <option value="041">충남 041</option>
-                      <option value="063">전북 063</option>
-                      <option value="061">전남 061</option>
-                      <option value="054">경북 054</option>
-                      <option value="055">경남 055</option>
-                      <option value="064">제주 064</option>
-                      <option value="070">일반 070</option>
-                      <option value="060">일반 060</option>
-                      <option value="050">일반 050</option>
-                    </select>
-                    <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 중간번호 입력" maxLength={4} value={formValues.rprsTelnoParts[1]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 1, keepDigitsOnly(event.target.value))} />
-                    <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 끝번호 입력" maxLength={4} value={formValues.rprsTelnoParts[2]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 2, keepDigitsOnly(event.target.value))} />
-                  </div>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <label htmlFor="select_02">팩스 번호</label>
-                </dt>
-                <dd className="form-row-content">
-                  <div className="form-wrapper row-small">
-                    <select className="krds-form-select small w-120" id="select_02" value={formValues.rprsFxnoParts[0]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 0, event.target.value)}>
-                      <option value="">선택</option>
-                      <option value="02">서울 02</option>
-                      <option value="051">부산 051</option>
-                      <option value="053">대구 053</option>
-                      <option value="032">인천 032</option>
-                      <option value="062">광주 062</option>
-                      <option value="042">대전 042</option>
-                      <option value="052">울산 052</option>
-                      <option value="044">세종 044</option>
-                      <option value="031">경기 031</option>
-                      <option value="033">강원 033</option>
-                      <option value="043">충북 043</option>
-                      <option value="041">충남 041</option>
-                      <option value="063">전북 063</option>
-                      <option value="061">전남 061</option>
-                      <option value="054">경북 054</option>
-                      <option value="055">경남 055</option>
-                      <option value="064">제주 064</option>
-                      <option value="070">일반 070</option>
-                      <option value="060">일반 060</option>
-                      <option value="050">일반 050</option>
-                    </select>
-                    <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스번호 중간번호 입력" maxLength={4} value={formValues.rprsFxnoParts[1]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 1, keepDigitsOnly(event.target.value))} />
-                    <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스번호 끝번호 입력" maxLength={4} value={formValues.rprsFxnoParts[2]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 2, keepDigitsOnly(event.target.value))} />
-                  </div>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <label htmlFor="input_05">이메일</label>
-                </dt>
-                <dd className="form-row-content">
-                  <div className="form-wrapper row-small">
-                    <input type="text" id="input_05" className="krds-input small w-140" placeholder="0000" title="이메일 아이디 입력" maxLength={64} value={formValues.emailLocal} onChange={(event) => setFormValue('emailLocal', removeKoreanCharacters(event.target.value))}/>
-                    <span>@</span>
-                    <input type="text" className="krds-input small w-140" placeholder="0000" title="이메일 도메인 입력" maxLength={255} value={formValues.emailDomain} onChange={(event) => setFormValue('emailDomain', removeKoreanCharacters(event.target.value))} />
-                    <span>-</span>
-                    <select className="krds-form-select small w-140" title="이메일 선택" onChange={(event) => setFormValue('emailDomain', removeKoreanCharacters(event.target.value))}>
-                      <option value="">직접입력</option>
-                      <option value="naver.com">naver</option>
-                      <option value="daum.net">daum</option>
-                      <option value="gmail.com">gmail</option>
-                      <option value="hotmail.com">hotmail</option>
-                      <option value="nate.com">nate</option>
-                      <option value="yahoo.com">yahoo</option>
-                    </select>
-                  </div>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label flex-start">
-                  <label htmlFor="input_06">회사주소</label>
-                </dt>
-                <dd className="form-row-content">
-                  <div className="form-wrapper row-small">
-                    <input type="text" id="input_06" className="krds-input small w-150" placeholder="-" maxLength={5} value={formValues.zip} onChange={(event) => setFormValue('zip', event.target.value)} disabled />
-                    <JusoAddressSearchButton
-                      onSelect={handleSelectAddress}
-                      onError={handleAddressSearchError}
-                      buttonText="우편번호 검색"
-                    />
-                  </div>
-                  <div className="form-wrapper">
-                    <input type="text" className="krds-input small w-460" placeholder="-" maxLength={200} value={formValues.entAddr} onChange={(event) => setFormValue('entAddr', event.target.value)} disabled />
-                  </div>
-                  <div className="form-wrapper">
-                    <input type="text" className="krds-input small w-460" placeholder="상세 주소 입력" maxLength={200} value={formValues.entDaddr} onChange={(event) => setFormValue('entDaddr', event.target.value)} />
-                  </div>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <label htmlFor="input_07">홈페이지 주소</label>
-                </dt>
-                <dd className="form-row-content">
-                  <div className="form-wrapper">
-                    <input type="text" id="input_07" className="krds-input small w-220" placeholder='-' maxLength={2000} value={formValues.hmpgAddr} onChange={(event) => setFormValue('hmpgAddr', event.target.value)} />
-                  </div>
-                </dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-
-        {/* 기업관리자 정보 */}
-        <div className="conts-wrap mt-64">
-          <div className="on-form-register">
-            <h3 className="form-title">기업관리자 정보</h3>
-            <dl className="on-form-row large">
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <span className="form-tit">담당자</span>
-                </dt>
-                <dd className="form-row-content">
-                  <span className="text-value">{renderManagerValue(managerContact?.mbrNm)}</span>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <span className="form-tit">휴대전화번호</span>
-                </dt>
-                <dd className="form-row-content">
-                  <span className="text-value">{renderManagerPhoneNumber(managerContact?.picMblTelno)}</span>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <span className="form-tit">유선전화</span>
-                </dt>
-                <dd className="form-row-content">
-                  <span className="text-value">{renderManagerPhoneNumber(managerContact?.picTelno)}</span>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <span className="form-tit">이메일</span>
-                </dt>
-                <dd className="form-row-content">
-                  <span className="text-value">{renderManagerValue(managerContact?.picEmlAddr)}</span>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <span className="form-tit">부서명</span>
-                </dt>
-                <dd className="form-row-content">
-                  <span className="text-value">{renderManagerValue(managerContact?.picDeptNm)}</span>
-                </dd>
-              </div>
-              <div className="form-row-item">
-                <dt className="form-row-label">
-                  <span className="form-tit">직위</span>
-                </dt>
-                <dd className="form-row-content">
-                  <span className="text-value">{renderManagerValue(managerContact?.picJbpsNm)}</span>
-                </dd>
-              </div>
-            </dl>
-          </div>
-          <ul className="info-list-point">
-            <li><i className="svg-icon ico-checkbox"></i>기업관리자 정보변경은 개인회원 마이페이지에서 변경이 가능합니다.</li>
-          </ul>
-        </div>
-
-        <div className="conts-wrap mt-64">
+        {/* TODO 구현예정 */}
+        {/*<div className="conts-wrap mt-64">
           <h3 className="sec-tit3">관심 분야 설정</h3>
           <div className="flex-between center">
             <p className="cont-desc">관심을 갖고 있는 분야를 선택하시면, 빠르고 정확한 지원사업 검색이 가능합니다.</p>
             <button type="button" className="krds-btn secondary small">관심분야 설정</button>
           </div>
-        </div>
+        </div>*/}
 
         <div className="conts-wrap mt-64">
           <h3 className="sec-tit3">알림 수신 동의</h3>

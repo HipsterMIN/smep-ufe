@@ -57,9 +57,10 @@ const UI_USR_W_411 = lazy( () => import('@pages/my-business/UI-USR-W-411.jsx'));
 const UI_USR_R_420 = lazy(() => import('@pages/my-business/PasswordChange.jsx'));
 const UI_USR_W_430 = lazy(() => import('@pages/my-business/UI-USR-W-430.jsx'));
 const UI_USR_R_440 = lazy(() => import('@pages/my-business/UI-USR-R-440.jsx'));
-const UI_USR_R_450 = lazy(() => import('@pages/my-business/company/CompanyDetail.jsx'));
-const UI_USR_W_452 = lazy(() => import('@pages/my-business/company/CompanyEdit.jsx'));
-const UI_USR_L_460 = lazy(() => import('@pages/my-business/company/ReassignOwner.jsx'));
+const UI_USR_R_450 = lazy(() => import('@pages/my-business/member/CompanyDetail.jsx'));
+const UI_USR_W_452 = lazy(() => import('@pages/my-business/member/CompanyEdit.jsx'));
+const UI_USR_R_490 = lazy(() => import('@pages/my-business/UI-USR-R-490.jsx'));
+const UI_USR_L_460 = lazy(() => import('@pages/my-business/member/ReassignOwner.jsx'));
 const UI_USR_L_020 = lazy(() => import('@pages/UI-USR-L-020.jsx'));
 const UI_USR_L_520 = lazy(() => import('@pages/my-business/UI-USR-L-520.jsx'));
 const ScrapList = lazy(() => import('@pages/my-business/ScrapList.jsx'));
@@ -558,10 +559,10 @@ export const componentMap = {
   },
 
   // 경영현황 분석
-  // 'M_PIIO_00120': {
-  //   component: UI_USR_R_490,
-  //   layout: SubpageLayoutWithMenu,
-  // },
+  'M_PIIO_00120': {
+    component: UI_USR_R_490,
+    layout: SubpageLayoutWithMenu,
+  },
 
   // 담당자 관리
   'M_PIIO_00121': {

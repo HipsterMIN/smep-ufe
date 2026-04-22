@@ -70,7 +70,7 @@ function AppRouter() {
         alignItems: 'center',
         height: '100vh',
       }}>
-        <div>라우터 초기화 중...</div>
+        {/*<div>라우터 초기화 중...</div>*/}
       </div>
     );
   }
