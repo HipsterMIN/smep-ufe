@@ -1,14 +1,183 @@
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import { useEffect, useState } from 'react';
+import { useMatches } from 'react-router-dom';
+import { api as apiClient } from '@lib/apiClient.js';
+import { useAuthStore } from '@store/useAuthStore.jsx';
+import {
+  fetchCorporateMemberDetail,
+  normalizeDigits,
+} from './company/companyMemberUtils.js';
+
+const EMPTY_FORM_VALUES = {
+  loginId: '',
+  mbrNm: '',
+  brno: '',
+  crno: '',
+  rprsvNm: '',
+  rprsTelnoParts: ['', '', ''],
+  rprsFxnoParts: ['', '', ''],
+  emailLocal: '',
+  emailDomain: '',
+  zip: '',
+  entAddr: '',
+  entDaddr: '',
+  hmpgAddr: '',
+};
+
+// JWT payload를 디코딩해 회원번호와 로그인 아이디 claim을 읽는다.
+const decodeJwtPayload = (token) => {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) {
+      return null;
+    }
+
+    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const paddedPayload = normalizedPayload.padEnd(
+      normalizedPayload.length + ((4 - normalizedPayload.length % 4) % 4),
+      '=',
+    );
+
+    return JSON.parse(atob(paddedPayload));
+  } catch (error) {
+    console.warn('Failed to decode access token payload.', error);
+    return null;
+  }
+};
+
+// 전화번호 문자열을 화면의 세 칸 입력값으로 분리한다.
+const splitPhoneNumber = (value) => {
+  const raw = String(value ?? '').trim();
+  if (!raw) {
+    return ['', '', ''];
+  }
+
+  if (raw.includes('-')) {
+    const parts = raw.split('-');
+    return [parts[0] || '', parts[1] || '', parts.slice(2).join('-') || ''];
+  }
+
+  const digits = normalizeDigits(raw);
+  if (digits.length === 9) {
+    return [digits.slice(0, 2), digits.slice(2, 5), digits.slice(5)];
+  }
+  if (digits.length === 10) {
+    if (digits.startsWith('02')) {
+      return [digits.slice(0, 2), digits.slice(2, 6), digits.slice(6)];
+    }
+    return [digits.slice(0, 3), digits.slice(3, 6), digits.slice(6)];
+  }
+  if (digits.length === 11) {
+    return [digits.slice(0, 3), digits.slice(3, 7), digits.slice(7)];
+  }
+
+  return [raw, '', ''];
+};
+
+// 이메일 문자열을 아이디와 도메인 입력값으로 분리한다.
+const splitEmail = (value) => {
+  const raw = String(value ?? '').trim();
+  if (!raw) {
+    return ['', ''];
+  }
+
+  const [localPart, ...domainParts] = raw.split('@');
+  return [localPart || '', domainParts.join('@') || ''];
+};
+
+// 회원 상세 응답을 화면 입력값 상태로 변환한다.
+const buildFormValues = (detail, tokenPayload) => {
+  const [emailLocal, emailDomain] = splitEmail(detail?.emlAddr);
+  return {
+    ...EMPTY_FORM_VALUES,
+    loginId: tokenPayload?.login_id || '',
+    mbrNm: detail?.mbrNm || '',
+    brno: detail?.brno || '',
+    crno: detail?.crno || '',
+    rprsvNm: detail?.rprsvNm || '',
+    rprsTelnoParts: splitPhoneNumber(detail?.rprsTelno),
+    rprsFxnoParts: splitPhoneNumber(detail?.rprsFxno),
+    emailLocal,
+    emailDomain,
+    zip: detail?.zip || '',
+    entAddr: detail?.entAddr || '',
+    entDaddr: detail?.entDaddr || '',
+    hmpgAddr: detail?.hmpgAddr || '',
+  };
+};
 
 const UI_USR_W_411 = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const authToken = useAuthStore((state) => state.token);
+  const [formValues, setFormValues] = useState(EMPTY_FORM_VALUES);
 
-  // ✅ 사이드바 데이터 계산
+  // 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+
+  const matches = useMatches();
+  const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '회원정보변경';
+
+  useEffect(() => {
+    const tokenPayload = decodeJwtPayload(authToken);
+    const mbrNo = tokenPayload?.member_no || tokenPayload?.sub;
+
+    if (!mbrNo) {
+      setFormValues((currentValues) => ({
+        ...currentValues,
+        loginId: tokenPayload?.login_id || '',
+      }));
+      return;
+    }
+
+    let active = true;
+
+    // 회원번호로 기업회원 상세정보를 조회한다.
+    const loadCorporateMemberDetail = async () => {
+      try {
+        const detail = await fetchCorporateMemberDetail(apiClient, mbrNo);
+        if (!active) {
+          return;
+        }
+        setFormValues(buildFormValues(detail, tokenPayload));
+      } catch (error) {
+        console.error('Failed to load corporate member detail:', error);
+      }
+    };
+
+    loadCorporateMemberDetail();
+
+    return () => {
+      active = false;
+    };
+  }, [authToken]);
+
+  // 입력값 상태를 단일 필드 기준으로 갱신한다.
+  const setFormValue = (field, value) => {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      [field]: value,
+    }));
+  };
+
+  // 전화번호와 팩스번호 입력값을 지정한 칸만 갱신한다.
+  const setPhonePartValue = (field, index, value) => {
+    setFormValues((currentValues) => {
+      const nextParts = [...currentValues[field]];
+      nextParts[index] = value;
+      return {
+        ...currentValues,
+        [field]: nextParts,
+      };
+    });
+  };
 
   return (
     <>
@@ -19,7 +188,7 @@ const UI_USR_W_411 = () => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">회원 탈퇴</h2>
+          <h2 className="h-tit">{pageTitle}</h2>
         </div>
 
         <p className="guide-txt">
@@ -37,7 +206,7 @@ const UI_USR_W_411 = () => {
                   <span className="form-tit">이름</span>
                 </dt>
                 <dd className="form-row-content">
-                  <span className="text-value">smes2025</span>
+                  <span className="text-value">{formValues.loginId}</span>
                 </dd>
               </div>
               <div className="form-row-item">
@@ -46,7 +215,7 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper w-220">
-                    <input type="text" id="input_01" className="krds-input small" value="에스엠이에스" disabled></input>
+                    <input type="text" id="input_01" className="krds-input small" value={formValues.mbrNm} disabled></input>
                   </div>
                 </dd>
               </div>
@@ -56,7 +225,7 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper w-220">
-                    <input type="text" id="input_02" className="krds-input small" value="1002030000" disabled></input>
+                    <input type="text" id="input_02" className="krds-input small" value={formValues.brno} disabled></input>
                   </div>
                 </dd>
               </div>
@@ -66,7 +235,7 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper w-220">
-                    <input type="text" id="input_03" className="krds-input small" disabled></input>
+                    <input type="text" id="input_03" className="krds-input small" value={formValues.crno} disabled></input>
                   </div>
                 </dd>
               </div>
@@ -76,7 +245,7 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper w-220">
-                    <input type="text" id="input_04" className="krds-input small" />
+                    <input type="text" id="input_04" className="krds-input small" value={formValues.rprsvNm} onChange={(event) => setFormValue('rprsvNm', event.target.value)} />
                   </div>
                 </dd>
               </div>
@@ -86,13 +255,13 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper row-small">
-                    <select className="krds-form-select small w-120" id="select_01">
-                      <option value="">서울 02</option>
+                    <select className="krds-form-select small w-120" id="select_01" value={formValues.rprsTelnoParts[0]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 0, event.target.value)}>
+                      <option value={formValues.rprsTelnoParts[0]}>{formValues.rprsTelnoParts[0] || '선택'}</option>
                     </select>
                     <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표 전화 두번째 칸 입력" />
+                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 중간번호 입력" value={formValues.rprsTelnoParts[1]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 1, event.target.value)} />
                     <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표 전화 세번째 칸 입력" />
+                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 끝번호 입력" value={formValues.rprsTelnoParts[2]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 2, event.target.value)} />
                   </div>
                 </dd>
               </div>
@@ -102,13 +271,13 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper row-small">
-                    <select className="krds-form-select small w-120" id="select_02">
-                      <option value="">선택</option>
+                    <select className="krds-form-select small w-120" id="select_02" value={formValues.rprsFxnoParts[0]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 0, event.target.value)}>
+                      <option value={formValues.rprsFxnoParts[0]}>{formValues.rprsFxnoParts[0] || '선택'}</option>
                     </select>
                     <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스 번호 두번째 칸 입력" />
+                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스번호 중간번호 입력" value={formValues.rprsFxnoParts[1]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 1, event.target.value)} />
                     <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스 번호 세번째 칸 입력" />
+                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스번호 끝번호 입력" value={formValues.rprsFxnoParts[2]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 2, event.target.value)} />
                   </div>
                 </dd>
               </div>
@@ -118,9 +287,9 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper row-small">
-                    <input type="text" id="input_05" className="krds-input small w-140" placeholder="0000" title="이메일 첫번째 칸 입력"/>
+                    <input type="text" id="input_05" className="krds-input small w-140" placeholder="0000" title="이메일 아이디 입력" value={formValues.emailLocal} onChange={(event) => setFormValue('emailLocal', event.target.value)}/>
                     <span>@</span>
-                    <input type="text" className="krds-input small w-140" placeholder="0000" title="이메일 두번째 칸 입력" />
+                    <input type="text" className="krds-input small w-140" placeholder="0000" title="이메일 도메인 입력" value={formValues.emailDomain} onChange={(event) => setFormValue('emailDomain', event.target.value)} />
                     <span>-</span>
                     <select className="krds-form-select small w-140" title="이메일 선택">
                       <option value="">직접입력</option>
@@ -134,14 +303,14 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper row-small">
-                    <input type="text" id="input_06" className="krds-input small w-150" placeholder="-" />
+                    <input type="text" id="input_06" className="krds-input small w-150" placeholder="-" value={formValues.zip} onChange={(event) => setFormValue('zip', event.target.value)} />
                     <button type="button" className="krds-btn secondary small">우편번호 검색</button>
                   </div>
                   <div className="form-wrapper">
-                    <input type="text" className="krds-input small w-460" placeholder="-" />
+                    <input type="text" className="krds-input small w-460" placeholder="-" value={formValues.entAddr} onChange={(event) => setFormValue('entAddr', event.target.value)} />
                   </div>
                   <div className="form-wrapper">
-                    <input type="text" className="krds-input small w-460" placeholder="상세 주소 입력" />
+                    <input type="text" className="krds-input small w-460" placeholder="상세 주소 입력" value={formValues.entDaddr} onChange={(event) => setFormValue('entDaddr', event.target.value)} />
                   </div>
                 </dd>
               </div>
@@ -151,7 +320,7 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper">
-                    <input type="text" id="input_07" className="krds-input small w-220" placeholder='-' />
+                    <input type="text" id="input_07" className="krds-input small w-220" placeholder='-' value={formValues.hmpgAddr} onChange={(event) => setFormValue('hmpgAddr', event.target.value)} />
                   </div>
                 </dd>
               </div>
@@ -169,7 +338,7 @@ const UI_USR_W_411 = () => {
                   <span className="form-tit">아이디</span>
                 </dt>
                 <dd className="form-row-content">
-                  <span className="text-value">smes2025</span>
+                  <span className="text-value">{formValues.loginId}</span>
                 </dd>
               </div>
               <div className="form-row-item">
@@ -417,19 +586,19 @@ const UI_USR_W_411 = () => {
 
         {/* bottom btn */}
         <div className="onboard-btm-btngroup bt-0">
-          <div> 
+          <div>
             <button type="button" className="krds-btn tertiary xlarge">
               취소
             </button>
           </div>
-          <div> 
+          <div>
             <button type="button" className="krds-btn primary xlarge">
               저장
             </button>
           </div>
         </div>
-        
-      </div> 
+
+      </div>
     </>
   );
 };

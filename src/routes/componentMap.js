@@ -93,10 +93,13 @@ const TermsOfUse = lazy(() => import('@pages/footer/TermsOfUse.jsx'));
  *   'MENU_ID': {
  *     component: ReactComponent,        // 렌더링할 컴포넌트
  *     layout: LayoutComponent,          // 적용할 레이아웃 (옵션)
+ *     componentProps: {},               // 컴포넌트에 전달할 props (옵션)
+ *     wrapChildren: false,              // true면 component가 자식 라우트 Outlet을 감싸는 래퍼로 동작
  *     children: [                       // 자식 라우트 (옵션)
  *       {
  *         path: 'relative-path',        // 상대 경로 (:id, :slug 등 동적 파라미터 가능)
  *         component: ChildComponent,    // 자식 컴포넌트
+ *         componentProps: {},           // 자식 컴포넌트에 전달할 props (옵션)
  *         layout: ChildLayout,          // 자식 레이아웃 (현재는 부모 상속, TODO : 구현예정)
  *       }
  *     ]
@@ -133,6 +136,20 @@ const TermsOfUse = lazy(() => import('@pages/footer/TermsOfUse.jsx'));
  *     { path: ':id/edit', component: PbancEdit },      // 수정
  *     { path: 'create', component: PbancCreate },      // 생성
  *   ]
+ * }
+ *
+ * @example
+ * // 라우트 래퍼 (비밀번호 확인, 권한 확인 등)
+ * 'M_PIIO_00115': {
+ *   component: VerifyPassword,
+ *   layout: SubpageLayoutWithMenu,
+ *   wrapChildren: true,
+ *   componentProps: {
+ *     successPath: 'modify',
+ *   },
+ *   children: [
+ *     { path: 'modify', component: MemberModify },
+ *   ],
  * }
  */
 
@@ -479,8 +496,15 @@ export const componentMap = {
 
   // 회원정보변경
   'M_PIIO_00115': {
-    component: UI_USR_W_411, //from VerifyPassword UI-USR-W-411.jsx
+    component: VerifyPassword,
     layout: SubpageLayoutWithMenu,
+    wrapChildren: true,
+    componentProps: {
+      successPath: 'modify',
+    },
+    children: [
+      { path: 'modify', component: UI_USR_W_411 }, // 기업 회원정보 변경
+    ],
   },
 
   // 비밀번호 수정
