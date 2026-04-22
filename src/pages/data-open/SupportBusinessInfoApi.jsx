@@ -2,10 +2,22 @@ import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import {useState} from "react";
-
+import ApiKeyForm from './ApiKeyForm';
+import { useNavigate } from 'react-router-dom';
+import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
 const SupportBusinessInfoApi = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const mbrNo = "2025120500381316";
+  const {
+    isOpen,
+    submitting,
+    errorMessage,
+    memberInfo,
+    openPopup,
+    closePopup,
+    submitApply
+  } = useApiKeyApply();
 
   // 1. 상태 관리 정의
   const [formData, setFormData] = useState({
@@ -50,7 +62,7 @@ const SupportBusinessInfoApi = () => {
   // ✅ 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
-
+  const navigate = useNavigate();
   return (
     <>
       <SideNavigation
@@ -971,19 +983,28 @@ public class ApiExplorer {
         {/* bottom btn */}
         <div className="onboard-btm-btngroup bt-0 ">
           <div>
-            <button type="button" className="krds-btn tertiary xlarge">
+            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate('..')}>
               목록
             </button>
           </div>
           <div>
-            <button type="button" className="krds-btn xlarge">
+            <button type="button" className="krds-btn xlarge"
+                    onClick={() => openPopup(mbrNo)}>
               신청하기
               <i className="svg-icon ico-angle right"></i>
             </button>
           </div>
         </div>
-
-      </div> 
+      </div>
+      <ApiKeyForm
+          isOpen={isOpen}
+          onClose={closePopup}
+          submitting={submitting}
+          errorMessage={errorMessage}
+          memberInfo={memberInfo}
+          mbrNo={mbrNo}
+          onSubmit={(formData) => submitApply(mbrNo, formData)}
+      />
     </>
   );
 };

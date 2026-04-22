@@ -1,6 +1,9 @@
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useNavigate } from 'react-router-dom';
+import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
+import ApiKeyForm from "@pages/data-open/ApiKeyForm.jsx";
+
 const MainBizCertificateApi = () => {
 
   const navigationData = {
@@ -37,6 +40,17 @@ const MainBizCertificateApi = () => {
     { label: '증명서 발급', link: '#' },
     { label: '증명서 발급', link: '#' },
   ];
+
+  const mbrNo = "2025120500381316";
+  const {
+    isOpen,
+    submitting,
+    errorMessage,
+    memberInfo,
+    openPopup,
+    closePopup,
+    submitApply
+  } = useApiKeyApply();
   const navigate = useNavigate();
   return (
     <>
@@ -244,14 +258,23 @@ const MainBizCertificateApi = () => {
             </button>
           </div>
           <div> 
-            <button type="button" className="krds-btn primary xlarge">
+            <button type="button" className="krds-btn primary xlarge"
+                    onClick={() => openPopup(mbrNo)}>
               신청하기
               <i className="svg-icon ico-angle right"></i>
             </button>
           </div>
         </div>
-
-      </div> 
+      </div>
+      <ApiKeyForm
+          isOpen={isOpen}
+          onClose={closePopup}
+          submitting={submitting}
+          errorMessage={errorMessage}
+          memberInfo={memberInfo}
+          mbrNo={mbrNo}
+          onSubmit={(formData) => submitApply(mbrNo, formData)}
+      />
     </>
   );
 };
