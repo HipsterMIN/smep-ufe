@@ -94,36 +94,39 @@ const OnePassSsoCallback = () => {
       return;
     }
 
-    // callback 1단계는 여전히 raw Keycloak token exchange 와 세션 저장이다.
-    // 단, 케이스1(로컬 비로그인)에서는 이어서 local-login 브리지와 /account/me 저장 흐름까지 바로 수행한다.
+    // callback 처리의 핵심은 "현재 로컬 로그인 상태가 있느냐"에 따라 백엔드 경로를 나누는 것이다.
+    // 케이스1(로컬 비로그인)은 callback/local-login one-shot endpoint가 code 교환과 local token 발급을 한 번에 끝내고,
+    // 케이스2(이미 로컬 로그인됨)는 기존 raw callback endpoint만 확인한 뒤 홈으로 복귀한다.
     const exchangeCode = async () => {
+      const authState = useAuthStore.getState();
+      const hasLocalLogin = Boolean(authState?.isLogin && authState?.token);
+      const callbackEndpoint = hasLocalLogin
+        ? '/api/v1/auth/keycloak/callback'
+        : '/api/v1/auth/keycloak/callback/local-login';
       // backend 호출 시작 로그다. 현재 어떤 endpoint 로 code 교환을 시도했는지, code 존재 여부가 맞는지 보는 용도다.
       console.log(`${LOG_PREFIX} exchange start`, {
-        endpoint: '/api/v1/auth/keycloak/callback',
+        endpoint: callbackEndpoint,
         hasCode: callbackState.hasCode,
       });
 
       try {
-        // /api/v1/auth/keycloak/callback 은 현재 smep-be 에서 code 를 Keycloak token endpoint 로 교환하고,
-        // raw Keycloak token 응답을 그대로 돌려주면서 HttpSession 에도 keycloak_access_token/keycloak_refresh_token 을 저장한다.
-        const response = await apiClient.post('/api/v1/auth/keycloak/callback', { code });
-        const callbackData = response?.data || response;
+        const response = await apiClient.post(callbackEndpoint, { code });
+        const responseData = response?.data || response;
         // 성공 로그는 token 원문을 남기지 않고도 응답 shape 를 확인하기 위한 로그다.
-        // responseKeys, hasAccessToken/hasRefreshToken, 길이, expiresIn, tokenType 으로 "교환은 됐는지"만 판단한다.
+        // 케이스1은 local token 응답, 케이스2는 raw Keycloak token 응답이므로 endpoint와 키 목록을 함께 본다.
         console.log(`${LOG_PREFIX} exchange success`, {
           hasResponse: Boolean(response),
+          endpoint: callbackEndpoint,
           responseKeys: response && typeof response === 'object' ? Object.keys(response) : [],
           dataKeys:
-            callbackData && typeof callbackData === 'object' ? Object.keys(callbackData) : [],
-          hasAccessToken: Boolean(callbackData?.accessToken),
-          accessTokenLength: callbackData?.accessToken?.length ?? 0,
-          hasRefreshToken: Boolean(callbackData?.refreshToken),
-          refreshTokenLength: callbackData?.refreshToken?.length ?? 0,
-          expiresIn: callbackData?.expiresIn ?? null,
-          tokenType: callbackData?.tokenType ?? null,
+            responseData && typeof responseData === 'object' ? Object.keys(responseData) : [],
+          hasAccessToken: Boolean(responseData?.accessToken || responseData?.access_token),
+          accessTokenLength: (responseData?.accessToken || responseData?.access_token)?.length ?? 0,
+          hasRefreshToken: Boolean(responseData?.refreshToken || responseData?.refresh_token),
+          refreshTokenLength: (responseData?.refreshToken || responseData?.refresh_token)?.length ?? 0,
+          expiresIn: responseData?.expiresIn ?? responseData?.expires_in ?? null,
+          tokenType: responseData?.tokenType ?? responseData?.token_type ?? null,
         });
-        const authState = useAuthStore.getState();
-        const hasLocalLogin = Boolean(authState?.isLogin && authState?.token);
         console.log(`${LOG_PREFIX} local login decision`, {
           hasLocalLogin,
           hasStoredToken: Boolean(authState?.token),
@@ -140,42 +143,10 @@ const OnePassSsoCallback = () => {
           return;
         }
 
-        const callbackAccessToken = callbackData?.accessToken;
-        console.log(`${LOG_PREFIX} local login bridge start`, {
-          endpoint: '/api/v1/auth/keycloak/local-login',
-          hasCallbackAccessToken: Boolean(callbackAccessToken),
-          callbackAccessTokenLength: callbackAccessToken?.length ?? 0,
-        });
-        // 케이스1 첫 복귀에서는 callback 직후 세션 handoff가 흔들릴 수 있어, callback 응답의 access token을 body로 직접 넘긴다.
-        // 백엔드는 request body token을 우선 사용하고, 없으면 기존 session fallback을 유지한다.
-        const localLoginRequestBody = callbackAccessToken
-          ? { accessToken: callbackAccessToken }
-          : null;
-        // local-login 응답도 일반 로그인과 동일하게 GlobalApiResponseAdvice 를 거쳐 data 안에 TokenResponse 가 들어올 수 있다.
-        const localLoginResponse = await apiClient.post(
-          '/api/v1/auth/keycloak/local-login',
-          localLoginRequestBody,
-        );
-        const localLoginData = localLoginResponse?.data || localLoginResponse;
-        console.log(`${LOG_PREFIX} local login bridge success`, {
-          responseKeys:
-            localLoginResponse && typeof localLoginResponse === 'object'
-              ? Object.keys(localLoginResponse)
-              : [],
-          dataKeys:
-            localLoginData && typeof localLoginData === 'object'
-              ? Object.keys(localLoginData)
-              : [],
-          hasAccessToken: Boolean(localLoginData?.accessToken),
-          accessTokenLength: localLoginData?.accessToken?.length ?? 0,
-          hasRefreshToken: Boolean(localLoginData?.refreshToken),
-          refreshTokenLength: localLoginData?.refreshToken?.length ?? 0,
-        });
-
-        const accessToken = localLoginData?.accessToken;
-        const refreshToken = localLoginData?.refreshToken;
+        const accessToken = responseData?.accessToken;
+        const refreshToken = responseData?.refreshToken;
         if (!accessToken || !refreshToken) {
-          throw new Error('Local login token response is incomplete');
+          throw new Error('Case1 callback/local-login token response is incomplete');
         }
 
         console.log(`${LOG_PREFIX} account me start`, {
