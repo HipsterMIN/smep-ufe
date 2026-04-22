@@ -265,7 +265,7 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
               <input
                 type="text"
                 className="krds-input"
-                placeholder="검색어를 입력해 주세요."
+                placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}
                 onChange={(event) => setSearchKeyword(event.target.value)}

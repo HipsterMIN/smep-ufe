@@ -937,7 +937,7 @@ const MainPage = () => {
                     <div className="service-tabcont">
                       <ul className="krds-structured-list row-4">
                         {certificateItems.map((item, index) => (
-                          <li className="structured-item" key={index}>
+                          <li className="structured-item mh-250" key={index}>
                             <div className="card-top">
                               {item.elpblYn === 'Y' && (
                                 <span className="krds-badge bg-light-primary">전자증명</span>
@@ -955,7 +955,7 @@ const MainPage = () => {
                                   {item.issuInstNm || item.jrsdInstNm}
                                 </p>
                               </div>
-                              <div>
+                              <div className="c-btn-pos">
                                 <button
                                   type="button"
                                   className="krds-btn secondary small full"
@@ -965,7 +965,7 @@ const MainPage = () => {
                                     )
                                   }
                                 >
-                                  발급받기
+                                  발급받기11
                                 </button>
                               </div>
                             </div>

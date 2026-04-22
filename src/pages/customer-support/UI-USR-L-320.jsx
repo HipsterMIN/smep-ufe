@@ -41,7 +41,7 @@ const UI_USR_L_320 = () => {
               <option value="">항목</option>
             </select>
             <div className="sch-input">
-              <input type="text" className="krds-input" placeholder="검색어를 입력해주세요." title="검색어 입력" />
+              <input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력" />
               <button type="button" className="krds-btn medium icon ico-search" >
                 <span className="sr-only">검색</span>
                 <i className="svg-icon ico-sch"></i>
@@ -74,7 +74,7 @@ const UI_USR_L_320 = () => {
             <Accordion.Header>
               <div className="accordion-title">
                 <span className="krds-badge bg-light-primary">경영혁신 마일리지 제도</span>
-                <p className="onellipsis-1">마일리지를 활용하여 사업신청을 했지만 지원대상이 되지 못하면(탈락하면) 사용한 마일리지는 어떻게 되나요?</p>
+                <p className="">마일리지를 활용하여 사업신청을 했지만 지원대상이 되지 못하면(탈락하면) 사용한 마일리지는 어떻게 되나요?</p>
               </div>
             </Accordion.Header>
             <Accordion.Panel>
@@ -91,7 +91,7 @@ const UI_USR_L_320 = () => {
             <Accordion.Header>
               <div className="accordion-title">
                 <span className="krds-badge bg-light-primary">경영혁신 마일리지 제도</span>
-                <p className="onellipsis-1">마일리지를 활용하여 사업신청을 했지만 지원대상이 되지 못하면(탈락하면) 사용한 마일리지는 어떻게 되나요?</p>
+                <p className="">마일리지를 활용하여 사업신청을 했지만 지원대상이 되지 못하면(탈락하면) 사용한 마일리지는 어떻게 되나요?</p>
               </div>
             </Accordion.Header>
             <Accordion.Panel>
@@ -108,7 +108,7 @@ const UI_USR_L_320 = () => {
             <Accordion.Header>
               <div className="accordion-title">
                 <span className="krds-badge bg-light-primary">경영혁신 마일리지 제도</span>
-                <p className="onellipsis-1">마일리지를 활용하여 사업신청을 했지만 지원대상이 되지 못하면(탈락하면) 사용한 마일리지는 어떻게 되나요?</p>
+                <p className="">마일리지를 활용하여 사업신청을 했지만 지원대상이 되지 못하면(탈락하면) 사용한 마일리지는 어떻게 되나요?</p>
               </div>
             </Accordion.Header>
             <Accordion.Panel>
