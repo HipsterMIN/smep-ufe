@@ -52,8 +52,7 @@ const UI_USR_R_480 = () => {
           <div className="sec-header align-top">
             <div>
               <div className="my-tit">
-                <span className="krds-badge bg-primary large">개인</span> {/* 개인 일때 */}
-                <span className="krds-badge bg-purple large">기업</span> {/* 기업 일때 */}
+                <span className="krds-badge bg-primary large">개인</span>
                 홍길동님
               </div>
               <div className="access-info">
@@ -61,7 +60,6 @@ const UI_USR_R_480 = () => {
               </div>
             </div>
             <div className="side-btn">
-              <button type="button" className="krds-btn secondary xsmall">회원정보 수정</button>
               <button type="button" className="krds-btn secondary xsmall">통합로그인 사이트 관리</button>
             </div>
           </div>
@@ -70,8 +68,8 @@ const UI_USR_R_480 = () => {
               <li>
                 <Link to="#">
                   <div className="card-info">
-                    <span className="card-info-tit">지원사업 <br />신청 현황</span>
-                    <div className="card-info-number"><strong>3</strong>건</div>
+                    <span className="card-info-tit">나의 관심공고</span>
+                    <div className="card-info-number"><strong>32</strong>건</div>
                   </div>
                 </Link>
               </li>
@@ -111,9 +109,6 @@ const UI_USR_R_480 = () => {
                   <dd>01-2345-678984</dd>
                   <dt>이메일</dt>
                   <dd>010-2345-6789</dd>
-                  {/* 기업 - 주요 사업부야 */}
-                  <dt>주요 사업분야</dt>
-                  <dd className="onellipsis-1">시스템구축/유지보수/솔루션개발/솔루션개발</dd>
                 </dl>
                 <button type="button" className="round-btn">알림 문자 / 이메일 수신중</button>
               </div>
@@ -122,7 +117,7 @@ const UI_USR_R_480 = () => {
         </div>
 
         {/* 추천하는 사업 공고 */}
-        <div className="my-section">
+        {/* <div className="my-section">
           <div className="sec-header">
             <div className="sec-tit">
               <h2><span className="point">홍길동</span> 님께 추천하는 사업 공고</h2>
@@ -134,8 +129,8 @@ const UI_USR_R_480 = () => {
             {Array.from({ length: 3 }).map((_, index) => (
               <li className="structured-item" key={index}>
                 <div className="card-top">
-                  <span className="krds-badge bg-point number">D-10</span> {/* D-10 이하일때 class명 bg-point */}
-                  <span className="krds-badge bg-primary number">D-402</span> {/* D-10 초과일때 class명 bg-primary */}
+                  <span className="krds-badge bg-point number">D-10</span>
+                  <span className="krds-badge bg-primary number">D-402</span>
                   <span className="krds-badge">경영</span>
                 </div>
                 <div className="card-body">
@@ -157,7 +152,7 @@ const UI_USR_R_480 = () => {
               </li>
             ))}
           </ul>
-        </div>
+        </div> */}
 
         {/* 서비스 현황 */}
         <div className="my-section">
@@ -169,11 +164,96 @@ const UI_USR_R_480 = () => {
           </div>
 
           <Accordion type="multi" shape="box">
-            {/* [S] - 지원사업 신청현황 */}
+            {/* [S] - 나의 관심공고 */}
             <Accordion.Item >
               <Accordion.Header>
                 <div className="accordion-title">
-                  <h3>지원사업 신청현황</h3>
+                  <h3>나의 관심공고</h3>
+                  <span className="krds-badge bg-primary number">36</span>
+                </div>
+              </Accordion.Header>
+              <Accordion.Panel>
+                <div className="accordion-panel-box">
+                  <ul className="krds-structured-list medium">
+                    <li className="structured-item">
+                      <div className="card-top">
+                        <span className="krds-badge small bg-light-primary">사업공고</span> 
+                      </div>
+                      <div className="card-body">
+                        <a href="#" className="c-text">
+                          <p className="c-tit no-icon"><span className="span onellipsis-2">2026년 중동 특화 긴급 물류바우처 사업 참여기업 모집 공고</span></p>
+                          <div className="c-etc">
+                            <p className="c-ico-txt onellipsis-1">
+                              <i className="svg-icon ico-build"></i> <span className="sr-only">기관</span>한국산업기술기획평가원
+                            </p>
+                            <p className="c-ico-txt onellipsis-1">
+                              <i className="svg-icon ico-calendar"></i> <span className="sr-only">신청일</span>25-12-30 ~ 26-12-31
+                            </p>
+                          </div>
+                        </a>
+                        <div>
+                          <a href="#" className="krds-btn primary small full" title="새 창 이동" target="_blank">자세히 보기</a>
+                        </div>
+                      </div> 
+                    </li>
+
+                    <li className="structured-item">
+                      <div className="card-top">
+                        <span className="krds-badge small bg-light-primary">정책금융</span> 
+                      </div>
+                      <div className="card-body">
+                        <a href="#" className="c-text">
+                          <p className="c-tit no-icon"><span className="span onellipsis-2">혁신성장지원자금</span></p>
+                          <div className="c-etc">
+                            <p className="c-ico-txt onellipsis-1">
+                              <i className="svg-icon ico-coin"></i> <span className="sr-only">금액</span>융자
+                            </p>
+                            <p className="c-ico-txt onellipsis-1">
+                              <i className="svg-icon ico-build"></i> <span className="sr-only">기관</span>한국산업기술기획평가원
+                            </p>
+                          </div>
+                        </a>
+                        <div>
+                          <a href="#" className="krds-btn primary small full" title="새 창 이동" target="_blank">자세히 보기</a>
+                        </div>
+                      </div> 
+                    </li>
+
+                    <li className="structured-item">
+                      <div className="card-top">
+                        <span className="krds-badge small bg-light-primary">사업공고</span> 
+                      </div>
+                      <div className="card-body">
+                        <a href="#" className="c-text">
+                          <p className="c-tit no-icon"><span className="span onellipsis-2">2026년 중동 특화 긴급 물류바우처 사업 참여기업 모집 공고</span></p>
+                          <div className="c-etc">
+                            <p className="c-ico-txt onellipsis-1">
+                              <i className="svg-icon ico-build"></i> <span className="sr-only">기관</span>한국산업기술기획평가원
+                            </p>
+                            <p className="c-ico-txt onellipsis-1">
+                              <i className="svg-icon ico-calendar"></i> <span className="sr-only">신청일</span>25-12-30 ~ 26-12-31
+                            </p>
+                          </div>
+                        </a>
+                        <div>
+                          <a href="#" className="krds-btn primary small full" title="새 창 이동" target="_blank">자세히 보기</a>
+                        </div>
+                      </div> 
+                    </li>
+                  </ul>
+                  <div className="more-btn">
+                    <button type="button" className="krds-btn secondary small full">더보기 <i className="svg-icon ico-angle right"></i></button>
+                  </div>
+                </div>
+              </Accordion.Panel>
+            </Accordion.Item>
+            {/* [E] - 나의 관심공고 */}
+
+            {/* [S] - Q&A */}
+            <Accordion.Item >
+              <Accordion.Header>
+                <div className="accordion-title">
+                  <h3>Q&A</h3>
                   <span className="krds-badge bg-primary number">36</span>
                 </div>
               </Accordion.Header>
@@ -184,25 +264,18 @@ const UI_USR_R_480 = () => {
                       <li className="structured-item" key={index}>
                         <div className="card-top">
                           {/* 전체 상태 case */}
-                          <span className="krds-badge small bg-light-primary">접수완료</span> 
-                          <span className="krds-badge small bg-light-secondary">평가중</span> 
-                          <span className="krds-badge small bg-light-success">선정</span> 
+                          <span className="krds-badge small bg-light-primary">답변완료</span> 
+                          <span className="krds-badge small bg-light-gray">답변대기</span> 
                         </div>
                         <div className="card-body">
                           <a href="#" className="c-text">
-                            <p className="c-tit no-icon"><span className="span onellipsis-2">2026년 중동 특화 긴급 물류바우처 사업 참여기업 모집 공고</span></p>
+                            <p className="c-tit no-icon"><span className="span onellipsis-2">소상공 정책자금 지원에서 일시적경영애로자금 관련 문의</span></p>
                             <div className="c-etc">
                               <p className="c-ico-txt onellipsis-1">
-                                <i className="svg-icon ico-build"></i> <span className="sr-only">기관</span>한국산업기술기획평가원
-                              </p>
-                              <p className="c-ico-txt onellipsis-1">
-                                <i className="svg-icon ico-calendar"></i> <span className="sr-only">신청일</span>2026.01.19 ~ 2026.02.12
+                                <i className="svg-icon ico-calendar"></i><span className="sr-only">작성일자</span> 25-12-30 ~ 26-12-31
                               </p>
                             </div>
                           </a>
-                          <div>
-                            <a href="#" className="krds-btn primary small full" title="새 창 이동" target="_blank">자세히 보기</a>
-                          </div>
                         </div> 
                       </li>
                     ))}
@@ -213,133 +286,7 @@ const UI_USR_R_480 = () => {
                 </div>
               </Accordion.Panel>
             </Accordion.Item>
-            {/* [E] - 지원사업 신청현황 */}
-
-            {/* [S] - 정책금융지원현황 */}
-            <Accordion.Item >
-              <Accordion.Header>
-                <div className="accordion-title">
-                  <h3>정책금융지원현황</h3>
-                  <span className="krds-badge bg-primary number">36</span>
-                </div>
-              </Accordion.Header>
-              <Accordion.Panel>
-                <div className="accordion-panel-box">
-                  <ul className="krds-structured-list medium">
-                    {Array.from({ length: 3 }).map((_, index) => (
-                      <li className="structured-item" key={index}>
-                        <div className="card-top">
-                          {/* 전체 상태 case */}
-                          <span className="krds-badge small bg-light-primary">접수완료</span> 
-                          <span className="krds-badge small bg-light-secondary">평가중</span> 
-                          <span className="krds-badge small bg-light-warning">탈락</span> 
-                        </div>
-                        <div className="card-body">
-                          <a href="#" className="c-text">
-                            <p className="c-tit no-icon"><span className="span onellipsis-1">혁신성장지원자금</span></p>
-                            <div className="c-etc">
-                              <p className="c-ico-txt onellipsis-1">
-                                <i className="svg-icon ico-coin"></i><span className="sr-only">용도</span>융자
-                              </p>
-                              <p className="c-ico-txt onellipsis-1">
-                                <i className="svg-icon ico-build"></i><span className="sr-only">기관</span> 한국산업기술기획평가원
-                              </p>
-                            </div>
-                          </a>
-                          <div>
-                            <a href="#" className="krds-btn primary small full" title="새 창 이동" target="_blank">자세히 보기</a>
-                          </div>
-                        </div> 
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="more-btn">
-                    <button type="button" className="krds-btn secondary small full">더보기 <i className="svg-icon ico-angle right"></i></button>
-                  </div>
-                </div>
-              </Accordion.Panel>
-            </Accordion.Item>
-            {/* [E] - 정책금융지원현황 */}
-
-            {/* [S] - 증명서 발급 이력 */}
-            <Accordion.Item >
-              <Accordion.Header>
-                <div className="accordion-title">
-                  <h3>증명서 발급 이력</h3>
-                  <span className="krds-badge bg-primary number">36</span>
-                </div>
-              </Accordion.Header>
-              <Accordion.Panel>
-                <div className="accordion-panel-box">
-                  <ul className="krds-structured-list medium">
-                    <li className="structured-item">
-                      <div className="card-body">
-                        <div className="c-text">
-                          <p className="c-tit no-icon"><span className="span onellipsis-1">창업기업확인서</span></p>
-                          <div className="c-etc">
-                            <p className="c-ico-txt c-date">
-                              <i className="svg-icon ico-calendar"></i><span className="tit">신청일자</span>
-                              <span className="onellipsis-1">2025.11.14 09:11:04</span>
-                            </p>
-                            <p className="c-ico-txt c-date">
-                              <i className="svg-icon ico-calendar"></i> <span className="tit">유효기간</span>
-                              <span className="onellipsis-1">2026.11.13</span>
-                            </p>
-                          </div>
-                        </div>
-                        <div>
-                          <button type="button" className="krds-btn primary small full">발급받기</button>
-                        </div>
-                      </div> 
-                    </li>
-                    <li className="structured-item">
-                      <div className="card-body">
-                        <div className="c-text">
-                          <p className="c-tit no-icon"><span className="span onellipsis-1">창업기업확인서</span></p>
-                          <div className="c-etc">
-                            <p className="c-ico-txt c-date">
-                              <i className="svg-icon ico-calendar"></i><span className="tit">신청일자</span>
-                              <span className="onellipsis-1">2025.11.14 09:11:04</span>
-                            </p>
-                            <p className="c-ico-txt c-date">
-                              <i className="svg-icon ico-calendar"></i> <span className="tit">유효기간</span>
-                              <span className="onellipsis-1">2025.11.14 09:11:04</span>
-                            </p>
-                          </div>
-                        </div>
-                        <div>
-                          <button type="button" className="krds-btn primary small full" disabled>출력불가</button>
-                        </div>
-                      </div> 
-                    </li>
-                    <li className="structured-item">
-                      <div className="card-body">
-                        <div className="c-text">
-                          <p className="c-tit no-icon"><span className="span onellipsis-1">창업기업확인서</span></p>
-                          <div className="c-etc">
-                            <p className="c-ico-txt c-date">
-                              <i className="svg-icon ico-calendar"></i><span className="tit">신청일자</span>
-                              <span className="onellipsis-1">2025.11.14 09:11:04</span>
-                            </p>
-                            <p className="c-ico-txt c-date">
-                              <i className="svg-icon ico-calendar"></i> <span className="tit">유효기간</span>
-                              <span className="onellipsis-1">2025.11.14 09:11:04</span>
-                            </p>
-                          </div>
-                        </div>
-                        <div>
-                          <button type="button" className="krds-btn primary small full" disabled>정부전자문서지갑</button>
-                        </div>
-                      </div> 
-                    </li>
-                  </ul>
-                  <div className="more-btn">
-                    <button type="button" className="krds-btn secondary small full">더보기 <i className="svg-icon ico-angle right"></i></button>
-                  </div>
-                </div>
-              </Accordion.Panel>
-            </Accordion.Item>
-            {/* [E] - 증명서 발급 이력 */}
+            {/* [E] - Q&A */}
 
             {/* [S] - API 인증키 신청 이력 */}
             <Accordion.Item >
@@ -381,11 +328,11 @@ const UI_USR_R_480 = () => {
             </Accordion.Item>
             {/* [E] - API 인증키 신청 이력 */}
 
-            {/* [S] - Q&A */}
+            {/* [S] - 나의 알림 */}
             <Accordion.Item >
               <Accordion.Header>
                 <div className="accordion-title">
-                  <h3>Q&A</h3>
+                  <h3>나의 알림</h3>
                   <span className="krds-badge bg-primary number">36</span>
                 </div>
               </Accordion.Header>
@@ -393,21 +340,25 @@ const UI_USR_R_480 = () => {
                 <div className="accordion-panel-box">
                   <ul className="krds-structured-list medium">
                     {Array.from({ length: 3 }).map((_, index) => (
-                      <li className="structured-item" key={index}>
+                      <li className="structured-item">
                         <div className="card-top">
-                          {/* 전체 상태 case */}
-                          <span className="krds-badge small bg-light-primary">답변완료</span> 
-                          <span className="krds-badge small bg-light-gray">답변대기</span> 
+                          <span className="krds-badge small bg-light-primary">사업공고</span> 
                         </div>
                         <div className="card-body">
                           <a href="#" className="c-text">
-                            <p className="c-tit no-icon"><span className="span onellipsis-2">소상공 정책자금 지원에서 일시적경영애로자금 관련 문의</span></p>
+                            <p className="c-tit no-icon"><span className="span onellipsis-2">2026년 중동 특화 긴급 물류바우처 사업 참여기업 모집 공고</span></p>
                             <div className="c-etc">
                               <p className="c-ico-txt onellipsis-1">
-                                <i className="svg-icon ico-calendar"></i><span className="sr-only">작성일자</span> 25-12-30 ~ 26-12-31
+                                <i className="svg-icon ico-calendar"></i> <span className="sr-only">신청일</span>2025-12-11 10:04
+                              </p>
+                              <p className="c-ico-txt onellipsis-1">
+                                <i className="svg-icon ico-alarm"></i> <span className="sr-only">알림</span>이메일 문자
                               </p>
                             </div>
                           </a>
+                          <div>
+                            <a href="#" className="krds-btn primary small full" title="새 창 이동" target="_blank">자세히 보기</a>
+                          </div>
                         </div> 
                       </li>
                     ))}
@@ -418,11 +369,11 @@ const UI_USR_R_480 = () => {
                 </div>
               </Accordion.Panel>
             </Accordion.Item>
-            {/* [E] - Q&A */}
+            {/* [E] - 나의 알림 */}
           </Accordion>
         </div>
         
-        <div className="my-section">
+        {/* <div className="my-section">
           <ul className="menu-list">
             <li>
               <Link to="#" className="menu-link blue">통합로그인 사이트 관리</Link>
@@ -434,8 +385,7 @@ const UI_USR_R_480 = () => {
               <Link to="#" className="menu-link pink">나의 알림</Link>
             </li>
           </ul>
-        </div>
-
+        </div> */}
       </div> 
     </>
   );

@@ -91,7 +91,7 @@ const UI_USR_L_140 = () => {
                       <option value="">항목</option>
                     </select>
                     <div className="sch-input">
-                      <input type="text" className="krds-input" placeholder="검색어를 입력해주세요." title="검색어 입력" />
+                      <input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력" />
                       <button type="button" className="krds-btn medium icon ico-search" >
                         <span className="sr-only">검색</span>
                         <i className="svg-icon ico-sch"></i>
@@ -189,7 +189,7 @@ const UI_USR_L_140 = () => {
                       <option value="">항목</option>
                     </select>
                     <div className="sch-input">
-                      <input type="text" className="krds-input" placeholder="검색어를 입력해주세요." title="검색어 입력" />
+                      <input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력" />
                       <button type="button" className="krds-btn medium icon ico-search" >
                         <span className="sr-only">검색</span>
                         <i className="svg-icon ico-sch"></i>
@@ -287,7 +287,7 @@ const UI_USR_L_140 = () => {
                       <option value="">항목</option>
                     </select>
                     <div className="sch-input">
-                      <input type="text" className="krds-input" placeholder="검색어를 입력해주세요." title="검색어 입력" />
+                      <input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력" />
                       <button type="button" className="krds-btn medium icon ico-search" >
                         <span className="sr-only">검색</span>
                         <i className="svg-icon ico-sch"></i>
