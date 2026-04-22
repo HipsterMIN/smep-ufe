@@ -4,7 +4,7 @@ const KEYCLOAK_URL = 'https://www.smes.go.kr/isso-dev/qsign';
 const KEYCLOAK_JOIN = 'https://www.smes.go.kr/onepass-dev/conversion/step1';
 const REALM = 'ucube-qsign';
 const CLIENT_ID = 'smes-tipa-01';
-const REDIRECT_URI = 'https://www.smes-tipa.go.kr/home-dev/sso'; // 우리 사이트 콜백 주소
+const REDIRECT_URI = 'https://www.smes.go.kr/home-dev/sso'; // 우리 사이트 콜백 주소
 
 // 로그인후 원패스 가입 유도시
 export function onePassJoin() {
