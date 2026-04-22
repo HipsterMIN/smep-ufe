@@ -6,9 +6,30 @@ import { useMatches } from 'react-router-dom';
 import { api as apiClient } from '@lib/apiClient.js';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import {
+  fetchCorporateManagerContact,
+  fetchCorporateMemberInfoReceptionAgreements,
   fetchCorporateMemberDetail,
+  formatPhoneNumber,
   normalizeDigits,
 } from './company/companyMemberUtils.js';
+
+const INFO_RECEPTION_MNS_CODES = {
+  message: 'A211',
+  email: 'A212',
+  kakaotalk: 'A213',
+  business: 'A214',
+  policyFinance: 'A215',
+  certificate: 'A216',
+};
+
+const DEFAULT_INFO_RECEPTION_AGREEMENTS = {
+  [INFO_RECEPTION_MNS_CODES.message]: 'N',
+  [INFO_RECEPTION_MNS_CODES.email]: 'N',
+  [INFO_RECEPTION_MNS_CODES.kakaotalk]: 'N',
+  [INFO_RECEPTION_MNS_CODES.business]: 'N',
+  [INFO_RECEPTION_MNS_CODES.policyFinance]: 'N',
+  [INFO_RECEPTION_MNS_CODES.certificate]: 'N',
+};
 
 const EMPTY_FORM_VALUES = {
   loginId: '',
@@ -91,6 +112,16 @@ const splitEmail = (value) => {
   return [localPart || '', domainParts.join('@') || ''];
 };
 
+const renderManagerValue = (value) => {
+  const normalized = String(value ?? '').trim();
+  return normalized || '--';
+};
+
+const renderManagerPhoneNumber = (value) => {
+  const formatted = formatPhoneNumber(value);
+  return formatted === '-' ? '--' : formatted;
+};
+
 // 회원 상세 응답을 화면 입력값 상태로 변환한다.
 const buildFormValues = (detail, tokenPayload) => {
   const [emailLocal, emailDomain] = splitEmail(detail?.emlAddr);
@@ -112,11 +143,32 @@ const buildFormValues = (detail, tokenPayload) => {
   };
 };
 
+// 정보수신 동의 응답을 radio 상태값으로 변환한다.
+const buildInfoReceptionAgreements = (agreements) => {
+  const nextAgreements = { ...DEFAULT_INFO_RECEPTION_AGREEMENTS };
+  if (!Array.isArray(agreements)) {
+    return nextAgreements;
+  }
+
+  agreements.forEach((agreement) => {
+    const infoRcptnMnsCd = agreement?.infoRcptnMnsCd;
+    if (Object.hasOwn(nextAgreements, infoRcptnMnsCd)) {
+      nextAgreements[infoRcptnMnsCd] = agreement?.infoRcptnAgreYn === 'Y' ? 'Y' : 'N';
+    }
+  });
+
+  return nextAgreements;
+};
+
 const UI_USR_W_411 = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const authToken = useAuthStore((state) => state.token);
   const [formValues, setFormValues] = useState(EMPTY_FORM_VALUES);
+  const [managerContact, setManagerContact] = useState(null);
+  const [infoReceptionAgreements, setInfoReceptionAgreements] = useState(
+    DEFAULT_INFO_RECEPTION_AGREEMENTS,
+  );
 
   // 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
@@ -134,10 +186,14 @@ const UI_USR_W_411 = () => {
         ...currentValues,
         loginId: tokenPayload?.login_id || '',
       }));
+      setManagerContact(null);
+      setInfoReceptionAgreements(DEFAULT_INFO_RECEPTION_AGREEMENTS);
       return;
     }
 
     let active = true;
+    setManagerContact(null);
+    setInfoReceptionAgreements(DEFAULT_INFO_RECEPTION_AGREEMENTS);
 
     // 회원번호로 기업회원 상세정보를 조회한다.
     const loadCorporateMemberDetail = async () => {
@@ -152,7 +208,43 @@ const UI_USR_W_411 = () => {
       }
     };
 
+    // 회원번호로 기업관리자정보를 조회한다.
+    const loadCorporateManagerContact = async () => {
+      try {
+        const contact = await fetchCorporateManagerContact(apiClient, mbrNo);
+        if (!active) {
+          return;
+        }
+        setManagerContact(contact || null);
+      } catch (error) {
+        if (!active) {
+          return;
+        }
+        console.error('Failed to load corporate manager contact:', error);
+        setManagerContact(null);
+      }
+    };
+
+    // 회원번호로 정보수신 동의값을 조회한다.
+    const loadCorporateMemberInfoReceptionAgreements = async () => {
+      try {
+        const agreements = await fetchCorporateMemberInfoReceptionAgreements(apiClient, mbrNo);
+        if (!active) {
+          return;
+        }
+        setInfoReceptionAgreements(buildInfoReceptionAgreements(agreements));
+      } catch (error) {
+        if (!active) {
+          return;
+        }
+        console.error('Failed to load corporate member info reception agreements:', error);
+        setInfoReceptionAgreements(DEFAULT_INFO_RECEPTION_AGREEMENTS);
+      }
+    };
+
     loadCorporateMemberDetail();
+    loadCorporateManagerContact();
+    loadCorporateMemberInfoReceptionAgreements();
 
     return () => {
       active = false;
@@ -177,6 +269,25 @@ const UI_USR_W_411 = () => {
         [field]: nextParts,
       };
     });
+  };
+
+  // 단일 정보수신 동의 radio 값을 갱신한다.
+  const setInfoReceptionAgreement = (infoRcptnMnsCd, infoRcptnAgreYn) => {
+    setInfoReceptionAgreements((currentAgreements) => ({
+      ...currentAgreements,
+      [infoRcptnMnsCd]: infoRcptnAgreYn,
+    }));
+  };
+
+  // 수신방법 radio 값에 따라 문자와 알림톡 동의값을 함께 갱신한다.
+  const setInfoReceptionMethod = (selectedMethodCd) => {
+    setInfoReceptionAgreements((currentAgreements) => ({
+      ...currentAgreements,
+      [INFO_RECEPTION_MNS_CODES.message]:
+        selectedMethodCd === INFO_RECEPTION_MNS_CODES.message ? 'Y' : 'N',
+      [INFO_RECEPTION_MNS_CODES.kakaotalk]:
+        selectedMethodCd === INFO_RECEPTION_MNS_CODES.kakaotalk ? 'Y' : 'N',
+    }));
   };
 
   return (
@@ -256,7 +367,27 @@ const UI_USR_W_411 = () => {
                 <dd className="form-row-content">
                   <div className="form-wrapper row-small">
                     <select className="krds-form-select small w-120" id="select_01" value={formValues.rprsTelnoParts[0]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 0, event.target.value)}>
-                      <option value={formValues.rprsTelnoParts[0]}>{formValues.rprsTelnoParts[0] || '선택'}</option>
+                      <option value="">선택</option>
+                      <option value="02">서울 02</option>
+                      <option value="051">부산 051</option>
+                      <option value="053">대구 053</option>
+                      <option value="032">인천 032</option>
+                      <option value="062">광주 062</option>
+                      <option value="042">대전 042</option>
+                      <option value="052">울산 052</option>
+                      <option value="044">세종 044</option>
+                      <option value="031">경기 031</option>
+                      <option value="033">강원 033</option>
+                      <option value="043">충북 043</option>
+                      <option value="041">충남 041</option>
+                      <option value="063">전북 063</option>
+                      <option value="061">전남 061</option>
+                      <option value="054">경북 054</option>
+                      <option value="055">경남 055</option>
+                      <option value="064">제주 064</option>
+                      <option value="070">일반 070</option>
+                      <option value="060">일반 060</option>
+                      <option value="050">일반 050</option>
                     </select>
                     <span>-</span>
                     <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 중간번호 입력" value={formValues.rprsTelnoParts[1]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 1, event.target.value)} />
@@ -272,7 +403,27 @@ const UI_USR_W_411 = () => {
                 <dd className="form-row-content">
                   <div className="form-wrapper row-small">
                     <select className="krds-form-select small w-120" id="select_02" value={formValues.rprsFxnoParts[0]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 0, event.target.value)}>
-                      <option value={formValues.rprsFxnoParts[0]}>{formValues.rprsFxnoParts[0] || '선택'}</option>
+                      <option value="">선택</option>
+                      <option value="02">서울 02</option>
+                      <option value="051">부산 051</option>
+                      <option value="053">대구 053</option>
+                      <option value="032">인천 032</option>
+                      <option value="062">광주 062</option>
+                      <option value="042">대전 042</option>
+                      <option value="052">울산 052</option>
+                      <option value="044">세종 044</option>
+                      <option value="031">경기 031</option>
+                      <option value="033">강원 033</option>
+                      <option value="043">충북 043</option>
+                      <option value="041">충남 041</option>
+                      <option value="063">전북 063</option>
+                      <option value="061">전남 061</option>
+                      <option value="054">경북 054</option>
+                      <option value="055">경남 055</option>
+                      <option value="064">제주 064</option>
+                      <option value="070">일반 070</option>
+                      <option value="060">일반 060</option>
+                      <option value="050">일반 050</option>
                     </select>
                     <span>-</span>
                     <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스번호 중간번호 입력" value={formValues.rprsFxnoParts[1]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 1, event.target.value)} />
@@ -293,6 +444,12 @@ const UI_USR_W_411 = () => {
                     <span>-</span>
                     <select className="krds-form-select small w-140" title="이메일 선택">
                       <option value="">직접입력</option>
+                      <option value="naver.com">naver</option>
+                      <option value="daum.net">daum</option>
+                      <option value="gmail.com">gmail</option>
+                      <option value="hotmail.com">hotmail</option>
+                      <option value="nate.com">nate</option>
+                      <option value="yahoo.com">yahoo</option>
                     </select>
                   </div>
                 </dd>
@@ -335,10 +492,10 @@ const UI_USR_W_411 = () => {
             <dl className="on-form-row large">
               <div className="form-row-item">
                 <dt className="form-row-label">
-                  <span className="form-tit">아이디</span>
+                  <span className="form-tit">담당자</span>
                 </dt>
                 <dd className="form-row-content">
-                  <span className="text-value">{formValues.loginId}</span>
+                  <span className="text-value">{renderManagerValue(managerContact?.mbrNm)}</span>
                 </dd>
               </div>
               <div className="form-row-item">
@@ -346,7 +503,7 @@ const UI_USR_W_411 = () => {
                   <span className="form-tit">휴대전화번호</span>
                 </dt>
                 <dd className="form-row-content">
-                  <span className="text-value">--</span>
+                  <span className="text-value">{renderManagerPhoneNumber(managerContact?.picMblTelno)}</span>
                 </dd>
               </div>
               <div className="form-row-item">
@@ -354,7 +511,7 @@ const UI_USR_W_411 = () => {
                   <span className="form-tit">유선전화</span>
                 </dt>
                 <dd className="form-row-content">
-                  <span className="text-value">--</span>
+                  <span className="text-value">{renderManagerPhoneNumber(managerContact?.picTelno)}</span>
                 </dd>
               </div>
               <div className="form-row-item">
@@ -362,7 +519,7 @@ const UI_USR_W_411 = () => {
                   <span className="form-tit">이메일</span>
                 </dt>
                 <dd className="form-row-content">
-                  <span className="text-value">--</span>
+                  <span className="text-value">{renderManagerValue(managerContact?.picEmlAddr)}</span>
                 </dd>
               </div>
               <div className="form-row-item">
@@ -370,7 +527,7 @@ const UI_USR_W_411 = () => {
                   <span className="form-tit">부서명</span>
                 </dt>
                 <dd className="form-row-content">
-                  <span className="text-value">경영지원팀</span>
+                  <span className="text-value">{renderManagerValue(managerContact?.picDeptNm)}</span>
                 </dd>
               </div>
               <div className="form-row-item">
@@ -378,7 +535,7 @@ const UI_USR_W_411 = () => {
                   <span className="form-tit">직위</span>
                 </dt>
                 <dd className="form-row-content">
-                  <span className="text-value">대표</span>
+                  <span className="text-value">{renderManagerValue(managerContact?.picJbpsNm)}</span>
                 </dd>
               </div>
             </dl>
@@ -392,7 +549,7 @@ const UI_USR_W_411 = () => {
           <h3 className="sec-tit3">관심 분야 설정</h3>
           <div className="flex-between center">
             <p className="cont-desc">관심을 갖고 있는 분야를 선택하시면, 빠르고 정확한 지원사업 검색이 가능합니다.</p>
-            <button type="button" className="krds-btn secondary small">인증키 신청</button>
+            <button type="button" className="krds-btn secondary small">관심분야 설정</button>
           </div>
         </div>
 
@@ -420,6 +577,9 @@ const UI_USR_W_411 = () => {
                           type="radio"
                           name="receive"
                           id="message"
+                          value={INFO_RECEPTION_MNS_CODES.message}
+                          checked={infoReceptionAgreements[INFO_RECEPTION_MNS_CODES.message] === 'Y'}
+                          onChange={() => setInfoReceptionMethod(INFO_RECEPTION_MNS_CODES.message)}
                         />
                         <label htmlFor="message">문자</label>
                       </div>
@@ -429,6 +589,9 @@ const UI_USR_W_411 = () => {
                           type="radio"
                           name="receive"
                           id="kakaotalk"
+                          value={INFO_RECEPTION_MNS_CODES.kakaotalk}
+                          checked={infoReceptionAgreements[INFO_RECEPTION_MNS_CODES.kakaotalk] === 'Y'}
+                          onChange={() => setInfoReceptionMethod(INFO_RECEPTION_MNS_CODES.kakaotalk)}
                         />
                         <label htmlFor="kakaotalk">알림톡(카카오톡)</label>
                       </div>
@@ -450,8 +613,11 @@ const UI_USR_W_411 = () => {
                       <div className="krds-form-check medium">
                         <input
                           type="radio"
-                          name="receive"
+                          name="emailReceive"
                           id="email_on"
+                          value="Y"
+                          checked={infoReceptionAgreements[INFO_RECEPTION_MNS_CODES.email] === 'Y'}
+                          onChange={() => setInfoReceptionAgreement(INFO_RECEPTION_MNS_CODES.email, 'Y')}
                         />
                         <label htmlFor="email_on">예</label>
                       </div>
@@ -459,8 +625,11 @@ const UI_USR_W_411 = () => {
                       <div className="krds-form-check medium">
                         <input
                           type="radio"
-                          name="receive"
+                          name="emailReceive"
                           id="email_off"
+                          value="N"
+                          checked={infoReceptionAgreements[INFO_RECEPTION_MNS_CODES.email] === 'N'}
+                          onChange={() => setInfoReceptionAgreement(INFO_RECEPTION_MNS_CODES.email, 'N')}
                         />
                         <label htmlFor="email_off">아니오</label>
                       </div>
@@ -495,6 +664,9 @@ const UI_USR_W_411 = () => {
                           type="radio"
                           name="business"
                           id="business_on"
+                          value="Y"
+                          checked={infoReceptionAgreements[INFO_RECEPTION_MNS_CODES.business] === 'Y'}
+                          onChange={() => setInfoReceptionAgreement(INFO_RECEPTION_MNS_CODES.business, 'Y')}
                         />
                         <label htmlFor="business_on">받기</label>
                       </div>
@@ -504,6 +676,9 @@ const UI_USR_W_411 = () => {
                           type="radio"
                           name="business"
                           id="business_off"
+                          value="N"
+                          checked={infoReceptionAgreements[INFO_RECEPTION_MNS_CODES.business] === 'N'}
+                          onChange={() => setInfoReceptionAgreement(INFO_RECEPTION_MNS_CODES.business, 'N')}
                         />
                         <label htmlFor="business_off">끄기</label>
                       </div>
@@ -528,6 +703,9 @@ const UI_USR_W_411 = () => {
                           type="radio"
                           name="policy"
                           id="policy_on"
+                          value="Y"
+                          checked={infoReceptionAgreements[INFO_RECEPTION_MNS_CODES.policyFinance] === 'Y'}
+                          onChange={() => setInfoReceptionAgreement(INFO_RECEPTION_MNS_CODES.policyFinance, 'Y')}
                         />
                         <label htmlFor="policy_on">받기</label>
                       </div>
@@ -537,6 +715,9 @@ const UI_USR_W_411 = () => {
                           type="radio"
                           name="policy"
                           id="policy_off"
+                          value="N"
+                          checked={infoReceptionAgreements[INFO_RECEPTION_MNS_CODES.policyFinance] === 'N'}
+                          onChange={() => setInfoReceptionAgreement(INFO_RECEPTION_MNS_CODES.policyFinance, 'N')}
                         />
                         <label htmlFor="policy_off">끄기</label>
                       </div>
@@ -561,6 +742,9 @@ const UI_USR_W_411 = () => {
                           type="radio"
                           name="certificate"
                           id="certificate_on"
+                          value="Y"
+                          checked={infoReceptionAgreements[INFO_RECEPTION_MNS_CODES.certificate] === 'Y'}
+                          onChange={() => setInfoReceptionAgreement(INFO_RECEPTION_MNS_CODES.certificate, 'Y')}
                         />
                         <label htmlFor="certificate_on">받기</label>
                       </div>
@@ -570,6 +754,9 @@ const UI_USR_W_411 = () => {
                           type="radio"
                           name="certificate"
                           id="certificate_off"
+                          value="N"
+                          checked={infoReceptionAgreements[INFO_RECEPTION_MNS_CODES.certificate] === 'N'}
+                          onChange={() => setInfoReceptionAgreement(INFO_RECEPTION_MNS_CODES.certificate, 'N')}
                         />
                         <label htmlFor="certificate_off">끄기</label>
                       </div>

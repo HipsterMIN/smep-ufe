@@ -168,7 +168,7 @@ const VerifyPassword = ({
         password,
       });
 
-      if (!normalizeVerifyResult(result)) {
+      if (!normalizeVerifyResult(result.data)) {
         setErrorMessage('아이디 또는 비밀번호가 일치하지 않습니다.');
         return;
       }
@@ -211,10 +211,11 @@ const VerifyPassword = ({
             <h3 className="sec-tit">비밀번호 재확인</h3>
             <ul className="krds-info-list decimal" role="list">
               <li role="listitem">정확한 본인확인을 위해 다시 한번 비밀번호를 입력해 주세요.</li>
-              <li role="listitem">비밀번호가 타인에게 노출되지 않도록 주의해 주세요.</li>
+              <li role="listitem">비밀번호는 타인에게 노출되지 않도록 주의해 주세요.</li>
             </ul>
 
-            <div className="form-group krds-check-area">
+            {/* 키보드 보안 적용시 주석해제하여 구현 */}
+            {/*<div className="form-group krds-check-area">
               <div className="krds-form-check">
                 <input type="checkbox" name="keyboard_security" id="keyboard_security" />
                 <label htmlFor="keyboard_security">키보드 보안 프로그램 적용</label>
@@ -222,7 +223,7 @@ const VerifyPassword = ({
             </div>
             <p className="txt-caution">
               안전한 중소벤처24 서비스 이용을 위해 키보드 보안 프로그램 적용을 권장합니다.
-            </p>
+            </p>*/}
 
             <dl className="on-form-row large">
               <div className="form-row-item">
