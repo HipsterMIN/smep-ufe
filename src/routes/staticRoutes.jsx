@@ -2,6 +2,7 @@
 import MainPage from '../pages/MainPage.jsx';
 import Login from '../pages/Login.jsx';
 import SSOLogin from '../pages/SSOLogin.jsx';
+import OnePassSsoCallback from '../pages/onepass/OnePassSsoCallback.jsx';
 import AiChat from '../pages/ai/AiChat.jsx';
 import IntegratedSearchRouteTest from '../pages/dev/IntegratedSearchRouteTest.jsx';
 import PublishingList from '../publishing/PublishingList.jsx';
@@ -47,6 +48,10 @@ export const staticRoutes = [
       {
         path: '/service/intg-search-route-test', // 통합검색 라우팅 테스트 페이지
         element: <IntegratedSearchRouteTest/>,
+      },
+      {
+        path: '/sso', // 중기원패스/Keycloak callback 라우트
+        element: <OnePassSsoCallback />,
       },
     ],
   },
