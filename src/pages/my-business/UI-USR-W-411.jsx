@@ -1,10 +1,16 @@
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
+import JusoAddressSearchButton from '@components/ui/JusoAddressSearchButton';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useEffect, useState } from 'react';
 import { useMatches } from 'react-router-dom';
 import { api as apiClient } from '@lib/apiClient.js';
 import { useAuthStore } from '@store/useAuthStore.jsx';
+import {
+  keepDigitsOnly,
+  removeDigits,
+  removeKoreanCharacters,
+} from '@utils/commonUtils.js';
 import {
   fetchCorporateManagerContact,
   fetchCorporateMemberInfoReceptionAgreements,
@@ -307,6 +313,20 @@ const UI_USR_W_411 = () => {
     });
   };
 
+  const handleSelectAddress = (payload) => {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      zip: payload.zipNo || '',
+      entAddr: payload.baseAddress || payload.roadFullAddress || '',
+      entDaddr: payload.detailAddress || '',
+    }));
+  };
+
+  const handleAddressSearchError = (error) => {
+    console.error('Failed to search address:', error);
+    window.alert(error?.message || '주소검색 중 오류가 발생했습니다.');
+  };
+
   // 단일 정보수신 동의 radio 값을 갱신한다.
   const setInfoReceptionAgreement = (infoRcptnMnsCd, infoRcptnAgreYn) => {
     setInfoReceptionAgreements((currentAgreements) => ({
@@ -371,7 +391,7 @@ const UI_USR_W_411 = () => {
             <dl className="on-form-row large">
               <div className="form-row-item">
                 <dt className="form-row-label">
-                  <span className="form-tit">이름</span>
+                  <span className="form-tit">아이디</span>
                 </dt>
                 <dd className="form-row-content">
                   <span className="text-value">{formValues.loginId}</span>
@@ -413,7 +433,7 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper w-220">
-                    <input type="text" id="input_04" className="krds-input small" maxLength={100} value={formValues.rprsvNm} onChange={(event) => setFormValue('rprsvNm', event.target.value)} />
+                    <input type="text" id="input_04" className="krds-input small" maxLength={100} value={formValues.rprsvNm} onChange={(event) => setFormValue('rprsvNm', removeDigits(event.target.value))} />
                   </div>
                 </dd>
               </div>
@@ -447,9 +467,9 @@ const UI_USR_W_411 = () => {
                       <option value="050">일반 050</option>
                     </select>
                     <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 중간번호 입력" maxLength={4} value={formValues.rprsTelnoParts[1]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 1, event.target.value)} />
+                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 중간번호 입력" maxLength={4} value={formValues.rprsTelnoParts[1]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 1, keepDigitsOnly(event.target.value))} />
                     <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 끝번호 입력" maxLength={4} value={formValues.rprsTelnoParts[2]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 2, event.target.value)} />
+                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 끝번호 입력" maxLength={4} value={formValues.rprsTelnoParts[2]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 2, keepDigitsOnly(event.target.value))} />
                   </div>
                 </dd>
               </div>
@@ -483,9 +503,9 @@ const UI_USR_W_411 = () => {
                       <option value="050">일반 050</option>
                     </select>
                     <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스번호 중간번호 입력" maxLength={4} value={formValues.rprsFxnoParts[1]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 1, event.target.value)} />
+                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스번호 중간번호 입력" maxLength={4} value={formValues.rprsFxnoParts[1]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 1, keepDigitsOnly(event.target.value))} />
                     <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스번호 끝번호 입력" maxLength={4} value={formValues.rprsFxnoParts[2]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 2, event.target.value)} />
+                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스번호 끝번호 입력" maxLength={4} value={formValues.rprsFxnoParts[2]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 2, keepDigitsOnly(event.target.value))} />
                   </div>
                 </dd>
               </div>
@@ -495,11 +515,11 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper row-small">
-                    <input type="text" id="input_05" className="krds-input small w-140" placeholder="0000" title="이메일 아이디 입력" maxLength={64} value={formValues.emailLocal} onChange={(event) => setFormValue('emailLocal', event.target.value)}/>
+                    <input type="text" id="input_05" className="krds-input small w-140" placeholder="0000" title="이메일 아이디 입력" maxLength={64} value={formValues.emailLocal} onChange={(event) => setFormValue('emailLocal', removeKoreanCharacters(event.target.value))}/>
                     <span>@</span>
-                    <input type="text" className="krds-input small w-140" placeholder="0000" title="이메일 도메인 입력" maxLength={255} value={formValues.emailDomain} onChange={(event) => setFormValue('emailDomain', event.target.value)} />
+                    <input type="text" className="krds-input small w-140" placeholder="0000" title="이메일 도메인 입력" maxLength={255} value={formValues.emailDomain} onChange={(event) => setFormValue('emailDomain', removeKoreanCharacters(event.target.value))} />
                     <span>-</span>
-                    <select className="krds-form-select small w-140" title="이메일 선택" onChange={(event) => setFormValue('emailDomain', event.target.value)}>
+                    <select className="krds-form-select small w-140" title="이메일 선택" onChange={(event) => setFormValue('emailDomain', removeKoreanCharacters(event.target.value))}>
                       <option value="">직접입력</option>
                       <option value="naver.com">naver</option>
                       <option value="daum.net">daum</option>
@@ -517,11 +537,15 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper row-small">
-                    <input type="text" id="input_06" className="krds-input small w-150" placeholder="-" maxLength={5} value={formValues.zip} onChange={(event) => setFormValue('zip', event.target.value)} />
-                    <button type="button" className="krds-btn secondary small">우편번호 검색</button>
+                    <input type="text" id="input_06" className="krds-input small w-150" placeholder="-" maxLength={5} value={formValues.zip} onChange={(event) => setFormValue('zip', event.target.value)} disabled />
+                    <JusoAddressSearchButton
+                      onSelect={handleSelectAddress}
+                      onError={handleAddressSearchError}
+                      buttonText="우편번호 검색"
+                    />
                   </div>
                   <div className="form-wrapper">
-                    <input type="text" className="krds-input small w-460" placeholder="-" maxLength={200} value={formValues.entAddr} onChange={(event) => setFormValue('entAddr', event.target.value)} />
+                    <input type="text" className="krds-input small w-460" placeholder="-" maxLength={200} value={formValues.entAddr} onChange={(event) => setFormValue('entAddr', event.target.value)} disabled />
                   </div>
                   <div className="form-wrapper">
                     <input type="text" className="krds-input small w-460" placeholder="상세 주소 입력" maxLength={200} value={formValues.entDaddr} onChange={(event) => setFormValue('entDaddr', event.target.value)} />
