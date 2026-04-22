@@ -265,7 +265,7 @@ const MainPage = () => {
       title: '입법·행정예고/고시',
       path: '/plcy/icr/UI_USR_L_110',
     },
-     {
+    {
       img: mainIcon06,
       title: '입주기업 모집공고 ',
       path: '/req/UI_USR_L_180',
@@ -619,8 +619,7 @@ const MainPage = () => {
   const requestLoginForScrap = () => {
     const moveToLogin = window.confirm('로그인 후 스크랩 가능합니다. 로그인 하시겠습니까?');
     if (moveToLogin) {
-      //todo 로그인생기면 링크걸기
-      //navigate('/service/login');
+      navigate('/service/login');
     }
   };
   const handleToggleLike1 = async (targetId) => {
