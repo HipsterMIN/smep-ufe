@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Datepicker from '@components/ui/Datepicker.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
-import { useAuthStore } from '@store/useAuthStore.jsx';
 import {
   fetchCorporateMemberCodeOptions,
   fetchCorporateMemberDetail,
@@ -17,18 +16,11 @@ import {
 import {
   parseDateFromYmd,
   toYmd,
-  decodeJwtPayload,
 } from '@utils/commonUtils.js';
 
-// 로그인/store 정리 전까지 기업정보 수정 화면은 전달된 회원번호가 없으면 임시 폴백 회원번호를 그대로 사용한다.
-const TEMP_FALLBACK_MBR_NO = '2025120500136492';
-
 const UI_USR_W_452 = () => {
-  const authToken = useAuthStore((state) => state.token);
-  const tokenPayload = decodeJwtPayload(authToken);
   const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-  const memberNo = tokenPayload?.member_no || TEMP_FALLBACK_MBR_NO;
   const [codeOptions, setCodeOptions] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -62,7 +54,7 @@ const UI_USR_W_452 = () => {
 
       try {
         const [detail, commonCodes, ksicTopLevelOptions] = await Promise.all([
-          fetchCorporateMemberDetail(apiClient, memberNo),
+          fetchCorporateMemberDetail(apiClient),
           fetchCorporateMemberCodeOptions(),
           fetchKsicTopLevelOptions(apiClient),
         ]);
@@ -107,7 +99,7 @@ const UI_USR_W_452 = () => {
     return () => {
       active = false;
     };
-  }, [memberNo]);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -193,11 +185,6 @@ const UI_USR_W_452 = () => {
   };
 
   const handleSave = async () => {
-    if (!memberNo) {
-      alert('회원번호를 확인할 수 없습니다.');
-      return;
-    }
-
     if (
       !form.entSclCd ||
       !form.fndnDate ||
@@ -218,7 +205,7 @@ const UI_USR_W_452 = () => {
 
     try {
       const nextKsicCd = form.ksicCd.trim();
-      await updateCorporateMemberDetail(apiClient, memberNo, {
+      await updateCorporateMemberDetail(apiClient, {
         entSclCd: form.entSclCd,
         fndnYmd: toYmd(form.fndnDate),
         wrkrCntClsfCd: form.wrkrCntClsfCd,

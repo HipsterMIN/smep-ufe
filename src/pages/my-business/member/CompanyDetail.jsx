@@ -1,11 +1,10 @@
-import {useEffect, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
-import {useUserMenu} from '@context/UserMenuContext.jsx';
-import {api as apiClient} from '@lib/apiClient.js';
-import {useAuthStore} from '@store/useAuthStore.jsx';
+import { useUserMenu } from '@context/UserMenuContext.jsx';
+import { api as apiClient } from '@lib/apiClient.js';
 
 import {
   buildCompanyAddress,
@@ -17,16 +16,11 @@ import {
   getCodeLabel,
   getKsicTopLevelLabel,
 } from '@/pages/my-business/member/memberUtils.js';
-import {decodeJwtPayload, formatDateTime, formatPhoneNumber, formatYmd,} from '@utils/commonUtils.js';
+import { formatDateTime, formatPhoneNumber, formatYmd } from '@utils/commonUtils.js';
 // 로그인/store 정리 전까지 기업정보 화면은 전달된 회원번호가 없으면 임시 폴백 회원번호로 진입을 보장한다.
-const TEMP_FALLBACK_MBR_NO = '2025120500136492';
-
 const UI_USR_R_450 = () => {
-  const authToken = useAuthStore((state) => state.token);
-  const tokenPayload = decodeJwtPayload(authToken);
   const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-  const effectiveMemberNo = tokenPayload?.member_no || TEMP_FALLBACK_MBR_NO;
   const [detail, setDetail] = useState(null);
   const [codeOptions, setCodeOptions] = useState({});
   const [loading, setLoading] = useState(true);
@@ -44,7 +38,7 @@ const UI_USR_R_450 = () => {
 
       try {
         const [memberDetail, commonCodes, ksicTopLevelOptions] = await Promise.all([
-          fetchCorporateMemberDetail(apiClient, effectiveMemberNo),
+          fetchCorporateMemberDetail(apiClient),
           fetchCorporateMemberCodeOptions(),
           fetchKsicTopLevelOptions(apiClient),
         ]);
@@ -76,7 +70,7 @@ const UI_USR_R_450 = () => {
     return () => {
       active = false;
     };
-  }, [effectiveMemberNo]);
+  }, []);
 
   const renderValue = (value) => {
     const normalized = String(value ?? '').trim();
@@ -204,8 +198,8 @@ const UI_USR_R_450 = () => {
             <button
               type="button"
               className="krds-btn primary xlarge"
-              onClick={() => navigate('edit', { state: { mbrNo: effectiveMemberNo } })}
-              disabled={loading || !effectiveMemberNo}
+              onClick={() => navigate('edit')}
+              disabled={loading}
             >
               상세정보 수정
             </button>

@@ -89,49 +89,47 @@ export const resolveCorporateMemberNo = async (apiClient, businessRegNo) => {
   return response.mbrNo;
 };
 
-export const fetchCorporateMemberDetail = async (apiClient, mbrNo) =>
+export const fetchCorporateMemberDetail = async (apiClient) =>
   normalizeApiPayload(
-    await apiClient.get(`/api/v1/member/corporate/${encodeURIComponent(mbrNo)}`),
+    await apiClient.get('/api/v1/member/corporate/me'),
   );
 
 // 개인회원 상세정보를 조회한다.
-export const fetchIndividualMemberDetail = async (apiClient, mbrNo) =>
+export const fetchIndividualMemberDetail = async (apiClient) =>
   normalizeApiPayload(
-    await apiClient.get(`/api/v1/member/individual/${encodeURIComponent(mbrNo)}`),
+    await apiClient.get('/api/v1/member/individual/me'),
   );
 
 // 회원 정보수신 동의 목록을 조회한다.
-export const fetchMemberInfoReceptionAgreements = async (apiClient, mbrNo) =>
+export const fetchMemberInfoReceptionAgreements = async (apiClient) =>
   normalizeApiPayload(
-    await apiClient.get(
-      `/api/v1/member/common/${encodeURIComponent(mbrNo)}/info-reception-agreements`,
-    ),
+    await apiClient.get('/api/v1/member/common/me/info-reception-agreements'),
   );
 
-export const fetchCorporateManagerContact = async (apiClient, mbrNo) =>
+export const fetchCorporateManagerContact = async (apiClient) =>
   normalizeApiPayload(
-    await apiClient.get(`/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/contacts/manager`),
+    await apiClient.get('/api/v1/member/corporate/me/contacts/manager'),
   );
 
-export const updateCorporateMemberDetail = async (apiClient, mbrNo, payload) =>
+export const updateCorporateMemberDetail = async (apiClient, payload) =>
   normalizeApiPayload(
-    await apiClient.put(`/api/v1/member/corporate/${encodeURIComponent(mbrNo)}`, payload),
+    await apiClient.put('/api/v1/member/corporate/me', payload),
   );
 
 // 기업회원 정보와 정보수신 동의를 저장한다.
-export const updateCorporateMemberInfo = async (apiClient, mbrNo, payload) =>
+export const updateCorporateMemberInfo = async (apiClient, payload) =>
   normalizeApiPayload(
     await apiClient.put(
-      `/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/member-info`,
+      '/api/v1/member/corporate/me/member-info',
       payload,
     ),
   );
 
 // 개인회원 정보와 정보수신 동의를 저장한다.
-export const updateIndividualMemberInfo = async (apiClient, mbrNo, payload) =>
+export const updateIndividualMemberInfo = async (apiClient, payload) =>
   normalizeApiPayload(
     await apiClient.put(
-      `/api/v1/member/individual/${encodeURIComponent(mbrNo)}/member-info`,
+      '/api/v1/member/individual/me/member-info',
       payload,
     ),
   );

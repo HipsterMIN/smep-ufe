@@ -198,7 +198,6 @@ const UI_USR_W_411 = () => {
   const currentMode = useAuthStore((state) => state.currentMode);
   const authToken = useAuthStore((state) => state.token);
   const tokenPayload = decodeJwtPayload(authToken);
-  const [memberNo, setMemberNo] = useState('');
   const [formValues, setFormValues] = useState(EMPTY_FORM_VALUES);
   const [managerContact, setManagerContact] = useState(null);
   const [infoReceptionAgreements, setInfoReceptionAgreements] = useState(
@@ -214,13 +213,12 @@ const UI_USR_W_411 = () => {
   const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '회원정보변경';
 
   useEffect(() => {
-    const mbrNo = tokenPayload?.member_no || tokenPayload?.sub;
+    const currentTokenPayload = decodeJwtPayload(authToken);
 
-    if (!mbrNo || !currentMode) {
-      setMemberNo(mbrNo || '');
+    if (!authToken || !currentMode) {
       setFormValues({
         ...EMPTY_FORM_VALUES,
-        loginId: tokenPayload?.login_id || '',
+        loginId: currentTokenPayload?.login_id || '',
       });
       setManagerContact(null);
       setInfoReceptionAgreements(DEFAULT_INFO_RECEPTION_AGREEMENTS);
@@ -228,18 +226,17 @@ const UI_USR_W_411 = () => {
     }
 
     let active = true;
-    setMemberNo(mbrNo);
     setManagerContact(null);
     setInfoReceptionAgreements(DEFAULT_INFO_RECEPTION_AGREEMENTS);
 
     // 회원번호로 기업회원 상세정보를 조회한다.
     const loadCorporateMemberDetail = async () => {
       try {
-        const detail = await fetchCorporateMemberDetail(apiClient, mbrNo);
+        const detail = await fetchCorporateMemberDetail(apiClient);
         if (!active) {
           return;
         }
-        setFormValues(buildCorporateFormValues(detail, tokenPayload));
+        setFormValues(buildCorporateFormValues(detail, currentTokenPayload));
       } catch (error) {
         console.error('Failed to load corporate member detail:', error);
       }
@@ -248,11 +245,11 @@ const UI_USR_W_411 = () => {
     // 회원번호로 개인회원 상세정보를 조회한다.
     const loadIndividualMemberDetail = async () => {
       try {
-        const detail = await fetchIndividualMemberDetail(apiClient, mbrNo);
+        const detail = await fetchIndividualMemberDetail(apiClient);
         if (!active) {
           return;
         }
-        setFormValues(buildIndividualFormValues(detail, tokenPayload));
+        setFormValues(buildIndividualFormValues(detail, currentTokenPayload));
       } catch (error) {
         console.error('Failed to load individual member detail:', error);
       }
@@ -261,7 +258,7 @@ const UI_USR_W_411 = () => {
     // 회원번호로 기업관리자정보를 조회한다.
     const loadCorporateManagerContact = async () => {
       try {
-        const contact = await fetchCorporateManagerContact(apiClient, mbrNo);
+        const contact = await fetchCorporateManagerContact(apiClient);
         if (!active) {
           return;
         }
@@ -278,7 +275,7 @@ const UI_USR_W_411 = () => {
     // 회원번호로 정보수신 동의값을 조회한다.
     const loadMemberInfoReceptionAgreements = async () => {
       try {
-        const agreements = await fetchMemberInfoReceptionAgreements(apiClient, mbrNo);
+        const agreements = await fetchMemberInfoReceptionAgreements(apiClient);
         if (!active) {
           return;
         }
@@ -327,7 +324,7 @@ const UI_USR_W_411 = () => {
 
   // 저장 버튼 클릭 시 현재 회원유형에 맞는 회원정보와 정보수신 동의를 저장한다.
   const handleSave = async () => {
-    if (!memberNo) {
+    if (!authToken) {
       window.alert('회원번호를 확인할 수 없습니다.');
       return;
     }
@@ -340,11 +337,11 @@ const UI_USR_W_411 = () => {
     try {
       if (currentMode === 'CORPORATE') {
         const payload = buildCorporateMemberInfoUpdatePayload(formValues, infoReceptionAgreements);
-        const detail = await updateCorporateMemberInfo(apiClient, memberNo, payload);
+        const detail = await updateCorporateMemberInfo(apiClient, payload);
         setFormValues(buildCorporateFormValues(detail, tokenPayload));
       } else if (currentMode === 'INDIVIDUAL') {
         const payload = buildIndividualMemberInfoUpdatePayload(formValues, infoReceptionAgreements);
-        const detail = await updateIndividualMemberInfo(apiClient, memberNo, payload);
+        const detail = await updateIndividualMemberInfo(apiClient, payload);
         setFormValues(buildIndividualFormValues(detail, tokenPayload));
       } else {
         throw new Error('지원하지 않는 회원유형입니다.');
