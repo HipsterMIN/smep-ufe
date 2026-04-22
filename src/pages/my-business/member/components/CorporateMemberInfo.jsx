@@ -3,18 +3,13 @@ import {
   keepDigitsOnly,
   removeDigits,
   removeKoreanCharacters,
+  renderManagerPhoneNumber,
 } from '@utils/commonUtils.js';
 
-import { formatPhoneNumber } from '../memberUtils.js';
 
 const renderManagerValue = (value) => {
   const normalized = String(value ?? '').trim();
   return normalized || '--';
-};
-
-const renderManagerPhoneNumber = (value) => {
-  const formatted = formatPhoneNumber(value);
-  return formatted === '-' ? '--' : formatted;
 };
 
 const CorporateMemberInfo = ({

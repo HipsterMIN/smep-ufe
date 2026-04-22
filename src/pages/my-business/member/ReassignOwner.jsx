@@ -7,9 +7,11 @@ import SideNavigation from '@components/ui/SideNavigation.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import {
-  formatPhoneNumber,
   normalizeApiPayload,
-} from './memberUtils.js';
+} from '@/pages/my-business/member/memberUtils.js';
+import {
+  formatPhoneNumber,
+} from '@utils/commonUtils.js';
 import ChangeManager from './components/ChangeManager.jsx';
 import JoinOwner from './components/JoinOwner.jsx';
 

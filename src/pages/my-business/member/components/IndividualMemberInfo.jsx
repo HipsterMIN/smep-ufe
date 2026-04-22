@@ -1,7 +1,7 @@
 
 import {
   keepDigitsOnly,
-  removeKoreanCharacters,
+  removeKoreanCharacters, renderManagerPhoneNumber,
 } from '@utils/commonUtils.js';
 
 
@@ -48,7 +48,7 @@ const IndividualMemberInfo = ({
                 <label htmlFor="input_01">이름</label>
               </dt>
               <dd className="form-row-content">
-                <span className="text-value">{formValues.rprsvNm}</span>
+                <span className="text-value">{formValues.mbrNm}</span>
                 <button type="button" className="krds-btn primary small ml-8">변경</button>
               </dd>
             </div>
@@ -57,7 +57,7 @@ const IndividualMemberInfo = ({
                 <label htmlFor="input_01">휴대전화번호</label>
               </dt>
               <dd className="form-row-content">
-                <span className="text-value">{formValues.rprsTelno}</span>
+                <span className="text-value">{renderManagerPhoneNumber(formValues.indvMblTelno)}</span>
                 <button type="button" className="krds-btn primary small ml-8">변경</button>
               </dd>
             </div>
@@ -67,7 +67,7 @@ const IndividualMemberInfo = ({
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper row-small">
-                  <select className="krds-form-select small w-120" id="select_01" value={formValues.rprsTelnoParts[0]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 0, event.target.value)}>
+                  <select className="krds-form-select small w-120" id="select_01" value={formValues.indvGnrlTelnoParts[0]} onChange={(event) => setPhonePartValue('indvGnrlTelnoParts', 0, event.target.value)}>
                     <option value="">선택</option>
                     <option value="02">서울 02</option>
                     <option value="051">부산 051</option>
@@ -91,9 +91,9 @@ const IndividualMemberInfo = ({
                     <option value="050">일반 050</option>
                   </select>
                   <span>-</span>
-                  <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 중간번호 입력" maxLength={4} value={formValues.rprsTelnoParts[1]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 1, keepDigitsOnly(event.target.value))} />
+                  <input type="text" className="krds-input small w-120" placeholder="0000" title="전화번호 중간번호 입력" maxLength={4} value={formValues.indvGnrlTelnoParts[1]} onChange={(event) => setPhonePartValue('indvGnrlTelnoParts', 1, keepDigitsOnly(event.target.value))} />
                   <span>-</span>
-                  <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 끝번호 입력" maxLength={4} value={formValues.rprsTelnoParts[2]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 2, keepDigitsOnly(event.target.value))} />
+                  <input type="text" className="krds-input small w-120" placeholder="0000" title="전화번호 끝번호 입력" maxLength={4} value={formValues.indvGnrlTelnoParts[2]} onChange={(event) => setPhonePartValue('indvGnrlTelnoParts', 2, keepDigitsOnly(event.target.value))} />
                 </div>
               </dd>
             </div>
@@ -121,8 +121,11 @@ const IndividualMemberInfo = ({
             </div>
           </dl>
         </div>
+        <ul className="info-list-point">
+          <li><i className="svg-icon ico-checkbox"></i>이름 변경은 법원의 허가를 통해 개명하신 경우 변경이 가능하며, 개명한 이름으로 개통한 본인 휴대전화로만 본인 인증이 가능합니다.
+            이동통신사 및 신용평가기관 모두 변경된 이름으로 등록되어 있는지 확인 후 진행해 주세요.</li>
+        </ul>
       </div>
-
     </>
   );
 };

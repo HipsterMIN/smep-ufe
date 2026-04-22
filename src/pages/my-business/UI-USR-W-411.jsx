@@ -10,10 +10,12 @@ import IndividualMemberInfo from '@pages/my-business/member/components/Individua
 import {
   fetchCorporateManagerContact,
   fetchCorporateMemberDetail,
+  fetchIndividualMemberDetail,
   fetchMemberInfoReceptionAgreements,
   normalizeDigits,
   updateCorporateMemberInfo,
-} from './member/memberUtils.js';
+  updateIndividualMemberInfo,
+} from '@/pages/my-business/member/memberUtils.js';
 
 const INFO_RECEPTION_MNS_CODES = {
   message: 'A211',
@@ -39,6 +41,10 @@ const EMPTY_FORM_VALUES = {
   brno: '',
   crno: '',
   rprsvNm: '',
+  rprsTelno: '',
+  indvMblTelno: '',
+  indvGnrlTelno: '',
+  indvGnrlTelnoParts: ['', '', ''],
   rprsTelnoParts: ['', '', ''],
   rprsFxnoParts: ['', '', ''],
   emailLocal: '',
@@ -48,6 +54,8 @@ const EMPTY_FORM_VALUES = {
   entDaddr: '',
   hmpgAddr: '',
 };
+
+
 
 // JWT payload를 디코딩해 회원번호와 로그인 아이디 claim을 읽는다.
 const decodeJwtPayload = (token) => {
@@ -114,8 +122,8 @@ const splitEmail = (value) => {
   return [localPart || '', domainParts.join('@') || ''];
 };
 
-// 회원 상세 응답을 화면 입력값 상태로 변환한다.
-const buildFormValues = (detail, tokenPayload) => {
+// 기업회원 상세 응답을 화면 입력값 상태로 변환한다.
+const buildCorporateFormValues = (detail, tokenPayload) => {
   const [emailLocal, emailDomain] = splitEmail(detail?.emlAddr);
   return {
     ...EMPTY_FORM_VALUES,
@@ -124,7 +132,7 @@ const buildFormValues = (detail, tokenPayload) => {
     brno: detail?.brno || '',
     crno: detail?.crno || '',
     rprsvNm: detail?.rprsvNm || '',
-    rprsTelno: detail?.rprsTelno,
+    rprsTelno: detail?.rprsTelno || '',
     rprsTelnoParts: splitPhoneNumber(detail?.rprsTelno),
     rprsFxnoParts: splitPhoneNumber(detail?.rprsFxno),
     emailLocal,
@@ -133,6 +141,20 @@ const buildFormValues = (detail, tokenPayload) => {
     entAddr: detail?.entAddr || '',
     entDaddr: detail?.entDaddr || '',
     hmpgAddr: detail?.hmpgAddr || '',
+  };
+};
+
+// 개인회원 상세 응답을 화면 입력값 상태로 변환한다.
+const buildIndividualFormValues = (detail, tokenPayload) => {
+  const [emailLocal, emailDomain] = splitEmail(detail?.indvEmlAddr);
+  return {
+    ...EMPTY_FORM_VALUES,
+    loginId: tokenPayload?.login_id || '',
+    mbrNm: detail?.mbrNm || '',
+    indvMblTelno: detail?.indvMblTelno || '',
+    indvGnrlTelnoParts: splitPhoneNumber(detail?.indvGnrlTelno),
+    emailLocal,
+    emailDomain,
   };
 };
 
@@ -172,7 +194,7 @@ const buildInfoReceptionAgreementPayload = (agreements) =>
   }));
 
 // 화면 입력값을 기업회원 정보 저장 payload로 변환한다.
-const buildMemberInfoUpdatePayload = (values, agreements) => ({
+const buildCorporateMemberInfoUpdatePayload = (values, agreements) => ({
   rprsvNm: values.rprsvNm,
   rprsTelno: joinPhoneNumberParts(values.rprsTelnoParts),
   rprsFxno: joinPhoneNumberParts(values.rprsFxnoParts),
@@ -184,10 +206,21 @@ const buildMemberInfoUpdatePayload = (values, agreements) => ({
   infoReceptionAgreements: buildInfoReceptionAgreementPayload(agreements),
 });
 
+// 화면 입력값을 개인회원 정보 저장 payload로 변환한다.
+const buildIndividualMemberInfoUpdatePayload = (values, agreements) => ({
+  indvGnrlTelno: joinPhoneNumberParts(values.indvGnrlTelnoParts),
+  indvEmlAddr: joinEmailParts(values.emailLocal, values.emailDomain),
+  zip: values.zip,
+  mbrAddr: values.mbrAddr || values.entAddr,
+  mbrDaddr: values.mbrDaddr || values.entDaddr,
+  infoReceptionAgreements: buildInfoReceptionAgreementPayload(agreements),
+});
+
 const UI_USR_W_411 = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const authToken = useAuthStore((state) => state.token);
+  const currentMode = useAuthStore((state) => state.currentMode);
   const [memberNo, setMemberNo] = useState('');
   const [formValues, setFormValues] = useState(EMPTY_FORM_VALUES);
   const [managerContact, setManagerContact] = useState(null);
@@ -207,12 +240,12 @@ const UI_USR_W_411 = () => {
     const tokenPayload = decodeJwtPayload(authToken);
     const mbrNo = tokenPayload?.member_no || tokenPayload?.sub;
 
-    if (!mbrNo) {
-      setMemberNo('');
-      setFormValues((currentValues) => ({
-        ...currentValues,
+    if (!mbrNo || !currentMode) {
+      setMemberNo(mbrNo || '');
+      setFormValues({
+        ...EMPTY_FORM_VALUES,
         loginId: tokenPayload?.login_id || '',
-      }));
+      });
       setManagerContact(null);
       setInfoReceptionAgreements(DEFAULT_INFO_RECEPTION_AGREEMENTS);
       return;
@@ -230,9 +263,22 @@ const UI_USR_W_411 = () => {
         if (!active) {
           return;
         }
-        setFormValues(buildFormValues(detail, tokenPayload));
+        setFormValues(buildCorporateFormValues(detail, tokenPayload));
       } catch (error) {
         console.error('Failed to load corporate member detail:', error);
+      }
+    };
+
+    // 회원번호로 개인회원 상세정보를 조회한다.
+    const loadIndividualMemberDetail = async () => {
+      try {
+        const detail = await fetchIndividualMemberDetail(apiClient, mbrNo);
+        if (!active) {
+          return;
+        }
+        setFormValues(buildIndividualFormValues(detail, tokenPayload));
+      } catch (error) {
+        console.error('Failed to load individual member detail:', error);
       }
     };
 
@@ -270,14 +316,19 @@ const UI_USR_W_411 = () => {
       }
     };
 
-    loadCorporateMemberDetail();
-    loadCorporateManagerContact();
+    if (currentMode === 'CORPORATE') {
+      loadCorporateMemberDetail();
+      loadCorporateManagerContact();
+    }
+    if (currentMode === 'INDIVIDUAL') {
+      loadIndividualMemberDetail();
+    }
     loadMemberInfoReceptionAgreements();
 
     return () => {
       active = false;
     };
-  }, [authToken]);
+  }, [authToken, currentMode]);
 
   // 단일 정보수신 동의 radio 값을 갱신한다.
   const setInfoReceptionAgreement = (infoRcptnMnsCd, infoRcptnAgreYn) => {
@@ -298,21 +349,34 @@ const UI_USR_W_411 = () => {
     }));
   };
 
-  // 저장 버튼 클릭 시 기업회원 정보와 정보수신 동의를 저장한다.
+  // 저장 버튼 클릭 시 현재 회원유형에 맞는 회원정보와 정보수신 동의를 저장한다.
   const handleSave = async () => {
     if (!memberNo) {
       window.alert('회원번호를 확인할 수 없습니다.');
       return;
     }
+    if (!currentMode) {
+      window.alert('회원유형을 확인할 수 없습니다.');
+      return;
+    }
 
     setSaving(true);
     try {
-      const payload = buildMemberInfoUpdatePayload(formValues, infoReceptionAgreements);
-      const detail = await updateCorporateMemberInfo(apiClient, memberNo, payload);
-      setFormValues(buildFormValues(detail, decodeJwtPayload(authToken)));
+      const tokenPayload = decodeJwtPayload(authToken);
+      if (currentMode === 'CORPORATE') {
+        const payload = buildCorporateMemberInfoUpdatePayload(formValues, infoReceptionAgreements);
+        const detail = await updateCorporateMemberInfo(apiClient, memberNo, payload);
+        setFormValues(buildCorporateFormValues(detail, tokenPayload));
+      } else if (currentMode === 'INDIVIDUAL') {
+        const payload = buildIndividualMemberInfoUpdatePayload(formValues, infoReceptionAgreements);
+        const detail = await updateIndividualMemberInfo(apiClient, memberNo, payload);
+        setFormValues(buildIndividualFormValues(detail, tokenPayload));
+      } else {
+        throw new Error('지원하지 않는 회원유형입니다.');
+      }
       window.alert('저장되었습니다.');
     } catch (error) {
-      console.error('Failed to update corporate member info:', error);
+      console.error('Failed to update member info:', error);
       window.alert(error?.message || '저장에 실패했습니다.');
     } finally {
       setSaving(false);
@@ -336,17 +400,19 @@ const UI_USR_W_411 = () => {
             <i className="svg-icon ico-checkbox"></i>
           </span>
           회원정보는 개인정보처리방침에 따라 안전하게 보호되며, 회원님의 명백한 동의 없이 공개 또는 제 3자에게 제공되지 않습니다.</p>
-        {/* CorporateMemberInfo or IndividualMemberInfo */}
-        {/*<CorporateMemberInfo
-          formValues={formValues}
-          setFormValues={setFormValues}
-          managerContact={managerContact}
-        />*/}
-        <CorporateMemberInfo
-          formValues={formValues}
-          setFormValues={setFormValues}
-          managerContact={managerContact}
-        />
+        {currentMode === 'CORPORATE' && (
+          <CorporateMemberInfo
+            formValues={formValues}
+            setFormValues={setFormValues}
+            managerContact={managerContact}
+          />
+        )}
+        {currentMode === 'INDIVIDUAL' && (
+          <IndividualMemberInfo
+            formValues={formValues}
+            setFormValues={setFormValues}
+          />
+        )}
 
         {/* TODO 구현예정 */}
         {/*<div className="conts-wrap mt-64">
