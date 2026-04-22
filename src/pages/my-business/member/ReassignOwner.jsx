@@ -49,15 +49,15 @@ const checkCorporateManagerChangeAuth = async (entPicMbrNo) =>
 
 const changeCorporateManager = async (entPicMbrNo) =>
   normalizeApiPayload(
-    await apiClient.put('/api/v1/member/corporate/me/contacts/manager', {
+    await apiClient.post('/api/v1/member/corporate/me/contacts/manager', {
       entPicMbrNo,
     }),
   );
 
 const deleteCorporateContacts = async (entPicMbrNos) =>
   normalizeApiPayload(
-    await apiClient.delete('/api/v1/member/corporate/me/contacts', {
-      body: { entPicMbrNos },
+    await apiClient.post('/api/v1/member/corporate/me/contacts/delete', {
+      entPicMbrNos,
     }),
   );
 
