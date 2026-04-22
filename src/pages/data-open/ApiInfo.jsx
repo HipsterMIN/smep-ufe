@@ -13,7 +13,13 @@ const ApiInfo = () => {
   // ✅ 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+  const handleGuideDownload = () => {
+    const atchFileId = '20260422195859_03121';
+    const atchFileSn = 1;
 
+    // 게시판 상세 페이지에서 사용한 것과 동일한 API 경로 사용
+    window.location.href = `${apiBaseUrl}/api/v1/files/download/${atchFileId}/${atchFileSn}`;
+  };
   return (
     <>
       <SideNavigation
@@ -253,8 +259,8 @@ const ApiInfo = () => {
 
         {/* bottom btn */}
         <div className="onboard-btm-btngroup bt-0 btn-single">
-          <div> 
-            <button type="button" className="krds-btn xlarge" onClick={() => window.location.href = '/main/user/file/중소벤처24_API개발가이드_V2.zip'}>
+          <div>
+            <button type="button" className="krds-btn xlarge" onClick={handleGuideDownload}>
             {/*<button type="button" className="krds-btn xlarge" onClick={() => window.location.href = `${apiBaseUrl}/api/v1/files/download/${file.atchFileId}/${file.atchFileSn}`}>*/}
               API 가이드
             </button>
@@ -263,7 +269,7 @@ const ApiInfo = () => {
 
 
 
-      </div> 
+      </div>
     </>
   );
 };

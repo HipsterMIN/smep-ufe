@@ -215,6 +215,16 @@
   -webkit-mask-image: url(./img/component/icon/ico_login.svg);
   mask-image: url(./img/component/icon/ico_login.svg);
 }
+.svg-icon.ico-onepass {
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: contain;
+  -webkit-mask-image: url(./img/component/icon/ico_integrated_member.svg);
+  mask-image: url(./img/component/icon/ico_integrated_member.svg);
+}
 .svg-icon.ico-func {
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center center;
@@ -5120,6 +5130,16 @@ caption {
   mask-size: contain;
   -webkit-mask-image: url(./img/component/icon/ico_login.svg);
   mask-image: url(./img/component/icon/ico_login.svg);
+}
+#krds-header .header-container .btn-navi.onepass::before {
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: contain;
+  -webkit-mask-image: url(./img/component/icon/ico_integrated_member.svg);
+  mask-image: url(./img/component/icon/ico_integrated_member.svg);
 }
 #krds-header .header-container .btn-navi.join::before {
   -webkit-mask-repeat: no-repeat;

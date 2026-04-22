@@ -12,6 +12,7 @@ export default function HeaderUserMenu({
   isExtendingSession,
   onExtendSession,
   onLogin,
+  onOnePassLogin,
   onLogout,
   onMyPage,
   onSwitchContext,
@@ -25,6 +26,11 @@ export default function HeaderUserMenu({
 
     return (
       <>
+        {/* 통합로그인은 로그인 상태와 무관하게 같은 진입점을 사용한다. */}
+        <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
+          중기원패스 통합로그인
+        </button>
+
         {/* <div className="user-info-wrap">
           <span className="user-name">
             {displayName}
@@ -101,6 +107,10 @@ export default function HeaderUserMenu({
 
   return (
     <>
+      {/* 통합로그인은 로그인 상태와 무관하게 같은 진입점을 사용한다. */}
+      <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
+        중기원패스 통합로그인
+      </button>
       <button type="button" className="btn-navi login on-mobile-none" onClick={onLogin}>
         로그인
       </button>
