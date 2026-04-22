@@ -12,8 +12,11 @@ export function onePassJoin() {
   const state = crypto.randomUUID();
   sessionStorage.setItem('keycloak_state', state);
 
+  // 가입 유도 플로우도 /sso callback에서 같은 state를 다시 받아 비교해야 한다.
+  // 저장만 하고 URL에 태우지 않으면 callback의 invalid-state 분기에 바로 걸린다.
   let params = new URLSearchParams({
-    redirect_uri: REDIRECT_URI
+    redirect_uri: REDIRECT_URI,
+    state: state,
   });
 
   let authUrl = `${KEYCLOAK_JOIN}?${params}`;
@@ -41,6 +44,5 @@ export function onePassGetAuthCode() {
 
   window.location.href = authUrl;
 }
-
 
 
