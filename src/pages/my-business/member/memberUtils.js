@@ -113,13 +113,13 @@ export const fetchCorporateManagerContact = async (apiClient) =>
 
 export const updateCorporateMemberDetail = async (apiClient, payload) =>
   normalizeApiPayload(
-    await apiClient.put('/api/v1/member/corporate/me', payload),
+    await apiClient.post('/api/v1/member/corporate/me', payload),
   );
 
 // 기업회원 정보와 정보수신 동의를 저장한다.
 export const updateCorporateMemberInfo = async (apiClient, payload) =>
   normalizeApiPayload(
-    await apiClient.put(
+    await apiClient.post(
       '/api/v1/member/corporate/me/member-info',
       payload,
     ),
@@ -128,7 +128,7 @@ export const updateCorporateMemberInfo = async (apiClient, payload) =>
 // 개인회원 정보와 정보수신 동의를 저장한다.
 export const updateIndividualMemberInfo = async (apiClient, payload) =>
   normalizeApiPayload(
-    await apiClient.put(
+    await apiClient.post(
       '/api/v1/member/individual/me/member-info',
       payload,
     ),
