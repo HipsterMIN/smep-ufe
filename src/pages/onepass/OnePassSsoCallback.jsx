@@ -54,31 +54,22 @@ const OnePassSsoCallback = () => {
     // queryKeys, 존재 여부, 길이, state 일치 여부를 보면 "무슨 값이 빠졌는지/어디서 틀어졌는지"를 추적할 수 있다.
     console.log(`${LOG_PREFIX} parsed callback params`, callbackState);
 
-    // 원본 sso.js와 같은 수준의 최소 검증만 남긴다.
-    // callback query 의 state 가 없거나 sessionStorage 에 저장한 값과 다르면 잘못된 왕복으로 보고 즉시 로그인으로 보낸다.
-    if (!state || state !== savedState) {
-      // warn 레벨을 쓰는 이유는 "실패"라기보다 검증 탈락(branch reject)임을 구분하기 위해서다.
-      // 여기선 missingState 와 mismatchedState 를 먼저 보면 된다.
-      console.warn(`${LOG_PREFIX} invalid state branch`, {
-        ...callbackState,
-        action: 'clear-session-state-and-redirect-login',
-      });
-      window.sessionStorage.removeItem(KEYCLOAK_STATE_KEY);
-      console.log(`${LOG_PREFIX} session state removed`, {
-        key: KEYCLOAK_STATE_KEY,
-      });
-      alert('원패스 인증 요청이 올바르지 않습니다. 다시 시도해 주세요.');
-      console.log(`${LOG_PREFIX} navigate login`, {
-        to: '/service/login',
-        reason: 'invalid-state',
-      });
-      navigate('/service/login', { replace: true });
-      return;
-    }
 
-    // 원본 sso.js와 맞추기 위해 state 검증 직후 sessionStorage 값을 지운다.
-    // 이후 code 가 없으면 alert만 띄우고 현재 화면에 남는다.
-    window.sessionStorage.removeItem(KEYCLOAK_STATE_KEY);
+    // warn 레벨을 쓰는 이유는 "실패"라기보다 검증 탈락(branch reject)임을 구분하기 위해서다.
+    // 여기선 missingState 와 mismatchedState 를 먼저 보면 된다.
+    console.warn(`${LOG_PREFIX} invalid state branch`, {
+    ...callbackState,
+    action: 'clear-session-state-and-redirect-login',
+    });
+    console.log(`${LOG_PREFIX} session state removed`, {
+    key: KEYCLOAK_STATE_KEY,
+    });
+    console.log(`${LOG_PREFIX} navigate login`, {
+    to: '/service/login',
+    reason: 'invalid-state',
+    });
+    navigate('/service/login', { replace: true });
+
     console.log(`${LOG_PREFIX} session state removed`, {
       key: KEYCLOAK_STATE_KEY,
     });
@@ -93,7 +84,7 @@ const OnePassSsoCallback = () => {
         ...callbackState,
         action: 'alert-and-stop',
       });
-      alert('원패스 인증 코드가 없습니다. 다시 시도해 주세요.');
+      alert('코드가 없습니다.');
       return;
     }
 
@@ -135,7 +126,7 @@ const OnePassSsoCallback = () => {
           status: error?.status ?? null,
           hasData: Boolean(error?.data),
         });
-        alert('원패스 SSO 로그인에 실패했습니다. 다시 시도해 주세요.');
+        alert('api/v1/auth/keycloak/callback 호출에 실패했습니다. 다시 시도해 주세요.');
         console.log(`${LOG_PREFIX} navigate login`, {
           to: '/service/login',
           reason: 'callback-api-failed',
