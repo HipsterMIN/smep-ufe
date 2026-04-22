@@ -146,7 +146,7 @@ const UI_USR_R_002 = () => {
                   </div>
                 </div>
                 <div className="sns-login">
-                  <div className="login-sub-tit">SNS 로그인</div>
+                  <div className="login-sub-tit"><span>SNS 로그인</span></div>
                   <div className="sns-login-btns">
                     <button type="button" className="krds-btn large tertiary">
                       <i className="ico-google"></i>

@@ -157,11 +157,11 @@ export const fetchCorporateMemberDetail = async (apiClient, mbrNo) =>
     await apiClient.get(`/api/v1/member/corporate/${encodeURIComponent(mbrNo)}`),
   );
 
-// 기업회원 정보수신 동의 목록을 조회한다.
-export const fetchCorporateMemberInfoReceptionAgreements = async (apiClient, mbrNo) =>
+// 회원 정보수신 동의 목록을 조회한다.
+export const fetchMemberInfoReceptionAgreements = async (apiClient, mbrNo) =>
   normalizeApiPayload(
     await apiClient.get(
-      `/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/info-reception-agreements`,
+      `/api/v1/member/common/${encodeURIComponent(mbrNo)}/info-reception-agreements`,
     ),
   );
 

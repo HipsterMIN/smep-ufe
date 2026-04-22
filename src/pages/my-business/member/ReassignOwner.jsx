@@ -9,7 +9,7 @@ import { api as apiClient } from '@lib/apiClient.js';
 import {
   formatPhoneNumber,
   normalizeApiPayload,
-} from './companyMemberUtils.js';
+} from './memberUtils.js';
 import ChangeManager from './components/ChangeManager.jsx';
 import JoinOwner from './components/JoinOwner.jsx';
 

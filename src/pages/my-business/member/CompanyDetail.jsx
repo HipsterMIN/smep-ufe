@@ -17,7 +17,7 @@ import {
   formatYmd,
   getCodeLabel,
   getKsicTopLevelLabel,
-} from './companyMemberUtils.js';
+} from './memberUtils.js';
 
 // 로그인/store 정리 전까지 기업정보 화면은 전달된 회원번호가 없으면 임시 폴백 회원번호로 진입을 보장한다.
 const TEMP_FALLBACK_MBR_NO = '2025120500136492';

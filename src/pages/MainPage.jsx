@@ -1099,15 +1099,18 @@ const MainPage = () => {
                               {item.elpblYn === 'Y' && (
                                 <span className="krds-badge bg-light-primary">전자증명</span>
                               )}
+                              {item.elpblYn !== 'Y' && (
+                                <span className="krds-badge"></span>
+                              )}
                             </div>
                             <div className="card-body">
                               <div className="c-text">
                                 <p className="c-tit no-icon no-link">
-                                  <span className="span onellipsis-2">
+                                  <span className="onellipsis-1">
                                     {item.prdocTtl}
                                   </span>
                                 </p>
-                                <p className="c-ico-txt">
+                                <p className="c-ico-txt onellipsis-2">
                                   <i className="svg-icon ico-build"></i>{' '}
                                   {item.issuInstNm || item.jrsdInstNm}
                                 </p>
@@ -1122,7 +1125,7 @@ const MainPage = () => {
                                     )
                                   }
                                 >
-                                  발급받기11
+                                  발급받기
                                 </button>
                               </div>
                             </div>

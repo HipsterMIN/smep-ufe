@@ -15,7 +15,7 @@ import {
   parseDateFromYmd,
   toYmd,
   updateCorporateMemberDetail,
-} from './companyMemberUtils.js';
+} from './memberUtils.js';
 
 // 로그인/store 정리 전까지 기업정보 수정 화면은 전달된 회원번호가 없으면 임시 폴백 회원번호를 그대로 사용한다.
 const TEMP_FALLBACK_MBR_NO = '2025120500136492';

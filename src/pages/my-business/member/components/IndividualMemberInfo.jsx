@@ -1,0 +1,130 @@
+
+import {
+  keepDigitsOnly,
+  removeKoreanCharacters,
+} from '@utils/commonUtils.js';
+
+
+
+const IndividualMemberInfo = ({
+  formValues,
+  setFormValues,
+}) => {
+  const setFormValue = (field, value) => {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      [field]: value,
+    }));
+  };
+
+  const setPhonePartValue = (field, index, value) => {
+    setFormValues((currentValues) => {
+      const nextParts = [...currentValues[field]];
+      nextParts[index] = value;
+      return {
+        ...currentValues,
+        [field]: nextParts,
+      };
+    });
+  };
+
+  return (
+    <>
+      {/* 회원정보 변경 */}
+      <div className="conts-wrap mt-64">
+        <div className="on-form-register">
+          <h3 className="form-title">회원정보 변경</h3>
+          <dl className="on-form-row large">
+            <div className="form-row-item">
+              <dt className="form-row-label">
+                <span className="form-tit">아이디</span>
+              </dt>
+              <dd className="form-row-content">
+                <span className="text-value">{formValues.loginId}</span>
+              </dd>
+            </div>
+            <div className="form-row-item">
+              <dt className="form-row-label">
+                <label htmlFor="input_01">이름</label>
+              </dt>
+              <dd className="form-row-content">
+                <span className="text-value">{formValues.rprsvNm}</span>
+                <button type="button" className="krds-btn primary small ml-8">변경</button>
+              </dd>
+            </div>
+            <div className="form-row-item">
+              <dt className="form-row-label">
+                <label htmlFor="input_01">휴대전화번호</label>
+              </dt>
+              <dd className="form-row-content">
+                <span className="text-value">{formValues.rprsTelno}</span>
+                <button type="button" className="krds-btn primary small ml-8">변경</button>
+              </dd>
+            </div>
+            <div className="form-row-item">
+              <dt className="form-row-label">
+                <label htmlFor="select_01">전화번호</label>
+              </dt>
+              <dd className="form-row-content">
+                <div className="form-wrapper row-small">
+                  <select className="krds-form-select small w-120" id="select_01" value={formValues.rprsTelnoParts[0]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 0, event.target.value)}>
+                    <option value="">선택</option>
+                    <option value="02">서울 02</option>
+                    <option value="051">부산 051</option>
+                    <option value="053">대구 053</option>
+                    <option value="032">인천 032</option>
+                    <option value="062">광주 062</option>
+                    <option value="042">대전 042</option>
+                    <option value="052">울산 052</option>
+                    <option value="044">세종 044</option>
+                    <option value="031">경기 031</option>
+                    <option value="033">강원 033</option>
+                    <option value="043">충북 043</option>
+                    <option value="041">충남 041</option>
+                    <option value="063">전북 063</option>
+                    <option value="061">전남 061</option>
+                    <option value="054">경북 054</option>
+                    <option value="055">경남 055</option>
+                    <option value="064">제주 064</option>
+                    <option value="070">일반 070</option>
+                    <option value="060">일반 060</option>
+                    <option value="050">일반 050</option>
+                  </select>
+                  <span>-</span>
+                  <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 중간번호 입력" maxLength={4} value={formValues.rprsTelnoParts[1]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 1, keepDigitsOnly(event.target.value))} />
+                  <span>-</span>
+                  <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 끝번호 입력" maxLength={4} value={formValues.rprsTelnoParts[2]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 2, keepDigitsOnly(event.target.value))} />
+                </div>
+              </dd>
+            </div>
+            <div className="form-row-item">
+              <dt className="form-row-label">
+                <label htmlFor="input_05">이메일</label>
+              </dt>
+              <dd className="form-row-content">
+                <div className="form-wrapper row-small">
+                  <input type="text" id="input_05" className="krds-input small w-140" placeholder="0000" title="이메일 아이디 입력" maxLength={64} value={formValues.emailLocal} onChange={(event) => setFormValue('emailLocal', removeKoreanCharacters(event.target.value))}/>
+                  <span>@</span>
+                  <input type="text" className="krds-input small w-140" placeholder="0000" title="이메일 도메인 입력" maxLength={255} value={formValues.emailDomain} onChange={(event) => setFormValue('emailDomain', removeKoreanCharacters(event.target.value))} />
+                  <span>-</span>
+                  <select className="krds-form-select small w-140" title="이메일 선택" onChange={(event) => setFormValue('emailDomain', removeKoreanCharacters(event.target.value))}>
+                    <option value="">직접입력</option>
+                    <option value="naver.com">naver</option>
+                    <option value="daum.net">daum</option>
+                    <option value="gmail.com">gmail</option>
+                    <option value="hotmail.com">hotmail</option>
+                    <option value="nate.com">nate</option>
+                    <option value="yahoo.com">yahoo</option>
+                  </select>
+                </div>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+    </>
+  );
+};
+
+export default IndividualMemberInfo;

@@ -1,6 +1,6 @@
 import Popup from '@components/ui/Popup.jsx';
 
-import { formatPhoneNumber } from '../companyMemberUtils.js';
+import { formatPhoneNumber } from '../memberUtils.js';
 
 const HELD_REASON_TEXT = '확인 대기';
 

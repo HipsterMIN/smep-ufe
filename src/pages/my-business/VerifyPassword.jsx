@@ -214,7 +214,7 @@ const VerifyPassword = ({
               <li role="listitem">비밀번호는 타인에게 노출되지 않도록 주의해 주세요.</li>
             </ul>
 
-            {/* 키보드 보안 적용시 주석해제하여 구현 */}
+            {/* TODO 키보드 보안 적용시 주석해제하여 구현 */}
             {/*<div className="form-group krds-check-area">
               <div className="krds-form-check">
                 <input type="checkbox" name="keyboard_security" id="keyboard_security" />
