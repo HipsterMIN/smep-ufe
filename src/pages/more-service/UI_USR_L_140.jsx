@@ -578,6 +578,54 @@ const UI_USR_L_140 = () => {
     <>
       <div className="search-top-box mt-40">
         {renderSearchForm()}
+        
+        {/** 아래 퍼블리싱 수정본 보시고 참고하시어 개발에 이용 부탁드립니다. */}
+        {/* <div className="sch-form-wrap">
+          <select className="krds-form-select" value={sdoCd} onChange={handleSdoCdChange}>
+            <option value="">전국</option>
+            {sidoList.map((item) => (
+              <option key={item.code} value={item.code}>{item.name}</option>
+            ))}
+          </select>
+
+          <select
+            className="krds-form-select"
+            value={sigunguCd}
+            onChange={(e) => setSigunguCd(e.target.value)}
+            disabled={isSigunguDisabled}
+          >
+            <option value="">시군구선택</option>
+            {sigunguList.map((item) => (
+              <option key={item.code} value={item.code}>{item.name}</option>
+            ))}
+          </select>
+
+          <select
+            className="krds-form-select"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
+            <option value="all">전체</option>
+            <option value="entNm">기업명</option>
+            <option value="cstmTelgmEntFldNm">업종명</option>
+          </select>
+
+          <div className="sch-input w-322">
+            <input
+              type="text"
+              className="krds-input"
+              placeholder="검색어를 입력하세요"
+              title="검색어 입력"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <button type="button" className="krds-btn medium icon ico-search" onClick={handleSearch}>
+              <span className="sr-only">검색</span>
+              <i className="svg-icon ico-sch"></i>
+            </button>
+          </div>
+        </div> */}
       </div>
 
       <div className="search-list-top">
