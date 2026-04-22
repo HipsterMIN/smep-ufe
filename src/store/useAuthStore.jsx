@@ -73,6 +73,8 @@ export const useAuthStore = create(
             };
           const contextRole =
             safeProfile.contextRole || safeProfile.context_role || currentCompany?.role || null;
+          const intgMbrSwtcYn =
+            safeProfile.intgMbrSwtcYn || safeProfile.intg_mbr_swtc_yn || null;
 
           return {
             currentMode,
@@ -84,6 +86,7 @@ export const useAuthStore = create(
             companySize,
             user,
             contextRole,
+            intgMbrSwtcYn,
           };
         };
 
@@ -101,6 +104,7 @@ export const useAuthStore = create(
                 currentCompany: null,
                 linkedCompanies: [],
                 contextRole: null,
+                intgMbrSwtcYn: null,
                 bizno: null,
                 cmpNm: null,
                 companySize: null,
@@ -122,6 +126,7 @@ export const useAuthStore = create(
           currentCompany: null,
           linkedCompanies: [],
           contextRole: null,
+          intgMbrSwtcYn: null,
           bizno: null,
           cmpNm: null,
           companySize: null,
@@ -138,6 +143,7 @@ export const useAuthStore = create(
                 currentCompany: normalized.currentCompany,
                 linkedCompanies: normalized.linkedCompanies,
                 contextRole: normalized.contextRole,
+                intgMbrSwtcYn: normalized.intgMbrSwtcYn,
                 bizno: normalized.bizno,
                 cmpNm: normalized.cmpNm,
                 companySize: normalized.companySize,
@@ -158,6 +164,7 @@ export const useAuthStore = create(
                 currentCompany: normalized.currentCompany,
                 linkedCompanies: normalized.linkedCompanies,
                 contextRole: normalized.contextRole,
+                intgMbrSwtcYn: normalized.intgMbrSwtcYn,
                 bizno: normalized.bizno,
                 cmpNm: normalized.cmpNm,
                 companySize: normalized.companySize,
@@ -179,6 +186,7 @@ export const useAuthStore = create(
                 currentCompany: null,
                 linkedCompanies: [],
                 contextRole: null,
+                intgMbrSwtcYn: null,
                 bizno: null,
                 cmpNm: null,
                 companySize: null,

@@ -23,6 +23,7 @@ import { api as apiClient } from '@lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useAuthStore } from '@store/useAuthStore.jsx';
+import OnepassLoginConversionModal from '@pages/onepass/OnepassLoginConversionModal.jsx';
 
 const MAIN_MENU_IDS = {
   notice: 'M_PIIO_00101',
@@ -132,6 +133,8 @@ const stripHtmlTags = (value) => {
 const SEARCH_POPULAR_LIMIT = 5;
 const SEARCH_AUTOCOMPLETE_LIMIT = 8;
 const SEARCH_AUTOCOMPLETE_DEBOUNCE_MS = 250;
+const ONEPASS_CONVERSION_MODAL_DISMISSED_KEY =
+  '__onepass_conversion_modal_dismissed__';
 
 const parseSearchPayload = (payload) => {
   if (!payload) return null;
@@ -203,6 +206,7 @@ const MainPage = () => {
   const [isPopularLoading, setIsPopularLoading] = useState(false);
   const [isAutoLoading, setIsAutoLoading] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [isOnepassModalOpen, setIsOnepassModalOpen] = useState(false);
   const srchInputRef = useRef(null);
   const keyboardButtonRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -211,6 +215,8 @@ const MainPage = () => {
   const swiperRef = useRef(null);
   const latestAutoQueryRef = useRef('');
   const authToken = useAuthStore((state) => state.token);
+  const isLogin = useAuthStore((state) => state.isLogin);
+  const intgMbrSwtcYn = useAuthStore((state) => state.intgMbrSwtcYn);
   const isLoggedIn = Boolean(authToken);
 
   const showPopular = isFocused && searchQuery.trim() === '';
@@ -542,6 +548,30 @@ const MainPage = () => {
     };
   }, [isLoggedIn, pbancScrapTargetIds, policyScrapTargetIds]);
 
+  useEffect(() => {
+    if (!isLogin) {
+      window.sessionStorage.removeItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY);
+      setIsOnepassModalOpen(false);
+      return;
+    }
+
+    if (intgMbrSwtcYn !== 'N') {
+      setIsOnepassModalOpen(false);
+      return;
+    }
+
+    const isDismissed =
+      window.sessionStorage.getItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY) ===
+      '1';
+
+    if (isDismissed) {
+      setIsOnepassModalOpen(false);
+      return;
+    }
+
+    setIsOnepassModalOpen(true);
+  }, [isLogin, intgMbrSwtcYn]);
+
   const handleSearch = () => {
     setIsKeyboardOpen(false);
     if (searchQuery.trim()) {
@@ -577,6 +607,14 @@ const MainPage = () => {
       setAutoCompleteKeywords([]);
       setIsAutoLoading(false);
     }
+  };
+  const handleOnepassModalDismiss = () => {
+    window.sessionStorage.setItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY, '1');
+    setIsOnepassModalOpen(false);
+  };
+  // 실제 전환 동선은 후속 계약 전까지 연결하지 않고, 현재는 노출/세션 제어까지만 수행한다.
+  const handleOnepassModalConvert = () => {
+    handleOnepassModalDismiss();
   };
   const requestLoginForScrap = () => {
     const moveToLogin = window.confirm('로그인 후 스크랩 가능합니다. 로그인 하시겠습니까?');
@@ -1491,6 +1529,12 @@ const MainPage = () => {
           </div>
         </div>
       </div>
+      <OnepassLoginConversionModal
+        isOpen={isOnepassModalOpen}
+        onConvert={handleOnepassModalConvert}
+        onLater={handleOnepassModalDismiss}
+        onClose={handleOnepassModalDismiss}
+      />
       <Footer />
       {visiblePopups.map((popup) => {
         const imageSrc = buildMainImageUrl(
