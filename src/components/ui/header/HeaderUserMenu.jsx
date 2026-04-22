@@ -6,6 +6,11 @@ export default function HeaderUserMenu({
   currentCompany,
   linkedCompanies,
   user,
+  showSessionTimer,
+  sessionTimerLabel,
+  canExtendSession,
+  isExtendingSession,
+  onExtendSession,
   onLogin,
   onLogout,
   onMyPage,
@@ -72,10 +77,19 @@ export default function HeaderUserMenu({
           </button>
         </div>
 
-        <div className="gnb-sesseion-timer">
-          <div className="timer"><span className="sr-only">남은 시간</span><i className="svg-icon ico-clock"></i> 28: 38</div>
-          <button type="button" className="krds-btn secondary xsmall">연장</button>
-        </div>
+        {showSessionTimer ? (
+          <div className="gnb-sesseion-timer">
+            <div className="timer"><span className="sr-only">남은 시간</span><i className="svg-icon ico-clock"></i> {sessionTimerLabel}</div>
+            <button
+              type="button"
+              className="krds-btn secondary xsmall"
+              onClick={onExtendSession}
+              disabled={!canExtendSession || isExtendingSession}
+            >
+              연장
+            </button>
+          </div>
+        ) : null}
 
         <button type="button" className="btn-navi logout on-mobile-none" onClick={onLogout}>
           로그아웃
