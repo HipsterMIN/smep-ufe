@@ -2156,6 +2156,22 @@ table tbody tr:hover td {
   gap: 64px;
   align-items: center;
 }
+.krds-structured-list .mh-250 {
+  min-height: 250px;
+}
+.krds-structured-list .mh-250 .c-ico-txt.onellipsis-2 {
+  word-break: unset;
+}
+.krds-structured-list .card-body {
+  position: relative;
+  height: 100%;
+}
+
+.krds-structured-list .card-body .c-btn-pos {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+}
 .totalsearch-wrap .krds-structured-list .card-body .c-btn {
   position: relative;
 }
@@ -2575,7 +2591,10 @@ table tbody tr:hover td {
 .def-list-wrap .def-list .def-list-group {
   width: 100%;
   display: flex;
+  flex-direction: column;
+  gap: var(--krds-gap-4) 0;
 }
+
 .def-list-wrap .def-list dt {
   width: 12.5rem;
   margin-right: var(--krds-gap-7);
@@ -3237,6 +3256,7 @@ textarea.krds-input::placeholder {
 .service-guide .guide-cont-list li {
   flex: 1;
   display: flex;
+  gap: 20px;
   flex-direction: column;
   padding: 40px 30px;
   background-color: #fff;
@@ -3261,15 +3281,15 @@ textarea.krds-input::placeholder {
   text-align: center;
 }
 .service-guide .guide-cont-list .detail-info {
-  margin-top: 28px;
-  padding: 20px; 
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F4F5F6;
-  border-radius: 8px;
   font-size: 19px;
   font-weight: 700;
+  padding: 20px; 
+  margin-top: auto;
+  background: #F4F5F6;
+  border-radius: 8px;
 }
 .service-guide .guide-cont-list .kakao-link {
   display: flex;
@@ -4354,11 +4374,6 @@ textarea.krds-input::placeholder {
     align-items: flex-start;
   }
 
-  .def-list-wrap .def-list .def-list-group  {
-    flex-direction: column;
-    gap: var(--krds-gap-4) 0;
-  }
-
   .on-form-row .form-row-item {
     flex-direction: column;
     gap: 12px;
@@ -4611,6 +4626,10 @@ textarea.krds-input::placeholder {
   }
   .krds-table-wrap .tbl.data.t-block .btn-flex .krds-btn:first-of-type {
     flex: 1;
+  }
+
+  .krds-structured-list .card-body .c-btn-pos {
+    bottom: 30px;
   }
 }
 .on-searchoption-toggle {

@@ -498,19 +498,19 @@ const MainPage = () => {
                       <div className="service-tabcont">
                           <ul className="krds-structured-list row-4">
                           {Array.from({ length: 8 }).map((_, index) => (
-                            <li className="structured-item" key={index}>
+                            <li className="structured-item mh-250" key={index}>
                               <div className="card-top">
                                 <span className="krds-badge bg-light-primary">전자증명</span>
                               </div>
                               <div className="card-body">
                                 <div className="c-text">
                                   <p className="c-tit no-icon no-link"><span className="onellipsis-1">벤처기업확인서</span></p>
-                                  <p className="c-ico-txt onellipsis-1">
+                                  <p className="c-ico-txt onellipsis-2">
                                     {/* 웹접근성 반영 */}
                                     <i className="svg-icon ico-build"></i><span className="sr-only">기관</span>중소벤처기업진흥공단
                                   </p>
                                 </div>
-                                <div>
+                                <div className="c-btn-pos">
                                   <button type="button" className="krds-btn secondary small full">발급받기</button>
                                 </div>
                               </div>

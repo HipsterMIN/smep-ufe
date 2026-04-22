@@ -91,7 +91,7 @@ const UI_USR_L_530 = () => {
             <div className="input-group-box">
               <label className="label" htmlFor="input_01">제목</label>
               <div className="sch-input">
-                <input type="text" id="input_01" className="krds-input medium" placeholder="검색어를 입력해주세요." title="검색어 입력" />
+                <input type="text" id="input_01" className="krds-input medium" placeholder="검색어를 입력하세요" title="검색어 입력" />
                 <button type="button" className="krds-btn medium icon ico-search" >
                   <span className="sr-only">검색</span>
                   <i className="svg-icon ico-sch"></i>

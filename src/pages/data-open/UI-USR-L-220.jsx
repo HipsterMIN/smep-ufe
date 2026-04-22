@@ -5,6 +5,9 @@ import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
+import ApiKeyForm from './ApiKeyForm';
+
 
 const PAGE_SIZE = 10;
 
@@ -20,6 +23,16 @@ const API_KEY_REQUEST_MOCK = Array.from({ length: 24 }, (_, index) => ({
 
 const UI_USR_L_220 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const mbrNo = "2025120500381316";
+  const {
+    isOpen,
+    submitting,
+    errorMessage,
+    memberInfo,
+    openPopup,
+    closePopup,
+    submitApply
+  } = useApiKeyApply();
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
 
@@ -81,7 +94,7 @@ const UI_USR_L_220 = () => {
         <div className="conts-wrap mt-40">
           <h3 className="sec-tit side-conts">
             인증키 신청
-            <button type="button" className="krds-btn secondary small">인증키 신청</button>
+            <button type="button" className="krds-btn secondary small" onClick={() => openPopup(mbrNo)}>인증키 신청</button>
           </h3>
           <p className="conts-desc">
             중소벤처24의 Open API를 사용하시고자 하시는 기관 및 시스템 담당자께서는 인증키 신청서를 작성하여 인증키 정보를 확인하시거나, 중소벤처24 운영팀에게 문의해 주시면 담당자 확인 후 이메일로 인증키 정보를 보내드립니다.
@@ -162,6 +175,15 @@ const UI_USR_L_220 = () => {
           syncUrl
         />
       </div>
+      <ApiKeyForm
+          isOpen={isOpen}
+          onClose={closePopup}
+          submitting={submitting}
+          errorMessage={errorMessage}
+          memberInfo={memberInfo}
+          mbrNo={mbrNo}
+          onSubmit={(formData) => submitApply(mbrNo, formData)}
+      />
     </>
   );
 };

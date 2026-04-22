@@ -8,7 +8,7 @@ import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
 const VentureCertificateApi = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-  const mbrNo = "2025120500136492";
+  const mbrNo = "2025120500381316";
   const {
     isOpen,
     submitting,

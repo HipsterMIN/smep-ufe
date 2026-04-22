@@ -552,7 +552,7 @@ const UI_USR_L_520 = () => {
                   type="text"
                   id="keyword_520"
                   className="krds-input medium"
-                  placeholder="검색어를 입력해주세요."
+                  placeholder="검색어를 입력하세요"
                   title="검색어 입력"
                   value={keyword}
                   onChange={(event) => setKeyword(event.target.value)}
