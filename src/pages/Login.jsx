@@ -23,13 +23,15 @@ const UI_USR_R_002 = () => {
         type: loginType,
       });
       const accessToken = response.accessToken || response.data?.accessToken;
+      const refreshToken = response.refreshToken || response.data?.refreshToken;
       if (!accessToken) {
         throw new Error('Access token is missing');
       }
 
       const profileResponse = await apiClient.get('/api/v1/account/me', { token: accessToken });
       const profile = profileResponse.data || profileResponse;
-      login({ token: accessToken, profile });
+      // Header session timer는 ID/PW 로그인에서 받은 refresh token이 있을 때만 동작한다.
+      login({ token: accessToken, refreshToken, profile });
       navigate('/');
     } catch (error) {
       console.error('Login failed:', error);

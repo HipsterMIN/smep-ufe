@@ -5,32 +5,43 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 
-const CbzIssue = () => {
-  const navigate  = useNavigate();
-  const location  = useLocation();
+const SmftIssue = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
 
-  const [records, setRecords]               = useState([]);
-  const [selectedCmpId1, setSelectedCmpId1] = useState(null);
-  const [isLoading, setIsLoading]           = useState(false);
-  const [isFetching, setIsFetching]         = useState(false);
+  const [records, setRecords]                       = useState([]);
+  const [cmpNm, setCmpNm]                           = useState('');
+  const [rpsntNm, setRpsntNm]                       = useState('');
+  const [selectedCrtfIssuNo, setSelectedCrtfIssuNo] = useState('');
+  const [isLoading, setIsLoading]                   = useState(false);
+  const [isFetching, setIsFetching]                 = useState(false);
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
   const depth1Menu  = getDepth1Parent();
 
   const goBack = () => navigate(-1);
-  const brno   = '6090499481'; // TODO: 실제 로그인 사용자 사업자번호로 교체
+  const brno   = '1538701997'; // TODO: 실제 로그인 사용자 사업자번호로 교체
 
+  // 종사업장 목록 조회
   useEffect(() => {
     const fetchRecords = async () => {
       setIsFetching(true);
       try {
-        const data = await apiClient.get(`/api/v1/certificate/cbz/records?brno=${brno}`);
-        setRecords(data?.data?.records || []);
+        const res = await apiClient.get(`/api/v1/certificate/smft/records?brno=${brno}`);
+        const data = res?.data;
+        setRecords(data?.records || []);
+        setCmpNm(data?.cmpNm || '');
+        setRpsntNm(data?.rpsntNm || '');
+
+        // 목록 1건이면 자동 선택
+        if (data?.records?.length === 1) {
+          setSelectedCrtfIssuNo(data.records[0].crtfIssuNo);
+        }
       } catch (e) {
-        console.error('CBZ 목록 조회 실패:', e);
-        alert('협업기업선정확인서 목록 조회 중 오류가 발생했습니다.');
+        console.error('스마트공장수준확인서 목록 조회 실패:', e);
+        alert('발급 가능한 스마트공장수준확인서가 없습니다.');
       } finally {
         setIsFetching(false);
       }
@@ -38,9 +49,17 @@ const CbzIssue = () => {
     fetchRecords();
   }, []);
 
+  // 드롭다운 옵션 레이블: "0001 (CRTF-2024-0001 / 서울특별시...)"
+  const toLabel = (r) => {
+    const inner = r.cmpAllAddr
+      ? `${r.crtfIssuNo}  /  ${r.cmpAllAddr}`
+      : r.crtfIssuNo;
+    return `${r.mplcbNo}  (${inner})`;
+  };
+
   const validate = () => {
-    if (!selectedCmpId1) { alert('발급할 항목을 선택해주세요.'); return false; }
-    if (!prdocCd)        { alert('증명서 코드가 없습니다.');      return false; }
+    if (!selectedCrtfIssuNo) { alert('종사업장을 선택해주세요.'); return false; }
+    if (!prdocCd)            { alert('증명서 코드가 없습니다.');   return false; }
     return true;
   };
 
@@ -54,7 +73,7 @@ const CbzIssue = () => {
         prdocCd,
         brno,
         prdocIssuTypeCd: 'Y301',
-        extraParams: { cmpId1: selectedCmpId1 },
+        extraParams: { crtfIssuNo: selectedCrtfIssuNo },
       });
 
       window.open(
@@ -81,7 +100,7 @@ const CbzIssue = () => {
         prdocCd,
         brno,
         prdocIssuTypeCd: 'Y302',
-        extraParams: { cmpId1: selectedCmpId1 },
+        extraParams: { crtfIssuNo: selectedCrtfIssuNo },
       });
 
       navigate('/mb/dash/UI_USR_L_510');
@@ -102,6 +121,7 @@ const CbzIssue = () => {
           <h2 className="h-tit">{prdocNm}발급</h2>
         </div>
 
+        {/* 안내문구 */}
         <div className="conts-wrap">
           <div className="txt-box outline">
             <h4 className="outline-tit">알려드립니다.</h4>
@@ -114,6 +134,7 @@ const CbzIssue = () => {
             </ul>
           </div>
 
+          {/* 기업 기본정보 */}
           <dl className="on-form-row mt-24 large">
             <div className="form-row-item">
               <dt className="form-row-label">
@@ -123,10 +144,11 @@ const CbzIssue = () => {
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper w-360">
-                  <input type="text" id="id_01" className="krds-input small" value="2288105280" readOnly />
+                  <input type="text" id="id_01" className="krds-input small" value={brno} readOnly />
                 </div>
               </dd>
             </div>
+
             <div className="form-row-item">
               <dt className="form-row-label">
                 <label htmlFor="id_02" className="form-label">
@@ -135,10 +157,11 @@ const CbzIssue = () => {
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper w-360">
-                  <input type="text" id="id_02" className="krds-input small" value="주식회사" readOnly />
+                  <input type="text" id="id_02" className="krds-input small" value={cmpNm} readOnly />
                 </div>
               </dd>
             </div>
+
             <div className="form-row-item">
               <dt className="form-row-label">
                 <label htmlFor="id_03" className="form-label">
@@ -147,47 +170,48 @@ const CbzIssue = () => {
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper w-360">
-                  <input type="text" id="id_03" className="krds-input small" value="홍길동" readOnly />
+                  <input type="text" id="id_03" className="krds-input small" value={rpsntNm} readOnly />
+                </div>
+              </dd>
+            </div>
+            <div className="form-row-item">
+              <dt className="form-row-label">
+                <label htmlFor="id_04" className="form-label">종사업장번호</label>
+              </dt>
+              <dd className="form-row-content">
+                <div className="form-wrapper w-360">
+                  {isFetching ? (
+                    <select id="id_04" className="krds-form-select small" disabled>
+                      <option value="">조회 중...</option>
+                    </select>
+                  ) : records.length > 0 ? (
+                    <select
+                      id="id_04"
+                      className="krds-form-select small"
+                      value={selectedCrtfIssuNo}
+                      onChange={(e) => setSelectedCrtfIssuNo(e.target.value)}
+                    >
+                      {records.length > 1 && (
+                        <option value="">선택해주세요.</option>
+                      )}
+                      {records.map((r) => (
+                        <option key={r.crtfIssuNo} value={r.crtfIssuNo}>
+                          {toLabel(r)}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <select id="id_04" className="krds-form-select small" disabled>
+                      <option value="">없음</option>
+                    </select>
+                  )}
                 </div>
               </dd>
             </div>
           </dl>
         </div>
 
-        <div className="conts-wrap mt-24">
-          <h3 className="sec-tit">발급선택</h3>
-          <div className="txt-box bg-white small">
-            {isFetching ? (
-              <p className="txt-center">목록을 불러오는 중입니다...</p>
-            ) : records.length === 0 ? (
-              <p className="txt-center">조회된 협업기업선정확인서가 없습니다.</p>
-            ) : (
-              <ul className="select-list">
-                {records.map((rec, idx) => (
-                  <li key={rec.CMP_ID_1}>
-                    <div className="krds-form-check medium">
-                      <input
-                        type="radio"
-                        name="radiogroup"
-                        id={`radio_cbz_${idx}`}
-                        checked={selectedCmpId1 === rec.CMP_ID_1}
-                        onChange={() => setSelectedCmpId1(rec.CMP_ID_1)}
-                      />
-                      <label htmlFor={`radio_cbz_${idx}`}>
-                        <div className="cont-inner">
-                          <span className="sub-txt"><em>선정번호</em>{rec.CMP_ID_1}</span>
-                          <span className="sub-txt"><em>참여기업명</em>{rec.PRTCPN_CMP_NM}</span>
-                          {rec.PRJCT_NM}
-                        </div>
-                      </label>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-
+        {/* 버튼 */}
         <div className="onboard-btm-btngroup bt-0">
           <div>
             <button type="button" className="krds-btn tertiary xlarge" onClick={goBack}>
@@ -199,7 +223,7 @@ const CbzIssue = () => {
               type="button"
               className="krds-btn primary xlarge"
               onClick={handleWalletClick}
-              disabled={isLoading}
+              disabled={isLoading || isFetching}
             >
                 전자문서지갑
             </button>
@@ -207,7 +231,7 @@ const CbzIssue = () => {
               type="button"
               className="krds-btn tertiary xlarge"
               onClick={handlePrint}
-              disabled={isLoading}
+              disabled={isLoading || isFetching}
             >
               <i className="svg-icon ico-print"></i>
               {isLoading ? '발급 중...' : '출력'}
@@ -215,9 +239,8 @@ const CbzIssue = () => {
           </div>
         </div>
       </div>
-
     </>
   );
 };
 
-export default CbzIssue;
+export default SmftIssue;
