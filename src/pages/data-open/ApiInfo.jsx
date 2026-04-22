@@ -4,6 +4,7 @@ import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext';
 import React from 'react';
+import {apiBaseUrl} from "@lib/apiClient.js";
 
 const ApiInfo = () => {
 
@@ -254,6 +255,7 @@ const ApiInfo = () => {
         <div className="onboard-btm-btngroup bt-0 btn-single">
           <div> 
             <button type="button" className="krds-btn xlarge" onClick={() => window.location.href = '/main/user/file/중소벤처24_API개발가이드_V2.zip'}>
+            {/*<button type="button" className="krds-btn xlarge" onClick={() => window.location.href = `${apiBaseUrl}/api/v1/files/download/${file.atchFileId}/${file.atchFileSn}`}>*/}
               API 가이드
             </button>
           </div>

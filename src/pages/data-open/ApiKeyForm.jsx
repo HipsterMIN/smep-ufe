@@ -1,23 +1,128 @@
 import Popup from '@components/ui/Popup';
 import {useEffect, useState} from "react";
+import {api as apiClient} from "@lib/apiClient.js";
 
 // 부모에게서 상태를 전달받도록 Props 설정
 const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo, memberInfo}) => {
 
-  // const [memberInfo, setMemberInfo] = useState({});
-  const [formData, setFormData] = useState({
+  const [institutions, setInstitutions] = useState({});
+  const [isDirectInput, setIsDirectInput] = useState(false);
+
+  // const [formData, setFormData] = useState({
+  //   siteNm: '',
+  //   apiRegAplyCn: '',
+  //   ogdpInstCd: '',       // 기관 코드
+  //   instNmDirect: '', // 직접 입력 시 기관명
+  //   picDeptNm: '',    // 부서 추가
+  //   picJbpsNm: '',    // 직위 추가
+  //   indvGnrlTelno: '', // 유선전화번호 추가
+  //   linkSiteCd: [], // 배열로 관리
+  //   usgSeCd: '',    // 용도구분(라디오)용
+  // });
+
+  const initialFormState = {
     siteNm: '',
     apiRegAplyCn: '',
-    // 추가적인 필드가 있다면 여기에 정의
-  });
+    ogdpInstCd: '',
+    instNmDirect: '',
+    picDeptNm: '',
+    picJbpsNm: '',
+    picEmlAddr: '',
+    indvGnrlTelno: '',
+    linkSiteCd: [],
+    usgSeCd: '',
+  };
 
-  // 3. 저장 버튼 클릭 시 실행
+  const [formData, setFormData] = useState(initialFormState);
+
+  // 폼 초기화 함수
+  const resetForm = () => {
+    setFormData({
+      ...initialFormState,
+      // memberInfo가 있다면 기본값은 다시 채워줌
+      picDeptNm: memberInfo?.picDeptNm || '',
+      picJbpsNm: memberInfo?.picJbpsNm || '',
+      picEmlAddr: memberInfo?.emlAddr || '',
+      indvGnrlTelno: memberInfo?.indvGnrlTelno || '',
+    });
+    setIsDirectInput(false);
+  };
+
+  const handleClose = () => {
+    resetForm(); // 데이터 리셋
+    onClose();   // 부모의 닫기 로직 실행
+  };
+
+  // 1. 컴포넌트 로드 시 기관 공통 코드 조회
+  useEffect(() => {
+    if (isOpen && memberInfo) {
+      setFormData(prev => ({
+        ...prev,
+        picDeptNm: memberInfo.picDeptNm || '',
+        picJbpsNm: memberInfo.picJbpsNm || '',
+        picEmlAddr: memberInfo.emlAddr || '',
+        indvGnrlTelno: memberInfo.indvGnrlTelno || '',
+      }));
+    }
+  }, [isOpen, memberInfo]);
+
+  // 2. 기관 공통 코드 조회
+  useEffect(() => {
+    if (isOpen) {
+      const fetchCodes = async () => {
+        try {
+          const res = await apiClient.get('/api/v1/apikey/codes/institutions');
+          setInstitutions(res.data);
+        } catch (error) {
+          console.error("기관 코드 조회 실패", error);
+        }
+      };
+      fetchCodes();
+    }
+  }, [isOpen]);
+
+  // 셀렉트 박스 변경 핸들러
+  const handleInstChange = (e) => {
+    const val = e.target.value;
+    if (val === 'DIRECT') {
+      setIsDirectInput(true);
+      setFormData({ ...formData, ogdpInstCd: 'DIRECT' });
+    } else {
+      setIsDirectInput(false);
+      // 기관을 다시 선택하면 직접 입력했던 내용은 초기화
+      setFormData({ ...formData, ogdpInstCd: val, instNmDirect: '' });
+    }
+  };
+
+  const handleCheckboxChange = (e) => {
+    const { value, checked } = e.target;
+    const { linkSiteCd } = formData;
+
+    if (checked) {
+      // 체크되면 배열에 추가
+      setFormData({
+        ...formData,
+        linkSiteCd: [...linkSiteCd, value]
+      });
+    } else {
+      // 체크 해제되면 배열에서 제거
+      setFormData({
+        ...formData,
+        linkSiteCd: linkSiteCd.filter(item => item !== value)
+      });
+    }
+  };
+
   const handleInternalSubmit = () => {
     if (!formData.siteNm || !formData.apiRegAplyCn) {
       alert("필수 항목을 모두 입력해 주세요.");
       return;
     }
-    // 부모(훅)의 submitApply 함수를 호출
+    // 소속기관 체크
+    if (!formData.ogdpInstCd || (isDirectInput && !formData.instNmDirect)) {
+      alert("소속기관을 선택하거나 입력해 주세요.");
+      return;
+    }
     onSubmit(formData);
   };
 
@@ -28,7 +133,7 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
           title="인증키 신청"
           footer={
             <>
-              <button type="button" className="krds-btn tertiary medium" onClick={onClose}>취소</button>
+              <button type="button" className="krds-btn tertiary medium" onClick={handleClose}>취소</button>
               <button
                   type="button"
                   className="krds-btn primary medium"
@@ -63,7 +168,7 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
                     <label htmlFor="id_01" className="form-label">이름</label>
                   </div>
                   <div className="form-conts">
-                    <input type="text" className="krds-input small" value={memberInfo.mbrNm || ''} readOnly={true}/>
+                    <input type="text" className="krds-input small" value={memberInfo.mbrNm || '-'} readOnly={true}/>
                   </div>
                 </div>
                 <div className="form-group">
@@ -71,7 +176,7 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
                     <label htmlFor="id_02" className="form-label">휴대전화 번호</label>
                   </div>
                   <div className="form-conts">
-                    <input type="text" className="krds-input small" value={memberInfo.indvMblTelno || ''} readOnly={true}/>
+                    <input type="text" className="krds-input small" value={memberInfo.indvMblTelno || '-'} readOnly={true}/>
                   </div>
                 </div>
               </div>
@@ -85,13 +190,16 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
                       type="text"
                       id="id_03"
                       className="krds-input small"
-                      value={memberInfo.emlAddr || '-'} readOnly={true}
+                      placeholder="example@mail.com"
+                      value={formData.picEmlAddr} // formData에서 값을 가져옴
+                      onChange={(e) => setFormData({...formData, picEmlAddr: e.target.value})} // 수정 핸들러
                   />
                 </div>
               </div>
                 <div className="form-group">
                   <div className="form-tit">
-                    <label htmlFor="id_04" className="form-label">유선전화번호 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
+                    <label htmlFor="id_04" className="form-label">유선전화번호 <span className="on-required"><span
+                        className="sr-only">필수입력</span></span></label>
                   </div>
                   <div className="form-conts">
                     <input
@@ -99,8 +207,8 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
                         id="id_04"
                         className="krds-input small"
                         placeholder="02-123-4567"
-                        value={memberInfo.indvGnrlTelno || ''}
-                        onChange={(e) => setMemberInfo({...memberInfo, indvGnrlTelno: e.target.value})}
+                        value={formData.indvGnrlTelno}
+                        onChange={(e) => setFormData({...formData, indvGnrlTelno: e.target.value})}
                     />
                   </div>
                 </div>
@@ -108,20 +216,52 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
               <div className="form-group-row">
                 <div className="form-group">
                   <div className="form-tit">
-                    <label htmlFor="id_04_1" className="form-label">소속기관 <span className="on-required"><span className="sr-only">필수입력</span></span></label>
+                    <label htmlFor="instSelect" className="form-label">소속기관 <span className="on-required"><span
+                        className="sr-only">필수입력</span></span></label>
                   </div>
                   <div className="form-conts">
-                    <select className="krds-form-select small">
-                      <option value="">중소벤처기업부</option>
+                    <select
+                        id="instSelect"
+                        className="krds-form-select small"
+                        value={formData.ogdpInstCd}
+                        onChange={handleInstChange}
+                    >
+                      <option value="">선택하세요</option>
+                      {/* 1. API로 받아온 기관 목록을 먼저 렌더링 */}
+                      {Object.entries(institutions).map(([code, name]) => (
+                          <option key={code} value={code}>{name}</option>
+                      ))}
+                      {/* 2. 맨 마지막에 직접 입력 옵션 추가 */}
+                      <option value="DIRECT">직접 입력</option>
                     </select>
                   </div>
                 </div>
                 <div className="form-group">
                   <div className="form-tit">
-                    <label htmlFor="id_04_2" className="form-label sr-only">소속기관</label>
+                    <label htmlFor="instDisplay" className="form-label sr-only">소속기관 상세입력</label>
                   </div>
                   <div className="form-conts">
-                    <input type="text" id="id_04_2" className="krds-input small" defaultValue="중소벤처기업부" disabled />
+                    <input
+                        type="text"
+                        id="instDisplay"
+                        className={`krds-input small ${!isDirectInput ? 'bg-readonly' : ''}`}
+                        placeholder={isDirectInput ? "기관명을 직접 입력하세요" : ""}
+
+                        /* - 직접 입력이 아닐 때: 선택한 기관명(institutions[코드])을 보여줌
+                           - 직접 입력일 때: 사용자가 입력한 instNmDirect 값을 보여줌
+                        */
+                        value={isDirectInput ? formData.instNmDirect : (institutions[formData.instCd] || '')}
+
+                        /* 직접 입력 모드가 아닐 때만 readOnly 처리 */
+                        readOnly={!isDirectInput}
+
+                        /* 직접 입력 모드일 때만 데이터 변경 허용 */
+                        onChange={(e) => {
+                          if (isDirectInput) {
+                            setFormData({...formData, instNmDirect: e.target.value});
+                          }
+                        }}
+                    />
                   </div>
                 </div>
               </div>
@@ -131,7 +271,13 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
                     <label htmlFor="id_05" className="form-label">부서</label>
                   </div>
                   <div className="form-conts">
-                    <input type="text" className="krds-input small" value={memberInfo.picDeptNm || '-'} />
+                    <input
+                        type="text"
+                        id="id_05"
+                        className="krds-input small"
+                        value={formData.picDeptNm}
+                        onChange={(e) => setFormData({...formData, picDeptNm: e.target.value})}
+                    />
                   </div>
                 </div>
                 <div className="form-group">
@@ -139,7 +285,13 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
                     <label htmlFor="id_06" className="form-label">직위</label>
                   </div>
                   <div className="form-conts">
-                    <input type="text" className="krds-input small" value={memberInfo.picJbpsNm || '-'} />
+                    <input
+                        type="text"
+                        id="id_06"
+                        className="krds-input small"
+                        value={formData.picJbpsNm}
+                        onChange={(e) => setFormData({...formData, picJbpsNm: e.target.value})}
+                    />
                   </div>
                 </div>
               </div>
@@ -174,26 +326,56 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
               <div className="form-conts mt-16">
                 <div className="krds-check-area">
                   <div className="krds-form-check medium">
-                    <input type="checkbox" name="hk_1-1a" id="hk_1-1a"/>
-                    <label htmlFor="hk_1-1a">지원사업목록API</label>
+                    <input
+                        type="checkbox"
+                        id="hk_1-1a"
+                        value="TE01" // 실제 DB에 들어갈 코드값
+                        checked={formData.linkSiteCd.includes("TE01")}
+                        onChange={handleCheckboxChange}
+                    />
+                    <label htmlFor="hk_1-1a">지원사업정보 API</label>
                   </div>
                   <div className="krds-form-check medium">
-                    <input type="checkbox" name="hk_1-2a" id="hk_1-2a"/>
-                    <label htmlFor="hk_1-2a">행사정보</label>
+                    <input
+                        type="checkbox"
+                        id="hk_1-2a"
+                        value="TE02"
+                        checked={formData.linkSiteCd.includes("TE02")}
+                        onChange={handleCheckboxChange}
+                    />
+                    <label htmlFor="hk_1-2a">행사정보 API</label>
                   </div>
                 </div>
 
                 <div className="krds-check-area">
                   <div className="krds-form-check medium">
-                    <input type="checkbox" id="chk_1-3a"/>
-                    <label htmlFor="chk_1-3a">이노비즈확인서 <br />[확인서 API]</label>
+                    <input
+                        type="checkbox"
+                        id="chk_1-3a"
+                        value="TE03"
+                        checked={formData.linkSiteCd.includes("TE03")}
+                        onChange={handleCheckboxChange}
+                    />
+                    <label htmlFor="chk_1-3a">이노비즈확인서</label>
                   </div>
                   <div className="krds-form-check medium">
-                    <input type="checkbox" id="chk_1-4a" />
+                    <input
+                        type="checkbox"
+                        id="chk_1-4a"
+                        value="TE04"
+                        checked={formData.linkSiteCd.includes("TE04")}
+                        onChange={handleCheckboxChange}
+                    />
                     <label htmlFor="chk_1-4a">벤처기업확인서</label>
                   </div>
                   <div className="krds-form-check medium">
-                    <input type="checkbox" id="chk_1-5a" />
+                    <input
+                        type="checkbox"
+                        id="chk_1-5a"
+                        value="TE05"
+                        checked={formData.linkSiteCd.includes("TE05")}
+                        onChange={handleCheckboxChange}
+                    />
                     <label htmlFor="chk_1-5a">메인비즈확인서</label>
                   </div>
                 </div>
@@ -203,20 +385,39 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
 
             <div className="form-group">
               <div className="form-tit">
-                <span className="form-label">용도<span className="on-required"><span className="sr-only">필수입력</span></span></span>
+                <span className="form-label">용도<span className="on-required"><span
+                    className="sr-only">필수입력</span></span></span>
               </div>
               <div className="form-conts">
                 <div className="krds-check-area">
                   <div className="krds-form-check medium">
-                    <input type="radio" name="rdo_2-1" id="rdo_2-1" />
+                    <input
+                        type="radio"
+                        name="usgSeCd"
+                        id="rdo_2-1"
+                        value="PD01"
+                        onChange={(e) => setFormData({...formData, usgSeCd: e.target.value})}
+                    />
                     <label htmlFor="rdo_2-1">웹사이트 개발</label>
                   </div>
                   <div className="krds-form-check medium">
-                    <input type="radio" name="rdo_2-1" id="rdo_2-2" />
+                    <input
+                        type="radio"
+                        name="usgSeCd"
+                        id="rdo_2-2"
+                        value="PD02"
+                        onChange={(e) => setFormData({...formData, usgSeCd: e.target.value})}
+                    />
                     <label htmlFor="rdo_2-2">앱 개발</label>
                   </div>
                   <div className="krds-form-check medium">
-                    <input type="radio" name="rdo_2-1" id="rdo_2-3" />
+                    <input
+                        type="radio"
+                        name="usgSeCd"
+                        id="rdo_2-3"
+                        value="PD03"
+                        onChange={(e) => setFormData({...formData, usgSeCd: e.target.value})}
+                    />
                     <label htmlFor="rdo_2-3">기타</label>
                   </div>
                 </div>
@@ -225,7 +426,8 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
 
             <div className="form-group">
               <div className="form-tit">
-                <label htmlFor="textarea" className="form-label">활용목적<span className="on-required"><span className="sr-only">필수입력</span></span></label>
+                <label htmlFor="textarea" className="form-label">활용목적<span className="on-required"><span
+                    className="sr-only">필수입력</span></span></label>
               </div>
               <div className="form-conts">
                 <div className="textarea-wrap">
