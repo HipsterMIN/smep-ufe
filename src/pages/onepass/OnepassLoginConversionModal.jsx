@@ -1,26 +1,6 @@
 import React from 'react';
 import styles from './OnepassLoginConversionModal.module.css';
-
-const ONEPASS_ORIGIN = 'https://www.smes.go.kr';
-const ONEPASS_CONVERSION_PATH = '/onepass-dev/conversion/step1';
-const APP_BASE_URL = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
-const ONEPASS_CLIENT_ID = 'smes-tipa-01';
-
-function buildOnepassConversionUrl() {
-  const url = new URL(ONEPASS_CONVERSION_PATH, ONEPASS_ORIGIN);
-  const currentOrigin =
-    typeof window !== 'undefined'
-      ? window.location.origin
-      : 'https://www.smes-tipa.go.kr';
-
-  // redirect_uri 등록값이 중복되지 않도록 앱 홈 경로는 trailing slash 없이 정규화한다.
-  const redirectUri = `${currentOrigin}${APP_BASE_URL}`;
-
-  url.searchParams.set('client_id', ONEPASS_CLIENT_ID);
-  url.searchParams.set('redirect_uri', redirectUri);
-
-  return url.toString();
-}
+import { keycloakGetAuthCode } from '../../utils/keycloakGetAuthCode';
 
 function SwitchVisual() {
   return (
@@ -104,12 +84,9 @@ export default function OnepassLoginConversionModal({
     return null;
   }
 
-  const onepassConversionUrl = buildOnepassConversionUrl();
   const handleConvertClick = () => {
-    if (import.meta.env.DEV) {
-      console.log('[Onepass] conversion url:', onepassConversionUrl);
-    }
     onConvert();
+    keycloakGetAuthCode();
   };
 
   return (
@@ -143,10 +120,8 @@ export default function OnepassLoginConversionModal({
               </div>
             </div>
             <div className={styles.buttonGroup}>
-              <a
-                href={onepassConversionUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
                 className={`${styles.button} ${styles.primaryButton}`}
                 onClick={handleConvertClick}
               >
@@ -154,7 +129,7 @@ export default function OnepassLoginConversionModal({
                 <span className={styles.iconWrap}>
                   <ArrowIcon />
                 </span>
-              </a>
+              </button>
               <button type="button" className={`${styles.button} ${styles.secondaryButton}`} onClick={onLater}>
                 <span>나중에 전환하기</span>
                 <span className={styles.iconWrap}>
