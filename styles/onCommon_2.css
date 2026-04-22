@@ -2036,6 +2036,24 @@ button.aichatButton.active {
   color: #464C53;
 }
 
+.sys-con .main-step {
+  margin-top: 0;
+}
+.sys-con .img-box {
+  margin-bottom: 24px;
+}
+.sys-con .sec-tit2 {
+  color: #052B57;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 150%;
+  letter-spacing: 0;
+  margin-bottom: 10px;
+}
+.sys-con .cont-desc.mb-10 {
+  margin-bottom: 10px;
+}
+
 /* 반응형*/
 @media (max-width: 1400px) {
   .krds-main-menu .gnb-menu .gnb-main-trigger {
@@ -2587,6 +2605,9 @@ button.aichatButton.active {
   .main-step .img-box {
     margin-top: 24px;
     padding: 0;
+  }
+  .sys-con .main-step .img-box {
+    padding: 20px;
   }
   .sub-step > li {
     margin-top: 12px;
