@@ -11,6 +11,7 @@ import {
   fetchCorporateMemberDetail,
   formatPhoneNumber,
   normalizeDigits,
+  updateCorporateMemberInfo,
 } from './company/companyMemberUtils.js';
 
 const INFO_RECEPTION_MNS_CODES = {
@@ -160,15 +161,48 @@ const buildInfoReceptionAgreements = (agreements) => {
   return nextAgreements;
 };
 
+// 전화번호 입력칸 값을 저장용 문자열로 조합한다.
+const joinPhoneNumberParts = (parts) =>
+  parts.map((part) => String(part ?? '').trim()).filter(Boolean).join('-');
+
+// 이메일 입력칸 값을 저장용 문자열로 조합한다.
+const joinEmailParts = (localPart, domainPart) => {
+  const local = String(localPart ?? '').trim();
+  const domain = String(domainPart ?? '').trim();
+  return local && domain ? `${local}@${domain}` : '';
+};
+
+// 정보수신 동의 상태를 저장 요청 목록으로 변환한다.
+const buildInfoReceptionAgreementPayload = (agreements) =>
+  Object.entries(agreements).map(([infoRcptnMnsCd, infoRcptnAgreYn]) => ({
+    infoRcptnMnsCd,
+    infoRcptnAgreYn,
+  }));
+
+// 화면 입력값을 기업회원 정보 저장 payload로 변환한다.
+const buildMemberInfoUpdatePayload = (values, agreements) => ({
+  rprsvNm: values.rprsvNm,
+  rprsTelno: joinPhoneNumberParts(values.rprsTelnoParts),
+  rprsFxno: joinPhoneNumberParts(values.rprsFxnoParts),
+  emlAddr: joinEmailParts(values.emailLocal, values.emailDomain),
+  zip: values.zip,
+  entAddr: values.entAddr,
+  entDaddr: values.entDaddr,
+  hmpgAddr: values.hmpgAddr,
+  infoReceptionAgreements: buildInfoReceptionAgreementPayload(agreements),
+});
+
 const UI_USR_W_411 = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const authToken = useAuthStore((state) => state.token);
+  const [memberNo, setMemberNo] = useState('');
   const [formValues, setFormValues] = useState(EMPTY_FORM_VALUES);
   const [managerContact, setManagerContact] = useState(null);
   const [infoReceptionAgreements, setInfoReceptionAgreements] = useState(
     DEFAULT_INFO_RECEPTION_AGREEMENTS,
   );
+  const [saving, setSaving] = useState(false);
 
   // 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
@@ -182,6 +216,7 @@ const UI_USR_W_411 = () => {
     const mbrNo = tokenPayload?.member_no || tokenPayload?.sub;
 
     if (!mbrNo) {
+      setMemberNo('');
       setFormValues((currentValues) => ({
         ...currentValues,
         loginId: tokenPayload?.login_id || '',
@@ -192,6 +227,7 @@ const UI_USR_W_411 = () => {
     }
 
     let active = true;
+    setMemberNo(mbrNo);
     setManagerContact(null);
     setInfoReceptionAgreements(DEFAULT_INFO_RECEPTION_AGREEMENTS);
 
@@ -290,6 +326,27 @@ const UI_USR_W_411 = () => {
     }));
   };
 
+  // 저장 버튼 클릭 시 기업회원 정보와 정보수신 동의를 저장한다.
+  const handleSave = async () => {
+    if (!memberNo) {
+      window.alert('회원번호를 확인할 수 없습니다.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = buildMemberInfoUpdatePayload(formValues, infoReceptionAgreements);
+      const detail = await updateCorporateMemberInfo(apiClient, memberNo, payload);
+      setFormValues(buildFormValues(detail, decodeJwtPayload(authToken)));
+      window.alert('저장되었습니다.');
+    } catch (error) {
+      console.error('Failed to update corporate member info:', error);
+      window.alert(error?.message || '저장에 실패했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <>
       <SideNavigation
@@ -326,7 +383,7 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper w-220">
-                    <input type="text" id="input_01" className="krds-input small" value={formValues.mbrNm} disabled></input>
+                    <input type="text" id="input_01" className="krds-input small" maxLength={100} value={formValues.mbrNm} disabled></input>
                   </div>
                 </dd>
               </div>
@@ -336,7 +393,7 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper w-220">
-                    <input type="text" id="input_02" className="krds-input small" value={formValues.brno} disabled></input>
+                    <input type="text" id="input_02" className="krds-input small" maxLength={10} value={formValues.brno} disabled></input>
                   </div>
                 </dd>
               </div>
@@ -346,7 +403,7 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper w-220">
-                    <input type="text" id="input_03" className="krds-input small" value={formValues.crno} disabled></input>
+                    <input type="text" id="input_03" className="krds-input small" maxLength={13} value={formValues.crno} disabled></input>
                   </div>
                 </dd>
               </div>
@@ -356,7 +413,7 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper w-220">
-                    <input type="text" id="input_04" className="krds-input small" value={formValues.rprsvNm} onChange={(event) => setFormValue('rprsvNm', event.target.value)} />
+                    <input type="text" id="input_04" className="krds-input small" maxLength={100} value={formValues.rprsvNm} onChange={(event) => setFormValue('rprsvNm', event.target.value)} />
                   </div>
                 </dd>
               </div>
@@ -390,9 +447,9 @@ const UI_USR_W_411 = () => {
                       <option value="050">일반 050</option>
                     </select>
                     <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 중간번호 입력" value={formValues.rprsTelnoParts[1]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 1, event.target.value)} />
+                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 중간번호 입력" maxLength={4} value={formValues.rprsTelnoParts[1]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 1, event.target.value)} />
                     <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 끝번호 입력" value={formValues.rprsTelnoParts[2]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 2, event.target.value)} />
+                    <input type="text" className="krds-input small w-120" placeholder="0000" title="대표전화 끝번호 입력" maxLength={4} value={formValues.rprsTelnoParts[2]} onChange={(event) => setPhonePartValue('rprsTelnoParts', 2, event.target.value)} />
                   </div>
                 </dd>
               </div>
@@ -426,9 +483,9 @@ const UI_USR_W_411 = () => {
                       <option value="050">일반 050</option>
                     </select>
                     <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스번호 중간번호 입력" value={formValues.rprsFxnoParts[1]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 1, event.target.value)} />
+                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스번호 중간번호 입력" maxLength={4} value={formValues.rprsFxnoParts[1]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 1, event.target.value)} />
                     <span>-</span>
-                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스번호 끝번호 입력" value={formValues.rprsFxnoParts[2]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 2, event.target.value)} />
+                    <input type="text" className="krds-input small w-120" placeholder="0000" title="팩스번호 끝번호 입력" maxLength={4} value={formValues.rprsFxnoParts[2]} onChange={(event) => setPhonePartValue('rprsFxnoParts', 2, event.target.value)} />
                   </div>
                 </dd>
               </div>
@@ -438,11 +495,11 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper row-small">
-                    <input type="text" id="input_05" className="krds-input small w-140" placeholder="0000" title="이메일 아이디 입력" value={formValues.emailLocal} onChange={(event) => setFormValue('emailLocal', event.target.value)}/>
+                    <input type="text" id="input_05" className="krds-input small w-140" placeholder="0000" title="이메일 아이디 입력" maxLength={64} value={formValues.emailLocal} onChange={(event) => setFormValue('emailLocal', event.target.value)}/>
                     <span>@</span>
-                    <input type="text" className="krds-input small w-140" placeholder="0000" title="이메일 도메인 입력" value={formValues.emailDomain} onChange={(event) => setFormValue('emailDomain', event.target.value)} />
+                    <input type="text" className="krds-input small w-140" placeholder="0000" title="이메일 도메인 입력" maxLength={255} value={formValues.emailDomain} onChange={(event) => setFormValue('emailDomain', event.target.value)} />
                     <span>-</span>
-                    <select className="krds-form-select small w-140" title="이메일 선택">
+                    <select className="krds-form-select small w-140" title="이메일 선택" onChange={(event) => setFormValue('emailDomain', event.target.value)}>
                       <option value="">직접입력</option>
                       <option value="naver.com">naver</option>
                       <option value="daum.net">daum</option>
@@ -460,14 +517,14 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper row-small">
-                    <input type="text" id="input_06" className="krds-input small w-150" placeholder="-" value={formValues.zip} onChange={(event) => setFormValue('zip', event.target.value)} />
+                    <input type="text" id="input_06" className="krds-input small w-150" placeholder="-" maxLength={5} value={formValues.zip} onChange={(event) => setFormValue('zip', event.target.value)} />
                     <button type="button" className="krds-btn secondary small">우편번호 검색</button>
                   </div>
                   <div className="form-wrapper">
-                    <input type="text" className="krds-input small w-460" placeholder="-" value={formValues.entAddr} onChange={(event) => setFormValue('entAddr', event.target.value)} />
+                    <input type="text" className="krds-input small w-460" placeholder="-" maxLength={200} value={formValues.entAddr} onChange={(event) => setFormValue('entAddr', event.target.value)} />
                   </div>
                   <div className="form-wrapper">
-                    <input type="text" className="krds-input small w-460" placeholder="상세 주소 입력" value={formValues.entDaddr} onChange={(event) => setFormValue('entDaddr', event.target.value)} />
+                    <input type="text" className="krds-input small w-460" placeholder="상세 주소 입력" maxLength={200} value={formValues.entDaddr} onChange={(event) => setFormValue('entDaddr', event.target.value)} />
                   </div>
                 </dd>
               </div>
@@ -477,7 +534,7 @@ const UI_USR_W_411 = () => {
                 </dt>
                 <dd className="form-row-content">
                   <div className="form-wrapper">
-                    <input type="text" id="input_07" className="krds-input small w-220" placeholder='-' value={formValues.hmpgAddr} onChange={(event) => setFormValue('hmpgAddr', event.target.value)} />
+                    <input type="text" id="input_07" className="krds-input small w-220" placeholder='-' maxLength={2000} value={formValues.hmpgAddr} onChange={(event) => setFormValue('hmpgAddr', event.target.value)} />
                   </div>
                 </dd>
               </div>
@@ -779,7 +836,7 @@ const UI_USR_W_411 = () => {
             </button>
           </div>
           <div>
-            <button type="button" className="krds-btn primary xlarge">
+            <button type="button" className="krds-btn primary xlarge" onClick={handleSave} disabled={saving}>
               저장
             </button>
           </div>

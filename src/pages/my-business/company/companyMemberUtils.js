@@ -174,3 +174,12 @@ export const updateCorporateMemberDetail = async (apiClient, mbrNo, payload) =>
   normalizeApiPayload(
     await apiClient.put(`/api/v1/member/corporate/${encodeURIComponent(mbrNo)}`, payload),
   );
+
+// 기업회원 정보와 정보수신 동의를 저장한다.
+export const updateCorporateMemberInfo = async (apiClient, mbrNo, payload) =>
+  normalizeApiPayload(
+    await apiClient.put(
+      `/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/member-info`,
+      payload,
+    ),
+  );
