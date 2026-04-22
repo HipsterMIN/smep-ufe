@@ -38,6 +38,15 @@ import GuideTab3_01_Mo from '@assets/sub/guide_tab3_01_mo.png'
 import GuideTab3_02_Mo from '@assets/sub/guide_tab3_02_mo.png'
 import GuideTab3_03_Mo from '@assets/sub/guide_tab3_03_mo.png'
 
+///tab4
+import GuideTab4_01 from '@assets/sub/guide_tab4_01_pc.png'
+import GuideTab4_02 from '@assets/sub/guide_tab4_02_pc.png'
+import GuideTab4_03 from '@assets/sub/guide_tab4_03_pc.png'
+/* mo img */
+import GuideTab4_01_Mo from '@assets/sub/guide_tab4_01_mo.png'
+import GuideTab4_02_Mo from '@assets/sub/guide_tab4_02_mo.png'
+import GuideTab4_03_Mo from '@assets/sub/guide_tab4_03_mo.png'
+
 // tab5
 import GuideTab5_01 from '@assets/sub/guide_tab5_01_pc.png'
 import GuideTab5_02 from '@assets/sub/guide_tab5_02_pc.png'
@@ -323,7 +332,48 @@ const UI_USR_R_360 = () => {
                     </ol>
                   </div>
                   <div className={`tab-conts ${activeSubTabIndex === 3 ? 'active' : ''}`}>
-								    <h4 className="sr-only">유관시스템</h4>
+                    <h4 className="sr-only">유관 시스템</h4>
+                    <div className="conts-wrap">
+                      <h4 className="sec-tit2">유관 시스템</h4>
+                    </div>
+                    <div className="sys-con">
+                      <div className="main-step">
+                        <div className="img-box">
+                          <img src={GuideTab4_01} alt="" className="img-pc" />
+                          <img src={GuideTab4_01_Mo} alt="" className="img-mo" />
+                        </div>
+                        <h4 className="sec-tit2">M&A 정보망 안내</h4>
+                        <p className="cont-desc mb-10">
+                          M&A자문기관과 M&A지원센터의 조직 및 네트워크를 활용하여 M&A 매수 / 매도 정보 제공하는 서비스 입니다.
+                        </p>
+                        <div className="more-btn">
+                          <button type="button" className="krds-btn secondary small">M&A 가이드 북</button>
+                        </div>
+                      </div>
+
+                      <div className="main-step">
+                        <div className="img-box">
+                          <img src={GuideTab4_02} alt="" className="img-pc" />
+                          <img src={GuideTab4_02_Mo} alt="" className="img-mo" />
+                        </div>
+                        <h4 className="sec-tit2">M&A 가이드 북</h4>
+                        <p className="cont-desc">
+                          M&A에 대해 궁금한 사항을 알기쉽게 기술한 가이드북을 배포하여 M&A에 대한 긍정적 분위기 확산.<br/>
+                          * 홈페이지를 통한 On-line 및 인쇄물을 통한 Off-line 제공 병행
+                        </p>
+                      </div>
+
+                      <div className="main-step">
+                        <div className="img-box">
+                          <img src={GuideTab4_03} alt="" className="img-pc" />
+                          <img src={GuideTab4_03_Mo} alt="" className="img-mo" />
+                        </div>
+                        <h4 className="sec-tit2">기업가 정신</h4>
+                        <p className="cont-desc">
+                          기업가정신 또는 창업가정신은 우리 주변에 있는 문제 또는 어려움 등을 단순하게 지나치지 않고 도전과 열정으로 창조적인 사고를 통하여 새로운 기회를 발견하고 이를 해결하고자 노력하는 마인드(mind)와 태도(attitude)라고 할 수 있습니다.
+                        </p>
+                      </div>
+                    </div>
                     
                   </div>
                   <div className={`tab-conts ${activeSubTabIndex === 4 ? 'active' : ''}`}>
