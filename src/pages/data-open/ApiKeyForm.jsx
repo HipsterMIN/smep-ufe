@@ -7,6 +7,7 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
 
   const [institutions, setInstitutions] = useState({});
   const [isDirectInput, setIsDirectInput] = useState(false);
+  const [appliedApis, setAppliedApis] = useState([]); // 1. 이미 신청된 API 코드들을 담을 상태
 
   // const [formData, setFormData] = useState({
   //   siteNm: '',
@@ -82,6 +83,26 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
     }
   }, [isOpen]);
 
+  // 2. 이미 신청된 내역 조회 (SELECT 쿼리 결과 호출)
+  useEffect(() => {
+    // mbrNo가 없을 때는 아예 호출하지 않도록 확실히 체크
+    if (isOpen && mbrNo && mbrNo !== '') {
+      const fetchAppliedHistory = async () => {
+        try {
+          const res = await apiClient.get(`/api/v1/apikey/apply/list?mbrNo=${mbrNo}`);
+
+          if (res.data) {
+            const appliedCodes = res.data.map(item => item.linkSiteCd);
+            setAppliedApis(appliedCodes);
+          }
+        } catch (error) {
+          console.error('기존 신청 내역 조회 실패', error);
+        }
+      };
+      fetchAppliedHistory();
+    }
+  }, [isOpen, mbrNo]); // mbrNo가 변경될 때마다 재실행
+
   // 셀렉트 박스 변경 핸들러
   const handleInstChange = (e) => {
     const val = e.target.value;
@@ -98,6 +119,7 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
   const handleCheckboxChange = (e) => {
     const { value, checked } = e.target;
     const { linkSiteCd } = formData;
+    if (appliedApis.includes(value)) return;
 
     if (checked) {
       // 체크되면 배열에 추가
@@ -355,7 +377,8 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
                     type="checkbox"
                     id="hk_1-1a"
                     value="TE01" // 실제 DB에 들어갈 코드값
-                    checked={formData.linkSiteCd.includes('TE01')}
+                    checked={formData.linkSiteCd.includes('TE01') || appliedApis.includes('TE01')} // 이미 신청됐으면 체크 표시
+                    disabled={appliedApis.includes('TE01')} // 3. 이미 신청된 경우 비활성화
                     onChange={handleCheckboxChange}
                   />
                   <label htmlFor="hk_1-1a">지원사업정보 API</label>
@@ -365,7 +388,8 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
                     type="checkbox"
                     id="hk_1-2a"
                     value="TE02"
-                    checked={formData.linkSiteCd.includes('TE02')}
+                    checked={formData.linkSiteCd.includes('TE02') || appliedApis.includes('TE02')}
+                    disabled={appliedApis.includes('TE02')}
                     onChange={handleCheckboxChange}
                   />
                   <label htmlFor="hk_1-2a">행사정보 API</label>
@@ -378,7 +402,8 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
                     type="checkbox"
                     id="chk_1-3a"
                     value="TE03"
-                    checked={formData.linkSiteCd.includes('TE03')}
+                    checked={formData.linkSiteCd.includes('TE03') || appliedApis.includes('TE03')}
+                    disabled={appliedApis.includes('TE03')}
                     onChange={handleCheckboxChange}
                   />
                   <label htmlFor="chk_1-3a">이노비즈확인서</label>
@@ -388,7 +413,8 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
                     type="checkbox"
                     id="chk_1-4a"
                     value="TE04"
-                    checked={formData.linkSiteCd.includes('TE04')}
+                    checked={formData.linkSiteCd.includes('TE04') || appliedApis.includes('TE04')}
+                    disabled={appliedApis.includes('TE04')}
                     onChange={handleCheckboxChange}
                   />
                   <label htmlFor="chk_1-4a">벤처기업확인서</label>
@@ -398,7 +424,8 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
                     type="checkbox"
                     id="chk_1-5a"
                     value="TE05"
-                    checked={formData.linkSiteCd.includes('TE05')}
+                    checked={formData.linkSiteCd.includes('TE05') || appliedApis.includes('TE05')}
+                    disabled={appliedApis.includes('TE05')}
                     onChange={handleCheckboxChange}
                   />
                   <label htmlFor="chk_1-5a">메인비즈확인서</label>
