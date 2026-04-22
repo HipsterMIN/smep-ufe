@@ -13,7 +13,11 @@ const UI_USR_L_030 = lazy(() => import('@pages/UI_USR_L_030.jsx'));
 const UI_USR_L_040 = lazy(() => import('@pages/certificate/UI_USR_L_040.jsx'));
 const UI_USR_R_041 = lazy(() => import('@pages/certificate/UI_USR_R_041.jsx'));
 const UI_USR_P_042 = lazy(() => import('@pages/certificate/UI_USR_P_042.jsx'));
+const DpcIssue = lazy(() => import('@pages/certificate/issue-extra/DpcIssue.jsx'));
 const CbzIssue = lazy(() => import('@pages/certificate/issue-extra/CbzIssue.jsx'));
+const PfcIssue = lazy(() => import('@pages/certificate/issue-extra/PfcIssue.jsx'));
+const SmtcIssue = lazy(() => import('@pages/certificate/issue-extra/SmtcIssue.jsx'));
+const SmftIssue = lazy(() => import('@pages/certificate/issue-extra/SmftIssue.jsx'));
 const UI_USR_R_031 = lazy(() => import('@pages/UI_USR_R_031.jsx'));
 const UI_USR_R_480 = lazy(() => import('@pages/my-business/UI_USR_R_480.jsx'));
 const UI_USR_L_510 = lazy(() => import('@pages/my-business/UI_USR_L_510.jsx'));
@@ -50,7 +54,7 @@ const PlatformIntro = lazy(() => import('@pages/customer-support/PlatformIntro.j
 const VerifyPassword = lazy(() => import('@pages/my-business/VerifyPassword.jsx'));
 const UI_USR_W_411 = lazy( () => import('@pages/my-business/UI-USR-W-411.jsx'));
 
-const UI_USR_R_420 = lazy(() => import('@pages/my-business/UI-USR-R-420.jsx'));
+const UI_USR_R_420 = lazy(() => import('@pages/my-business/PasswordChange.jsx'));
 const UI_USR_W_430 = lazy(() => import('@pages/my-business/UI-USR-W-430.jsx'));
 const UI_USR_R_440 = lazy(() => import('@pages/my-business/UI-USR-R-440.jsx'));
 const UI_USR_R_450 = lazy(() => import('@pages/my-business/company/CompanyDetail.jsx'));
@@ -233,8 +237,24 @@ export const componentMap = {
         component: UI_USR_P_042,
       },
       {
+        path: 'Y101/dpc-issue',
+        component: DpcIssue,
+      },
+      {
         path: 'Y109/cbz-issue',
         component: CbzIssue,
+      },
+      {
+        path: 'Y113/pfc-issue',
+        component: PfcIssue,
+      },
+      {
+        path: ':prdocCd/smtc-issue',
+        component: SmtcIssue,
+      },
+      {
+        path: ':prdocCd/smft-issue',
+        component: SmftIssue,
       },
     ],
   },

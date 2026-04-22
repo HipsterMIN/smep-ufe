@@ -2,52 +2,27 @@ import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import ApiKeyForm from './ApiKeyForm';
-import {useState} from "react"; // 팝업 컴포넌트
+import { useNavigate } from 'react-router-dom';
+import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
 
 const VentureCertificateApi = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-
-  // 팝업 관련 상태 관리 (UI_USR_L_460 방식)
-  const [applyPopupOpen, setApplyPopupOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const mbrNo = "2025120500136492";
+  const {
+    isOpen,
+    submitting,
+    errorMessage,
+    memberInfo,
+    openPopup,
+    closePopup,
+    submitApply
+  } = useApiKeyApply();
 
   // ✅ 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
-
-  // 팝업 열기 핸들러
-  const handleOpenApplyPopup = () => {
-    setErrorMessage('');
-    setApplyPopupOpen(true);
-  };
-
-  // 팝업 닫기(초기화) 핸들러
-  const resetApplyPopupState = () => {
-    setApplyPopupOpen(false);
-    setSubmitting(false);
-    setErrorMessage('');
-  };
-
-  // 실제 신청 처리 핸들러
-  const handleApplySubmit = async () => {
-    setSubmitting(true);
-    setErrorMessage('');
-
-    try {
-      // 여기에 API 호출 로직 추가 (예: await apiClient.post(...))
-      console.log("신청 로직 실행");
-
-      // 성공 시 팝업 닫기
-      resetApplyPopupState();
-      alert('인증키 신청이 완료되었습니다.');
-    } catch (error) {
-      setErrorMessage(error?.message || '신청 중 오류가 발생했습니다.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  const navigate = useNavigate();
 
   return (
     <>
@@ -140,51 +115,56 @@ const VentureCertificateApi = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="ac"><span>0</span></td>
-                  <td><span>정상적으로 조회 되었습니다.</span></td>
-                  <td className="ac"><span>정상</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>2</span></td>
-                  <td><span>데이터가 없습니다.</span></td>
-                  <td className="ac"><span>정상</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>3</span></td>
-                  <td><span>확인서 발급기관과 연계 실패</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>5</span></td>
-                  <td><span>기타 메세지 오류</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>9</span></td>
-                  <td><span>인증키 오류 오류</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>10</span></td>
-                  <td><span>인증키 오류 해당 API의 인증키가 아닙니다.</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>11</span></td>
-                  <td><span>인증키 오류 존재하지 않는 인증키입니다.</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>12</span></td>
-                  <td><span>인증키가 필요합니다.</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>99</span></td>
-                  <td><span>기타 오류 발생</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
+              <tr>
+                <td className="ac"><span>0</span></td>
+                <td><span>정상적으로 조회 되었습니다.</span></td>
+                <td className="ac"><span>정상</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>2</span></td>
+                <td><span>데이터가 없습니다.</span></td>
+                <td className="ac"><span>정상</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>3</span></td>
+                <td><span>확인서 발급기관과 연계 실패</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>5</span></td>
+                <td><span>기타 메세지</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>9</span></td>
+                <td><span>인증키 오류</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>10</span></td>
+                <td><span>인증키 오류. 해당 API의 인증키가 아닙니다.</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>11</span></td>
+                <td><span>인증키 오류. 존재하지 않는 인증키입니다.</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>12</span></td>
+                <td><span>인증키가 필요합니다.</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>99</span></td>
+                <td><span>기타 오류 발생</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>429</span></td>
+                <td><span>사용량이 많습니다. 잠시 후 이용해 주세요</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
               </tbody>
             </table>
           </div>
@@ -199,7 +179,7 @@ const VentureCertificateApi = () => {
                 <code>
                   {`{
   "bizno" : "", // 사업자번호
-  "token" : "" // 인증키
+  "token" : "" // 인증키(header token 사용 권장)
 }`}
                 </code>
               </pre>
@@ -212,18 +192,26 @@ const VentureCertificateApi = () => {
               <pre className="code-pre">
                 <code>
                   {`{
-  "bizno": "",
-  "resultCd": "0",
-  "data": {
-    "score": "A",
-    "ceo_name": "",       // 대표자명
-    "innobiz_num": "",    // 확인서 번호
-    "co_name": "",        // 회사명
-    "co_addr": "",        // 주소
-    "inno_valday": "2017-11-21",     // 유효시작일
-    "inno_valday_end": "2020-11-20"  // 유효종료일
-  }
-}`}
+    "bizno": "",
+    "resultCd": "0",
+    "data": {
+    "vnti_ymd": "", // 벤처확인일자    
+    "vnia_sn": , // 벤처확인일렬번호      
+    "vnti_typ_nm": "",  // 밴처투자유형   
+    "rprsv_nm": "",  // 대표자명 
+    "hdofc_dtl_addr": "", // 본사상세주소    
+    "vntr_end_vld_ymd": "2024년 06월 02일 ", //벤처유효종료일자    
+    "vntr_bgng_vld_ymd": "2021년 06월 03일 ", //벤처유효시작일자    
+    "cnfmt_issu_no": "", // 확인서발급번호
+    "bizrno": "", // 사업자등록번호
+    "cmp_nm": "" // 기업명 
+    },
+    "crtfNm": " ",벤처기업확인서
+    "crtfCd": "Y106",
+   "resultMsg": " .",정상적으로 조회되었습니다 
+    "url": "www.smes.go.kr/ClipReport4/commonTibero.jsp?fileName=abc&CRTF_REQST_SNO=12341234", // 증명서 리포트 URL
+}
+`}
                 </code>
               </pre>
             </div>
@@ -233,19 +221,28 @@ const VentureCertificateApi = () => {
         {/* bottom btn */}
         <div className="onboard-btm-btngroup bt-0 ">
           <div> 
-            <button type="button" className="krds-btn tertiary xlarge">
+            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate('..')}>
               목록
             </button>
           </div>
           <div> 
             <button type="button" className="krds-btn primary xlarge"
-                    onClick={handleOpenApplyPopup}>
+                    onClick={() => openPopup(mbrNo)}>
               신청하기
               <i className="svg-icon ico-angle right"></i>
             </button>
           </div>
         </div>
-      </div> 
+      </div>
+      <ApiKeyForm
+          isOpen={isOpen}
+          onClose={closePopup}
+          submitting={submitting}
+          errorMessage={errorMessage}
+          memberInfo={memberInfo}
+          mbrNo={mbrNo}
+          onSubmit={(formData) => submitApply(mbrNo, formData)}
+      />
     </>
   );
 };

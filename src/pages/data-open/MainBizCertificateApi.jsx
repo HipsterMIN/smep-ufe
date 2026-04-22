@@ -1,6 +1,6 @@
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
-
+import { useNavigate } from 'react-router-dom';
 const MainBizCertificateApi = () => {
 
   const navigationData = {
@@ -37,7 +37,7 @@ const MainBizCertificateApi = () => {
     { label: '증명서 발급', link: '#' },
     { label: '증명서 발급', link: '#' },
   ];
-
+  const navigate = useNavigate();
   return (
     <>
       <SideNavigation
@@ -129,51 +129,56 @@ const MainBizCertificateApi = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="ac"><span>0</span></td>
-                  <td><span>정상적으로 조회 되었습니다.</span></td>
-                  <td className="ac"><span>정상</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>2</span></td>
-                  <td><span>데이터가 없습니다.</span></td>
-                  <td className="ac"><span>정상</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>3</span></td>
-                  <td><span>확인서 발급기관과 연계 실패</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>5</span></td>
-                  <td><span>기타 메세지 오류</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>9</span></td>
-                  <td><span>인증키 오류 오류</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>10</span></td>
-                  <td><span>인증키 오류 해당 API의 인증키가 아닙니다.</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>11</span></td>
-                  <td><span>인증키 오류 존재하지 않는 인증키입니다.</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>12</span></td>
-                  <td><span>인증키가 필요합니다.</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>99</span></td>
-                  <td><span>기타 오류 발생</span></td>
-                  <td className="ac"><span>오류</span></td>
-                </tr>
+              <tr>
+                <td className="ac"><span>0</span></td>
+                <td><span>정상적으로 조회 되었습니다.</span></td>
+                <td className="ac"><span>정상</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>2</span></td>
+                <td><span>데이터가 없습니다.</span></td>
+                <td className="ac"><span>정상</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>3</span></td>
+                <td><span>확인서 발급기관과 연계 실패</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>5</span></td>
+                <td><span>기타 메세지</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>9</span></td>
+                <td><span>인증키 오류</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>10</span></td>
+                <td><span>인증키 오류. 해당 API의 인증키가 아닙니다.</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>11</span></td>
+                <td><span>인증키 오류. 존재하지 않는 인증키입니다.</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>12</span></td>
+                <td><span>인증키가 필요합니다.</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>99</span></td>
+                <td><span>기타 오류 발생</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
+              <tr>
+                <td className="ac"><span>429</span></td>
+                <td><span>사용량이 많습니다. 잠시 후 이용해 주세요</span></td>
+                <td className="ac"><span>오류</span></td>
+              </tr>
               </tbody>
             </table>
           </div>
@@ -188,7 +193,7 @@ const MainBizCertificateApi = () => {
                 <code>
                   {`{
   "bizno" : "", // 사업자번호
-  "token" : "" // 인증키
+  "token" : "" // 인증키(header token 사용 권장)
 }`}
                 </code>
               </pre>
@@ -200,19 +205,31 @@ const MainBizCertificateApi = () => {
             <div className="subtitle-boxcon ">
               <pre className="code-pre">
                 <code>
-                  {`{
-  "bizno": "",
-  "resultCd": "0",
-  "data": {
-    "score": "A",
-    "ceo_name": "",       // 대표자명
-    "innobiz_num": "",    // 확인서 번호
-    "co_name": "",        // 회사명
-    "co_addr": "",        // 주소
-    "inno_valday": "2017-11-21",     // 유효시작일
-    "inno_valday_end": "2020-11-20"  // 유효종료일
-  }
-}`}
+                  {`{ 
+ "bizno": "",
+ "resultCd": "0",
+ "data" : [
+   {
+    "bizno": "",
+    "resultCd": "0",
+    "data": {
+        "BIZNO": "", //사업자번호
+        "VLD_SDT": "", //증명서유효시작일자
+        "REPER_NM": "", //대표자명
+        "VLD_EDT": "", //증명서유효종료일자
+        "ADRES2": null, //상세주소
+        "ADRES1": "", //기본주소
+        "NO_POST": "", //우편번호
+        "PRINT_DATE": "", //증명서발급일자
+        "ISS_NO": "", //증명서발급번호
+        "CMP_NM": "" //기업명
+    },
+    "crtfNm": "메인비즈확인서",
+    "crtfCd": "Y104",
+    "url": "", // 증명서 리포트 URL
+    "resultMsg": "정상적으로 조회되었습니다."
+   }
+]`}
                 </code>
               </pre>
             </div>
@@ -222,7 +239,7 @@ const MainBizCertificateApi = () => {
         {/* bottom btn */}
         <div className="onboard-btm-btngroup bt-0 ">
           <div> 
-            <button type="button" className="krds-btn tertiary xlarge">
+            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate('..')}>
               목록
             </button>
           </div>

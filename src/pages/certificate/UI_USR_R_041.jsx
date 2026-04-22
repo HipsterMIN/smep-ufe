@@ -75,7 +75,7 @@ const UI_USR_R_041 = () => {
         '/api/v1/certificate/eligibility',
         {
           prdocCd,
-          bizNo: '1378626719', // TODO: 로그인 구현 후 Zustand store bizno로 교체
+          bizNo: '2288105280', // TODO: 로그인 구현 후 Zustand store bizno로 교체
         },
       );
 
@@ -100,23 +100,28 @@ const UI_USR_R_041 = () => {
       return;
     }
 
-    // if (prdocCd === 'Y109'){
-    //   navigate(`${getFullPath('M_PIIO_00078')}/Y109/cbz-issue`, {
-    //     state: {
-    //       prdocCd,
-    //       prdocNm: data.prdocTtl,
-    //       prdocIssuGdCn: data.prdocIssuGdCn,
-    //     },
-    //   });
-    // } else {
-    navigate(`${getFullPath('M_PIIO_00078')}/${prdocCd}/apply`, {
-      state: {
-        prdocCd,
-        prdocNm: data.prdocTtl,
-        prdocIssuGdCn: data.prdocIssuGdCn,
-      },
-    });
-    //}
+    const base = getFullPath('M_PIIO_00078');
+
+    const state = {
+      prdocCd,
+      prdocNm: data.prdocTtl,
+      prdocIssuGdCn: data.prdocIssuGdCn,
+      elpblYn: data.elpblYn,
+    };
+
+    if (prdocCd === 'Y101') {
+      navigate(`${base}/Y101/dpc-issue`, { state });
+    } else if (prdocCd === 'Y109') {
+      navigate(`${base}/Y109/cbz-issue`, { state });
+    } else if (prdocCd === 'Y113') {
+      navigate(`${base}/Y113/pfc-issue`, { state });
+    } else if (['Y114', 'Y115', 'Y116', 'Y117'].includes(prdocCd)) {
+      navigate(`${base}/${prdocCd}/smtc-issue`, { state });
+    } else if (prdocCd === 'Y121') {
+      navigate(`${base}/Y121/smft-issue`, { state });
+    } else {
+      navigate(`${base}/${prdocCd}/apply`, { state });
+    }
   };
 
   if (loading) return <div>로딩 중...</div>;
