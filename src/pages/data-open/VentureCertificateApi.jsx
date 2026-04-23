@@ -34,7 +34,7 @@ const VentureCertificateApi = () => {
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
           <p className="on-p1 on-colorblue">API안내</p>
-          <h2 className="h-tit">벤처기업확인서 API</h2>
+          <h2 className="h-tit">벤처기업확인서</h2>
         </div>
 
         <div className="conts-wrap mt-40">
