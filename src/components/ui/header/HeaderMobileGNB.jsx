@@ -1,4 +1,4 @@
-import React, { useState, forwardRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
 import { Link } from 'react-router-dom';
 import { extractExternalUrl } from '@utils/menuUtils.js';
 import FullSystemPopup from '../../ui/FullSystemPopup';
@@ -34,14 +34,94 @@ const HeaderMobileGNB = forwardRef(({
   onExtendSession,
 }, ref) => {
   const [activeMobileTab, setActiveMobileTab] = useState(0);
+  const gnbBodyRef = useRef(null);
+  const subMenuSectionRefs = useRef([]);
+
+  /**
+   * 모바일 전체메뉴 스크롤 위치를 기준으로 좌측 1depth active를 동기화한다.
+   * 왜 필요한지: 사용자가 우측 목록을 스크롤로 탐색할 때도 현재 보고 있는 섹션이 좌측 메뉴에 즉시 반영되어
+   * "보이는 섹션"과 "강조된 1depth"가 어긋나는 UX 혼선을 방지해야 한다.
+   * 무엇을 하는지: 스크롤 컨테이너 상단 기준선과 각 섹션 위치를 비교해, 기준선을 지난 마지막 섹션 인덱스를 active로 반영한다.
+   * 주의할 점: 스크롤 이벤트는 매우 빈번하므로 requestAnimationFrame으로 계산 시점을 묶어 과도한 re-render를 피한다.
+   */
+  const syncActiveTabWithScroll = useCallback(() => {
+    const scrollContainer = gnbBodyRef.current;
+
+    if (!scrollContainer || menus.length === 0) {
+      return;
+    }
+
+    const activationLine = scrollContainer.getBoundingClientRect().top + 12;
+    let nextActiveIndex = 0;
+
+    for (let index = 0; index < menus.length; index += 1) {
+      const sectionElement = subMenuSectionRefs.current[index];
+      if (!sectionElement) {
+        continue;
+      }
+
+      const sectionTop = sectionElement.getBoundingClientRect().top;
+      if (sectionTop <= activationLine) {
+        nextActiveIndex = index;
+      }
+    }
+
+    setActiveMobileTab((prev) => (prev === nextActiveIndex ? prev : nextActiveIndex));
+  }, [menus.length]);
+
+  useEffect(() => {
+    subMenuSectionRefs.current = subMenuSectionRefs.current.slice(0, menus.length);
+
+    const scrollContainer = gnbBodyRef.current;
+    if (!scrollContainer) {
+      return;
+    }
+
+    let rafId = null;
+    const handleScroll = () => {
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+      }
+
+      rafId = window.requestAnimationFrame(() => {
+        syncActiveTabWithScroll();
+        rafId = null;
+      });
+    };
+
+    // 초기 렌더 직후 현재 스크롤 위치 기준으로 active를 맞춰 두어, 첫 진입 시 강조 상태가 어긋나지 않도록 한다.
+    syncActiveTabWithScroll();
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', syncActiveTabWithScroll);
+
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', syncActiveTabWithScroll);
+
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+      }
+    };
+  }, [menus.length, syncActiveTabWithScroll]);
 
   const handleMobileTabClick = (e, index) => {
     e.preventDefault();
     setActiveMobileTab(index);
-    const targetId = `mGnb-anchor${index + 1}`;
-    const targetElement = document.getElementById(targetId);
-    if (targetElement) {
-      targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const targetElement = subMenuSectionRefs.current[index];
+    const scrollContainer = gnbBodyRef.current;
+
+    if (targetElement && scrollContainer) {
+      /**
+       * 클릭 이동도 동일한 스크롤 컨테이너 기준으로 처리한다.
+       * 왜 필요한지: 브라우저 기본 scrollIntoView는 상위 스크롤 컨테이너 판단에 따라 예상과 다른 스크롤이 발생할 수 있다.
+       * 무엇을 하는지: 컨테이너와 타겟의 현재 위치 차이를 계산해 컨테이너 scrollTop을 직접 보정한다.
+       * 주의할 점: 부드러운 이동 중에는 scroll 이벤트가 연속 발생하므로 active 갱신은 위의 스크롤 동기화 로직이 최종 상태를 보장한다.
+       */
+      const containerTop = scrollContainer.getBoundingClientRect().top;
+      const targetTop = targetElement.getBoundingClientRect().top;
+      const nextScrollTop = scrollContainer.scrollTop + (targetTop - containerTop);
+
+      scrollContainer.scrollTo({ top: nextScrollTop, behavior: 'smooth' });
     }
   };
 
@@ -121,7 +201,7 @@ const HeaderMobileGNB = forwardRef(({
 
           </div>
 
-          <div className="gnb-body">
+          <div className="gnb-body" ref={gnbBodyRef}>
             <div className="gnb-menu">
               <div className="menu-wrap">
                 <ul role="tablist">
@@ -146,6 +226,9 @@ const HeaderMobileGNB = forwardRef(({
                     role="tabpanel"
                     aria-labelledby={`tab-${index}`}
                     key={menu.menuId}
+                    ref={(element) => {
+                      subMenuSectionRefs.current[index] = element;
+                    }}
                   >
                     <h2 className="sub-title">{menu.menuNm}</h2>
                     <ul>
