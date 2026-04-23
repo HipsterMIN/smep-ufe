@@ -319,7 +319,7 @@ export default function Header() {
   };
 
   const handleMyPage = () => {
-    navigate(getFullPath('M_PIIO_00114'));
+    navigate('/mb');
   };
 
   const handleOpenMobGnb = () => {
