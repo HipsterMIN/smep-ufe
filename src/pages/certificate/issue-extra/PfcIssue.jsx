@@ -4,11 +4,13 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 
 const PfcIssue = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
+  const { brno, cmpNm } = useAuthStore((state) => ({ brno: state.bizno, cmpNm: state.cmpNm }));
 
   const [records, setRecords]               = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -20,13 +22,12 @@ const PfcIssue = () => {
   const depth1Menu  = getDepth1Parent();
 
   const goBack = () => navigate(-1);
-  const brno   = '1378604388';
 
   useEffect(() => {
     const fetchRecords = async () => {
       setIsFetching(true);
       try {
-        const data = await apiClient.get(`/api/v1/certificate/pfc/records?brno=${brno}`);
+        const data = await apiClient.get('/api/v1/certificate/pfc/records');
         setRecords(data?.data?.records || []);
       } catch (e) {
         console.error('PFC 목록 조회 실패:', e);
@@ -54,7 +55,6 @@ const PfcIssue = () => {
       setIsLoading(true);
       const prdocIssuAplyNo = await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
-        brno,
         prdocIssuTypeCd: 'Y301',
         extraParams: {
           reqstNo: selectedRecord.reqstNo,
@@ -85,7 +85,6 @@ const PfcIssue = () => {
       setIsLoading(true);
       await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
-        brno,
         prdocIssuTypeCd: 'Y302',
         extraParams: {
           reqstNo: selectedRecord.reqstNo,
@@ -133,7 +132,7 @@ const PfcIssue = () => {
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper w-360">
-                  <input type="text" id="id_01" className="krds-input small" value="2288105280" readOnly />
+                  <input type="text" id="id_01" className="krds-input small" value={brno} readOnly />
                 </div>
               </dd>
             </div>
@@ -145,7 +144,7 @@ const PfcIssue = () => {
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper w-360">
-                  <input type="text" id="id_02" className="krds-input small" value="주식회사" readOnly />
+                  <input type="text" id="id_02" className="krds-input small" value={cmpNm} readOnly />
                 </div>
               </dd>
             </div>

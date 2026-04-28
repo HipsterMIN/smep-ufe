@@ -5,11 +5,13 @@ import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Popup from '@components/ui/Popup.jsx';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 
 const DpcIssue = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
+  const userId = useAuthStore((state) => state.user?.id);
 
   const [productList, setProductList]         = useState([]);
   const [selectedCode, setSelectedCode]       = useState('');
@@ -28,13 +30,11 @@ const DpcIssue = () => {
   const sidebarData = getSideNavigationData();
   const depth1Menu  = getDepth1Parent();
 
-  const brno = '2288105280'; // TODO: 로그인 사용자 사업자번호로 교체
-
   useEffect(() => {
     const fetchProducts = async () => {
       setIsFetching(true);
       try {
-        const response = await apiClient.get(`/api/v1/certificate/dpc/records?brno=${brno}`);
+        const response = await apiClient.get('/api/v1/certificate/dpc/records');
         if (response.data.resCd === '-1') {
           setIsIneligible(true);
         } else {
@@ -68,7 +68,6 @@ const DpcIssue = () => {
       setIsLoading(true);
       const prdocIssuAplyNo = await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
-        brno,
         prdocIssuTypeCd: 'Y301',
         extraParams: { cmpetPrductCode: selectedCode },
       });
@@ -96,7 +95,6 @@ const DpcIssue = () => {
       setIsLoading(true);
       await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
-        brno,
         prdocIssuTypeCd: 'Y302',
         extraParams: { cmpetPrductCode: selectedCode },
       });
@@ -115,7 +113,7 @@ const DpcIssue = () => {
       setSurveyProduct(item);
       setIsSurveyLoading(true);
       setSurveyAnswers({});
-      const response = await apiClient.get(`/api/v1/certificate/dpc/survey?brno=${brno}`);
+      const response = await apiClient.get('/api/v1/certificate/dpc/survey');
       setSurveyData(response.data.record);
       setIsSurveyOpen(true);
     } catch (e) {
@@ -153,10 +151,9 @@ const DpcIssue = () => {
       });
 
       await apiClient.post('/api/v1/certificate/dpc/survey', {
-        bsnmNo: brno,
         bizCrtfcSeReq: prdocCd,
         cmpetPrductCode: surveyProduct.cmpetPrductCode,
-        cmpMbrId: 'ucube', // TODO: 로그인 사용자 ID로 교체
+        cmpMbrId: userId,
         survey,
       });
 

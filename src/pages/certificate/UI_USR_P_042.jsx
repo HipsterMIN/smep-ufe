@@ -6,11 +6,13 @@ import { api as apiClient } from '@lib/apiClient.js';
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 
 const UI_USR_P_042 = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn, elpblYn } = location.state || {};
+  const { brno, cmpNm } = useAuthStore((state) => ({ brno: state.bizno, cmpNm: state.cmpNm }));
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -55,7 +57,6 @@ const UI_USR_P_042 = () => {
 
       await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
-        brno,
         prdocIssuTypeCd: 'Y302',
       });
 
@@ -119,7 +120,7 @@ const UI_USR_P_042 = () => {
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
                   <input type="text" id="id_02" className="krds-input small"
-                    placeholder="상호를 입력해주세요" value="유큐브" disabled />
+                    placeholder="상호를 입력해주세요" value={cmpNm} disabled />
                 </div>
               </dd>
             </div>

@@ -4,11 +4,13 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 
 const SmftIssue = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
+  const { brno } = useAuthStore((state) => ({ brno: state.bizno }));
 
   const [records, setRecords]                       = useState([]);
   const [cmpNm, setCmpNm]                           = useState('');
@@ -22,14 +24,13 @@ const SmftIssue = () => {
   const depth1Menu  = getDepth1Parent();
 
   const goBack = () => navigate(-1);
-  const brno   = '1538701997'; // TODO: 실제 로그인 사용자 사업자번호로 교체
 
   // 종사업장 목록 조회
   useEffect(() => {
     const fetchRecords = async () => {
       setIsFetching(true);
       try {
-        const res = await apiClient.get(`/api/v1/certificate/smft/records?brno=${brno}`);
+        const res = await apiClient.get('/api/v1/certificate/smft/records');
         const data = res?.data;
         setRecords(data?.records || []);
         setCmpNm(data?.cmpNm || '');
@@ -71,7 +72,6 @@ const SmftIssue = () => {
       setIsLoading(true);
       const prdocIssuAplyNo = await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
-        brno,
         prdocIssuTypeCd: 'Y301',
         extraParams: { crtfIssuNo: selectedCrtfIssuNo },
       });
@@ -98,7 +98,6 @@ const SmftIssue = () => {
       setIsLoading(true);
       await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
-        brno,
         prdocIssuTypeCd: 'Y302',
         extraParams: { crtfIssuNo: selectedCrtfIssuNo },
       });
