@@ -30,7 +30,7 @@ const ApiInfo = () => {
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap side-conts" data-type="responsive">
           <h2 className="h-tit">
-            정책정보 개방
+            API 소개
           </h2>
         </div>
 

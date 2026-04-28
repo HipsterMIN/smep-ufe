@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
@@ -65,7 +65,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const authToken = useAuthStore((state) => state.token);
-
+  const isQnaPage = location.pathname.includes('UI_USR_L_230');
   // 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -200,7 +200,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">{boardTitle}</h2>
+          <h2 className="h-tit">{isQnaPage ? "API Q&A" : boardTitle}</h2>
         </div>
         <div className="search-top-box">
           <div className="sch-form-wrap">
@@ -242,6 +242,20 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
             </div>
           </div>
         </div>
+        {/* isQnaPage가 true일 때만 이 영역이 보입니다 */}
+        {isQnaPage && (
+            <div className="tab fill full mt-48">
+              <ul>
+                <li><Link to="/cs/opndata/UI_USR_L_210" className="btn-tab">API 소개</Link></li>
+                <li><Link to="/cs/opndata/UI_USR_L_220" className="btn-tab">인증키 신청</Link></li>
+                <li className="active">
+                  <Link to="/cs/opndata/UI_USR_L_230" className="btn-tab">
+                    API Q&A <span className="sr-only">현재 페이지</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+        )}
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
             <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
@@ -277,77 +291,77 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
               <col style={{ width: '7.4 %' }} />
             </colgroup>
             <thead>
-              <tr>
-                <th scope="col" className="ac">번호</th>
-                <th scope="col" className="ac">카테고리</th>
-                <th scope="col" className="ac">제목</th>
-                <th scope="col" className="ac">작성</th>
-                <th scope="col" className="ac">처리상태</th>
-                <th scope="col" className="ac">작성일</th>
-                <th scope="col" className="ac views">조회</th>
-              </tr>
+            <tr>
+              <th scope="col" className="ac">번호</th>
+              <th scope="col" className="ac">카테고리</th>
+              <th scope="col" className="ac">제목</th>
+              <th scope="col" className="ac">작성</th>
+              <th scope="col" className="ac">처리상태</th>
+              <th scope="col" className="ac">작성일</th>
+              <th scope="col" className="ac views">조회</th>
+            </tr>
             </thead>
             <tbody>
-              {loading ? (
+            {loading ? (
                 <tr>
                   <td className="ac" colSpan={7}>
                     <span>로딩 중입니다.</span>
                   </td>
                 </tr>
-              ) : postList.length === 0 ? (
+            ) : postList.length === 0 ? (
                 <tr>
                   <td className="ac" colSpan={7}>
                     <span>조회된 데이터가 없습니다.</span>
                   </td>
                 </tr>
-              ) : (
+            ) : (
                 postList.map((item, index) => (
-                  <tr key={item?.pstNo ?? `${item?.pstTtl ?? 'qna'}-${index}`}>
-                    <th scope="row" className="ac">
-                      <span>{item?.pstNo ?? '-'}</span>
-                    </th>
-                    <td className="ac"><span>{item?.ctgryNm || '-'}</span></td>
-                    <td>
-                      <a
-                        className="onellipsis-1"
-                        href="#"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          moveToDetail(item?.pstNo);
-                        }}
-                      >
-                        {item?.upendPstgYn === 'Y' && <span className="krds-badge bg-light-primary">공지</span>}
-                        <span>{item?.pstTtl || '-'}</span>
-                      </a>
-                    </td>
-                    <td className="ac"><span>{item?.pstRgtrNm || '-'}</span></td>
-                    <td className="ac"><span>{getAnswerStatus(item)}</span></td>
-                    <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
-                    <td className="ac views"><span>{item?.inqCnt ?? 0}</span></td>
-                  </tr>
+                    <tr key={item?.pstNo ?? `${item?.pstTtl ?? 'qna'}-${index}`}>
+                      <th scope="row" className="ac">
+                        <span>{item?.pstNo ?? '-'}</span>
+                      </th>
+                      <td className="ac"><span>{item?.ctgryNm || '-'}</span></td>
+                      <td>
+                        <a
+                            className="onellipsis-1"
+                            href="#"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              moveToDetail(item?.pstNo);
+                            }}
+                        >
+                          {item?.upendPstgYn === 'Y' && <span className="krds-badge bg-light-primary">공지</span>}
+                          <span>{item?.pstTtl || '-'}</span>
+                        </a>
+                      </td>
+                      <td className="ac"><span>{item?.pstRgtrNm || '-'}</span></td>
+                      <td className="ac"><span>{getAnswerStatus(item)}</span></td>
+                      <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
+                      <td className="ac views"><span>{item?.inqCnt ?? 0}</span></td>
+                    </tr>
                 ))
-              )}
+            )}
             </tbody>
           </table>
         </div>
         {/* table [E] */}
         {!loading && totalPages > 0 && (
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage + 1}
-            onPageChange={handlePageChange}
-            syncUrl
-          />
+            <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage + 1}
+                onPageChange={handlePageChange}
+                syncUrl
+            />
         )}
 
         {isLoggedIn && (
-          <div className="onboard-btm-btngroup btn-single bt-0">
-            <div>
-              <button type="button" className="krds-btn primary xlarge" onClick={moveToWrite}>
-                문의하기
-              </button>
+            <div className="onboard-btm-btngroup btn-single bt-0">
+              <div>
+                <button type="button" className="krds-btn primary xlarge" onClick={moveToWrite}>
+                  문의하기
+                </button>
+              </div>
             </div>
-          </div>
         )}
       </div>
     </>
