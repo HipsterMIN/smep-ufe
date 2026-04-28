@@ -50,10 +50,12 @@ const Pbanc = () => {
       const nextSearchType = overrides.searchType ?? searchType;
       const nextBizPbancClsfCd = overrides.bizPbancClsfCd ?? bizPbancClsfCd;
       const nextApplyStatus = overrides.applyStatus ?? applyStatus;
+      const nextSize = overrides.size ?? size;
+      const nextSortType = overrides.sortType ?? sortType;
 
       params.set('page', String(pageParam));
-      params.set('size', String(size));
-      params.set('sortType', sortType);
+      params.set('size', String(nextSize));
+      params.set('sortType', nextSortType);
       params.set('bizPbancTypeCd', bizPbancTypeCd);
 
       if (nextSearchText.trim()) params.set('searchText', nextSearchText.trim());
@@ -99,9 +101,23 @@ const Pbanc = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    search(1);
+    setSearchText('');
+    setSearchType('');
+    setBizPbancClsfCd('');
+    setApplyStatus('AVAILABLE');
+    setSize(DEFAULT_SIZE);
+    setSortType(DEFAULT_SORT);
+
+    search(1, {
+      searchText: '',
+      searchType: '',
+      bizPbancClsfCd: '',
+      applyStatus: 'AVAILABLE',
+      size: DEFAULT_SIZE,
+      sortType: DEFAULT_SORT,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentMenu?.menuId]);
 
   useEffect(() => {
     let mounted = true;
