@@ -90,7 +90,7 @@ const UI_USR_L_220 = () => {
         <div className="contents">
           <Breadcrumb items={breadcrumbItems} />
           <div className="page-title-wrap side-conts" data-type="responsive">
-            <h2 className="h-tit">정책정보 개방</h2>
+            <h2 className="h-tit">인증키 신청</h2>
           </div>
 
           <p className="guide-txt">

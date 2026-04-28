@@ -36,7 +36,7 @@ const RelatedSystems = lazy(() => import('@pages/more-service/RelatedSystems.jsx
 const UI_USR_L_170 = lazy(() => import('@pages/more-service/UI_USR_L_170.jsx'));
 const ApiInfo = lazy(() => import('@pages/data-open/ApiInfo.jsx'));
 const UI_USR_L_220 = lazy(() => import('@pages/data-open/UI-USR-L-220.jsx'));
-const UI_USR_L_230 = lazy(() => import('@pages/data-open/UI-USR-L-230.jsx'));
+const UI_USR_L_230 = lazy(() => import('@pages/board/BoardResolver.jsx'));
 const SupportBusinessInfoApi = lazy(() => import('@pages/data-open/SupportBusinessInfoApi.jsx'));
 const EventInfoApi = lazy(() => import('@pages/data-open/EventInfoApi.jsx'));
 const InnoBizCertificateApi = lazy(() => import('@pages/data-open/InnoBizCertificateApi.jsx'));
@@ -432,11 +432,11 @@ export const componentMap = {
 
   // API Q&A
   'M_PIIO_00098': {
-    component: UI_USR_L_230,
+    component: BoardResolver,
     layout: SubpageLayoutWithMenu,
     children: [
-      { path: 'create', component: UI_USR_W_231 }, // API Q&A 등록
-      { path: ':id', component: UI_USR_R_232 }, // API Q&A 상세
+      { path: 'save', component: BoardWriteResolver }, // API Q&A 등록 /수정
+      { path: ':id', component: BoardPostResolver }, // API Q&A 상세
     ],
   },
 

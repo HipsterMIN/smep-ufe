@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
-import { api as apiClient } from '@lib/apiClient.js';
+import {api as apiClient, apiBaseUrl} from '@lib/apiClient.js';
 
 const EMPTY_HTML_PATTERNS = new Set([
   '<p style="text-align: left;"></p>',
@@ -83,6 +83,14 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
     };
   }, [bbsNo, pstNo]);
 
+  const downloadFile = (atchFileId, atchFileSn) => {
+    if (!atchFileId || atchFileSn == null) return;
+    window.location.href = `${apiBaseUrl}/api/v1/files/download/${atchFileId}/${atchFileSn}`;
+  };
+
+  const attachedFiles = useMemo(() => {
+    return postDetail?.attachFiles || [];
+  }, [postDetail]);
   const postTitle = useMemo(() => postDetail?.pstTtl || '-', [postDetail]);
   const categoryName = useMemo(() => postDetail?.ctgryNm || '-', [postDetail]);
   const visibilityLabel = useMemo(() => {
@@ -114,6 +122,7 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
   const moveToList = () => {
     navigate('..');
   };
+  console.log(attachedFiles);
 
   return (
     <>
@@ -122,7 +131,7 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
         menuItems={sidebarData}
       />
       <div className="contents">
-        <Breadcrumb items={breadcrumbItems} />
+        <Breadcrumb items={breadcrumbItems}/>
         <div className="page-title-wrap" data-type="responsive">
           <h2 className="h-tit2">{postTitle}</h2>
         </div>
@@ -146,22 +155,46 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
 
         {/* 게시글 내용 */}
 
-        <div className="onboard-conts-area">
-          <p dangerouslySetInnerHTML={{ __html: contentHtml }} />
-          <br /><br />
-        </div>
+        <br/><br/>
+        <p dangerouslySetInnerHTML={{__html: contentHtml}}/>
+
+        <br/><br/>
+        {attachedFiles.length > 0 && (
+            <div className="onbox-group-areawrap">
+              <p className="onbox-group-title">첨부파일</p>
+              <ul className="box-group-area">
+                {attachedFiles.map((file, index) => (
+                    <li key={`${file?.atchFileId ?? 'atch'}-${file?.atchFileSn ?? index}`}>
+                      <p className="tit">
+                        <i className="svg-icon ico-file2"></i>
+                        {file?.orgnlFileNm || '-'}
+                      </p>
+                      <div className="btn-wrap">
+                        <button
+                            type="button"
+                            className="krds-btn medium text on-colorblue"
+                            onClick={() => downloadFile(file?.atchFileId, file?.atchFileSn)}
+                        >
+                          <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
+                        </button>
+                      </div>
+                    </li>
+                ))}
+              </ul>
+            </div>
+        )}
 
 
         {/* 하단 버튼 */}
         <div className="onboard-btm-btngroup">
           {hasAnswer && (
-            <div className="onanswerbox">
-              <dl>
-                <dt>담당자</dt>
-                <dd className="usrNm">{answerManagerName}</dd>
-              </dl>
-              <p className="answer-txt" dangerouslySetInnerHTML={{ __html: answerHtml }} />
-            </div>
+              <div className="onanswerbox">
+                <dl>
+                  <dt>담당자</dt>
+                  <dd className="usrNm">{answerManagerName}</dd>
+                </dl>
+                <p className="answer-txt" dangerouslySetInnerHTML={{__html: answerHtml}}/>
+              </div>
           )}
           <div>
             <button type="button" className="krds-btn tertiary xlarge" onClick={moveToList}>
