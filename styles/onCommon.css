@@ -4627,9 +4627,15 @@ textarea.krds-input::placeholder {
   .krds-table-wrap .tbl.data.t-block .btn-flex .krds-btn:first-of-type {
     flex: 1;
   }
-
   .krds-structured-list .card-body .c-btn-pos {
     bottom: 30px;
+  }
+  .krds-structured-list .card-body {
+    height: auto;
+  }
+  .krds-structured-list.type-full .card-form {
+    flex-wrap: wrap;
+    gap: 1.6rem;
   }
 }
 .on-searchoption-toggle {
