@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
-import {api as apiClient, apiBaseUrl} from '@lib/apiClient.js';
+import { api as apiClient, apiBaseUrl } from '@lib/apiClient.js';
 
 const EMPTY_HTML_PATTERNS = new Set([
   '<p style="text-align: left;"></p>',
@@ -88,9 +88,12 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
     window.location.href = `${apiBaseUrl}/api/v1/files/download/${atchFileId}/${atchFileSn}`;
   };
 
+  const isPrivatePostHidden = useMemo(() => Boolean(postDetail?.privatePostHidden), [postDetail]);
+
   const attachedFiles = useMemo(() => {
+    if (isPrivatePostHidden) return [];
     return postDetail?.attachFiles || [];
-  }, [postDetail]);
+  }, [isPrivatePostHidden, postDetail]);
   const postTitle = useMemo(() => postDetail?.pstTtl || '-', [postDetail]);
   const categoryName = useMemo(() => postDetail?.ctgryNm || '-', [postDetail]);
   const visibilityLabel = useMemo(() => {
@@ -100,10 +103,11 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
   const regDate = useMemo(() => formatDate(postDetail?.pstRegDt ?? postDetail?.regDt), [postDetail]);
   const writerName = useMemo(() => postDetail?.pstRgtrNm || '-', [postDetail]);
   const answerHtml = useMemo(() => {
+    if (isPrivatePostHidden) return '';
     const rawAnswer = String(postDetail?.pstAnsCn ?? '').trim();
     if (!isMeaningfulHtml(rawAnswer)) return '';
     return rawAnswer;
-  }, [postDetail]);
+  }, [isPrivatePostHidden, postDetail]);
   const hasAnswer = useMemo(() => answerHtml.length > 0, [answerHtml]);
   const answerManagerName = useMemo(() => {
     const rawManagerName = postDetail?.pstMdfrNm ?? postDetail?.pstRgtrNm;
@@ -114,10 +118,11 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
   const contentHtml = useMemo(() => {
     if (loading) return '게시물 상세 정보를 불러오는 중입니다.';
     if (errorMessage) return errorMessage;
+    if (isPrivatePostHidden) return '비공개 게시글입니다';
     const rawContent = postDetail?.pstCn;
     if (rawContent && String(rawContent).trim()) return rawContent;
     return '-';
-  }, [loading, errorMessage, postDetail]);
+  }, [loading, errorMessage, isPrivatePostHidden, postDetail]);
 
   const moveToList = () => {
     navigate('..');
@@ -154,47 +159,39 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
         </ul>
 
         {/* 게시글 내용 */}
-
         <br/><br/>
-        <p dangerouslySetInnerHTML={{__html: contentHtml}}/>
-
+        <p dangerouslySetInnerHTML={{ __html: contentHtml }}/>
         <br/><br/>
         {attachedFiles.length > 0 && (
-            <div className="onbox-group-areawrap">
-              <p className="onbox-group-title">첨부파일</p>
-              <ul className="box-group-area">
-                {attachedFiles.map((file, index) => (
-                    <li key={`${file?.atchFileId ?? 'atch'}-${file?.atchFileSn ?? index}`}>
-                      <p className="tit">
-                        <i className="svg-icon ico-file2"></i>
-                        {file?.orgnlFileNm || '-'}
-                      </p>
-                      <div className="btn-wrap">
-                        <button
-                            type="button"
-                            className="krds-btn medium text on-colorblue"
-                            onClick={() => downloadFile(file?.atchFileId, file?.atchFileSn)}
-                        >
-                          <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
-                        </button>
-                      </div>
-                    </li>
-                ))}
-              </ul>
-            </div>
+          <div className="onbox-group-areawrap">
+            <p className="onbox-group-title">첨부파일</p>
+            <ul className="box-group-area">
+              {attachedFiles.map((file, index) => (
+                <li key={`${file?.atchFileId ?? 'atch'}-${file?.atchFileSn ?? index}`}>
+                  <p className="tit">
+                    <i className="svg-icon ico-file2"></i>
+                    {file?.orgnlFileNm || '-'}
+                  </p>
+                  <div className="btn-wrap">
+                    <button type="button" className="krds-btn medium text on-colorblue" onClick={() => downloadFile(file?.atchFileId, file?.atchFileSn)}>
+                      <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
-
-
         {/* 하단 버튼 */}
         <div className="onboard-btm-btngroup">
           {hasAnswer && (
-              <div className="onanswerbox">
-                <dl>
-                  <dt>담당자</dt>
-                  <dd className="usrNm">{answerManagerName}</dd>
-                </dl>
-                <p className="answer-txt" dangerouslySetInnerHTML={{__html: answerHtml}}/>
-              </div>
+            <div className="onanswerbox">
+              <dl>
+                <dt>담당자</dt>
+                <dd className="usrNm">{answerManagerName}</dd>
+              </dl>
+              <p className="answer-txt" dangerouslySetInnerHTML={{ __html: answerHtml }}/>
+            </div>
           )}
           <div>
             <button type="button" className="krds-btn tertiary xlarge" onClick={moveToList}>
