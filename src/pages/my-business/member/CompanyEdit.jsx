@@ -12,6 +12,7 @@ import {
   fetchKsicTopLevelOptions,
   extractTopLevelKsicCd,
   updateCorporateMemberDetail,
+  fetchKedCorpInfo,
 } from '@/pages/my-business/member/memberUtils.js';
 import {
   parseDateFromYmd,
@@ -233,6 +234,26 @@ const UI_USR_W_452 = () => {
     : '';
   const isSigunguDisabled = loading || saving || sigunguLoading || !form.stdgCtpvCd;
 
+  const handleLoadKedInfo = async () => {
+    if (saving) return;
+
+    try {
+      setErrorMessage('');
+      const ked = await fetchKedCorpInfo(apiClient);
+
+      setForm((prev) => ({
+        ...prev,
+        entSclCd: ked.entSclCd || prev.entSclCd,
+        fndnDate: ked.fndnYmd ? parseDateFromYmd(ked.fndnYmd) : prev.fndnDate,
+        wrkrCntClsfCd: ked.wrkrCntClsfCd || prev.wrkrCntClsfCd,
+        mainBizFldNm: ked.mainBizFldNm || prev.mainBizFldNm,
+        // 매출액(slsAmtClsfCd), 소재지, 설명 등은 사용자가 직접 유지
+      }));
+    } catch (error) {
+      console.error('KED 기업정보 로드 실패:', error);
+    }
+  };
+
   return (
     <>
       <SideNavigation
@@ -250,9 +271,10 @@ const UI_USR_W_452 = () => {
             <p className="txt-caution">*표시는 필수 입력입니다.</p>
             <button
               type="button"
-              className="krds-btn small secondary"
-              disabled
-              title="KED정보 로드 확인 대기"
+              className="krds-btn secondary small"
+              title="KED정보 로드"
+              onClick={handleLoadKedInfo}
+              disabled={saving}
             >
               KED정보 로드
             </button>

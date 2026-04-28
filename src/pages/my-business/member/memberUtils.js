@@ -133,3 +133,14 @@ export const updateIndividualMemberInfo = async (apiClient, payload) =>
       payload,
     ),
   );
+
+// KED 기업정보 호출
+export const fetchKedCorpInfo = async (apiClient) => {
+  const response = normalizeApiPayload(
+    await apiClient.get('/api/v1/member/corporate/me/ked-info'),
+  );
+  if (!response) {
+    throw new Error('KED 기업정보를 불러오지 못했습니다.');
+  }
+  return response; // { entSclCd, fndnYmd, mainBizFldNm, wrkrCntClsfCd }
+};
