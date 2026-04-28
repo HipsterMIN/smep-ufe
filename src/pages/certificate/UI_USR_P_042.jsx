@@ -18,8 +18,6 @@ const UI_USR_P_042 = () => {
   const sidebarData = getSideNavigationData();
   const depth1Menu  = getDepth1Parent();
 
-  const brno = '2288105280'; // TODO: 실제 로그인 사용자 사업자번호로 교체
-
   const goBack = () => navigate(-1);
 
   const handlePrint = async () => {
@@ -31,7 +29,6 @@ const UI_USR_P_042 = () => {
 
       const prdocIssuAplyNo = await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
-        brno,
         prdocIssuTypeCd: 'Y301',
       });
 
