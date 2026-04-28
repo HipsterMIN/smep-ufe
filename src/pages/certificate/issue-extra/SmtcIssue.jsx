@@ -19,8 +19,6 @@ const SmtcIssue = () => {
   const sidebarData = getSideNavigationData();
   const depth1Menu  = getDepth1Parent();
 
-  const brno = '1378626719'; // TODO: 실제 로그인 사용자 사업자번호로 교체
-
   const goBack = () => navigate(-1);
 
   const validate = () => {
@@ -39,7 +37,6 @@ const SmtcIssue = () => {
 
       const prdocIssuAplyNo = await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
-        brno,
         prdocIssuTypeCd: 'Y301',
         extraParams: {
           lginId: lginId.trim(),
@@ -70,7 +67,6 @@ const SmtcIssue = () => {
 
       await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
-        brno,
         prdocIssuTypeCd: 'Y302',
         extraParams: {
           lginId: lginId.trim(),
