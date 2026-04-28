@@ -3,23 +3,12 @@ import { useEffect, useState } from 'react';
 import { api as apiClient } from '@lib/apiClient.js';
 
 // 부모에게서 상태를 전달받도록 Props 설정
-const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo, memberInfo }) => {
+const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo, memberInfo }) => {
 
   const [institutions, setInstitutions] = useState({});
   const [isDirectInput, setIsDirectInput] = useState(false);
   const [appliedApis, setAppliedApis] = useState([]); // 1. 이미 신청된 API 코드들을 담을 상태
-
-  // const [formData, setFormData] = useState({
-  //   siteNm: '',
-  //   apiRegAplyCn: '',
-  //   ogdpInstCd: '',       // 기관 코드
-  //   instNmDirect: '', // 직접 입력 시 기관명
-  //   picDeptNm: '',    // 부서 추가
-  //   picJbpsNm: '',    // 직위 추가
-  //   indvGnrlTelno: '', // 유선전화번호 추가
-  //   linkSiteCd: [], // 배열로 관리
-  //   usgSeCd: '',    // 용도구분(라디오)용
-  // });
+  const ALL_API_CODES = ['TE01', 'TE02', 'TE03', 'TE04', 'TE05'];
 
   const initialFormState = {
     siteNm: '',
@@ -137,8 +126,32 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
   };
 
   const handleInternalSubmit = () => {
-    if (!formData.siteNm || !formData.apiRegAplyCn) {
-      alert('필수 항목을 모두 입력해 주세요.');
+    const isAllApplied = ALL_API_CODES.every(code => appliedApis.includes(code));
+
+    if (isAllApplied) {
+      alert("모든 API가 이미 신청 완료되어 추가 신청이 불가능합니다.");
+      return;
+    }
+
+    if(formData.linkSiteCd.length === 0){
+      alert("신청할 API를 선택해 주세요.");
+      return;
+    }
+    if (!formData.siteNm) {
+      alert('시스템명을 입력해 주세요.');
+      return;
+    }
+    if (!formData.apiRegAplyCn) {
+      alert('활용목적을 입력해 주세요.');
+      return;
+    }
+    if (!formData.indvGnrlTelno) {
+      alert('유선 전화번호를 입력해 주세요.');
+      return;
+    }
+
+    if (!formData.usgSeCd){
+      alert("용도를 선택해 주세요.");
       return;
     }
     // 소속기관 체크

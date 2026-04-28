@@ -3,43 +3,11 @@ import Breadcrumb from '@components/ui/Breadcrumb';
 import { useNavigate } from 'react-router-dom';
 import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
 import ApiKeyForm from "@pages/data-open/ApiKeyForm.jsx";
+import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 const MainBizCertificateApi = () => {
-
-  const navigationData = {
-    depth1Title: '신청·발급',
-    depth: [
-      {
-        depth2: 'AI 스마트 통합 검색',
-      },
-      {
-        depth2: '지원사업 소개',
-      },
-      {
-        depth2: '사업공고',
-      },
-      {
-        depth2: '정책금융',
-      },
-      {
-        depth2: '증명서발급',
-        active: true,
-        depth3: [
-          {
-            label: '증명서 발급',
-            link: '/',
-            active: true,
-          },
-        ],
-      },
-    ],
-  };
-
-  const breadcrumbItems = [
-    { label: '신청·발급', link: '#' },
-    { label: '증명서 발급', link: '#' },
-    { label: '증명서 발급', link: '#' },
-  ];
+  const navigate = useNavigate();
+  const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const mbrNo = "2025120500381316";
   const {
@@ -51,12 +19,16 @@ const MainBizCertificateApi = () => {
     closePopup,
     submitApply
   } = useApiKeyApply();
-  const navigate = useNavigate();
+
+  // ✅ 사이드바 데이터 계산
+  const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
+  const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+
   return (
     <>
       <SideNavigation
-        pageTitle={navigationData.depth1Title}
-        depth={navigationData.depth}
+          pageTitle={depth1Menu?.menuNm || ''}
+          menuItems={sidebarData}
       />
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
