@@ -13,7 +13,10 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 const UI_USR_R_041 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent, getFullPath } = useUserMenu();
 
-  const { isLogin, cmpNm } = useAuthStore((state) => state.isLogin, (state) => state.cmpNm);
+  const { isLogin, cmpNm } = useAuthStore((state) => ({
+    isLogin: state.isLogin,
+    cmpNm: state.cmpNm,
+  }));
 
   const { prdocCd } = useParams();
   const navigate = useNavigate();
