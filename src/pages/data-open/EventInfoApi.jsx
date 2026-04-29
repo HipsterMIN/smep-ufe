@@ -5,11 +5,16 @@ import {useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
 import ApiKeyForm from './ApiKeyForm';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 
 const EventInfoApi = () => {
+  const userInfo = useAuthStore((state) => state.user);
+  const authToken = useAuthStore((state) => state.token);
+  const isLoggedIn = Boolean(authToken);
+  const mbrNo = userInfo?.id;
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-  const mbrNo = "2025120500381316";
+  // const mbrNo = "2025120500381316";
   const {
     isOpen,
     submitting,
@@ -63,6 +68,22 @@ const EventInfoApi = () => {
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
   const navigate = useNavigate();
+
+  const handleApplyClick = () => {
+    if (!isLoggedIn) {
+      requestLoginForScrap();
+      return;
+    }
+    openPopup(mbrNo); // 로그인 되어 있으면 팝업 열기
+  };
+
+  const requestLoginForScrap = () => {
+    const moveToLogin = window.confirm('로그인 후 인증키 신청이 가능합니다. 로그인 하시겠습니까?');
+    if (moveToLogin) {
+      navigate('/service/login');
+    }
+  };
+
   return (
     <>
       <SideNavigation
@@ -926,7 +947,7 @@ public class ApiExplorer {
           </div>
           <div> 
             <button type="button" className="krds-btn primary xlarge"
-                    onClick={() => openPopup(mbrNo)}>
+                    onClick={() => handleApplyClick(mbrNo)}>
               신청하기
               <i className="svg-icon ico-angle right"></i>
             </button>

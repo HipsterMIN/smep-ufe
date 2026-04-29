@@ -31,10 +31,10 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
     setFormData({
       ...initialFormState,
       // memberInfo가 있다면 기본값은 다시 채워줌
-      picDeptNm: memberInfo?.picDeptNm || '',
-      picJbpsNm: memberInfo?.picJbpsNm || '',
+      // picDeptNm: memberInfo?.picDeptNm || '',
+      // picJbpsNm: memberInfo?.picJbpsNm || '',
       indvEmlAddr: memberInfo?.emlAddr || '',
-      indvGnrlTelno: memberInfo?.indvGnrlTelno || '',
+      // indvGnrlTelno: memberInfo?.indvGnrlTelno || '',
     });
     setIsDirectInput(false);
   };
@@ -49,10 +49,10 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
     if (isOpen && memberInfo) {
       setFormData(prev => ({
         ...prev,
-        picDeptNm: memberInfo.picDeptNm || '',
-        picJbpsNm: memberInfo.picJbpsNm || '',
+        picDeptNm:  '',
+        picJbpsNm:  '',
         indvEmlAddr: memberInfo.emlAddr || '',
-        indvGnrlTelno: memberInfo.indvGnrlTelno || '',
+        indvGnrlTelno:  '',
       }));
     }
   }, [isOpen, memberInfo]);
