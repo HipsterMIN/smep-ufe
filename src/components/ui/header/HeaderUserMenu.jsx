@@ -70,21 +70,22 @@ export default function HeaderUserMenu({
     <>
       <button
         type="button"
-        className="on-mobile-none"
-        style={externalLinkButtonStyle}
+        className="btn-navi none-icon on-mobile-none"
         onClick={handleCollaborationInfoSystemClick}
       >
         협업정보시스템
       </button>
       <button
         type="button"
-        className="on-mobile-none"
-        style={externalLinkButtonStyle}
+        className="btn-navi none-icon on-mobile-none"
         onClick={handleBusinessProjectGroupClick}
       >
         비지니스사업단
       </button>
-      <button type="button" className="on-mobile-none" style={externalLinkButtonStyle} onClick={handleMnaClick}>
+      <button
+        type="button"
+        className="btn-navi none-icon on-mobile-none"
+        onClick={handleMnaClick}>
         M&amp;A
       </button>
     </>
