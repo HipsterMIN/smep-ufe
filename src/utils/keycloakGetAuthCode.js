@@ -39,7 +39,6 @@ export function onePassJoin() {
   let authUrl = `${KEYCLOAK_JOIN}?${params}`;
 
   console.log('joinUrl : ', authUrl);
-  window.alert(authUrl);
   window.location.href = authUrl;
 }
 
@@ -59,7 +58,6 @@ export function onePassGetAuthCode() {
 
   let authUrl = `${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/auth?${params}`;
   console.log('authUrl : ', authUrl);
-  window.alert(authUrl);
   window.location.href = authUrl;
 }
 

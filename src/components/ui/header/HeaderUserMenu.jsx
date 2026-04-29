@@ -18,7 +18,8 @@ export default function HeaderUserMenu({
   onSwitchContext,
 }) {
   const handleCollaborationInfoSystemClick = () => {
-    const url = '';
+    //협업정보시스템
+    const url = 'https://www.smes.go.kr/isso-dev/qsign/realms/ucube-qsign/protocol/openid-connect/auth?response_type=code&client_id=cobiz&redirect_uri=https://www.smes.go.kr/cobiz-iam/iam/oauth/loginCallback.do&scope=openid';
     if (!url) {
       return;
     }
@@ -27,7 +28,8 @@ export default function HeaderUserMenu({
   };
 
   const handleBusinessProjectGroupClick = () => {
-    const url = '';
+    //비지니스사업단
+    const url = 'https://www.smes.go.kr/isso-dev/qsign/realms/ucube-qsign/protocol/openid-connect/auth?response_type=code&client_id=bizlink&redirect_uri=https://www.smes.go.kr/bizlink-iam/iam/oauth/loginCallback.do&scope=openid';
     if (!url) {
       return;
     }
@@ -36,7 +38,7 @@ export default function HeaderUserMenu({
   };
 
   const handleMnaClick = () => {
-    const url = '';
+    const url = 'https://www.smes.go.kr/isso-dev/qsign/realms/ucube-qsign/protocol/openid-connect/auth?response_type=code&client_id=mna&redirect_uri=https://www.smes.go.kr/mna-iam/iam/oauth/loginCallback.do&scope=openid';
     if (!url) {
       return;
     }
