@@ -33,13 +33,13 @@ const UI_USR_R_002 = () => {
       // 시연 동안에만 기업 회원 탭은 사업자번호로 우회 로그인한다.
       const response = isCorporateDemoLogin
         ? await apiClient.post('/api/v1/auth/demo-corporate-login', {
-            brno: loginId,
-          })
+          brno: loginId,
+        })
         : await apiClient.post('/api/v1/auth/login', {
-            id: loginId,
-            password,
-            type: loginType,
-          });
+          id: loginId,
+          password,
+          type: loginType,
+        });
       const accessToken = response.accessToken || response.data?.accessToken;
       const refreshToken = response.refreshToken || response.data?.refreshToken;
       if (!accessToken) {
@@ -91,8 +91,14 @@ const UI_USR_R_002 = () => {
           </button>
         </div>
 
+        <style>{`
+          .login-form-area.login-form-area-no-divider::after {
+            display: none;
+          }
+        `}</style>
+
         <div className="login-contents">
-          <div className="login-form-area">
+          <div className="login-form-area login-form-area-no-divider">
             <div className="login-wrap">
               <fieldset>
                 <legend>로그인 폼</legend>
@@ -145,7 +151,7 @@ const UI_USR_R_002 = () => {
                     </ul>
                   </div>
                 </div>
-                <div className="sns-login">
+                {/*                <div className="sns-login">
                   <div className="login-sub-tit"><span>SNS 로그인</span></div>
                   <div className="sns-login-btns">
                     <button type="button" className="krds-btn large tertiary">
@@ -161,11 +167,11 @@ const UI_USR_R_002 = () => {
                       <span className="sns-login-tit">네이버</span>
                     </button>
                   </div>
-                </div>
+                </div>*/}
               </fieldset>
             </div>
 
-            <div className="other-login-methods">
+            {/*           <div className="other-login-methods">
               <div className="login-sub-tit">다른 로그인 방식을 찾고 계신가요?</div>
               <div className="other-login-box">
                 <ul className="other-login-btns">
@@ -199,7 +205,7 @@ const UI_USR_R_002 = () => {
                   </li>
                 </ul>
               </div>
-            </div>
+            </div>*/}
           </div>
 
 
