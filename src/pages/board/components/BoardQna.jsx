@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {Link, useNavigate} from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
@@ -200,7 +200,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">{isQnaPage ? "API Q&A" : boardTitle}</h2>
+          <h2 className="h-tit">{boardTitle}</h2>
         </div>
         <div className="search-top-box">
           <div className="sch-form-wrap">
