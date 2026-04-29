@@ -70,6 +70,8 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const isMainPage = location.pathname === '/';
+  const isLoginPage = location.pathname.endsWith('/service/login');
+  const showHeaderSearch = !isMainPage && !isLoginPage;
   const [remainingSeconds, setRemainingSeconds] = useState(null);
   const [isExtendingSession, setIsExtendingSession] = useState(false);
   
@@ -475,7 +477,7 @@ export default function Header() {
                 </div>
                 <div className="header-right">
                   {/* 검색란 */}
-                  {!isMainPage && (
+                  {showHeaderSearch && (
                     <div className="sch-input">
                       <input
                         type="text"
