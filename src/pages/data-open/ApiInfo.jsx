@@ -3,11 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 import React from 'react';
 import {apiBaseUrl} from "@lib/apiClient.js";
 
 const ApiInfo = () => {
-
+  const authToken = useAuthStore((state) => state.token);
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   // ✅ 사이드바 데이터 계산
@@ -16,7 +17,7 @@ const ApiInfo = () => {
   const handleGuideDownload = () => {
     const atchFileId = '20260422195859_03121';
     const atchFileSn = 1;
-
+    const isLoggedIn = Boolean(authToken);
     // 게시판 상세 페이지에서 사용한 것과 동일한 API 경로 사용
     window.location.href = `${apiBaseUrl}/api/v1/files/download/${atchFileId}/${atchFileSn}`;
   };
@@ -97,7 +98,7 @@ const ApiInfo = () => {
             <h4 className="sub-title">1. 증명(확인)서 정보 API <em className="txt-caution">※기업회원만 신청이 가능합니다.</em></h4>
             <p className="conts-desc">중소벤처24에서 확인 가능한 증명(확인)서 정보를 제공하는 API입니다. 지원사업 신청 시 자격요건에 증명(확인)서가 포함되어 있는 경우, 신청기업이 증명(확인)서를 제출하지 않더라도 API를 통해 간단히 자격여부 확인이 가능합니다.</p>
           </div>
-           
+
           <ul className="krds-structured-list type-full  mt-40">
             <li className="structured-item">
               <div  className="in">
@@ -189,7 +190,7 @@ const ApiInfo = () => {
                지역, 기관 성격 등에 적합한 콘텐츠를 현재 운영중인 서비스에 API 연계를 통해 적용할 수 있습니다.
             </p>
           </div>
-           
+
           <ul className="krds-structured-list type-full mt-40">
             <li className="structured-item">
               <div className="in">

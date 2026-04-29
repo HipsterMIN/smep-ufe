@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate} from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
@@ -9,9 +9,17 @@ import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
 import { api as apiClient } from '@lib/apiClient.js'; // API 클라이언트 추가
 import ApiKeyForm from './ApiKeyForm';
 import ApiKeyDetailView from './ApiKeyDetailView';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 const UI_USR_L_220 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-  const mbrNo = "2025120500381316"; // 고정 사용자 번호
+  // const mbrNo = "2025120500381316"; // 고정 사용자 번호
+  const navigate = useNavigate();
+  const userInfo = useAuthStore((state) => state.user);
+  const authToken = useAuthStore((state) => state.token);
+
+  const isLoggedIn = Boolean(authToken);
+
+  const mbrNo = userInfo?.id;
 
   const {
     isOpen,
@@ -84,6 +92,21 @@ const UI_USR_L_220 = () => {
     setSelectedDetail(row); // 행 데이터 저장
     setIsDetailOpen(true);  // 상세 전용 팝업 열기
   };
+
+  const handleApplyClick = () => {
+    if (!isLoggedIn) {
+      requestLoginForScrap();
+      return;
+    }
+    openPopup(mbrNo); // 로그인 되어 있으면 팝업 열기
+  };
+
+  const requestLoginForScrap = () => {
+    const moveToLogin = window.confirm('로그인 후 인증키 신청이 가능합니다. 로그인 하시겠습니까?');
+    if (moveToLogin) {
+      navigate('/service/login');
+    }
+  };
   return (
       <>
         <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />
@@ -110,11 +133,10 @@ const UI_USR_L_220 = () => {
               <li><Link to="/cs/opndata/UI_USR_L_230" className="btn-tab">API Q&A</Link></li>
             </ul>
           </div>
-
           <div className="conts-wrap mt-40">
             <h3 className="sec-tit side-conts">
               인증키 신청
-              <button type="button" className="krds-btn secondary small" onClick={() => openPopup(mbrNo)}>
+              <button type="button" className="krds-btn secondary small" onClick={() => handleApplyClick(mbrNo)}>
                 인증키 신청
               </button>
             </h3>
@@ -122,7 +144,6 @@ const UI_USR_L_220 = () => {
               중소벤처24의 Open API를 사용하시고자 하시는 기관 및 시스템 담당자께서는 인증키 신청서를 작성하여 인증키 정보를 확인하시거나, 중소벤처24 운영팀에게 문의해 주시면 담당자 확인 후 이메일로 인증키 정보를 보내드립니다.
             </p>
           </div>
-
           <div className="conts-wrap mt-40">
             <h3 className="sec-tit">인증키 신청 이력</h3>
 
@@ -180,9 +201,22 @@ const UI_USR_L_220 = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {isLoading ? (
-                    <tr><td colSpan="7" className="ac">데이터를 불러오는 중입니다...</td></tr>
+                {!isLoggedIn ? (
+                    /* 1. 로그인이 되어 있지 않은 경우 */
+                    <tr>
+                      <td colSpan="7" className="ac">
+                        인증키 신청 이력이 없습니다.
+                      </td>
+                    </tr>
+                ) : isLoading ? (
+                    /* 2. 로그인 상태이고 데이터를 불러오는 중인 경우 */
+                    <tr>
+                      <td colSpan="7" className="ac">
+                        데이터를 불러오는 중입니다...
+                      </td>
+                    </tr>
                 ) : pagedRows.length > 0 ? (
+                    /* 3. 로그인 상태이고 데이터가 존재하는 경우 */
                     pagedRows.map((row, index) => (
                         <tr key={index}>
                           <th scope="row" className="ac">
@@ -190,15 +224,18 @@ const UI_USR_L_220 = () => {
                           </th>
                           <td className="ac"><span>{row.ogdpInstNm}</span></td>
                           <td className="ac"><span>{row.siteNm}</span></td>
-                          <td className="ac" onClick={() => handleViewDetail(row)} style={{ cursor: 'pointer' }}>
-                            <span
-                              className="on-colorblue"
-                              style={{
-                                textDecoration: 'underline',
-                                fontWeight: '500',
-                                display: 'inline-block'
-                              }}
-                          >{row.linkSiteNm}</span></td>
+                          <td className="ac" onClick={() => handleViewDetail(row)} style={{cursor: 'pointer'}}>
+          <span
+              className="on-colorblue"
+              style={{
+                textDecoration: 'underline',
+                fontWeight: '500',
+                display: 'inline-block'
+              }}
+          >
+            {row.linkSiteNm}
+          </span>
+                          </td>
                           <td className="ac"><span>{row.picEmlAddr}</span></td>
                           <td className="ac">
                             <span>{row.apiAplyYmd?.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')}</span>
@@ -207,7 +244,12 @@ const UI_USR_L_220 = () => {
                         </tr>
                     ))
                 ) : (
-                    <tr><td colSpan="7" className="ac">신청 내역이 없습니다.</td></tr>
+                    /* 4. 로그인 상태이지만 신청 내역이 없는 경우 */
+                    <tr>
+                      <td colSpan="7" className="ac">
+                        인증키 신청 이력이 없습니다.
+                      </td>
+                    </tr>
                 )}
                 </tbody>
               </table>
