@@ -459,11 +459,11 @@ export default function Header() {
                   <li>
                     <HeaderFontDropdown />
                   </li>
-                  <li>
-                    <Link onClick={() => setPopOpen(true)} className="krds-btn small text">
-                      <i class="svg-icon ico-system"></i> 유관시스템 둘러보기
-                    </Link>
-                  </li>
+                  {/*<li>*/}
+                  {/*  <Link onClick={() => setPopOpen(true)} className="krds-btn small text">*/}
+                  {/*    <i class="svg-icon ico-system"></i> 유관시스템 둘러보기*/}
+                  {/*  </Link>*/}
+                  {/*</li>*/}
                 </ul>
               </div>
               <div className="header-branding">
