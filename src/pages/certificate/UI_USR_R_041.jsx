@@ -13,7 +13,7 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 const UI_USR_R_041 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent, getFullPath } = useUserMenu();
 
-  const cmpNm = useAuthStore((state) => state.cmpNm);
+  const { isLogin, cmpNm } = useAuthStore((state) => state.isLogin, (state) => state.cmpNm);
 
   const { prdocCd } = useParams();
   const navigate = useNavigate();
@@ -52,16 +52,14 @@ const UI_USR_R_041 = () => {
 
   /**
    * 증명서 발급 버튼 클릭 핸들러
-   * TODO: 로그인/기업회원 정책 결정 후 아래 주석 처리된 체크 로직 활성화
    */
   const handleClickIssue = async () => {
-    // TODO: 로그인 체크 - 정책 결정 후 활성화
-    // if (!isLogin) {
-    //   if (window.confirm('로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?')) {
-    //     navigate('/login');
-    //   }
-    //   return;
-    // }
+    if (!isLogin) {
+      if (window.confirm('로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?')) {
+        navigate('/service/login');
+      }
+      return;
+    }
 
     // TODO: 기업회원 체크 - 정책 결정 후 활성화
     // if (currentMode !== 'CORPORATE') {
