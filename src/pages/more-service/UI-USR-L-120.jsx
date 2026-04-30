@@ -168,11 +168,11 @@ const UI_USR_L_120 = () => {
               <option value="certSystmNm">인증제도명</option>
               <option value="certSystmItemNm">품목명</option>
             </select>
-            <div className="sch-input">
+            <div className="sch-input w-322">
               <input
                 type="text"
                 className="krds-input"
-                placeholder="검색어를 입력해주세요."
+                placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}
                 onChange={handleSearchKeywordChange}

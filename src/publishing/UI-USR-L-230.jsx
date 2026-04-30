@@ -108,7 +108,7 @@ const UI_USR_L_230 = () => {
                 </select>
               </div>
               <div className="sch-input w-476">
-                <input type="text" className="krds-input medium" placeholder="검색어를 입력해주세요." title="검색어 입력" />
+                <input type="text" className="krds-input medium" placeholder="검색어를 입력하세요" title="검색어 입력" />
                 <button type="button" className="krds-btn medium icon ico-search" >
                   <span className="sr-only">검색</span>
                   <i className="svg-icon ico-sch"></i>

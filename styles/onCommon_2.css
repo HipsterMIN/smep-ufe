@@ -935,6 +935,12 @@
   background-size: 100% auto;
   mask:none;
 }
+.krds-structured-list .c-ico-txt .ico-alarm {
+  width: 16px;
+  background: url(../src/assets/common/ico_alarm.svg) no-repeat 50%;
+  background-size: 100% auto;
+  mask:none;
+}
 .krds-structured-list .c-ico-txt .ico-email {
   background-color: #6D7882;
 }
@@ -1781,6 +1787,53 @@ button.aichatButton.active {
 .my-dashboard .mycard li {
   flex: 1 1 calc(50% - 12px);
 }
+.my-dashboard .krds-btn.w-full {
+  width: 100%;
+}
+.my-dashboard .krds-btn.mt-20 {
+  margin-top: 20px;
+}
+.my-dashboard .noneBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  padding: 27.5px 0px;
+  background: #F4F5F6;
+}
+.my-dashboard .noneBox h4 {
+  color: #1E2124;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 150%;
+  letter-spacing: 0;
+  margin-bottom: 4px;
+}
+.my-dashboard .noneBox p {
+  color: #464C53;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 150%;
+  letter-spacing: 0;
+  margin-bottom: 12px;
+}
+.my-dashboard .noneBox a {
+  display: inline-flex;
+  align-items: center;
+  color: #0B50D0;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 150%;
+  letter-spacing: 0;
+}
+.my-dashboard .svg-icon.ico-angle.blue-right {
+  width: 16px;
+  height: 16px;
+  background: url(../src/assets/common/ico_arrow-blue-right.svg) no-repeat 50%;
+  background-size: 100% auto;
+  mask:none;
+}
 .card-info {
   display: flex;
   flex-direction: column;
@@ -1981,6 +2034,24 @@ button.aichatButton.active {
   margin-top: 10px;
   font-weight: 400;
   color: #464C53;
+}
+
+.sys-con .main-step {
+  margin-top: 0;
+}
+.sys-con .img-box {
+  margin-bottom: 24px;
+}
+.sys-con .sec-tit2 {
+  color: #052B57;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 150%;
+  letter-spacing: 0;
+  margin-bottom: 10px;
+}
+.sys-con .cont-desc.mb-10 {
+  margin-bottom: 10px;
 }
 
 /* 반응형*/
@@ -2534,6 +2605,9 @@ button.aichatButton.active {
   .main-step .img-box {
     margin-top: 24px;
     padding: 0;
+  }
+  .sys-con .main-step .img-box {
+    padding: 20px;
   }
   .sub-step > li {
     margin-top: 12px;

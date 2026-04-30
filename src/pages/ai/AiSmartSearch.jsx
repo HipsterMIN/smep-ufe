@@ -323,7 +323,7 @@ const AiSmartSearchContent = ({
     const currentSearchQuery = sdkLastQuery || storedLastQuery || query;
     
     if (!currentSearchQuery && displayTotal === 0) {
-      return 'AI가 기업 조건에 맞는 지원사업을 찾아드립니다. 검색어를 입력해주세요.';
+      return 'AI가 기업 조건에 맞는 지원사업을 찾아드립니다. 검색어를 입력하세요';
     }
     
     return `"${currentSearchQuery}"에 대한 검색 결과를 분석한 결과, 총 ${displayTotal}개의 지원사업을 발견했습니다.`;
