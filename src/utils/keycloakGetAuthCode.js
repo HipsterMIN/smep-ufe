@@ -25,12 +25,13 @@ export function onePassJoin() {
     return;
   }
 
+  // 임시 연동 계약: /sso 콜백에서 state를 검증하지 않으므로 keycloak_state를 저장하지 않는다.
   // CSRF 방지용 state 값 생성 및 저장
-  const state = crypto.randomUUID();
-  sessionStorage.setItem('keycloak_state', state);
+  // const state = crypto.randomUUID();
+  // sessionStorage.setItem('keycloak_state', state);
 
-  // 가입 유도 플로우도 /sso callback에서 같은 state를 다시 받아 비교해야 한다.
-  // 상대가 요구하는 회원 로그인ID는 mbrId로 같이 전달하되, callback 검증을 위해 state는 계속 유지한다.
+  // 기존 계약에서는 가입 유도 플로우도 /sso callback에서 같은 state를 다시 받아 비교했다.
+  // 현재는 상대가 요구하는 회원 로그인ID만 mbrId로 전달하고 state 검증은 사용하지 않는다.
   let params = new URLSearchParams({
     redirect_uri: REDIRECT_HOME_URI,
     mbrId: loginId,
@@ -44,20 +45,20 @@ export function onePassJoin() {
 
 // 비로그인/로그인 상시표기
 export function onePassGetAuthCode() {
+  // 임시 연동 계약: 외부 출발 콜백과 맞추기 위해 state 저장과 auth URL state 전달을 중단한다.
   // CSRF 방지용 state 값 생성 및 저장
-  const state = crypto.randomUUID();
-  sessionStorage.setItem('keycloak_state', state);
+  // const state = crypto.randomUUID();
+  // sessionStorage.setItem('keycloak_state', state);
 
   let params = new URLSearchParams({
     client_id: CLIENT_ID,
     redirect_uri: REDIRECT_SSO_URI,
     response_type: 'code',
     scope: 'openid',
-    state: state,
+    // state: state,
   });
 
   let authUrl = `${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/auth?${params}`;
   console.log('authUrl : ', authUrl);
   window.location.href = authUrl;
 }
-
