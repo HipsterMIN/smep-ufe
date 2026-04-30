@@ -73,6 +73,8 @@ export const useAuthStore = create(
             };
           const contextRole =
             safeProfile.contextRole || safeProfile.context_role || currentCompany?.role || null;
+          const intgMbrSwtcYn =
+            safeProfile.intgMbrSwtcYn || safeProfile.intg_mbr_swtc_yn || null;
 
           return {
             currentMode,
@@ -84,6 +86,7 @@ export const useAuthStore = create(
             companySize,
             user,
             contextRole,
+            intgMbrSwtcYn,
           };
         };
 
@@ -95,11 +98,13 @@ export const useAuthStore = create(
               {
                 isLogin: false,
                 token: null,
+                refreshToken: null,
                 user: null,
                 currentMode: null,
                 currentCompany: null,
                 linkedCompanies: [],
                 contextRole: null,
+                intgMbrSwtcYn: null,
                 bizno: null,
                 cmpNm: null,
                 companySize: null,
@@ -115,26 +120,30 @@ export const useAuthStore = create(
         return {
           isLogin: false,
           token: null,
+          refreshToken: null,
           user: null,
           currentMode: null,
           currentCompany: null,
           linkedCompanies: [],
           contextRole: null,
+          intgMbrSwtcYn: null,
           bizno: null,
           cmpNm: null,
           companySize: null,
           companyProfile: null,
-          login: ({ token, profile } = {}) => {
+          login: ({ token, refreshToken, profile } = {}) => {
             const normalized = normalizeProfile(profile);
             set(
               {
                 isLogin: true,
                 token: token || null,
+                refreshToken: refreshToken || null,
                 user: normalized.user,
                 currentMode: normalized.currentMode,
                 currentCompany: normalized.currentCompany,
                 linkedCompanies: normalized.linkedCompanies,
                 contextRole: normalized.contextRole,
+                intgMbrSwtcYn: normalized.intgMbrSwtcYn,
                 bizno: normalized.bizno,
                 cmpNm: normalized.cmpNm,
                 companySize: normalized.companySize,
@@ -144,6 +153,8 @@ export const useAuthStore = create(
               'auth/login',
             );
           },
+          setRefreshToken: (refreshToken) =>
+            set({ refreshToken: refreshToken || null }, false, 'auth/setRefreshToken'),
           updateProfile: (profile) => {
             const normalized = normalizeProfile(profile);
             set(
@@ -153,6 +164,7 @@ export const useAuthStore = create(
                 currentCompany: normalized.currentCompany,
                 linkedCompanies: normalized.linkedCompanies,
                 contextRole: normalized.contextRole,
+                intgMbrSwtcYn: normalized.intgMbrSwtcYn,
                 bizno: normalized.bizno,
                 cmpNm: normalized.cmpNm,
                 companySize: normalized.companySize,
@@ -162,17 +174,19 @@ export const useAuthStore = create(
               'auth/update_profile',
             );
           },
-          setToken: (token) => set({ token }, false, 'auth/set_token'),
+          setToken: (token) => set({ token: token || null }, false, 'auth/set_token'),
           logout: () => {
             set(
               {
                 isLogin: false,
                 token: null,
+                refreshToken: null,
                 user: null,
                 currentMode: null,
                 currentCompany: null,
                 linkedCompanies: [],
                 contextRole: null,
+                intgMbrSwtcYn: null,
                 bizno: null,
                 cmpNm: null,
                 companySize: null,

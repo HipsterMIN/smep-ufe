@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
@@ -7,24 +7,21 @@ import Datepicker from '@components/ui/Datepicker.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import {
-  HELD_FIELD_PENDING_TEXT,
   fetchCorporateMemberCodeOptions,
   fetchCorporateMemberDetail,
   fetchKsicTopLevelOptions,
   extractTopLevelKsicCd,
+  updateCorporateMemberDetail,
+  fetchKedCorpInfo,
+} from '@/pages/my-business/member/memberUtils.js';
+import {
   parseDateFromYmd,
   toYmd,
-  updateCorporateMemberDetail,
-} from './companyMemberUtils.js';
-
-// 로그인/store 정리 전까지 기업정보 수정 화면은 전달된 회원번호가 없으면 임시 폴백 회원번호를 그대로 사용한다.
-const TEMP_FALLBACK_MBR_NO = '2025120500136492';
+} from '@utils/commonUtils.js';
 
 const UI_USR_W_452 = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-  const memberNo = location.state?.mbrNo || TEMP_FALLBACK_MBR_NO;
   const [codeOptions, setCodeOptions] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -37,9 +34,14 @@ const UI_USR_W_452 = () => {
     slsAmtClsfCd: '',
     mainBizFldNm: '',
     ksicCd: '',
+    stdgCtpvCd: '',
+    stdgSggCd: '',
     etcExpln: '',
     entExpln: '',
   });
+  const [sidoList, setSidoList] = useState([]);
+  const [sigunguList, setSigunguList] = useState([]);
+  const [sigunguLoading, setSigunguLoading] = useState(false);
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -53,7 +55,7 @@ const UI_USR_W_452 = () => {
 
       try {
         const [detail, commonCodes, ksicTopLevelOptions] = await Promise.all([
-          fetchCorporateMemberDetail(apiClient, memberNo),
+          fetchCorporateMemberDetail(apiClient),
           fetchCorporateMemberCodeOptions(),
           fetchKsicTopLevelOptions(apiClient),
         ]);
@@ -75,6 +77,8 @@ const UI_USR_W_452 = () => {
           slsAmtClsfCd: detail?.slsAmtClsfCd || '',
           mainBizFldNm: detail?.mainBizFldNm || '',
           ksicCd: topLevelKsicCd,
+          stdgCtpvCd: String(detail?.stdgCtpvCd || '').trim(),
+          stdgSggCd: String(detail?.stdgSggCd || '').trim(),
           etcExpln: detail?.etcExpln || '',
           entExpln: detail?.entExpln || '',
         });
@@ -96,7 +100,67 @@ const UI_USR_W_452 = () => {
     return () => {
       active = false;
     };
-  }, [memberNo]);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    const fetchSidoList = async () => {
+      try {
+        const response = await apiClient.get('/api/v1/stdg/sido');
+        const responseData = response?.data ?? response;
+        if (active) {
+          setSidoList(Array.isArray(responseData) ? responseData : []);
+        }
+      } catch (error) {
+        console.error('시도 목록 조회 실패:', error);
+      }
+    };
+
+    fetchSidoList();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const stdgCtpvCd = String(form.stdgCtpvCd || '').trim();
+    if (!stdgCtpvCd) {
+      setSigunguList([]);
+      setSigunguLoading(false);
+      return undefined;
+    }
+
+    let active = true;
+    const fetchSigunguList = async () => {
+      setSigunguLoading(true);
+      try {
+        const response = await apiClient.get(
+          `/api/v1/stdg/sigungu?sidoCd=${encodeURIComponent(stdgCtpvCd)}`,
+        );
+        const responseData = response?.data ?? response;
+        if (active) {
+          setSigunguList(Array.isArray(responseData) ? responseData : []);
+        }
+      } catch (error) {
+        console.error('시군구 목록 조회 실패:', error);
+        if (active) {
+          setSigunguList([]);
+        }
+      } finally {
+        if (active) {
+          setSigunguLoading(false);
+        }
+      }
+    };
+
+    fetchSigunguList();
+
+    return () => {
+      active = false;
+    };
+  }, [form.stdgCtpvCd]);
 
   const handleFieldChange = (fieldName, value) => {
     setForm((prev) => ({
@@ -105,12 +169,23 @@ const UI_USR_W_452 = () => {
     }));
   };
 
-  const handleSave = async () => {
-    if (!memberNo) {
-      alert('회원번호를 확인할 수 없습니다.');
-      return;
-    }
+  const handleSidoChange = (value) => {
+    setForm((prev) => ({
+      ...prev,
+      stdgCtpvCd: value,
+      stdgSggCd: '',
+    }));
+  };
 
+  const handleSigunguChange = (value) => {
+    setForm((prev) => ({
+      ...prev,
+      stdgCtpvCd: value ? value.slice(0, 2) : prev.stdgCtpvCd,
+      stdgSggCd: value ? value.slice(2, 5) : '',
+    }));
+  };
+
+  const handleSave = async () => {
     if (
       !form.entSclCd ||
       !form.fndnDate ||
@@ -118,6 +193,8 @@ const UI_USR_W_452 = () => {
       !form.slsAmtClsfCd ||
       !form.mainBizFldNm.trim() ||
       !form.ksicCd ||
+      !form.stdgCtpvCd ||
+      !form.stdgSggCd ||
       !form.etcExpln.trim()
     ) {
       alert('필수 입력 항목을 확인해주세요.');
@@ -129,7 +206,7 @@ const UI_USR_W_452 = () => {
 
     try {
       const nextKsicCd = form.ksicCd.trim();
-      await updateCorporateMemberDetail(apiClient, memberNo, {
+      await updateCorporateMemberDetail(apiClient, {
         entSclCd: form.entSclCd,
         fndnYmd: toYmd(form.fndnDate),
         wrkrCntClsfCd: form.wrkrCntClsfCd,
@@ -137,6 +214,8 @@ const UI_USR_W_452 = () => {
         mainBizFldNm: form.mainBizFldNm.trim(),
         // 사용자가 산업구분을 실제로 바꾼 경우에만 1레벨 코드를 보내 기존 세분류 값을 무의식적으로 축소하지 않게 한다.
         ksicCd: nextKsicCd && nextKsicCd !== initialKsicCd ? nextKsicCd : undefined,
+        stdgCtpvCd: form.stdgCtpvCd,
+        stdgSggCd: form.stdgSggCd,
         etcExpln: form.etcExpln.trim(),
         entExpln: form.entExpln.trim(),
       });
@@ -147,6 +226,31 @@ const UI_USR_W_452 = () => {
       alert(error?.message || '저장에 실패했습니다.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const selectedSigunguCd = form.stdgCtpvCd && form.stdgSggCd
+    ? `${form.stdgCtpvCd}${form.stdgSggCd}`
+    : '';
+  const isSigunguDisabled = loading || saving || sigunguLoading || !form.stdgCtpvCd;
+
+  const handleLoadKedInfo = async () => {
+    if (saving) return;
+
+    try {
+      setErrorMessage('');
+      const ked = await fetchKedCorpInfo(apiClient);
+
+      setForm((prev) => ({
+        ...prev,
+        entSclCd: ked.entSclCd || prev.entSclCd,
+        fndnDate: ked.fndnYmd ? parseDateFromYmd(ked.fndnYmd) : prev.fndnDate,
+        wrkrCntClsfCd: ked.wrkrCntClsfCd || prev.wrkrCntClsfCd,
+        mainBizFldNm: ked.mainBizFldNm || prev.mainBizFldNm,
+        // 매출액(slsAmtClsfCd), 소재지, 설명 등은 사용자가 직접 유지
+      }));
+    } catch (error) {
+      console.error('KED 기업정보 로드 실패:', error);
     }
   };
 
@@ -167,9 +271,10 @@ const UI_USR_W_452 = () => {
             <p className="txt-caution">*표시는 필수 입력입니다.</p>
             <button
               type="button"
-              className="krds-btn small secondary"
-              disabled
-              title="KED정보 로드 확인 대기"
+              className="krds-btn secondary small"
+              title="KED정보 로드"
+              onClick={handleLoadKedInfo}
+              disabled={saving}
             >
               KED정보 로드
             </button>
@@ -305,13 +410,32 @@ const UI_USR_W_452 = () => {
               <dd className="form-row-content">
                 <div className="select-group">
                   <div className="form-wrapper w-184">
-                    <select id="select_05" className="krds-form-select small" disabled>
-                      <option value="">{HELD_FIELD_PENDING_TEXT}</option>
+                    <select
+                      id="select_05"
+                      className="krds-form-select small"
+                      title="소재지 선택"
+                      value={form.stdgCtpvCd}
+                      onChange={(event) => handleSidoChange(event.target.value)}
+                      disabled={loading || saving}
+                    >
+                      <option value="">시도선택</option>
+                      {sidoList.map((item) => (
+                        <option key={item.code} value={item.code}>{item.name}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="form-wrapper w-184">
-                    <select className="krds-form-select small" title="상세 소재지 선택" disabled>
-                      <option value="">{HELD_FIELD_PENDING_TEXT}</option>
+                    <select
+                      className="krds-form-select small"
+                      title="상세 소재지 선택"
+                      value={selectedSigunguCd}
+                      onChange={(event) => handleSigunguChange(event.target.value)}
+                      disabled={isSigunguDisabled}
+                    >
+                      <option value="">{sigunguLoading ? '조회 중' : '시군구선택'}</option>
+                      {sigunguList.map((item) => (
+                        <option key={item.code} value={item.code}>{item.name}</option>
+                      ))}
                     </select>
                   </div>
                 </div>

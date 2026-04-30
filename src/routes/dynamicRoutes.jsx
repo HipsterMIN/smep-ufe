@@ -68,10 +68,50 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
   if (menuNode.scrnTypeCd === 'T') {
     const componentConfig = componentMap[menuNode.menuId];
     if (componentConfig) {
-      const { component: Component, layout: Layout, children } = componentConfig;
+      const {
+        component: Component,
+        layout: Layout,
+        children,
+        wrapChildren = false,
+        componentProps = {},
+      } = componentConfig;
 
       // ✅ children이 있는 경우: 중첩 라우트 구조 (목록 + 상세 등)
       if (children && children.length > 0) {
+        if (wrapChildren) {
+          const wrappedOutlet = (
+            <Suspense fallback={<div>Loading...</div>}>
+              <Component {...componentProps}>
+                <Outlet />
+              </Component>
+            </Suspense>
+          );
+
+          if (Layout) {
+            routeConfig.element = (
+              <Layout>
+                {wrappedOutlet}
+              </Layout>
+            );
+          } else {
+            routeConfig.element = wrappedOutlet;
+          }
+
+          routeConfig.children = children.map(child => {
+            const ChildComponent = child.component;
+            return {
+              path: child.path,
+              element: (
+                <Suspense fallback={<div>Loading...</div>}>
+                  <ChildComponent {...(child.componentProps || {})} />
+                </Suspense>
+              ),
+            };
+          });
+
+          return routeConfig;
+        }
+
         // 부모는 Layout + Outlet만 (자식 라우트를 렌더링하기 위함)
         if (Layout) {
           routeConfig.element = (
@@ -96,7 +136,7 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
             index: true,
             element: (
               <Suspense fallback={<div>로딩중...</div>}>
-                <Component />
+                <Component {...componentProps} />
               </Suspense>
             ),
           },
@@ -107,7 +147,7 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
               path: child.path,
               element: (
                 <Suspense fallback={<div>로딩중...</div>}>
-                  <ChildComponent />
+                  <ChildComponent {...(child.componentProps || {})} />
                 </Suspense>
               ),
             };
@@ -120,7 +160,7 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
           routeConfig.element = (
             <Layout>
               <Suspense fallback={<div>로딩중...</div>}>
-                <Component />
+                <Component {...componentProps} />
               </Suspense>
             </Layout>
           );
@@ -128,7 +168,7 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
           // Layout이 없는 경우 (단독 페이지)
           routeConfig.element = (
             <Suspense fallback={<div>로딩중...</div>}>
-              <Component />
+              <Component {...componentProps} />
             </Suspense>
           );
         }

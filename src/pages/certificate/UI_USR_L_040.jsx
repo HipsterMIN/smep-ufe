@@ -6,21 +6,24 @@ import Pagination from '@components/ui/Pagination.jsx';
 import Popup from '@components/ui/Popup.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { shortenInstName  } from '@utils/stringUtils.js';
+import { useNavigate, useSearchParams  } from 'react-router-dom';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
-import { useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 const UI_USR_L_040 = () => {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+
+  const initialPage = Math.max(0, parseInt(searchParams.get('page') || '1', 10) - 1);
 
   // 증명서 발급 안내 팝업 동작
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [totalPages, setTotalPages] = useState(0);
   const [topCertificateList, setTopCertificateList] = useState([]);
   const [certificateList, setCertificateList] = useState([]);

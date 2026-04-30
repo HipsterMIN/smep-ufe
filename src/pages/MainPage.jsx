@@ -23,6 +23,7 @@ import { api as apiClient } from '@lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useAuthStore } from '@store/useAuthStore.jsx';
+import OnepassLoginConversionModal from '@pages/onepass/OnepassLoginConversionModal.jsx';
 
 const MAIN_MENU_IDS = {
   notice: 'M_PIIO_00101',
@@ -132,6 +133,8 @@ const stripHtmlTags = (value) => {
 const SEARCH_POPULAR_LIMIT = 5;
 const SEARCH_AUTOCOMPLETE_LIMIT = 8;
 const SEARCH_AUTOCOMPLETE_DEBOUNCE_MS = 250;
+const ONEPASS_CONVERSION_MODAL_DISMISSED_KEY =
+  '__onepass_conversion_modal_dismissed__';
 
 const parseSearchPayload = (payload) => {
   if (!payload) return null;
@@ -203,6 +206,7 @@ const MainPage = () => {
   const [isPopularLoading, setIsPopularLoading] = useState(false);
   const [isAutoLoading, setIsAutoLoading] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [isOnepassModalOpen, setIsOnepassModalOpen] = useState(false);
   const srchInputRef = useRef(null);
   const keyboardButtonRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -211,6 +215,8 @@ const MainPage = () => {
   const swiperRef = useRef(null);
   const latestAutoQueryRef = useRef('');
   const authToken = useAuthStore((state) => state.token);
+  const isLogin = useAuthStore((state) => state.isLogin);
+  const intgMbrSwtcYn = useAuthStore((state) => state.intgMbrSwtcYn);
   const isLoggedIn = Boolean(authToken);
 
   const showPopular = isFocused && searchQuery.trim() === '';
@@ -259,7 +265,7 @@ const MainPage = () => {
       title: '입법·행정예고/고시',
       path: '/plcy/icr/UI_USR_L_110',
     },
-     {
+    {
       img: mainIcon06,
       title: '입주기업 모집공고 ',
       path: '/req/UI_USR_L_180',
@@ -542,6 +548,30 @@ const MainPage = () => {
     };
   }, [isLoggedIn, pbancScrapTargetIds, policyScrapTargetIds]);
 
+  useEffect(() => {
+    if (!isLogin) {
+      window.sessionStorage.removeItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY);
+      setIsOnepassModalOpen(false);
+      return;
+    }
+
+    if (intgMbrSwtcYn !== 'N') {
+      setIsOnepassModalOpen(false);
+      return;
+    }
+
+    const isDismissed =
+      window.sessionStorage.getItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY) ===
+      '1';
+
+    if (isDismissed) {
+      setIsOnepassModalOpen(false);
+      return;
+    }
+
+    setIsOnepassModalOpen(true);
+  }, [isLogin, intgMbrSwtcYn]);
+
   const handleSearch = () => {
     setIsKeyboardOpen(false);
     if (searchQuery.trim()) {
@@ -578,11 +608,18 @@ const MainPage = () => {
       setIsAutoLoading(false);
     }
   };
+  const handleOnepassModalDismiss = () => {
+    window.sessionStorage.setItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY, '1');
+    setIsOnepassModalOpen(false);
+  };
+  // 실제 전환 동선은 후속 계약 전까지 연결하지 않고, 현재는 노출/세션 제어까지만 수행한다.
+  const handleOnepassModalConvert = () => {
+    handleOnepassModalDismiss();
+  };
   const requestLoginForScrap = () => {
     const moveToLogin = window.confirm('로그인 후 스크랩 가능합니다. 로그인 하시겠습니까?');
     if (moveToLogin) {
-      //todo 로그인생기면 링크걸기
-      //navigate('/service/login');
+      navigate('/service/login');
     }
   };
   const handleToggleLike1 = async (targetId) => {
@@ -1062,15 +1099,18 @@ const MainPage = () => {
                               {item.elpblYn === 'Y' && (
                                 <span className="krds-badge bg-light-primary">전자증명</span>
                               )}
+                              {item.elpblYn !== 'Y' && (
+                                <span className="krds-badge"></span>
+                              )}
                             </div>
                             <div className="card-body">
                               <div className="c-text">
                                 <p className="c-tit no-icon no-link">
-                                  <span className="span onellipsis-2">
+                                  <span className="onellipsis-1">
                                     {item.prdocTtl}
                                   </span>
                                 </p>
-                                <p className="c-ico-txt">
+                                <p className="c-ico-txt onellipsis-2">
                                   <i className="svg-icon ico-build"></i>{' '}
                                   {item.issuInstNm || item.jrsdInstNm}
                                 </p>
@@ -1085,7 +1125,7 @@ const MainPage = () => {
                                     )
                                   }
                                 >
-                                  발급받기11
+                                  발급받기
                                 </button>
                               </div>
                             </div>
@@ -1486,11 +1526,17 @@ const MainPage = () => {
 
         <div className="main-btm-bar">
           <div className="contents-inner">
-            <p className="title">68개 중소기업 유관 시스템을 하나의 통합 ID로 이용할 수 있습니다</p>
+            <p className="title">중소기업 유관 시스템을 하나의 통합 ID로 이용할 수 있습니다</p>
             <button type="button" className="krds-btn primary">통합회원 가입하기</button>
           </div>
         </div>
       </div>
+      <OnepassLoginConversionModal
+        isOpen={isOnepassModalOpen}
+        onConvert={handleOnepassModalConvert}
+        onLater={handleOnepassModalDismiss}
+        onClose={handleOnepassModalDismiss}
+      />
       <Footer />
       {visiblePopups.map((popup) => {
         const imageSrc = buildMainImageUrl(

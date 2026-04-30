@@ -1,29 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Pagination from '@components/ui/Pagination.jsx';
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
-import {
-  formatPhoneNumber,
-  normalizeApiPayload,
-} from './companyMemberUtils.js';
+import { normalizeApiPayload } from '@/pages/my-business/member/memberUtils.js';
+import { formatPhoneNumber } from '@utils/commonUtils.js';
 import ChangeManager from './components/ChangeManager.jsx';
 import JoinOwner from './components/JoinOwner.jsx';
 
 const PAGE_SIZE = 10;
-const TEMP_FALLBACK_MBR_NO = '2025120500136492';
-
-const fetchCorporateContacts = async (mbrNo) => {
+const fetchCorporateContacts = async () => {
   const response = normalizeApiPayload(
-    await apiClient.get(`/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/contacts`),
+    await apiClient.get('/api/v1/member/corporate/me/contacts'),
   );
   return Array.isArray(response) ? response : [];
 };
 
-const fetchCorporateContactCandidate = async (mbrNo, lgnId, mbrNm) => {
+const fetchCorporateContactCandidate = async (lgnId, mbrNm) => {
   const query = new URLSearchParams();
   if (mbrNm) {
     query.set('mbrNm', mbrNm);
@@ -32,37 +27,37 @@ const fetchCorporateContactCandidate = async (mbrNo, lgnId, mbrNm) => {
   const suffix = query.size > 0 ? `?${query.toString()}` : '';
   return normalizeApiPayload(
     await apiClient.get(
-      `/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/contacts/candidates/${encodeURIComponent(lgnId)}${suffix}`,
+      `/api/v1/member/corporate/me/contacts/candidates/${encodeURIComponent(lgnId)}${suffix}`,
     ),
   );
 };
 
-const createCorporateContact = async (mbrNo, entPicMbrNo) =>
+const createCorporateContact = async (entPicMbrNo) =>
   normalizeApiPayload(
-    await apiClient.post(`/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/contacts`, {
+    await apiClient.post('/api/v1/member/corporate/me/contacts', {
       entPicMbrNo,
     }),
   );
 
-const checkCorporateManagerChangeAuth = async (mbrNo, entPicMbrNo) =>
+const checkCorporateManagerChangeAuth = async (entPicMbrNo) =>
   normalizeApiPayload(
     await apiClient.post(
-      `/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/contacts/manager/auth-check`,
+      '/api/v1/member/corporate/me/contacts/manager/auth-check',
       { entPicMbrNo },
     ),
   );
 
-const changeCorporateManager = async (mbrNo, entPicMbrNo) =>
+const changeCorporateManager = async (entPicMbrNo) =>
   normalizeApiPayload(
-    await apiClient.put(`/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/contacts/manager`, {
+    await apiClient.post('/api/v1/member/corporate/me/contacts/manager', {
       entPicMbrNo,
     }),
   );
 
-const deleteCorporateContacts = async (mbrNo, entPicMbrNos) =>
+const deleteCorporateContacts = async (entPicMbrNos) =>
   normalizeApiPayload(
-    await apiClient.delete(`/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/contacts`, {
-      body: { entPicMbrNos },
+    await apiClient.post('/api/v1/member/corporate/me/contacts/delete', {
+      entPicMbrNos,
     }),
   );
 
@@ -74,12 +69,10 @@ const renderValue = (value) => {
 const getRoleLabel = (entMngPicYn) => (entMngPicYn === 'Y' ? '기업관리자' : '담당자');
 
 const UI_USR_L_460 = () => {
-  const location = useLocation();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
   // 기업 기본정보 화면과 같은 임시 경로를 따라, 전달값이 없으면 동일 폴백 회원번호로 담당자 관리 진입을 보장한다.
-  const effectiveMemberNo = location.state?.mbrNo || TEMP_FALLBACK_MBR_NO;
 
   const [contacts, setContacts] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -108,7 +101,7 @@ const UI_USR_L_460 = () => {
       setErrorMessage('');
 
       try {
-        const response = await fetchCorporateContacts(effectiveMemberNo);
+        const response = await fetchCorporateContacts();
         if (!active) {
           return;
         }
@@ -132,7 +125,7 @@ const UI_USR_L_460 = () => {
     return () => {
       active = false;
     };
-  }, [effectiveMemberNo, reloadKey]);
+  }, [reloadKey]);
 
   useEffect(() => {
     const totalPages = Math.max(1, Math.ceil(contacts.length / PAGE_SIZE));
@@ -231,7 +224,6 @@ const UI_USR_L_460 = () => {
 
     try {
       const candidate = await fetchCorporateContactCandidate(
-        effectiveMemberNo,
         normalizedLgnId,
         normalizedName,
       );
@@ -254,7 +246,7 @@ const UI_USR_L_460 = () => {
     setJoinErrorMessage('');
 
     try {
-      await createCorporateContact(effectiveMemberNo, joinCandidate.entPicMbrNo);
+      await createCorporateContact(joinCandidate.entPicMbrNo);
       resetJoinPopupState();
       setFeedbackMessage('담당자를 등록했습니다.');
       setReloadKey((prev) => prev + 1);
@@ -277,14 +269,13 @@ const UI_USR_L_460 = () => {
 
     try {
       const authResult = await checkCorporateManagerChangeAuth(
-        effectiveMemberNo,
         selectedManagerCandidate.entPicMbrNo,
       );
       if (!authResult?.authorized) {
         throw new Error('기업관리자 변경 인증에 실패했습니다.');
       }
 
-      await changeCorporateManager(effectiveMemberNo, selectedManagerCandidate.entPicMbrNo);
+      await changeCorporateManager(selectedManagerCandidate.entPicMbrNo);
       resetManagerPopupState();
       setSelectedIds([]);
       setFeedbackMessage('기업관리자를 변경했습니다.');
@@ -312,7 +303,7 @@ const UI_USR_L_460 = () => {
     setErrorMessage('');
 
     try {
-      await deleteCorporateContacts(effectiveMemberNo, selectedContacts.map((contact) => contact.entPicMbrNo));
+      await deleteCorporateContacts(selectedContacts.map((contact) => contact.entPicMbrNo));
       setSelectedIds([]);
       setFeedbackMessage('선택한 담당자를 삭제했습니다.');
       setReloadKey((prev) => prev + 1);

@@ -1,19 +1,18 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuthStore } from '@store/useAuthStore.jsx';
 
-const UI_USR_P_042 = () => {
+const SmtcIssue = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { prdocNm, prdocCd, prdocIssuGdCn, elpblYn } = location.state || {};
-  const { brno, cmpNm } = useAuthStore((state) => ({ brno: state.bizno, cmpNm: state.cmpNm }));
+  const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
 
+  const [lginId, setLginId]       = useState('');
+  const [sbjtId, setSbjtId]       = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -22,8 +21,15 @@ const UI_USR_P_042 = () => {
 
   const goBack = () => navigate(-1);
 
+  const validate = () => {
+    if (!prdocCd)           { alert('증명서 코드가 없습니다.');        return false; }
+    if (!lginId.trim())     { alert('SMTECH 아이디를 입력해주세요.');   return false; }
+    if (!sbjtId.trim())     { alert('과제번호를 입력해주세요.');         return false; }
+    return true;
+  };
+
   const handlePrint = async () => {
-    if (!prdocCd) { alert('증명서 코드가 없습니다.'); return; }
+    if (!validate()) return;
     if (!window.confirm('증명서를 출력하시겠습니까?')) return;
 
     try {
@@ -32,6 +38,10 @@ const UI_USR_P_042 = () => {
       const prdocIssuAplyNo = await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
         prdocIssuTypeCd: 'Y301',
+        extraParams: {
+          lginId: lginId.trim(),
+          sbjtId: sbjtId.trim(),
+        },
       });
 
       window.open(
@@ -42,14 +52,14 @@ const UI_USR_P_042 = () => {
       navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
       console.error('증명서 발급 실패:', e);
-      alert('증명서 발급 중 오류가 발생했습니다.');
+      alert('조회된 데이터가 없습니다. SMTECH 홈페이지에 문의해주세요.(https://www.smtech.go.kr)');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleWalletClick = async () => {
-    if (!prdocCd) { alert('증명서 코드가 없습니다.'); return; }
+    if (!validate()) return;
     if (!window.confirm('전자증명서 발급을 신청하시겠습니까?')) return;
 
     try {
@@ -58,12 +68,16 @@ const UI_USR_P_042 = () => {
       await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
         prdocIssuTypeCd: 'Y302',
+        extraParams: {
+          lginId: lginId.trim(),
+          sbjtId: sbjtId.trim(),
+        },
       });
 
       navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
       console.error('증명서 발급 실패:', e);
-      alert('증명서 발급 중 오류가 발생했습니다.');
+      alert('조회된 데이터가 없습니다. SMTECH 홈페이지에 문의해주세요.(https://www.smtech.go.kr)');
     } finally {
       setIsLoading(false);
     }
@@ -71,15 +85,13 @@ const UI_USR_P_042 = () => {
 
   return (
     <>
-      <SideNavigation
-        pageTitle={depth1Menu?.menuNm || ''}
-        menuItems={sidebarData}
-      />
+      <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
           <h2 className="h-tit">{prdocNm}발급</h2>
         </div>
+
         <div className="conts-wrap">
           <div className="txt-box outline">
             <h4 className="outline-tit">알려드립니다.</h4>
@@ -88,9 +100,7 @@ const UI_USR_P_042 = () => {
                 ? prdocIssuGdCn
                   .split('\n')
                   .filter((line) => line.trim() !== '')
-                  .map((line, index) => (
-                    <li key={index}>{line.trim()}</li>
-                  ))
+                  .map((line, index) => <li key={index}>{line.trim()}</li>)
                 : null}
             </ul>
           </div>
@@ -99,42 +109,40 @@ const UI_USR_P_042 = () => {
             <div className="form-row-item">
               <dt className="form-row-label">
                 <label htmlFor="id_01" className="form-label">
-                    사업자등록번호
+                    SMTECH 아이디
                   <span className="on-required"><span className="sr-only">필수입력</span></span>
                 </label>
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
-                  <input type="text" id="id_01" className="krds-input small"
-                    placeholder="사업자등록번호를 입력해주세요" value={brno} disabled />
+                  <input
+                    type="text"
+                    id="id_01"
+                    className="krds-input small"
+                    placeholder="SMTECH 아이디를 입력해주세요"
+                    value={lginId}
+                    onChange={(e) => setLginId(e.target.value)}
+                  />
                 </div>
               </dd>
             </div>
             <div className="form-row-item">
               <dt className="form-row-label">
                 <label htmlFor="id_02" className="form-label">
-                    상호
+                    과제번호
                   <span className="on-required"><span className="sr-only">필수입력</span></span>
                 </label>
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
-                  <input type="text" id="id_02" className="krds-input small"
-                    placeholder="상호를 입력해주세요" value={cmpNm} disabled />
-                </div>
-              </dd>
-            </div>
-            <div className="form-row-item">
-              <dt className="form-row-label">
-                <label htmlFor="id_03" className="form-label">
-                    대표자명
-                  <span className="on-required"><span className="sr-only">필수입력</span></span>
-                </label>
-              </dt>
-              <dd className="form-row-content">
-                <div className="form-wrapper w-220">
-                  <input type="text" id="id_03" className="krds-input small"
-                    placeholder="대표자명을 입력해주세요" value="김정범" disabled />
+                  <input
+                    type="text"
+                    id="id_02"
+                    className="krds-input small"
+                    placeholder="과제번호를 입력해주세요"
+                    value={sbjtId}
+                    onChange={(e) => setSbjtId(e.target.value)}
+                  />
                 </div>
               </dd>
             </div>
@@ -148,19 +156,17 @@ const UI_USR_P_042 = () => {
             </button>
           </div>
           <div>
-            {elpblYn === 'Y' && (
-              <button
-                type="button"
-                className="krds-btn primary xlarge"
-                onClick={handleWalletClick}
-                disabled={isLoading}
-              >
-                  전자문서지갑
-              </button>
-            )}
             <button
               type="button"
               className="krds-btn primary xlarge"
+              onClick={handleWalletClick}
+              disabled={isLoading}
+            >
+                전자문서지갑
+            </button>
+            <button
+              type="button"
+              className="krds-btn tertiary xlarge"
               onClick={handlePrint}
               disabled={isLoading}
             >
@@ -174,4 +180,4 @@ const UI_USR_P_042 = () => {
   );
 };
 
-export default UI_USR_P_042;
+export default SmtcIssue;

@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
@@ -63,12 +64,14 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-
+  const authToken = useAuthStore((state) => state.token);
+  const isQnaPage = location.pathname.includes('UI_USR_L_230');
   // 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
 
   const boardTitle = useMemo(() => boardDetail?.bbsNm || 'Q&A', [boardDetail]);
+  const isLoggedIn = Boolean(authToken);
 
   useEffect(() => {
     let isMounted = true;
@@ -239,6 +242,20 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
             </div>
           </div>
         </div>
+        {/* isQnaPage가 true일 때만 이 영역이 보입니다 */}
+        {isQnaPage && (
+          <div className="tab fill full mt-48">
+            <ul>
+              <li><Link to="/cs/opndata/UI_USR_L_210" className="btn-tab">API 소개</Link></li>
+              <li><Link to="/cs/opndata/UI_USR_L_220" className="btn-tab">인증키 신청</Link></li>
+              <li className="active">
+                <Link to="/cs/opndata/UI_USR_L_230" className="btn-tab">
+                  API Q&A <span className="sr-only">현재 페이지</span>
+                </Link>
+              </li>
+            </ul>
+          </div>
+        )}
         <div className="search-list-top">
           <ul className="sch-info" aria-live="polite">
             <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
@@ -315,6 +332,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
                       >
                         {item?.upendPstgYn === 'Y' && <span className="krds-badge bg-light-primary">공지</span>}
                         <span>{item?.pstTtl || '-'}</span>
+                        {item?.pstRlsYn === 'N' && <i className="svg-icon ico-lock"></i>}
                       </a>
                     </td>
                     <td className="ac"><span>{item?.pstRgtrNm || '-'}</span></td>
@@ -337,13 +355,15 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
           />
         )}
 
-        <div className="onboard-btm-btngroup btn-single bt-0">
-          <div>
-            <button type="button" className="krds-btn primary xlarge" onClick={moveToWrite}>
-              문의하기
-            </button>
+        {isLoggedIn && (
+          <div className="onboard-btm-btngroup btn-single bt-0">
+            <div>
+              <button type="button" className="krds-btn primary xlarge" onClick={moveToWrite}>
+                문의하기
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

@@ -6,11 +6,91 @@ export default function HeaderUserMenu({
   currentCompany,
   linkedCompanies,
   user,
+  showSessionTimer,
+  sessionTimerLabel,
+  canExtendSession,
+  isExtendingSession,
+  onExtendSession,
   onLogin,
+  onOnePassLogin,
   onLogout,
   onMyPage,
   onSwitchContext,
 }) {
+  const handleCollaborationInfoSystemClick = () => {
+    //협업정보시스템
+    const url = 'https://www.smes.go.kr/isso-dev/qsign/realms/ucube-qsign/protocol/openid-connect/auth?response_type=code&client_id=cobiz&redirect_uri=https://www.smes.go.kr/cobiz-iam/iam/oauth/loginCallback.do&scope=openid';
+    if (!url) {
+      return;
+    }
+
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleBusinessProjectGroupClick = () => {
+    //비지니스사업단
+    const url = 'https://www.smes.go.kr/isso-dev/qsign/realms/ucube-qsign/protocol/openid-connect/auth?response_type=code&client_id=bizlink&redirect_uri=https://www.smes.go.kr/bizlink-iam/iam/oauth/loginCallback.do&scope=openid';
+    if (!url) {
+      return;
+    }
+
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleMnaClick = () => {
+    const url = 'https://www.smes.go.kr/isso-dev/qsign/realms/ucube-qsign/protocol/openid-connect/auth?response_type=code&client_id=mna&redirect_uri=https://www.smes.go.kr/mna-iam/iam/oauth/loginCallback.do&scope=openid';
+    if (!url) {
+      return;
+    }
+
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const externalLinkButtonStyle = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 'var(--krds-header--navi-gap)',
+    minHeight: 'var(--krds-header--navi-min-height)',
+    padding: 'var(--krds-header--navi-padding)',
+    border: 0,
+    borderRadius: 'var(--krds-header--navi-border-radius)',
+    backgroundColor: 'transparent',
+    color: 'var(--krds-header--navi-color-text)',
+    fontFamily: 'inherit',
+    fontSize: 'var(--krds-header--navi-font-size-pc)',
+    fontWeight: 'var(--krds-font-weight-bold)',
+    lineHeight: 'inherit',
+    transition: 'var(--krds-transition-base)',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+  };
+
+  const externalLinkButtons = (
+    <>
+      <button
+        type="button"
+        className="btn-navi none-icon on-mobile-none"
+        onClick={handleCollaborationInfoSystemClick}
+      >
+        협업정보시스템
+      </button>
+      <button
+        type="button"
+        className="btn-navi none-icon on-mobile-none"
+        onClick={handleBusinessProjectGroupClick}
+      >
+        비지니스사업단
+      </button>
+      <button
+        type="button"
+        className="btn-navi none-icon on-mobile-none"
+        onClick={handleMnaClick}>
+        M&amp;A
+      </button>
+    </>
+  );
+
   if (isLogin) {
     const modeLabel = currentMode === 'CORPORATE' ? '기업' : '개인';
     const displayName =
@@ -20,6 +100,13 @@ export default function HeaderUserMenu({
 
     return (
       <>
+        {externalLinkButtons}
+
+        {/* 통합로그인은 로그인 상태와 무관하게 같은 진입점을 사용한다. */}
+        <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
+          중기원패스 통합로그인
+        </button>
+
         {/* <div className="user-info-wrap">
           <span className="user-name">
             {displayName}
@@ -72,10 +159,19 @@ export default function HeaderUserMenu({
           </button>
         </div>
 
-        <div className="gnb-sesseion-timer">
-          <div className="timer"><span className="sr-only">남은 시간</span><i className="svg-icon ico-clock"></i> 28: 38</div>
-          <button type="button" className="krds-btn secondary xsmall">연장</button>
-        </div>
+        {showSessionTimer ? (
+          <div className="gnb-sesseion-timer">
+            <div className="timer"><span className="sr-only">남은 시간</span><i className="svg-icon ico-clock"></i> {sessionTimerLabel}</div>
+            <button
+              type="button"
+              className="krds-btn secondary xsmall"
+              onClick={onExtendSession}
+              disabled={!canExtendSession || isExtendingSession}
+            >
+              연장
+            </button>
+          </div>
+        ) : null}
 
         <button type="button" className="btn-navi logout on-mobile-none" onClick={onLogout}>
           로그아웃
@@ -87,6 +183,12 @@ export default function HeaderUserMenu({
 
   return (
     <>
+      {externalLinkButtons}
+
+      {/* 통합로그인은 로그인 상태와 무관하게 같은 진입점을 사용한다. */}
+      <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
+        중기원패스 통합로그인
+      </button>
       <button type="button" className="btn-navi login on-mobile-none" onClick={onLogin}>
         로그인
       </button>

@@ -1,11 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Pagination from '@components/ui/Pagination.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 10;
+const ALLOWED_PAGE_SIZES = new Set([10, 20, 30, 50]);
+const ALLOWED_SEARCH_TYPES = new Set(['TITLE', 'CONTENT', 'WRITER']);
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -20,30 +25,112 @@ const formatDate = (dateString) => {
   return `${year}-${month}-${day}`;
 };
 
+const normalizeTrimmedText = (value) => String(value ?? '').trim();
+
+const normalizePositiveInt = (value, fallback) => {
+  const parsed = Number.parseInt(String(value ?? '').trim(), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const normalizePageSize = (value) => {
+  const normalized = normalizePositiveInt(value, DEFAULT_PAGE_SIZE);
+  return ALLOWED_PAGE_SIZES.has(normalized) ? normalized : DEFAULT_PAGE_SIZE;
+};
+
+const normalizeSearchType = (value) => {
+  if (value == null) {
+    return 'TITLE';
+  }
+
+  const normalized = normalizeTrimmedText(value).toUpperCase();
+  if (normalized === '') {
+    return '';
+  }
+
+  return ALLOWED_SEARCH_TYPES.has(normalized) ? normalized : 'TITLE';
+};
+
+const buildBoardListSearchParams = ({
+  currentSearchParams,
+  page,
+  size,
+  searchType,
+  searchKeyword,
+  categoryNo,
+  isCategoryEnabled,
+}) => {
+  const params = new URLSearchParams(currentSearchParams);
+  const normalizedKeyword = normalizeTrimmedText(searchKeyword);
+  const normalizedCategoryNo = isCategoryEnabled ? normalizeTrimmedText(categoryNo) : '';
+  const normalizedSearchType = normalizeSearchType(searchType);
+
+  if (page > DEFAULT_PAGE) {
+    params.set('page', String(page));
+  } else {
+    params.delete('page');
+  }
+
+  if (size !== DEFAULT_PAGE_SIZE) {
+    params.set('size', String(size));
+  } else {
+    params.delete('size');
+  }
+
+  if (normalizedCategoryNo) {
+    params.set('ctgryNo', normalizedCategoryNo);
+  } else {
+    params.delete('ctgryNo');
+  }
+
+  // 검색어가 비면 searchType도 같이 정리해 통합검색 query 의미와 목록 기본 진입을 구분한다.
+  if (normalizedKeyword) {
+    params.set('searchType', normalizedSearchType);
+    params.set('searchKeyword', normalizedKeyword);
+  } else {
+    params.delete('searchType');
+    params.delete('searchKeyword');
+  }
+
+  return params;
+};
+
 const BoardBasic = ({ boardDetail, bbsNo }) => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [selectedCategoryNo, setSelectedCategoryNo] = useState('');
   const [searchType, setSearchType] = useState('TITLE');
   const [searchKeyword, setSearchKeyword] = useState('');
-
-  const [appliedCategoryNo, setAppliedCategoryNo] = useState('');
-  const [appliedSearchType, setAppliedSearchType] = useState('TITLE');
-  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
 
   const [categories, setCategories] = useState([]);
   const [postList, setPostList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
 
   const isCategoryEnabled = useMemo(() => {
     const raw = boardDetail?.ctgryUseYn ?? boardDetail?.ctgry_use_yn ?? '';
     return String(raw).trim().toUpperCase() === 'Y';
   }, [boardDetail]);
+
+  const normalizedQueryState = useMemo(() => {
+    const queryPage = normalizePositiveInt(searchParams.get('page'), DEFAULT_PAGE);
+    const querySize = normalizePageSize(searchParams.get('size'));
+    const querySearchType = normalizeSearchType(searchParams.get('searchType'));
+    const querySearchKeyword = normalizeTrimmedText(searchParams.get('searchKeyword'));
+    const queryCategoryNo = normalizeTrimmedText(searchParams.get('ctgryNo'));
+
+    return {
+      page: queryPage,
+      size: querySize,
+      searchType: querySearchType,
+      searchKeyword: querySearchKeyword,
+      categoryNo: queryCategoryNo,
+    };
+  }, [searchParams]);
+
+  const effectiveCategoryNo = isCategoryEnabled ? normalizedQueryState.categoryNo : '';
 
   // 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();
@@ -78,11 +165,16 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
     };
   }, [bbsNo, isCategoryEnabled]);
 
+  // Pagination.syncUrl는 page만 다루므로, 목록 query hydrate는 부모가 직접 맡는다.
   useEffect(() => {
-    if (isCategoryEnabled) return;
-    setSelectedCategoryNo('');
-    setAppliedCategoryNo('');
-  }, [isCategoryEnabled]);
+    setSearchType(normalizedQueryState.searchType);
+    setSearchKeyword(normalizedQueryState.searchKeyword);
+    setSelectedCategoryNo(effectiveCategoryNo);
+  }, [
+    normalizedQueryState.searchType,
+    normalizedQueryState.searchKeyword,
+    effectiveCategoryNo,
+  ]);
 
   const boardTitle = useMemo(() => boardDetail?.bbsNm || '공지사항', [boardDetail]);
 
@@ -103,17 +195,17 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
         setLoading(true);
 
         const params = new URLSearchParams({
-          page: String(currentPage + 1),
-          size: String(pageSize),
+          page: String(normalizedQueryState.page),
+          size: String(normalizedQueryState.size),
         });
 
-        if (appliedCategoryNo) {
-          params.append('ctgryNo', appliedCategoryNo);
+        if (effectiveCategoryNo) {
+          params.append('ctgryNo', effectiveCategoryNo);
         }
 
-        if (appliedSearchKeyword.trim()) {
-          params.append('searchType', appliedSearchType);
-          params.append('searchKeyword', appliedSearchKeyword.trim());
+        if (normalizedQueryState.searchKeyword) {
+          params.append('searchType', normalizedQueryState.searchType);
+          params.append('searchKeyword', normalizedQueryState.searchKeyword);
         }
 
         const response = await apiClient.get(`/api/v1/board/${bbsNo}/posts/list?${params.toString()}`);
@@ -141,13 +233,26 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
     return () => {
       isMounted = false;
     };
-  }, [bbsNo, currentPage, pageSize, appliedCategoryNo, appliedSearchType, appliedSearchKeyword]);
+  }, [
+    bbsNo,
+    normalizedQueryState.page,
+    normalizedQueryState.size,
+    normalizedQueryState.searchType,
+    normalizedQueryState.searchKeyword,
+    effectiveCategoryNo,
+  ]);
 
   const handleSearch = () => {
-    setAppliedCategoryNo(isCategoryEnabled ? selectedCategoryNo : '');
-    setAppliedSearchType(searchType);
-    setAppliedSearchKeyword(searchKeyword);
-    setCurrentPage(0);
+    const nextSearchParams = buildBoardListSearchParams({
+      currentSearchParams: searchParams,
+      page: DEFAULT_PAGE,
+      size: normalizedQueryState.size,
+      searchType,
+      searchKeyword,
+      categoryNo: selectedCategoryNo,
+      isCategoryEnabled,
+    });
+    setSearchParams(nextSearchParams);
   };
 
   const handleSearchKeyDown = (event) => {
@@ -156,22 +261,28 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
     }
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page - 1);
+  const handlePageChange = () => {
     window.scrollTo(0, 0);
   };
 
   const handlePageSizeChange = (event) => {
-    setPageSize(Number(event.target.value));
-    setCurrentPage(0);
+    const nextPageSize = normalizePageSize(event.target.value);
+    const nextSearchParams = buildBoardListSearchParams({
+      currentSearchParams: searchParams,
+      page: DEFAULT_PAGE,
+      size: nextPageSize,
+      searchType: normalizedQueryState.searchType,
+      searchKeyword: normalizedQueryState.searchKeyword,
+      categoryNo: effectiveCategoryNo,
+      isCategoryEnabled,
+    });
+    setSearchParams(nextSearchParams);
   };
 
   const moveToDetail = (pstNo) => {
     if (pstNo == null) return;
-    const queryString = appliedCategoryNo
-      ? `?ctgryNo=${encodeURIComponent(appliedCategoryNo)}`
-      : '';
-    navigate(`${pstNo}${queryString}`);
+    const queryString = searchParams.toString();
+    navigate(queryString ? `${pstNo}?${queryString}` : `${pstNo}`);
   };
 
   return (
@@ -235,13 +346,13 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
           <ul className="sch-sort">
             <li>
               <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
-              <select
-                className="krds-form-select-sort"
-                id="search_result_count"
-                value={pageSize}
-                onChange={handlePageSizeChange}
-              >
-                <option value={10}>10개</option>
+                <select
+                  className="krds-form-select-sort"
+                  id="search_result_count"
+                  value={normalizedQueryState.size}
+                  onChange={handlePageSizeChange}
+                >
+                  <option value={10}>10개</option>
                 <option value={20}>20개</option>
                 <option value={30}>30개</option>
                 <option value={50}>50개</option>
@@ -318,7 +429,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
         {!loading && totalPages > 0 && (
           <Pagination
             totalPages={totalPages}
-            currentPage={currentPage + 1}
+            currentPage={normalizedQueryState.page}
             onPageChange={handlePageChange}
             syncUrl
           />

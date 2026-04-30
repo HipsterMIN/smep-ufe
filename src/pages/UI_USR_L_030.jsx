@@ -131,9 +131,45 @@ const unwrapResponse = (response) => response?.data ?? response;
 const tagList = (value) => (value || '').split(',').map((item) => item.trim()).filter(Boolean);
 const hasValue = (value) => value !== null && value !== undefined && String(value).trim() !== '';
 const asText = (value, fallback = '-') => (hasValue(value) ? value : fallback);
+const formatDateDot = (value, fallback = '-') => {
+  if (!hasValue(value)) return fallback;
+
+  const text = String(value).trim();
+  const ymd = text.match(/^(\d{4})[-./]?(\d{2})[-./]?(\d{2})$/);
+  if (ymd) return `${ymd[1]}.${ymd[2]}.${ymd[3]}`;
+
+  const ymdWithTime = text.match(/^(\d{4})[-./]?(\d{2})[-./]?(\d{2})[\sT].*$/);
+  if (ymdWithTime) return `${ymdWithTime[1]}.${ymdWithTime[2]}.${ymdWithTime[3]}`;
+
+  const date = new Date(text);
+  if (Number.isNaN(date.getTime())) return fallback;
+
+  const year = String(date.getFullYear());
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}.${month}.${day}`;
+};
 const stripHtml = (value) => String(value || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 const asPlainText = (value, fallback = '-') => {
   const text = stripHtml(value);
+  return text || fallback;
+};
+const stripHtmlKeepLineBreaks = (value) => {
+  const text = String(value || '')
+    .replace(/&lt;\s*br\s*\/?\s*&gt;/gi, '\n')
+    .replace(/<\s*br\s*\/?\s*>/gi, '\n')
+    .replace(/&nbsp;|&#160;|&#xA0;/gi, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\u00a0/g, ' ');
+
+  return text
+    .split('\n')
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join('\n');
+};
+const asPlainTextWithLineBreaks = (value, fallback = '-') => {
+  const text = stripHtmlKeepLineBreaks(value);
   return text || fallback;
 };
 const splitMultiValue = (value) => String(value || '').split(/\s*,\s*/).map((item) => item.trim()).filter(Boolean);
@@ -245,14 +281,14 @@ const getCompareValue = (item, row, filterOptions) => {
   if (!item) return '-';
   const codeMap = row.format ? toCodeMap(filterOptions[row.format] || []) : null;
   if (row.key) {
-    if (codeMap && hasValue(item[row.key])) return decodeByMap(item[row.key], codeMap);
-    return asText(item[row.key]);
+    if (codeMap && hasValue(item[row.key])) return asPlainTextWithLineBreaks(decodeByMap(item[row.key], codeMap));
+    return asPlainTextWithLineBreaks(item[row.key]);
   }
   if (row.values) {
     const matched = row.values.find((key) => hasValue(item[key]));
     if (!matched) return '-';
-    if (codeMap) return decodeByMap(item[matched], codeMap);
-    return asText(item[matched]);
+    if (codeMap) return asPlainTextWithLineBreaks(decodeByMap(item[matched], codeMap));
+    return asPlainTextWithLineBreaks(item[matched]);
   }
   return '-';
 };
@@ -879,24 +915,29 @@ const UI_USR_L_030 = () => {
                             {renderTypeSpecificListFields(item)}
                           </a>
                         </div>
-                        <div className="card-btm">
-                          {tagList(item.hashtags).slice(0, 4).map((tag) => (
-                            <span
-                              className="tag"
-                              key={`${item.plcyFnncGdsSn}-${tag}`}
-                              role="button"
-                              tabIndex={0}
-                              onClick={() => applyHashtagFilter(tag)}
-                              onKeyDown={(event) => {
-                                if (event.key === 'Enter' || event.key === ' ') {
-                                  event.preventDefault();
-                                  applyHashtagFilter(tag);
-                                }
-                              }}
-                            >
-                              {tag}
-                            </span>
-                          ))}
+                        <div className="card-form">
+                          <div className="card-btm">
+                            {tagList(item.hashtags).slice(0, 4).map((tag) => (
+                              <span
+                                className="tag"
+                                key={`${item.plcyFnncGdsSn}-${tag}`}
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => applyHashtagFilter(tag)}
+                                onKeyDown={(event) => {
+                                  if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault();
+                                    applyHashtagFilter(tag);
+                                  }
+                                }}
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                          <div className="regist-date">
+                            등록일 : <b>{formatDateDot(item.plcyFnncFrstRegDt)}</b>
+                          </div>
                         </div>
                         <div className="card-btn">
                           <span className="krds-btn text">
@@ -1084,8 +1125,8 @@ const UI_USR_L_030 = () => {
                 {compareRows.map((row) => (
                   <tr key={row.label}>
                     <th scope="row" className="ac">{row.label}</th>
-                    <td>{getCompareValue(compareItems[0], row, filterOptions)}</td>
-                    <td>{getCompareValue(compareItems[1], row, filterOptions)}</td>
+                    <td style={{ whiteSpace: 'pre-line' }}>{getCompareValue(compareItems[0], row, filterOptions)}</td>
+                    <td style={{ whiteSpace: 'pre-line' }}>{getCompareValue(compareItems[1], row, filterOptions)}</td>
                   </tr>
                 ))}
               </tbody>
