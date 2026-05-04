@@ -481,7 +481,7 @@ export default function Header() {
                     <div className="sch-input">
                       <input
                         type="text"
-                        name="sch-input"
+                        autoComplete="off"
                         className="krds-input"
                         placeholder="검색어를 입력하세요"
                         title="검색어 입력"
