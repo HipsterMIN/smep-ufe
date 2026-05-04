@@ -28,69 +28,6 @@ export const formatCorporationRegNo = (value) => {
   return `${digits.slice(0, 6)}-${digits.slice(6, 13)}`;
 };
 
-export const formatPhoneNumber = (value) => {
-  const raw = String(value ?? '').trim();
-  if (!raw) {
-    return '-';
-  }
-  if (raw.includes('-')) {
-    return raw;
-  }
-
-  const digits = raw.replace(/[^0-9]/g, '');
-  if (digits.length === 9) {
-    return `${digits.slice(0, 2)}-${digits.slice(2, 5)}-${digits.slice(5)}`;
-  }
-  if (digits.length === 10) {
-    if (digits.startsWith('02')) {
-      return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6)}`;
-    }
-    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
-  }
-  if (digits.length === 11) {
-    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
-  }
-  return raw;
-};
-
-export const formatYmd = (value, separator = '-') => {
-  const digits = normalizeDigits(value);
-  if (digits.length !== 8) {
-    return value || '-';
-  }
-  return `${digits.slice(0, 4)}${separator}${digits.slice(4, 6)}${separator}${digits.slice(6, 8)}`;
-};
-
-export const formatDateTime = (value) => {
-  if (!value) {
-    return '-';
-  }
-  return String(value).replace('T', ' ').split('.')[0];
-};
-
-export const parseDateFromYmd = (value) => {
-  const digits = normalizeDigits(value);
-  if (digits.length !== 8) {
-    return null;
-  }
-
-  const year = Number(digits.slice(0, 4));
-  const month = Number(digits.slice(4, 6)) - 1;
-  const day = Number(digits.slice(6, 8));
-  const parsed = new Date(year, month, day);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-};
-
-export const toYmd = (date) => {
-  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
-    return '';
-  }
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}${month}${day}`;
-};
-
 export const buildCompanyAddress = (baseAddress, detailAddress) => {
   const values = [baseAddress, detailAddress]
     .map((item) => String(item ?? '').trim())
@@ -152,34 +89,58 @@ export const resolveCorporateMemberNo = async (apiClient, businessRegNo) => {
   return response.mbrNo;
 };
 
-export const fetchCorporateMemberDetail = async (apiClient, mbrNo) =>
+export const fetchCorporateMemberDetail = async (apiClient) =>
   normalizeApiPayload(
-    await apiClient.get(`/api/v1/member/corporate/${encodeURIComponent(mbrNo)}`),
+    await apiClient.get('/api/v1/member/corporate/me'),
   );
 
-// 기업회원 정보수신 동의 목록을 조회한다.
-export const fetchCorporateMemberInfoReceptionAgreements = async (apiClient, mbrNo) =>
+// 개인회원 상세정보를 조회한다.
+export const fetchIndividualMemberDetail = async (apiClient) =>
   normalizeApiPayload(
-    await apiClient.get(
-      `/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/info-reception-agreements`,
-    ),
+    await apiClient.get('/api/v1/member/individual/me'),
   );
 
-export const fetchCorporateManagerContact = async (apiClient, mbrNo) =>
+// 회원 정보수신 동의 목록을 조회한다.
+export const fetchMemberInfoReceptionAgreements = async (apiClient) =>
   normalizeApiPayload(
-    await apiClient.get(`/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/contacts/manager`),
+    await apiClient.get('/api/v1/member/common/me/info-reception-agreements'),
   );
 
-export const updateCorporateMemberDetail = async (apiClient, mbrNo, payload) =>
+export const fetchCorporateManagerContact = async (apiClient) =>
   normalizeApiPayload(
-    await apiClient.put(`/api/v1/member/corporate/${encodeURIComponent(mbrNo)}`, payload),
+    await apiClient.get('/api/v1/member/corporate/me/contacts/manager'),
+  );
+
+export const updateCorporateMemberDetail = async (apiClient, payload) =>
+  normalizeApiPayload(
+    await apiClient.post('/api/v1/member/corporate/me', payload),
   );
 
 // 기업회원 정보와 정보수신 동의를 저장한다.
-export const updateCorporateMemberInfo = async (apiClient, mbrNo, payload) =>
+export const updateCorporateMemberInfo = async (apiClient, payload) =>
   normalizeApiPayload(
-    await apiClient.put(
-      `/api/v1/member/corporate/${encodeURIComponent(mbrNo)}/member-info`,
+    await apiClient.post(
+      '/api/v1/member/corporate/me/member-info',
       payload,
     ),
   );
+
+// 개인회원 정보와 정보수신 동의를 저장한다.
+export const updateIndividualMemberInfo = async (apiClient, payload) =>
+  normalizeApiPayload(
+    await apiClient.post(
+      '/api/v1/member/individual/me/member-info',
+      payload,
+    ),
+  );
+
+// KED 기업정보 호출
+export const fetchKedCorpInfo = async (apiClient) => {
+  const response = normalizeApiPayload(
+    await apiClient.get('/api/v1/member/corporate/me/ked-info'),
+  );
+  if (!response) {
+    throw new Error('KED 기업정보를 불러오지 못했습니다.');
+  }
+  return response; // { entSclCd, fndnYmd, mainBizFldNm, wrkrCntClsfCd }
+};

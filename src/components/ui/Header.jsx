@@ -70,6 +70,8 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const isMainPage = location.pathname === '/';
+  const isLoginPage = location.pathname.endsWith('/service/login');
+  const showHeaderSearch = !isMainPage && !isLoginPage;
   const [remainingSeconds, setRemainingSeconds] = useState(null);
   const [isExtendingSession, setIsExtendingSession] = useState(false);
   
@@ -162,8 +164,31 @@ export default function Header() {
     onePassGetAuthCode();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    let logoutUrl = null;
+
+    try {
+      const response = await apiClient.post('/api/v1/auth/keycloak/logout');
+      const responseData = response?.data || response;
+      logoutUrl = responseData?.logoutUrl || responseData?.data?.logoutUrl || null;
+      console.log('[Header] keycloak logout url resolved', {
+        hasLogoutUrl: Boolean(logoutUrl),
+        logoutUrlLength: logoutUrl?.length ?? 0,
+      });
+    } catch (error) {
+      console.error('[Header] failed to fetch keycloak logout url', {
+        message: error?.message ?? 'unknown-error',
+        status: error?.status ?? null,
+      });
+    }
+
+    // 로컬 로그아웃은 항상 수행하고, OnePass 세션이 있으면 외부 logout redirect를 이어서 태운다.
     logout();
+    if (logoutUrl) {
+      window.location.href = logoutUrl;
+      return;
+    }
+
     navigate('/');
   };
 
@@ -296,7 +321,7 @@ export default function Header() {
   };
 
   const handleMyPage = () => {
-    navigate(getFullPath('M_PIIO_00114'));
+    navigate('/mb');
   };
 
   const handleOpenMobGnb = () => {
@@ -434,11 +459,11 @@ export default function Header() {
                   <li>
                     <HeaderFontDropdown />
                   </li>
-                  <li>
-                    <Link onClick={() => setPopOpen(true)} className="krds-btn small text">
-                      <i class="svg-icon ico-system"></i> 유관시스템 둘러보기
-                    </Link>
-                  </li>
+                  {/*<li>*/}
+                  {/*  <Link onClick={() => setPopOpen(true)} className="krds-btn small text">*/}
+                  {/*    <i class="svg-icon ico-system"></i> 유관시스템 둘러보기*/}
+                  {/*  </Link>*/}
+                  {/*</li>*/}
                 </ul>
               </div>
               <div className="header-branding">
@@ -452,7 +477,7 @@ export default function Header() {
                 </div>
                 <div className="header-right">
                   {/* 검색란 */}
-                  {!isMainPage && (
+                  {showHeaderSearch && (
                     <div className="sch-input">
                       <input
                         type="text"

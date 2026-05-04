@@ -4,11 +4,13 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 
 const CbzIssue = () => {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
+  const { brno, cmpNm } = useAuthStore((state) => ({ brno: state.bizno, cmpNm: state.cmpNm }));
 
   const [records, setRecords]               = useState([]);
   const [selectedCmpId1, setSelectedCmpId1] = useState(null);
@@ -20,13 +22,12 @@ const CbzIssue = () => {
   const depth1Menu  = getDepth1Parent();
 
   const goBack = () => navigate(-1);
-  const brno   = '6090499481'; // TODO: 실제 로그인 사용자 사업자번호로 교체
 
   useEffect(() => {
     const fetchRecords = async () => {
       setIsFetching(true);
       try {
-        const data = await apiClient.get(`/api/v1/certificate/cbz/records?brno=${brno}`);
+        const data = await apiClient.get('/api/v1/certificate/cbz/records');
         setRecords(data?.data?.records || []);
       } catch (e) {
         console.error('CBZ 목록 조회 실패:', e);
@@ -52,7 +53,6 @@ const CbzIssue = () => {
       setIsLoading(true);
       const prdocIssuAplyNo = await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
-        brno,
         prdocIssuTypeCd: 'Y301',
         extraParams: { cmpId1: selectedCmpId1 },
       });
@@ -79,7 +79,6 @@ const CbzIssue = () => {
       setIsLoading(true);
       await apiClient.post('/api/v1/certificate/issue', {
         prdocCd,
-        brno,
         prdocIssuTypeCd: 'Y302',
         extraParams: { cmpId1: selectedCmpId1 },
       });
@@ -123,7 +122,7 @@ const CbzIssue = () => {
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper w-360">
-                  <input type="text" id="id_01" className="krds-input small" value="2288105280" readOnly />
+                  <input type="text" id="id_01" className="krds-input small" value={brno} readOnly />
                 </div>
               </dd>
             </div>
@@ -135,7 +134,7 @@ const CbzIssue = () => {
               </dt>
               <dd className="form-row-content">
                 <div className="form-wrapper w-360">
-                  <input type="text" id="id_02" className="krds-input small" value="주식회사" readOnly />
+                  <input type="text" id="id_02" className="krds-input small" value={cmpNm} readOnly />
                 </div>
               </dd>
             </div>

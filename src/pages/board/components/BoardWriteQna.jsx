@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
@@ -9,6 +9,14 @@ const normalizeResponse = (response) => response?.data ?? response ?? null;
 const normalizeText = (value) => String(value ?? '').trim();
 
 const BoardWriteQna = ({ boardDetail, bbsNo }) => {
+  //  숨겨진 file input ref
+  const fileInputRef = useRef(null);
+  const atchFileIdRef = useRef('');
+
+  // 첨부파일 버튼 클릭 시 input 이벤트 트리거
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const navigate = useNavigate();
 
@@ -17,8 +25,9 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
   const [selectedCategoryNo, setSelectedCategoryNo] = useState('');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [visibility, setVisibility] = useState('PUBLIC');
+  const [visibility, setVisibility] = useState('PRIVATE');
   const [saving, setSaving] = useState(false);
+  const [fileList, setFileList] = useState([]);
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -100,6 +109,42 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
 
     return true;
   };
+  const handleFileChange = (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    const file = files[0]; // 무조건 첫 번째 파일만 취함
+
+    // 1. 확장자 벨리데이션 설정
+    const allowedExtensions = [
+      'zip',
+      'hwp', 'hwpx', 'xls', 'xlsx', 'doc', 'docx', 'ppt', 'pptx', 'pdf', 'txt',
+      'jpg', 'jpeg', 'png', 'gif',
+    ];
+
+    // 파일명에서 확장자 추출 (소문자 변환)
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+
+    // 2. 확장자 체크
+    if (!allowedExtensions.includes(fileExtension)) {
+      alert('허용되지 않은 파일 형식입니다.\n(zip, hwp, xls, doc, ppt, pdf, txt, jpg, png, gif 등만 가능)');
+      event.target.value = ''; // input 비우기
+      return;
+    }
+
+    // 3. 용량 제한 체크 (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('첨부파일은 10MB 이하만 가능합니다.');
+      event.target.value = '';
+      return;
+    }
+
+    // 모든 통과 시 파일 리스트를 비우고 새 파일 '하나'만 넣음
+    setFileList([file]);
+
+    // input 초기화 (같은 파일 다시 선택 가능하도록)
+    event.target.value = '';
+  };
 
   const buildRequestBody = () => {
     const parsedCategoryNo =
@@ -110,11 +155,16 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
       pstTtl: normalizeText(title),
       pstCn: normalizeText(content),
       pstRlsYn: visibility === 'PRIVATE' ? 'N' : 'Y',
+      atchFileId: atchFileIdRef.current,
     };
   };
 
   const handleCancel = () => {
     navigate('..');
+  };
+
+  const removeFile = () => {
+    setFileList([]);
   };
 
   const handleSave = async () => {
@@ -123,11 +173,34 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
 
     try {
       setSaving(true);
-      await apiClient.post(`/api/v1/board/${bbsNo}/posts`, buildRequestBody());
+
+      // 저장 시점에 파일을 먼저 업로드
+      let finalAtchFileId = atchFileIdRef.current;
+
+      if (fileList.length > 0) {
+        const formData = new FormData();
+        fileList.forEach(file => formData.append('file', file));
+        formData.append('type', 'general');
+
+        const fileRes = await apiClient.post('/api/v1/files/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        console.log(fileRes);
+        const result = normalizeResponse(fileRes);
+        finalAtchFileId = result?.data?.atchFileId || result?.atchFileId;
+      }
+
+      // 최종 게시글 저장
+      const body = {
+        ...buildRequestBody(),
+        atchFileId: finalAtchFileId,
+      };
+
+      await apiClient.post(`/api/v1/board/${bbsNo}/posts`, body);
       alert('문의가 등록되었습니다.');
       navigate('..');
     } catch (error) {
-      alert(error?.message || '문의 등록 중 오류가 발생했습니다.');
+      alert(error?.message || '등록 중 오류가 발생했습니다.');
     } finally {
       setSaving(false);
     }
@@ -269,6 +342,51 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
                       />
                       <label htmlFor="visibility-private">비공개</label>
                     </div>
+                  </div>
+                </div>
+              </dd>
+            </div>
+            <div className="form-row-item">
+              <dt className="form-row-label">
+                <label htmlFor="file-input" className="label">첨부파일</label>
+              </dt>
+              <dd className="form-row-content">
+                <ul className="info-list-point">
+                  <li><i className="svg-icon ico-checkbox"></i>첨부파일은 10MB 이하의 파일만 가능합니다.</li>
+                  <li><i className="svg-icon ico-checkbox"></i>첨부파일은 zip 압축파일, 문서(한글, 엑셀, MS워드, 파워포인트, PDF, TXT)또는
+                    이미지(jpg, png, gif 등)파일만 가능합니다.
+                  </li>
+                </ul>
+                <div className="file-upload mt-16">
+                  {/* 실제 파일 입력창은 숨김 처리 */}
+                  <input
+                    type="file"
+                    id="file-input"
+                    className="sr-only"
+                    ref={fileInputRef}
+                    accept=".zip, .hwp, .hwpx, .xls, .xlsx, .doc, .docx, .ppt, .pptx, .pdf, .txt, .jpg, .jpeg, .png, .gif"
+                    onChange={handleFileChange}
+                  />
+                  <button
+                    type="button"
+                    className="krds-btn secondary medium"
+                    onClick={handleButtonClick}
+                  >
+                    찾아보기
+                  </button>
+                  <div className="file-list-container mt-16">
+                    {fileList.map((file, index) => (
+                      <div key={'${file.name}-${index}'} className="file-item d-flex ai-center mb-8">
+                        <span className="text-primary">📎 {file.name}</span>
+                        <button
+                          type="button"
+                          className="ml-8 text-danger"
+                          onClick={() => removeFile(index)}
+                        >
+                            삭제
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </dd>

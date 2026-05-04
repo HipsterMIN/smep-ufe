@@ -40,7 +40,8 @@ export const useApiKeyApply = () => {
         indvGnrlTelno: formData.indvGnrlTelno?.replace(/-/g, '') ?? '',
       };
       await apiClient.post(`/api/v1/apikey/apply/${mbrNo}`, payload);
-      alert('인증키 신청이 완료되었습니다. 담당자 승인 후 사용 가능합니다.');
+      alert('인증키 신청이 완료되었습니다.');
+      window.location.reload();
       closePopup();
     } catch (err) {
       setErrorMessage(err.response?.data?.message || '신청 중 오류가 발생했습니다.');

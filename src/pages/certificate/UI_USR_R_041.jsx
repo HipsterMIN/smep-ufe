@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api as apiClient } from '@lib/apiClient.js';
 import Logo from '@assets/common/logo2.svg';
-// import { useAuthStore } from '@store/useAuthStore'; // TODO: 로그인/기업회원 정책 결정 후 활성화
+import { useAuthStore } from '@store/useAuthStore';
 
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
@@ -12,6 +12,11 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 const UI_USR_R_041 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent, getFullPath } = useUserMenu();
+
+  const { isLogin, cmpNm } = useAuthStore((state) => ({
+    isLogin: state.isLogin,
+    cmpNm: state.cmpNm,
+  }));
 
   const { prdocCd } = useParams();
   const navigate = useNavigate();
@@ -50,16 +55,14 @@ const UI_USR_R_041 = () => {
 
   /**
    * 증명서 발급 버튼 클릭 핸들러
-   * TODO: 로그인/기업회원 정책 결정 후 아래 주석 처리된 체크 로직 활성화
    */
   const handleClickIssue = async () => {
-    // TODO: 로그인 체크 - 정책 결정 후 활성화
-    // if (!isLogin) {
-    //   if (window.confirm('로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?')) {
-    //     navigate('/login');
-    //   }
-    //   return;
-    // }
+    if (!isLogin) {
+      if (window.confirm('로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?')) {
+        navigate('/service/login');
+      }
+      return;
+    }
 
     // TODO: 기업회원 체크 - 정책 결정 후 활성화
     // if (currentMode !== 'CORPORATE') {
@@ -75,7 +78,6 @@ const UI_USR_R_041 = () => {
         '/api/v1/certificate/eligibility',
         {
           prdocCd,
-          bizNo: '2288105280', // TODO: 로그인 구현 후 Zustand store bizno로 교체
         },
       );
 
@@ -190,7 +192,7 @@ const UI_USR_R_041 = () => {
               <img src={Logo} alt="중소벤처 24 로고" />
             </div>
             <div className="guide-text">
-                귀사 <span className="bold">업체명</span>은(는)
+                귀사 <span className="bold">{cmpNm}</span>은(는)
               <br />
               <strong>
                   현재 중소기업통합플랫폼에서 <br /> {ineligibleInfo?.prdocNm} 발급 대상이 아닙니다.

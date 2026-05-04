@@ -36,7 +36,7 @@ const RelatedSystems = lazy(() => import('@pages/more-service/RelatedSystems.jsx
 const UI_USR_L_170 = lazy(() => import('@pages/more-service/UI_USR_L_170.jsx'));
 const ApiInfo = lazy(() => import('@pages/data-open/ApiInfo.jsx'));
 const UI_USR_L_220 = lazy(() => import('@pages/data-open/UI-USR-L-220.jsx'));
-const UI_USR_L_230 = lazy(() => import('@pages/data-open/UI-USR-L-230.jsx'));
+const UI_USR_L_230 = lazy(() => import('@pages/board/BoardResolver.jsx'));
 const SupportBusinessInfoApi = lazy(() => import('@pages/data-open/SupportBusinessInfoApi.jsx'));
 const EventInfoApi = lazy(() => import('@pages/data-open/EventInfoApi.jsx'));
 const InnoBizCertificateApi = lazy(() => import('@pages/data-open/InnoBizCertificateApi.jsx'));
@@ -57,9 +57,10 @@ const UI_USR_W_411 = lazy( () => import('@pages/my-business/UI-USR-W-411.jsx'));
 const UI_USR_R_420 = lazy(() => import('@pages/my-business/PasswordChange.jsx'));
 const UI_USR_W_430 = lazy(() => import('@pages/my-business/UI-USR-W-430.jsx'));
 const UI_USR_R_440 = lazy(() => import('@pages/my-business/UI-USR-R-440.jsx'));
-const UI_USR_R_450 = lazy(() => import('@pages/my-business/company/CompanyDetail.jsx'));
-const UI_USR_W_452 = lazy(() => import('@pages/my-business/company/CompanyEdit.jsx'));
-const UI_USR_L_460 = lazy(() => import('@pages/my-business/company/ReassignOwner.jsx'));
+const UI_USR_R_450 = lazy(() => import('@pages/my-business/member/CompanyDetail.jsx'));
+const UI_USR_W_452 = lazy(() => import('@pages/my-business/member/CompanyEdit.jsx'));
+const UI_USR_R_490 = lazy(() => import('@pages/my-business/UI-USR-R-490.jsx'));
+const UI_USR_L_460 = lazy(() => import('@pages/my-business/member/ReassignOwner.jsx'));
 const UI_USR_L_020 = lazy(() => import('@pages/UI-USR-L-020.jsx'));
 const UI_USR_L_520 = lazy(() => import('@pages/my-business/UI-USR-L-520.jsx'));
 const ScrapList = lazy(() => import('@pages/my-business/ScrapList.jsx'));
@@ -431,11 +432,11 @@ export const componentMap = {
 
   // API Q&A
   'M_PIIO_00098': {
-    component: UI_USR_L_230,
+    component: BoardResolver,
     layout: SubpageLayoutWithMenu,
     children: [
-      { path: 'create', component: UI_USR_W_231 }, // API Q&A 등록
-      { path: ':id', component: UI_USR_R_232 }, // API Q&A 상세
+      { path: 'save', component: BoardWriteResolver }, // API Q&A 등록 /수정
+      { path: ':id', component: BoardPostResolver }, // API Q&A 상세
     ],
   },
 
@@ -558,10 +559,10 @@ export const componentMap = {
   },
 
   // 경영현황 분석
-  // 'M_PIIO_00120': {
-  //   component: UI_USR_R_490,
-  //   layout: SubpageLayoutWithMenu,
-  // },
+  'M_PIIO_00120': {
+    component: UI_USR_R_490,
+    layout: SubpageLayoutWithMenu,
+  },
 
   // 담당자 관리
   'M_PIIO_00121': {
