@@ -59,13 +59,6 @@ const formatDate = (value, separator = '.') => {
   return raw;
 };
 
-const formatDateRange = (start, end, separator = ' ~ ') => {
-  const startText = formatDate(start);
-  const endText = formatDate(end);
-  if (startText && endText) return `${startText}${separator}${endText}`;
-  return startText || endText || '';
-};
-
 const getDaysRemaining = (deadline) => {
   if (!deadline || !/^\d{8}$/.test(String(deadline))) return null;
   const raw = String(deadline);
@@ -1325,6 +1318,7 @@ const MainPage = () => {
                               item,
                               false,
                             );
+                            const faqTitle = stripHtmlTags(item.pstTtl) || '-';
                             return (
                               <li
                                 className="board-list-item"
@@ -1343,7 +1337,7 @@ const MainPage = () => {
                                       </span>
                                     )}
                                     <span className="board-list-title onellipsis-1">
-                                      {item.pstTtl}
+                                      {faqTitle}
                                     </span>
                                   </a>
                                 ) : (
@@ -1354,7 +1348,7 @@ const MainPage = () => {
                                       </span>
                                     )}
                                     <span className="board-list-title onellipsis-1">
-                                      {item.pstTtl}
+                                      {faqTitle}
                                     </span>
                                   </Link>
                                 )}
@@ -1381,6 +1375,9 @@ const MainPage = () => {
                               item,
                               true,
                             );
+                            const adminInfoDate = formatDate(
+                              item.pstgBgngYmd || item.pstRegDt,
+                            );
                             return (
                               <li
                                 className="board-list-item"
@@ -1402,10 +1399,7 @@ const MainPage = () => {
                                       {item.pstTtl}
                                     </span>
                                     <span className="board-list-date">
-                                      {formatDateRange(
-                                        item.pstgBgngYmd,
-                                        item.pstgEndYmd,
-                                      )}
+                                      {adminInfoDate}
                                     </span>
                                   </a>
                                 ) : (
@@ -1419,10 +1413,7 @@ const MainPage = () => {
                                       {item.pstTtl}
                                     </span>
                                     <span className="board-list-date">
-                                      {formatDateRange(
-                                        item.pstgBgngYmd,
-                                        item.pstgEndYmd,
-                                      )}
+                                      {adminInfoDate}
                                     </span>
                                   </Link>
                                 )}
