@@ -34,7 +34,7 @@ const ApiKeyDetailView = ({ isOpen, onClose, detailData }) => {
                                 <div className="form-tit"><label className="form-label">휴대전화 번호</label></div>
                                 <div className="form-conts">
                                     <input type="text" className="krds-input small bg-readonly"
-                                           value={data.indvMblTelno || '-'} readOnly/>
+                                           value={data.picMblTelno || data.indvMblTelno || '-'} readOnly/>
                                 </div>
                             </div>
                         </div>
@@ -145,7 +145,7 @@ const ApiKeyDetailView = ({ isOpen, onClose, detailData }) => {
                                     borderRadius: '4px',
                                     fontSize: '1.4rem'
                                 }}>
-                                    {data.linkSiteNm || data.linkSiteCd || '-'}
+                                    {data.apiNm || data.apiSeCd || '-'}
                                 </div>
                             </div>
                         </div>
