@@ -233,7 +233,7 @@ const UI_USR_L_220 = () => {
                 display: 'inline-block'
               }}
           >
-            {row.linkSiteNm}
+            {row.apiNm}
           </span>
                           </td>
                           <td className="ac"><span>{row.picEmlAddr}</span></td>
