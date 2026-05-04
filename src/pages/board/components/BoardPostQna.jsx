@@ -34,7 +34,7 @@ const formatDate = (dateString) => {
   return `${year}.${month}.${day}`;
 };
 
-const BoardPostQna = ({ bbsNo, pstNo }) => {
+const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const navigate = useNavigate();
 
@@ -94,6 +94,7 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
     if (isPrivatePostHidden) return [];
     return postDetail?.attachFiles || [];
   }, [isPrivatePostHidden, postDetail]);
+  const boardTitle = useMemo(() => boardDetail?.bbsNm || '', [boardDetail]);
   const postTitle = useMemo(() => postDetail?.pstTtl || '-', [postDetail]);
   const categoryName = useMemo(() => postDetail?.ctgryNm || '-', [postDetail]);
   const visibilityLabel = useMemo(() => {
@@ -138,6 +139,7 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems}/>
         <div className="page-title-wrap" data-type="responsive">
+          <p className="on-p1 on-colorblue">{boardTitle}</p>
           <h2 className="h-tit2">{postTitle}</h2>
         </div>
         <ul className="onboard-summary">

@@ -12,7 +12,7 @@ const EMPTY_HTML_PATTERNS = new Set([
 ]);
 
 const SprtBizView = () => {
-  const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const { breadcrumbItems, currentMenu, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -117,7 +117,7 @@ const SprtBizView = () => {
         <Breadcrumb items={breadcrumbItems} />
 
         <div className="page-title-wrap on-btmline" data-type="responsive">
-          <p className="on-p1 on-colorblue">지원사업소개</p>
+          <p className="on-p1 on-colorblue">{currentMenu?.menuNm || '지원사업 소개'}</p>
           <h2 className="h-tit2">{item.sprtBizNm}</h2>
         </div>
 
