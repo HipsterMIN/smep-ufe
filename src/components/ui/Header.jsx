@@ -480,7 +480,8 @@ export default function Header() {
                   {showHeaderSearch && (
                     <div className="sch-input">
                       <input
-                        type="text"
+                        type="search"
+                        name="headerSearchKeyword"
                         autoComplete="off"
                         className="krds-input"
                         placeholder="검색어를 입력하세요"
