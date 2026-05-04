@@ -24,6 +24,7 @@ import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import OnepassLoginConversionModal from '@pages/onepass/OnepassLoginConversionModal.jsx';
+import { onePassJoin } from '@utils/keycloakGetAuthCode.js';
 
 const MAIN_MENU_IDS = {
   notice: 'M_PIIO_00101',
@@ -608,6 +609,14 @@ const MainPage = () => {
   // 실제 전환 동선은 후속 계약 전까지 연결하지 않고, 현재는 노출/세션 제어까지만 수행한다.
   const handleOnepassModalConvert = () => {
     handleOnepassModalDismiss();
+  };
+  const handleOnepassJoinClick = () => {
+    if (!isLoggedIn) {
+      window.alert('중기원패스 회원가입 준비중입니다.');
+      return;
+    }
+
+    onePassJoin();
   };
   const requestLoginForScrap = () => {
     const moveToLogin = window.confirm('로그인 후 스크랩 가능합니다. 로그인 하시겠습니까?');
@@ -1518,7 +1527,7 @@ const MainPage = () => {
         <div className="main-btm-bar">
           <div className="contents-inner">
             <p className="title">중소기업 유관 시스템을 하나의 통합 ID로 이용할 수 있습니다</p>
-            <button type="button" className="krds-btn primary">통합회원 가입하기</button>
+            <button type="button" className="krds-btn primary" onClick={handleOnepassJoinClick}>통합회원 가입하기</button>
           </div>
         </div>
       </div>
