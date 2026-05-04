@@ -124,7 +124,7 @@ const UI_USR_L_220 = () => {
 
           <div className="tab fill full mt-48">
             <ul>
-              <li><Link to="/cs/opndata/UI_USR_L_210" className="btn-tab">API 소개</Link></li>
+              <li><Link to="/cs/opndata/UI_USR_L_210" className="btn-tab">API 안내</Link></li>
               <li className="active">
                 <Link to="/cs/opndata/UI_USR_L_220" className="btn-tab">
                   인증키 신청<span className="sr-only">현재 페이지</span>

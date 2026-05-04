@@ -31,7 +31,7 @@ const ApiInfo = () => {
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap side-conts" data-type="responsive">
           <h2 className="h-tit">
-            API 소개
+            API 안내
           </h2>
         </div>
 
@@ -46,7 +46,7 @@ const ApiInfo = () => {
           <ul>
             <li className="active">
               <Link to="/cs/opndata/UI_USR_L_210" className="btn-tab">
-                    API 소개
+                    API 안내
                 <span className="sr-only">현재 페이지</span>
               </Link>
             </li>
@@ -64,7 +64,7 @@ const ApiInfo = () => {
         </div>
 
         <div className="conts-wrap mt-40">
-          <h3 className="sec-tit">Open API 소개</h3>
+          <h3 className="sec-tit">Open API 안내</h3>
           <p className="conts-desc">
             특정 시스템이 갖고 있는 콘텐츠 데이터를 다른 이용자들이 손쉽게 이용하거나 재활용 할 수 있도록 돕기 위해 <br />
             표준화된 규약을 만들어 공개적으로 제공하는 것을 Open API(Application Program Interface)라고 말합니다. <br />
