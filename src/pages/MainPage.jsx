@@ -693,7 +693,7 @@ const MainPage = () => {
   return (
     <div id="wrap">
       <Header />{ /* 임시 해더 */}
-      <div id="container" class="main-container">
+      <div id="container" className="main-container">
         { /*컨텐츠 영역 */}
 
         {/* S - main-totallayout */}
