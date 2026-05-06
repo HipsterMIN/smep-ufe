@@ -13,10 +13,7 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 const UI_USR_R_041 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent, getFullPath } = useUserMenu();
 
-  const { isLogin, cmpNm } = useAuthStore((state) => ({
-    isLogin: state.isLogin,
-    cmpNm: state.cmpNm,
-  }));
+  const { isLogin, cmpNm, currentMode, logout  } = useAuthStore();
 
   const { prdocCd } = useParams();
   const navigate = useNavigate();
@@ -59,18 +56,40 @@ const UI_USR_R_041 = () => {
   const handleClickIssue = async () => {
     if (!isLogin) {
       if (window.confirm('로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?')) {
-        navigate('/service/login');
+        navigate('/service/login', { state: { loginType: 'CORPORATE' } });
       }
       return;
     }
 
-    // TODO: 기업회원 체크 - 정책 결정 후 활성화
-    // if (currentMode !== 'CORPORATE') {
-    //   if (window.confirm('기업회원 로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?')) {
-    //     navigate('/login');
-    //   }
-    //   return;
-    // }
+    if (currentMode !== 'CORPORATE') {
+      if (window.confirm('기업회원 로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?')) {
+        // 로그아웃 처리 후 로그인 페이지로 이동
+        try {
+          const response = await apiClient.post('/api/v1/auth/keycloak/logout');
+          const responseData = response?.data || response;
+          const logoutUrl = responseData?.logoutUrl || responseData?.data?.logoutUrl || null;
+
+          logout(); // 로컬 로그아웃은 항상 수행
+
+          if (logoutUrl) {
+            // OnePass 세션이 있으면 외부 logout redirect 처리
+            // → keycloak 로그아웃 완료 후 로그인 페이지로 돌아오도록 redirect_uri 파라미터 추가
+            const redirectAfterLogout = `${window.location.origin}/service/login`;
+            window.location.href = `${logoutUrl}&redirect_uri=${encodeURIComponent(redirectAfterLogout)}`;
+            return;
+          }
+        } catch (error) {
+          console.error('[Certificate] failed to fetch keycloak logout url', {
+            message: error?.message ?? 'unknown-error',
+            status: error?.status ?? null,
+          });
+          logout(); // API 실패해도 로컬 로그아웃은 수행
+        }
+
+        navigate('/service/login', { state: { loginType: 'CORPORATE' } });
+      }
+      return;
+    }
 
     // 발급 가능 기업 여부 확인
     try {

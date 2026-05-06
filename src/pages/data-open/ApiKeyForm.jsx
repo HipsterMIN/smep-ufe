@@ -1,6 +1,7 @@
 import Popup from '@components/ui/Popup';
 import { useEffect, useState } from 'react';
 import { api as apiClient } from '@lib/apiClient.js';
+import { useAuthStore } from '@store/useAuthStore.jsx';
 
 // 부모에게서 상태를 전달받도록 Props 설정
 const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo, memberInfo }) => {
@@ -9,7 +10,9 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
   const [isDirectInput, setIsDirectInput] = useState(false);
   const [appliedApis, setAppliedApis] = useState([]); // 1. 이미 신청된 API 코드들을 담을 상태
   const ALL_API_CODES = ['TE01', 'TE02', 'TE03', 'TE04', 'TE05'];
-
+  const currentMode = useAuthStore((state) => state.currentMode);
+  const [apiMasterList, setApiMasterList] = useState({});
+  const INDIVIDUAL_API_CODES = ['AD01', 'AD02'];
   const initialFormState = {
     siteNm: '',
     apiRegAplyCn: '',
@@ -20,8 +23,8 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
     picJbpsNm: '',
     indvEmlAddr: '',
     indvGnrlTelno: '',
-    linkSiteCd: [],
-    usgSeCd: '',
+    apiSeCd: [],
+    usgSeCd: 'PD01',
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -33,7 +36,10 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
       // memberInfo가 있다면 기본값은 다시 채워줌
       // picDeptNm: memberInfo?.picDeptNm || '',
       // picJbpsNm: memberInfo?.picJbpsNm || '',
-      indvEmlAddr: memberInfo?.emlAddr || '',
+      indvEmlAddr: currentMode === 'CORPORATE'
+          ? (memberInfo?.picEmlAddr || '')
+          : (memberInfo?.indvEmlAddr || ''),
+      usgSeCd: 'PD01',
       // indvGnrlTelno: memberInfo?.indvGnrlTelno || '',
     });
     setIsDirectInput(false);
@@ -47,15 +53,17 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
   // 1. 컴포넌트 로드 시 기관 공통 코드 조회
   useEffect(() => {
     if (isOpen && memberInfo) {
+
       setFormData(prev => ({
         ...prev,
         picDeptNm:  '',
         picJbpsNm:  '',
-        indvEmlAddr: memberInfo.emlAddr || '',
-        indvGnrlTelno:  '',
+        indvEmlAddr: currentMode === 'CORPORATE'
+            ? (memberInfo.picEmlAddr || '')
+            : (memberInfo.indvEmlAddr || ''),
       }));
     }
-  }, [isOpen, memberInfo]);
+  }, [isOpen, memberInfo, currentMode]);
 
   // 2. 기관 공통 코드 조회
   useEffect(() => {
@@ -81,7 +89,7 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
           const res = await apiClient.get(`/api/v1/apikey/apply/list?mbrNo=${mbrNo}`);
 
           if (res.data) {
-            const appliedCodes = res.data.map(item => item.linkSiteCd);
+            const appliedCodes = res.data.map(item => item.apiSeCd);
             setAppliedApis(appliedCodes);
           }
         } catch (error) {
@@ -91,6 +99,33 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
       fetchAppliedHistory();
     }
   }, [isOpen, mbrNo]); // mbrNo가 변경될 때마다 재실행
+
+  useEffect(() => {
+    if (isOpen) {
+      const fetchApiMaster = async () => {
+        try {
+          const res = await apiClient.get('/api/v1/apikey/apply/dvsn-code');
+          setApiMasterList(res.data);
+        } catch (error) {
+          console.error('API 마스터 목록 조회 실패', error);
+        }
+      };
+      fetchApiMaster();
+    }
+  }, [isOpen]);
+
+  const getFilteredApiList = () => {
+    // 1. Map 객체를 [key, value] 배열로 변환
+    const allApis = Object.entries(apiMasterList);
+
+    // 2. 권한에 따른 필터링
+    if (currentMode === 'CORPORATE') {
+      return allApis; // 기업은 전체 노출
+    } else {
+      // 개인은 정의된 코드만 노출
+      return allApis.filter(([code]) => INDIVIDUAL_API_CODES.includes(code));
+    }
+  };
 
   // 셀렉트 박스 변경 핸들러
   const handleInstChange = (e) => {
@@ -105,35 +140,53 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
     }
   };
 
+  // const handleCheckboxChange = (e) => {
+  //   const { value, checked } = e.target;
+  //   const { apiSeCd } = formData;
+  //   if (appliedApis.includes(value)) return;
+  //
+  //   if (checked) {
+  //     // 체크되면 배열에 추가
+  //     setFormData({
+  //       ...formData,
+  //       apiSeCd: [...apiSeCd, value],
+  //     });
+  //   } else {
+  //     // 체크 해제되면 배열에서 제거
+  //     setFormData({
+  //       ...formData,
+  //       apiSeCd: apiSeCd.filter(item => item !== value),
+  //     });
+  //   }
+  // };
+
   const handleCheckboxChange = (e) => {
     const { value, checked } = e.target;
-    const { linkSiteCd } = formData;
+    // appliedApis(이미 신청 완료된 목록)에 있으면 무시
     if (appliedApis.includes(value)) return;
 
-    if (checked) {
-      // 체크되면 배열에 추가
-      setFormData({
-        ...formData,
-        linkSiteCd: [...linkSiteCd, value],
-      });
-    } else {
-      // 체크 해제되면 배열에서 제거
-      setFormData({
-        ...formData,
-        linkSiteCd: linkSiteCd.filter(item => item !== value),
-      });
-    }
+    setFormData(prev => ({
+      ...prev,
+      apiSeCd: checked
+          ? [...prev.apiSeCd, value]
+          : prev.apiSeCd.filter(item => item !== value)
+    }));
   };
 
   const handleInternalSubmit = () => {
-    const isAllApplied = ALL_API_CODES.every(code => appliedApis.includes(code));
+
+
+    const availableCodes = getFilteredApiList().map(([code]) => code);
+
+    const isAllApplied = availableCodes.length > 0 &&
+        availableCodes.every(code => appliedApis.includes(code));
 
     if (isAllApplied) {
       alert("모든 API가 이미 신청 완료되어 추가 신청이 불가능합니다.");
       return;
     }
 
-    if(formData.linkSiteCd.length === 0){
+    if(formData.apiSeCd.length === 0){
       alert("신청할 API를 선택해 주세요.");
       return;
     }
@@ -162,10 +215,25 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
     // 직접입력이면 instNmDirect → ogdpInstNm으로 매핑하여 전송
     const submitData = {
       ...formData,
+      linkUseTrgtSeCd: currentMode === 'CORPORATE' ? 'ENT' : 'IND',
+      mbrNm: memberInfo?.mbrNm,
+
+      // 이메일과 전화번호를 무조건 pic 계열 필드에 할당
+      picEmlAddr: formData.indvEmlAddr,      // 화면 입력값(이메일)
+      picTelno: formData.indvGnrlTelno,      // 화면 입력값(유선전화)
+
+      picMblTelno: currentMode === 'CORPORATE'
+          ? memberInfo.picMblTelno
+          : memberInfo.indvMblTelno,
+
+      entPicMbrNo: memberInfo.entPicMbrNo,
+
       ogdpInstNm: isDirectInput ? formData.instNmDirect : formData.ogdpInstNm,
     };
+
     onSubmit(submitData);
   };
+
 
   // 유선전화번호 자동 하이픈 포맷 (숫자만 추출 후 최대 11자리)
   const formatTelno = (value) => {
@@ -236,7 +304,11 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
                   <label htmlFor="id_02" className="form-label">휴대전화 번호</label>
                 </div>
                 <div className="form-conts">
-                  <input type="text" className="krds-input small" value={memberInfo.indvMblTelno || '-'} readOnly={true}/>
+                  <input type="text" className="krds-input small" value={
+                    currentMode === 'CORPORATE'
+                        ? (memberInfo.picMblTelno || '-')
+                        : (memberInfo.indvMblTelno || '-')
+                  } readOnly={true}/>
                 </div>
               </div>
             </div>
@@ -364,16 +436,17 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
         <div className="box-cnt gap-24">
           <div className="form-group">
             <div className="form-tit">
-              <label htmlFor="id_07" className="form-label">시스템명<span className="on-required"><span className="sr-only">필수입력</span></span></label>
+              <label htmlFor="id_07" className="form-label">시스템명<span className="on-required"><span
+                  className="sr-only">필수입력</span></span></label>
             </div>
             <div className="form-conts">
               <input
-                type="text"
-                id="siteNm"
-                className="krds-input small"
-                placeholder="시스템명을 입력해주세요."
-                value={formData.siteNm}
-                onChange={(e) => setFormData({ ...formData, siteNm: e.target.value })}
+                  type="text"
+                  id="siteNm"
+                  className="krds-input small"
+                  placeholder="시스템명을 입력해주세요."
+                  value={formData.siteNm}
+                  onChange={(e) => setFormData({...formData, siteNm: e.target.value})}
               />
             </div>
           </div>
@@ -381,107 +454,65 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
           <div className="form-group">
             <div className="form-tit">
               <span className="form-label">API 선택<span className="on-required"><span
-                className="sr-only">필수입력</span></span></span>
+                  className="sr-only">필수입력</span></span></span>
             </div>
             <div className="form-conts mt-16">
               <div className="krds-check-area">
-                <div className="krds-form-check medium">
-                  <input
-                    type="checkbox"
-                    id="hk_1-1a"
-                    value="TE01" // 실제 DB에 들어갈 코드값
-                    checked={formData.linkSiteCd.includes('TE01') || appliedApis.includes('TE01')} // 이미 신청됐으면 체크 표시
-                    disabled={appliedApis.includes('TE01')} // 3. 이미 신청된 경우 비활성화
-                    onChange={handleCheckboxChange}
-                  />
-                  <label htmlFor="hk_1-1a">지원사업정보 API</label>
-                </div>
-                <div className="krds-form-check medium">
-                  <input
-                    type="checkbox"
-                    id="hk_1-2a"
-                    value="TE02"
-                    checked={formData.linkSiteCd.includes('TE02') || appliedApis.includes('TE02')}
-                    disabled={appliedApis.includes('TE02')}
-                    onChange={handleCheckboxChange}
-                  />
-                  <label htmlFor="hk_1-2a">행사정보 API</label>
-                </div>
+                {getFilteredApiList().map(([code, name]) => (
+                    <div className="krds-form-check medium" key={code}>
+                      <input
+                          type="checkbox"
+                          id={`chk_${code}`}
+                          value={code}
+                          checked={formData.apiSeCd.includes(code) || appliedApis.includes(code)}
+                          disabled={appliedApis.includes(code)}
+                          onChange={handleCheckboxChange}
+                      />
+                      <label htmlFor={`chk_${code}`}>{name}</label>
+                    </div>
+                ))}
               </div>
-
-              <div className="krds-check-area">
-                <div className="krds-form-check medium">
-                  <input
-                    type="checkbox"
-                    id="chk_1-3a"
-                    value="TE03"
-                    checked={formData.linkSiteCd.includes('TE03') || appliedApis.includes('TE03')}
-                    disabled={appliedApis.includes('TE03')}
-                    onChange={handleCheckboxChange}
-                  />
-                  <label htmlFor="chk_1-3a">이노비즈확인서</label>
-                </div>
-                <div className="krds-form-check medium">
-                  <input
-                    type="checkbox"
-                    id="chk_1-4a"
-                    value="TE04"
-                    checked={formData.linkSiteCd.includes('TE04') || appliedApis.includes('TE04')}
-                    disabled={appliedApis.includes('TE04')}
-                    onChange={handleCheckboxChange}
-                  />
-                  <label htmlFor="chk_1-4a">벤처기업확인서</label>
-                </div>
-                <div className="krds-form-check medium">
-                  <input
-                    type="checkbox"
-                    id="chk_1-5a"
-                    value="TE05"
-                    checked={formData.linkSiteCd.includes('TE05') || appliedApis.includes('TE05')}
-                    disabled={appliedApis.includes('TE05')}
-                    onChange={handleCheckboxChange}
-                  />
-                  <label htmlFor="chk_1-5a">메인비즈확인서</label>
-                </div>
-              </div>
-              <p className="txt-caution">※ 이미 신청승인된 API는 신청이 불가능 합니다.</p>
+              <p className="txt-caution mt-8">※ 이미 신청승인된 API는 신청이 불가능합니다.</p>
             </div>
           </div>
 
           <div className="form-group">
             <div className="form-tit">
               <span className="form-label">용도<span className="on-required"><span
-                className="sr-only">필수입력</span></span></span>
+                  className="sr-only">필수입력</span></span></span>
             </div>
             <div className="form-conts">
               <div className="krds-check-area">
                 <div className="krds-form-check medium">
                   <input
-                    type="radio"
-                    name="usgSeCd"
-                    id="rdo_2-1"
-                    value="PD01"
-                    onChange={(e) => setFormData({ ...formData, usgSeCd: e.target.value })}
+                      type="radio"
+                      name="usgSeCd"
+                      id="rdo_2-1"
+                      value="PD01"
+                      checked={formData.usgSeCd === 'PD01'}
+                      onChange={(e) => setFormData({...formData, usgSeCd: e.target.value})}
                   />
                   <label htmlFor="rdo_2-1">웹사이트 개발</label>
                 </div>
                 <div className="krds-form-check medium">
                   <input
-                    type="radio"
-                    name="usgSeCd"
-                    id="rdo_2-2"
-                    value="PD02"
-                    onChange={(e) => setFormData({ ...formData, usgSeCd: e.target.value })}
+                      type="radio"
+                      name="usgSeCd"
+                      id="rdo_2-2"
+                      value="PD02"
+                      checked={formData.usgSeCd === 'PD02'}
+                      onChange={(e) => setFormData({...formData, usgSeCd: e.target.value})}
                   />
                   <label htmlFor="rdo_2-2">앱 개발</label>
                 </div>
                 <div className="krds-form-check medium">
                   <input
-                    type="radio"
-                    name="usgSeCd"
-                    id="rdo_2-3"
-                    value="PD03"
-                    onChange={(e) => setFormData({ ...formData, usgSeCd: e.target.value })}
+                      type="radio"
+                      name="usgSeCd"
+                      id="rdo_2-3"
+                      value="PD03"
+                      checked={formData.usgSeCd === 'PD03'}
+                      onChange={(e) => setFormData({...formData, usgSeCd: e.target.value})}
                   />
                   <label htmlFor="rdo_2-3">기타</label>
                 </div>
@@ -492,19 +523,20 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
           <div className="form-group">
             <div className="form-tit">
               <label htmlFor="textarea" className="form-label">활용목적<span className="on-required"><span
-                className="sr-only">필수입력</span></span></label>
+                  className="sr-only">필수입력</span></span></label>
             </div>
             <div className="form-conts">
               <div className="textarea-wrap">
                 <textarea
-                  className="krds-input medium"
-                  id="apiRegAplyCn"
-                  placeholder="활용목적은 500자 이내로 적어주세요."
-                  value={formData.apiRegAplyCn}
-                  onChange={(e) => setFormData({ ...formData, apiRegAplyCn: e.target.value })}
+                    className="krds-input medium"
+                    id="apiRegAplyCn"
+                    placeholder="활용목적은 500자 이내로 적어주세요."
+                    value={formData.apiRegAplyCn}
+                    onChange={(e) => setFormData({...formData, apiRegAplyCn: e.target.value})}
                 ></textarea>
                 <p className="textarea-count">
-                  <span className="count-now">{formData.apiRegAplyCn.length}</span><span className="count-total">/500</span>
+                  <span className="count-now">{formData.apiRegAplyCn.length}</span><span
+                    className="count-total">/500</span>
                 </p>
               </div>
             </div>

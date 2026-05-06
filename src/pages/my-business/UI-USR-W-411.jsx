@@ -387,13 +387,13 @@ const UI_USR_W_411 = () => {
         )}
 
         {/* TODO 구현예정 */}
-        {/*<div className="conts-wrap mt-64">
+        <div className="conts-wrap mt-64">
           <h3 className="sec-tit3">관심 분야 설정</h3>
           <div className="flex-between center">
             <p className="cont-desc">관심을 갖고 있는 분야를 선택하시면, 빠르고 정확한 지원사업 검색이 가능합니다.</p>
             <button type="button" className="krds-btn secondary small">관심분야 설정</button>
           </div>
-        </div>*/}
+        </div>
 
         <div className="conts-wrap mt-64">
           <h3 className="sec-tit3">알림 수신 동의</h3>

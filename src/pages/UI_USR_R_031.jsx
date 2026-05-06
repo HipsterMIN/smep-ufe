@@ -295,7 +295,7 @@ const getTypeConfig = (detail, formatCode) => {
 };
 
 const UI_USR_R_031 = () => {
-  const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const { breadcrumbItems, currentMenu, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const { plcyFnncNo } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -451,7 +451,7 @@ const UI_USR_R_031 = () => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
-          <p className="on-p1 on-colorblue">정책금융 안내</p>
+          <p className="on-p1 on-colorblue">{currentMenu?.menuNm || '정책금융'}</p>
           <h2 className="h-tit2">{detail.plcyFnncGdsNm}</h2>
         </div>
 

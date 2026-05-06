@@ -24,6 +24,7 @@ import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import OnepassLoginConversionModal from '@pages/onepass/OnepassLoginConversionModal.jsx';
+import { onePassJoin } from '@utils/keycloakGetAuthCode.js';
 
 const MAIN_MENU_IDS = {
   notice: 'M_PIIO_00101',
@@ -57,13 +58,6 @@ const formatDate = (value, separator = '.') => {
   if (/^\d{4}-\d{2}-\d{2}$/.test(datePart))
     return datePart.replace(/-/g, separator);
   return raw;
-};
-
-const formatDateRange = (start, end, separator = ' ~ ') => {
-  const startText = formatDate(start);
-  const endText = formatDate(end);
-  if (startText && endText) return `${startText}${separator}${endText}`;
-  return startText || endText || '';
 };
 
 const getDaysRemaining = (deadline) => {
@@ -616,6 +610,14 @@ const MainPage = () => {
   const handleOnepassModalConvert = () => {
     handleOnepassModalDismiss();
   };
+  const handleOnepassJoinClick = () => {
+    if (!isLoggedIn) {
+      window.alert('중기원패스 회원가입 준비중입니다.');
+      return;
+    }
+
+    onePassJoin();
+  };
   const requestLoginForScrap = () => {
     const moveToLogin = window.confirm('로그인 후 스크랩 가능합니다. 로그인 하시겠습니까?');
     if (moveToLogin) {
@@ -691,7 +693,7 @@ const MainPage = () => {
   return (
     <div id="wrap">
       <Header />{ /* 임시 해더 */}
-      <div id="container" class="main-container">
+      <div id="container" className="main-container">
         { /*컨텐츠 영역 */}
 
         {/* S - main-totallayout */}
@@ -1325,6 +1327,7 @@ const MainPage = () => {
                               item,
                               false,
                             );
+                            const faqTitle = stripHtmlTags(item.pstTtl) || '-';
                             return (
                               <li
                                 className="board-list-item"
@@ -1343,7 +1346,7 @@ const MainPage = () => {
                                       </span>
                                     )}
                                     <span className="board-list-title onellipsis-1">
-                                      {item.pstTtl}
+                                      {faqTitle}
                                     </span>
                                   </a>
                                 ) : (
@@ -1354,7 +1357,7 @@ const MainPage = () => {
                                       </span>
                                     )}
                                     <span className="board-list-title onellipsis-1">
-                                      {item.pstTtl}
+                                      {faqTitle}
                                     </span>
                                   </Link>
                                 )}
@@ -1381,6 +1384,9 @@ const MainPage = () => {
                               item,
                               true,
                             );
+                            const adminInfoDate = formatDate(
+                              item.pstgBgngYmd || item.pstRegDt,
+                            );
                             return (
                               <li
                                 className="board-list-item"
@@ -1402,10 +1408,7 @@ const MainPage = () => {
                                       {item.pstTtl}
                                     </span>
                                     <span className="board-list-date">
-                                      {formatDateRange(
-                                        item.pstgBgngYmd,
-                                        item.pstgEndYmd,
-                                      )}
+                                      {adminInfoDate}
                                     </span>
                                   </a>
                                 ) : (
@@ -1419,10 +1422,7 @@ const MainPage = () => {
                                       {item.pstTtl}
                                     </span>
                                     <span className="board-list-date">
-                                      {formatDateRange(
-                                        item.pstgBgngYmd,
-                                        item.pstgEndYmd,
-                                      )}
+                                      {adminInfoDate}
                                     </span>
                                   </Link>
                                 )}
@@ -1527,7 +1527,7 @@ const MainPage = () => {
         <div className="main-btm-bar">
           <div className="contents-inner">
             <p className="title">중소기업 유관 시스템을 하나의 통합 ID로 이용할 수 있습니다</p>
-            <button type="button" className="krds-btn primary">통합회원 가입하기</button>
+            <button type="button" className="krds-btn primary" onClick={handleOnepassJoinClick}>통합회원 가입하기</button>
           </div>
         </div>
       </div>

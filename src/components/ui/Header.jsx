@@ -480,7 +480,9 @@ export default function Header() {
                   {showHeaderSearch && (
                     <div className="sch-input">
                       <input
-                        type="text"
+                        type="search"
+                        name="headerSearchKeyword"
+                        autoComplete="off"
                         className="krds-input medium"
                         placeholder="검색어를 입력하세요"
                         title="검색어 입력"
@@ -539,7 +541,7 @@ export default function Header() {
                       }}
                     />
                     {/* <HeaderSearch /> */}
-                    <button type="button" className="btn-navi sch open-modal"><span className="sr-only">검색</span></button>
+                    {/*<button type="button" className="btn-navi sch open-modal"><span className="sr-only">검색</span></button>*/}
                     <button type="button" onClick={handleOpenMobGnb} className="btn-navi all" aria-controls="mobile-nav"><span className="sr-only">전체메뉴</span></button>
                   </div>
                 </div>
@@ -556,6 +558,7 @@ export default function Header() {
           onClose={handleCloseMobGnb} 
           onLogin={handleServiceLogin}
           onOnePassLogin={handleOnePassIntegratedLogin}
+          onMyPage={handleMyPage}
           onLogout={handleLogout}
           isLogin={isLogin}
           userName={currentCompany?.companyName || user?.name}

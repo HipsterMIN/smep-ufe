@@ -24,7 +24,6 @@ const MyApiRequestList = () => { // mbrNo를 받아옵니다.
       try {
         setIsLoading(true);
         const res = await apiClient.get(`/api/v1/apikey/history/list?mbrNo=${mbrNo}`);
-        console.log(res.data);
         setHistoryList(res.data);
       } catch (error) {
         console.error('신청 내역 조회 실패:', error);
@@ -53,15 +52,15 @@ const MyApiRequestList = () => { // mbrNo를 받아옵니다.
     setCurrentPage(1);
   };
 
-  const getLinkSitePath = (linkSiteCd) => {
+  const getLinkSitePath = (apiSeCd) => {
     const pathMap = {
-      TE01: 'supportBusinessInfoApi',
-      TE02: 'eventInfoApi',
-      TE03: 'innoBizCertificateApi',
-      TE04: 'ventureCertificateApi',
-      TE05: 'mainBizCertificateApi',
+      AD01: 'supportBusinessInfoApi',
+      AD02: 'eventInfoApi',
+      Y105: 'innoBizCertificateApi',
+      Y106: 'ventureCertificateApi',
+      Y104: 'mainBizCertificateApi',
     };
-    return pathMap[linkSiteCd] ?? null;
+    return pathMap[apiSeCd] ?? null;
   };
 
   return (
@@ -136,11 +135,11 @@ const MyApiRequestList = () => { // mbrNo를 받아옵니다.
                           className="txt-point"
                           style={{ cursor: 'pointer' }}
                           onClick={() => {
-                            const path = getLinkSitePath(row.linkSiteCd);
+                            const path = getLinkSitePath(row.apiSeCd);
                             if (path) navigate(`/cs/opndata/UI_USR_L_210/${path}`);
                           }}
                         >
-                          {row.linkSiteNm}
+                          {row.apiNm}
                         </span>
                       </td>
                       <td className="ac"><span>{row.picEmlAddr}</span></td>
