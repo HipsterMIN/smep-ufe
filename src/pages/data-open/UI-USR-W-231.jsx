@@ -154,7 +154,7 @@ const UI_USR_W_231 = () => {
                   <div className="form-wrapper">
                     <div className="textarea-wrap">
                       <textarea 
-                        className="krds-input"
+                        className="krds-input medium"
                         id="textarea_01" 
                         placeholder="문의내용을 입력해주세요."
                         required

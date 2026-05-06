@@ -59,13 +59,13 @@ const UI_USR_R_211 = () => {
           <div className="filter-form">
             <div>
               <label className="label" htmlFor="select_01">데이터타입</label>
-              <select id="select_01" className="krds-form-select medium ">
+              <select id="select_01" className="krds-form-select small ">
                 <option value="">XML(RSS)</option>
               </select>
             </div>
             <div>
               <label className="label" htmlFor="select_02">조회건수</label>
-              <select id="select_02" className="krds-form-select medium">
+              <select id="select_02" className="krds-form-select small">
                 <option value="">전체</option>
               </select>
             </div>

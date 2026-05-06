@@ -110,7 +110,7 @@ const UI_USR_R_002 = () => {
                     <input
                       type="text"
                       id="login_id"
-                      className="krds-input"
+                      className="krds-input medium"
                       value={loginId}
                       onChange={(e) => setLoginId(e.target.value)}
                       onKeyDown={handleEnterSubmit}
@@ -125,7 +125,7 @@ const UI_USR_R_002 = () => {
                       <input
                         type="password"
                         id="login_pw"
-                        className="krds-input"
+                        className="krds-input medium"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         onKeyDown={handleEnterSubmit}

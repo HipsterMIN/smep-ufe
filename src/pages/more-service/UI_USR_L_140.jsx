@@ -297,7 +297,7 @@ const UI_USR_L_140 = () => {
     if (activeTabIndex === 0) {
       return (
         <div className="sch-form-wrap">
-          <select className="krds-form-select" value={sdoCd} onChange={handleSdoCdChange}>
+          <select className="krds-form-select medium" value={sdoCd} onChange={handleSdoCdChange}>
             <option value="">전국</option>
             {sidoList.map((item) => (
               <option key={item.code} value={item.code}>{item.name}</option>
@@ -305,7 +305,7 @@ const UI_USR_L_140 = () => {
           </select>
 
           <select
-            className="krds-form-select"
+            className="krds-form-select medium"
             value={sigunguCd}
             onChange={(e) => setSigunguCd(e.target.value)}
             disabled={isSigunguDisabled}
@@ -317,7 +317,7 @@ const UI_USR_L_140 = () => {
           </select>
 
           <select
-            className="krds-form-select"
+            className="krds-form-select medium"
             value={searchType}
             onChange={(e) => setSearchType(e.target.value)}
           >
@@ -329,7 +329,7 @@ const UI_USR_L_140 = () => {
           <div className="sch-input">
             <input
               type="text"
-              className="krds-input"
+              className="krds-input medium"
               placeholder="검색어를 입력해주세요."
               title="검색어 입력"
               value={searchKeyword}
@@ -349,7 +349,7 @@ const UI_USR_L_140 = () => {
     if (activeTabIndex === 1) {
       return (
         <div className="sch-form-wrap">
-          <select className="krds-form-select" value={sdoCd} onChange={handleSdoCdChange}>
+          <select className="krds-form-select medium" value={sdoCd} onChange={handleSdoCdChange}>
             <option value="">전국</option>
             {sidoList.map((item) => (
               <option key={item.code} value={item.code}>{item.name}</option>
@@ -357,7 +357,7 @@ const UI_USR_L_140 = () => {
           </select>
 
           <select
-            className="krds-form-select"
+            className="krds-form-select medium"
             value={fdtnlTechNm}
             onChange={(e) => setFdtnlTechNm(e.target.value)}
           >
@@ -370,7 +370,7 @@ const UI_USR_L_140 = () => {
           <div className="sch-input w-322">
             <input
               type="text"
-              className="krds-input"
+              className="krds-input medium"
               placeholder="검색어를 입력해주세요."
               title="검색어 입력"
               value={searchKeyword}
@@ -389,7 +389,7 @@ const UI_USR_L_140 = () => {
     // 탭2: 시도 + 시군구 + 업종명 드롭다운 + 검색어
     return (
       <div className="sch-form-wrap">
-        <select className="krds-form-select" value={sdoCd} onChange={handleSdoCdChange}>
+        <select className="krds-form-select medium" value={sdoCd} onChange={handleSdoCdChange}>
           <option value="">전국</option>
           {sidoList.map((item) => (
             <option key={item.code} value={item.code}>{item.name}</option>
@@ -397,7 +397,7 @@ const UI_USR_L_140 = () => {
         </select>
 
         <select
-          className="krds-form-select"
+          className="krds-form-select medium"
           value={fldNm}
           onChange={(e) => setFldNm(e.target.value)}
         >
@@ -410,7 +410,7 @@ const UI_USR_L_140 = () => {
         <div className="sch-input">
           <input
             type="text"
-            className="krds-input"
+             className="krds-input medium"
             placeholder="검색어를 입력해주세요."
             title="검색어 입력"
             value={searchKeyword}
@@ -581,7 +581,7 @@ const UI_USR_L_140 = () => {
         
         {/** 아래 퍼블리싱 수정본 보시고 참고하시어 개발에 이용 부탁드립니다. */}
         {/* <div className="sch-form-wrap">
-          <select className="krds-form-select" value={sdoCd} onChange={handleSdoCdChange}>
+          <select className="krds-form-select medium" value={sdoCd} onChange={handleSdoCdChange}>
             <option value="">전국</option>
             {sidoList.map((item) => (
               <option key={item.code} value={item.code}>{item.name}</option>
@@ -613,7 +613,7 @@ const UI_USR_L_140 = () => {
           <div className="sch-input w-322">
             <input
               type="text"
-              className="krds-input"
+               className="krds-input medium"
               placeholder="검색어를 입력하세요"
               title="검색어 입력"
               value={searchKeyword}

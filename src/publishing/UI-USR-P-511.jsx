@@ -93,7 +93,7 @@ const UI_USR_P_511 = () => {
             <h2 className="sec-tit">발급 불가 사유</h2>
             <div className="form-conts">
               <div className="textarea-wrap">
-                <textarea className="krds-input" placeholder="" id="textarea" title="발급 불가 사유 입력란"></textarea>
+                <textarea className="krds-input medium" placeholder="" id="textarea" title="발급 불가 사유 입력란"></textarea>
                 <p className="textarea-count">
                   <span className="count-now">0</span><span className="count-total">/100</span>
                 </p>

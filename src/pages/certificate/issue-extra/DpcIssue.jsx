@@ -388,7 +388,7 @@ const DpcIssue = () => {
                   ) : (
                     <div className="textarea-wrap">
                       <textarea
-                        className="krds-input"
+                        className="krds-input medium"
                         placeholder="내용을 입력하세요."
                         title={`${question.iemNm} 입력`}
                         value={surveyAnswers[question.iemSn] || ''}

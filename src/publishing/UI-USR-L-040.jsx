@@ -116,11 +116,11 @@ const UI_USR_L_040 = () => {
 
         <div className="search-top-box mt-48">
           <div className="sch-form-wrap">
-            <select className="krds-form-select" title="카테고리 선택"> {/* 웹접근성 반영 */}
+            <select className="krds-form-select medium" title="카테고리 선택"> {/* 웹접근성 반영 */}
               <option value="">카테고리 전체</option>
             </select>
             <div className="sch-input">
-              <input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력" />
+              <input type="text" className="krds-input medium" placeholder="검색어를 입력하세요" title="검색어 입력" />
               <button type="button" className="krds-btn medium icon ico-search" >
                 <span className="sr-only">검색</span>
                 <i className="svg-icon ico-sch"></i>

@@ -140,7 +140,7 @@ const UI_USR_L_120 = () => {
         <div className="search-top-box">
           <div className="sch-form-wrap">
             <select
-              className="krds-form-select"
+              className="krds-form-select medium"
               value={certSystmFldNm}
               onChange={(e) => setCertSystmFldNm(e.target.value)}
             >
@@ -150,7 +150,7 @@ const UI_USR_L_120 = () => {
               ))}
             </select>
             <select
-              className="krds-form-select"
+              className="krds-form-select medium"
               value={tkcgMaoNm}
               onChange={(e) => setTkcgMaoNm(e.target.value)}
             >
@@ -160,7 +160,7 @@ const UI_USR_L_120 = () => {
               ))}
             </select>
             <select
-              className="krds-form-select"
+              className="krds-form-select medium"
               value={searchType}
               onChange={handleSearchTypeChange}
             >
@@ -171,7 +171,7 @@ const UI_USR_L_120 = () => {
             <div className="sch-input w-322">
               <input
                 type="text"
-                className="krds-input"
+                 className="krds-input medium"
                 placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}

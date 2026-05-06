@@ -26,7 +26,7 @@ const UI_USR_R_002 = () => {
                         <label htmlFor="login_id">아이디</label>
                       </div>
                       <div className="form-conts">
-                        <input type="text" id="login_id" className="krds-input" autocomplete="on" placeholder="아이디를 입력하세요" />
+                        <input type="text" id="login_id" className="krds-input medium" autocomplete="on" placeholder="아이디를 입력하세요" />
                       </div>
                     </div>
                     <div className="form-group">
@@ -34,7 +34,7 @@ const UI_USR_R_002 = () => {
                         <label htmlFor="login_pw">비밀번호</label>
                       </div>
                       <div className="form-conts btn-ico-wrap">
-                        <input type="password" id="login_pw" className="krds-input" placeholder="비밀번호를 입력하세요" />
+                        <input type="password" id="login_pw" className="krds-input medium" placeholder="비밀번호를 입력하세요" />
                       </div>
                     </div>
                     <div className="form-group krds-check-area">

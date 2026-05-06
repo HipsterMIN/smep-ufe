@@ -176,7 +176,7 @@ const UI_USR_L_180 = () => {
         <div className="search-top-box">
           <div className="sch-form-wrap">
             <select
-              className="krds-form-select"
+              className="krds-form-select medium"
               value={searchType}
               onChange={(event) => setSearchType(event.target.value)}
             >
@@ -186,7 +186,7 @@ const UI_USR_L_180 = () => {
             <div className="sch-input">
               <input
                 type="text"
-                className="krds-input"
+                 className="krds-input medium"
                 placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}

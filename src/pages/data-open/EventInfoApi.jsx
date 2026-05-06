@@ -102,7 +102,7 @@ const EventInfoApi = () => {
             <div className="filter-form">
               <div>
                 <label className="label" htmlFor="select_01" >데이터타입</label>
-                <select id="select_01" className="krds-form-select medium " value={formData.dataType}
+                <select id="select_01" className="krds-form-select small " value={formData.dataType}
                         onChange={handleInputChange}>
                   <option value="rss">XML(RSS)</option>
                   <option value="json">JSON</option>
@@ -113,7 +113,7 @@ const EventInfoApi = () => {
                 <input
                     type="text"
                     id="input_02"
-                    className="krds-form-input medium" value={formData.searchCnt} onChange={handleInputChange}/>
+                    className="krds-form-input small" value={formData.searchCnt} onChange={handleInputChange}/>
               </div>
             </div>
             <dl className="filter-chip align-center">

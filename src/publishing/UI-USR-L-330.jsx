@@ -53,18 +53,18 @@ const UI_USR_L_330 = () => {
         </div>
 		<div className="search-top-box">
 			<div className="sch-form-wrap">
-				<select className="krds-form-select" aria-label="카테고리 선택"> {/* 기술진단보고서 반영 */}
+				<select className="krds-form-select medium" aria-label="카테고리 선택"> {/* 기술진단보고서 반영 */}
 					<option value="">카테고리 전체</option>
 					<option value="">항목</option>
 					<option value="">항목</option>
 				</select>
-				<select className="krds-form-select" aria-label="카테고리 선택"> {/* 기술진단보고서 반영 */}
+				<select className="krds-form-select medium" aria-label="카테고리 선택"> {/* 기술진단보고서 반영 */}
 					<option value="">제목</option>
 					<option value="">항목</option>
 					<option value="">항목</option>
 				</select>
 				<div className="sch-input">
-					<input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력" />
+					<input type="text" className="krds-input medium" placeholder="검색어를 입력하세요" title="검색어 입력" />
 					<button type="button" className="krds-btn medium icon ico-search" >
 						<span className="sr-only">검색</span>
 						<i className="svg-icon ico-sch"></i>

@@ -272,12 +272,12 @@ const SprtBiz = () => {
 
               <div className="search-top-box">
                 <div className="sch-form-wrap" ref={schFormWrapRef}>
-                  <select className="krds-form-select" value={searchStts} onChange={(e) => handleSearchSttsChange(e.target.value)}>
+                  <select className="krds-form-select medium" value={searchStts} onChange={(e) => handleSearchSttsChange(e.target.value)}>
                     <option value="">공고상태 전체</option>
                     <option value="ONGOING">진행중</option>
                     <option value="PLANNED">진행예정</option>
                   </select>
-                  <select className="krds-form-select" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+                  <select className="krds-form-select medium" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
                     <option value="">검색구분 전체</option>
                     <option value="TITLE">제목</option>
                     <option value="CONTENT">내용</option>
@@ -285,7 +285,7 @@ const SprtBiz = () => {
                   <div className="sch-input">
                     <input
                       type="text"
-                      className="krds-input"
+                      className="krds-input medium"
                       placeholder="지원사업명을 입력해 주세요"
                       title="검색어 입력"
                       value={searchText}
@@ -299,7 +299,7 @@ const SprtBiz = () => {
                   </div>
                   <button
                     type="button"
-                    className={`krds-btn medium text${hasDetailedSearchInput ? ' primary' : ''}`}
+                    className={`krds-btn small text${hasDetailedSearchInput ? ' primary' : ''}`}
                     onClick={handleToggleFilter}
                   >
                     <i className="svg-icon ico-sch-plus"></i>

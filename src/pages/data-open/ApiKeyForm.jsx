@@ -497,7 +497,7 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
             <div className="form-conts">
               <div className="textarea-wrap">
                 <textarea
-                  className="krds-input"
+                  className="krds-input medium"
                   id="apiRegAplyCn"
                   placeholder="활용목적은 500자 이내로 적어주세요."
                   value={formData.apiRegAplyCn}

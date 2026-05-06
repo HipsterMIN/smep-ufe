@@ -85,7 +85,7 @@ const UI_USR_P_045 = () => {
           <div className="form-item">
             <p className="form-question"><span>3.</span> 개선사항이나 건의사항이 있으시면 자유롭게 작성해 주세요.</p>
             <div className="textarea-wrap">
-              <textarea className="krds-input" placeholder="내용을 입력하세요." title="개선사항이나 건의사항 입력" />
+              <textarea className="krds-input medium" placeholder="내용을 입력하세요." title="개선사항이나 건의사항 입력" />
               <p className="textarea-count">
                 <span className="count-now">0</span><span className="count-total">/100</span>
               </p>

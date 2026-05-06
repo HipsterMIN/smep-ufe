@@ -286,7 +286,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
                 <div className="form-wrapper">
                   <div className="textarea-wrap">
                     <textarea
-                      className="krds-input"
+                      className="krds-input medium"
                       id="board_qna_content"
                       placeholder="문의내용을 입력해주세요."
                       required

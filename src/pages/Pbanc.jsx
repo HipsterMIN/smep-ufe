@@ -179,7 +179,7 @@ const Pbanc = () => {
 
         <div className="search-top-box">
           <div className="sch-form-wrap" ref={schFormWrapRef}>
-            <select className="krds-form-select" aria-label="검색구분 선택" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+            <select className="krds-form-select medium" aria-label="검색구분 선택" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
               <option value="">전체</option>
               <option value="pbancnm">공고명</option>
               <option value="sprvsnInstNm">사업수행기관</option>
@@ -187,7 +187,7 @@ const Pbanc = () => {
             <div className="sch-input">
               <input
                 type="text"
-                className="krds-input"
+                className="krds-input medium"
                 placeholder="공고명, 사업수행기관으로 검색해 주세요."
                 title="검색어 입력"
                 value={searchText}
@@ -201,7 +201,7 @@ const Pbanc = () => {
             </div>
             <button
               type="button"
-              className={`krds-btn medium text${hasDetailedSearchInput ? ' primary' : ''}`}
+              className={`krds-btn small text${hasDetailedSearchInput ? ' primary' : ''}`}
               onClick={handleToggleFilter}
             >
               <i className="svg-icon ico-sch-plus"></i>
@@ -217,7 +217,7 @@ const Pbanc = () => {
                 <label className="label" htmlFor="appl-sch-sel1">분야</label>
                 <select
                   id="appl-sch-sel1"
-                  className="krds-form-select medium"
+                  className="krds-form-select small"
                   value={bizPbancClsfCd}
                   onChange={(e) => handleBizFieldChange(e.target.value)}
                 >
@@ -232,7 +232,7 @@ const Pbanc = () => {
                 <label className="label" htmlFor="appl-sch-sel2">신청</label>
                 <select
                   id="appl-sch-sel2"
-                  className="krds-form-select medium"
+                  className="krds-form-select small"
                   value={applyStatus}
                   onChange={(e) => handleApplyStatusChange(e.target.value)}
                 >

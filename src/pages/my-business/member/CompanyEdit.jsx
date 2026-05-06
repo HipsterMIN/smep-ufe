@@ -462,7 +462,7 @@ const UI_USR_W_452 = () => {
                 <div className="form-wrapper">
                   <div className="textarea-wrap mt-16">
                     <textarea
-                      className="krds-input"
+                       className="krds-input medium"
                       title="기업소개 입력"
                       placeholder="내용을 입력해주세요."
                       value={form.entExpln}

@@ -197,7 +197,7 @@ const typeClass = (code) => {
 const renderSelectField = ({ id, label, value, onChange, options, placeholder, disabled = false }) => (
   <div>
     <label className="label" htmlFor={id}>{label}</label>
-    <select id={id} className="krds-form-select medium" value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
+    <select id={id} className="krds-form-select small" value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
       <option value="">{placeholder}</option>
       {(options || []).map((item) => (
         <option key={item.code} value={item.code}>{item.name}</option>
@@ -688,7 +688,7 @@ const UI_USR_L_030 = () => {
 
               <div className="search-top-box">
                 <div className="sch-form-wrap" ref={filterWrapRef}>
-                  <select className="krds-form-select" aria-label="검색 구분 선택" value={filters.plcyFnncSrchTypeCd} onChange={(e) => updateFilter('plcyFnncSrchTypeCd', e.target.value)}>
+                  <select className="krds-form-select medium" aria-label="검색 구분 선택" value={filters.plcyFnncSrchTypeCd} onChange={(e) => updateFilter('plcyFnncSrchTypeCd', e.target.value)}>
                     <option value="ALL">전체</option>
                     {filterOptions.searchTypes.filter((item) => item.code !== 'ALL').map((item) => (
                       <option key={item.code} value={item.code}>{item.name}</option>
@@ -697,7 +697,7 @@ const UI_USR_L_030 = () => {
                   <div className="sch-input">
                     <input
                       type="text"
-                      className="krds-input"
+                      className="krds-input medium"
                       placeholder="금융상품 검색어를 입력해 주세요"
                       title="검색어 입력"
                       value={filters.plcyFnncSrchKwdCn}
@@ -711,7 +711,7 @@ const UI_USR_L_030 = () => {
                   </div>
                   <button
                     type="button"
-                    className={`krds-btn medium text${hasActiveDetailFilters ? ' primary' : ''}`}
+                    className={`krds-btn small text${hasActiveDetailFilters ? ' primary' : ''}`}
                     onClick={() => filterWrapRef.current?.classList.toggle('on')}
                   >
                     <i className="svg-icon ico-sch-plus"></i>
@@ -747,12 +747,7 @@ const UI_USR_L_030 = () => {
                       options: filterOptions.companySizes,
                       placeholder: '전체',
                     })}
-                    {renderIndustryFilterSection({
-                      items: selectedIndustries,
-                      onOpen: () => { setIndustryDraft(selectedIndustries); setPopupOpen(true); },
-                      onReset: resetIndustrySelection,
-                      onRemove: removeIndustrySelection,
-                    })}
+                    
                     {showLoan && (
                       <div className="on-mw100p">
                         <label className="label" htmlFor="thmTpbizNm">테마업종명</label>
@@ -782,6 +777,12 @@ const UI_USR_L_030 = () => {
                       onChange: (value) => applyDetailFilter('plcyFnncAplyMthCd', value),
                       options: filterOptions.applicationMethods,
                       placeholder: '전체',
+                    })}
+                    {renderIndustryFilterSection({
+                      items: selectedIndustries,
+                      onOpen: () => { setIndustryDraft(selectedIndustries); setPopupOpen(true); },
+                      onReset: resetIndustrySelection,
+                      onRemove: removeIndustrySelection,
                     })}
                   </div>
 
@@ -974,7 +975,7 @@ const UI_USR_L_030 = () => {
             <div className="input-wrap w-180">
               <input
                 type="text"
-                className="krds-input"
+                className="krds-input medium"
                 placeholder="업종코드"
                 title="업종코드 입력"
                 value={industryKeyword.ksicCd}
@@ -986,7 +987,7 @@ const UI_USR_L_030 = () => {
             <div className="sch-input w-304">
               <input
                 type="text"
-                className="krds-input"
+                className="krds-input medium"
                 placeholder="업종명"
                 title="업종명 입력"
                 value={industryKeyword.ksicNm}

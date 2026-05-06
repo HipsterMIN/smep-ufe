@@ -95,17 +95,17 @@ const UI_USR_L_030 = () => {
                  <h3 className="sr-only">사업유형별</h3>
                  <div className="search-top-box">
                     <div className="sch-form-wrap" ref={schFormWrapRef1}>
-                      <select className="krds-form-select" aria-label="검색 구분 선택"> {/* 기술진단보고서 반영 */}
+                      <select className="krds-form-select medium" aria-label="검색 구분 선택"> {/* 기술진단보고서 반영 */}
                         <option value="">전체</option>
                       </select>
                       <div className="sch-input">
-                        <input type="text" className="krds-input" placeholder="금융상품 조회를 위한 검색어를 입력해주세요" title="검색어 입력" />
+                        <input type="text" className="krds-input medium" placeholder="금융상품 조회를 위한 검색어를 입력해주세요" title="검색어 입력" />
                         <button type="button" className="krds-btn medium icon ico-search" >
                           <span className="sr-only">검색</span>
                           <i className="svg-icon ico-sch"></i>
                         </button>
                       </div>
-                      <button type="button" className="krds-btn medium text" onClick={() => handleToggleFilter(0)}><i className="svg-icon ico-sch-plus"></i>
+                      <button type="button" className="krds-btn small text" onClick={() => handleToggleFilter(0)}><i className="svg-icon ico-sch-plus"></i>
                         상세검색
                         <span className="onfilter-open sr-only">열기</span>
                         <span className="onfilter-close sr-only">닫기</span>
@@ -115,7 +115,7 @@ const UI_USR_L_030 = () => {
                       <div className="filter-form">
                         <div>
                           <label className="label" htmlFor="appl-sch-sel1">상품유형</label>
-                          <select id="appl-sch-sel1" className="krds-form-select medium">
+                          <select id="appl-sch-sel1" className="krds-form-select small">
                             <option value="">전체</option>
                             <option value="">항목</option>
                             <option value="">항목</option>
@@ -123,7 +123,7 @@ const UI_USR_L_030 = () => {
                         </div>
                         <div>
                           <label className="label" htmlFor="appl-sch-sel2">금융기관</label>
-                          <select id="appl-sch-sel2" className="krds-form-select medium">
+                          <select id="appl-sch-sel2" className="krds-form-select small">
                             <option value="">전체</option>
                             <option value="">항목</option>
                             <option value="">항목</option>
@@ -131,7 +131,31 @@ const UI_USR_L_030 = () => {
                         </div>
                         <div className="on-fit-width">
                           <label className="label" htmlFor="appl-sch-sel3">기업규모</label>
-                          <select id="appl-sch-sel3" className="krds-form-select medium">
+                          <select id="appl-sch-sel3" className="krds-form-select small">
+                            <option value="">전체</option>
+                            <option value="">항목</option>
+                            <option value="">항목</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="label" htmlFor="appl-sch-sel4">접수상황</label>
+                          <select id="appl-sch-sel4" className="krds-form-select medium">
+                            <option value="">전체</option>
+                            <option value="">항목</option>
+                            <option value="">항목</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="label" htmlFor="appl-sch-sel5">우대기업</label>
+                          <select id="appl-sch-sel5" className="krds-form-select medium">
+                            <option value="">전체</option>
+                            <option value="">항목</option>
+                            <option value="">항목</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="label" htmlFor="appl-sch-sel6">신청방식</label>
+                          <select id="appl-sch-sel6" className="krds-form-select medium">
                             <option value="">전체</option>
                             <option value="">항목</option>
                             <option value="">항목</option>
@@ -167,30 +191,6 @@ const UI_USR_L_030 = () => {
                           </dl>
                         </div>
                         {/* E: 2026-03-17 업종 선택 ui 변경 */}
-                        <div>
-                          <label className="label" htmlFor="appl-sch-sel4">접수상황</label>
-                          <select id="appl-sch-sel4" className="krds-form-select medium">
-                            <option value="">전체</option>
-                            <option value="">항목</option>
-                            <option value="">항목</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="label" htmlFor="appl-sch-sel5">우대기업</label>
-                          <select id="appl-sch-sel5" className="krds-form-select medium">
-                            <option value="">전체</option>
-                            <option value="">항목</option>
-                            <option value="">항목</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="label" htmlFor="appl-sch-sel6">신청방식</label>
-                          <select id="appl-sch-sel6" className="krds-form-select medium">
-                            <option value="">전체</option>
-                            <option value="">항목</option>
-                            <option value="">항목</option>
-                          </select>
-                        </div>
                       </div>
                     </div>
                 </div>
@@ -516,17 +516,17 @@ const UI_USR_L_030 = () => {
                  <h3 className="sr-only">사업유형별</h3>
                  <div className="search-top-box">
                     <div className="sch-form-wrap" ref={schFormWrapRef2}>
-                      <select className="krds-form-select" aria-label="검색구분 선택"> {/* 기술진단보고서 반영 */}
+                      <select className="krds-form-select medium" aria-label="검색구분 선택"> {/* 기술진단보고서 반영 */}
                         <option value="">전체</option>
                       </select>
                       <div className="sch-input">
-                        <input type="text" className="krds-input" placeholder="금융상품 조회를 위한 검색어를 입력해주세요" title="검색어 입력" />
+                        <input type="text"  className="krds-input medium" placeholder="금융상품 조회를 위한 검색어를 입력해주세요" title="검색어 입력" />
                         <button type="button" className="krds-btn medium icon ico-search" >
                           <span className="sr-only">검색</span>
                           <i className="svg-icon ico-sch"></i>
                         </button>
                       </div>
-                      <button type="button" className="krds-btn medium text" onClick={() => handleToggleFilter(1)}><i className="svg-icon ico-sch-plus"></i>
+                      <button type="button" className="krds-btn small text" onClick={() => handleToggleFilter(1)}><i className="svg-icon ico-sch-plus"></i>
                         상세검색
                         <span className="onfilter-open sr-only">열기</span>
                         <span className="onfilter-close sr-only">닫기</span>
@@ -536,7 +536,7 @@ const UI_USR_L_030 = () => {
                       <div className="filter-form">
                         <div>
                           <label className="label" htmlFor="appl-sch-sel1">상품유형</label>
-                          <select id="appl-sch-sel1" className="krds-form-select medium">
+                          <select id="appl-sch-sel1" className="krds-form-select small">
                             <option value="">전체</option>
                             <option value="">항목</option>
                             <option value="">항목</option>
@@ -544,7 +544,7 @@ const UI_USR_L_030 = () => {
                         </div>
                         <div>
                           <label className="label" htmlFor="appl-sch-sel2">금융기관</label>
-                          <select id="appl-sch-sel2" className="krds-form-select medium">
+                          <select id="appl-sch-sel2" className="krds-form-select small">
                             <option value="">전체</option>
                             <option value="">항목</option>
                             <option value="">항목</option>
@@ -552,7 +552,7 @@ const UI_USR_L_030 = () => {
                         </div>
                         <div className="on-fit-width">
                           <label className="label" htmlFor="appl-sch-sel3">기업규모</label>
-                          <select id="appl-sch-sel3" className="krds-form-select medium">
+                          <select id="appl-sch-sel3" className="krds-form-select small">
                             <option value="">전체</option>
                             <option value="">항목</option>
                             <option value="">항목</option>
@@ -1103,11 +1103,11 @@ const UI_USR_L_030 = () => {
           <div className="search-top-box">
             <div className="sch-form-wrap">
               <div className="input-wrap w-180">
-                <input type="text" className="krds-input" placeholder="업종코드" title="업종코드 입력" />
+                <input type="text"  className="krds-input medium" placeholder="업종코드" title="업종코드 입력" />
               </div>
 
               <div className="sch-input w-304">
-                <input type="text" className="krds-input" placeholder="업종명" title="업종명 입력" />
+                <input type="text"  className="krds-input medium" placeholder="업종명" title="업종명 입력" />
                 <button type="button" className="krds-btn medium icon ico-search" >
                   <span className="sr-only">검색</span>
                   <i className="svg-icon ico-sch"></i>

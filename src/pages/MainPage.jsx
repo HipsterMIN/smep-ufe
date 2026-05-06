@@ -717,7 +717,7 @@ const MainPage = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     onFocus={() => setIsFocused(true)}
-                    className="krds-input"
+                    className="krds-input medium"
                   />
                   {isFocused && (
                     <button

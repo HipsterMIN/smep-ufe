@@ -228,7 +228,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
             <div className="sch-input">
               <input
                 type="text"
-                className="krds-input"
+                className="krds-input medium"
                 placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}
