@@ -2,17 +2,21 @@ import Breadcrumb from '../components/ui/Breadcrumb';
 import React, { useState } from 'react';
 import { api as apiClient } from '../lib/apiClient.js';
 import { useAuthStore } from '../store/useAuthStore.jsx';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 const LOGIN_TYPE_INDIVIDUAL = 'INDIVIDUAL';
 const LOGIN_TYPE_CORPORATE = 'CORPORATE';
 
 const UI_USR_R_002 = () => {
   const { login } = useAuthStore();
-  const [loginType, setLoginType] = useState(LOGIN_TYPE_INDIVIDUAL);
+  const location = useLocation();
+  const [loginType, setLoginType] = useState(
+    location.state?.loginType || LOGIN_TYPE_INDIVIDUAL,
+  );
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+
   const isCorporateDemoLogin = loginType === LOGIN_TYPE_CORPORATE;
   
   const breadcrumbItems = [
