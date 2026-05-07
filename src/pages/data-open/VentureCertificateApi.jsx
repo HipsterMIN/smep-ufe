@@ -5,6 +5,7 @@ import ApiKeyForm from './ApiKeyForm';
 import { useNavigate } from 'react-router-dom';
 import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
 import { useAuthStore } from '@store/useAuthStore.jsx';
+import {useEffect} from "react";
 
 const VentureCertificateApi = () => {
 
@@ -14,7 +15,9 @@ const VentureCertificateApi = () => {
   const isLoggedIn = Boolean(authToken);
 
   const mbrNo = userInfo?.id;
-  // const mbrNo = "2025120500381316";
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const {
     isOpen,
     submitting,

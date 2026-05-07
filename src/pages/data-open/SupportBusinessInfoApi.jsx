@@ -1,7 +1,7 @@
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import ApiKeyForm from './ApiKeyForm';
 import { useNavigate } from 'react-router-dom';
 import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
@@ -15,7 +15,9 @@ const SupportBusinessInfoApi = () => {
   const isLoggedIn = Boolean(authToken);
 
   const mbrNo = userInfo?.id;
-  // const mbrNo = "2025120500381316";
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const {
     isOpen,
     submitting,

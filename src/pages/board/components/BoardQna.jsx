@@ -74,6 +74,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
   const isLoggedIn = Boolean(authToken);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let isMounted = true;
 
     const fetchCategories = async () => {
@@ -202,171 +203,178 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
         <div className="page-title-wrap" data-type="responsive">
           <h2 className="h-tit">{boardTitle}</h2>
         </div>
-        <div className="search-top-box">
-          <div className="sch-form-wrap">
-            <select
-              className="krds-form-select"
-              value={selectedCategoryNo}
-              onChange={(event) => setSelectedCategoryNo(event.target.value)}
-            >
-              <option value="">카테고리 전체</option>
-              {categories.map((category) => (
-                <option key={category?.ctgryNo} value={String(category?.ctgryNo ?? '')}>
-                  {category?.ctgryNm || '-'}
-                </option>
-              ))}
-            </select>
-            <select
-              className="krds-form-select"
-              value={searchType}
-              onChange={(event) => setSearchType(event.target.value)}
-            >
-              <option value="TITLE">제목</option>
-              <option value="CONTENT">내용</option>
-              <option value="WRITER">작성자</option>
-            </select>
-            <div className="sch-input">
-              <input
-                type="text"
-                className="krds-input medium"
-                placeholder="검색어를 입력하세요"
-                title="검색어 입력"
-                value={searchKeyword}
-                onChange={(event) => setSearchKeyword(event.target.value)}
-                onKeyDown={handleSearchKeyDown}
-              />
-              <button type="button" className="krds-btn medium icon ico-search" onClick={handleSearch}>
-                <span className="sr-only">검색</span>
-                <i className="svg-icon ico-sch"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        {/* isQnaPage가 true일 때만 이 영역이 보입니다 */}
         {isQnaPage && (
-          <div className="tab fill full mt-48">
-            <ul>
-              <li><Link to="/cs/opndata/UI_USR_L_210" className="btn-tab">API 안내</Link></li>
-              <li><Link to="/cs/opndata/UI_USR_L_220" className="btn-tab">인증키 신청</Link></li>
-              <li className="active">
-                <Link to="/cs/opndata/UI_USR_L_230" className="btn-tab">
-                  API Q&A <span className="sr-only">현재 페이지</span>
-                </Link>
-              </li>
-            </ul>
-          </div>
-        )}
-        <div className="search-list-top">
-          <ul className="sch-info" aria-live="polite">
-            <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
-          </ul>
-          <ul className="sch-sort">
-            <li>
-              <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
-              <select
-                className="krds-form-select-sort"
-                id="search_result_count"
-                value={pageSize}
-                onChange={handlePageSizeChange}
-              >
-                <option value={10}>10개</option>
-                <option value={20}>20개</option>
-                <option value={30}>30개</option>
-                <option value={50}>50개</option>
-              </select>
-            </li>
-          </ul>
-        </div>
-        {/* table [S] */}
-        <div className="krds-table-wrap">
-          <table className="tbl col data t-block">
-            <caption>Q & A 목록. 번호, 카테고리, 제목, 작성자, 처리상태, 작성일, 조회수 정보가 제공됩니다.</caption>
-            <colgroup>
-              <col style={{ width: '7.4%' }} />
-              <col style={{ width: '12%' }} />
-              <col />
-              <col style={{ width: '12%' }} />
-              <col style={{ width: '12%' }} />
-              <col style={{ width: '12%' }} />
-              <col style={{ width: '7.4 %' }} />
-            </colgroup>
-            <thead>
-              <tr>
-                <th scope="col" className="ac">번호</th>
-                <th scope="col" className="ac">카테고리</th>
-                <th scope="col" className="ac">제목</th>
-                <th scope="col" className="ac">작성</th>
-                <th scope="col" className="ac">처리상태</th>
-                <th scope="col" className="ac">작성일</th>
-                <th scope="col" className="ac views">조회</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td className="ac" colSpan={7}>
-                    <span>로딩 중입니다.</span>
-                  </td>
-                </tr>
-              ) : postList.length === 0 ? (
-                <tr>
-                  <td className="ac" colSpan={7}>
-                    <span>조회된 데이터가 없습니다.</span>
-                  </td>
-                </tr>
-              ) : (
-                postList.map((item, index) => (
-                  <tr key={item?.pstNo ?? `${item?.pstTtl ?? 'qna'}-${index}`}>
-                    <th scope="row" className="ac">
-                      <span>{item?.pstNo ?? '-'}</span>
-                    </th>
-                    <td className="ac"><span>{item?.ctgryNm || '-'}</span></td>
-                    <td>
-                      <a
-                        className="onellipsis-1"
-                        href="#"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          moveToDetail(item?.pstNo);
-                        }}
-                      >
-                        {item?.upendPstgYn === 'Y' && <span className="krds-badge bg-light-primary">공지</span>}
-                        <span>{item?.pstTtl || '-'}</span>
-                        {item?.pstRlsYn === 'N' && <i className="svg-icon ico-lock"></i>}
-                      </a>
-                    </td>
-                    <td className="ac"><span>{item?.pstRgtrNm || '-'}</span></td>
-                    <td className="ac"><span>{getAnswerStatus(item)}</span></td>
-                    <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
-                    <td className="ac views"><span>{item?.inqCnt ?? 0}</span></td>
-                  </tr>
-                ))
+              <p className="guide-txt" style={{ marginBottom: '24px', clear: 'both' }}>
+                중소벤처24에서는 중소벤처기업부에서 보유하고 있는 정보 및 서비스를 API를 통해 배포하고 있습니다. <br/>
+                Open API는 중소벤처기업부 각 기관 및 이를 서비스하고자 하는 일반을 대상으로 배포하고 있습니다.<br/>
+                * 다만, 해당 인증키는 신청 및 가능여부를 판단하여 제공하고 있습니다.
+              </p>
               )}
-            </tbody>
-          </table>
-        </div>
-        {/* table [E] */}
-        {!loading && totalPages > 0 && (
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage + 1}
-            onPageChange={handlePageChange}
-            syncUrl
-          />
-        )}
+              <div className="search-top-box">
+                <div className="sch-form-wrap">
+                  <select
+                      className="krds-form-select"
+                      value={selectedCategoryNo}
+                      onChange={(event) => setSelectedCategoryNo(event.target.value)}
+                  >
+                    <option value="">카테고리 전체</option>
+                    {categories.map((category) => (
+                        <option key={category?.ctgryNo} value={String(category?.ctgryNo ?? '')}>
+                          {category?.ctgryNm || '-'}
+                        </option>
+                    ))}
+                  </select>
+                  <select
+                      className="krds-form-select"
+                      value={searchType}
+                      onChange={(event) => setSearchType(event.target.value)}
+                  >
+                    <option value="TITLE">제목</option>
+                    <option value="CONTENT">내용</option>
+                    <option value="WRITER">작성자</option>
+                  </select>
+                  <div className="sch-input">
+                    <input
+                        type="text"
+                        className="krds-input"
+                        placeholder="검색어를 입력하세요"
+                        title="검색어 입력"
+                        value={searchKeyword}
+                        onChange={(event) => setSearchKeyword(event.target.value)}
+                        onKeyDown={handleSearchKeyDown}
+                    />
+                    <button type="button" className="krds-btn medium icon ico-search" onClick={handleSearch}>
+                      <span className="sr-only">검색</span>
+                      <i className="svg-icon ico-sch"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              {/* isQnaPage가 true일 때만 이 영역이 보입니다 */}
+              {isQnaPage && (
+                  <div className="tab fill full mt-48">
+                    <ul>
+                      <li><Link to="/cs/opndata/UI_USR_L_210" className="btn-tab">API 안내</Link></li>
+                      <li><Link to="/cs/opndata/UI_USR_L_220" className="btn-tab">인증키 신청</Link></li>
+                      <li className="active">
+                        <Link to="/cs/opndata/UI_USR_L_230" className="btn-tab">
+                          API Q&A <span className="sr-only">현재 페이지</span>
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+              )}
+              <div className="search-list-top">
+                <ul className="sch-info" aria-live="polite">
+                  <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
+                </ul>
+                <ul className="sch-sort">
+                  <li>
+                    <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
+                    <select
+                        className="krds-form-select-sort"
+                        id="search_result_count"
+                        value={pageSize}
+                        onChange={handlePageSizeChange}
+                    >
+                      <option value={10}>10개</option>
+                      <option value={20}>20개</option>
+                      <option value={30}>30개</option>
+                      <option value={50}>50개</option>
+                    </select>
+                  </li>
+                </ul>
+              </div>
+              {/* table [S] */}
+              <div className="krds-table-wrap">
+                <table className="tbl col data t-block">
+                  <caption>Q & A 목록. 번호, 카테고리, 제목, 작성자, 처리상태, 작성일, 조회수 정보가 제공됩니다.</caption>
+                  <colgroup>
+                    <col style={{width: '7.4%'}}/>
+                    <col style={{width: '12%'}}/>
+                    <col/>
+                    <col style={{width: '12%'}}/>
+                    <col style={{width: '12%'}}/>
+                    <col style={{width: '12%'}}/>
+                    <col style={{width: '7.4 %'}}/>
+                  </colgroup>
+                  <thead>
+                  <tr>
+                    <th scope="col" className="ac">번호</th>
+                    <th scope="col" className="ac">카테고리</th>
+                    <th scope="col" className="ac">제목</th>
+                    <th scope="col" className="ac">작성</th>
+                    <th scope="col" className="ac">처리상태</th>
+                    <th scope="col" className="ac">작성일</th>
+                    <th scope="col" className="ac views">조회</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {loading ? (
+                      <tr>
+                        <td className="ac" colSpan={7}>
+                          <span>로딩 중입니다.</span>
+                        </td>
+                      </tr>
+                  ) : postList.length === 0 ? (
+                      <tr>
+                        <td className="ac" colSpan={7}>
+                          <span>조회된 데이터가 없습니다.</span>
+                        </td>
+                      </tr>
+                  ) : (
+                      postList.map((item, index) => (
+                          <tr key={item?.pstNo ?? `${item?.pstTtl ?? 'qna'}-${index}`}>
+                            <th scope="row" className="ac">
+                              <span>{item?.pstNo ?? '-'}</span>
+                            </th>
+                            <td className="ac"><span>{item?.ctgryNm || '-'}</span></td>
+                            <td>
+                              <a
+                                  className="onellipsis-1"
+                                  href="#"
+                                  onClick={(event) => {
+                                    event.preventDefault();
+                                    moveToDetail(item?.pstNo);
+                                  }}
+                              >
+                                {item?.upendPstgYn === 'Y' && <span className="krds-badge bg-light-primary">공지</span>}
+                                <span>{item?.pstTtl || '-'}</span>
+                                {item?.pstRlsYn === 'N' && <i className="svg-icon ico-lock"></i>}
+                              </a>
+                            </td>
+                            <td className="ac"><span>{item?.pstRgtrNm || '-'}</span></td>
+                            <td className="ac"><span>{getAnswerStatus(item)}</span></td>
+                            <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
+                            <td className="ac views"><span>{item?.inqCnt ?? 0}</span></td>
+                          </tr>
+                      ))
+                  )}
+                  </tbody>
+                </table>
+              </div>
+              {/* table [E] */}
+              {!loading && totalPages > 0 && (
+                  <Pagination
+                      totalPages={totalPages}
+                      currentPage={currentPage + 1}
+                      onPageChange={handlePageChange}
+                      syncUrl
+                  />
+              )}
 
-        {isLoggedIn && (
-          <div className="onboard-btm-btngroup btn-single bt-0">
-            <div>
-              <button type="button" className="krds-btn primary xlarge" onClick={moveToWrite}>
-                문의하기
-              </button>
+              {isLoggedIn && (
+                  <div className="onboard-btm-btngroup btn-single bt-0">
+                    <div>
+                      <button type="button" className="krds-btn primary xlarge" onClick={moveToWrite}>
+                        문의하기
+                      </button>
+                    </div>
+                  </div>
+              )}
             </div>
-          </div>
-        )}
-      </div>
-    </>
-  );
-};
+          </>
+          );
+        };
 
-export default BoardQna;
+        export default BoardQna;

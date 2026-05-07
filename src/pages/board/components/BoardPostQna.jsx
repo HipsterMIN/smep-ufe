@@ -46,6 +46,7 @@ const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
   const depth1Menu = getDepth1Parent();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let isMounted = true;
 
     const fetchPostDetail = async () => {

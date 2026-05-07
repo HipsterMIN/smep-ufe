@@ -61,6 +61,7 @@ const UI_USR_L_120 = () => {
 
   // 목록 조회
   useEffect(() => {
+    window.scrollTo(0, 0);
     const fetchData = async () => {
       setLoading(true);
       try {

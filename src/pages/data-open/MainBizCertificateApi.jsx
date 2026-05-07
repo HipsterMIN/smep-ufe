@@ -5,6 +5,7 @@ import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
 import ApiKeyForm from "@pages/data-open/ApiKeyForm.jsx";
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useAuthStore } from '@store/useAuthStore.jsx';
+import {useEffect} from "react";
 
 const MainBizCertificateApi = () => {
   const navigate = useNavigate();
@@ -14,7 +15,9 @@ const MainBizCertificateApi = () => {
   const isLoggedIn = Boolean(authToken);
 
   const mbrNo = userInfo?.id;
-  // const mbrNo = "2025120500381316";
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const {
     isOpen,
     submitting,
