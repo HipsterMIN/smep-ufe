@@ -2,7 +2,7 @@ import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useEffect, useState } from 'react';
-import { useMatches } from 'react-router-dom';
+import { useMatches, useNavigate } from 'react-router-dom';
 import { api as apiClient } from '@lib/apiClient.js';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import CorporateMemberInfo from '@pages/my-business/member/components/CorporateMemberInfo.jsx';
@@ -212,6 +212,7 @@ const UI_USR_W_411 = () => {
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
 
   const matches = useMatches();
+  const navigate = useNavigate();
   const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '회원정보변경';
 
   useEffect(() => {
@@ -355,6 +356,10 @@ const UI_USR_W_411 = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleCancel = () => {
+    navigate('..', { replace: true });
   };
 
   return (
@@ -624,7 +629,7 @@ const UI_USR_W_411 = () => {
         {/* bottom btn */}
         <div className="onboard-btm-btngroup bt-0">
           <div>
-            <button type="button" className="krds-btn tertiary xlarge">
+            <button type="button" className="krds-btn tertiary xlarge" onClick={handleCancel}>
               취소
             </button>
           </div>

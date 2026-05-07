@@ -89,7 +89,7 @@ const UI_USR_R_420 = () => {
     setIsSubmitting(true);
 
     try {
-      await apiClient.patch('/api/v1/account/password', {
+      await apiClient.post('/api/v1/account/password', {
         currentPassword,
         newPassword,
       });

@@ -1,20 +1,21 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, {useEffect, useMemo, useState} from 'react';
+import {useMatches, useSearchParams} from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
 import Tab from '@components/ui/Tab';
 import Accordion from '@components/ui/Accordion';
-import { useUserMenu } from '@context/UserMenuContext.jsx';
-import { api as apiClient } from '@lib/apiClient.js';
-import { formatNumberWithCommas } from '@utils/numberUtils.js';
+import {useUserMenu} from '@context/UserMenuContext.jsx';
+import {api as apiClient} from '@lib/apiClient.js';
+import {formatNumberWithCommas} from '@utils/numberUtils.js';
 
 const stripHtmlTags = (value) => {
   if (!value) return '';
   return String(value).replace(/<[^>]*>/g, '').trim();
 };
 
-const BoardFaq = ({ boardDetail, bbsNo }) => {
+const BoardFaq = ({ bbsNo }) => {const matches = useMatches();
+  const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '자주 묻는 질문';
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const [searchParams] = useSearchParams();
 
@@ -41,8 +42,6 @@ const BoardFaq = ({ boardDetail, bbsNo }) => {
   // 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
-
-  const boardTitle = useMemo(() => boardDetail?.bbsNm || '자주 묻는 질문', [boardDetail]);
 
   const tabData = useMemo(
     () => ['전체', ...categories.map((category) => category?.ctgryNm || '-')],
@@ -186,7 +185,7 @@ const BoardFaq = ({ boardDetail, bbsNo }) => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">{boardTitle}</h2>
+          <h2 className="h-tit">{pageTitle}</h2>
         </div>
 
         <div className="search-top-box">
