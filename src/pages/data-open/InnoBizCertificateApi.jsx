@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {useApiKeyApply} from "@pages/data-open/useApiKeyApply.js";
 import ApiKeyForm from './ApiKeyForm';
 import { useAuthStore } from '@store/useAuthStore.jsx';
-
+import React, {useEffect } from 'react';
 const InnoBizCertificateApi = () => {
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -16,7 +16,9 @@ const InnoBizCertificateApi = () => {
   const isLoggedIn = Boolean(authToken);
 
   const mbrNo = userInfo?.id;
-  // const mbrNo = "2025120500381316";
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const {
     isOpen,
     submitting,

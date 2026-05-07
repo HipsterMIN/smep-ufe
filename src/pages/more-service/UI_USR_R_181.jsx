@@ -46,6 +46,7 @@ const UI_USR_R_181 = () => {
   }, [id]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let isMounted = true;
 
     const fetchBoardDetail = async () => {

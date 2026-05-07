@@ -1,6 +1,7 @@
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
-import { useUserMenu } from '@context/UserMenuContext.jsx';
+import {useUserMenu} from '@context/UserMenuContext.jsx';
+import {useEffect} from "react";
 
 /**
  * 상태 화면(로딩/에러/미지원)에서 보장할 최소 콘텐츠 높이(px)
@@ -41,6 +42,9 @@ const BoardResolverStateView = ({ title = '게시판', message }) => {
   // 렌더 시점의 메뉴 상태를 기반으로 좌측/상단 네비 데이터 계산
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
   return (
     <>
