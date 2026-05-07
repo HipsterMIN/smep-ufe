@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useMatches, useNavigate } from 'react-router-dom';
 
 import SideNavigation from '@components/ui/SideNavigation.jsx';
@@ -12,6 +12,26 @@ import {
 
 const DEFAULT_VERIFY_ENDPOINT = '/api/v1/account/password/verify';
 const VERIFICATION_STORAGE_PREFIX = 'verify-password:';
+
+const normalizePathname = (pathname) => pathname.replace(/\/+$/, '') || '/';
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const getVerificationBasePath = (pathname, successPath) => {
+  const normalizedPathname = normalizePathname(pathname);
+  const normalizedSuccessPath = String(successPath || '')
+    .replace(/^\.\//, '')
+    .replace(/^\/+|\/+$/g, '');
+
+  if (!normalizedSuccessPath) {
+    return normalizedPathname;
+  }
+
+  return normalizedPathname.replace(
+    new RegExp(`/${escapeRegExp(normalizedSuccessPath)}$`),
+    '',
+  );
+};
 
 const getStoredVerificationStatus = (storageKey) => {
   if (!storageKey || typeof window === 'undefined') {
@@ -72,6 +92,7 @@ const VerifyPassword = ({
   const authUser = useAuthStore((state) => state.user);
   const authToken = useAuthStore((state) => state.token);
   const tokenPayload = decodeJwtPayload(authToken);
+  const tokenLoginId = tokenPayload?.login_id;
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '비밀번호 확인';
@@ -79,8 +100,8 @@ const VerifyPassword = ({
   const depth1Menu = getDepth1Parent();
 
   const defaultLoginId = useMemo(() => {
-    return tokenPayload?.login_id || authUser?.loginId || authUser?.username || '';
-  }, [authToken, authUser]);
+    return tokenLoginId || authUser?.loginId || authUser?.username || '';
+  }, [tokenLoginId, authUser]);
 
   const isSuccessRouteActive = useMemo(() => {
     if (!successPath) {
@@ -100,6 +121,14 @@ const VerifyPassword = ({
     const menuId = [...matches].reverse().find((match) => match?.handle?.menuId)?.handle?.menuId;
     return `${VERIFICATION_STORAGE_PREFIX}${menuId || verifyEndpoint}:${successPath || 'default'}`;
   }, [matches, successPath, verifyEndpoint]);
+  const verificationBasePathRef = useRef(null);
+
+  if (verificationBasePathRef.current === null && typeof window !== 'undefined') {
+    verificationBasePathRef.current = getVerificationBasePath(
+      window.location.pathname,
+      successPath,
+    );
+  }
 
   const [loginId, setLoginId] = useState(defaultLoginId);
   const [password, setPassword] = useState('');
@@ -125,6 +154,28 @@ const VerifyPassword = ({
 
     setIsVerified(getStoredVerificationStatus(verificationStorageKey));
   }, [isSuccessRouteActive, successPath, verificationStorageKey]);
+
+  useEffect(() => {
+    if (!successPath) {
+      return undefined;
+    }
+
+    return () => {
+      if (typeof window === 'undefined') {
+        return;
+      }
+
+      const verificationBasePath = verificationBasePathRef.current;
+      const currentPathname = normalizePathname(window.location.pathname);
+      const isInVerificationFlow =
+        currentPathname === verificationBasePath ||
+        currentPathname.startsWith(`${verificationBasePath}/`);
+
+      if (!isInVerificationFlow) {
+        clearStoredVerificationStatus(verificationStorageKey);
+      }
+    };
+  }, [successPath, verificationStorageKey]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
