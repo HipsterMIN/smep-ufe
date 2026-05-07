@@ -51,6 +51,7 @@ export default function HeaderUserMenu({
       <button
         type="button"
         className="btn-navi none-icon on-mobile-none"
+        hidden
         onClick={handleMnaClick}>
         M&amp;A
       </button>
