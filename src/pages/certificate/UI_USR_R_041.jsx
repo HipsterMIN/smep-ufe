@@ -92,6 +92,7 @@ const UI_USR_R_041 = () => {
     }
 
     // 발급 가능 기업 여부 확인
+    let supportedLangs = [];
     try {
       const result = await apiClient.post(
         '/api/v1/certificate/eligibility',
@@ -115,6 +116,7 @@ const UI_USR_R_041 = () => {
         setIsIneligiblePopupOpen(true);
         return;
       }
+      supportedLangs = result.data.supportedLangs || [];
     } catch (error) {
       console.error('발급 가능 여부 확인 실패:', error);
       alert('발급 가능 여부 확인 중 오류가 발생했습니다.');
@@ -128,10 +130,13 @@ const UI_USR_R_041 = () => {
       prdocNm: data.prdocTtl,
       prdocIssuGdCn: data.prdocIssuGdCn,
       elpblYn: data.elpblYn,
+      supportedLangs,
     };
 
     if (prdocCd === 'Y101') {
       navigate(`${base}/Y101/dpc-issue`, { state });
+    }  else if (prdocCd === 'Y104' || prdocCd === 'Y105') {
+      navigate(`${base}/Y104/biz-issue`, { state });
     } else if (prdocCd === 'Y109') {
       navigate(`${base}/Y109/cbz-issue`, { state });
     } else if (prdocCd === 'Y113') {
