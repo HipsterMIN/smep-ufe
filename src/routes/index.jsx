@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { staticRoutes } from './staticRoutes.jsx';
 import { generateDynamicRoutes } from './dynamicRoutes.jsx';
 import { useMenuStore } from '../store/useMenuStore';
+import { useAuthStore } from '../store/useAuthStore.jsx';
 
 /**
  * Router 생성 함수
@@ -36,8 +37,17 @@ const createAppRouter = (menuTree, flatMenuMap) => {
  * AppRouter - 메뉴 로드 및 router 생성을 담당하는 컴포넌트
  */
 function AppRouter() {
-  const { menuTree, flatMenuMap, fetchMenuData, isLoading } = useMenuStore();
+  const currentMode = useAuthStore((state) => state.currentMode);
+  const { menuTree, flatMenuMap, fetchMenuData, resetMenu, isLoading } = useMenuStore();
   const [routerInstance, setRouterInstance] = useState(null);
+  const previousModeRef = useRef(currentMode);
+
+  useEffect(() => {
+    if (previousModeRef.current !== currentMode) {
+      previousModeRef.current = currentMode;
+      resetMenu();
+    }
+  }, [currentMode, resetMenu]);
 
   /**
    * menuTree, fetchMenuData 의존성으로 메뉴 데이터 fetch
