@@ -61,7 +61,7 @@ import {useUserMenu} from "@context/UserMenuContext.jsx";
 
 
 const UI_USR_R_360 = () => {
-  const tabData = useRef(['주요서비스', '회원서비스']);
+  const tabData = useRef(['주요서비스']);//'회원서비스'탭은 시연때문에 임시로 제외함
   const subTabData = useRef(['지원사업소개', '증명서 발급', '기관/기업 조회', '유관시스템', '정책금융안내']);
   const schFormWrapRef1 = useRef(null);
   const schFormWrapRef2 = useRef(null);
