@@ -1,24 +1,22 @@
 
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext';
-import { useAuthStore } from '@store/useAuthStore.jsx';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {apiBaseUrl} from "@lib/apiClient.js";
 
 const ApiInfo = () => {
-  const authToken = useAuthStore((state) => state.token);
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   // ✅ 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
   const handleGuideDownload = () => {
     const atchFileId = '20260422195859_03121';
     const atchFileSn = 1;
-    const isLoggedIn = Boolean(authToken);
-    // 게시판 상세 페이지에서 사용한 것과 동일한 API 경로 사용
     window.location.href = `${apiBaseUrl}/api/v1/files/download/${atchFileId}/${atchFileSn}`;
   };
   return (

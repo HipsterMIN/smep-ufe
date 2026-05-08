@@ -23,6 +23,7 @@ const UI_USR_R_121 = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const fetchDetail = async () => {
       setLoading(true);
       try {

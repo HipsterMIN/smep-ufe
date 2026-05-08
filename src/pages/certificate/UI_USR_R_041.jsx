@@ -197,7 +197,7 @@ const UI_USR_R_041 = () => {
               <button
                 type="button"
                 className="krds-btn primary medium"
-                onClick={() => window.open(`https://${ineligibleInfo.linkedSystemUrl}`, '_blank')}
+                onClick={() => window.open(`${ineligibleInfo.linkedSystemUrl}`, '_blank')}
               >
                       바로가기
               </button>

@@ -2,11 +2,12 @@ import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useEffect, useState } from 'react';
-import { useMatches } from 'react-router-dom';
+import { useMatches, useNavigate } from 'react-router-dom';
 import { api as apiClient } from '@lib/apiClient.js';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import CorporateMemberInfo from '@pages/my-business/member/components/CorporateMemberInfo.jsx';
 import IndividualMemberInfo from '@pages/my-business/member/components/IndividualMemberInfo.jsx';
+import ItrstFldPopup from '@pages/my-business/member/components/ItrstFldPopup.jsx';
 import {
   fetchCorporateManagerContact,
   fetchCorporateMemberDetail,
@@ -204,12 +205,14 @@ const UI_USR_W_411 = () => {
     DEFAULT_INFO_RECEPTION_AGREEMENTS,
   );
   const [saving, setSaving] = useState(false);
+  const [isInterestPopupOpen, setIsInterestPopupOpen] = useState(false);
 
   // 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
 
   const matches = useMatches();
+  const navigate = useNavigate();
   const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '회원정보변경';
 
   useEffect(() => {
@@ -355,6 +358,10 @@ const UI_USR_W_411 = () => {
     }
   };
 
+  const handleCancel = () => {
+    navigate('..', { replace: true });
+  };
+
   return (
     <>
       <SideNavigation
@@ -391,7 +398,13 @@ const UI_USR_W_411 = () => {
           <h3 className="sec-tit3">관심 분야 설정</h3>
           <div className="flex-between center">
             <p className="cont-desc">관심을 갖고 있는 분야를 선택하시면, 빠르고 정확한 지원사업 검색이 가능합니다.</p>
-            <button type="button" className="krds-btn secondary small">관심분야 설정</button>
+            <button
+              type="button"
+              className="krds-btn secondary small"
+              onClick={() => setIsInterestPopupOpen(true)}
+            >
+              관심분야 설정
+            </button>
           </div>
         </div>
 
@@ -616,7 +629,7 @@ const UI_USR_W_411 = () => {
         {/* bottom btn */}
         <div className="onboard-btm-btngroup bt-0">
           <div>
-            <button type="button" className="krds-btn tertiary xlarge">
+            <button type="button" className="krds-btn tertiary xlarge" onClick={handleCancel}>
               취소
             </button>
           </div>
@@ -628,6 +641,10 @@ const UI_USR_W_411 = () => {
         </div>
 
       </div>
+      <ItrstFldPopup
+        isOpen={isInterestPopupOpen}
+        onClose={() => setIsInterestPopupOpen(false)}
+      />
     </>
   );
 };

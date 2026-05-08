@@ -49,6 +49,7 @@ const UI_USR_L_180 = () => {
   }, [matches]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let isMounted = true;
 
     const fetchBoardDetail = async () => {

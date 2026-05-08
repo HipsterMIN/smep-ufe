@@ -2,8 +2,8 @@
 import { useAuthStore } from '../store/useAuthStore.jsx';
 import { decodeJwtPayload } from './commonUtils.js';
 
-const KEYCLOAK_URL = 'https://www.smes.go.kr/isso-dev/qsign';
-const KEYCLOAK_JOIN = 'https://www.smes.go.kr/onepass-dev/conversion/step1';
+const KEYCLOAK_URL = 'https://isso-dev.smes.go.kr/qsign';
+const KEYCLOAK_JOIN = 'https://onepass-dev.smes.go.kr/conversion/step1';
 const REALM = 'ucube-qsign';
 const CLIENT_ID = 'smes-tipa-01';
 const REDIRECT_SSO_URI = 'https://www.smes.go.kr/home-dev/sso'; // 우리 사이트 SSO 콜백 주소 (로그인)

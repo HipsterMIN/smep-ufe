@@ -1,11 +1,14 @@
 ﻿import Header from '@components/ui/Header.jsx';
-import React from 'react';
+import React, {useEffect} from 'react';
 import Footer from '@components/ui/Footer.jsx';
 import { useMatches } from 'react-router-dom';
 
 const UI_USR_R_564 = () => {
   const matches = useMatches();
   const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '이용약관';
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <div id="wrap">
       <Header/>

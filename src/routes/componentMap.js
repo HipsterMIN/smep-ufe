@@ -76,6 +76,7 @@ const UI_USR_R_181 = lazy(() => import('@pages/more-service/UI_USR_R_181.jsx'));
 const UI_USR_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
 const UI_USR_R_121 = lazy(() => import('@pages/more-service/UI-USR-R-121.jsx'));
 const UI_USR_R_190 = lazy(() => import('@pages/more-service/UI-USR-R-190.jsx'));
+const UI_USR_R_360 = lazy(() => import('@pages/customer-support/UI-USR-R-360.jsx'));
 
 const TotalSearch = lazy(() => import('@pages/total-search/TotalSearch.jsx'));
 
@@ -490,10 +491,10 @@ export const componentMap = {
   },
 
   // 이용가이드
-  // 'M_PIIO_00107': {
-  //   component: null,
-  //   layout: SubpageLayoutWithMenu,
-  // },
+  'M_PIIO_00107': {
+    component: UI_USR_R_360,
+    layout: SubpageLayoutWithMenu,
+  },
 
   // ========== 마이비즈니스 (M_PIIO_00068) ==========
 

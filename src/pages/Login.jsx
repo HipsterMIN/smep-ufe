@@ -17,8 +17,6 @@ const UI_USR_R_002 = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const isCorporateDemoLogin = loginType === LOGIN_TYPE_CORPORATE;
-  
   const breadcrumbItems = [
     { label: '로그인', link: '#' },
   ];
@@ -33,17 +31,11 @@ const UI_USR_R_002 = () => {
 
   const handleClick = async () => {
     try {
-      // DEMO TEMP / REMOVE AFTER DEMO:
-      // 시연 동안에만 기업 회원 탭은 사업자번호로 우회 로그인한다.
-      const response = isCorporateDemoLogin
-        ? await apiClient.post('/api/v1/auth/demo-corporate-login', {
-          brno: loginId,
-        })
-        : await apiClient.post('/api/v1/auth/login', {
-          id: loginId,
-          password,
-          type: loginType,
-        });
+      const response = await apiClient.post('/api/v1/auth/login', {
+        id: loginId,
+        password,
+        type: loginType,
+      });
       const accessToken = response.accessToken || response.data?.accessToken;
       const refreshToken = response.refreshToken || response.data?.refreshToken;
       if (!accessToken) {
@@ -109,7 +101,7 @@ const UI_USR_R_002 = () => {
                 <div className="fieldset">
                   <div className="form-group">
                     <div className="form-tit">
-                      <label htmlFor="login_id">{isCorporateDemoLogin ? '사업자번호' : '아이디'}</label>
+                      <label htmlFor="login_id">아이디</label>
                     </div>
                     <input
                       type="text"
@@ -118,7 +110,7 @@ const UI_USR_R_002 = () => {
                       value={loginId}
                       onChange={(e) => setLoginId(e.target.value)}
                       onKeyDown={handleEnterSubmit}
-                      placeholder={isCorporateDemoLogin ? '사업자번호를 입력하세요' : '개인 로그인 ID'}
+                      placeholder={loginType === LOGIN_TYPE_CORPORATE ? '기업 로그인 ID' : '개인 로그인 ID'}
                     />
                   </div>
                   <div className="form-group">
@@ -133,8 +125,7 @@ const UI_USR_R_002 = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         onKeyDown={handleEnterSubmit}
-                        placeholder={isCorporateDemoLogin ? '' : '비밀번호를 입력하세요'}
-                        disabled={isCorporateDemoLogin}
+                        placeholder="비밀번호를 입력하세요"
                       />
                     </div>
                   </div>

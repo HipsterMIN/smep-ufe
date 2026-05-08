@@ -80,6 +80,9 @@ const BoardPostResolver = () => {
     return String(id).trim();
   }, [id]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   /**
    * 게시판 메타 조회 effect
    *
