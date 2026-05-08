@@ -26,11 +26,6 @@ const UI_USR_L_230 = () => {
   // --- 상태 관리 ---
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState('latest'); // 'latest' | 'oldest'
-  const [searchParams, setSearchParams] = useState({
-    inquiryType: '',
-    status: '',
-    searchKeyword: ''
-  });
 
   // --- 정렬 및 데이터 가공 ---
   const pagedRows = useMemo(() => {

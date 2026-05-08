@@ -68,6 +68,7 @@ const UI_USR_R_191 = () => {
   const depth1Menu = getDepth1Parent();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let mounted = true;
 
     const fetchDetail = async () => {

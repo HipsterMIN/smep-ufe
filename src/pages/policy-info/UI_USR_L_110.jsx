@@ -22,10 +22,11 @@ const formatDate = (dateString) => {
 
 const UI_USR_L_110 = () => {
   const matches = useMatches();
+  const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '';
   const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
-  const [boardDetail, setBoardDetail] = useState(null);
+  const [setBoardDetail] = useState(null);
   const [searchType, setSearchType] = useState('TITLE');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [appliedSearchType, setAppliedSearchType] = useState('TITLE');
@@ -49,6 +50,7 @@ const UI_USR_L_110 = () => {
   }, [matches]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let isMounted = true;
 
     const fetchBoardDetail = async () => {
@@ -129,11 +131,6 @@ const UI_USR_L_110 = () => {
     };
   }, [bbsNo, currentPage, pageSize, appliedSearchType, appliedSearchKeyword]);
 
-  const boardTitle = useMemo(
-    () => boardDetail?.bbsNm || depth1Menu?.menuNm || '입법·행정예고/고시',
-    [boardDetail, depth1Menu],
-  );
-
   const handleSearch = () => {
     setAppliedSearchType(searchType);
     setAppliedSearchKeyword(searchKeyword);
@@ -170,7 +167,7 @@ const UI_USR_L_110 = () => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">{boardTitle}</h2>
+          <h2 className="h-tit">{pageTitle}</h2>
         </div>
 
         <div className="search-top-box">

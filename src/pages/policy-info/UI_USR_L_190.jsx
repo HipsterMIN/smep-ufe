@@ -91,6 +91,7 @@ const UI_USR_L_190 = () => {
   const selectedAreaGroup = AREA_TABS[activeTabIndex]?.value || 'ALL';
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let mounted = true;
 
     const fetchList = async () => {

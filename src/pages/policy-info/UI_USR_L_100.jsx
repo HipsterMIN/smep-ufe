@@ -58,6 +58,7 @@ const UI_USR_L_100 = () => {
   }, [matches]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let isMounted = true;
 
     const fetchBoardDetail = async () => {
@@ -91,6 +92,7 @@ const UI_USR_L_100 = () => {
   }, [boardDetail]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let isMounted = true;
 
     const fetchCategories = async () => {

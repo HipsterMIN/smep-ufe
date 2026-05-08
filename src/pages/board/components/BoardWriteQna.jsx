@@ -40,6 +40,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
   const contentLength = useMemo(() => content.length, [content]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let isMounted = true;
 
     const fetchCategories = async () => {

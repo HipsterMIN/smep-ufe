@@ -1,7 +1,7 @@
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import { useNavigate } from 'react-router-dom';
 import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
 import ApiKeyForm from './ApiKeyForm';
@@ -12,9 +12,10 @@ const EventInfoApi = () => {
   const authToken = useAuthStore((state) => state.token);
   const isLoggedIn = Boolean(authToken);
   const mbrNo = userInfo?.id;
-
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-  // const mbrNo = "2025120500381316";
   const {
     isOpen,
     submitting,
