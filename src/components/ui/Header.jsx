@@ -378,6 +378,9 @@ export default function Header() {
       } else if (delta > 0 && currentScrollY > 80) {
         // 아래로: lock 적용
         if (isLocked.current) return;
+        const headerHeight = headerRef.current?.offsetHeight ?? 0;
+        const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (scrollableHeight <= headerHeight) return; // 숨기면 스크롤 불가 → 중단
         setIsHeaderVisible(false);
         isLocked.current = true;
         setTimeout(() => { isLocked.current = false; }, 400);
