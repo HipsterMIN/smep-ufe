@@ -2,6 +2,30 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { api as apiClient } from '../lib/apiClient.js';
 import { mockMenuData } from '@lib/menuData.js';
+import { useAuthStore } from './useAuthStore.jsx';
+
+const COMPANY_INFO_MANAGEMENT_MENU_ID = 'M_PIIO_00119';
+
+const filterMenuByCurrentMode = (menuData) => {
+  if (useAuthStore.getState().currentMode !== 'INDIVIDUAL') {
+    return menuData;
+  }
+
+  const filterNode = (node) => ({
+    ...node,
+    children: (node.children || [])
+      .filter((child) => {
+        if (child.menuId === COMPANY_INFO_MANAGEMENT_MENU_ID) {
+          return false;
+        }
+
+        return true;
+      })
+      .map(filterNode),
+  });
+
+  return filterNode(menuData);
+};
 
 /**
  * =============================================================================
@@ -47,11 +71,13 @@ const menuStoreImpl  = (set, get) => ({
 
     try {
       const response = await apiClient.get('/api/v1/menu');
-      const menuData = response.data || response;
+      const rawMenuData = response.data || response;
 
-      if (!menuData) {
+      if (!rawMenuData) {
         throw new Error('응답 데이터가 비어있습니다.');
       }
+
+      const menuData = filterMenuByCurrentMode(rawMenuData);
 
       // 메뉴 데이터를 평탄화된 맵으로 변환
       const flatMap = get()._buildFlatMap(menuData);
@@ -74,16 +100,17 @@ const menuStoreImpl  = (set, get) => ({
         console.error('메뉴 데이터 로드 실패:', error.message);
       }
 
-      const flatMap = get()._buildFlatMap(mockMenuData);
+      const menuData = filterMenuByCurrentMode(mockMenuData);
+      const flatMap = get()._buildFlatMap(menuData);
 
       set({
-        menuTree: mockMenuData,
+        menuTree: menuData,
         flatMenuMap: flatMap,
         isLoading: false,
         error: isDev ? null : error.message, // 개발환경에서는 에러 상태로 처리하지 않음
       });
 
-      return mockMenuData;
+      return menuData;
     }
   },
 

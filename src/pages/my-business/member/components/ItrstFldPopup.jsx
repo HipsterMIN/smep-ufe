@@ -15,6 +15,10 @@ const COMMON_CODE_GROUPS = {
 };
 
 const COMMON_CODE_GROUP_IDS = Object.values(COMMON_CODE_GROUPS);
+const LOCATION_INTEREST_FIELD_CODES = {
+  sido: '1',
+  sigungu: '2',
+};
 
 const EMPTY_COMMON_CODE_OPTIONS = {
   businessType: [],
@@ -26,6 +30,59 @@ const EMPTY_COMMON_CODE_OPTIONS = {
   certification: [],
 };
 
+// 관심분야 조회 응답을 체크박스 상태 객체로 변환한다.
+const normalizeInterestFieldSelections = (interestFields) => {
+  if (!Array.isArray(interestFields)) {
+    return {};
+  }
+
+  return interestFields.reduce((selectionMap, item) => {
+    const interestFieldCode = String(item?.itrstFldCd || '').trim();
+    const valueCode = String(item?.itrstFldVlCd || '').trim();
+    if (!COMMON_CODE_GROUP_IDS.includes(interestFieldCode) || !valueCode) {
+      return selectionMap;
+    }
+
+    return {
+      ...selectionMap,
+      [interestFieldCode]: [...(selectionMap[interestFieldCode] || []), valueCode],
+    };
+  }, {});
+};
+
+// 관심분야 조회 응답에서 소재지 선택값을 추출한다.
+const normalizeLocationSelections = (interestFields) => {
+  if (!Array.isArray(interestFields)) {
+    return {
+      sidoCd: '',
+      sigunguCd: '',
+    };
+  }
+
+  const sidoCd = String(
+    interestFields.find((item) => item?.itrstFldCd === LOCATION_INTEREST_FIELD_CODES.sido)
+      ?.itrstFldVlCd || '',
+  ).trim();
+  const sigunguCd = String(
+    interestFields.find((item) => item?.itrstFldCd === LOCATION_INTEREST_FIELD_CODES.sigungu)
+      ?.itrstFldVlCd || '',
+  ).trim();
+
+  return {
+    sidoCd,
+    sigunguCd,
+  };
+};
+
+// 관심분야 체크박스 상태 객체를 안전하게 복사한다.
+const cloneInterestFieldSelections = (interestFields) =>
+  Object.fromEntries(
+    Object.entries(interestFields || {}).map(([interestFieldCode, valueCodes]) => [
+      interestFieldCode,
+      [...valueCodes],
+    ]),
+  );
+
 const ItrstFldPopup = ({ isOpen = false, onClose }) => {
   const [commonCodeOptions, setCommonCodeOptions] = useState(EMPTY_COMMON_CODE_OPTIONS);
   const [sidoList, setSidoList] = useState([]);
@@ -33,6 +90,10 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
   const [selectedSidoCd, setSelectedSidoCd] = useState('');
   const [selectedSigunguCd, setSelectedSigunguCd] = useState('');
   const [sigunguLoading, setSigunguLoading] = useState(false);
+  const [savedLocationFields, setSavedLocationFields] = useState({ sidoCd: '', sigunguCd: '' });
+  const [savedInterestFields, setSavedInterestFields] = useState({});
+  const [selectedInterestFields, setSelectedInterestFields] = useState({});
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
@@ -66,6 +127,46 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
     };
 
     loadCommonCodes();
+
+    return () => {
+      active = false;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    let active = true;
+
+    // 저장된 관심분야를 조회해 체크박스 선택 상태에 반영한다.
+    const loadSavedInterestFields = async () => {
+      try {
+        const response = await apiClient.get('/api/v1/member/common/me/interest-fields');
+        const responseData = response?.data ?? response;
+        const nextInterestFields = normalizeInterestFieldSelections(responseData);
+        const nextLocationFields = normalizeLocationSelections(responseData);
+        if (active) {
+          setSavedInterestFields(nextInterestFields);
+          setSavedLocationFields(nextLocationFields);
+          setSelectedInterestFields(cloneInterestFieldSelections(nextInterestFields));
+          setSelectedSidoCd(nextLocationFields.sidoCd);
+          setSelectedSigunguCd(nextLocationFields.sigunguCd);
+        }
+      } catch (error) {
+        console.error('저장된 관심분야 조회 실패:', error);
+        if (active) {
+          setSavedInterestFields({});
+          setSavedLocationFields({ sidoCd: '', sigunguCd: '' });
+          setSelectedInterestFields({});
+          setSelectedSidoCd('');
+          setSelectedSigunguCd('');
+        }
+      }
+    };
+
+    loadSavedInterestFields();
 
     return () => {
       active = false;
@@ -139,7 +240,13 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
     };
   }, [isOpen, selectedSidoCd]);
 
+  // 팝업을 닫을 때 현재 체크박스 선택 상태를 비운다.
   const handleClose = useCallback(() => {
+    setSelectedInterestFields({});
+    setSavedInterestFields({});
+    setSelectedSidoCd('');
+    setSelectedSigunguCd('');
+    setSavedLocationFields({ sidoCd: '', sigunguCd: '' });
     onClose?.();
   }, [onClose]);
 
@@ -148,14 +255,79 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
     setSelectedSigunguCd('');
   };
 
-  const renderCheckOptions = (idPrefix, options) => (
+  // 체크박스 선택 상태를 관심분야 구분 코드별로 갱신한다.
+  const handleInterestFieldChange = (interestFieldCode, valueCode, checked) => {
+    setSelectedInterestFields((currentFields) => {
+      const currentValues = new Set(currentFields[interestFieldCode] || []);
+      if (checked) {
+        currentValues.add(valueCode);
+      } else {
+        currentValues.delete(valueCode);
+      }
+
+      return {
+        ...currentFields,
+        [interestFieldCode]: Array.from(currentValues),
+      };
+    });
+  };
+
+  // 선택된 체크박스 값을 관심분야 저장 API 요청 형식으로 변환한다.
+  const buildInterestFieldPayload = () => ({
+    interestFields: [
+      ...COMMON_CODE_GROUP_IDS.flatMap((interestFieldCode) =>
+        (selectedInterestFields[interestFieldCode] || []).map((valueCode) => ({
+          itrstFldCd: interestFieldCode,
+          itrstFldVlCd: valueCode,
+        })),
+      ),
+      ...(selectedSidoCd
+        ? [{ itrstFldCd: LOCATION_INTEREST_FIELD_CODES.sido, itrstFldVlCd: selectedSidoCd }]
+        : []),
+      ...(selectedSigunguCd
+        ? [{ itrstFldCd: LOCATION_INTEREST_FIELD_CODES.sigungu, itrstFldVlCd: selectedSigunguCd }]
+        : []),
+    ],
+  });
+
+  // 관심분야 체크 상태를 팝업 호출 시점에 조회된 저장값으로 복원한다.
+  const handleReset = () => {
+    setSelectedInterestFields(cloneInterestFieldSelections(savedInterestFields));
+    setSelectedSidoCd(savedLocationFields.sidoCd);
+    setSelectedSigunguCd(savedLocationFields.sigunguCd);
+  };
+
+  // 선택된 관심분야 체크박스를 서버에 저장한다.
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await apiClient.post('/api/v1/member/common/me/interest-fields', buildInterestFieldPayload());
+      window.alert('저장되었습니다.');
+      handleClose();
+    } catch (error) {
+      console.error('관심분야 저장 실패:', error);
+      window.alert(error?.message || '관심분야 저장에 실패했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const renderCheckOptions = (idPrefix, options, interestFieldCode) => (
     <div className="krds-check-area">
       {options.map((option) => {
         const id = `${idPrefix}_${option.value}`;
 
         return (
           <div className="krds-form-check medium" key={id}>
-            <input type="checkbox" id={id} value={option.value} />
+            <input
+              type="checkbox"
+              id={id}
+              value={option.value}
+              checked={(selectedInterestFields[interestFieldCode] || []).includes(option.value)}
+              onChange={(event) =>
+                handleInterestFieldChange(interestFieldCode, option.value, event.target.checked)
+              }
+            />
             <label htmlFor={id}>{option.label}</label>
           </div>
         );
@@ -170,10 +342,10 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
       title="관심 분야 설정"
       footer={
         <>
-          <button type="button" className="krds-btn tertiary medium" onClick={handleClose}>
+          <button type="button" className="krds-btn tertiary medium" onClick={handleClose} disabled={saving}>
             닫기
           </button>
-          <button type="button" className="krds-btn primary medium" onClick={handleClose}>
+          <button type="button" className="krds-btn primary medium" onClick={handleSave} disabled={saving}>
             저장
           </button>
         </>
@@ -181,7 +353,7 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
     >
       <div className="form-area">
         <p className="required-msg">
-          <button type="button" className="krds-btn primary small">
+          <button type="button" className="krds-btn primary small" onClick={handleReset} disabled={saving}>
             초기화
           </button>
         </p>
@@ -193,7 +365,11 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
                 <span className="form-label">사업유형</span>
               </div>
               <div className="form-conts mt-16">
-                {renderCheckOptions('business_type', commonCodeOptions.businessType)}
+                {renderCheckOptions(
+                  'business_type',
+                  commonCodeOptions.businessType,
+                  COMMON_CODE_GROUPS.businessType,
+                )}
               </div>
             </div>
 
@@ -202,7 +378,11 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
                 <span className="form-label">지원분야</span>
               </div>
               <div className="form-conts mt-16">
-                {renderCheckOptions('support_field', commonCodeOptions.supportField)}
+                {renderCheckOptions(
+                  'support_field',
+                  commonCodeOptions.supportField,
+                  COMMON_CODE_GROUPS.supportField,
+                )}
               </div>
             </div>
           </div>
@@ -216,7 +396,11 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
                 <span className="form-label">기업규모</span>
               </div>
               <div className="form-conts mt-16">
-                {renderCheckOptions('company_size', commonCodeOptions.companySize)}
+                {renderCheckOptions(
+                  'company_size',
+                  commonCodeOptions.companySize,
+                  COMMON_CODE_GROUPS.companySize,
+                )}
               </div>
             </div>
 
@@ -240,7 +424,11 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
                 <span className="form-label">업력</span>
               </div>
               <div className="form-conts mt-16">
-                {renderCheckOptions('business_age', commonCodeOptions.businessAge)}
+                {renderCheckOptions(
+                  'business_age',
+                  commonCodeOptions.businessAge,
+                  COMMON_CODE_GROUPS.businessAge,
+                )}
               </div>
             </div>
 
@@ -249,7 +437,11 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
                 <span className="form-label">근로자수</span>
               </div>
               <div className="form-conts mt-16">
-                {renderCheckOptions('employee_count', commonCodeOptions.employeeCount)}
+                {renderCheckOptions(
+                  'employee_count',
+                  commonCodeOptions.employeeCount,
+                  COMMON_CODE_GROUPS.employeeCount,
+                )}
               </div>
             </div>
 
@@ -258,7 +450,11 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
                 <span className="form-label">매출액</span>
               </div>
               <div className="form-conts mt-16">
-                {renderCheckOptions('sales', commonCodeOptions.sales)}
+                {renderCheckOptions(
+                  'sales',
+                  commonCodeOptions.sales,
+                  COMMON_CODE_GROUPS.sales,
+                )}
               </div>
             </div>
 
@@ -305,7 +501,11 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
                 <span className="form-label">인증</span>
               </div>
               <div className="form-conts mt-16">
-                {renderCheckOptions('certification', commonCodeOptions.certification)}
+                {renderCheckOptions(
+                  'certification',
+                  commonCodeOptions.certification,
+                  COMMON_CODE_GROUPS.certification,
+                )}
               </div>
             </div>
           </div>

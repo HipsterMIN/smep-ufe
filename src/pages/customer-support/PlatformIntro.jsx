@@ -34,7 +34,7 @@ const UI_USR_R_350 = () => {
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
 
-  const tabData = useRef(['중소벤처24·기업마당', 'BI 소개']);
+  const tabData = useRef(['중소벤처24', 'BI 소개']);
   const schFormWrapRef1 = useRef(null);
   const schFormWrapRef2 = useRef(null);
 
@@ -69,22 +69,22 @@ const UI_USR_R_350 = () => {
         </div>
 
         <div className="krds-tab-area layer">
-          <p className="guide-txt custom mb-40">중소벤처24·기업마당의 주요 기능과 이용 절차를 안내합니다.</p>
+          <p className="guide-txt custom mb-40">중소벤처24의 주요 기능과 이용 절차를 안내합니다.</p>
           <Tab tabData={tabData.current} onTabChange={handleTabChange} />
 
           <div className="tab-conts-wrap mt-40">
             <section className={`tab-conts ${activeTabIndex === 0 ? 'active' : ''}`}>
-              <h3 className="sr-only">중소벤처24·기업마당</h3>
+              <h3 className="sr-only">중소벤처24</h3>
 
               <div className="platform-intro-wrap" ref={schFormWrapRef1}>
                 <h2>기업이 필요한 모든 지원을 하나의 흐름으로 연결합니다.</h2>
                 <p>
-                    중소벤처24·기업마당은 <span className="point">분산된 중소기업 지원 서비스를 통합</span>하여
+                    중소벤처24는 <span className="point">분산된 중소기업 지원 서비스를 통합</span>하여
                   <span className="point">기업 중심의 이용 환경을 제공</span>합니다.
                 </p>
                 <p className="sub-text">
                     중소기업 지원 서비스는 영역별 시스템이 분산 운영되어, 기업이 정보 탐색·신청·확인 과정에서 반복 이동과 중복 입력 부담이 발생해 왔습니다.<br/>
-                    이러한 비효율을 해소하고 기업 중심의 원스톱 업무 흐름을 제공하기 위해 중소벤처24·기업마당 통합 서비스 환경을 구축하고<br/>
+                    이러한 비효율을 해소하고 기업 중심의 원스톱 업무 흐름을 제공하기 위해 중소벤처24 통합 서비스 환경을 구축하고<br/>
                     기업이 필요한 지원사업·정책금융·증명서 서비스를 한 곳에서 조회하고, 신청·관리까지 이어갈 수 있도록 서비스 경험을 재구성합니다.
                 </p>
                 <div className="platformObjImgs" />
@@ -188,7 +188,7 @@ const UI_USR_R_350 = () => {
                 <div className="policy-form">
                   <h5>유관기관 둘러보기</h5>
                   <p>
-                      중소벤처24·기업마당 통합 계정 하나로 별도의 가입 절차 없이 68개 핵심 플랫폼을 이용할 수 있는 단일 계정(SSO) 기반의 통합 환경을 제공합니다. 이를 통해 기관별로 산재한 주요 플랫폼을 효율적으로 이용할 수 있도록 통합 인증 기반의 유관 사이트 정보를 안내합니다
+                      중소벤처24 통합 계정 하나로 별도의 가입 절차 없이 68개 핵심 플랫폼을 이용할 수 있는 단일 계정(SSO) 기반의 통합 환경을 제공합니다. 이를 통해 기관별로 산재한 주요 플랫폼을 효율적으로 이용할 수 있도록 통합 인증 기반의 유관 사이트 정보를 안내합니다
                   </p>
                   <div className="policy-list">
                     <ul>
@@ -205,7 +205,7 @@ const UI_USR_R_350 = () => {
               <div className="platform-bi-wrap" ref={schFormWrapRef2}>
                 <h4>기관상징 (MI)기본 디자인</h4>
                 <div className="default-design-box mb-24">
-                  <img src={logoImgsBi} alt="중소벤처24·기업마당 BI 로고 이미지" />
+                  <img src={logoImgsBi} alt="중소벤처24 BI 로고 이미지" />
                 </div>
                 <p>
                     태극을 청색과 적색의 하나된 모습으로 역동적으로 표현하여<br/>
@@ -220,7 +220,7 @@ const UI_USR_R_350 = () => {
                     <img
                       src={logoVertical}
                       className="img-vertical"
-                      alt="기본형 세로조합 - 중소벤처24·기업마당 BI 로고 이미지"
+                      alt="기본형 세로조합 - 중소벤처24 BI 로고 이미지"
                     />
                   </div>
                   <div className="box-inner">
@@ -228,7 +228,7 @@ const UI_USR_R_350 = () => {
                     <img
                       src={logoHorizontal}
                       className="img-horizontal"
-                      alt="기본형 가로조합 - 중소벤처24·기업마당 BI 로고 이미지"
+                      alt="기본형 가로조합 - 중소벤처24 BI 로고 이미지"
                     />
                   </div>
                 </div>
