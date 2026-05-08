@@ -68,14 +68,14 @@ const IssuanceTableRow = ({ item, totalElements, currentPage, pageSize, index, o
       <td>
         <button
           type="button"
-          className="on-linktxt"
+          className="on-linktxt onellipsis-1"
           onClick={() => onRowClick(item)}
         >
           {item.prdocTtl}
         </button>
       </td>
       <td className="ac"><span>{formatBrno(item.brno)}</span></td>
-      <td className="ac"><span>{formatDateTime(item.aplyDt)}</span></td>
+      <td className="ac"><span className="onellipsis-1">{formatDateTime(item.aplyDt)}</span></td>
       <td className="ac"><span>{formatDate(item.vldEndYmd)}</span></td>
       <td className="ac"><span>{item.prdocIssuPrgrsStNm}</span></td>
       <td className="ac">
@@ -94,7 +94,7 @@ const IssuanceTableRow = ({ item, totalElements, currentPage, pageSize, index, o
       </td>
       <td className="ac">
         {isDpaper ? (
-          <span>정부전자문서지갑</span>
+          <span>전자지갑</span>
         ) : expired ? (
           <button type="button" className="krds-btn small" disabled>출력</button>
         ) : (
@@ -239,8 +239,8 @@ const UI_USR_L_510 = () => {
               <col/>
               <col style={{ width: '150px' }}/>
               <col style={{ width: '90px' }}/>
-              <col style={{ width: '130px' }}/>
-              <col/>
+              <col style={{ width: '128px' }}/>
+              <col style={{ width: '5%' }}/>
             </colgroup>
             <thead>
               <tr>
