@@ -128,7 +128,7 @@ const SprtBizView = () => {
             </div>
             <div className="def-list-wrap">
               <dl className="def-list">
-                {renderHtmlRow('사업명', item.sprtBizNm)}
+                {/*{renderHtmlRow('사업명', item.sprtBizNm)}*/}
                 {renderHtmlRow('사업개요', item.sprtBizOtln)}
               </dl>
             </div>
