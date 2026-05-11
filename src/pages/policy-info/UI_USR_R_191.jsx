@@ -9,11 +9,11 @@ import { formatEventRegionForDetail } from '@utils/stringUtils.js';
 
 const STREAMDOCS_VIEWER_URL =
   import.meta.env.VITE_STREAMDOCS_VIEWER_URL
-  || 'http://192.168.16.82:8088/venturein-pdf/view/sd';
+  || 'http://192.168.16.82:8088/e-paper/view/sd';
 
 const STREAMDOCS_ADAPTER_URL =
   import.meta.env.VITE_STREAMDOCS_ADAPTER_URL
-  || 'http://192.168.16.82:8088/venturein-pdf/adapter.js';
+  || 'http://192.168.16.82:8088/e-paper/adapter.js';
 
 const formatDate = (value) => {
   if (!value) return '-';
