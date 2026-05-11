@@ -1,23 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Pagination from '@components/ui/Pagination.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import {
+  appendListSearchToPath,
+  getNumberSearchParam,
+  getSearchParam,
+  setQueryParam,
+} from '@utils/listNavigation.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 const UI_USR_L_120 = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [, setSearchParams] = useSearchParams();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(() => Math.max(0, getNumberSearchParam(location.search, 'page', 1) - 1));
   const [totalPages, setTotalPages] = useState(0);
   const [certifications, setCertifications] = useState([]);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 20));
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
 
@@ -31,16 +39,16 @@ const UI_USR_L_120 = () => {
   const [tkcgMaoNmList, setTkcgMaoNmList] = useState([]);
 
   // 입력용 (화면 표시용)
-  const [searchType, setSearchType] = useState('');
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [certSystmFldNm, setCertSystmFldNm] = useState('');
-  const [tkcgMaoNm, setTkcgMaoNm] = useState('');
+  const [searchType, setSearchType] = useState(() => getSearchParam(location.search, 'searchType', ''));
+  const [searchKeyword, setSearchKeyword] = useState(() => getSearchParam(location.search, 'searchKeyword', ''));
+  const [certSystmFldNm, setCertSystmFldNm] = useState(() => getSearchParam(location.search, 'certSystmFldNm', ''));
+  const [tkcgMaoNm, setTkcgMaoNm] = useState(() => getSearchParam(location.search, 'tkcgMaoNm', ''));
 
   // 전송용 (API 파라미터용)
-  const [appliedSearchType, setAppliedSearchType] = useState('');
-  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
-  const [appliedCertSystmFldNm, setAppliedCertSystmFldNm] = useState('');
-  const [appliedTkcgMaoNm, setAppliedTkcgMaoNm] = useState('');
+  const [appliedSearchType, setAppliedSearchType] = useState(() => getSearchParam(location.search, 'searchType', ''));
+  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState(() => getSearchParam(location.search, 'searchKeyword', ''));
+  const [appliedCertSystmFldNm, setAppliedCertSystmFldNm] = useState(() => getSearchParam(location.search, 'certSystmFldNm', ''));
+  const [appliedTkcgMaoNm, setAppliedTkcgMaoNm] = useState(() => getSearchParam(location.search, 'tkcgMaoNm', ''));
 
   // 드롭박스 옵션 초기 로드
   useEffect(() => {
@@ -59,12 +67,25 @@ const UI_USR_L_120 = () => {
     fetchFilterOptions();
   }, []);
 
+  const buildListSearchParams = () => {
+    const params = new URLSearchParams();
+    setQueryParam(params, 'page', currentPage + 1, 1);
+    setQueryParam(params, 'size', pageSize, 20);
+    setQueryParam(params, 'searchType', appliedSearchType);
+    setQueryParam(params, 'searchKeyword', appliedSearchKeyword);
+    setQueryParam(params, 'certSystmFldNm', appliedCertSystmFldNm);
+    setQueryParam(params, 'tkcgMaoNm', appliedTkcgMaoNm);
+    return params;
+  };
+
   // 목록 조회
   useEffect(() => {
     window.scrollTo(0, 0);
     const fetchData = async () => {
       setLoading(true);
       try {
+        setSearchParams(buildListSearchParams(), { replace: true });
+
         const params = new URLSearchParams({
           page: currentPage + 1,
           size: pageSize,
@@ -122,7 +143,7 @@ const UI_USR_L_120 = () => {
 
   // 상세페이지 핸들러
   const goToDetail = (certSystmId) => {
-    navigate(`${certSystmId}`);
+    navigate(appendListSearchToPath(`${certSystmId}`, buildListSearchParams().toString()));
   };
 
   return (

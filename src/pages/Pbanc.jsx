@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useMatches } from 'react-router-dom';
+import { Link, useLocation, useMatches, useSearchParams } from 'react-router-dom';
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import Pagination from '../components/ui/Pagination.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
 import { formatNumberWithCommas } from '../utils/numberUtils.js';
+import { appendListSearchToPath, getNumberSearchParam, getSearchParam, setQueryParam } from '../utils/listNavigation.js';
 import { useUserMenu } from '../context/UserMenuContext';
 
 const DEFAULT_SIZE = 10;
@@ -14,20 +15,22 @@ const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
 
 const Pbanc = () => {
   const matches = useMatches();
+  const location = useLocation();
+  const [, setSearchParams] = useSearchParams();
   const { breadcrumbItems, currentMenu, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [items, setItems] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(() => getNumberSearchParam(location.search, 'page', 1));
   const [bizFieldOptions, setBizFieldOptions] = useState([]);
 
-  const [searchText, setSearchText] = useState('');
-  const [searchType, setSearchType] = useState('');
-  const [bizPbancClsfCd, setBizPbancClsfCd] = useState('');
-  const [applyStatus, setApplyStatus] = useState('AVAILABLE');
-  const [size, setSize] = useState(DEFAULT_SIZE);
-  const [sortType, setSortType] = useState(DEFAULT_SORT);
+  const [searchText, setSearchText] = useState(() => getSearchParam(location.search, 'searchText', ''));
+  const [searchType, setSearchType] = useState(() => getSearchParam(location.search, 'searchType', ''));
+  const [bizPbancClsfCd, setBizPbancClsfCd] = useState(() => getSearchParam(location.search, 'bizPbancClsfCd', ''));
+  const [applyStatus, setApplyStatus] = useState(() => getSearchParam(location.search, 'applyStatus', 'AVAILABLE'));
+  const [size, setSize] = useState(() => getNumberSearchParam(location.search, 'size', DEFAULT_SIZE));
+  const [sortType, setSortType] = useState(() => getSearchParam(location.search, 'sortType', DEFAULT_SORT));
 
   const schFormWrapRef = useRef(null);
   const latestRequestIdRef = useRef(0);
@@ -68,6 +71,40 @@ const Pbanc = () => {
     [applyStatus, bizPbancClsfCd, bizPbancTypeCd, searchText, searchType, size, sortType],
   );
 
+  const buildListSearchParams = useCallback((pageParam, overrides = {}) => {
+    const params = new URLSearchParams();
+    const nextSearchText = overrides.searchText ?? searchText;
+    const nextSearchType = overrides.searchType ?? searchType;
+    const nextBizPbancClsfCd = overrides.bizPbancClsfCd ?? bizPbancClsfCd;
+    const nextApplyStatus = overrides.applyStatus ?? applyStatus;
+    const nextSize = overrides.size ?? size;
+    const nextSortType = overrides.sortType ?? sortType;
+
+    setQueryParam(params, 'page', pageParam, 1);
+    setQueryParam(params, 'size', nextSize, DEFAULT_SIZE);
+    setQueryParam(params, 'sortType', nextSortType, DEFAULT_SORT);
+    setQueryParam(params, 'searchText', nextSearchText);
+    setQueryParam(params, 'searchType', nextSearchType);
+    setQueryParam(params, 'bizPbancClsfCd', nextBizPbancClsfCd);
+    if (nextApplyStatus === 'AVAILABLE') {
+      params.delete('applyStatus');
+    } else {
+      params.set('applyStatus', nextApplyStatus);
+    }
+
+    return params;
+  }, [applyStatus, bizPbancClsfCd, searchText, searchType, size, sortType]);
+
+  const getQueryState = useCallback(() => ({
+    page: getNumberSearchParam(location.search, 'page', 1),
+    searchText: getSearchParam(location.search, 'searchText', ''),
+    searchType: getSearchParam(location.search, 'searchType', ''),
+    bizPbancClsfCd: getSearchParam(location.search, 'bizPbancClsfCd', ''),
+    applyStatus: getSearchParam(location.search, 'applyStatus', 'AVAILABLE'),
+    size: getNumberSearchParam(location.search, 'size', DEFAULT_SIZE),
+    sortType: getSearchParam(location.search, 'sortType', DEFAULT_SORT),
+  }), [location.search]);
+
   const search = useCallback(
     async (pageParam = 1, overrides = {}) => {
       const requestId = ++latestRequestIdRef.current;
@@ -81,8 +118,9 @@ const Pbanc = () => {
       setTotalPages(pageData.totalPages || 0);
       setTotalElements(pageData.totalElements || 0);
       setPage(pageParam);
+      setSearchParams(buildListSearchParams(pageParam, overrides), { replace: true });
     },
-    [buildParams],
+    [buildListSearchParams, buildParams, setSearchParams],
   );
 
   const handleKeyDown = (e) => {
@@ -100,22 +138,16 @@ const Pbanc = () => {
   };
 
   useEffect(() => {
+    const queryState = getQueryState();
     window.scrollTo(0, 0);
-    setSearchText('');
-    setSearchType('');
-    setBizPbancClsfCd('');
-    setApplyStatus('AVAILABLE');
-    setSize(DEFAULT_SIZE);
-    setSortType(DEFAULT_SORT);
+    setSearchText(queryState.searchText);
+    setSearchType(queryState.searchType);
+    setBizPbancClsfCd(queryState.bizPbancClsfCd);
+    setApplyStatus(queryState.applyStatus);
+    setSize(queryState.size);
+    setSortType(queryState.sortType);
 
-    search(1, {
-      searchText: '',
-      searchType: '',
-      bizPbancClsfCd: '',
-      applyStatus: 'AVAILABLE',
-      size: DEFAULT_SIZE,
-      sortType: DEFAULT_SORT,
-    });
+    search(queryState.page, queryState);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentMenu?.menuId]);
 
@@ -323,7 +355,7 @@ const Pbanc = () => {
                           <span className="krds-badge bg-light-primary">{fieldLabel}</span>
                         </div>
                       )}
-                      <Link className="onellipsis-1" to={`${item.bizPbancNo}`}>
+                      <Link className="onellipsis-1" to={appendListSearchToPath(`${item.bizPbancNo}`, location.search)}>
                         <span>{item.bizPbancNm}</span>
                       </Link>
                     </td>

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
@@ -7,6 +7,7 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
+import { appendListSearchToPath, getNumberSearchParam, getSearchParam, setQueryParam } from '@utils/listNavigation.js';
 
 const EMPTY_HTML_PATTERNS = new Set([
   '<p style="text-align: left;"></p>',
@@ -47,23 +48,25 @@ const getAnswerStatus = (post) => {
 
 const BoardQna = ({ boardDetail, bbsNo }) => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const location = useLocation();
   const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
 
-  const [selectedCategoryNo, setSelectedCategoryNo] = useState('');
-  const [searchType, setSearchType] = useState('TITLE');
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [selectedCategoryNo, setSelectedCategoryNo] = useState(() => getSearchParam(location.search, 'ctgryNo', ''));
+  const [searchType, setSearchType] = useState(() => getSearchParam(location.search, 'searchType', 'TITLE'));
+  const [searchKeyword, setSearchKeyword] = useState(() => getSearchParam(location.search, 'searchKeyword', ''));
 
-  const [appliedCategoryNo, setAppliedCategoryNo] = useState('');
-  const [appliedSearchType, setAppliedSearchType] = useState('TITLE');
-  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
+  const [appliedCategoryNo, setAppliedCategoryNo] = useState(() => getSearchParam(location.search, 'ctgryNo', ''));
+  const [appliedSearchType, setAppliedSearchType] = useState(() => getSearchParam(location.search, 'searchType', 'TITLE'));
+  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState(() => getSearchParam(location.search, 'searchKeyword', ''));
 
   const [categories, setCategories] = useState([]);
   const [postList, setPostList] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(() => Math.max(0, getNumberSearchParam(location.search, 'page', 1) - 1));
+  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 10));
   const authToken = useAuthStore((state) => state.token);
   const isQnaPage = location.pathname.includes('UI_USR_L_230');
   // 사이드바 데이터 계산
@@ -72,6 +75,16 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
 
   const boardTitle = useMemo(() => boardDetail?.bbsNm || 'Q&A', [boardDetail]);
   const isLoggedIn = Boolean(authToken);
+
+  const buildListSearchParams = () => {
+    const params = new URLSearchParams();
+    setQueryParam(params, 'page', currentPage + 1, 1);
+    setQueryParam(params, 'size', pageSize, 10);
+    setQueryParam(params, 'ctgryNo', appliedCategoryNo);
+    setQueryParam(params, 'searchType', appliedSearchType, 'TITLE');
+    setQueryParam(params, 'searchKeyword', appliedSearchKeyword);
+    return params;
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -133,6 +146,8 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
           params.append('searchKeyword', appliedSearchKeyword.trim());
         }
 
+        setSearchParams(buildListSearchParams(), { replace: true });
+
         const response = await apiClient.get(`/api/v1/board/${bbsNo}/posts/list?${params.toString()}`);
         const data = response?.data || {};
 
@@ -185,7 +200,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
 
   const moveToDetail = (pstNo) => {
     if (pstNo == null) return;
-    navigate(`${pstNo}`);
+    navigate(appendListSearchToPath(`${pstNo}`, buildListSearchParams().toString()));
   };
 
   const moveToWrite = () => {

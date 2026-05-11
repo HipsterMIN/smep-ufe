@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import Pagination from '../components/ui/Pagination';
@@ -7,6 +7,7 @@ import Tab from '../components/ui/Tab';
 import { useUserMenu } from '../context/UserMenuContext';
 import { api as apiClient } from '../lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
+import { appendListSearchToPath, getNumberSearchParam, getSearchParam, setQueryParam } from '../utils/listNavigation.js';
 import { formatNumberWithCommas } from '../utils/numberUtils.js';
 
 const DEFAULT_SIZE = 12;
@@ -22,6 +23,23 @@ const INITIAL_CONDITION = {
 
 const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
 const BIZ_PBANC_SPRT_INST_GROUP_ID = 'BIZ_PBANC_SPRT_INST_CD';
+
+const toCodeList = (value) => String(value || '').split(',').map((item) => item.trim()).filter(Boolean);
+
+const getConditionFromSearch = (search) => {
+  const tabType = getSearchParam(search, 'tabType', 'bizType');
+  const activeTabIndex = tabType === 'orgType' ? 1 : 0;
+  const filterCodes = toCodeList(getSearchParam(search, 'filterCodes', ''));
+
+  return {
+    activeTabIndex,
+    selectedBizTypes: activeTabIndex === 0 ? filterCodes : [],
+    selectedOrgs: activeTabIndex === 1 ? filterCodes : [],
+    searchStts: getSearchParam(search, 'searchStts', ''),
+    searchType: getSearchParam(search, 'searchType', ''),
+    searchText: getSearchParam(search, 'searchText', ''),
+  };
+};
 
 const EMPTY_HTML_PATTERNS = new Set([
   '<p style="text-align: left;"></p>',
@@ -42,29 +60,38 @@ const stripHtml = (html) => {
 };
 
 const SprtBiz = () => {
+  const location = useLocation();
+  const [, setSearchParams] = useSearchParams();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const initialQueryRef = useRef({
+    condition: getConditionFromSearch(location.search),
+    page: getNumberSearchParam(location.search, 'page', 1),
+    size: getNumberSearchParam(location.search, 'size', DEFAULT_SIZE),
+  });
+  const didInitialFetchRef = useRef(false);
+  const { condition: initialCondition, page: initialPage, size: initialSize } = initialQueryRef.current;
   const tabData = useRef(['사업유형별', '지원기관별']);
   const schFormWrapRef = useRef(null);
-  const prevSizeRef = useRef(DEFAULT_SIZE);
+  const prevSizeRef = useRef(initialSize);
   const requestSequenceRef = useRef(0);
-  const appliedConditionRef = useRef(INITIAL_CONDITION);
+  const appliedConditionRef = useRef(initialCondition);
 
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const [selectedBizTypes, setSelectedBizTypes] = useState([]);
-  const [selectedOrgs, setSelectedOrgs] = useState([]);
+  const [activeTabIndex, setActiveTabIndex] = useState(initialCondition.activeTabIndex);
+  const [selectedBizTypes, setSelectedBizTypes] = useState(initialCondition.selectedBizTypes);
+  const [selectedOrgs, setSelectedOrgs] = useState(initialCondition.selectedOrgs);
   const [bizFieldOptions, setBizFieldOptions] = useState([]);
   const [organizationOptions, setOrganizationOptions] = useState([]);
 
   const [items, setItems] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(initialPage);
 
-  const [searchStts] = useState('');
-  const [searchType, setSearchType] = useState('');
-  const [searchText, setSearchText] = useState('');
-  const [size, setSize] = useState(DEFAULT_SIZE);
-  const [appliedCondition, setAppliedCondition] = useState(INITIAL_CONDITION);
+  const [searchStts] = useState(initialCondition.searchStts);
+  const [searchType, setSearchType] = useState(initialCondition.searchType);
+  const [searchText, setSearchText] = useState(initialCondition.searchText);
+  const [size, setSize] = useState(initialSize);
+  const [appliedCondition, setAppliedCondition] = useState(initialCondition);
 
   const fieldLabelMap = useMemo(
     () => Object.fromEntries(bizFieldOptions.map((option) => [option.value, option.label])),
@@ -129,6 +156,23 @@ const SprtBiz = () => {
     return params.toString();
   }, []);
 
+  const buildListSearchParams = useCallback((pageParam, condition, sizeValue) => {
+    const params = new URLSearchParams();
+    const filterCodes = condition.activeTabIndex === 0
+      ? condition.selectedBizTypes.join(',')
+      : condition.selectedOrgs.join(',');
+
+    setQueryParam(params, 'page', pageParam, 1);
+    setQueryParam(params, 'size', sizeValue, DEFAULT_SIZE);
+    setQueryParam(params, 'tabType', condition.activeTabIndex === 0 ? 'bizType' : 'orgType', 'bizType');
+    setQueryParam(params, 'searchStts', condition.searchStts);
+    setQueryParam(params, 'searchType', condition.searchType);
+    setQueryParam(params, 'searchText', condition.searchText);
+    setQueryParam(params, 'filterCodes', filterCodes);
+
+    return params;
+  }, []);
+
   const fetchList = useCallback(async (pageParam, condition, sizeValue) => {
     const requestSequence = ++requestSequenceRef.current;
     const response = await apiClient.get(`/api/v1/sprtBiz?${buildParams(pageParam, condition, sizeValue)}`);
@@ -141,12 +185,18 @@ const SprtBiz = () => {
     setTotalPages(pageData?.totalPages || 0);
     setTotalElements(pageData?.totalElements || 0);
     setPage(pageParam);
-  }, [buildParams]);
+    setSearchParams(buildListSearchParams(pageParam, condition, sizeValue), { replace: true });
+  }, [buildListSearchParams, buildParams, setSearchParams]);
 
   useEffect(() => {
+    if (didInitialFetchRef.current) {
+      return;
+    }
+
+    didInitialFetchRef.current = true;
     window.scrollTo(0, 0);
-    fetchList(1, INITIAL_CONDITION, DEFAULT_SIZE);
-  }, [fetchList]);
+    fetchList(initialPage, initialCondition, initialSize);
+  }, [fetchList, initialCondition, initialPage, initialSize]);
 
   useEffect(() => {
     let mounted = true;
@@ -256,7 +306,7 @@ const SprtBiz = () => {
         </div>
 
         <div className="krds-tab-area layer">
-          <Tab tabData={tabData.current} onTabChange={handleTabChange} />
+          <Tab tabData={tabData.current} onTabChange={handleTabChange} activeIndex={activeTabIndex} />
 
           <div className="tab-conts-wrap">
             <section className="tab-conts active">
@@ -364,7 +414,13 @@ const SprtBiz = () => {
                       )}
                     </div>
                     <div className="card-body">
-                      <Link className="c-text" to={`${item.sprtBizId}`}>
+                      <Link
+                        className="c-text"
+                        to={appendListSearchToPath(
+                          `${item.sprtBizId}`,
+                          buildListSearchParams(page, appliedCondition, size).toString(),
+                        )}
+                      >
                         <p className="c-tit no-icon">
                           <span className="span onellipsis-2">{item.sprtBizNm}</span>
                         </p>
