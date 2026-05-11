@@ -513,8 +513,8 @@ table tbody tr:hover td {
 }
 #krds-header .header-container .logo-platform {
   margin-left: 2rem;
-  width: 20rem;
-  height: 3rem;
+  width: 9rem;
+  height: 4rem;
   background: url(../src/assets/common/logo_platform.svg) no-repeat 50%/ 100% auto;
 }
 #krds-header .header-search-wrap {
