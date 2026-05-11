@@ -233,7 +233,7 @@ const RelatedSystems = () => {
           <p className="guide-txt custom">
             중소벤처기업부 및 산하 유관 시스템을 별도 가입 없이,
             <br />
-            <b>중소벤처24·기업마당</b> 통합 ID 하나로 이용하세요.
+            <b>중소벤처24</b> 통합 ID 하나로 이용하세요.
           </p>
 
           <div className="tab-conts-wrap mt-40">
@@ -245,7 +245,7 @@ const RelatedSystems = () => {
                   <div className="sch-input">
                     <input
                       type="text"
-                      className="krds-input"
+                      className="krds-input medium"
                       placeholder="검색어를 입력하세요"
                       title="검색어 입력"
                       value={searchKeyword}

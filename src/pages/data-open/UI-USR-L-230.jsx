@@ -26,11 +26,6 @@ const UI_USR_L_230 = () => {
   // --- 상태 관리 ---
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState('latest'); // 'latest' | 'oldest'
-  const [searchParams, setSearchParams] = useState({
-    inquiryType: '',
-    status: '',
-    searchKeyword: ''
-  });
 
   // --- 정렬 및 데이터 가공 ---
   const pagedRows = useMemo(() => {
@@ -75,7 +70,7 @@ const UI_USR_L_230 = () => {
           {/* 탭 영역 */}
           <div className="tab fill full mt-48">
             <ul>
-              <li><Link to="/cs/opndata/UI_USR_L_210" className="btn-tab">API 소개</Link></li>
+              <li><Link to="/cs/opndata/UI_USR_L_210" className="btn-tab">API 안내</Link></li>
               <li><Link to="/cs/opndata/UI_USR_L_220" className="btn-tab">인증키 신청</Link></li>
               <li className="active">
                 <Link to="/cs/opndata/UI_USR_L_230" className="btn-tab">

@@ -8,15 +8,16 @@ import { api as apiClient } from '@lib/apiClient.js';
 import { shortenInstName  } from '@utils/stringUtils.js';
 import { useNavigate, useSearchParams  } from 'react-router-dom';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
+import { appendListSearchToPath, getNumberSearchParam, getSearchParam, setQueryParam } from '@utils/listNavigation.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 const UI_USR_L_040 = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
-  const initialPage = Math.max(0, parseInt(searchParams.get('page') || '1', 10) - 1);
+  const initialPage = Math.max(0, getNumberSearchParam(searchParams, 'page', 1) - 1);
 
   // 증명서 발급 안내 팝업 동작
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -27,19 +28,28 @@ const UI_USR_L_040 = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [topCertificateList, setTopCertificateList] = useState([]);
   const [certificateList, setCertificateList] = useState([]);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(searchParams, 'size', 20));
 
   // 입력용 (화면 표시용)
-  const [searchType, setSearchType] = useState('');
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchType, setSearchType] = useState(() => getSearchParam(searchParams, 'searchType', ''));
+  const [searchKeyword, setSearchKeyword] = useState(() => getSearchParam(searchParams, 'searchKeyword', ''));
 
   // 전송용 (API 파라미터용)
-  const [appliedSearchType, setAppliedSearchType] = useState('');
-  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
+  const [appliedSearchType, setAppliedSearchType] = useState(() => getSearchParam(searchParams, 'searchType', ''));
+  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState(() => getSearchParam(searchParams, 'searchKeyword', ''));
 
   // ✅ 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
+
+  const buildListSearchParams = () => {
+    const params = new URLSearchParams();
+    setQueryParam(params, 'page', currentPage + 1, 1);
+    setQueryParam(params, 'size', pageSize, 20);
+    setQueryParam(params, 'searchType', appliedSearchType);
+    setQueryParam(params, 'searchKeyword', appliedSearchKeyword);
+    return params;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,6 +65,8 @@ const UI_USR_L_040 = () => {
           params.append('searchKeyword', appliedSearchKeyword);
           params.append('searchType', appliedSearchType);
         }
+
+        setSearchParams(buildListSearchParams(), { replace: true });
 
         const response = await apiClient.get(
           `/api/v1/certificate/main?${params.toString()}`,
@@ -107,7 +119,7 @@ const UI_USR_L_040 = () => {
 
   // 상세페이지 핸들러
   const goToDetail = (prdocCd) => {
-    navigate(`${prdocCd}`);
+    navigate(appendListSearchToPath(`${prdocCd}`, buildListSearchParams().toString()));
   };
 
   return (
@@ -170,7 +182,7 @@ const UI_USR_L_040 = () => {
         <div className="search-top-box mt-48">
           <div className="sch-form-wrap">
             <select
-              className="krds-form-select"
+              className="krds-form-select medium"
               value={searchType}
               onChange={handleSearchTypeChange}
             >
@@ -181,7 +193,7 @@ const UI_USR_L_040 = () => {
             <div className="sch-input">
               <input
                 type="text"
-                className="krds-input"
+                className="krds-input medium"
                 placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}

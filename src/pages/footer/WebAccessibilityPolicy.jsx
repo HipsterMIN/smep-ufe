@@ -1,11 +1,14 @@
 ﻿import Header from '@components/ui/Header.jsx';
-import React from 'react';
+import React, {useEffect} from 'react';
 import Footer from '@components/ui/Footer.jsx';
 import { useMatches } from 'react-router-dom';
 
 const UI_USR_R_563 = () => {
   const matches = useMatches();
   const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '웹접근성 정책';
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
   return (
     <div id="wrap">
       <Header/>

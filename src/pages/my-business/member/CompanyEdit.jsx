@@ -180,8 +180,7 @@ const UI_USR_W_452 = () => {
   const handleSigunguChange = (value) => {
     setForm((prev) => ({
       ...prev,
-      stdgCtpvCd: value ? value.slice(0, 2) : prev.stdgCtpvCd,
-      stdgSggCd: value ? value.slice(2, 5) : '',
+      stdgSggCd: value ? value : '',
     }));
   };
 
@@ -229,8 +228,8 @@ const UI_USR_W_452 = () => {
     }
   };
 
-  const selectedSigunguCd = form.stdgCtpvCd && form.stdgSggCd
-    ? `${form.stdgCtpvCd}${form.stdgSggCd}`
+  const selectedSigunguCd = form.stdgSggCd
+    ? `${form.stdgSggCd}`
     : '';
   const isSigunguDisabled = loading || saving || sigunguLoading || !form.stdgCtpvCd;
 
@@ -269,15 +268,15 @@ const UI_USR_W_452 = () => {
         <div className="on-form-register">
           <div className="on-form-option">
             <p className="txt-caution">*표시는 필수 입력입니다.</p>
-            <button
+            {/*<button
               type="button"
               className="krds-btn secondary small"
-              title="KED정보 로드"
+              title="KoDATA정보 로드"
               onClick={handleLoadKedInfo}
               disabled={saving}
             >
-              KED정보 로드
-            </button>
+              KoDATA정보 로드
+            </button>*/}
           </div>
           <dl className="on-form-row large">
             <div className="form-row-item">
@@ -462,7 +461,7 @@ const UI_USR_W_452 = () => {
                 <div className="form-wrapper">
                   <div className="textarea-wrap mt-16">
                     <textarea
-                      className="krds-input"
+                       className="krds-input medium"
                       title="기업소개 입력"
                       placeholder="내용을 입력해주세요."
                       value={form.entExpln}

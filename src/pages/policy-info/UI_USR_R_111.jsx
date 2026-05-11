@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useMatches, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useMatches, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import http from '@lib/http.js';
+import { appendListSearchToPath, resolveListBackPath } from '@utils/listNavigation.js';
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -22,6 +23,7 @@ const formatDate = (dateString) => {
 const UI_USR_R_111 = () => {
   const matches = useMatches();
   const { id } = useParams();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -54,6 +56,7 @@ const UI_USR_R_111 = () => {
   }, [id]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let isMounted = true;
 
     const fetchBoardDetail = async () => {
@@ -82,6 +85,7 @@ const UI_USR_R_111 = () => {
   }, [bbsNo]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let isMounted = true;
 
     const fetchPostDetail = async () => {
@@ -147,7 +151,7 @@ const UI_USR_R_111 = () => {
   const nextPost = useMemo(() => postDetail?.nextPost ?? null, [postDetail]);
 
   const moveToList = () => {
-    navigate('..');
+    navigate(resolveListBackPath(location));
   };
 
   const handleDownload = async (e, file) => {
@@ -193,10 +197,7 @@ const UI_USR_R_111 = () => {
 
   const buildPostLink = (targetPstNo) => {
     if (targetPstNo == null) return '#';
-    const queryString = navigationCategoryNo
-      ? `?ctgryNo=${encodeURIComponent(navigationCategoryNo)}`
-      : '';
-    return `../${targetPstNo}${queryString}`;
+    return appendListSearchToPath(`../${targetPstNo}`, location.search);
   };
 
   const handleNavigationClick = (event, targetPstNo) => {

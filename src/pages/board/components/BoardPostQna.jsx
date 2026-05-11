@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient, apiBaseUrl } from '@lib/apiClient.js';
+import { resolveListBackPath } from '@utils/listNavigation.js';
 
 const EMPTY_HTML_PATTERNS = new Set([
   '<p style="text-align: left;"></p>',
@@ -34,8 +35,9 @@ const formatDate = (dateString) => {
   return `${year}.${month}.${day}`;
 };
 
-const BoardPostQna = ({ bbsNo, pstNo }) => {
+const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const [postDetail, setPostDetail] = useState(null);
@@ -46,6 +48,7 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
   const depth1Menu = getDepth1Parent();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let isMounted = true;
 
     const fetchPostDetail = async () => {
@@ -94,6 +97,7 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
     if (isPrivatePostHidden) return [];
     return postDetail?.attachFiles || [];
   }, [isPrivatePostHidden, postDetail]);
+  const boardTitle = useMemo(() => boardDetail?.bbsNm || '', [boardDetail]);
   const postTitle = useMemo(() => postDetail?.pstTtl || '-', [postDetail]);
   const categoryName = useMemo(() => postDetail?.ctgryNm || '-', [postDetail]);
   const visibilityLabel = useMemo(() => {
@@ -125,7 +129,7 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
   }, [loading, errorMessage, isPrivatePostHidden, postDetail]);
 
   const moveToList = () => {
-    navigate('..');
+    navigate(resolveListBackPath(location));
   };
   console.log(attachedFiles);
 
@@ -138,6 +142,7 @@ const BoardPostQna = ({ bbsNo, pstNo }) => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems}/>
         <div className="page-title-wrap" data-type="responsive">
+          <p className="on-p1 on-colorblue">{boardTitle}</p>
           <h2 className="h-tit2">{postTitle}</h2>
         </div>
         <ul className="onboard-summary">

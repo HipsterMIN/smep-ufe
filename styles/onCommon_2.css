@@ -438,8 +438,8 @@
     min-width: 200px;
 }
 .search-top-box .sch-filter-box .filter-sect {
-  padding-bottom: 24px;
-  border-bottom: 1px solid #D6E0EB;
+  /*padding-bottom: 24px;
+  border-bottom: 1px solid #D6E0EB;*/
 }
 .search-top-box .filter-sect .filter-chip {
   margin-top: 0;
@@ -688,7 +688,7 @@
   top: 20px;
   /* left: 50%;
   transform: translateX(-50%); */
-  z-index: 80;
+  z-index: 69;
 }
 .main-container .top-srch {
   display: block;
@@ -874,7 +874,7 @@
   max-width: 1000px;
 }
 .main-quick-menu .swiper {
-  padding: 16px 0;
+  padding: 0;
 }
 .main-quick-menu .quick-menu-item {
   display: flex;
@@ -2404,7 +2404,7 @@ button.aichatButton.active {
     display: none;
   }
   .main-quick-menu .swiper {
-    padding: 0;
+    padding: 0 16px;
   }
   .main-quick-menu .quick-menu-img {
     width: 60px;

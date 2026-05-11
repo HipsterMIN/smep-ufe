@@ -24,6 +24,7 @@ const HeaderMobileGNB = forwardRef(({
   onClose,
   onLogin,
   onOnePassLogin,
+  onMyPage,
   onLogout,
   userName,
   isLogin,
@@ -144,6 +145,10 @@ const HeaderMobileGNB = forwardRef(({
     onClose?.();
     onOnePassLogin?.();
   };
+  const handleMyPageClick = () => {
+    onClose?.();
+    onMyPage?.();
+  };
 
   return (
     <>
@@ -154,9 +159,8 @@ const HeaderMobileGNB = forwardRef(({
             <div className="gnb-utils">
               <ul className="utility-list">
                 <li>
-                  
                   <Link onClick={() => setPopOpen(true)} className="krds-btn medium text">
-                    <i class="svg-icon ico-system"></i> 유관시스템 둘러보기
+                    <i className="svg-icon ico-system"></i> 유관시스템 둘러보기
                   </Link>
                 </li>
               </ul>
@@ -184,7 +188,7 @@ const HeaderMobileGNB = forwardRef(({
                   ) : null}
                   <div className="gnb-header-link">
                     <button type="button" className="krds-btn large text" onClick={handleOnePassLoginClick}><i className="svg-icon ico-onepass"></i> 중기원패스</button>
-                    <Link to="#" className="krds-btn large text"><i className="svg-icon ico-my"></i> 마이비즈니스</Link>
+                    <button type="button" className="krds-btn large text" onClick={handleMyPageClick}><i className="svg-icon ico-my"></i> 마이비즈니스</button>
                     <button type="button" className="krds-btn large text" onClick={handleLogoutClick}><i className="svg-icon ico-logout"></i> 로그아웃</button>
                   </div>
                 </>

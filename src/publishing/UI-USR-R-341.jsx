@@ -125,7 +125,7 @@ const UI_USR_R_341 = () => {
                 <div className="form-group">
                   <div className="form-conts">
                     <div className="textarea-wrap">
-                      <textarea className="krds-input" placeholder="내용을 입력하세요" title="내용입력란"></textarea>
+                      <textarea className="krds-input medium" placeholder="내용을 입력하세요" title="내용입력란"></textarea>
                       <p className="textarea-count">
                         <span className="count-now">0</span><span className="count-total">/100</span>
                       </p>

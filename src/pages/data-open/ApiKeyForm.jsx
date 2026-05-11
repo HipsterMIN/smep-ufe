@@ -9,7 +9,6 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
   const [institutions, setInstitutions] = useState({});
   const [isDirectInput, setIsDirectInput] = useState(false);
   const [appliedApis, setAppliedApis] = useState([]); // 1. 이미 신청된 API 코드들을 담을 상태
-  const ALL_API_CODES = ['TE01', 'TE02', 'TE03', 'TE04', 'TE05'];
   const currentMode = useAuthStore((state) => state.currentMode);
   const [apiMasterList, setApiMasterList] = useState({});
   const INDIVIDUAL_API_CODES = ['AD01', 'AD02'];
@@ -33,14 +32,10 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
   const resetForm = () => {
     setFormData({
       ...initialFormState,
-      // memberInfo가 있다면 기본값은 다시 채워줌
-      // picDeptNm: memberInfo?.picDeptNm || '',
-      // picJbpsNm: memberInfo?.picJbpsNm || '',
       indvEmlAddr: currentMode === 'CORPORATE'
           ? (memberInfo?.picEmlAddr || '')
           : (memberInfo?.indvEmlAddr || ''),
       usgSeCd: 'PD01',
-      // indvGnrlTelno: memberInfo?.indvGnrlTelno || '',
     });
     setIsDirectInput(false);
   };
@@ -140,26 +135,6 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
     }
   };
 
-  // const handleCheckboxChange = (e) => {
-  //   const { value, checked } = e.target;
-  //   const { apiSeCd } = formData;
-  //   if (appliedApis.includes(value)) return;
-  //
-  //   if (checked) {
-  //     // 체크되면 배열에 추가
-  //     setFormData({
-  //       ...formData,
-  //       apiSeCd: [...apiSeCd, value],
-  //     });
-  //   } else {
-  //     // 체크 해제되면 배열에서 제거
-  //     setFormData({
-  //       ...formData,
-  //       apiSeCd: apiSeCd.filter(item => item !== value),
-  //     });
-  //   }
-  // };
-
   const handleCheckboxChange = (e) => {
     const { value, checked } = e.target;
     // appliedApis(이미 신청 완료된 목록)에 있으면 무시
@@ -217,11 +192,8 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
       ...formData,
       linkUseTrgtSeCd: currentMode === 'CORPORATE' ? 'ENT' : 'IND',
       mbrNm: memberInfo?.mbrNm,
-
-      // 이메일과 전화번호를 무조건 pic 계열 필드에 할당
       picEmlAddr: formData.indvEmlAddr,      // 화면 입력값(이메일)
       picTelno: formData.indvGnrlTelno,      // 화면 입력값(유선전화)
-
       picMblTelno: currentMode === 'CORPORATE'
           ? memberInfo.picMblTelno
           : memberInfo.indvMblTelno,
@@ -528,7 +500,7 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
             <div className="form-conts">
               <div className="textarea-wrap">
                 <textarea
-                    className="krds-input"
+                    className="krds-input medium"
                     id="apiRegAplyCn"
                     placeholder="활용목적은 500자 이내로 적어주세요."
                     value={formData.apiRegAplyCn}

@@ -73,7 +73,7 @@ const DpcIssue = () => {
       });
 
       window.open(
-        `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
+        `https://www.smes.go.kr/e-page?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
         '_blank',
       );
 
@@ -388,7 +388,7 @@ const DpcIssue = () => {
                   ) : (
                     <div className="textarea-wrap">
                       <textarea
-                        className="krds-input"
+                        className="krds-input medium"
                         placeholder="내용을 입력하세요."
                         title={`${question.iemNm} 입력`}
                         value={surveyAnswers[question.iemSn] || ''}

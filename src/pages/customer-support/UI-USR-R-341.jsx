@@ -316,7 +316,7 @@ const UI_USR_R_341 = () => {
                           <div className="form-conts">
                             <div className="textarea-wrap">
                               <textarea
-                                className="krds-input"
+                                className="krds-input medium"
                                 placeholder="내용을 입력해 주세요."
                                 title="내용 입력"
                                 value={answerState.ansCn}

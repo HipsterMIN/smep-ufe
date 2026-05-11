@@ -12,7 +12,6 @@ import ApiKeyDetailView from './ApiKeyDetailView';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 const UI_USR_L_220 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
-  // const mbrNo = "2025120500381316"; // 고정 사용자 번호
   const navigate = useNavigate();
   const userInfo = useAuthStore((state) => state.user);
   const authToken = useAuthStore((state) => state.token);
@@ -33,7 +32,6 @@ const UI_USR_L_220 = () => {
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
-  const [popupMode, setPopupMode] = useState('create');
   const [isDetailOpen, setIsDetailOpen] = useState(false); // 상세 팝업 제어
   const [selectedDetail, setSelectedDetail] = useState(null); // 선택된 상세 데이터
   // 상태 관리
@@ -65,6 +63,7 @@ const UI_USR_L_220 = () => {
 
   // 1. 실제 데이터 호출 (useEffect)
   useEffect(() => {
+    window.scrollTo(0, 0);
     const fetchHistory = async () => {
       try {
         setIsLoading(true);
@@ -124,7 +123,7 @@ const UI_USR_L_220 = () => {
 
           <div className="tab fill full mt-48">
             <ul>
-              <li><Link to="/cs/opndata/UI_USR_L_210" className="btn-tab">API 소개</Link></li>
+              <li><Link to="/cs/opndata/UI_USR_L_210" className="btn-tab">API 안내</Link></li>
               <li className="active">
                 <Link to="/cs/opndata/UI_USR_L_220" className="btn-tab">
                   인증키 신청<span className="sr-only">현재 페이지</span>

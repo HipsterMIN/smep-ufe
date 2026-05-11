@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Tab from '@components/ui/Tab';
@@ -10,6 +10,10 @@ import { api as apiClient } from '@lib/apiClient.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const appBaseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 12;
+const ALLOWED_PAGE_SIZES = new Set([12, 24, 36]);
+const ALLOWED_SEARCH_TYPES = new Set(['TITLE']);
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -31,16 +35,85 @@ const resolveThumbnailSrc = (post) => {
   return `${appBaseUrl}/api/v1/board/thumbnails/${encodeURIComponent(rprsImgAtchFileId)}/${encodeURIComponent(atchFileSn)}`;
 };
 
+const normalizeTrimmedText = (value) => String(value ?? '').trim();
+
+const normalizePositiveInt = (value, fallback) => {
+  const parsed = Number.parseInt(String(value ?? '').trim(), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const normalizePageSize = (value) => {
+  const normalized = normalizePositiveInt(value, DEFAULT_PAGE_SIZE);
+  return ALLOWED_PAGE_SIZES.has(normalized) ? normalized : DEFAULT_PAGE_SIZE;
+};
+
+const normalizeSearchType = (value) => {
+  const normalized = normalizeTrimmedText(value).toUpperCase();
+  if (!normalized) return '';
+  return ALLOWED_SEARCH_TYPES.has(normalized) ? normalized : '';
+};
+
+/**
+ * 썸네일 게시판 목록 URL query 생성기.
+ *
+ * 의도: 탭/검색/페이지 상태를 컴포넌트 내부 state에만 두지 않고 URL에 남겨,
+ * 상세 화면에서 목록으로 돌아와도 사용자가 보던 조건을 복원하기 위해 필요하다.
+ * 동작: 기존 query를 기준으로 ctgryNo/page/size/searchType/searchKeyword만 정규화해서 갱신하고,
+ * 기본값은 제거해 기존 기본 진입 URL을 최대한 유지한다.
+ * 주의: ctgryNo는 게시판별 서버 카테고리 값이므로 여기서 하드코딩하지 않고,
+ * 호출부에서 현재 선택된 카테고리 번호를 전달해야 한다.
+ */
+const buildThumbnailListSearchParams = ({
+  currentSearchParams,
+  page,
+  size,
+  searchType,
+  searchKeyword,
+  categoryNo,
+}) => {
+  const params = new URLSearchParams(currentSearchParams);
+  const normalizedKeyword = normalizeTrimmedText(searchKeyword);
+  const normalizedSearchType = normalizeSearchType(searchType);
+  const normalizedCategoryNo = normalizeTrimmedText(categoryNo);
+  const normalizedPage = normalizePositiveInt(page, DEFAULT_PAGE);
+  const normalizedSize = normalizePageSize(size);
+
+  if (normalizedCategoryNo) {
+    params.set('ctgryNo', normalizedCategoryNo);
+  } else {
+    params.delete('ctgryNo');
+  }
+
+  if (normalizedPage > DEFAULT_PAGE) {
+    params.set('page', String(normalizedPage));
+  } else {
+    params.delete('page');
+  }
+
+  if (normalizedSize !== DEFAULT_PAGE_SIZE) {
+    params.set('size', String(normalizedSize));
+  } else {
+    params.delete('size');
+  }
+
+  if (normalizedKeyword) {
+    params.set('searchType', normalizedSearchType);
+    params.set('searchKeyword', normalizedKeyword);
+  } else {
+    params.delete('searchType');
+    params.delete('searchKeyword');
+  }
+
+  return params;
+};
+
 const BoardThumbnail = ({ boardDetail, bbsNo }) => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const [selectedCategoryNo, setSelectedCategoryNo] = useState('');
   const [searchType, setSearchType] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [appliedSearchType, setAppliedSearchType] = useState('');
-  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
 
   const [categories, setCategories] = useState([]);
   const [isCategoryLoaded, setIsCategoryLoaded] = useState(false);
@@ -48,8 +121,6 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
   const [loading, setLoading] = useState(false);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(12);
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -72,6 +143,46 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
     [categories],
   );
 
+  const normalizedQueryState = useMemo(() => ({
+    page: normalizePositiveInt(searchParams.get('page'), DEFAULT_PAGE),
+    size: normalizePageSize(searchParams.get('size')),
+    searchType: normalizeSearchType(searchParams.get('searchType')),
+    searchKeyword: normalizeTrimmedText(searchParams.get('searchKeyword')),
+    categoryNo: normalizeTrimmedText(searchParams.get('ctgryNo')),
+  }), [searchParams]);
+
+  const resolvedCategoryState = useMemo(() => {
+    if (categories.length === 0) {
+      return {
+        activeTabIndex: 0,
+        selectedCategoryNo: '',
+      };
+    }
+
+    const queryCategoryIndex = categories.findIndex((category) => {
+      const categoryNo = normalizeTrimmedText(category?.ctgryNo);
+      return categoryNo && categoryNo === normalizedQueryState.categoryNo;
+    });
+
+    if (queryCategoryIndex >= 0) {
+      return {
+        activeTabIndex: queryCategoryIndex,
+        selectedCategoryNo: normalizedQueryState.categoryNo,
+      };
+    }
+
+    const fallbackCategoryNo = categories[0]?.ctgryNo != null
+      ? String(categories[0].ctgryNo)
+      : '';
+
+    return {
+      activeTabIndex: 0,
+      selectedCategoryNo: fallbackCategoryNo,
+    };
+  }, [categories, normalizedQueryState.categoryNo]);
+
+  const { activeTabIndex, selectedCategoryNo } = resolvedCategoryState;
+
   useEffect(() => {
     let isMounted = true;
 
@@ -83,8 +194,6 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
       if (!bbsNo) {
         if (!isMounted) return;
         setCategories([]);
-        setActiveTabIndex(0);
-        setSelectedCategoryNo('');
         setIsCategoryLoaded(true);
         return;
       }
@@ -95,22 +204,9 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
         if (!isMounted) return;
         const nextCategories = Array.isArray(data) ? data : [];
         setCategories(nextCategories);
-
-        if (nextCategories.length > 0) {
-          const initialCategoryNo = nextCategories[0]?.ctgryNo != null
-            ? String(nextCategories[0].ctgryNo)
-            : '';
-          setActiveTabIndex(0);
-          setSelectedCategoryNo(initialCategoryNo);
-        } else {
-          setActiveTabIndex(0);
-          setSelectedCategoryNo('');
-        }
       } catch (error) {
         if (!isMounted) return;
         setCategories([]);
-        setActiveTabIndex(0);
-        setSelectedCategoryNo('');
         console.error('썸네일 게시판 카테고리 조회 실패:', error);
       } finally {
         if (isMounted) {
@@ -127,14 +223,9 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
   }, [bbsNo]);
 
   useEffect(() => {
-    if (categories.length > 0 && activeTabIndex >= categories.length) {
-      const fallbackCategoryNo = categories[0]?.ctgryNo != null
-        ? String(categories[0].ctgryNo)
-        : '';
-      setActiveTabIndex(0);
-      setSelectedCategoryNo(fallbackCategoryNo);
-    }
-  }, [categories, activeTabIndex]);
+    setSearchType(normalizedQueryState.searchType);
+    setSearchKeyword(normalizedQueryState.searchKeyword);
+  }, [normalizedQueryState.searchType, normalizedQueryState.searchKeyword]);
 
   useEffect(() => {
     let isMounted = true;
@@ -162,17 +253,19 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
         setLoading(true);
 
         const params = new URLSearchParams({
-          page: String(currentPage + 1),
-          size: String(pageSize),
+          page: String(normalizedQueryState.page),
+          size: String(normalizedQueryState.size),
         });
 
         if (selectedCategoryNo) {
           params.append('ctgryNo', selectedCategoryNo);
         }
 
-        if (appliedSearchKeyword.trim()) {
-          params.append('searchType', appliedSearchType);
-          params.append('searchKeyword', appliedSearchKeyword.trim());
+        if (normalizedQueryState.searchKeyword) {
+          if (normalizedQueryState.searchType) {
+            params.append('searchType', normalizedQueryState.searchType);
+          }
+          params.append('searchKeyword', normalizedQueryState.searchKeyword);
         }
 
         const response = await apiClient.get(`/api/v1/board/${bbsNo}/posts/list?${params.toString()}`);
@@ -200,19 +293,41 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
     return () => {
       isMounted = false;
     };
-  }, [bbsNo, currentPage, pageSize, selectedCategoryNo, appliedSearchType, appliedSearchKeyword, isCategoryLoaded, categories.length]);
+  }, [
+    bbsNo,
+    normalizedQueryState.page,
+    normalizedQueryState.size,
+    normalizedQueryState.searchType,
+    normalizedQueryState.searchKeyword,
+    selectedCategoryNo,
+    isCategoryLoaded,
+    categories.length,
+  ]);
 
   const handleSearch = () => {
-    setAppliedSearchType(searchType);
-    setAppliedSearchKeyword(searchKeyword);
-    setCurrentPage(0);
+    const nextSearchParams = buildThumbnailListSearchParams({
+      currentSearchParams: searchParams,
+      page: DEFAULT_PAGE,
+      size: normalizedQueryState.size,
+      searchType,
+      searchKeyword,
+      categoryNo: selectedCategoryNo,
+    });
+    setSearchParams(nextSearchParams);
   };
 
   const handleTabChange = (index) => {
-    setActiveTabIndex(index);
     const selectedCategory = categories[index];
-    setSelectedCategoryNo(selectedCategory?.ctgryNo != null ? String(selectedCategory.ctgryNo) : '');
-    setCurrentPage(0);
+    const nextCategoryNo = selectedCategory?.ctgryNo != null ? String(selectedCategory.ctgryNo) : '';
+    const nextSearchParams = buildThumbnailListSearchParams({
+      currentSearchParams: searchParams,
+      page: DEFAULT_PAGE,
+      size: normalizedQueryState.size,
+      searchType: normalizedQueryState.searchType,
+      searchKeyword: normalizedQueryState.searchKeyword,
+      categoryNo: nextCategoryNo,
+    });
+    setSearchParams(nextSearchParams);
   };
 
   const handleSearchKeyDown = (event) => {
@@ -221,22 +336,34 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
     }
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page - 1);
+  const handlePageChange = () => {
     window.scrollTo(0, 0);
   };
 
   const handlePageSizeChange = (event) => {
-    setPageSize(Number(event.target.value));
-    setCurrentPage(0);
+    const nextSearchParams = buildThumbnailListSearchParams({
+      currentSearchParams: searchParams,
+      page: DEFAULT_PAGE,
+      size: event.target.value,
+      searchType: normalizedQueryState.searchType,
+      searchKeyword: normalizedQueryState.searchKeyword,
+      categoryNo: selectedCategoryNo,
+    });
+    setSearchParams(nextSearchParams);
   };
 
   const moveToDetail = (pstNo) => {
     if (pstNo == null) return;
-    const queryString = selectedCategoryNo
-      ? `?ctgryNo=${encodeURIComponent(selectedCategoryNo)}`
-      : '';
-    navigate(`${pstNo}${queryString}`);
+    const detailSearchParams = buildThumbnailListSearchParams({
+      currentSearchParams: searchParams,
+      page: normalizedQueryState.page,
+      size: normalizedQueryState.size,
+      searchType: normalizedQueryState.searchType,
+      searchKeyword: normalizedQueryState.searchKeyword,
+      categoryNo: selectedCategoryNo,
+    });
+    const queryString = detailSearchParams.toString();
+    navigate(queryString ? `${pstNo}?${queryString}` : `${pstNo}`);
   };
 
   return (
@@ -264,7 +391,7 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
             <div className="sch-input">
               <input
                 type="text"
-                className="krds-input"
+                className="krds-input medium"
                 placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}
@@ -280,7 +407,7 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
         </div>
 
         <div className="krds-tab-area layer">
-          <Tab tabData={tabData} onTabChange={handleTabChange}></Tab>
+          <Tab tabData={tabData} onTabChange={handleTabChange} activeIndex={activeTabIndex}></Tab>
 
           <div className="tab-conts-wrap">
             <section className={`tab-conts ${activeTabIndex >= 0 ? 'active' : ''}`}>
@@ -296,7 +423,7 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
                     <select
                       className="krds-form-select-sort"
                       id="search_result_count"
-                      value={pageSize}
+                      value={normalizedQueryState.size}
                       onChange={handlePageSizeChange}
                     >
                       <option value={12}>12개</option>
@@ -384,7 +511,7 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
               {!loading && totalPages > 0 && (
                 <Pagination
                   totalPages={totalPages}
-                  currentPage={currentPage + 1}
+                  currentPage={normalizedQueryState.page}
                   onPageChange={handlePageChange}
                   syncUrl
                 />

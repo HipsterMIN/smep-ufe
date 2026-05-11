@@ -27,19 +27,19 @@ const UI_USR_L_150 = () => {
         </div>
         <div className="search-top-box">
           <div className="sch-form-wrap" ref={schFormWrapRef}>
-            <select className="krds-form-select">
+            <select className="krds-form-select medium">
               <option value="">전체</option>
               <option value="">항목</option>
               <option value="">항목</option>
             </select>
             <div className="sch-input">
-              <input type="text" className="krds-input" placeholder="공고명·사업명·기관명으로 검색하세요" title="검색어 입력" />
+              <input type="text"  className="krds-input medium" placeholder="공고명·사업명·기관명으로 검색하세요" title="검색어 입력" />
               <button type="button" className="krds-btn medium icon ico-search" >
                 <span className="sr-only">검색</span>
                 <i className="svg-icon ico-sch"></i>
               </button>
             </div>
-            <button type="button" className="krds-btn medium text" onClick={handleToggleFilter}><i className="svg-icon ico-sch-plus"></i>
+            <button type="button" className="krds-btn small text" onClick={handleToggleFilter}><i className="svg-icon ico-sch-plus"></i>
 						상세검색
               <span className="onfilter-open sr-only">열기</span>
               <span className="onfilter-close sr-only">닫기</span>
@@ -49,7 +49,7 @@ const UI_USR_L_150 = () => {
             <div className="filter-form">
               <div>
                 <label className="label" for="appl-sch-sel1">분야</label>
-                <select id="appl-sch-sel1" className="krds-form-select medium">
+                <select id="appl-sch-sel1" className="krds-form-select small">
                   <option value="">전체</option>
                   <option value="">항목</option>
                   <option value="">항목</option>
@@ -57,7 +57,7 @@ const UI_USR_L_150 = () => {
               </div>
               <div>
                 <label className="label" for="appl-sch-sel2">지역</label>
-                <select id="appl-sch-sel2" className="krds-form-select medium">
+                <select id="appl-sch-sel2" className="krds-form-select small">
                   <option value="">전체</option>
                   <option value="">항목</option>
                   <option value="">항목</option>
@@ -65,7 +65,7 @@ const UI_USR_L_150 = () => {
               </div>
               <div>
                 <label className="label" for="appl-sch-sel3">기관별</label>
-                <select id="appl-sch-sel3" className="krds-form-select medium">
+                <select id="appl-sch-sel3" className="krds-form-select small">
                   <option value="">전체</option>
                   <option value="">항목</option>
                   <option value="">항목</option>

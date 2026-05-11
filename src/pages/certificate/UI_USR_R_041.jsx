@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { api as apiClient } from '@lib/apiClient.js';
 import Logo from '@assets/common/logo2.svg';
 import { useAuthStore } from '@store/useAuthStore';
@@ -8,17 +8,16 @@ import { useAuthStore } from '@store/useAuthStore';
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Popup from '@components/ui/Popup.jsx';
+import { resolveListBackPath } from '@utils/listNavigation.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 const UI_USR_R_041 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent, getFullPath } = useUserMenu();
 
-  const { isLogin, cmpNm } = useAuthStore((state) => ({
-    isLogin: state.isLogin,
-    cmpNm: state.cmpNm,
-  }));
+  const { isLogin, cmpNm, currentMode, logout  } = useAuthStore();
 
   const { prdocCd } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -50,7 +49,7 @@ const UI_USR_R_041 = () => {
   }, [prdocCd]);
 
   const goBack = () => {
-    navigate(-1);
+    navigate(resolveListBackPath(location));
   };
 
   /**
@@ -59,20 +58,43 @@ const UI_USR_R_041 = () => {
   const handleClickIssue = async () => {
     if (!isLogin) {
       if (window.confirm('로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?')) {
-        navigate('/service/login');
+        navigate('/service/login', { state: { loginType: 'CORPORATE' } });
       }
       return;
     }
 
-    // TODO: 기업회원 체크 - 정책 결정 후 활성화
-    // if (currentMode !== 'CORPORATE') {
-    //   if (window.confirm('기업회원 로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?')) {
-    //     navigate('/login');
-    //   }
-    //   return;
-    // }
+    if (currentMode !== 'CORPORATE') {
+      if (window.confirm('기업회원 로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?')) {
+        // 로그아웃 처리 후 로그인 페이지로 이동
+        try {
+          const response = await apiClient.post('/api/v1/auth/keycloak/logout');
+          const responseData = response?.data || response;
+          const logoutUrl = responseData?.logoutUrl || responseData?.data?.logoutUrl || null;
+
+          logout(); // 로컬 로그아웃은 항상 수행
+
+          if (logoutUrl) {
+            // OnePass 세션이 있으면 외부 logout redirect 처리
+            // → keycloak 로그아웃 완료 후 로그인 페이지로 돌아오도록 redirect_uri 파라미터 추가
+            const redirectAfterLogout = `${window.location.origin}/service/login`;
+            window.location.href = `${logoutUrl}&redirect_uri=${encodeURIComponent(redirectAfterLogout)}`;
+            return;
+          }
+        } catch (error) {
+          console.error('[Certificate] failed to fetch keycloak logout url', {
+            message: error?.message ?? 'unknown-error',
+            status: error?.status ?? null,
+          });
+          logout(); // API 실패해도 로컬 로그아웃은 수행
+        }
+
+        navigate('/service/login', { state: { loginType: 'CORPORATE' } });
+      }
+      return;
+    }
 
     // 발급 가능 기업 여부 확인
+    let supportedLangs = [];
     try {
       const result = await apiClient.post(
         '/api/v1/certificate/eligibility',
@@ -96,6 +118,7 @@ const UI_USR_R_041 = () => {
         setIsIneligiblePopupOpen(true);
         return;
       }
+      supportedLangs = result.data.supportedLangs || [];
     } catch (error) {
       console.error('발급 가능 여부 확인 실패:', error);
       alert('발급 가능 여부 확인 중 오류가 발생했습니다.');
@@ -109,10 +132,13 @@ const UI_USR_R_041 = () => {
       prdocNm: data.prdocTtl,
       prdocIssuGdCn: data.prdocIssuGdCn,
       elpblYn: data.elpblYn,
+      supportedLangs,
     };
 
     if (prdocCd === 'Y101') {
       navigate(`${base}/Y101/dpc-issue`, { state });
+    }  else if (prdocCd === 'Y104' || prdocCd === 'Y105') {
+      navigate(`${base}/Y104/biz-issue`, { state });
     } else if (prdocCd === 'Y109') {
       navigate(`${base}/Y109/cbz-issue`, { state });
     } else if (prdocCd === 'Y113') {
@@ -178,7 +204,7 @@ const UI_USR_R_041 = () => {
               <button
                 type="button"
                 className="krds-btn primary medium"
-                onClick={() => window.open(`https://${ineligibleInfo.linkedSystemUrl}`, '_blank')}
+                onClick={() => window.open(`${ineligibleInfo.linkedSystemUrl}`, '_blank')}
               >
                       바로가기
               </button>

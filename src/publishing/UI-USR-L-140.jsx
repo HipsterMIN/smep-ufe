@@ -78,20 +78,20 @@ const UI_USR_L_140 = () => {
                 </div>
                 <div className="search-top-box mt-40">
                   <div className="sch-form-wrap">
-                    <select className="krds-form-select" aria-label="시도 선택">{/* 기술진단보고서 반영 */}
+                    <select className="krds-form-select medium" aria-label="시도 선택">{/* 기술진단보고서 반영 */}
                       <option value="">시도선택</option>
                       <option value="">항목</option>
                     </select>
-                    <select className="krds-form-select" aria-label="시군구 선택">{/* 기술진단보고서 반영 */}
+                    <select className="krds-form-select medium" aria-label="시군구 선택">{/* 기술진단보고서 반영 */}
                       <option value="">시군구선택</option>
                       <option value="">항목</option>
                     </select>
-                    <select className="krds-form-select" aria-label="검색구분 선택">{/* 기술진단보고서 반영 */}
+                    <select className="krds-form-select medium" aria-label="검색구분 선택">{/* 기술진단보고서 반영 */}
                       <option value="">전체</option>
                       <option value="">항목</option>
                     </select>
                     <div className="sch-input">
-                      <input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력" />
+                      <input type="text" className="krds-input medium" placeholder="검색어를 입력하세요" title="검색어 입력" />
                       <button type="button" className="krds-btn medium icon ico-search" >
                         <span className="sr-only">검색</span>
                         <i className="svg-icon ico-sch"></i>
@@ -176,20 +176,20 @@ const UI_USR_L_140 = () => {
                 </div>
                 <div className="search-top-box mt-40">
                   <div className="sch-form-wrap">
-                    <select className="krds-form-select">
+                    <select className="krds-form-select medium">
                       <option value="">시도선택</option>
                       <option value="">항목</option>
                     </select>
-                    <select className="krds-form-select">
+                    <select className="krds-form-select medium">
                       <option value="">시군구선택</option>
                       <option value="">항목</option>
                     </select>
-                    <select className="krds-form-select">
+                    <select className="krds-form-select medium">
                       <option value="">전체</option>
                       <option value="">항목</option>
                     </select>
                     <div className="sch-input">
-                      <input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력" />
+                      <input type="text"  className="krds-input medium" placeholder="검색어를 입력하세요" title="검색어 입력" />
                       <button type="button" className="krds-btn medium icon ico-search" >
                         <span className="sr-only">검색</span>
                         <i className="svg-icon ico-sch"></i>
@@ -274,20 +274,20 @@ const UI_USR_L_140 = () => {
                 </div>
                 <div className="search-top-box mt-40">
                   <div className="sch-form-wrap">
-                    <select className="krds-form-select">
+                    <select className="krds-form-select medium">
                       <option value="">시도선택</option>
                       <option value="">항목</option>
                     </select>
-                    <select className="krds-form-select">
+                    <select className="krds-form-select medium">
                       <option value="">시군구선택</option>
                       <option value="">항목</option>
                     </select>
-                    <select className="krds-form-select">
+                    <select className="krds-form-select medium">
                       <option value="">전체</option>
                       <option value="">항목</option>
                     </select>
                     <div className="sch-input">
-                      <input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력" />
+                      <input type="text"  className="krds-input medium" placeholder="검색어를 입력하세요" title="검색어 입력" />
                       <button type="button" className="krds-btn medium icon ico-search" >
                         <span className="sr-only">검색</span>
                         <i className="svg-icon ico-sch"></i>

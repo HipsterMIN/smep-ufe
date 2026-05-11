@@ -1,9 +1,10 @@
 ﻿import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
+import { resolveListBackPath } from '../utils/listNavigation.js';
 
 const EMPTY_HTML_PATTERNS = new Set([
   '<p style="text-align: left;"></p>',
@@ -12,8 +13,9 @@ const EMPTY_HTML_PATTERNS = new Set([
 ]);
 
 const SprtBizView = () => {
-  const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const { breadcrumbItems, currentMenu, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const [item, setItem] = useState(null);
@@ -117,7 +119,7 @@ const SprtBizView = () => {
         <Breadcrumb items={breadcrumbItems} />
 
         <div className="page-title-wrap on-btmline" data-type="responsive">
-          <p className="on-p1 on-colorblue">지원사업소개</p>
+          <p className="on-p1 on-colorblue">{currentMenu?.menuNm || '지원사업 소개'}</p>
           <h2 className="h-tit2">{item.sprtBizNm}</h2>
         </div>
 
@@ -128,7 +130,7 @@ const SprtBizView = () => {
             </div>
             <div className="def-list-wrap">
               <dl className="def-list">
-                {renderHtmlRow('사업명', item.sprtBizNm)}
+                {/*{renderHtmlRow('사업명', item.sprtBizNm)}*/}
                 {renderHtmlRow('사업개요', item.sprtBizOtln)}
               </dl>
             </div>
@@ -229,7 +231,7 @@ const SprtBizView = () => {
 
         <div className="onboard-btm-btngroup">
           <div>
-            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate(-1)}>
+            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate(resolveListBackPath(location))}>
               목록
             </button>
           </div>

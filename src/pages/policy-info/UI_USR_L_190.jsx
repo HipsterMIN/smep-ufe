@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
@@ -7,6 +7,7 @@ import Tab from '@components/ui/Tab';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
+import { appendListSearchToPath, getNumberSearchParam, getSearchParam, setQueryParam } from '@utils/listNavigation.js';
 import { formatEventRegionForList } from '@utils/stringUtils.js';
 
 const AREA_TABS = [
@@ -70,27 +71,40 @@ const formatEventPeriod = (value) => {
 };
 
 const UI_USR_L_190 = () => {
+  const location = useLocation();
+  const [, setSearchParams] = useSearchParams();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const [searchType, setSearchType] = useState('ALL');
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [appliedSearchType, setAppliedSearchType] = useState('ALL');
-  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
-  const [sortType, setSortType] = useState('REG_DT');
+  const [activeTabIndex, setActiveTabIndex] = useState(() => getNumberSearchParam(location.search, 'tab', 0));
+  const [searchType, setSearchType] = useState(() => getSearchParam(location.search, 'searchType', 'ALL'));
+  const [searchKeyword, setSearchKeyword] = useState(() => getSearchParam(location.search, 'searchKeyword', ''));
+  const [appliedSearchType, setAppliedSearchType] = useState(() => getSearchParam(location.search, 'searchType', 'ALL'));
+  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState(() => getSearchParam(location.search, 'searchKeyword', ''));
+  const [sortType, setSortType] = useState(() => getSearchParam(location.search, 'sortType', 'REG_DT'));
 
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(() => Math.max(0, getNumberSearchParam(location.search, 'page', 1) - 1));
   const pageSize = 10;
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
   const selectedAreaGroup = AREA_TABS[activeTabIndex]?.value || 'ALL';
 
+  const buildListSearchParams = () => {
+    const params = new URLSearchParams();
+    setQueryParam(params, 'tab', activeTabIndex, 0);
+    setQueryParam(params, 'page', currentPage + 1, 1);
+    setQueryParam(params, 'sortType', sortType, 'REG_DT');
+    setQueryParam(params, 'searchType', appliedSearchType, 'ALL');
+    setQueryParam(params, 'searchKeyword', appliedSearchKeyword);
+    return params;
+  };
+
   useEffect(() => {
+    window.scrollTo(0, 0);
     let mounted = true;
 
     const fetchList = async () => {
@@ -109,6 +123,8 @@ const UI_USR_L_190 = () => {
           params.append('searchType', appliedSearchType);
           params.append('searchKeyword', appliedSearchKeyword.trim());
         }
+
+        setSearchParams(buildListSearchParams(), { replace: true });
 
         const response = await apiClient.get(`/api/v1/event-info?${params.toString()}`);
         const pageData = response?.data || response || {};
@@ -178,7 +194,7 @@ const UI_USR_L_190 = () => {
         <div className="search-top-box">
           <div className="sch-form-wrap">
             <select
-              className="krds-form-select"
+              className="krds-form-select medium"
               value={searchType}
               onChange={(event) => setSearchType(event.target.value)}
             >
@@ -189,7 +205,7 @@ const UI_USR_L_190 = () => {
             <div className="sch-input">
               <input
                 type="text"
-                className="krds-input"
+                 className="krds-input medium"
                 placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}
@@ -205,7 +221,7 @@ const UI_USR_L_190 = () => {
         </div>
 
         <div className="mt-40">
-          <Tab tabData={tabData} onTabChange={handleTabChange}></Tab>
+          <Tab tabData={tabData} onTabChange={handleTabChange} activeIndex={activeTabIndex}></Tab>
         </div>
 
         <div className="search-list-top">
@@ -292,7 +308,7 @@ const UI_USR_L_190 = () => {
                     </th>
                     <td className="ac"><span>{formatEventRegionForList(item?.evntInfoRgnNm)}</span></td>
                     <td>
-                      <Link className="onellipsis-1" to={`${item.evntInfoId}`}>
+                      <Link className="onellipsis-1" to={appendListSearchToPath(`${item.evntInfoId}`, buildListSearchParams().toString())}>
                         <span>{item?.evntInfoTtlNm || '-'}</span>
                       </Link>
                     </td>

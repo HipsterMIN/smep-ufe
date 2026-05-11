@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useMatches, useNavigate } from 'react-router-dom';
+import { useLocation, useMatches, useNavigate, useSearchParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Tab from '@components/ui/Tab';
@@ -7,6 +7,12 @@ import Pagination from '@components/ui/Pagination';
 import noImg from '@assets/common/noImg.png';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import {
+  appendListSearchToPath,
+  getNumberSearchParam,
+  getSearchParam,
+  setQueryParam,
+} from '@utils/listNavigation.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const appBaseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
@@ -34,18 +40,20 @@ const resolveThumbnailSrc = (post) => {
 const UI_USR_L_100 = () => {
   const matches = useMatches();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [, setSearchParams] = useSearchParams();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [boardDetail, setBoardDetail] = useState(null);
   const [categories, setCategories] = useState([]);
   const [postList, setPostList] = useState([]);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const [selectedCategoryNo, setSelectedCategoryNo] = useState('');
+  const [selectedCategoryNo, setSelectedCategoryNo] = useState(() => getSearchParam(location.search, 'ctgryNo', ''));
   const [loading, setLoading] = useState(false);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(12);
+  const [currentPage, setCurrentPage] = useState(() => Math.max(0, getNumberSearchParam(location.search, 'page', 1) - 1));
+  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 12));
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -58,6 +66,7 @@ const UI_USR_L_100 = () => {
   }, [matches]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let isMounted = true;
 
     const fetchBoardDetail = async () => {
@@ -91,6 +100,7 @@ const UI_USR_L_100 = () => {
   }, [boardDetail]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     let isMounted = true;
 
     const fetchCategories = async () => {
@@ -136,6 +146,38 @@ const UI_USR_L_100 = () => {
   }, [isCategoryEnabled, activeTabIndex, categories]);
 
   useEffect(() => {
+    if (!isCategoryEnabled) {
+      setActiveTabIndex(0);
+      return;
+    }
+
+    if (!selectedCategoryNo) {
+      setActiveTabIndex(0);
+      return;
+    }
+
+    const categoryIndex = categories.findIndex(
+      (category) => String(category?.ctgryNo ?? '') === String(selectedCategoryNo),
+    );
+
+    if (categoryIndex >= 0) {
+      setActiveTabIndex(categoryIndex + 1);
+    } else if (categories.length > 0) {
+      setSelectedCategoryNo('');
+      setActiveTabIndex(0);
+      setCurrentPage(0);
+    }
+  }, [isCategoryEnabled, categories, selectedCategoryNo]);
+
+  const buildListSearchParams = () => {
+    const params = new URLSearchParams();
+    setQueryParam(params, 'page', currentPage + 1, 1);
+    setQueryParam(params, 'size', pageSize, 12);
+    setQueryParam(params, 'ctgryNo', selectedCategoryNo);
+    return params;
+  };
+
+  useEffect(() => {
     let isMounted = true;
 
     const fetchPostList = async () => {
@@ -150,6 +192,7 @@ const UI_USR_L_100 = () => {
       try {
         if (!isMounted) return;
         setLoading(true);
+        setSearchParams(buildListSearchParams(), { replace: true });
 
         const params = new URLSearchParams({
           page: String(currentPage + 1),
@@ -222,10 +265,7 @@ const UI_USR_L_100 = () => {
 
   const moveToDetail = (pstNo) => {
     if (pstNo == null) return;
-    const queryString = selectedCategoryNo
-      ? `?ctgryNo=${encodeURIComponent(selectedCategoryNo)}`
-      : '';
-    navigate(`${pstNo}${queryString}`);
+    navigate(appendListSearchToPath(`${pstNo}`, buildListSearchParams().toString()));
   };
 
   return (
@@ -241,7 +281,7 @@ const UI_USR_L_100 = () => {
         </div>
 
         <div className="krds-tab-area layer">
-          <Tab tabData={tabData} onTabChange={handleTabChange}></Tab>
+          <Tab tabData={tabData} onTabChange={handleTabChange} activeIndex={activeTabIndex}></Tab>
 
           <div className="tab-conts-wrap">
             <section className={`tab-conts ${activeTabIndex >= 0 ? 'active' : ''}`}>

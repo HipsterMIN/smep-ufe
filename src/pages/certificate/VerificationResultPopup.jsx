@@ -76,7 +76,7 @@ const VerificationResultPopup = ({
                                                 (
                         <a
                           className="on-linktxt2"
-                          href={`http://${data.prdocType.linkedSystemUrl}`}
+                          href={`${data.prdocType.linkedSystemUrl}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

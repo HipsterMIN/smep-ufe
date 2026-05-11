@@ -38,7 +38,7 @@ const UI_USR_R_232 = () => {
           <ul>
             <li>
               <Link to="#" className="btn-tab">
-                    API 소개
+                    API 안내
               </Link>
             </li>
             <li>

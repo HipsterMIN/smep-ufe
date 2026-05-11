@@ -32,6 +32,7 @@ const BoardPostThumbnail = ({ boardDetail, bbsNo, pstNo }) => {
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
+  const preservedQueryString = useMemo(() => searchParams.toString(), [searchParams]);
   const navigationCategoryNo = useMemo(() => {
     const rawCategoryNo = searchParams.get('ctgryNo');
     if (rawCategoryNo == null) return '';
@@ -102,7 +103,7 @@ const BoardPostThumbnail = ({ boardDetail, bbsNo, pstNo }) => {
   const nextPost = useMemo(() => postDetail?.nextPost ?? null, [postDetail]);
 
   const moveToList = () => {
-    navigate('..');
+    navigate(preservedQueryString ? `..?${preservedQueryString}` : '..');
   };
 
   const buildAttachmentDownloadUrl = (file) => {
@@ -117,10 +118,7 @@ const BoardPostThumbnail = ({ boardDetail, bbsNo, pstNo }) => {
 
   const buildPostLink = (targetPstNo) => {
     if (targetPstNo == null) return '#';
-    const queryString = navigationCategoryNo
-      ? `?ctgryNo=${encodeURIComponent(navigationCategoryNo)}`
-      : '';
-    return `../${targetPstNo}${queryString}`;
+    return preservedQueryString ? `../${targetPstNo}?${preservedQueryString}` : `../${targetPstNo}`;
   };
 
   const handleNavigationClick = (event, targetPstNo) => {

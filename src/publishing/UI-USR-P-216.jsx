@@ -180,7 +180,7 @@ const UI_USR_P_216 = () => {
               </div>
               <div className="form-conts">
                 <div className="textarea-wrap">
-                  <textarea className="krds-input" placeholder="※ 활용목적은 500자 이내로 적어주세요." id="textarea"></textarea>
+                  <textarea className="krds-input medium" placeholder="※ 활용목적은 500자 이내로 적어주세요." id="textarea"></textarea>
                   <p className="textarea-count">
                     <span className="count-now">0</span><span className="count-total">/100</span>
                   </p>

@@ -164,6 +164,12 @@ export default function Header() {
     onePassGetAuthCode();
   };
 
+  const handleOnePassJoin = () => {
+    const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/register/step1?type=member&return_client=smes-tipa-01';
+    console.log('onOnePassJoin : ', onePassJoinUrl);
+    window.location.href = onePassJoinUrl;
+  }
+
   const handleLogout = async () => {
     let logoutUrl = null;
 
@@ -378,6 +384,9 @@ export default function Header() {
       } else if (delta > 0 && currentScrollY > 80) {
         // 아래로: lock 적용
         if (isLocked.current) return;
+        const headerHeight = headerRef.current?.offsetHeight ?? 0;
+        const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (scrollableHeight <= headerHeight) return; // 숨기면 스크롤 불가 → 중단
         setIsHeaderVisible(false);
         isLocked.current = true;
         setTimeout(() => { isLocked.current = false; }, 400);
@@ -480,8 +489,10 @@ export default function Header() {
                   {showHeaderSearch && (
                     <div className="sch-input">
                       <input
-                        type="text"
-                        className="krds-input"
+                        type="search"
+                        name="headerSearchKeyword"
+                        autoComplete="off"
+                        className="krds-input medium"
                         placeholder="검색어를 입력하세요"
                         title="검색어 입력"
                         value={headerSearchQuery}
@@ -512,6 +523,7 @@ export default function Header() {
                       onExtendSession={handleExtendSession}
                       onLogin={handleServiceLogin}
                       onOnePassLogin={handleOnePassIntegratedLogin}
+                      onOnePassJoin={handleOnePassJoin}
                       onLogout={handleLogout}
                       onMyPage={handleMyPage}
                       onSwitchContext={async (companyId) => {
@@ -539,7 +551,7 @@ export default function Header() {
                       }}
                     />
                     {/* <HeaderSearch /> */}
-                    <button type="button" className="btn-navi sch open-modal"><span className="sr-only">검색</span></button>
+                    {/*<button type="button" className="btn-navi sch open-modal"><span className="sr-only">검색</span></button>*/}
                     <button type="button" onClick={handleOpenMobGnb} className="btn-navi all" aria-controls="mobile-nav"><span className="sr-only">전체메뉴</span></button>
                   </div>
                 </div>
@@ -556,6 +568,7 @@ export default function Header() {
           onClose={handleCloseMobGnb} 
           onLogin={handleServiceLogin}
           onOnePassLogin={handleOnePassIntegratedLogin}
+          onMyPage={handleMyPage}
           onLogout={handleLogout}
           isLogin={isLogin}
           userName={currentCompany?.companyName || user?.name}

@@ -67,7 +67,7 @@ const UI_USR_R_160 = () => {
                  <div className="search-top-box mb-40">
                     <div className="sch-form-wrap" ref={schFormWrapRef1}>
                       <div className="sch-input">
-                        <input type="text" className="krds-input" placeholder="검색어를 입력하세요" title="검색어 입력" />
+                        <input type="text" className="krds-input medium" placeholder="검색어를 입력하세요" title="검색어 입력" />
                         <button type="button" className="krds-btn medium icon ico-search" >
                           <span className="sr-only">검색</span>
                           <i className="svg-icon ico-sch"></i>
