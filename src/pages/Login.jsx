@@ -67,7 +67,7 @@ const UI_USR_R_002 = () => {
   const handleOnePassJoin = () => {
     const typeStr = (loginType === LOGIN_TYPE_INDIVIDUAL) ? 'member' : 'business';
       
-    const onePassJoinUrl = `https://onepass-dev.smes.go.kr/register/step1?type=${typeStr}&return_client=smes-tipa-01&redirect_uri=https://www.smes.go.kr/home-dev/`;
+    const onePassJoinUrl = `https://onepass-dev.smes.go.kr/register/step1?type=${typeStr}&return_client=smes-tipa-01&return_uri=https://www.smes.go.kr/home-dev/`;
     console.log('onOnePassJoin (Current Type: ' + loginType + ') : ', onePassJoinUrl);
     window.location.href = onePassJoinUrl;
   };

@@ -219,7 +219,7 @@ export default function Header() {
   };
 
   const handleOnePassJoin = () => {
-    const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/register/step1?type=member&return_client=smes-tipa-01&redirect_uri=https://www.smes.go.kr/home-dev/';
+    const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/register/step1?type=member&return_client=smes-tipa-01&return_uri=https://www.smes.go.kr/home-dev/';
     console.log('onOnePassJoin : ', onePassJoinUrl);
     window.location.href = onePassJoinUrl;
   }
