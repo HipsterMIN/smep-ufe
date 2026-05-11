@@ -621,8 +621,6 @@ const MainPage = () => {
       console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     }
-
-    onePassJoin();
   };
   const requestLoginForScrap = () => {
     const moveToLogin = window.confirm('로그인 후 스크랩 가능합니다. 로그인 하시겠습니까?');
