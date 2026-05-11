@@ -41,12 +41,6 @@ const stripHtml = (html) => {
     .trim();
 };
 
-const toggleSelection = (values, target) => (
-  values.includes(target)
-    ? values.filter((item) => item !== target)
-    : [...values, target]
-);
-
 const SprtBiz = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const tabData = useRef(['사업유형별', '지원기관별']);
@@ -66,7 +60,7 @@ const SprtBiz = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
 
-  const [searchStts, setSearchStts] = useState('');
+  const [searchStts] = useState('');
   const [searchType, setSearchType] = useState('');
   const [searchText, setSearchText] = useState('');
   const [size, setSize] = useState(DEFAULT_SIZE);
@@ -223,7 +217,7 @@ const SprtBiz = () => {
   };
 
   const handleBizTypeChange = (value) => {
-    const nextSelectedBizTypes = toggleSelection(selectedBizTypes, value);
+    const nextSelectedBizTypes = value ? [value] : [];
     setSelectedBizTypes(nextSelectedBizTypes);
     autoSearch({
       activeTabIndex: 0,
@@ -232,16 +226,12 @@ const SprtBiz = () => {
   };
 
   const handleOrgChange = (value) => {
-    const nextSelectedOrgs = toggleSelection(selectedOrgs, value);
+    const nextSelectedOrgs = value ? [value] : [];
     setSelectedOrgs(nextSelectedOrgs);
     autoSearch({
       activeTabIndex: 1,
       selectedOrgs: nextSelectedOrgs,
     });
-  };
-
-  const handleSearchSttsChange = (nextSearchStts) => {
-    setSearchStts(nextSearchStts);
   };
 
   const getFieldLabel = (code) => fieldLabelMap[code] || code;
@@ -250,6 +240,8 @@ const SprtBiz = () => {
   const depth1Menu = getDepth1Parent();
   const currentFilters = activeTabIndex === 0 ? bizFieldOptions : organizationOptions;
   const selectedFilters = activeTabIndex === 0 ? selectedBizTypes : selectedOrgs;
+  const detailFilterLabel = activeTabIndex === 0 ? '사업유형' : '지원기관';
+  const detailFilterSelectId = activeTabIndex === 0 ? 'appl-sch-sel1' : 'appl-sch-sel2';
   const hasDetailedSearchInput = activeTabIndex === 0
     ? selectedBizTypes.length > 0
     : selectedOrgs.length > 0;
@@ -272,11 +264,11 @@ const SprtBiz = () => {
 
               <div className="search-top-box">
                 <div className="sch-form-wrap" ref={schFormWrapRef}>
-                  <select className="krds-form-select medium" value={searchStts} onChange={(e) => handleSearchSttsChange(e.target.value)}>
-                    <option value="">공고상태 전체</option>
-                    <option value="ONGOING">진행중</option>
-                    <option value="PLANNED">진행예정</option>
-                  </select>
+                  {/*<select className="krds-form-select medium" value={searchStts} onChange={(e) => handleSearchSttsChange(e.target.value)}>*/}
+                  {/*  <option value="">공고상태 전체</option>*/}
+                  {/*  <option value="ONGOING">진행중</option>*/}
+                  {/*  <option value="PLANNED">진행예정</option>*/}
+                  {/*</select>*/}
                   <select className="krds-form-select medium" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
                     <option value="">검색구분 전체</option>
                     <option value="TITLE">제목</option>
@@ -311,34 +303,19 @@ const SprtBiz = () => {
 
                 <div className="sch-filter-box">
                   <div className="filter-form">
-                    <div className="on-flexwrap on-mw100p">
-                      <label className="label">{activeTabIndex === 0 ? '사업유형' : '지원기관'}</label>
-                      <div
-                        className="krds-check-area"
-                        style={activeTabIndex === 1 ? { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', width: '100%' } : undefined}
+                    <div>
+                      <label className="label" htmlFor={detailFilterSelectId}>{detailFilterLabel}</label>
+                      <select
+                        id={detailFilterSelectId}
+                        className="krds-form-select small"
+                        value={selectedFilters[0] || ''}
+                        onChange={(e) => (activeTabIndex === 0 ? handleBizTypeChange(e.target.value) : handleOrgChange(e.target.value))}
                       >
-                        {currentFilters.map((option) => {
-                          const inputId = `${activeTabIndex === 0 ? 'biz' : 'org'}_${option.value}`;
-                          return (
-                            <div className="krds-form-chip small" key={option.value} style={activeTabIndex === 1 ? { width: '100%' } : undefined}>
-                              <input
-                                type="checkbox"
-                                className="checkbox"
-                                id={inputId}
-                                checked={selectedFilters.includes(option.value)}
-                                onChange={() => (activeTabIndex === 0 ? handleBizTypeChange(option.value) : handleOrgChange(option.value))}
-                              />
-                              <label
-                                className="krds-form-chip-outline"
-                                htmlFor={inputId}
-                                style={activeTabIndex === 1 ? { width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex' } : undefined}
-                              >
-                                {option.label}
-                              </label>
-                            </div>
-                          );
-                        })}
-                      </div>
+                        <option value="">전체</option>
+                        {currentFilters.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>
