@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useMatches, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useMatches, useNavigate, useParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import http from '@lib/http.js';
+import { appendListSearchToPath, resolveListBackPath } from '@utils/listNavigation.js';
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -23,6 +24,7 @@ const UI_USR_R_181 = () => {
   const matches = useMatches();
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [boardDetail, setBoardDetail] = useState(null);
@@ -137,7 +139,7 @@ const UI_USR_R_181 = () => {
   const nextPost = useMemo(() => postDetail?.nextPost ?? null, [postDetail]);
 
   const moveToList = () => {
-    navigate('..');
+    navigate(resolveListBackPath(location));
   };
 
   const handleDownload = async (e, file) => {
@@ -183,7 +185,7 @@ const UI_USR_R_181 = () => {
 
   const buildPostLink = (targetPstNo) => {
     if (targetPstNo == null) return '#';
-    return `../${targetPstNo}`;
+    return appendListSearchToPath(`../${targetPstNo}`, location.search);
   };
 
   const handleNavigationClick = (event, targetPstNo) => {

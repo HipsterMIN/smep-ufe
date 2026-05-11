@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api as apiClient, apiBaseUrl } from '../lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
+import { resolveListBackPath } from '../utils/listNavigation.js';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
 import { useAuthStore } from '../store/useAuthStore.jsx';
 
@@ -28,6 +29,7 @@ const resolveApiErrorMessage = (error, fallbackMessage) =>
 const PbancView = () => {
   const { breadcrumbItems, currentMenu, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const { id } = useParams();
+  const location = useLocation();
   const [item, setItem] = useState(null);
   const [bizFieldOptions, setBizFieldOptions] = useState([]);
   const [viewerVisible, setViewerVisible] = useState(false);
@@ -467,7 +469,7 @@ const PbancView = () => {
 
         <div className="onboard-btm-btngroup">
           <div>
-            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate(-1)}>
+            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate(resolveListBackPath(location))}>
               목록
             </button>
           </div>
