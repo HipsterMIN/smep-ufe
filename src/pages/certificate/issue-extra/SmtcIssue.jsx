@@ -45,7 +45,7 @@ const SmtcIssue = () => {
       });
 
       window.open(
-        `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
+        `https://www.smes.go.kr/e-page?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
         '_blank',
       );
 

@@ -13,6 +13,7 @@ export default function HeaderUserMenu({
   onExtendSession,
   onLogin,
   onOnePassLogin,
+  onOnePassJoin,
   onLogout,
   onMyPage,
   onSwitchContext,
@@ -160,7 +161,7 @@ export default function HeaderUserMenu({
       <button type="button" className="btn-navi login on-mobile-none" onClick={onLogin}>
         로그인
       </button>
-      <button type="button" className="btn-navi join">
+      <button type="button" className="btn-navi join" onClick={onOnePassJoin}>
         회원가입
       </button>
     </>

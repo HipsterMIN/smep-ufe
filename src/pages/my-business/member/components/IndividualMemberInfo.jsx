@@ -28,6 +28,10 @@ const IndividualMemberInfo = ({
     });
   };
 
+  const handleChangeAuthModule = () => {
+    window.alert('인증모듈 적용예정');
+  };
+
   return (
     <>
       {/* 회원정보 변경 */}
@@ -49,7 +53,7 @@ const IndividualMemberInfo = ({
               </dt>
               <dd className="form-row-content">
                 <span className="text-value">{formValues.mbrNm}</span>
-                <button type="button" className="krds-btn primary small ml-8">변경</button>
+                <button type="button" className="krds-btn primary small ml-8" onClick={handleChangeAuthModule}>변경</button>
               </dd>
             </div>
             <div className="form-row-item">
@@ -58,7 +62,7 @@ const IndividualMemberInfo = ({
               </dt>
               <dd className="form-row-content">
                 <span className="text-value">{renderManagerPhoneNumber(formValues.indvMblTelno)}</span>
-                <button type="button" className="krds-btn primary small ml-8">변경</button>
+                <button type="button" className="krds-btn primary small ml-8" onClick={handleChangeAuthModule}>변경</button>
               </dd>
             </div>
             <div className="form-row-item">

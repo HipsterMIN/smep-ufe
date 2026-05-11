@@ -68,6 +68,7 @@ export const useAuthStore = create(
             safeProfile.user ||
             {
               id: safeProfile.id || null,
+              loginId: safeProfile.loginId || safeProfile.login_id || null,
               name: safeProfile.name || safeProfile.username || null,
               email: safeProfile.email || null,
             };

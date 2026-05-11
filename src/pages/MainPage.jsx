@@ -612,8 +612,10 @@ const MainPage = () => {
   };
   const handleOnepassJoinClick = () => {
     if (!isLoggedIn) {
-      window.alert('중기원패스 회원가입 준비중입니다.');
-      return;
+      //window.alert('중기원패스 회원가입 준비중입니다.');
+      const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/register/step1?type=member&return_client=smes-tipa-01';
+      console.log('onOnePassJoin : ', onePassJoinUrl);
+      window.location.href = onePassJoinUrl;
     }
 
     onePassJoin();

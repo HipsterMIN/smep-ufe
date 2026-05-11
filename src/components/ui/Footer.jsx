@@ -69,14 +69,14 @@ export default function Footer() {
         </div>
         <div className="inner">
           <div className="f-logo sample">
-            <span className="sr-only">중소벤처24·기업마당</span>
+            <span className="sr-only">중소벤처24</span>
           </div>
           <div className="f-cnt">
             <div className="f-info">
               <p className="info-addr">30121, 세종특별자치시 가름로 180(어진동), 세종파이낸스센터3차 4층~6층</p>
               <ul className="info-cs">
                 <li>
-                  <strong className="key-info">중소벤처24·기업마당 시스템 장애 문의 <span>(044) 300-0990, (044) 300-0991</span></strong>
+                  <strong className="key-info">중소벤처24 시스템 장애 문의 <span>(044) 300-0990, (044) 300-0991</span></strong>
                   <strong className="more-info">메일문의 <span>smeshelp@tipa.or.kr</span></strong>
                 </li>
                 <li>

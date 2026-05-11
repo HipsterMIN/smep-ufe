@@ -14,6 +14,7 @@ const UI_USR_L_040 = lazy(() => import('@pages/certificate/UI_USR_L_040.jsx'));
 const UI_USR_R_041 = lazy(() => import('@pages/certificate/UI_USR_R_041.jsx'));
 const UI_USR_P_042 = lazy(() => import('@pages/certificate/UI_USR_P_042.jsx'));
 const DpcIssue = lazy(() => import('@pages/certificate/issue-extra/DpcIssue.jsx'));
+const BizIssue = lazy(() => import('@pages/certificate/issue-extra/BizIssue.jsx'));
 const CbzIssue = lazy(() => import('@pages/certificate/issue-extra/CbzIssue.jsx'));
 const PfcIssue = lazy(() => import('@pages/certificate/issue-extra/PfcIssue.jsx'));
 const SmtcIssue = lazy(() => import('@pages/certificate/issue-extra/SmtcIssue.jsx'));
@@ -241,6 +242,10 @@ export const componentMap = {
       {
         path: 'Y101/dpc-issue',
         component: DpcIssue,
+      },
+      {
+        path: 'Y104/biz-issue',
+        component: BizIssue,
       },
       {
         path: 'Y109/cbz-issue',
