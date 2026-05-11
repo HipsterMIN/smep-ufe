@@ -278,7 +278,7 @@ const BoardFaq = ({ bbsNo }) => {const matches = useMatches();
                 <Accordion.Header>
                   <div className="accordion-title">
                     <span className="krds-badge bg-light-primary">{item?.ctgryNm || 'FAQ'}</span>
-                    <p className="onellipsis-1">{stripHtmlTags(item?.pstTtl) || '-'}</p>
+                    <p className="onellipsis-1" style={{ WebkitLineClamp: 'unset' }}>{stripHtmlTags(item?.pstTtl) || '-'}</p>
                   </div>
                 </Accordion.Header>
                 <Accordion.Panel>
