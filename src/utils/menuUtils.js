@@ -29,19 +29,53 @@ export const buildFullPath = (menuNode, flatMenuMap) => {
   return '/' + pathSegments.join('/');
 };
 
-// ✅ 외부 링크 유틸리티 함수 (TODO : 데이터 구조 개선 시 제거)
+export const isHttpProtocolUrl = (value) => {
+  const raw = String(value ?? '').trim();
+  if (!raw) return false;
+
+  try {
+    const parsed = new URL(raw);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+// 외부 링크 유틸리티 함수 (TODO : 데이터 구조 개선 시 제거)
 export const extractExternalUrl = (link) => {
   /*
-  정규식 패턴: https?:\/\/.+
-  - http      → 문자열 "http"와 정확히 일치
-  - s?        → "s"가 0개 또는 1개 (http 또는 https 둘 다 매칭)
-  - :         → 콜론 문자 ":"
-  - \/\/      → 슬래시 2개 "//" (정규식에서 /는 특수문자라 \로 이스케이프)
-  - .+        → 임의의 문자(.)가 1개 이상(+) 반복
   결과: "http://..." 또는 "https://..."로 시작하는 부분을 찾아서 반환
   예: "/do/https://example.com" → "https://example.com" 추출
    */
-  if (!link) return null;
-  const httpMatch = link.match(/https?:\/\/.+/);
-  return httpMatch ? httpMatch[0] : null;
+  const raw = String(link ?? '').trim();
+  if (!raw) return null;
+
+  const httpMatch = raw.match(/https?:\/\/.+/i);
+  const candidate = httpMatch ? httpMatch[0] : null;
+  return isHttpProtocolUrl(candidate) ? candidate : null;
+};
+
+export const getMenuExternalUrl = (menuNode) => extractExternalUrl(menuNode?.scrnUrlAddr);
+
+export const isExternalMenuNode = (menuNode) => Boolean(getMenuExternalUrl(menuNode));
+
+export const findFirstVisibleTMenu = (menuNode, predicate = () => true) => {
+  if (!menuNode?.children || menuNode.children.length === 0) {
+    return null;
+  }
+
+  const queue = [...menuNode.children];
+  while (queue.length > 0) {
+    const node = queue.shift();
+
+    if (node.scrnTypeCd === 'T' && node.lfsdMenuExpsrYn === 'Y' && predicate(node)) {
+      return node;
+    }
+
+    if (node.children && node.children.length > 0) {
+      queue.push(...node.children);
+    }
+  }
+
+  return null;
 };

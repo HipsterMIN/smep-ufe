@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import arrowIcon from '@assets/main/icon-arrow.svg';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import { useMenuStore } from '@store/useMenuStore.js';
-import { buildFullPath } from '@utils/menuUtils.js';
+import { buildFullPath, findFirstVisibleTMenu, getMenuExternalUrl } from '@utils/menuUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import HeaderUserMenu from '@components/ui/header/HeaderUserMenu';
 import HeaderDesktopGNB from '@components/ui/header/HeaderDesktopGNB';
@@ -18,21 +18,38 @@ const BASE_URL = import.meta.env.VITE_BASE || '/';
 const MY_BUSINESS_MENU_ID = 'M_PIIO_00068';
 const TOTAL_SEARCH_MENU_ID = 'M_PIIO_00152';
 
+const resolveHeaderMenuPath = (menu, flatMenuMap, basePath) => {
+  const menuExternalUrl = getMenuExternalUrl(menu);
+  if (menuExternalUrl) {
+    return menuExternalUrl;
+  }
+
+  if (menu.scrnTypeCd === 'M') {
+    const firstVisibleTMenu = findFirstVisibleTMenu(menu);
+    const firstExternalUrl = getMenuExternalUrl(firstVisibleTMenu);
+    if (firstExternalUrl) {
+      return firstExternalUrl;
+    }
+  }
+
+  return basePath + buildFullPath(menu, flatMenuMap);
+};
+
 const buildHeaderMenuItem = (menu, flatMenuMap, basePath) => ({
   ...menu,
-  fullPath: basePath + buildFullPath(menu, flatMenuMap),
+  fullPath: resolveHeaderMenuPath(menu, flatMenuMap, basePath),
   children: (menu.children || [])
     .filter(child => child.lfsdMenuExpsrYn === 'Y')
     .sort((a, b) => a.sortSeq - b.sortSeq)
     .map(child => ({
       ...child,
-      fullPath: basePath + buildFullPath(child, flatMenuMap),
+      fullPath: resolveHeaderMenuPath(child, flatMenuMap, basePath),
       children: (child.children || [])
         .filter(grandChild => grandChild.lfsdMenuExpsrYn === 'Y')
         .sort((a, b) => a.sortSeq - b.sortSeq)
         .map(grandChild => ({
           ...grandChild,
-          fullPath: basePath + buildFullPath(grandChild, flatMenuMap),
+          fullPath: resolveHeaderMenuPath(grandChild, flatMenuMap, basePath),
         })),
     })),
 });
@@ -113,19 +130,19 @@ export default function Header() {
       .sort((a, b) => a.sortSeq - b.sortSeq)
       .map(menu => ({
         ...menu,
-        fullPath: basePath + buildFullPath(menu, flatMenuMap),
+        fullPath: resolveHeaderMenuPath(menu, flatMenuMap, basePath),
         children: (menu.children || [])
           .filter(child => child.lfsdMenuExpsrYn === 'Y')
           .sort((a, b) => a.sortSeq - b.sortSeq)
           .map(child => ({
             ...child,
-            fullPath: basePath + buildFullPath(child, flatMenuMap),
+            fullPath: resolveHeaderMenuPath(child, flatMenuMap, basePath),
             children: (child.children || [])
               .filter(grandChild => grandChild.lfsdMenuExpsrYn === 'Y')
               .sort((a, b) => a.sortSeq - b.sortSeq)
               .map(grandChild => ({
                 ...grandChild,
-                fullPath: basePath + buildFullPath(grandChild, flatMenuMap),
+                fullPath: resolveHeaderMenuPath(grandChild, flatMenuMap, basePath),
               })),
           })),
       }));
