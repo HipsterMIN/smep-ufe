@@ -164,6 +164,12 @@ export default function Header() {
     onePassGetAuthCode();
   };
 
+  const handleOnePassJoin = () => {
+    const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/register/step1?type=member';
+    console.log('onOnePassJoin : ', onePassJoinUrl);
+    window.location.href = onePassJoinUrl;
+  }
+
   const handleLogout = async () => {
     let logoutUrl = null;
 
@@ -517,6 +523,7 @@ export default function Header() {
                       onExtendSession={handleExtendSession}
                       onLogin={handleServiceLogin}
                       onOnePassLogin={handleOnePassIntegratedLogin}
+                      onOnePassJoin={handleOnePassJoin}
                       onLogout={handleLogout}
                       onMyPage={handleMyPage}
                       onSwitchContext={async (companyId) => {
