@@ -195,11 +195,11 @@ const HeaderMobileGNB = forwardRef(({
             {/* 03-10 디자인 변경 */}
             <div className="gnb-utils">
               <ul className="utility-list">
-                <li>
+                {/*<li>
                   <Link onClick={() => setPopOpen(true)} className="krds-btn medium text">
                     <i className="svg-icon ico-system"></i> 유관시스템 둘러보기
                   </Link>
-                </li>
+                </li>*/}
               </ul>
             </div>
             <div className={`gnb-login ${isLogin ? 'is-login' : 'is-logout'}`}>
