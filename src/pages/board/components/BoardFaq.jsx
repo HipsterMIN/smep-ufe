@@ -193,7 +193,7 @@ const BoardFaq = ({ bbsNo }) => {const matches = useMatches();
         <div className="search-top-box">
           <div className="sch-form-wrap">
             <select
-              className="krds-form-select"
+              className="krds-form-select medium"
               value={searchType}
               onChange={(event) => setSearchType(event.target.value)}
             >

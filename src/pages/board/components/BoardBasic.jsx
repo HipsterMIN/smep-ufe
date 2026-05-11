@@ -300,7 +300,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
           <div className="sch-form-wrap">
             {isCategoryEnabled && (
               <select
-                className="krds-form-select"
+                className="krds-form-select medium"
                 value={selectedCategoryNo}
                 onChange={(event) => setSelectedCategoryNo(event.target.value)}
               >
@@ -313,7 +313,7 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
               </select>
             )}
             <select
-              className="krds-form-select"
+              className="krds-form-select medium"
               value={searchType}
               onChange={(event) => setSearchType(event.target.value)}
             >
