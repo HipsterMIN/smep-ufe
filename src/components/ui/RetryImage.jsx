@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const DEFAULT_MAX_RETRIES = 2;
-const DEFAULT_TIMEOUT_MS = 2000;
+const DEFAULT_TIMEOUT_MS = 1200;
 const RETRY_QUERY_KEY = '_retry';
 
 const normalizeSource = (value) => String(value ?? '').trim();
