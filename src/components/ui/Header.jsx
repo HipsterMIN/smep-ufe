@@ -15,7 +15,27 @@ import { onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
 
 // BASE URL 상수
 const BASE_URL = import.meta.env.VITE_BASE || '/';
+const MY_BUSINESS_MENU_ID = 'M_PIIO_00068';
 const TOTAL_SEARCH_MENU_ID = 'M_PIIO_00152';
+
+const buildHeaderMenuItem = (menu, flatMenuMap, basePath) => ({
+  ...menu,
+  fullPath: basePath + buildFullPath(menu, flatMenuMap),
+  children: (menu.children || [])
+    .filter(child => child.lfsdMenuExpsrYn === 'Y')
+    .sort((a, b) => a.sortSeq - b.sortSeq)
+    .map(child => ({
+      ...child,
+      fullPath: basePath + buildFullPath(child, flatMenuMap),
+      children: (child.children || [])
+        .filter(grandChild => grandChild.lfsdMenuExpsrYn === 'Y')
+        .sort((a, b) => a.sortSeq - b.sortSeq)
+        .map(grandChild => ({
+          ...grandChild,
+          fullPath: basePath + buildFullPath(grandChild, flatMenuMap),
+        })),
+    })),
+});
 
 // JWT 디코딩 함수 (간단한 구현)
 function parseJwt(token) {
@@ -110,6 +130,23 @@ export default function Header() {
           })),
       }));
   }, [menuTree, flatMenuMap]);
+
+  const mobileMenus = useMemo(() => {
+    if (!isLogin || !menuTree || !menuTree.children) {
+      return dynamicMenus;
+    }
+
+    const hasMyBusinessMenu = dynamicMenus.some(menu => menu.menuId === MY_BUSINESS_MENU_ID);
+    const myBusinessMenu = menuTree.children.find(menu => menu.menuId === MY_BUSINESS_MENU_ID);
+    if (hasMyBusinessMenu || !myBusinessMenu) {
+      return dynamicMenus;
+    }
+
+    const basePath = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+    // 모바일 로그인 전체메뉴에서만 마이비즈니스 1depth를 보강하고, 원본 상단 노출값은 바꾸지 않는다.
+    return [...dynamicMenus, buildHeaderMenuItem(myBusinessMenu, flatMenuMap, basePath)]
+      .sort((a, b) => a.sortSeq - b.sortSeq);
+  }, [isLogin, menuTree, flatMenuMap, dynamicMenus]);
 
   // 타이머는 우리 관리 범위가 확정된 ID/PW 세션(access + refresh 보유)에만 노출한다.
   const showSessionTimer = Boolean(token && refreshToken && remainingSeconds !== null);
@@ -564,7 +601,7 @@ export default function Header() {
 
         <HeaderMobileGNB 
           ref={mobGnbRef} 
-          menus={dynamicMenus} 
+          menus={mobileMenus}
           onClose={handleCloseMobGnb} 
           onLogin={handleServiceLogin}
           onOnePassLogin={handleOnePassIntegratedLogin}
