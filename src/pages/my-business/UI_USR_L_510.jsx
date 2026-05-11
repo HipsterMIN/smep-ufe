@@ -93,7 +93,7 @@ const IssuanceTableRow = ({ item, totalElements, currentPage, pageSize, index, o
             className="krds-btn small"
             onClick={() =>
               window.open(
-                `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${effectivePrdocCd}&prdocIssuAplyNo=${item.prdocIssuAplyNo}`,
+                `https://www.smes.go.kr/e-page?prdocCd=${effectivePrdocCd}&prdocIssuAplyNo=${item.prdocIssuAplyNo}`,
                 '_blank',
               )
             }
@@ -307,7 +307,7 @@ const UI_USR_L_510 = () => {
                   disabled={selectedExpired}
                   onClick={() =>
                     window.open(
-                      `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${popupEffectivePrdocCd}&prdocIssuAplyNo=${selectedItem.prdocIssuAplyNo}`,
+                      `https://www.smes.go.kr/e-page?prdocCd=${popupEffectivePrdocCd}&prdocIssuAplyNo=${selectedItem.prdocIssuAplyNo}`,
                       '_blank',
                     )
                   }
