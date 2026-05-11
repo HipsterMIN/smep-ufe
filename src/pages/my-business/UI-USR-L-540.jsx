@@ -6,32 +6,48 @@ import Datepicker from '@components/ui/Datepicker';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import { api as apiClient } from '@lib/apiClient.js';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  appendReturnUrlToPath,
+  getNumberSearchParam,
+  getSearchParam,
+  setQueryParam,
+} from '@utils/listNavigation.js';
+
+const parseDateParam = (value) => {
+  const text = String(value || '').trim();
+  if (!text) return null;
+
+  const date = new Date(`${text}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
 
 const UI_USR_L_540 = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [, setSearchParams] = useSearchParams();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
 
   // 검색 조건 (입력용)
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [startDate, setStartDate] = useState(() => parseDateParam(getSearchParam(location.search, 'srchFrDt', '')));
+  const [endDate, setEndDate] = useState(() => parseDateParam(getSearchParam(location.search, 'srchToDt', '')));
+  const [selectedCategory, setSelectedCategory] = useState(() => getSearchParam(location.search, 'pbancTypeSeCd', ''));
+  const [searchKeyword, setSearchKeyword] = useState(() => getSearchParam(location.search, 'srchTtl', ''));
 
   // 검색 조건 (전송용)
-  const [appliedStartDate, setAppliedStartDate] = useState(null);
-  const [appliedEndDate, setAppliedEndDate] = useState(null);
-  const [appliedCategory, setAppliedCategory] = useState('');
-  const [appliedKeyword, setAppliedKeyword] = useState('');
+  const [appliedStartDate, setAppliedStartDate] = useState(() => parseDateParam(getSearchParam(location.search, 'srchFrDt', '')));
+  const [appliedEndDate, setAppliedEndDate] = useState(() => parseDateParam(getSearchParam(location.search, 'srchToDt', '')));
+  const [appliedCategory, setAppliedCategory] = useState(() => getSearchParam(location.search, 'pbancTypeSeCd', ''));
+  const [appliedKeyword, setAppliedKeyword] = useState(() => getSearchParam(location.search, 'srchTtl', ''));
 
   // 목록 데이터
   const [notificationList, setNotificationList] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(() => getNumberSearchParam(location.search, 'page', 1));
+  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 10));
   const [loading, setLoading] = useState(false);
 
   // Date → YYYY-MM-DD 포맷
@@ -44,6 +60,17 @@ const UI_USR_L_540 = () => {
     return `${year}-${month}-${day}`;
   };
 
+  const buildListSearchParams = () => {
+    const params = new URLSearchParams();
+    setQueryParam(params, 'page', currentPage, 1);
+    setQueryParam(params, 'size', pageSize, 10);
+    setQueryParam(params, 'srchFrDt', formatDate(appliedStartDate));
+    setQueryParam(params, 'srchToDt', formatDate(appliedEndDate));
+    setQueryParam(params, 'pbancTypeSeCd', appliedCategory);
+    setQueryParam(params, 'srchTtl', appliedKeyword);
+    return params;
+  };
+
   // LocalDateTime → 화면 표시용 포맷 (2025-12-11T10:04:00 → 2025-12-11 10:04)
   const formatDateTime = (dateTime) => {
     if (!dateTime) return '-';
@@ -54,6 +81,8 @@ const UI_USR_L_540 = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        setSearchParams(buildListSearchParams(), { replace: true });
+
         const params = new URLSearchParams({
           page: currentPage,
           size: pageSize,
@@ -104,9 +133,9 @@ const UI_USR_L_540 = () => {
   // 자세히보기 - 공고 유형에 따라 라우팅
   const handleDetail = (item) => {
     if (item.pbancTypeSeCd === 'BIZP') {
-      navigate(`/req/pbanc/${item.bizPbancNo}`);
+      navigate(appendReturnUrlToPath(`/req/pbanc/${item.bizPbancNo}`, location));
     } else if (item.pbancTypeSeCd === 'PLCF') {
-      navigate(`/req/UI_USR_L_030/${item.plcyFnncNo}`);
+      navigate(appendReturnUrlToPath(`/req/UI_USR_L_030/${item.plcyFnncNo}`, location));
     }
   };
 

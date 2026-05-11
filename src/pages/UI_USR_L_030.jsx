@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import Pagination from '../components/ui/Pagination';
 import Popup from '../components/ui/Popup';
@@ -9,6 +9,7 @@ import Tooltip from '../components/ui/Tooltip';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
+import { appendListSearchToPath, getNumberSearchParam, getSearchParam, setQueryParam } from '../utils/listNavigation.js';
 import { formatNumberWithCommas } from '../utils/numberUtils.js';
 
 const TAB_LABELS = ['전체', '융자', '보증', '보험'];
@@ -79,6 +80,28 @@ const EMPTY_FILTERS = {
   plcyFnncGdsKndCd: '',
   plcyFnncGrnteRtSmryCn: '',
   plcyFnncCmpnRtSmryCn: '',
+};
+
+const getTabIndexFromSearch = (search) => {
+  const tabIndex = getNumberSearchParam(search, 'tab', NaN);
+  if (Number.isFinite(tabIndex) && tabIndex >= 0 && tabIndex < TAB_CODES.length) {
+    return tabIndex;
+  }
+
+  const tabCode = getSearchParam(search, 'plcyFnncGdsTypeCd', '');
+  const foundIndex = TAB_CODES.indexOf(tabCode);
+  return foundIndex >= 0 ? foundIndex : 0;
+};
+
+const getFiltersFromSearch = (search) => {
+  const nextFilters = { ...EMPTY_FILTERS };
+  Object.keys(EMPTY_FILTERS).forEach((key) => {
+    const value = getSearchParam(search, key, null);
+    if (value !== null) {
+      nextFilters[key] = value;
+    }
+  });
+  return nextFilters;
 };
 const DEFAULT_FILTER_OPTIONS = {
   searchTypes: SEARCH_TYPE_OPTIONS,
@@ -303,22 +326,26 @@ const getListSummaryValue = (value, codeMap) => {
 
 const UI_USR_L_030 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const location = useLocation();
   const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
   const filterWrapRef = useRef(null);
-  const filtersRef = useRef(EMPTY_FILTERS);
+  const initialFilters = useMemo(() => getFiltersFromSearch(location.search), []);
+  const initialTabIndex = useMemo(() => getTabIndexFromSearch(location.search), []);
+  const filtersRef = useRef(initialFilters);
   const listRequestSeqRef = useRef(0);
 
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const [filters, setFilters] = useState(EMPTY_FILTERS);
-  const [appliedFilters, setAppliedFilters] = useState(EMPTY_FILTERS);
+  const [activeTabIndex, setActiveTabIndex] = useState(initialTabIndex);
+  const [filters, setFilters] = useState(initialFilters);
+  const [appliedFilters, setAppliedFilters] = useState(initialFilters);
   const [filterOptions, setFilterOptions] = useState(DEFAULT_FILTER_OPTIONS);
   const [items, setItems] = useState([]);
   const [popularItems, setPopularItems] = useState([]);
-  const [page, setPage] = useState(1);
-  const [size, setSize] = useState(12);
-  const [sortType, setSortType] = useState('INQ_CNT');
+  const [page, setPage] = useState(() => getNumberSearchParam(location.search, 'page', 1));
+  const [size, setSize] = useState(() => getNumberSearchParam(location.search, 'size', 12));
+  const [sortType, setSortType] = useState(() => getSearchParam(location.search, 'sortType', 'INQ_CNT'));
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -357,6 +384,26 @@ const UI_USR_L_030 = () => {
         setFilterOptions(DEFAULT_FILTER_OPTIONS);
       });
   }, []);
+
+  const buildListSearchParams = () => {
+    const params = new URLSearchParams();
+
+    setQueryParam(params, 'tab', activeTabIndex, 0);
+    setQueryParam(params, 'page', page, 1);
+    setQueryParam(params, 'size', size, 12);
+    setQueryParam(params, 'sortType', sortType, 'INQ_CNT');
+
+    Object.entries(appliedFilters).forEach(([key, value]) => {
+      const defaultValue = EMPTY_FILTERS[key] ?? '';
+      setQueryParam(params, key, value, defaultValue);
+    });
+
+    if (appliedIndustries.length > 0) {
+      setQueryParam(params, 'plcyFnncTpbizNm', appliedIndustries.map((item) => item.upperKsicCd).join(','));
+    }
+
+    return params;
+  };
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -410,6 +457,8 @@ const UI_USR_L_030 = () => {
     if (appliedIndustries.length > 0) {
       params.set('plcyFnncTpbizNm', appliedIndustries.map((item) => item.upperKsicCd).join(','));
     }
+
+    setSearchParams(buildListSearchParams(), { replace: true });
 
     const requestSeq = ++listRequestSeqRef.current;
     setLoading(true);
@@ -664,7 +713,9 @@ const UI_USR_L_030 = () => {
 
   const navigateToDetail = (goodsSn) => {
     const queryString = buildDetailSearchQuery();
-    navigate(queryString ? `${goodsSn}?${queryString}` : `${goodsSn}`);
+    const listSearch = buildListSearchParams().toString();
+    const detailPath = queryString ? `${goodsSn}?${queryString}` : `${goodsSn}`;
+    navigate(appendListSearchToPath(detailPath, listSearch));
   };
 
   return (
@@ -677,7 +728,7 @@ const UI_USR_L_030 = () => {
         </div>
 
         <div className="krds-tab-area layer">
-          <Tab tabData={TAB_LABELS} onTabChange={handleTabChange} />
+          <Tab tabData={TAB_LABELS} onTabChange={handleTabChange} activeIndex={activeTabIndex} />
           <div className="conts-desc">
             중소기업 성장과 경영 안정을 위해 제공하는 다양한 정책금융 상품을 조회할 수 있습니다.
           </div>

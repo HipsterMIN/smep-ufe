@@ -7,7 +7,13 @@ import Datepicker from '@components/ui/Datepicker';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import { api as apiClient } from '@lib/apiClient.js';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  appendReturnUrlToPath,
+  getNumberSearchParam,
+  getSearchParam,
+  setQueryParam,
+} from '@utils/listNavigation.js';
 
 function ScrapToggleButton({ row, onToggle }) {
   // 1. 처음 로딩 시 목록에 있다면 기본적으로 '등록된 상태(Y)'로 시작
@@ -40,19 +46,35 @@ function ScrapToggleButton({ row, onToggle }) {
   );
 }
 
+const parseDateParam = (value) => {
+  const text = String(value || '').trim();
+  if (!text) return null;
+
+  const date = new Date(`${text}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
 const ScrapList = () => {
   const tabData = useRef(['사업공고', '정책금융']);
 
   const categoryMap = { '사업공고': 'BIZP', '정책금융': 'PLCF' };
 
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12);
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [appliedKeyword, setAppliedKeyword] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [, setSearchParams] = useSearchParams();
+  const initialTabIndex = Math.min(
+    tabData.current.length - 1,
+    Math.max(0, getNumberSearchParam(location.search, 'tab', 0)),
+  );
 
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [activeTabIndex, setActiveTabIndex] = useState(initialTabIndex);
+  const [currentPage, setCurrentPage] = useState(() => getNumberSearchParam(location.search, 'page', 1));
+  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 12));
+  const [searchKeyword, setSearchKeyword] = useState(() => getSearchParam(location.search, 'keyword', ''));
+  const [appliedKeyword, setAppliedKeyword] = useState(() => getSearchParam(location.search, 'keyword', ''));
+
+  const [startDate, setStartDate] = useState(() => parseDateParam(getSearchParam(location.search, 'srchFrDt', '')));
+  const [endDate, setEndDate] = useState(() => parseDateParam(getSearchParam(location.search, 'srchToDt', '')));
 
 
   // 서버에서 받아온 실제 데이터 상태
@@ -64,7 +86,6 @@ const ScrapList = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
-  const navigate = useNavigate();
   const activeCategory = tabData.current[activeTabIndex];
 
   const handleDetail = (row) => {
@@ -72,9 +93,9 @@ const ScrapList = () => {
     const type = row.pbanc_type_se_cd || row.pbancTypeSeCd;
 
     if (type === 'BIZP') {
-      navigate(`/req/pbanc/${row.id}`);
+      navigate(appendReturnUrlToPath(`/req/pbanc/${row.id}`, location));
     } else if (type === 'PLCF') {
-      navigate(`/req/UI_USR_L_030/${row.id}`);
+      navigate(appendReturnUrlToPath(`/req/UI_USR_L_030/${row.id}`, location));
     }
   };
 
@@ -86,6 +107,17 @@ const ScrapList = () => {
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
+
+  const buildListSearchParams = useCallback(() => {
+    const params = new URLSearchParams();
+    setQueryParam(params, 'tab', activeTabIndex, 0);
+    setQueryParam(params, 'page', currentPage, 1);
+    setQueryParam(params, 'size', pageSize, 12);
+    setQueryParam(params, 'keyword', appliedKeyword);
+    setQueryParam(params, 'srchFrDt', formatDate(startDate));
+    setQueryParam(params, 'srchToDt', formatDate(endDate));
+    return params;
+  }, [activeTabIndex, currentPage, pageSize, appliedKeyword, startDate, endDate]);
 
   // LocalDateTime → 화면 표시용 포맷 (2025-12-11T10:04:00 → 2025-12-11 10:04)
   const formatDateTime = (dateTime) => {
@@ -113,6 +145,8 @@ const ScrapList = () => {
     setLoading(true);
 
     try {
+      setSearchParams(buildListSearchParams(), { replace: true });
+
       const params = {
         category: categoryMap[activeCategory],
         page: currentPage,
@@ -143,7 +177,16 @@ const ScrapList = () => {
     } finally {
       setLoading(false);
     }
-  }, [activeCategory, currentPage, pageSize, appliedKeyword, startDate, endDate]);
+  }, [
+    activeCategory,
+    currentPage,
+    pageSize,
+    appliedKeyword,
+    startDate,
+    endDate,
+    buildListSearchParams,
+    setSearchParams,
+  ]);
 
   useEffect(() => {
     fetchListData();
@@ -207,7 +250,7 @@ const ScrapList = () => {
         </p>
 
         <div className="mt-40">
-          <Tab tabData={tabData.current} onTabChange={handleTabChange}></Tab>
+          <Tab tabData={tabData.current} onTabChange={handleTabChange} activeIndex={activeTabIndex}></Tab>
         </div>
 
         <div className="search-top-box no-details mt-40">

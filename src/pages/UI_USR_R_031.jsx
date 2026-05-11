@@ -5,6 +5,7 @@ import SideNavigation from '../components/ui/SideNavigation';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
+import { resolveListBackPath } from '../utils/listNavigation.js';
 import { useAuthStore } from '../store/useAuthStore.jsx';
 
 const DEFAULT_FILTER_OPTIONS = {
@@ -587,7 +588,7 @@ const UI_USR_R_031 = () => {
 
         <div className="onboard-btm-btngroup">
           <div>
-            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate(-1)}>
+            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate(resolveListBackPath(location, '..', { excludeKeys: ['srchText', 'reSrchText'] }))}>
               목록
             </button>
           </div>

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient, apiBaseUrl } from '@lib/apiClient.js';
+import { resolveListBackPath } from '@utils/listNavigation.js';
 
 const EMPTY_HTML_PATTERNS = new Set([
   '<p style="text-align: left;"></p>',
@@ -36,6 +37,7 @@ const formatDate = (dateString) => {
 
 const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const [postDetail, setPostDetail] = useState(null);
@@ -127,7 +129,7 @@ const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
   }, [loading, errorMessage, isPrivatePostHidden, postDetail]);
 
   const moveToList = () => {
-    navigate('..');
+    navigate(resolveListBackPath(location));
   };
   console.log(attachedFiles);
 

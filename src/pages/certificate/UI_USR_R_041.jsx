@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { api as apiClient } from '@lib/apiClient.js';
 import Logo from '@assets/common/logo2.svg';
 import { useAuthStore } from '@store/useAuthStore';
@@ -8,6 +8,7 @@ import { useAuthStore } from '@store/useAuthStore';
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Popup from '@components/ui/Popup.jsx';
+import { resolveListBackPath } from '@utils/listNavigation.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 const UI_USR_R_041 = () => {
@@ -16,6 +17,7 @@ const UI_USR_R_041 = () => {
   const { isLogin, cmpNm, currentMode, logout  } = useAuthStore();
 
   const { prdocCd } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,7 @@ const UI_USR_R_041 = () => {
   }, [prdocCd]);
 
   const goBack = () => {
-    navigate(-1);
+    navigate(resolveListBackPath(location));
   };
 
   /**
@@ -92,6 +94,7 @@ const UI_USR_R_041 = () => {
     }
 
     // 발급 가능 기업 여부 확인
+    let supportedLangs = [];
     try {
       const result = await apiClient.post(
         '/api/v1/certificate/eligibility',
@@ -115,6 +118,7 @@ const UI_USR_R_041 = () => {
         setIsIneligiblePopupOpen(true);
         return;
       }
+      supportedLangs = result.data.supportedLangs || [];
     } catch (error) {
       console.error('발급 가능 여부 확인 실패:', error);
       alert('발급 가능 여부 확인 중 오류가 발생했습니다.');
@@ -128,10 +132,13 @@ const UI_USR_R_041 = () => {
       prdocNm: data.prdocTtl,
       prdocIssuGdCn: data.prdocIssuGdCn,
       elpblYn: data.elpblYn,
+      supportedLangs,
     };
 
     if (prdocCd === 'Y101') {
       navigate(`${base}/Y101/dpc-issue`, { state });
+    }  else if (prdocCd === 'Y104' || prdocCd === 'Y105') {
+      navigate(`${base}/Y104/biz-issue`, { state });
     } else if (prdocCd === 'Y109') {
       navigate(`${base}/Y109/cbz-issue`, { state });
     } else if (prdocCd === 'Y113') {

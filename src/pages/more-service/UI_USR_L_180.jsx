@@ -1,10 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useMatches, useNavigate } from 'react-router-dom';
+import { useLocation, useMatches, useNavigate, useSearchParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import {
+  appendListSearchToPath,
+  getNumberSearchParam,
+  getSearchParam,
+  setQueryParam,
+} from '@utils/listNavigation.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const formatDate = (dateString) => {
@@ -23,20 +29,22 @@ const formatDate = (dateString) => {
 const UI_USR_L_180 = () => {
   const matches = useMatches();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [, setSearchParams] = useSearchParams();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const [boardDetail, setBoardDetail] = useState(null);
-  const [searchType, setSearchType] = useState('TITLE');
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [appliedSearchType, setAppliedSearchType] = useState('TITLE');
-  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState('');
+  const [searchType, setSearchType] = useState(() => getSearchParam(location.search, 'searchType', 'TITLE'));
+  const [searchKeyword, setSearchKeyword] = useState(() => getSearchParam(location.search, 'searchKeyword', ''));
+  const [appliedSearchType, setAppliedSearchType] = useState(() => getSearchParam(location.search, 'searchType', 'TITLE'));
+  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState(() => getSearchParam(location.search, 'searchKeyword', ''));
 
   const [postList, setPostList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [currentPage, setCurrentPage] = useState(() => Math.max(0, getNumberSearchParam(location.search, 'page', 1) - 1));
+  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 20));
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -77,6 +85,19 @@ const UI_USR_L_180 = () => {
     };
   }, [bbsNo]);
 
+  const buildListSearchParams = () => {
+    const params = new URLSearchParams();
+    setQueryParam(params, 'page', currentPage + 1, 1);
+    setQueryParam(params, 'size', pageSize, 20);
+
+    if (appliedSearchKeyword.trim()) {
+      setQueryParam(params, 'searchType', appliedSearchType, 'TITLE');
+      setQueryParam(params, 'searchKeyword', appliedSearchKeyword);
+    }
+
+    return params;
+  };
+
   useEffect(() => {
     let isMounted = true;
 
@@ -92,6 +113,7 @@ const UI_USR_L_180 = () => {
       try {
         if (!isMounted) return;
         setLoading(true);
+        setSearchParams(buildListSearchParams(), { replace: true });
 
         const params = new URLSearchParams({
           page: String(currentPage + 1),
@@ -159,7 +181,7 @@ const UI_USR_L_180 = () => {
 
   const moveToDetail = (pstNo) => {
     if (pstNo == null) return;
-    navigate(`${pstNo}`);
+    navigate(appendListSearchToPath(`${pstNo}`, buildListSearchParams().toString()));
   };
 
   return (

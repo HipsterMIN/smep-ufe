@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import SideNavigation from '@/components/ui/SideNavigation';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import Popup from '@/components/ui/Popup';
 import { api as apiClient } from '@lib/apiClient.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import { resolveListBackPath } from '@utils/listNavigation.js';
 
 /** 태그로 바로 표시할 최대 품목 수 */
 const ITEM_PREVIEW_COUNT = 7;
 
 const UI_USR_R_121 = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { certSystmSn } = useParams();
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -44,7 +46,7 @@ const UI_USR_R_121 = () => {
   }, [certSystmSn]);
 
   const goBack = () => {
-    navigate(-1);
+    navigate(resolveListBackPath(location));
   };
 
   // 인증제도 상세정보 URL 조합

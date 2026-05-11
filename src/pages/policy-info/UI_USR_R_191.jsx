@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient, apiBaseUrl } from '@lib/apiClient.js';
+import { resolveListBackPath } from '@utils/listNavigation.js';
 import { formatEventRegionForDetail } from '@utils/stringUtils.js';
 
 const STREAMDOCS_VIEWER_URL =
@@ -52,6 +53,7 @@ const formatEventPeriod = (value) => {
 };
 
 const UI_USR_R_191 = () => {
+  const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -303,7 +305,7 @@ const UI_USR_R_191 = () => {
 
         <div className="onboard-btm-btngroup">
           <div>
-            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate('..')}>
+            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate(resolveListBackPath(location))}>
               목록
             </button>
           </div>

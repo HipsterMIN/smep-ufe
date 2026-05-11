@@ -32,29 +32,19 @@ const isExpired = (aplyDt) => {
   return (now - applyTime) > 24 * 60 * 60 * 1000;
 };
 
-// prdocCd 별 출력언어 옵션
-const getLanguageOptions = (prdocCd) => {
-  // if (prdocCd === 'Y104' || prdocCd === 'Y105') {
-  //   return [
-  //     { value: '',    label: '한국어' },
-  //     { value: '_CN', label: '중국어' },
-  //     { value: '_EN', label: '영어'   },
-  //   ];
-  // }
-  // if (prdocCd === 'Y120') {
-  //   return [
-  //     { value: '',    label: '한국어' },
-  //     { value: '_EN', label: '영어'   },
-  //   ];
-  // }
-  return [{ value: '', label: '한국어' }];
+// supportedLangs 배열 기반으로 언어 옵션 생성
+const getLanguageOptions = (supportedLangs = []) => {
+  const options = [{ value: '', label: '한국어' }];
+  if (supportedLangs.includes('EN')) options.push({ value: '_EN', label: '영어' });
+  if (supportedLangs.includes('CN')) options.push({ value: '_CN', label: '중국어' });
+  return options;
 };
 
 // ─── 행 컴포넌트 ──────────────────────────────────────────────
 const IssuanceTableRow = ({ item, totalElements, currentPage, pageSize, index, onRowClick }) => {
   const [selectedSuffix, setSelectedSuffix] = useState('');
 
-  const langOptions = getLanguageOptions(item.prdocCd);
+  const langOptions = getLanguageOptions(item.supportedLangs);
   const isMultiLang = langOptions.length > 1;
   const effectivePrdocCd = item.prdocCd + selectedSuffix;
   const expired = isExpired(item.aplyDt);
@@ -103,7 +93,7 @@ const IssuanceTableRow = ({ item, totalElements, currentPage, pageSize, index, o
             className="krds-btn small"
             onClick={() =>
               window.open(
-                `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${effectivePrdocCd}&prdocIssuAplyNo=${item.prdocIssuAplyNo}`,
+                `https://www.smes.go.kr/e-page?prdocCd=${effectivePrdocCd}&prdocIssuAplyNo=${item.prdocIssuAplyNo}`,
                 '_blank',
               )
             }
@@ -128,6 +118,8 @@ const UI_USR_L_510 = () => {
   // 상세 팝업
   const [isDetailPopupOpen, setIsDetailPopupOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  // 팝업 내 언어 선택
+  const [popupSelectedSuffix, setPopupSelectedSuffix] = useState('');
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const sidebarData = getSideNavigationData();
@@ -172,16 +164,21 @@ const UI_USR_L_510 = () => {
 
   const handleRowClick = (item) => {
     setSelectedItem(item);
+    setPopupSelectedSuffix('');  // 팝업 열 때 언어 초기화
     setIsDetailPopupOpen(true);
   };
 
   const handleDetailClose = () => {
     setIsDetailPopupOpen(false);
     setSelectedItem(null);
+    setPopupSelectedSuffix('');
   };
 
   const selectedExpired = selectedItem ? isExpired(selectedItem.aplyDt) : true;
   const selectedIsDpaper = selectedItem?.prdocIssuTypeCd === 'Y302';
+  const popupLangOptions = selectedItem ? getLanguageOptions(selectedItem.supportedLangs) : [];
+  const popupIsMultiLang = popupLangOptions.length > 1;
+  const popupEffectivePrdocCd = selectedItem ? selectedItem.prdocCd + popupSelectedSuffix : '';
 
   return (
     <>
@@ -310,7 +307,7 @@ const UI_USR_L_510 = () => {
                   disabled={selectedExpired}
                   onClick={() =>
                     window.open(
-                      `http://e-page.smes-tipa.go.kr/markany/report?prdocCd=${selectedItem.prdocCd}&prdocIssuAplyNo=${selectedItem.prdocIssuAplyNo}`,
+                      `https://www.smes.go.kr/e-page?prdocCd=${popupEffectivePrdocCd}&prdocIssuAplyNo=${selectedItem.prdocIssuAplyNo}`,
                       '_blank',
                     )
                   }
@@ -355,7 +352,7 @@ const UI_USR_L_510 = () => {
               <h2 className="sec-tit">증명서 발급 정보</h2>
               <div className="krds-table-wrap">
                 <table className="tbl col data tbl-row">
-                  <caption>증명서 발급 정보 표. 신청번호, 증명(확인)서명, 신청일시, 상태, 유효기간, 출력여부 정보가 제공됨.</caption>
+                  <caption>증명서 발급 정보 표. 신청번호, 증명(확인)서명, 신청일시, 상태, 유효기간, 출력언어, 출력여부 정보가 제공됨.</caption>
                   <colgroup>
                     <col style={{ width: '26%' }}/>
                     <col/>
@@ -381,6 +378,25 @@ const UI_USR_L_510 = () => {
                       <th scope="row" className="ac">유효기간</th>
                       <td>{formatDate(selectedItem.vldEndYmd)}</td>
                     </tr>
+                    {/* 다국어 지원 증명서일 때만 출력언어 선택 노출 */}
+                    {popupIsMultiLang && !selectedIsDpaper && !selectedExpired && (
+                      <tr>
+                        <th scope="row" className="ac">출력언어</th>
+                        <td>
+                          <select
+                            className="krds-form-select small"
+                            value={popupSelectedSuffix}
+                            onChange={(e) => setPopupSelectedSuffix(e.target.value)}
+                          >
+                            {popupLangOptions.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                      </tr>
+                    )}
                     <tr>
                       <th scope="row" className="ac">출력여부</th>
                       <td>
