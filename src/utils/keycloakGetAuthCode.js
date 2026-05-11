@@ -15,8 +15,6 @@ const resolveOnePassJoinMemberId = () => {
 };
 
 
-const { currentMode } = useAuthStore();
-
 // 로그인후 원패스 가입 유도시
 export function onePassJoin() {
   // 가입 유도 플로우는 현재 우리 사이트에 로그인된 회원만 타므로,
