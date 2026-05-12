@@ -14,6 +14,16 @@ const resolveOnePassJoinMemberId = () => {
   return String(user?.loginId || user?.id || '').trim();
 };
 
+const resolveOnePassJoinUserType = () => {
+  const { currentMode } = useAuthStore.getState();
+
+  // 상대 전환 URL 계약은 우리 화면 모드가 아니라 QIM 회원 구분값(ENT/IND)을 요구한다.
+  if (currentMode === 'CORPORATE') return 'ENT';
+  if (currentMode === 'INDIVIDUAL') return 'IND';
+
+  return '';
+};
+
 
 // 로그인후 원패스 가입 유도시
 export function onePassJoin() {
@@ -22,6 +32,12 @@ export function onePassJoin() {
   const memberId = resolveOnePassJoinMemberId();
   if (!memberId) {
     window.alert('회원 식별값을 확인할 수 없습니다.');
+    return;
+  }
+
+  const userType = resolveOnePassJoinUserType();
+  if (!userType) {
+    window.alert('회원 유형을 확인할 수 없습니다.');
     return;
   }
 
@@ -35,7 +51,8 @@ export function onePassJoin() {
   let params = new URLSearchParams({
     redirect_uri: REDIRECT_HOME_URI,
     mbrId: memberId,
-    return_client: CLIENT_ID
+    userType: userType,
+    return_client: CLIENT_ID,
   });
 
   let authUrl = `${KEYCLOAK_JOIN}?${params}`;
