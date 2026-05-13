@@ -62,6 +62,16 @@ const UI_USR_R_002 = () => {
     handleClick();
   };
 
+
+
+  const handleOnePassJoin = () => {
+    const typeStr = (loginType === LOGIN_TYPE_INDIVIDUAL) ? 'member' : 'business';
+      
+    const onePassJoinUrl = `https://onepass-dev.smes.go.kr/register/step1?type=${typeStr}&return_client=smes-tipa-01&return_uri=https://www.smes.go.kr/home-dev/`;
+    console.log('onOnePassJoin (Current Type: ' + loginType + ') : ', onePassJoinUrl);
+    window.location.href = onePassJoinUrl;
+  };
+
   return (
     <>
       <div className="contents">
@@ -142,7 +152,7 @@ const UI_USR_R_002 = () => {
                     <ul className="link-group">
                       <li><Link to="#" className="krds-btn medium text">아이디 찾기</Link></li>
                       <li><Link to="#" className="krds-btn medium text">비밀번호 찾기</Link></li>
-                      <li><Link to="#" className="krds-btn medium text">회원가입</Link></li>
+                      <li><button type="button" className="krds-btn medium text" onClick={handleOnePassJoin}>회원가입</button></li>
                     </ul>
                   </div>
                 </div>

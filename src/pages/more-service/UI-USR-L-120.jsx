@@ -315,15 +315,14 @@ const UI_USR_L_120 = () => {
               )}
             </tbody>
           </table>
-
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage + 1}
-            onPageChange={handlePageChange}
-            syncUrl
-          />
         </div>
         {/* table [E] */}
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage + 1}
+          onPageChange={handlePageChange}
+          syncUrl
+        />
       </div>
     </>
   );

@@ -19,6 +19,52 @@ const resolveMenuLinkAttrs = (fullPath) => {
   };
 };
 
+const MOBILE_ACTIVE_BOTTOM_THRESHOLD_PX = 96;
+const MOBILE_ACTIVE_LINE_RATIO = 0.35;
+
+const getNextActiveMobileTab = (scrollContainer, sectionElements, menuCount) => {
+  if (!scrollContainer || menuCount === 0) {
+    return 0;
+  }
+
+  const maxScrollTop = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
+  const distanceToBottom = maxScrollTop - scrollContainer.scrollTop;
+  const bottomThreshold = Math.min(
+    MOBILE_ACTIVE_BOTTOM_THRESHOLD_PX,
+    scrollContainer.clientHeight * 0.15,
+  );
+
+  if (maxScrollTop > 1 && distanceToBottom <= bottomThreshold) {
+    return menuCount - 1;
+  }
+
+  const containerRect = scrollContainer.getBoundingClientRect();
+  const activationLine = containerRect.top + containerRect.height * MOBILE_ACTIVE_LINE_RATIO;
+  let nextActiveIndex = 0;
+
+  for (let index = 0; index < menuCount; index += 1) {
+    const sectionElement = sectionElements[index];
+    if (!sectionElement) {
+      continue;
+    }
+
+    const sectionRect = sectionElement.getBoundingClientRect();
+    if (sectionRect.height <= 0) {
+      continue;
+    }
+
+    if (sectionRect.top <= activationLine && sectionRect.bottom > activationLine) {
+      return index;
+    }
+
+    if (sectionRect.top <= activationLine) {
+      nextActiveIndex = index;
+    }
+  }
+
+  return nextActiveIndex;
+};
+
 const HeaderMobileGNB = forwardRef(({
   menus,
   onClose,
@@ -42,7 +88,7 @@ const HeaderMobileGNB = forwardRef(({
    * 모바일 전체메뉴 스크롤 위치를 기준으로 좌측 1depth active를 동기화한다.
    * 왜 필요한지: 사용자가 우측 목록을 스크롤로 탐색할 때도 현재 보고 있는 섹션이 좌측 메뉴에 즉시 반영되어
    * "보이는 섹션"과 "강조된 1depth"가 어긋나는 UX 혼선을 방지해야 한다.
-   * 무엇을 하는지: 스크롤 컨테이너 상단 기준선과 각 섹션 위치를 비교해, 기준선을 지난 마지막 섹션 인덱스를 active로 반영한다.
+   * 무엇을 하는지: 읽기 기준선에 걸친 섹션을 우선하되, 스크롤 하단 근처에서는 마지막 섹션을 active로 보정한다.
    * 주의할 점: 스크롤 이벤트는 매우 빈번하므로 requestAnimationFrame으로 계산 시점을 묶어 과도한 re-render를 피한다.
    */
   const syncActiveTabWithScroll = useCallback(() => {
@@ -52,20 +98,11 @@ const HeaderMobileGNB = forwardRef(({
       return;
     }
 
-    const activationLine = scrollContainer.getBoundingClientRect().top + 12;
-    let nextActiveIndex = 0;
-
-    for (let index = 0; index < menus.length; index += 1) {
-      const sectionElement = subMenuSectionRefs.current[index];
-      if (!sectionElement) {
-        continue;
-      }
-
-      const sectionTop = sectionElement.getBoundingClientRect().top;
-      if (sectionTop <= activationLine) {
-        nextActiveIndex = index;
-      }
-    }
+    const nextActiveIndex = getNextActiveMobileTab(
+      scrollContainer,
+      subMenuSectionRefs.current,
+      menus.length,
+    );
 
     setActiveMobileTab((prev) => (prev === nextActiveIndex ? prev : nextActiveIndex));
   }, [menus.length]);
@@ -158,11 +195,11 @@ const HeaderMobileGNB = forwardRef(({
             {/* 03-10 디자인 변경 */}
             <div className="gnb-utils">
               <ul className="utility-list">
-                <li>
+                {/*<li>
                   <Link onClick={() => setPopOpen(true)} className="krds-btn medium text">
                     <i className="svg-icon ico-system"></i> 유관시스템 둘러보기
                   </Link>
-                </li>
+                </li>*/}
               </ul>
             </div>
             <div className={`gnb-login ${isLogin ? 'is-login' : 'is-logout'}`}>

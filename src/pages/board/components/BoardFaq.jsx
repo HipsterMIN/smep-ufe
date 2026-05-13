@@ -1,13 +1,13 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {useMatches, useSearchParams} from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useMatches, useSearchParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
 import Tab from '@components/ui/Tab';
 import Accordion from '@components/ui/Accordion';
-import {useUserMenu} from '@context/UserMenuContext.jsx';
-import {api as apiClient} from '@lib/apiClient.js';
-import {formatNumberWithCommas} from '@utils/numberUtils.js';
+import { useUserMenu } from '@context/UserMenuContext.jsx';
+import { api as apiClient } from '@lib/apiClient.js';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const stripHtmlTags = (value) => {
   if (!value) return '';
@@ -33,6 +33,7 @@ const BoardFaq = ({ bbsNo }) => {const matches = useMatches();
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
   const querySearchKeyword = String(searchParams.get('searchKeyword') ?? '').trim();
   const rawQuerySearchType = String(searchParams.get('searchType') ?? '').trim().toUpperCase();
   const querySearchType = ['TITLE', 'CONTENT'].includes(rawQuerySearchType)
@@ -145,6 +146,7 @@ const BoardFaq = ({ bbsNo }) => {const matches = useMatches();
   }, [bbsNo, currentPage, pageSize, selectedCategoryNo, appliedSearchType, appliedSearchKeyword]);
 
   const handleTabChange = (index) => {
+    setActiveTabIndex(index);
     if (index === 0) {
       setSelectedCategoryNo('');
     } else {
@@ -191,7 +193,7 @@ const BoardFaq = ({ bbsNo }) => {const matches = useMatches();
         <div className="search-top-box">
           <div className="sch-form-wrap">
             <select
-              className="krds-form-select"
+              className="krds-form-select medium"
               value={searchType}
               onChange={(event) => setSearchType(event.target.value)}
             >
@@ -243,7 +245,7 @@ const BoardFaq = ({ bbsNo }) => {const matches = useMatches();
           </ul>
         </div>
 
-        <Accordion type="single"> {/* multi인 경우 type="multi" */}
+        <Accordion type="single" key={activeTabIndex}> {/* multi인 경우 type="multi" */}
           {loading ? (
             <Accordion.Item>
               <Accordion.Header>

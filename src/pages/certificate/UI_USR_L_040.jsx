@@ -303,15 +303,14 @@ const UI_USR_L_040 = () => {
               )}
             </tbody>
           </table>
-
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage + 1}
-            onPageChange={handlePageChange}
-            syncUrl
-          />
         </div>
         {/* table [E] */}
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage + 1}
+          onPageChange={handlePageChange}
+          syncUrl
+        />
       </div>
 
       {/* 증명서 발급 안내 팝업 */}

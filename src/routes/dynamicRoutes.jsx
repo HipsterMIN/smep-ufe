@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { componentMap } from './componentMap.js';
 import { Suspense } from 'react';
-import { buildFullPath } from '../utils/menuUtils.js';
+import { buildFullPath, findFirstVisibleTMenu, isExternalMenuNode } from '../utils/menuUtils.js';
 
 /**
  * =============================================================================
@@ -11,32 +11,15 @@ import { buildFullPath } from '../utils/menuUtils.js';
 
 /**
  * M 타입 노드의 첫 번째 T 타입 자식 찾기 (redirect용)
- * DFS로 탐색하여 가장 먼저 만나는 T 타입 노드 반환
+ * BFS로 탐색하여 가장 먼저 만나는 내부 T 타입 노드 반환
  * Side Navigation에서 사용되는 메뉴 노드 기준
+ * 외부 URL T 메뉴는 header/LNB에서 새 탭 링크로 소비하므로 내부 redirect 대상에서 제외한다.
  *
  * @param {Object} menuNode - 메뉴 노드
  * @returns {Object|null} 첫 번째 T 타입 노드 또는 null
  */
 export const findFirstTComponentBySide = (menuNode) => {
-  if (!menuNode.children || menuNode.children.length === 0) {
-    return null;
-  }
-
-  // BFS로 자식들 탐색
-  const queue = [...menuNode.children];
-  while (queue.length > 0) {
-    const node = queue.shift();
-    // T 타입 발견 ( lfsdMenuExpsrYn 체크 )
-    if (node.scrnTypeCd === 'T' && node.lfsdMenuExpsrYn === 'Y') {
-      return node;
-    }
-
-    // M 타입이면 자식들을 큐에 추가
-    if (node.children && node.children.length > 0) {
-      queue.push(...node.children);
-    }
-  }
-  return null;
+  return findFirstVisibleTMenu(menuNode, node => !isExternalMenuNode(node));
 };
 
 /**
@@ -49,6 +32,11 @@ export const findFirstTComponentBySide = (menuNode) => {
 const createRouteFromNode = (menuNode, flatMenuMap) => {
   // depth 0은 제외
   if (menuNode.depth === 0) {
+    return null;
+  }
+
+  // 외부 URL 메뉴는 React Router 내부 route로 등록하지 않는다.
+  if (isExternalMenuNode(menuNode)) {
     return null;
   }
 

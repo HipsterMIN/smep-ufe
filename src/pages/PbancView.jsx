@@ -16,15 +16,28 @@ const EMPTY_HTML_PATTERNS = new Set([
 
 const STREAMDOCS_VIEWER_URL =
   import.meta.env.VITE_STREAMDOCS_VIEWER_URL
-  || 'http://192.168.16.82:8088/venturein-pdf/view/sd';
+  || 'http://192.168.16.82:8088/e-paper/view/sd';
 
 const STREAMDOCS_ADAPTER_URL =
   import.meta.env.VITE_STREAMDOCS_ADAPTER_URL
-  || 'http://192.168.16.82:8088/venturein-pdf/adapter.js';
+  || 'http://192.168.16.82:8088/e-paper/adapter.js';
 
 const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
 const resolveApiErrorMessage = (error, fallbackMessage) =>
   error?.data?.message || error?.message || fallbackMessage;
+
+const decodeUrlHtmlEntities = (value) =>
+  String(value ?? '')
+    .trim()
+    .replace(/&amp;/gi, '&')
+    .replace(/&#38;|&#x26;/gi, '&');
+
+const openExternalUrl = (value) => {
+  const url = decodeUrlHtmlEntities(value);
+  if (url) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+};
 
 const PbancView = () => {
   const { breadcrumbItems, currentMenu, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -363,7 +376,7 @@ const PbancView = () => {
                         <button
                           type="button"
                           className="krds-btn xsmall"
-                          onClick={() => window.open(item?.bizAplyUrlAddr, '_blank')}
+                          onClick={() => openExternalUrl(item?.bizAplyUrlAddr)}
                         >
                           온라인 신청 바로가기
                           <i className="svg-icon ico-angle right"></i>
@@ -488,7 +501,7 @@ const PbancView = () => {
               <button
                 type="button"
                 className="krds-btn tertiary xlarge"
-                onClick={() => window.open(item?.bizDtlUrlAddr, '_blank')}
+                onClick={() => openExternalUrl(item?.bizDtlUrlAddr)}
               >
                 출처 바로가기
                 <i className="svg-icon ico-angle right"></i>

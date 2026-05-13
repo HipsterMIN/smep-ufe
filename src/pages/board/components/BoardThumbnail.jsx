@@ -4,6 +4,7 @@ import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Tab from '@components/ui/Tab';
 import Pagination from '@components/ui/Pagination';
+import RetryImage from '@components/ui/RetryImage.jsx';
 import noImg from '@assets/common/noImg.png';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
@@ -126,6 +127,7 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
   const depth1Menu = getDepth1Parent();
 
   const boardTitle = useMemo(() => boardDetail?.bbsNm || '썸네일 게시판', [boardDetail]);
+  const shouldRetryThumbnail = String(bbsNo ?? '') === '64';
 
   const boardTypeCd = useMemo(() => {
     const rawBoardTypeCd = boardDetail?.bbs_type_cd ?? boardDetail?.bbsTypeCd ?? '';
@@ -381,7 +383,7 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
         <div className="search-top-box">
           <div className="sch-form-wrap">
             <select
-              className="krds-form-select"
+              className="krds-form-select medium"
               value={searchType}
               onChange={(event) => setSearchType(event.target.value)}
             >
@@ -473,15 +475,23 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
                             }}
                           >
                             <div className={`ongallery-thumnb ${thumbnailSrc ? '' : 'noImage'}`}>
-                              <img
-                                src={thumbnailSrc || noImg}
-                                alt={thumbnailAlt}
-                                onError={(event) => {
-                                  if (event.currentTarget.src !== noImg) {
-                                    event.currentTarget.src = noImg;
-                                  }
-                                }}
-                              />
+                              {shouldRetryThumbnail ? (
+                                <RetryImage
+                                  src={thumbnailSrc}
+                                  fallbackSrc={noImg}
+                                  alt={thumbnailAlt}
+                                />
+                              ) : (
+                                <img
+                                  src={thumbnailSrc || noImg}
+                                  alt={thumbnailAlt}
+                                  onError={(event) => {
+                                    if (event.currentTarget.src !== noImg) {
+                                      event.currentTarget.src = noImg;
+                                    }
+                                  }}
+                                />
+                              )}
                             </div>
                             <div className="krds-badge-wrap">
                               <span className="krds-badge bg-light-primary">{sourceName || defaultBadgeLabel}</span>
