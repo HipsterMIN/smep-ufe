@@ -451,14 +451,15 @@ const TotalSearch = () => {
 
   const handleSearch = () => {
     const nextKeyword = toTrimmedString(searchInput);
+
+    if (!nextKeyword) {
+      return;
+    }
+
     setActiveTabIndex(0);
     setTabPageByCollection(createInitialPageState());
 
     if (nextKeyword === searchKeyword) {
-      if (!nextKeyword) {
-        resetResultState();
-        return;
-      }
       fetchAllResults(nextKeyword);
       return;
     }
