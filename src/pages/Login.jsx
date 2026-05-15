@@ -219,9 +219,7 @@ const UI_USR_R_002 = () => {
             <div className="helper-desc-wrap">
               <ul className="krds-info-list decimal" role="list">
                 <li role="listitem">
-                    로그인 <a href="#" className="krds-btn medium link"><span className="underline">관련 도움말</span></a>이나
-                    다른 사용자가 <a href="#" className="krds-btn medium link"><span className="underline">자주 찾는 질문</span></a>을
-                    확인해보세요.
+                    로그인 관련 문의사항은 <Link to="/cs/csc/faq" className="krds-btn medium link"><span className="underline">자주 찾는 질문</span></Link>을 확인해보세요.
                 </li>
                 <li role="listitem">(044) 300-0990, (044) 300-0991으로 전화주세요. 서비스에 로그인할 수 있도록 도와드리겠습니다.</li>
               </ul>
