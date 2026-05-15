@@ -567,14 +567,16 @@ const MainPage = () => {
   }, [isLogin, intgMbrSwtcYn]);
 
   const handleSearch = () => {
-    setIsKeyboardOpen(false);
-    if (searchQuery.trim()) {
-      navigate('/totalSearch', {
-        state: { q: searchQuery.trim() },
-      });
+    const keyword = searchQuery.trim();
+
+    if (!keyword) {
       return;
     }
-    navigate('/totalSearch');
+
+    setIsKeyboardOpen(false);
+    navigate('/totalSearch', {
+      state: { q: keyword },
+    });
   };
   const handleKeyDown = (e) => e.key === 'Enter' && handleSearch();
   const handleClear = () => {
