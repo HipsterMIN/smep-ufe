@@ -442,6 +442,7 @@ export const componentMap = {
     layout: SubpageLayoutWithMenu,
     children: [
       { path: 'save', component: BoardWriteResolver }, // API Q&A 등록 /수정
+      { path: ':id/edit', component: BoardWriteResolver }, // API Q&A 수정
       { path: ':id', component: BoardPostResolver }, // API Q&A 상세
     ],
   },

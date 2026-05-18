@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
@@ -8,7 +8,12 @@ import { api as apiClient } from '@lib/apiClient.js';
 const normalizeResponse = (response) => response?.data ?? response ?? null;
 const normalizeText = (value) => String(value ?? '').trim();
 
-const BoardWriteQna = ({ boardDetail, bbsNo }) => {
+const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
+  const params = useParams();
+  const pstNo = params.id;
+  const isEditMode = mode === 'edit' && !!pstNo;
+
+
   //  숨겨진 file input ref
   const fileInputRef = useRef(null);
   const atchFileIdRef = useRef('');
@@ -28,6 +33,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
   const [visibility, setVisibility] = useState('PRIVATE');
   const [saving, setSaving] = useState(false);
   const [fileList, setFileList] = useState([]);
+  const [existingFiles, setExistingFiles] = useState([]);
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -79,6 +85,31 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
   }, [bbsNo, isCategoryRequired]);
 
   useEffect(() => {
+    if (!isEditMode) return;
+
+    const fetchPostDetail = async () => {
+      try {
+        const response = await apiClient.get(`/api/v1/board/${bbsNo}/posts/${pstNo}/for-update`);
+        const data = normalizeResponse(response);
+
+        if (data) {
+          setTitle(data.pstTtl || '');
+          setContent(data.pstCn || '');
+          setVisibility(data.pstRlsYn === 'N' ? 'PRIVATE' : 'PUBLIC');
+          setSelectedCategoryNo(String(data.ctgryNo || ''));
+          atchFileIdRef.current = data.atchFileId || '';
+          setExistingFiles(data.attachFiles || []); // 기존 파일 목록 저장
+        }
+      } catch (error) {
+        alert('게시글 정보를 불러오지 못했습니다.');
+        navigate('..');
+      }
+    };
+    fetchPostDetail();
+  }, [isEditMode, bbsNo, pstNo, navigate]);
+
+
+  useEffect(() => {
     if (!selectedCategoryNo) return;
 
     const exists = categories.some((category) => String(category?.ctgryNo ?? '') === selectedCategoryNo);
@@ -103,6 +134,12 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
       return false;
     }
 
+    const cleanContent = normalizeText(content);
+    if (cleanContent.length > 100) {
+      alert('문의내용은 최대 100자까지 입력 가능합니다.');
+      return false;
+    }
+
     if (isCategoryRequired && categories.length > 0 && selectedCategoryNo === '') {
       alert('카테고리를 선택해주세요.');
       return false;
@@ -112,9 +149,9 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
   };
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
-    if (files.length === 0) return;
+    if (!files || files.length === 0) return;
 
-    const file = files[0]; // 무조건 첫 번째 파일만 취함
+    const file = files[0];
 
     // 1. 확장자 벨리데이션 설정
     const allowedExtensions = [
@@ -140,14 +177,14 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
       return;
     }
 
-    // 모든 통과 시 파일 리스트를 비우고 새 파일 '하나'만 넣음
     setFileList([file]);
+    setExistingFiles([]); // 새 파일을 올리면 기존 파일 목록은 초기화
 
     // input 초기화 (같은 파일 다시 선택 가능하도록)
     event.target.value = '';
   };
 
-  const buildRequestBody = () => {
+  const buildRequestBody = (fileId) => {
     const parsedCategoryNo =
       isCategoryRequired && selectedCategoryNo !== '' ? Number(selectedCategoryNo) : null;
 
@@ -156,7 +193,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
       pstTtl: normalizeText(title),
       pstCn: normalizeText(content),
       pstRlsYn: visibility === 'PRIVATE' ? 'N' : 'Y',
-      atchFileId: atchFileIdRef.current,
+      atchFileId: fileId,
     };
   };
 
@@ -166,6 +203,11 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
 
   const removeFile = () => {
     setFileList([]);
+  };
+
+  const removeExistingFile = () => {
+    setExistingFiles([]);
+    atchFileIdRef.current = '';
   };
 
   const handleSave = async () => {
@@ -186,19 +228,20 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
         const fileRes = await apiClient.post('/api/v1/files/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
-        console.log(fileRes);
         const result = normalizeResponse(fileRes);
         finalAtchFileId = result?.data?.atchFileId || result?.atchFileId;
       }
 
       // 최종 게시글 저장
-      const body = {
-        ...buildRequestBody(),
-        atchFileId: finalAtchFileId,
-      };
+      const body = buildRequestBody(finalAtchFileId);
 
-      await apiClient.post(`/api/v1/board/${bbsNo}/posts`, body);
-      alert('문의가 등록되었습니다.');
+      if (isEditMode) {
+        await apiClient.put(`/api/v1/board/${bbsNo}/posts/${pstNo}`, body);
+        alert('문의가 수정되었습니다.');
+      } else {
+        await apiClient.post(`/api/v1/board/${bbsNo}/posts`, body);
+        alert('문의가 등록되었습니다.');
+      }
       navigate('..');
     } catch (error) {
       alert(error?.message || '등록 중 오류가 발생했습니다.');
@@ -216,7 +259,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">{boardTitle}</h2>
+          <h2 className="h-tit">{isEditMode ? `${boardTitle} 수정` : boardTitle}</h2>
         </div>
 
         <div className="mt-48">
@@ -293,6 +336,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
                       required
                       rows={8}
                       value={content}
+                      maxLength={100}
                       onChange={(event) => setContent(event.target.value)}
                       disabled={saving}
                     />
@@ -376,15 +420,29 @@ const BoardWriteQna = ({ boardDetail, bbsNo }) => {
                     찾아보기
                   </button>
                   <div className="file-list-container mt-16">
-                    {fileList.map((file, index) => (
-                      <div key={'${file.name}-${index}'} className="file-item d-flex ai-center mb-8">
-                        <span className="text-primary">📎 {file.name}</span>
+                    {existingFiles.map((file, index) => (
+                      <div key={`existing-${file.atchFileId}-${index}`} className="file-item d-flex ai-center mb-8">
+                        <span className="on-colorblue">📎{file.orgnlFileNm}</span>
                         <button
                           type="button"
-                          className="ml-8 text-danger"
+                          className="ml-8"
+                          onClick={removeExistingFile}
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    ))}
+
+                    {/* 2. 새로 선택한 로컬 파일 표시 */}
+                    {fileList.map((file, index) => (
+                      <div key={`new-${file.name}-${index}`} className="file-item d-flex ai-center mb-8">
+                        <span className="text-primary">📎{file.name}</span>
+                        <button
+                          type="button"
+                          className="ml-8"
                           onClick={() => removeFile(index)}
                         >
-                            삭제
+                          삭제
                         </button>
                       </div>
                     ))}

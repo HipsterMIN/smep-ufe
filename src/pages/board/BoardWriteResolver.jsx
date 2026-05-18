@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useMatches } from 'react-router-dom';
+import {useMatches, useParams} from 'react-router-dom';
 import { api as apiClient } from '@lib/apiClient.js';
 import BoardWriteQna from './components/BoardWriteQna.jsx';
 import BoardResolverStateView from './components/BoardResolverStateView.jsx';
@@ -13,8 +13,11 @@ const getBoardTypeCd = (boardDetail) => {
   return String(rawBoardTypeCd).trim().toUpperCase();
 };
 
-const BoardWriteResolver = () => {
+const BoardWriteResolver = ({ mode: propsMode }) => {
   const matches = useMatches();
+  const params = useParams();
+  const paramPstNo = params.pstNo || params.id;
+
 
   const [boardDetail, setBoardDetail] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,6 +29,9 @@ const BoardWriteResolver = () => {
       .reverse()
       .find((match) => match?.handle?.bbsNo != null)?.handle?.bbsNo ?? currentMatch?.handle?.bbsNo;
   }, [matches]);
+
+  const isEditMode = propsMode === 'edit' || !!paramPstNo;
+  const currentMode = isEditMode ? 'edit' : 'create';
 
   useEffect(() => {
     let isMounted = true;
@@ -95,7 +101,7 @@ const BoardWriteResolver = () => {
     );
   }
 
-  return <ResolvedBoardWriteComponent boardDetail={boardDetail} bbsNo={bbsNo} />;
+  return <ResolvedBoardWriteComponent boardDetail={boardDetail} bbsNo={bbsNo} pstNo={paramPstNo} mode={currentMode}/>;
 };
 
 export default BoardWriteResolver;
