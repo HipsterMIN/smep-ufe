@@ -6,11 +6,55 @@ import { api as apiClient } from '@lib/apiClient.js';
 
 const OBJECTIVE_TYPES = new Set(['MLCH', 'ASCT']);
 const TEXTAREA_MAX_LENGTH = 100;
+const DAILY_SUBMISSION_STORAGE_PREFIX = 'survey:dailySubmitted';
+const DAILY_SUBMISSION_LIMIT_MESSAGE = '이미 오늘 고객 만족도 조사를 제출하셨습니다. 내일 다시 참여해주세요.';
 
 const normalizeResponse = (response) => response?.data ?? response ?? null;
 const toQuestionKey = (qstnNo) => String(qstnNo ?? '');
 const toItemKey = (qitemNo) => String(qitemNo ?? '');
 const trimText = (value) => String(value ?? '').trim();
+
+const getLocalDateKey = () => {
+  const now = new Date();
+  const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return localDate.toISOString().slice(0, 10);
+};
+
+const getDailySubmissionStorageKey = (srvyNo) => {
+  const normalizedSurveyNo = String(srvyNo ?? '').trim();
+  if (!normalizedSurveyNo) return '';
+  return `${DAILY_SUBMISSION_STORAGE_PREFIX}:${normalizedSurveyNo}:${getLocalDateKey()}`;
+};
+
+const hasSubmittedToday = (srvyNo) => {
+  const storageKey = getDailySubmissionStorageKey(srvyNo);
+  if (!storageKey || typeof window === 'undefined') return false;
+
+  try {
+    return window.localStorage.getItem(storageKey) === '1';
+  } catch {
+    // 의도: 브라우저 저장소가 막힌 환경에서도 화면이 중단되지 않게 한다.
+    // 동작: localStorage 조회 실패 시 미제출 상태로 보고 서버의 중복 제한에 맡긴다.
+    // 주의: 비로그인 사용자는 이 경우 같은 브라우저 기준 차단이 적용되지 않을 수 있다.
+    return false;
+  }
+};
+
+const markSubmittedToday = (srvyNo) => {
+  const storageKey = getDailySubmissionStorageKey(srvyNo);
+  if (!storageKey || typeof window === 'undefined') return;
+
+  try {
+    window.localStorage.setItem(storageKey, '1');
+  } catch {
+    // 의도: 제출 성공 후 같은 브라우저의 재제출을 막되 저장소 예외로 제출 흐름을 깨지 않는다.
+    // 동작: localStorage 기록 실패는 무시하고 로그인 사용자는 서버 중복 제한에 맡긴다.
+    // 주의: 비로그인 사용자는 저장소 차단/삭제 시 브라우저 기준 제한이 우회될 수 있다.
+  }
+};
+
+const isDuplicateSubmissionError = (error) =>
+  error?.status === 409 || error?.data?.code === 'COMMON_401';
 
 const sortQuestions = (questions) =>
   [...(Array.isArray(questions) ? questions : [])].sort((a, b) => {
@@ -43,6 +87,7 @@ const UI_USR_R_341 = () => {
   const [answers, setAnswers] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [submittedToday, setSubmittedToday] = useState(false);
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -67,9 +112,11 @@ const UI_USR_R_341 = () => {
 
         if (!isMounted) return;
         setSurvey(data || null);
+        setSubmittedToday(data?.srvyNo ? hasSubmittedToday(data.srvyNo) : false);
       } catch (error) {
         if (!isMounted) return;
         setSurvey(null);
+        setSubmittedToday(false);
         setLoadError(error?.data?.message || error?.message || '설문 정보를 불러오지 못했습니다.');
       } finally {
         if (isMounted) {
@@ -231,6 +278,12 @@ const UI_USR_R_341 = () => {
 
   const handleSubmit = async () => {
     if (submitting) return;
+    if (submittedToday || hasSubmittedToday(survey?.srvyNo)) {
+      setSubmittedToday(true);
+      alert(DAILY_SUBMISSION_LIMIT_MESSAGE);
+      return;
+    }
+
     if (!validateBeforeSubmit()) return;
 
     const payload = buildSubmitPayload();
@@ -248,9 +301,18 @@ const UI_USR_R_341 = () => {
       const data = normalizeResponse(response);
       const serverMessage = response?.message || data?.message;
 
+      markSubmittedToday(survey?.srvyNo);
+      setSubmittedToday(true);
       setAnswers({});
       alert(serverMessage || '설문 응답이 제출되었습니다.');
     } catch (error) {
+      if (isDuplicateSubmissionError(error)) {
+        markSubmittedToday(survey?.srvyNo);
+        setSubmittedToday(true);
+        alert(DAILY_SUBMISSION_LIMIT_MESSAGE);
+        return;
+      }
+
       alert(error?.data?.message || error?.message || '설문 제출 중 오류가 발생했습니다.');
     } finally {
       setSubmitting(false);
@@ -370,9 +432,9 @@ const UI_USR_R_341 = () => {
                   type="button"
                   className="krds-btn primary xlarge"
                   onClick={handleSubmit}
-                  disabled={submitting}
+                  disabled={submitting || submittedToday}
                 >
-                  {submitting ? '제출중...' : '설문완료'}
+                  {submittedToday ? '제출 완료' : submitting ? '제출중...' : '설문완료'}
                 </button>
               </div>
             </div>

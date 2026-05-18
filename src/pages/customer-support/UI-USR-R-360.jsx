@@ -59,6 +59,7 @@ import GuideTab5_03_Mo from '@assets/sub/guide_tab5_03_mo.png'
 import {useUserMenu} from "@context/UserMenuContext.jsx";
 
 
+const MNA_GUIDE_BOOK_URL = 'https://www.smes.go.kr/mna/user/informService/contract/contract_list.do';
 
 const UI_USR_R_360 = () => {
   const tabData = useRef(['주요서비스']);//'회원서비스'탭은 시연때문에 임시로 제외함
@@ -80,6 +81,13 @@ const UI_USR_R_360 = () => {
 
   const handleSubTabChange = (index) => {
     setActiveSubTabIndex(index);
+  };
+
+  const handleMnaGuideBookClick = () => {
+    // 의도: 유관시스템 탭의 M&A 가이드 북 버튼이 고객이 요청한 외부 M&A 정보망 화면으로 연결되도록 한다.
+    // 동작: 현재 이용가이드 화면은 유지하고, 브라우저 새 창/새 탭으로 지정된 계약 목록 페이지를 연다.
+    // 주의: 외부 사이트에 opener가 전달되지 않도록 noopener/noreferrer 옵션을 함께 사용한다.
+    window.open(MNA_GUIDE_BOOK_URL, '_blank', 'noopener,noreferrer');
   };
 
   const navigationData = {
@@ -350,7 +358,9 @@ const UI_USR_R_360 = () => {
                           M&A자문기관과 M&A지원센터의 조직 및 네트워크를 활용하여 M&A 매수 / 매도 정보 제공하는 서비스 입니다.
                         </p>
                         <div className="more-btn">
-                          <button type="button" className="krds-btn secondary small">M&A 가이드 북</button>
+                          <button type="button" className="krds-btn secondary small" onClick={handleMnaGuideBookClick}>
+                            M&A 가이드 북
+                          </button>
                         </div>
                       </div>
 

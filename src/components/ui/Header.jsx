@@ -475,6 +475,7 @@ export default function Header() {
     const totalSearchPath = getTotalSearchPath();
 
     if (!keyword) {
+      window.alert('검색어를 입력해주세요.');
       return;
     }
 

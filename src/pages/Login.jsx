@@ -6,6 +6,26 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 const LOGIN_TYPE_INDIVIDUAL = 'INDIVIDUAL';
 const LOGIN_TYPE_CORPORATE = 'CORPORATE';
+const LOGIN_ERROR_MESSAGES = {
+  INVALID_CREDENTIALS: '아이디 또는 비밀번호가 일치하지 않습니다.',
+  PASSWORD_LOCKED: '비밀번호 5회 이상 입력 오류로 계정이 잠겼습니다.',
+  COMMUNICATION_DELAY: '현재 시스템 통신 지연으로 로그인이 불가합니다.',
+};
+
+const resolveLoginErrorMessage = (error) => {
+  const code = error?.data?.code;
+  const status = error?.status;
+
+  if (code === 'ACCOUNT_LOGIN_002') {
+    return LOGIN_ERROR_MESSAGES.PASSWORD_LOCKED;
+  }
+
+  if (!status || status >= 500 || code === 'COMMON_502' || code === 'COMMON_503') {
+    return LOGIN_ERROR_MESSAGES.COMMUNICATION_DELAY;
+  }
+
+  return LOGIN_ERROR_MESSAGES.INVALID_CREDENTIALS;
+};
 
 const UI_USR_R_002 = () => {
   const { login } = useAuthStore();
@@ -49,7 +69,7 @@ const UI_USR_R_002 = () => {
       navigate('/');
     } catch (error) {
       console.error('Login failed:', error);
-      alert('로그인에 실패했습니다. 다시 시도해 주세요.');
+      alert(resolveLoginErrorMessage(error));
     }
   };
 

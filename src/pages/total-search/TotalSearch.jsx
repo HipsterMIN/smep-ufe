@@ -453,6 +453,7 @@ const TotalSearch = () => {
     const nextKeyword = toTrimmedString(searchInput);
 
     if (!nextKeyword) {
+      window.alert('검색어를 입력해주세요.');
       return;
     }
 
@@ -779,6 +780,5 @@ const TotalSearch = () => {
 };
 
 export default TotalSearch;
-
 
 
