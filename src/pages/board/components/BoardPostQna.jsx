@@ -72,7 +72,7 @@ const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
 
     try {
       setLoading(true);
-      await apiClient.post(`/api/v1/board/${bbsNo}/posts/${pstNo}`);
+      await apiClient.post(`/api/v1/board/${bbsNo}/posts/${pstNo}/delete`);
       alert('삭제되었습니다.');
       moveToList(); // 삭제 후 목록으로 이동
     } catch (error) {
