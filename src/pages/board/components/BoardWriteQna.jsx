@@ -110,7 +110,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
 
 
   useEffect(() => {
-    if (!selectedCategoryNo) return;
+    if (!selectedCategoryNo || categories.length === 0) return;
 
     const exists = categories.some((category) => String(category?.ctgryNo ?? '') === selectedCategoryNo);
     if (!exists) {
@@ -422,7 +422,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
                   <div className="file-list-container mt-16">
                     {existingFiles.map((file, index) => (
                       <div key={`existing-${file.atchFileId}-${index}`} className="file-item d-flex ai-center mb-8">
-                        <span className="on-colorblue">📎{file.orgnlFileNm}</span>
+                        <span className="text-primary">📎{file.orgnlFileNm}</span>
                         <button
                           type="button"
                           className="ml-8"
