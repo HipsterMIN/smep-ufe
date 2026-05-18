@@ -236,7 +236,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
       const body = buildRequestBody(finalAtchFileId);
 
       if (isEditMode) {
-        await apiClient.put(`/api/v1/board/${bbsNo}/posts/${pstNo}`, body);
+        await apiClient.post(`/api/v1/board/${bbsNo}/posts/${pstNo}`, body);
         alert('문의가 수정되었습니다.');
       } else {
         await apiClient.post(`/api/v1/board/${bbsNo}/posts`, body);
