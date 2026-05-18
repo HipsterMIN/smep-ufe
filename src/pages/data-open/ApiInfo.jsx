@@ -1,11 +1,12 @@
-
 import { Link } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext';
 import React, {useEffect} from 'react';
-import {apiBaseUrl} from "@lib/apiClient.js";
+import apiGuideZipUrl from '@assets/guide/중소벤처24_API개발가이드_V2.zip?url';
 
+const API_GUIDE_FILE_NAME =
+    '중소벤처24_API개발가이드_V2.zip';
 const ApiInfo = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   useEffect(() => {
@@ -14,10 +15,13 @@ const ApiInfo = () => {
   // ✅ 사이드바 데이터 계산
   const sidebarData = getSideNavigationData();  // currentMenu 기준으로 자동 계산
   const depth1Menu = getDepth1Parent();         // depth1 부모 찾기
-  const handleGuideDownload = () => {
-    const atchFileId = '20260422195859_03121';
-    const atchFileSn = 1;
-    window.location.href = `${apiBaseUrl}/api/v1/files/download/${atchFileId}/${atchFileSn}`;
+  const handleDownloadGuide = () => {
+    const link = document.createElement('a');
+    link.href = apiGuideZipUrl;
+    link.download = API_GUIDE_FILE_NAME;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
   return (
     <>
@@ -259,8 +263,7 @@ const ApiInfo = () => {
         {/* bottom btn */}
         <div className="onboard-btm-btngroup bt-0 btn-single">
           <div>
-            <button type="button" className="krds-btn xlarge" onClick={handleGuideDownload}>
-            {/*<button type="button" className="krds-btn xlarge" onClick={() => window.location.href = `${apiBaseUrl}/api/v1/files/download/${file.atchFileId}/${file.atchFileSn}`}>*/}
+            <button type="button" className="krds-btn xlarge" onClick={handleDownloadGuide}>
               API 가이드
             </button>
           </div>
