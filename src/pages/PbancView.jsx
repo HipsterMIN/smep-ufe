@@ -16,15 +16,28 @@ const EMPTY_HTML_PATTERNS = new Set([
 
 const STREAMDOCS_VIEWER_URL =
   import.meta.env.VITE_STREAMDOCS_VIEWER_URL
-  || 'http://192.168.16.82:8088/venturein-pdf/view/sd';
+  || 'http://192.168.16.82:8088/e-paper/view/sd';
 
 const STREAMDOCS_ADAPTER_URL =
   import.meta.env.VITE_STREAMDOCS_ADAPTER_URL
-  || 'http://192.168.16.82:8088/venturein-pdf/adapter.js';
+  || 'http://192.168.16.82:8088/e-paper/adapter.js';
 
 const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
 const resolveApiErrorMessage = (error, fallbackMessage) =>
   error?.data?.message || error?.message || fallbackMessage;
+
+const decodeUrlHtmlEntities = (value) =>
+  String(value ?? '')
+    .trim()
+    .replace(/&amp;/gi, '&')
+    .replace(/&#38;|&#x26;/gi, '&');
+
+const openExternalUrl = (value) => {
+  const url = decodeUrlHtmlEntities(value);
+  if (url) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+};
 
 const PbancView = () => {
   const { breadcrumbItems, currentMenu, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -344,34 +357,71 @@ const PbancView = () => {
         <div className="def-list-wrap">
           <dl className="def-list">
             {renderTextRow('분야', item?.bizPbancClsfCd ? fieldLabelMap[item.bizPbancClsfCd] || item.bizPbancClsfCd : '')}
-            {renderTextRow('사업수행기관', item?.bizSprvsnInstNm)}
-            {renderExpandableHtmlRow('사업개요', item?.bizPbancOtln)}
-            {renderExpandableHtmlRow('지원규모', item?.bizSprtSclCn)}
-            {renderExpandableHtmlRow('지원내용', item?.bizSprtCn)}
-            {renderExpandableHtmlRow('지원대상', item?.bizSprtTrgtCn)}
-            {renderTextRow('신청기간', item?.applyPeriodText)}
-            {(isMeaningfulHtml(item?.bizAplyMthdCn) || item?.bizAplyUrlAddr) && (
+            {currentMenu?.menuNm === '사업공고' ? (
               <>
-                <dt>사업신청 방법</dt>
-                <dd>
-                  <ul className="list">
-                    {isMeaningfulHtml(item?.bizAplyMthdCn) && (
-                      <li dangerouslySetInnerHTML={{ __html: item.bizAplyMthdCn }} />
-                    )}
-                    {item?.bizAplyUrlAddr && (
-                      <li>
-                        <button
-                          type="button"
-                          className="krds-btn xsmall"
-                          onClick={() => window.open(item?.bizAplyUrlAddr, '_blank')}
-                        >
-                          온라인 신청 바로가기
-                          <i className="svg-icon ico-angle right"></i>
-                        </button>
-                      </li>
-                    )}
-                  </ul>
-                </dd>
+                {renderExpandableHtmlRow('사업개요', item?.bizPbancOtln)}
+                {renderExpandableHtmlRow('지원대상', item?.bizSprtTrgtCn)}
+                {renderTextRow('신청기간', item?.applyPeriodText)}
+
+                {(isMeaningfulHtml(item?.bizAplyMthdCn) || item?.bizAplyUrlAddr) && (
+                  <>
+                    <dt>사업신청 방법</dt>
+                    <dd>
+                      <ul className="list">
+                        {isMeaningfulHtml(item?.bizAplyMthdCn) && (
+                          <li dangerouslySetInnerHTML={{ __html: item.bizAplyMthdCn }}/>
+                        )}
+                        {item?.bizAplyUrlAddr && (
+                          <li>
+                            <button
+                              type="button"
+                              className="krds-btn xsmall"
+                              onClick={() => openExternalUrl(item?.bizAplyUrlAddr)}
+                            >
+                              온라인 신청 바로가기
+                              <i className="svg-icon ico-angle right"></i>
+                            </button>
+                          </li>
+                        )}
+                      </ul>
+                    </dd>
+                  </>
+                )}
+
+                {renderTextRow('사업수행기관', item?.bizSprvsnInstNm)}
+              </>
+            ) : (
+              <>
+                {renderTextRow('사업수행기관', item?.bizSprvsnInstNm)}
+                {renderExpandableHtmlRow('사업개요', item?.bizPbancOtln)}
+                {renderExpandableHtmlRow('지원규모', item?.bizSprtSclCn)}
+                {renderExpandableHtmlRow('지원내용', item?.bizSprtCn)}
+                {renderExpandableHtmlRow('지원대상', item?.bizSprtTrgtCn)}
+                {renderTextRow('신청기간', item?.applyPeriodText)}
+                {(isMeaningfulHtml(item?.bizAplyMthdCn) || item?.bizAplyUrlAddr) && (
+                  <>
+                    <dt>사업신청 방법</dt>
+                    <dd>
+                      <ul className="list">
+                        {isMeaningfulHtml(item?.bizAplyMthdCn) && (
+                          <li dangerouslySetInnerHTML={{ __html: item.bizAplyMthdCn }}/>
+                        )}
+                        {item?.bizAplyUrlAddr && (
+                          <li>
+                            <button
+                              type="button"
+                              className="krds-btn xsmall"
+                              onClick={() => openExternalUrl(item?.bizAplyUrlAddr)}
+                            >
+                              온라인 신청 바로가기
+                              <i className="svg-icon ico-angle right"></i>
+                            </button>
+                          </li>
+                        )}
+                      </ul>
+                    </dd>
+                  </>
+                )}
               </>
             )}
             {renderExpandableHtmlRow('지원자격', item?.bizSprtQlfcRqmtCn)}
@@ -386,15 +436,15 @@ const PbancView = () => {
         </div>
 
         {item?.strmdcsId && viewerVisible && (
-          <div style={{ width: '100%', marginBottom: '48px' }}>
+          <div style={ {width: '100%', marginBottom: '48px'} }>
             <iframe
               ref={viewerFrameRef}
               title="문서뷰어"
               src={STREAMDOCS_VIEWER_URL}
-              style={{ width: '100%', minHeight: '960px', border: 0 }}
+              style={ {width: '100%', minHeight: '960px', border: 0} }
             />
             {viewerError && (
-              <p style={{ marginTop: '12px', textAlign: 'center' }}>{viewerError}</p>
+              <p style={ {marginTop: '12px', textAlign: 'center'} }>{viewerError}</p>
             )}
           </div>
         )}
@@ -469,7 +519,8 @@ const PbancView = () => {
 
         <div className="onboard-btm-btngroup">
           <div>
-            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate(resolveListBackPath(location))}>
+            <button type="button" className="krds-btn tertiary xlarge"
+              onClick={() => navigate(resolveListBackPath(location))}>
               목록
             </button>
           </div>
@@ -488,7 +539,7 @@ const PbancView = () => {
               <button
                 type="button"
                 className="krds-btn tertiary xlarge"
-                onClick={() => window.open(item?.bizDtlUrlAddr, '_blank')}
+                onClick={() => openExternalUrl(item?.bizDtlUrlAddr)}
               >
                 출처 바로가기
                 <i className="svg-icon ico-angle right"></i>

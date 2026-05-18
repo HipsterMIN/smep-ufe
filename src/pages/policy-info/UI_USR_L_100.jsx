@@ -4,6 +4,7 @@ import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Tab from '@components/ui/Tab';
 import Pagination from '@components/ui/Pagination';
+import RetryImage from '@components/ui/RetryImage.jsx';
 import noImg from '@assets/common/noImg.png';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
@@ -342,14 +343,10 @@ const UI_USR_L_100 = () => {
                             }}
                           >
                             <div className={`ongallery-thumnb ${thumbnailSrc ? '' : 'noImage'}`}>
-                              <img
-                                src={thumbnailSrc || noImg}
+                              <RetryImage
+                                src={thumbnailSrc}
+                                fallbackSrc={noImg}
                                 alt={item?.pstTtl || ''}
-                                onError={(event) => {
-                                  if (event.currentTarget.src !== noImg) {
-                                    event.currentTarget.src = noImg;
-                                  }
-                                }}
                               />
                             </div>
                             <div className="krds-badge-wrap">

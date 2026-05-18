@@ -567,14 +567,17 @@ const MainPage = () => {
   }, [isLogin, intgMbrSwtcYn]);
 
   const handleSearch = () => {
-    setIsKeyboardOpen(false);
-    if (searchQuery.trim()) {
-      navigate('/totalSearch', {
-        state: { q: searchQuery.trim() },
-      });
+    const keyword = searchQuery.trim();
+
+    if (!keyword) {
+      window.alert('검색어를 입력해주세요.');
       return;
     }
-    navigate('/totalSearch');
+
+    setIsKeyboardOpen(false);
+    navigate('/totalSearch', {
+      state: { q: keyword },
+    });
   };
   const handleKeyDown = (e) => e.key === 'Enter' && handleSearch();
   const handleClear = () => {
@@ -613,12 +616,14 @@ const MainPage = () => {
   const handleOnepassJoinClick = () => {
     if (!isLoggedIn) {
       //window.alert('중기원패스 회원가입 준비중입니다.');
-      const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/register/step1?type=member&return_client=smes-tipa-01';
+      const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/register/step1?type=member&return_client=smes-tipa-01&return_uri=https://www.smes.go.kr/home-dev/';
+      console.log('onOnePassJoin : ', onePassJoinUrl);
+      window.location.href = onePassJoinUrl;
+    } else {
+      const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/conversion/step1?return_client=smes-tipa-01&return_uri=https://www.smes.go.kr/home-dev/';
       console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     }
-
-    onePassJoin();
   };
   const requestLoginForScrap = () => {
     const moveToLogin = window.confirm('로그인 후 스크랩 가능합니다. 로그인 하시겠습니까?');

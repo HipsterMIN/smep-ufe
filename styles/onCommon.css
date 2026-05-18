@@ -513,9 +513,10 @@ table tbody tr:hover td {
 }
 #krds-header .header-container .logo-platform {
   margin-left: 2rem;
-  width: 20rem;
-  height: 3rem;
-  background: url(../src/assets/common/logo_platform.svg) no-repeat 50%/ 100% auto;
+  width: 11.2rem;
+  height: 4rem;
+  background: url(../src/assets/common/logo_platform.svg) no-repeat;
+  background-size: cover;
 }
 #krds-header .header-search-wrap {
   position: relative;
@@ -2062,6 +2063,7 @@ table tbody tr:hover td {
   gap: 20px;
   text-align: center;
   cursor: pointer;
+  min-width: 0;
 }
 .krds-structured-list.relate .structured-item .card-top {
   margin-bottom: 20px;
@@ -2080,6 +2082,9 @@ table tbody tr:hover td {
 }
 .krds-structured-list.relate .structured-item .card-body p:not(:last-of-type) {
   margin-bottom: 8px;
+}
+.krds-structured-list.relate .structured-item .card-body .c-bold-tit {
+  width: 100%;
 }
 .hash-box {
   display: flex;

@@ -15,7 +15,7 @@ const UI_USR_L_050 = () => {
   const [institutions, setInstitutions] = useState([]);
   const [certificateTypes, setCertificateTypes] = useState([]);
   const [formData, setFormData] = useState({
-    issuInstCd: '',
+    issuInstNm: '',
     prdocCd: '',
     prdocIssuAplyNo: '',
   });
@@ -82,8 +82,8 @@ const UI_USR_L_050 = () => {
         prdocIssuAplyNo: formData.prdocIssuAplyNo,
       });
 
-      if (formData.issuInstCd && formData.issuInstCd.trim()) {
-        params.append('issuInstCd', formData.issuInstCd);
+      if (formData.issuInstNm && formData.issuInstNm.trim()) {
+        params.append('issuInstNm', formData.issuInstNm);
       }
 
       const response = await api.get(
@@ -154,9 +154,9 @@ const UI_USR_L_050 = () => {
                 <div className="form-wrapper w-272">
                   <select
                     id="select_01"
-                    name="issuInstCd"
+                    name="issuInstNm"
                     className="krds-form-select small"
-                    value={formData.issuInstCd}
+                    value={formData.issuInstNm}
                     onChange={handleChange}
                   >
                     <option value="">전체</option>

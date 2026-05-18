@@ -6,6 +6,26 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 const LOGIN_TYPE_INDIVIDUAL = 'INDIVIDUAL';
 const LOGIN_TYPE_CORPORATE = 'CORPORATE';
+const LOGIN_ERROR_MESSAGES = {
+  INVALID_CREDENTIALS: '아이디 또는 비밀번호가 일치하지 않습니다.',
+  PASSWORD_LOCKED: '비밀번호 5회 이상 입력 오류로 계정이 잠겼습니다.',
+  COMMUNICATION_DELAY: '현재 시스템 통신 지연으로 로그인이 불가합니다.',
+};
+
+const resolveLoginErrorMessage = (error) => {
+  const code = error?.data?.code;
+  const status = error?.status;
+
+  if (code === 'ACCOUNT_LOGIN_002') {
+    return LOGIN_ERROR_MESSAGES.PASSWORD_LOCKED;
+  }
+
+  if (!status || status >= 500 || code === 'COMMON_502' || code === 'COMMON_503') {
+    return LOGIN_ERROR_MESSAGES.COMMUNICATION_DELAY;
+  }
+
+  return LOGIN_ERROR_MESSAGES.INVALID_CREDENTIALS;
+};
 
 const UI_USR_R_002 = () => {
   const { login } = useAuthStore();
@@ -49,7 +69,7 @@ const UI_USR_R_002 = () => {
       navigate('/');
     } catch (error) {
       console.error('Login failed:', error);
-      alert('로그인에 실패했습니다. 다시 시도해 주세요.');
+      alert(resolveLoginErrorMessage(error));
     }
   };
 
@@ -60,6 +80,16 @@ const UI_USR_R_002 = () => {
 
     event.preventDefault();
     handleClick();
+  };
+
+
+
+  const handleOnePassJoin = () => {
+    const typeStr = (loginType === LOGIN_TYPE_INDIVIDUAL) ? 'member' : 'business';
+      
+    const onePassJoinUrl = `https://onepass-dev.smes.go.kr/register/step1?type=${typeStr}&return_client=smes-tipa-01&return_uri=https://www.smes.go.kr/home-dev/`;
+    console.log('onOnePassJoin (Current Type: ' + loginType + ') : ', onePassJoinUrl);
+    window.location.href = onePassJoinUrl;
   };
 
   return (
@@ -142,7 +172,7 @@ const UI_USR_R_002 = () => {
                     <ul className="link-group">
                       <li><Link to="#" className="krds-btn medium text">아이디 찾기</Link></li>
                       <li><Link to="#" className="krds-btn medium text">비밀번호 찾기</Link></li>
-                      <li><Link to="#" className="krds-btn medium text">회원가입</Link></li>
+                      <li><button type="button" className="krds-btn medium text" onClick={handleOnePassJoin}>회원가입</button></li>
                     </ul>
                   </div>
                 </div>
@@ -209,9 +239,7 @@ const UI_USR_R_002 = () => {
             <div className="helper-desc-wrap">
               <ul className="krds-info-list decimal" role="list">
                 <li role="listitem">
-                    로그인 <a href="#" className="krds-btn medium link"><span className="underline">관련 도움말</span></a>이나
-                    다른 사용자가 <a href="#" className="krds-btn medium link"><span className="underline">자주 찾는 질문</span></a>을
-                    확인해보세요.
+                    로그인 관련 문의사항은 <Link to="/cs/csc/faq" className="krds-btn medium link"><span className="underline">자주 찾는 질문</span></Link>을 확인해보세요.
                 </li>
                 <li role="listitem">(044) 300-0990, (044) 300-0991으로 전화주세요. 서비스에 로그인할 수 있도록 도와드리겠습니다.</li>
               </ul>

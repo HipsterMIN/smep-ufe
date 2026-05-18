@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import arrowIcon from '@assets/main/icon-arrow.svg';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import { useMenuStore } from '@store/useMenuStore.js';
-import { buildFullPath } from '@utils/menuUtils.js';
+import { buildFullPath, findFirstVisibleTMenu, getMenuExternalUrl } from '@utils/menuUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import HeaderUserMenu from '@components/ui/header/HeaderUserMenu';
 import HeaderDesktopGNB from '@components/ui/header/HeaderDesktopGNB';
@@ -15,7 +15,44 @@ import { onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
 
 // BASE URL 상수
 const BASE_URL = import.meta.env.VITE_BASE || '/';
+const MY_BUSINESS_MENU_ID = 'M_PIIO_00068';
 const TOTAL_SEARCH_MENU_ID = 'M_PIIO_00152';
+
+const resolveHeaderMenuPath = (menu, flatMenuMap, basePath) => {
+  const menuExternalUrl = getMenuExternalUrl(menu);
+  if (menuExternalUrl) {
+    return menuExternalUrl;
+  }
+
+  if (menu.scrnTypeCd === 'M') {
+    const firstVisibleTMenu = findFirstVisibleTMenu(menu);
+    const firstExternalUrl = getMenuExternalUrl(firstVisibleTMenu);
+    if (firstExternalUrl) {
+      return firstExternalUrl;
+    }
+  }
+
+  return basePath + buildFullPath(menu, flatMenuMap);
+};
+
+const buildHeaderMenuItem = (menu, flatMenuMap, basePath) => ({
+  ...menu,
+  fullPath: resolveHeaderMenuPath(menu, flatMenuMap, basePath),
+  children: (menu.children || [])
+    .filter(child => child.lfsdMenuExpsrYn === 'Y')
+    .sort((a, b) => a.sortSeq - b.sortSeq)
+    .map(child => ({
+      ...child,
+      fullPath: resolveHeaderMenuPath(child, flatMenuMap, basePath),
+      children: (child.children || [])
+        .filter(grandChild => grandChild.lfsdMenuExpsrYn === 'Y')
+        .sort((a, b) => a.sortSeq - b.sortSeq)
+        .map(grandChild => ({
+          ...grandChild,
+          fullPath: resolveHeaderMenuPath(grandChild, flatMenuMap, basePath),
+        })),
+    })),
+});
 
 // JWT 디코딩 함수 (간단한 구현)
 function parseJwt(token) {
@@ -93,23 +130,40 @@ export default function Header() {
       .sort((a, b) => a.sortSeq - b.sortSeq)
       .map(menu => ({
         ...menu,
-        fullPath: basePath + buildFullPath(menu, flatMenuMap),
+        fullPath: resolveHeaderMenuPath(menu, flatMenuMap, basePath),
         children: (menu.children || [])
           .filter(child => child.lfsdMenuExpsrYn === 'Y')
           .sort((a, b) => a.sortSeq - b.sortSeq)
           .map(child => ({
             ...child,
-            fullPath: basePath + buildFullPath(child, flatMenuMap),
+            fullPath: resolveHeaderMenuPath(child, flatMenuMap, basePath),
             children: (child.children || [])
               .filter(grandChild => grandChild.lfsdMenuExpsrYn === 'Y')
               .sort((a, b) => a.sortSeq - b.sortSeq)
               .map(grandChild => ({
                 ...grandChild,
-                fullPath: basePath + buildFullPath(grandChild, flatMenuMap),
+                fullPath: resolveHeaderMenuPath(grandChild, flatMenuMap, basePath),
               })),
           })),
       }));
   }, [menuTree, flatMenuMap]);
+
+  const mobileMenus = useMemo(() => {
+    if (!isLogin || !menuTree || !menuTree.children) {
+      return dynamicMenus;
+    }
+
+    const hasMyBusinessMenu = dynamicMenus.some(menu => menu.menuId === MY_BUSINESS_MENU_ID);
+    const myBusinessMenu = menuTree.children.find(menu => menu.menuId === MY_BUSINESS_MENU_ID);
+    if (hasMyBusinessMenu || !myBusinessMenu) {
+      return dynamicMenus;
+    }
+
+    const basePath = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+    // 모바일 로그인 전체메뉴에서만 마이비즈니스 1depth를 보강하고, 원본 상단 노출값은 바꾸지 않는다.
+    return [...dynamicMenus, buildHeaderMenuItem(myBusinessMenu, flatMenuMap, basePath)]
+      .sort((a, b) => a.sortSeq - b.sortSeq);
+  }, [isLogin, menuTree, flatMenuMap, dynamicMenus]);
 
   // 타이머는 우리 관리 범위가 확정된 ID/PW 세션(access + refresh 보유)에만 노출한다.
   const showSessionTimer = Boolean(token && refreshToken && remainingSeconds !== null);
@@ -165,10 +219,10 @@ export default function Header() {
   };
 
   const handleOnePassJoin = () => {
-    const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/register/step1?type=member&return_client=smes-tipa-01';
+    const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/register/step1?type=member&return_client=smes-tipa-01&return_uri=https://www.smes.go.kr/home-dev/';
     console.log('onOnePassJoin : ', onePassJoinUrl);
     window.location.href = onePassJoinUrl;
-  }
+  };
 
   const handleLogout = async () => {
     let logoutUrl = null;
@@ -421,7 +475,7 @@ export default function Header() {
     const totalSearchPath = getTotalSearchPath();
 
     if (!keyword) {
-      navigate(totalSearchPath);
+      window.alert('검색어를 입력해주세요.');
       return;
     }
 
@@ -564,7 +618,7 @@ export default function Header() {
 
         <HeaderMobileGNB 
           ref={mobGnbRef} 
-          menus={dynamicMenus} 
+          menus={mobileMenus}
           onClose={handleCloseMobGnb} 
           onLogin={handleServiceLogin}
           onOnePassLogin={handleOnePassIntegratedLogin}

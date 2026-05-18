@@ -451,14 +451,16 @@ const TotalSearch = () => {
 
   const handleSearch = () => {
     const nextKeyword = toTrimmedString(searchInput);
+
+    if (!nextKeyword) {
+      window.alert('검색어를 입력해주세요.');
+      return;
+    }
+
     setActiveTabIndex(0);
     setTabPageByCollection(createInitialPageState());
 
     if (nextKeyword === searchKeyword) {
-      if (!nextKeyword) {
-        resetResultState();
-        return;
-      }
       fetchAllResults(nextKeyword);
       return;
     }
@@ -778,6 +780,5 @@ const TotalSearch = () => {
 };
 
 export default TotalSearch;
-
 
 

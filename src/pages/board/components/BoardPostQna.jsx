@@ -5,6 +5,7 @@ import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient, apiBaseUrl } from '@lib/apiClient.js';
 import { resolveListBackPath } from '@utils/listNavigation.js';
+import { useAuthStore } from "@store/useAuthStore.jsx";
 
 const EMPTY_HTML_PATTERNS = new Set([
   '<p style="text-align: left;"></p>',
@@ -39,6 +40,12 @@ const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const location = useLocation();
   const navigate = useNavigate();
+  const { token, user } = useAuthStore((state) => ({
+    token: state.token,
+    user: state.user,
+  }));
+
+  const isLoggedIn = Boolean(token);
 
   const [postDetail, setPostDetail] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -46,6 +53,26 @@ const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
+
+  const moveToEdit = () => {
+    navigate('edit', { state: { from: location.pathname } });
+  };
+
+  // [추가] 삭제 처리
+  const handleDelete = async () => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+
+    try {
+      setLoading(true);
+      await apiClient.post(`/api/v1/board/${bbsNo}/posts/${pstNo}/delete`);
+      alert('삭제되었습니다.');
+      moveToList(); // 삭제 후 목록으로 이동
+    } catch (error) {
+      alert(error?.message || '삭제에 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -131,7 +158,14 @@ const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
   const moveToList = () => {
     navigate(resolveListBackPath(location));
   };
-  console.log(attachedFiles);
+
+  const isMyPost = useMemo(() => {
+    if (!isLoggedIn || !postDetail) return false;
+
+    return (
+        String(postDetail.pstRegMbrNo) === String(user.id) && !hasAnswer
+    );
+  }, [isLoggedIn, postDetail, user, hasAnswer]);
 
   return (
     <>
@@ -203,6 +237,16 @@ const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
               목록
             </button>
           </div>
+          {isMyPost && (
+            <div className="btn-group">
+              <button type="button" className="krds-btn secondary xlarge" onClick={moveToEdit}>
+                수정
+              </button>
+              <button type="button" className="krds-btn small width-auto xlarge" onClick={handleDelete}>
+                삭제
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </>

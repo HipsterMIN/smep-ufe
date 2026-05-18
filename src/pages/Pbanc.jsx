@@ -355,7 +355,7 @@ const Pbanc = () => {
                           <span className="krds-badge bg-light-primary">{fieldLabel}</span>
                         </div>
                       )}
-                      <Link className="onellipsis-1" to={appendListSearchToPath(`${item.bizPbancNo}`, location.search)}>
+                      <Link className="onellipsis-1" to={appendListSearchToPath(`${item.bizPbancNo}`, location.search)} title={item.bizPbancNm}>
                         <span>{item.bizPbancNm}</span>
                       </Link>
                     </td>
@@ -373,8 +373,8 @@ const Pbanc = () => {
               )}
             </tbody>
           </table>
-          <Pagination totalPages={totalPages} currentPage={page} onPageChange={(p) => search(p)} syncUrl />
         </div>
+        <Pagination totalPages={totalPages} currentPage={page} onPageChange={(p) => search(p)} syncUrl />
       </div>
     </>
   );
