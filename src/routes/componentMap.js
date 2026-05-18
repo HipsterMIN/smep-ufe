@@ -441,7 +441,7 @@ export const componentMap = {
     component: BoardResolver,
     layout: SubpageLayoutWithMenu,
     children: [
-      { path: 'save', component: BoardWriteResolver }, // API Q&A 등록 /수정
+      { path: 'save', component: BoardWriteResolver }, // API Q&A 등록
       { path: ':id/edit', component: BoardWriteResolver }, // API Q&A 수정
       { path: ':id', component: BoardPostResolver }, // API Q&A 상세
     ],
@@ -473,8 +473,8 @@ export const componentMap = {
     layout: SubpageLayoutWithMenu,
     children: [
       { path: ':id', component: BoardPostResolver }, // Q&A 상세 (게시물 상세 공통 사용)
-      /*{ path: ':id', component: UI_USR_R_331 }, // Q&A 상세*/
-      { path: 'save', component: BoardWriteResolver }, // Q&A 등록/수정
+      { path: ':id/edit', component: BoardWriteResolver }, // Q&A 수정
+      { path: 'save', component: BoardWriteResolver }, // Q&A 등록
     ],
   },
 
