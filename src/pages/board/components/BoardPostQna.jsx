@@ -54,14 +54,6 @@ const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
 
-  const isMyPost = useMemo(() => {
-    if (!isLoggedIn || !postDetail) return false;
-
-    return (
-      String(postDetail.pstRegMbrNo) === String(user.id)
-    );
-  }, [isLoggedIn, postDetail, user]);
-
   const moveToEdit = () => {
     navigate('edit', { state: { from: location.pathname } });
   };
@@ -166,7 +158,14 @@ const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
   const moveToList = () => {
     navigate(resolveListBackPath(location));
   };
-  console.log(attachedFiles);
+
+  const isMyPost = useMemo(() => {
+    if (!isLoggedIn || !postDetail) return false;
+
+    return (
+        String(postDetail.pstRegMbrNo) === String(user.id) && !hasAnswer
+    );
+  }, [isLoggedIn, postDetail, user, hasAnswer]);
 
   return (
     <>
