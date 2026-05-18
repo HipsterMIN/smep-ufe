@@ -357,34 +357,71 @@ const PbancView = () => {
         <div className="def-list-wrap">
           <dl className="def-list">
             {renderTextRow('분야', item?.bizPbancClsfCd ? fieldLabelMap[item.bizPbancClsfCd] || item.bizPbancClsfCd : '')}
-            {renderTextRow('사업수행기관', item?.bizSprvsnInstNm)}
-            {renderExpandableHtmlRow('사업개요', item?.bizPbancOtln)}
-            {renderExpandableHtmlRow('지원규모', item?.bizSprtSclCn)}
-            {renderExpandableHtmlRow('지원내용', item?.bizSprtCn)}
-            {renderExpandableHtmlRow('지원대상', item?.bizSprtTrgtCn)}
-            {renderTextRow('신청기간', item?.applyPeriodText)}
-            {(isMeaningfulHtml(item?.bizAplyMthdCn) || item?.bizAplyUrlAddr) && (
+            {currentMenu?.menuNm === '사업공고' ? (
               <>
-                <dt>사업신청 방법</dt>
-                <dd>
-                  <ul className="list">
-                    {isMeaningfulHtml(item?.bizAplyMthdCn) && (
-                      <li dangerouslySetInnerHTML={{ __html: item.bizAplyMthdCn }} />
-                    )}
-                    {item?.bizAplyUrlAddr && (
-                      <li>
-                        <button
-                          type="button"
-                          className="krds-btn xsmall"
-                          onClick={() => openExternalUrl(item?.bizAplyUrlAddr)}
-                        >
-                          온라인 신청 바로가기
-                          <i className="svg-icon ico-angle right"></i>
-                        </button>
-                      </li>
-                    )}
-                  </ul>
-                </dd>
+                {renderExpandableHtmlRow('사업개요', item?.bizPbancOtln)}
+                {renderExpandableHtmlRow('지원대상', item?.bizSprtTrgtCn)}
+                {renderTextRow('신청기간', item?.applyPeriodText)}
+
+                {(isMeaningfulHtml(item?.bizAplyMthdCn) || item?.bizAplyUrlAddr) && (
+                  <>
+                    <dt>사업신청 방법</dt>
+                    <dd>
+                      <ul className="list">
+                        {isMeaningfulHtml(item?.bizAplyMthdCn) && (
+                          <li dangerouslySetInnerHTML={{ __html: item.bizAplyMthdCn }}/>
+                        )}
+                        {item?.bizAplyUrlAddr && (
+                          <li>
+                            <button
+                              type="button"
+                              className="krds-btn xsmall"
+                              onClick={() => openExternalUrl(item?.bizAplyUrlAddr)}
+                            >
+                              온라인 신청 바로가기
+                              <i className="svg-icon ico-angle right"></i>
+                            </button>
+                          </li>
+                        )}
+                      </ul>
+                    </dd>
+                  </>
+                )}
+
+                {renderTextRow('사업수행기관', item?.bizSprvsnInstNm)}
+              </>
+            ) : (
+              <>
+                {renderTextRow('사업수행기관', item?.bizSprvsnInstNm)}
+                {renderExpandableHtmlRow('사업개요', item?.bizPbancOtln)}
+                {renderExpandableHtmlRow('지원규모', item?.bizSprtSclCn)}
+                {renderExpandableHtmlRow('지원내용', item?.bizSprtCn)}
+                {renderExpandableHtmlRow('지원대상', item?.bizSprtTrgtCn)}
+                {renderTextRow('신청기간', item?.applyPeriodText)}
+                {(isMeaningfulHtml(item?.bizAplyMthdCn) || item?.bizAplyUrlAddr) && (
+                  <>
+                    <dt>사업신청 방법</dt>
+                    <dd>
+                      <ul className="list">
+                        {isMeaningfulHtml(item?.bizAplyMthdCn) && (
+                          <li dangerouslySetInnerHTML={{ __html: item.bizAplyMthdCn }}/>
+                        )}
+                        {item?.bizAplyUrlAddr && (
+                          <li>
+                            <button
+                              type="button"
+                              className="krds-btn xsmall"
+                              onClick={() => openExternalUrl(item?.bizAplyUrlAddr)}
+                            >
+                              온라인 신청 바로가기
+                              <i className="svg-icon ico-angle right"></i>
+                            </button>
+                          </li>
+                        )}
+                      </ul>
+                    </dd>
+                  </>
+                )}
               </>
             )}
             {renderExpandableHtmlRow('지원자격', item?.bizSprtQlfcRqmtCn)}
@@ -399,15 +436,15 @@ const PbancView = () => {
         </div>
 
         {item?.strmdcsId && viewerVisible && (
-          <div style={{ width: '100%', marginBottom: '48px' }}>
+          <div style={ {width: '100%', marginBottom: '48px'} }>
             <iframe
               ref={viewerFrameRef}
               title="문서뷰어"
               src={STREAMDOCS_VIEWER_URL}
-              style={{ width: '100%', minHeight: '960px', border: 0 }}
+              style={ {width: '100%', minHeight: '960px', border: 0} }
             />
             {viewerError && (
-              <p style={{ marginTop: '12px', textAlign: 'center' }}>{viewerError}</p>
+              <p style={ {marginTop: '12px', textAlign: 'center'} }>{viewerError}</p>
             )}
           </div>
         )}
@@ -482,7 +519,8 @@ const PbancView = () => {
 
         <div className="onboard-btm-btngroup">
           <div>
-            <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate(resolveListBackPath(location))}>
+            <button type="button" className="krds-btn tertiary xlarge"
+              onClick={() => navigate(resolveListBackPath(location))}>
               목록
             </button>
           </div>
