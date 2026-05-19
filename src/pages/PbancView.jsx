@@ -16,11 +16,11 @@ const EMPTY_HTML_PATTERNS = new Set([
 
 const STREAMDOCS_VIEWER_URL =
   import.meta.env.VITE_STREAMDOCS_VIEWER_URL
-  || 'http://192.168.16.82:8088/e-paper/view/sd';
+  || 'https://www.smes.go.kr/e-paper/view/sd';
 
 const STREAMDOCS_ADAPTER_URL =
   import.meta.env.VITE_STREAMDOCS_ADAPTER_URL
-  || 'http://192.168.16.82:8088/e-paper/adapter.js';
+  || 'https://www.smes.go.kr/e-paper/adapter.js';
 
 const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
 const resolveApiErrorMessage = (error, fallbackMessage) =>
