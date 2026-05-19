@@ -22,6 +22,12 @@ const STREAMDOCS_ADAPTER_URL =
   import.meta.env.VITE_STREAMDOCS_ADAPTER_URL
   || 'https://www.smes.go.kr/e-paper/adapter.js';
 
+// 의도: 첨부파일 바로보기는 공고문 인라인 미리보기와 분리해 새 창으로 열고, 본문 뷰어의 열림/닫힘 상태를 건드리지 않는다.
+// 동작: StreamDocs viewer URL에 streamdocsId를 붙여 새 창 링크 href로 사용할 주소를 만든다.
+// 주의: strmdcsId가 없는 첨부파일에는 사용하지 않으며, 기존 데이터 호환용 master strmdcsId fallback은 공고문에만 적용한다.
+const buildStreamDocsPreviewUrl = (streamdocsId) =>
+  `${STREAMDOCS_VIEWER_URL};streamdocsId=${encodeURIComponent(streamdocsId)}`;
+
 const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
 const resolveApiErrorMessage = (error, fallbackMessage) =>
   error?.data?.message || error?.message || fallbackMessage;
@@ -46,6 +52,7 @@ const PbancView = () => {
   const [item, setItem] = useState(null);
   const [bizFieldOptions, setBizFieldOptions] = useState([]);
   const [viewerVisible, setViewerVisible] = useState(false);
+  const [activeStreamdocsId, setActiveStreamdocsId] = useState('');
   const [viewerError, setViewerError] = useState('');
   const [expandedRows, setExpandedRows] = useState({});
   const [isScrapped, setIsScrapped] = useState(false);
@@ -106,7 +113,7 @@ const PbancView = () => {
   }, []);
 
   useEffect(() => {
-    if (!viewerVisible || !item?.strmdcsId || !viewerFrameRef.current) return undefined;
+    if (!viewerVisible || !activeStreamdocsId || !viewerFrameRef.current) return undefined;
 
     let cancelled = false;
     setViewerError('');
@@ -143,7 +150,7 @@ const PbancView = () => {
         });
 
         return streamdocsRef.current.document.open({
-          streamdocsId: item.strmdcsId,
+          streamdocsId: activeStreamdocsId,
         });
       })
       .catch(() => {
@@ -156,7 +163,7 @@ const PbancView = () => {
       cancelled = true;
       streamdocsRef.current = null;
     };
-  }, [viewerVisible, item?.strmdcsId]);
+  }, [viewerVisible, activeStreamdocsId]);
 
   useEffect(() => {
     const targetId = Number(item?.bizPbancNo);
@@ -192,6 +199,19 @@ const PbancView = () => {
   const depth1Menu = getDepth1Parent();
   const pbancMtxtFiles = item?.pbancMtxtFiles || [];
   const pbancAtchFiles = item?.pbancAtchFiles || [];
+
+  const resolveNoticePreviewId = (file, index) =>
+    file?.strmdcsId || (index === 0 ? item?.strmdcsId : '');
+
+  const toggleStreamdocsViewer = (streamdocsId) => {
+    if (!streamdocsId) return;
+
+    setViewerVisible((visible) => {
+      const shouldClose = visible && activeStreamdocsId === streamdocsId;
+      return !shouldClose;
+    });
+    setActiveStreamdocsId(streamdocsId);
+  };
 
   const isMeaningfulHtml = (html) => {
     if (!html || typeof html !== 'string') return false;
@@ -435,7 +455,7 @@ const PbancView = () => {
           </dl>
         </div>
 
-        {item?.strmdcsId && viewerVisible && (
+        {activeStreamdocsId && viewerVisible && (
           <div style={ {width: '100%', marginBottom: '48px'} }>
             <iframe
               ref={viewerFrameRef}
@@ -453,22 +473,23 @@ const PbancView = () => {
           <div className="onbox-group-areawrap">
             <p className="onbox-group-title">공고문</p>
             <ul className="box-group-area">
-              {pbancMtxtFiles.map((file) => (
+              {pbancMtxtFiles.map((file, index) => {
+                const previewId = resolveNoticePreviewId(file, index);
+                return (
                 <li key={`${file.atchFileId}-${file.atchFileSn}`}>
                   <p className="tit">
                     <i className="svg-icon ico-file2"></i>
                     {file.orgnlFileNm}
                   </p>
                   <div className="btn-wrap">
-                    {item?.strmdcsId && (
+                    {previewId && (
                       <a
                         href="#"
                         className="krds-btn medium link basic"
-                        target="_blank"
-                        title="새 창 열기"
+                        title="문서 미리보기"
                         onClick={(e) => {
                           e.preventDefault();
-                          setViewerVisible((visible) => !visible);
+                          toggleStreamdocsViewer(previewId);
                         }}
                       >
                         <i className="svg-icon ico-sch-plus"></i> 바로보기
@@ -485,7 +506,8 @@ const PbancView = () => {
                     </button>
                   </div>
                 </li>
-              ))}
+              );
+              })}
             </ul>
           </div>
         )}
@@ -501,6 +523,17 @@ const PbancView = () => {
                     {file.orgnlFileNm}
                   </p>
                   <div className="btn-wrap">
+                    {file?.strmdcsId && (
+                      <a
+                        href={buildStreamDocsPreviewUrl(file.strmdcsId)}
+                        className="krds-btn medium link basic"
+                        title="문서 미리보기 새 창 열림"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <i className="svg-icon ico-sch-plus"></i> 바로보기
+                      </a>
+                    )}
                     <button
                       type="button"
                       className="krds-btn medium text on-colorblue"
