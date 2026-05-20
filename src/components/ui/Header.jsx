@@ -11,7 +11,7 @@ import HeaderMobileGNB from '@components/ui/header/HeaderMobileGNB';
 import HeaderFontDropdown from '@components/ui/header/HeaderFontDropdown';
 import FullSystemPopup from '@components/ui/FullSystemPopup';
 import { api as apiClient } from '@lib/apiClient.js';
-import { onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
+import { buildOnePassRegisterUrl, onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
 
 // BASE URL 상수
 const BASE_URL = import.meta.env.VITE_BASE || '/';
@@ -219,7 +219,7 @@ export default function Header() {
   };
 
   const handleOnePassJoin = () => {
-    const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/register/step1?type=member&return_client=smes-tipa-01&return_uri=https://www.smes.go.kr/home-dev/';
+    const onePassJoinUrl = buildOnePassRegisterUrl('member');
     console.log('onOnePassJoin : ', onePassJoinUrl);
     window.location.href = onePassJoinUrl;
   };

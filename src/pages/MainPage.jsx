@@ -24,7 +24,7 @@ import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import OnepassLoginConversionModal from '@pages/onepass/OnepassLoginConversionModal.jsx';
-import { onePassJoin } from '@utils/keycloakGetAuthCode.js';
+import { buildOnePassConversionUrl, buildOnePassRegisterUrl, onePassJoin } from '@utils/keycloakGetAuthCode.js';
 
 const MAIN_MENU_IDS = {
   notice: 'M_PIIO_00101',
@@ -609,18 +609,16 @@ const MainPage = () => {
     window.sessionStorage.setItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY, '1');
     setIsOnepassModalOpen(false);
   };
-  // 실제 전환 동선은 후속 계약 전까지 연결하지 않고, 현재는 노출/세션 제어까지만 수행한다.
   const handleOnepassModalConvert = () => {
     handleOnepassModalDismiss();
   };
   const handleOnepassJoinClick = () => {
     if (!isLoggedIn) {
-      //window.alert('중기원패스 회원가입 준비중입니다.');
-      const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/register/step1?type=member&return_client=smes-tipa-01&return_uri=https://www.smes.go.kr/home-dev/';
+      const onePassJoinUrl = buildOnePassRegisterUrl('member');
       console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     } else {
-      const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/conversion/step1?return_client=smes-tipa-01&return_uri=https://www.smes.go.kr/home-dev/';
+      const onePassJoinUrl = buildOnePassConversionUrl();
       console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     }

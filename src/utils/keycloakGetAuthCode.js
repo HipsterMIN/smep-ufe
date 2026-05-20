@@ -1,13 +1,75 @@
 // src/utils/keycloakGetAuthCode.js
 import { useAuthStore } from '../store/useAuthStore.jsx';
 
-const KEYCLOAK_URL = 'https://isso-dev.smes.go.kr/qsign';
-const KEYCLOAK_JOIN = 'https://onepass-dev.smes.go.kr/conversion/step1';
-const ONEPASS_JOIN = 'https://onepass-dev.smes.go.kr/register/step1?type=member&return_client=smes-tipa-01';
-const REALM = 'ucube-qsign';
-const CLIENT_ID = 'smes-tipa-01';
-const REDIRECT_SSO_URI = 'https://www.smes.go.kr/home-dev/sso'; // 우리 사이트 SSO 콜백 주소 (로그인)
-const REDIRECT_HOME_URI = 'https://www.smes.go.kr/home-dev/'; // 우리 사이트 메인 주소 (가입유도팝업)
+const readEnv = (key) => String(import.meta.env[key] || '').trim();
+const trimTrailingSlash = (value) => value.replace(/\/+$/, '');
+
+const KEYCLOAK_URL = trimTrailingSlash(readEnv('VITE_QSIGN_URL'));
+const KEYCLOAK_JOIN = readEnv('VITE_ONEPASS_CONVERSION_URL');
+const ONEPASS_JOIN = readEnv('VITE_ONEPASS_REGISTER_URL');
+const REALM = readEnv('VITE_QSIGN_REALM');
+const CLIENT_ID = readEnv('VITE_ONEPASS_CLIENT_ID');
+const REDIRECT_SSO_URI = readEnv('VITE_ONEPASS_REDIRECT_SSO_URI'); // 우리 사이트 SSO 콜백 주소 (로그인)
+const REDIRECT_HOME_URI = readEnv('VITE_ONEPASS_REDIRECT_HOME_URI'); // 우리 사이트 메인 주소 (가입유도팝업)
+const AGENCY_QSIGN_URL = trimTrailingSlash(readEnv('VITE_AGENCY_QSIGN_URL'));
+const MNA_CLIENT_ID = readEnv('VITE_MNA_CLIENT_ID');
+const MNA_REDIRECT_URI = readEnv('VITE_MNA_REDIRECT_URI');
+const COBIZ_CLIENT_ID = readEnv('VITE_COBIZ_CLIENT_ID');
+const COBIZ_REDIRECT_URI = readEnv('VITE_COBIZ_REDIRECT_URI');
+const BIZLINK_CLIENT_ID = readEnv('VITE_BIZLINK_CLIENT_ID');
+const BIZLINK_REDIRECT_URI = readEnv('VITE_BIZLINK_REDIRECT_URI');
+
+export function buildOnePassRegisterUrl(type = 'member') {
+  const params = new URLSearchParams({
+    type,
+    return_client: CLIENT_ID,
+    return_uri: REDIRECT_HOME_URI,
+  });
+
+  return `${ONEPASS_JOIN}?${params}`;
+}
+
+export function buildOnePassConversionUrl() {
+  const params = new URLSearchParams({
+    return_client: CLIENT_ID,
+    return_uri: REDIRECT_HOME_URI,
+  });
+
+  return `${KEYCLOAK_JOIN}?${params}`;
+}
+
+const buildAgencyAuthUrl = ({ clientId, redirectUri }) => {
+  // 외부 기관 연계는 공통 QSign base를 쓰고, 기관별 client_id와 redirect_uri만 분기한다.
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    scope: 'openid',
+  });
+
+  return `${AGENCY_QSIGN_URL}/realms/${REALM}/protocol/openid-connect/auth?${params}`;
+};
+
+export function buildMnaAuthUrl() {
+  return buildAgencyAuthUrl({
+    clientId: MNA_CLIENT_ID,
+    redirectUri: MNA_REDIRECT_URI,
+  });
+}
+
+export function buildCobizAuthUrl() {
+  return buildAgencyAuthUrl({
+    clientId: COBIZ_CLIENT_ID,
+    redirectUri: COBIZ_REDIRECT_URI,
+  });
+}
+
+export function buildBizlinkAuthUrl() {
+  return buildAgencyAuthUrl({
+    clientId: BIZLINK_CLIENT_ID,
+    redirectUri: BIZLINK_REDIRECT_URI,
+  });
+}
 
 const resolveOnePassJoinMemberId = () => {
   const { user } = useAuthStore.getState();

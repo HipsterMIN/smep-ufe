@@ -1,4 +1,5 @@
 import React from 'react';
+import { buildBizlinkAuthUrl, buildCobizAuthUrl, buildMnaAuthUrl } from '@utils/keycloakGetAuthCode.js';
 
 export default function HeaderUserMenu({
   isLogin,
@@ -18,8 +19,26 @@ export default function HeaderUserMenu({
   onMyPage,
   onSwitchContext,
 }) {
+  const handleCollaborationInfoSystemClick = () => {
+    const url = buildCobizAuthUrl();
+    if (!url) {
+      return;
+    }
+
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleBusinessSupportClick = () => {
+    const url = buildBizlinkAuthUrl();
+    if (!url) {
+      return;
+    }
+
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   const handleMnaClick = () => {
-    const url = 'https://www.smes.go.kr/isso-dev/qsign/realms/ucube-qsign/protocol/openid-connect/auth?response_type=code&client_id=mna&redirect_uri=https://www.smes.go.kr/mna-iam/iam/oauth/loginCallback.do&scope=openid';
+    const url = buildMnaAuthUrl();
     if (!url) {
       return;
     }
@@ -52,8 +71,20 @@ export default function HeaderUserMenu({
       <button
         type="button"
         className="btn-navi none-icon on-mobile-none"
-        hidden
-        style={{ display: 'none' }}
+        onClick={handleCollaborationInfoSystemClick}
+      >
+        협업정보시스템
+      </button>
+      <button
+        type="button"
+        className="btn-navi none-icon on-mobile-none"
+        onClick={handleBusinessSupportClick}
+      >
+        비즈니스지원단
+      </button>
+      <button
+        type="button"
+        className="btn-navi none-icon on-mobile-none"
         onClick={handleMnaClick}>
         M&amp;A
       </button>
