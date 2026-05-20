@@ -34,7 +34,7 @@ const OnePassSsoCallback = () => {
     });
 
     // 임시 연동 계약: 현재 프론트는 state/sessionStorage 검증 없이 code 존재 여부만 확인한다.
-    // code/state 는 원패스/Keycloak 이 redirect_uri(/home-dev/sso)로 돌려보낼 때 query string 으로 붙여 준다.
+    // code/state 는 원패스/Keycloak 이 환경별 redirect_uri의 /sso 콜백으로 돌려보낼 때 query string 으로 붙여 준다.
     // savedState 는 onePassJoin()/onePassGetAuthCode()가 외부 인증으로 보내기 직전에 sessionStorage 에 저장한 비교 기준이다.
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
