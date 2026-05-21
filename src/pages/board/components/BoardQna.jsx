@@ -218,6 +218,23 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
         <div className="page-title-wrap" data-type="responsive">
           <h2 className="h-tit">{boardTitle}</h2>
         </div>
+        {!isQnaPage && (
+        <div className="guide-txt custom mb-40">
+          <p>
+          궁금한게 있으신가요? 먼저 자주 묻는 질문을 한번 살펴보세요.
+          </p>
+          <button
+            type="button"
+            className="krds-btn secondary small"
+            style={{ marginTop: '5px', marginBottom: '5px' }}
+            onClick={() => navigate('/cs/csc/faq')}
+          >
+            자주 묻는 질문 바로가기
+          </button>
+          <p>
+          직접 상담원과 통화도 해보세요! (전화문의 : 044-300-0990~1)
+          </p>
+        </div>)}
         {isQnaPage && (
               <p className="guide-txt" style={{ marginBottom: '24px', clear: 'both' }}>
                 중소벤처24에서는 중소벤처기업부에서 보유하고 있는 정보 및 서비스를 API를 통해 배포하고 있습니다. <br/>
