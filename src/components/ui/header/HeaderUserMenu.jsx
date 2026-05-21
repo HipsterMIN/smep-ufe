@@ -100,7 +100,7 @@ export default function HeaderUserMenu({
 
     return (
       <>
-        {externalLinkButtons}
+        {/*externalLinkButtons*/}
 
         {/* 통합로그인은 로그인 상태와 무관하게 같은 진입점을 사용한다. */}
         <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
@@ -183,7 +183,7 @@ export default function HeaderUserMenu({
 
   return (
     <>
-      {externalLinkButtons}
+      {/*externalLinkButtons*/}
 
       {/* 통합로그인은 로그인 상태와 무관하게 같은 진입점을 사용한다. */}
       <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
