@@ -88,6 +88,13 @@ const UI_USR_R_031 = () => {
               0
             </span>
           </li>
+          <li>
+            <span>
+              <span className="sr-only">관심 공고</span>
+              <i className="svg-icon ico-like"></i>
+              0
+            </span>
+          </li>
         </ul>
 
         <div className="conts-desc">
