@@ -4,7 +4,7 @@ import { persist, devtools, createJSONStorage } from 'zustand/middleware';
 // BroadcastChannel 생성 (싱글톤)
 const authChannel = new BroadcastChannel('auth_channel');
 
-export const useAuthStore = create(
+export const useAuthStore = create( 
   devtools(
     persist(
       (set) => {
@@ -113,6 +113,7 @@ export const useAuthStore = create(
                 token: null,
                 refreshToken: null,
                 user: null,
+                uuid: null,
                 currentMode: null,
                 currentCompany: null,
                 linkedCompanies: [],
@@ -138,6 +139,7 @@ export const useAuthStore = create(
           token: null,
           refreshToken: null,
           user: null,
+          uuid: null,
           currentMode: null,
           currentCompany: null,
           linkedCompanies: [],
@@ -158,6 +160,7 @@ export const useAuthStore = create(
                 token: token || null,
                 refreshToken: refreshToken || null,
                 user: normalized.user,
+                uuid: normalized.uuid,
                 currentMode: normalized.currentMode,
                 currentCompany: normalized.currentCompany,
                 linkedCompanies: normalized.linkedCompanies,
@@ -182,6 +185,7 @@ export const useAuthStore = create(
             set(
               {
                 user: normalized.user,
+                uuid: normalized.uuid,
                 currentMode: normalized.currentMode,
                 currentCompany: normalized.currentCompany,
                 linkedCompanies: normalized.linkedCompanies,
@@ -207,6 +211,7 @@ export const useAuthStore = create(
                 token: null,
                 refreshToken: null,
                 user: null,
+                uuid: null,
                 currentMode: null,
                 currentCompany: null,
                 linkedCompanies: [],
