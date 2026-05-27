@@ -114,6 +114,7 @@ export const useAuthStore = create(
             set(
               {
                 isLogin: false,
+                isSsoLogin: false,
                 token: null,
                 refreshToken: null,
                 user: null,
@@ -140,6 +141,7 @@ export const useAuthStore = create(
 
         return {
           isLogin: false,
+          isSsoLogin: false,
           token: null,
           refreshToken: null,
           user: null,
@@ -182,6 +184,33 @@ export const useAuthStore = create(
               'auth/login',
             );
           },
+          ssoLogin: ({ token, refreshToken, profile } = {}) => {
+            const normalized = normalizeProfile(profile);
+            set(
+              {
+                isLogin: true,
+                isSsoLogin: true,
+                token: token || null,
+                refreshToken: refreshToken || null,
+                user: normalized.user,
+                uuid: normalized.uuid,
+                currentMode: normalized.currentMode,
+                currentCompany: normalized.currentCompany,
+                linkedCompanies: normalized.linkedCompanies,
+                contextRole: normalized.contextRole,
+                intgMbrSwtcYn: normalized.intgMbrSwtcYn,
+                bizno: normalized.bizno,
+                cmpNm: normalized.cmpNm,
+                companySize: normalized.companySize,
+                companyProfile: normalized.companyProfile,
+                additionalInfoRequired: normalized.additionalInfoRequired,
+                additionalInfoReason: normalized.additionalInfoReason,
+                additionalInfoMissingFields: normalized.additionalInfoMissingFields,
+              },
+              false,
+              'auth/ssoLogin',
+            );
+          },
           setRefreshToken: (refreshToken) =>
             set({ refreshToken: refreshToken || null }, false, 'auth/setRefreshToken'),
           updateProfile: (profile) => {
@@ -212,6 +241,7 @@ export const useAuthStore = create(
             set(
               {
                 isLogin: false,
+                isSsoLogin: false,
                 token: null,
                 refreshToken: null,
                 user: null,

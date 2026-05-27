@@ -119,13 +119,13 @@ const UI_USR_R_440 = () => {
           <h4 className="outline-tit">알려드립니다.</h4>
           <ul className="check-list">
             <li>중소벤처24를 이용해 주신 회원님께 진심으로 감사드립니다.</li>
-            <li>탈퇴 이후에 재가입은 가능하지만 기존에 사용하였던 ID는 더이상 사용할 수 없습니다.</li>
-            <li>기업회원은 해당 기업관리자만이 회원탈퇴가 가능합니다.</li>
+            <li>탈퇴는 중기통합회원 마이페이지에서 진행 부탁드립니다.</li>
           </ul>
         </div>
 
+{/* 
         <div className="krds-table-wrap mt-24">
-          <table className="tbl col data tbl-row"> {/* row타입 테이블 class명: tbl-row */}
+          <table className="tbl col data tbl-row">
             <caption>회원 기업 정보. 기업명, 기업 관리자 정보가 제공됨.  </caption>
             <colgroup>
               <col style={{ width: '20%' }} />
@@ -189,7 +189,7 @@ const UI_USR_R_440 = () => {
               </tbody>
             </table>
           </div>
-        </div>
+        </div> */}
 
         <div className="conts-wrap mt-64 certify-conts">
           <div className="certify-cont-box" style={{ border: '0px', marginTop: '-80px' }}>
@@ -200,7 +200,7 @@ const UI_USR_R_440 = () => {
                 onClick={handleWithdrawal}
                 disabled={isWithdrawing}
               >
-                {isWithdrawing ? '탈퇴 처리 중' : '탈퇴하기'}
+                {isWithdrawing ? '탈퇴 처리 중' : '중기통합회원 관리'}
               </button>
             </div>
           </div>

@@ -14,7 +14,7 @@ export default function HeaderUserMenu({
   onExtendSession,
   onLogin,
   onOnePassLogin,
-  onOnePassConfig,
+  onOnePassConfig, 
   onOnePassJoin,
   onLogout,
   onMyPage,
