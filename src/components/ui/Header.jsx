@@ -218,6 +218,19 @@ export default function Header() {
     onePassGetAuthCode();
   };
 
+  const handleOnePassConfig = () => {
+    if(isLogin && currentMode === 'CORPORATE') {
+      const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/mypage-business/information?redirect_uri=https://www.smes.go.kr/home-dev/mb/dash/UI_USR_L_510&client_id=smes-tipa-01&uuid=019e693e-e17d-7992-917c-5924695003d4';
+      console.log('onOnePassJoin : ', onePassJoinUrl);
+      window.location.href = onePassJoinUrl;
+    } else if (isLogin) {
+      const onePassJoinUrl = 'https://onepass-dev.smes.go.kr/mypage-member/information?redirect_uri=https://www.smes.go.kr/home-dev/mb/dash/UI_USR_L_510&client_id=smes-tipa-01&uuid=019e693e-e17d-7992-917c-5924695003d4';      
+      console.log('onOnePassJoin : ', onePassJoinUrl);
+      window.location.href = onePassJoinUrl;
+    }
+    
+  }
+
   const handleOnePassJoin = () => {
     const onePassJoinUrl = buildOnePassRegisterUrl('member');
     console.log('onOnePassJoin : ', onePassJoinUrl);
@@ -577,6 +590,7 @@ export default function Header() {
                       onExtendSession={handleExtendSession}
                       onLogin={handleServiceLogin}
                       onOnePassLogin={handleOnePassIntegratedLogin}
+                      onOnePassConfig={handleOnePassConfig}
                       onOnePassJoin={handleOnePassJoin}
                       onLogout={handleLogout}
                       onMyPage={handleMyPage}
@@ -622,6 +636,7 @@ export default function Header() {
           onClose={handleCloseMobGnb} 
           onLogin={handleServiceLogin}
           onOnePassLogin={handleOnePassIntegratedLogin}
+          onOnePassConfig={handleOnePassConfig}
           onMyPage={handleMyPage}
           onLogout={handleLogout}
           isLogin={isLogin}
