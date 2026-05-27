@@ -32,6 +32,9 @@ export const useAuthStore = create(
 
         const normalizeProfile = (profile) => {
           const safeProfile = profile || {};
+
+          const uuid = safeProfile.uuid || safeProfile.userUuid || safeProfile.user_uuid || null;
+
           const currentCompany = normalizeCompany(
             safeProfile.currentCompany || safeProfile.companyProfile || safeProfile.company,
           );
@@ -82,6 +85,7 @@ export const useAuthStore = create(
             [];
 
           return {
+            uuid,
             currentMode,
             currentCompany,
             linkedCompanies,

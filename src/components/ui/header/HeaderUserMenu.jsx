@@ -105,11 +105,11 @@ export default function HeaderUserMenu({
 
         {/* 통합로그인은 로그인 상태와 무관하게 같은 진입점을 사용한다. */}
         <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
-          중기원패스 통합로그인
+          중기통합회원 로그인
         </button>
 
         <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassConfig}>
-          통합회원정보 관리
+          중기통합회원 관리
         </button>
 
         {/* <div className="user-info-wrap">
