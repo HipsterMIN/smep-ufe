@@ -5,18 +5,19 @@ import AppRouter from './routes/index.jsx';
 import { CubeIAxProvider } from '@cube-i-ax/sdk/react';
 import { ProgramChatProvider } from '@cube-i-ax/sdk/smes/program';
 import { useAuthStore } from './store/useAuthStore.jsx';
+import AdditionalInfoRequiredGate from './components/account/AdditionalInfoRequiredGate.jsx';
 
 const AI_CONFIGS = {
   prod: {
     url: 'https://www.smes-tipa.go.kr/aiax-dev/v1',
     key: 'sk-F4E9gAEtT-5NKFuPIiDnT3UoNyXqXSwOFqcfp__CUDY',
-    label: '운영(개발) 서버'
+    label: '운영(개발) 서버',
   },
   dev: {
     url: 'https://ax.llmonx.kr:28443/v1',
     key: 'sk-dSXsb0I7zcjxqr23mwYsjJoFFpCfvjg5LHkwaf-CP0s',
-    label: '개발 서버'
-  }
+    label: '개발 서버',
+  },
 };
 
 const SAMPLE_COMPANY_PROFILE = {
@@ -98,6 +99,7 @@ function App() {
           groupByField={AI_SETTINGS.groupByField}
         >
           <AppRouter />
+          <AdditionalInfoRequiredGate />
         </ProgramChatProvider>
       </CubeIAxProvider>
     </AuthProvider>

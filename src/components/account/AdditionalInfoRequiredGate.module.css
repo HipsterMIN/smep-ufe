@@ -1,0 +1,176 @@
+.page {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+}
+
+.modalWrap {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6.4rem 1.6rem;
+}
+
+.modalDialog {
+  position: relative;
+  z-index: 1;
+  width: 76rem;
+  max-width: calc(100% - 3.2rem);
+}
+
+.modalContent {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: min(82rem, calc(100vh - 12.8rem));
+  padding: 4rem 3.2rem 3.2rem;
+  border: 0;
+  border-radius: 0.8rem;
+  background: var(--krds-light-color-surface-white-subtler, #ffffff);
+  box-shadow: 0 1.2rem 3.2rem rgb(0 0 0 / 14%);
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #256ef4;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.modalTitle {
+  margin: 0;
+  color: var(--krds-light-color-text-primary, #101828);
+  font-size: 2.8rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1.35;
+}
+
+.guideText {
+  margin: 0;
+  color: var(--krds-light-color-text-basic, #344054);
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.55;
+}
+
+.stateText,
+.errorText {
+  margin: 2.4rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.5;
+}
+
+.stateText {
+  color: var(--krds-light-color-text-basic, #344054);
+}
+
+.errorText {
+  color: #d92d20;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.2rem;
+  padding-top: 2.4rem;
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(15 23 42 / 28%);
+  backdrop-filter: blur(2px);
+}
+
+.modalContent :global(.form-wrapper.row-small) {
+  flex-wrap: wrap;
+}
+
+.modalContent :global(form) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.4rem;
+}
+
+@media screen and (max-width: 640px) {
+  .modalWrap {
+    padding: 4.8rem 1.2rem;
+  }
+
+  .modalContent {
+    height: calc(100vh - 9.6rem);
+    padding: 3.2rem 2rem 2.4rem;
+  }
+
+  .modalTitle {
+    font-size: 2.2rem;
+  }
+
+  .buttonGroup {
+    flex-direction: column-reverse;
+    justify-content: stretch;
+  }
+
+  .buttonGroup button {
+    width: 100%;
+  }
+
+  .modalContent :global(.form-wrapper.row-small) {
+    align-items: stretch;
+    gap: 0.8rem;
+  }
+
+  .modalContent :global(.form-wrapper.row-small .w-120),
+  .modalContent :global(.form-wrapper.row-small .w-140),
+  .modalContent :global(.form-wrapper.row-small .w-150),
+  .modalContent :global(.form-wrapper .w-220),
+  .modalContent :global(.form-wrapper .w-460) {
+    width: 100%;
+  }
+
+  .modalContent :global(.form-wrapper.row-small).phoneInline {
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+  }
+
+  .modalContent :global(.form-wrapper.row-small).phoneInline :global(.w-120) {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+  }
+
+  .phoneInline span {
+    flex: 0 0 auto;
+  }
+
+  .modalContent :global(.form-wrapper.row-small).emailInline {
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+  }
+
+  .modalContent :global(.form-wrapper.row-small).emailInline :global(.w-140) {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+  }
+
+  .emailInline span {
+    flex: 0 0 auto;
+  }
+}
