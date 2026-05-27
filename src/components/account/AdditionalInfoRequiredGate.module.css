@@ -95,6 +95,10 @@
   backdrop-filter: blur(2px);
 }
 
+.modalContent :global(.krds-form-check) {
+  position: relative;
+}
+
 .modalContent :global(.form-wrapper.row-small) {
   flex-wrap: wrap;
 }
