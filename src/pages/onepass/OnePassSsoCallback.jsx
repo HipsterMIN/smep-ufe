@@ -165,7 +165,9 @@ const OnePassSsoCallback = () => {
           profileKeys: profile && typeof profile === 'object' ? Object.keys(profile) : [],
         });
 
-        useAuthStore.getState().login({ token: accessToken, refreshToken, profile });
+        useAuthStore.getState().ssoLogin({ token: accessToken, refreshToken, profile });
+        //useAuthStore.getState().login({ token: accessToken, refreshToken, profile });
+
         console.log(`${LOG_PREFIX} auth store login saved`, {
           hasToken: Boolean(useAuthStore.getState().token),
           isLogin: Boolean(useAuthStore.getState().isLogin),
