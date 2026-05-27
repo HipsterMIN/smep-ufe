@@ -1266,6 +1266,15 @@ table tbody tr:hover td {
   min-width: fit-content;
   font-size:15px;
 }
+
+.search-top-box .sch-filter-box .filter-form.w2 .label {min-width:26px;}
+.search-top-box .sch-filter-box .filter-form.w3 .label {min-width:39px;}
+.search-top-box .sch-filter-box .filter-form.w4 .label {min-width:52px;}
+.search-top-box .sch-filter-box .filter-form.w5 .label {min-width:65px;}
+.search-top-box .sch-filter-box .filter-form.w6 .label {min-width:78px;}
+.search-top-box .sch-filter-box .filter-form.w7 .label {min-width:91px;}
+.search-top-box .sch-filter-box .filter-form.w8 .label {min-width:104px;}
+.search-top-box .sch-filter-box .filter-form.w9 .label {min-width:117px;}
 .search-top-box .sch-filter-box .krds-btn.text {
   font-weight: 700;
   align-items: center;
@@ -1592,6 +1601,10 @@ table tbody tr:hover td {
   display: none;
 }
 
+.onboard-summary .bu-like {display:flex; border-radius: 6px; padding: 6px 3px; margin-top: -6px; gap:4px;}
+.onboard-summary .bu-like:hover {background-color: #EEF2F7;}
+.onboard-summary .bu-like.active .svg-icon.ico-like {mask-image: url(/home-dev/styles/img/component/icon/ico_like_on.svg);}
+.onboard-summary .bu-like.active .svg-icon {background-color: #1877F2;}
 /* on-announcement */
 .on-announcement {
   margin-top: 48px;
