@@ -31,6 +31,7 @@ const UI_USR_R_440 = () => {
   const logout = useAuthStore((state) => state.logout);
   const [managerContact, setManagerContact] = useState(null);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
@@ -102,6 +103,32 @@ const UI_USR_R_440 = () => {
       setIsWithdrawing(false);
     }
   };
+
+
+  const onOnePassConfig = () => {
+    const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
+
+    if(!isSsoLogin) {
+      alert('통합회원 로그인 후 이용할 수 있습니다.');
+      return;
+    }
+
+    if (!isLogin || !uuid) {
+      alert('로그인 정보가 올바르지 않거나 UUID를 찾을 수 없습니다.');
+      return;
+    }
+
+    if(currentMode === 'CORPORATE') {
+      const onePassJoinUrl = `https://onepass-dev.smes.go.kr/mypage-business/information?redirect_uri=https://www.smes.go.kr/home-dev/mb/dash/UI_USR_L_510&client_id=smes-tipa-01&uuid=${uuid}`;
+      console.log('onOnePassJoin : ', onePassJoinUrl);
+      window.location.href = onePassJoinUrl;
+    } else {
+      const onePassJoinUrl = `https://onepass-dev.smes.go.kr/mypage-member/information?redirect_uri=https://www.smes.go.kr/home-dev/mb/dash/UI_USR_L_510&client_id=smes-tipa-01&uuid=${uuid}`;
+      console.log('onOnePassJoin : ', onePassJoinUrl);
+      window.location.href = onePassJoinUrl;
+    }
+  }
+
 
   return (
     <>
@@ -197,16 +224,15 @@ const UI_USR_R_440 = () => {
               <button
                 type="button"
                 className="krds-btn medium primary"
-                onClick={handleWithdrawal}
-                disabled={isWithdrawing}
+                onClick={onOnePassConfig}
               >
-                {isWithdrawing ? '탈퇴 처리 중' : '중기통합회원 관리'}
+                중기통합회원 마이페이지
               </button>
             </div>
           </div>
           <ul className="krds-info-list decimal" role="list">
             <li role="listitem">
-              탈퇴 처리 후 현재 로그인 세션은 종료되며 홈으로 이동합니다.
+              {/*탈퇴 처리 후 현재 로그인 세션은 종료되며 홈으로 이동합니다.*/}
             </li>
           </ul>
         </div>

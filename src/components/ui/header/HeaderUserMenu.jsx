@@ -1,6 +1,8 @@
 import React from 'react';
 import { buildBizlinkAuthUrl, buildCobizAuthUrl, buildMnaAuthUrl } from '@utils/keycloakGetAuthCode.js';
 
+import { useAuthStore } from '@store/useAuthStore.jsx';
+
 export default function HeaderUserMenu({
   isLogin,
   currentMode,
@@ -99,18 +101,23 @@ export default function HeaderUserMenu({
         ? currentCompany?.companyName || '기업'
         : user?.name || currentCompany?.companyName || '사용자';
 
+    const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
+
     return (
       <>
         {/*externalLinkButtons*/}
 
-        {/* 통합로그인은 로그인 상태와 무관하게 같은 진입점을 사용한다. */}
+        
+        {!isSsoLogin ? (
         <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
           중기통합회원 로그인
         </button>
-
+          ) : (
         <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassConfig}>
           중기통합회원 관리
         </button>
+        )}
+
 
         {/* <div className="user-info-wrap">
           <span className="user-name">
