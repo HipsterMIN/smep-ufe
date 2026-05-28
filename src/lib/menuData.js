@@ -931,7 +931,7 @@ export const mockMenuData = {
       'children': [
         {
           'menuId': 'M_PIIO_00108',
-          'menuNm': '나의 대시보드',
+          'menuNm': '서비스 이용이력',
           'intgSysSeCd': 'PIIO',
           'menuUseTrgtSeCd': 'USR',
           'upMenuId': 'M_PIIO_00068',
@@ -957,7 +957,7 @@ export const mockMenuData = {
               'iconClssNm': null,
               'sortSeq': 1,
               'upendMenuExpsrYn': 'N',
-              'lfsdMenuExpsrYn': 'N',
+              'lfsdMenuExpsrYn': 'Y',
               'scrnUseYn': 'Y',
               'scrnId': 'S_PIIO_00112',
               'bbsNo': null,
