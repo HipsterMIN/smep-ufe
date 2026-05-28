@@ -22,7 +22,7 @@ const SmftIssue = lazy(() => import('@pages/certificate/issue-extra/SmftIssue.js
 const UI_USR_R_031 = lazy(() => import('@pages/UI_USR_R_031.jsx'));
 //const UI_USR_R_480 = lazy(() => import('@pages/my-business/UI_USR_R_480.jsx'));
 /* 마이비즈니스 작업파일명 */
-const MyBussiness = lazy(() => import('@pages/my-business/UI_USR_R_480.jsx'));
+const MyBussiness = lazy(() => import('@pages/my-business/MyBusiness.jsx'));
 /* 마이비즈니스 작업파일명 */
 const UI_USR_L_510 = lazy(() => import('@pages/my-business/UI_USR_L_510.jsx'));
 const UI_USR_R_060 = lazy(() => import('@pages/certificate/UI_USR_R_060.jsx'));
