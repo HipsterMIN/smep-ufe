@@ -113,10 +113,10 @@ const UI_USR_R_440 = () => {
       return;
     }
 
-    if (!isLogin || !uuid) {
-      alert('로그인 정보가 올바르지 않거나 UUID를 찾을 수 없습니다.');
-      return;
-    }
+    // if (!isLogin || !uuid) {
+    //   alert('로그인 정보가 올바르지 않거나 UUID를 찾을 수 없습니다.');
+    //   return;
+    // }
 
     if(currentMode === 'CORPORATE') {
       const onePassJoinUrl = `https://onepass-dev.smes.go.kr/mypage-business/information?redirect_uri=https://www.smes.go.kr/home-dev/mb/dash/UI_USR_L_510&client_id=smes-tipa-01&uuid=${uuid}`;
