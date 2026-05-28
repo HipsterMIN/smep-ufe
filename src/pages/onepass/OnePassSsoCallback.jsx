@@ -165,7 +165,9 @@ const OnePassSsoCallback = () => {
           profileKeys: profile && typeof profile === 'object' ? Object.keys(profile) : [],
         });
 
-        useAuthStore.getState().login({ token: accessToken, refreshToken, profile });
+        useAuthStore.getState().ssoLogin({ token: accessToken, refreshToken, profile });
+        //useAuthStore.getState().login({ token: accessToken, refreshToken, profile });
+
         console.log(`${LOG_PREFIX} auth store login saved`, {
           hasToken: Boolean(useAuthStore.getState().token),
           isLogin: Boolean(useAuthStore.getState().isLogin),
@@ -183,7 +185,7 @@ const OnePassSsoCallback = () => {
           status: error?.status ?? null,
           hasData: Boolean(error?.data),
         });
-        alert('중기원패스 로그인 처리에 실패했습니다. 다시 시도해 주세요.');
+        alert('중기 통합회원 로그인 처리에 실패했습니다. 다시 시도해 주세요.');
         console.log(`${LOG_PREFIX} navigate login`, {
           to: '/service/login',
           reason: 'keycloak-case1-flow-failed',
@@ -209,7 +211,7 @@ const OnePassSsoCallback = () => {
         textAlign: 'center',
       }}
     >
-      <h2>중기원패스 인증 처리 중입니다.</h2>
+      <h2>중기 통합회원 인증 처리 중입니다.</h2>
       <p>잠시만 기다려 주세요.</p>
     </div>
   );

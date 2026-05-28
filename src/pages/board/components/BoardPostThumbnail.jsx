@@ -3,8 +3,15 @@ import { useEffect, useMemo, useState } from 'react';
 
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
+import StreamDocsInlineViewer from '@components/ui/StreamDocsInlineViewer.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import { buildStreamDocsPreviewUrl } from '@utils/streamDocsUtils.js';
+import {
+  getBoardPostFileLabel,
+  getFirstPreviewableStreamdocsId,
+  mergeBoardPostFiles,
+} from '@utils/boardPostFileUtils.js';
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -99,6 +106,18 @@ const BoardPostThumbnail = ({ boardDetail, bbsNo, pstNo }) => {
     () => (Array.isArray(postDetail?.attachFiles) ? postDetail.attachFiles : []),
     [postDetail],
   );
+  const mtxtCnOtptFiles = useMemo(
+    () => (Array.isArray(postDetail?.mtxtCnOtptFiles) ? postDetail.mtxtCnOtptFiles : []),
+    [postDetail],
+  );
+  const inlinePreviewStreamdocsId = useMemo(
+    () => getFirstPreviewableStreamdocsId(mtxtCnOtptFiles),
+    [mtxtCnOtptFiles],
+  );
+  const boardPostFiles = useMemo(
+    () => mergeBoardPostFiles(mtxtCnOtptFiles, attachFiles),
+    [mtxtCnOtptFiles, attachFiles],
+  );
   const prevPost = useMemo(() => postDetail?.prevPost ?? null, [postDetail]);
   const nextPost = useMemo(() => postDetail?.nextPost ?? null, [postDetail]);
 
@@ -164,15 +183,17 @@ const BoardPostThumbnail = ({ boardDetail, bbsNo, pstNo }) => {
           <br /><br />
         </div>
 
+        <StreamDocsInlineViewer streamdocsId={inlinePreviewStreamdocsId} />
+
         {/* 첨부파일 */}
-        {attachFiles.length > 0 && (
+        {boardPostFiles.length > 0 && (
           <div className="onbox-group-areawrap">
             <p className="onbox-group-title">첨부파일</p>
             <ul className="box-group-area">
-              {attachFiles.map((file, index) => {
-                const fileLabel =
-                  String(file?.orgnlFileNm ?? file?.strgFileNm ?? '').trim() || `첨부파일 ${index + 1}`;
+              {boardPostFiles.map((file, index) => {
+                const fileLabel = getBoardPostFileLabel(file, index);
                 const downloadUrl = buildAttachmentDownloadUrl(file);
+                const streamdocsId = String(file?.strmdcsId ?? '').trim();
 
                 return (
                   <li key={`${file?.atchFileId ?? 'atch'}-${file?.atchFileSn ?? index}`}>
@@ -181,6 +202,17 @@ const BoardPostThumbnail = ({ boardDetail, bbsNo, pstNo }) => {
                       {fileLabel}
                     </p>
                     <div className="btn-wrap">
+                      {streamdocsId && (
+                        <a
+                          className="krds-btn medium link basic"
+                          href={buildStreamDocsPreviewUrl(streamdocsId)}
+                          title="문서 미리보기 새 창 열림"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <i className="svg-icon ico-sch-plus"></i> 바로가기
+                        </a>
+                      )}
                       <a className="krds-btn medium text on-colorblue" href={downloadUrl}>
                         <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
                       </a>

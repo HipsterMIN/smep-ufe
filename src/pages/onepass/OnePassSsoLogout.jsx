@@ -40,7 +40,7 @@ const OnePassSsoLogout = () => {
         textAlign: 'center',
       }}
     >
-      <h2>중기원패스 로그아웃 처리 중입니다.</h2>
+      <h2>중기 통합회원 로그아웃 처리 중입니다.</h2>
       <p>잠시만 기다려 주세요.</p>
     </div>
   );

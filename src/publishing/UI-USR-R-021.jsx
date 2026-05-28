@@ -76,6 +76,9 @@ const UI_USR_R_021 = () => {
                 0
               </span>
             </li>
+            <li><span><span class="sr-only">관심 공고</span><i class="svg-icon ico-like"></i>0</span></li>
+            <li class="bu-type"><span><button type="button" class="bu-like active"><i class="svg-icon ico-like"></i><span>관심 공고 등록</span></button></span> </li>
+            <li class="bu-type"><span><button type="button" class="bu-like"><i class="svg-icon ico-like"></i><span>관심 공고 등록</span></button></span> </li>
           </ul>
           <div className="def-list-wrap">
             <dl className="def-list">

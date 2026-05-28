@@ -31,6 +31,7 @@ const UI_USR_R_440 = () => {
   const logout = useAuthStore((state) => state.logout);
   const [managerContact, setManagerContact] = useState(null);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
@@ -103,6 +104,32 @@ const UI_USR_R_440 = () => {
     }
   };
 
+
+  const onOnePassConfig = () => {
+    const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
+
+    if(!isSsoLogin) {
+      alert('통합회원 로그인 후 이용할 수 있습니다.');
+      return;
+    }
+
+    // if (!isLogin || !uuid) {
+    //   alert('로그인 정보가 올바르지 않거나 UUID를 찾을 수 없습니다.');
+    //   return;
+    // }
+
+    if(currentMode === 'CORPORATE') {
+      const onePassJoinUrl = `https://onepass-dev.smes.go.kr/mypage-business/information?redirect_uri=https://www.smes.go.kr/home-dev/mb/dash/UI_USR_L_510&client_id=smes-tipa-01&uuid=${uuid}`;
+      console.log('onOnePassJoin : ', onePassJoinUrl);
+      window.location.href = onePassJoinUrl;
+    } else {
+      const onePassJoinUrl = `https://onepass-dev.smes.go.kr/mypage-member/information?redirect_uri=https://www.smes.go.kr/home-dev/mb/dash/UI_USR_L_510&client_id=smes-tipa-01&uuid=${uuid}`;
+      console.log('onOnePassJoin : ', onePassJoinUrl);
+      window.location.href = onePassJoinUrl;
+    }
+  }
+
+
   return (
     <>
       <SideNavigation
@@ -119,13 +146,13 @@ const UI_USR_R_440 = () => {
           <h4 className="outline-tit">알려드립니다.</h4>
           <ul className="check-list">
             <li>중소벤처24를 이용해 주신 회원님께 진심으로 감사드립니다.</li>
-            <li>탈퇴 이후에 재가입은 가능하지만 기존에 사용하였던 ID는 더이상 사용할 수 없습니다.</li>
-            <li>기업회원은 해당 기업관리자만이 회원탈퇴가 가능합니다.</li>
+            <li>탈퇴는 중기 통합회원 마이페이지에서 진행 부탁드립니다.</li>
           </ul>
         </div>
 
+{/* 
         <div className="krds-table-wrap mt-24">
-          <table className="tbl col data tbl-row"> {/* row타입 테이블 class명: tbl-row */}
+          <table className="tbl col data tbl-row">
             <caption>회원 기업 정보. 기업명, 기업 관리자 정보가 제공됨.  </caption>
             <colgroup>
               <col style={{ width: '20%' }} />
@@ -189,7 +216,7 @@ const UI_USR_R_440 = () => {
               </tbody>
             </table>
           </div>
-        </div>
+        </div> */}
 
         <div className="conts-wrap mt-64 certify-conts">
           <div className="certify-cont-box" style={{ border: '0px', marginTop: '-80px' }}>
@@ -197,16 +224,15 @@ const UI_USR_R_440 = () => {
               <button
                 type="button"
                 className="krds-btn medium primary"
-                onClick={handleWithdrawal}
-                disabled={isWithdrawing}
+                onClick={onOnePassConfig}
               >
-                {isWithdrawing ? '탈퇴 처리 중' : '탈퇴하기'}
+                중기 통합회원 마이페이지
               </button>
             </div>
           </div>
           <ul className="krds-info-list decimal" role="list">
             <li role="listitem">
-              탈퇴 처리 후 현재 로그인 세션은 종료되며 홈으로 이동합니다.
+              {/*탈퇴 처리 후 현재 로그인 세션은 종료되며 홈으로 이동합니다.*/}
             </li>
           </ul>
         </div>

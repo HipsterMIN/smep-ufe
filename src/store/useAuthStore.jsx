@@ -4,10 +4,10 @@ import { persist, devtools, createJSONStorage } from 'zustand/middleware';
 // BroadcastChannel 생성 (싱글톤)
 const authChannel = new BroadcastChannel('auth_channel');
 
-export const useAuthStore = create(
+export const useAuthStore = create( 
   devtools(
     persist(
-      (set, get) => {
+      (set) => {
         const normalizeCompany = (company) => {
           if (!company) return null;
           return {
@@ -32,6 +32,9 @@ export const useAuthStore = create(
 
         const normalizeProfile = (profile) => {
           const safeProfile = profile || {};
+
+          const uuid = safeProfile.uuid || safeProfile.userUuid || safeProfile.user_uuid || null;
+
           const currentCompany = normalizeCompany(
             safeProfile.currentCompany || safeProfile.companyProfile || safeProfile.company,
           );
@@ -76,8 +79,13 @@ export const useAuthStore = create(
             safeProfile.contextRole || safeProfile.context_role || currentCompany?.role || null;
           const intgMbrSwtcYn =
             safeProfile.intgMbrSwtcYn || safeProfile.intg_mbr_swtc_yn || null;
+          const additionalInfoMissingFields =
+            safeProfile.additionalInfoMissingFields ||
+            safeProfile.additional_info_missing_fields ||
+            [];
 
           return {
+            uuid,
             currentMode,
             currentCompany,
             linkedCompanies,
@@ -88,6 +96,14 @@ export const useAuthStore = create(
             user,
             contextRole,
             intgMbrSwtcYn,
+            additionalInfoRequired: Boolean(
+              safeProfile.additionalInfoRequired || safeProfile.additional_info_required,
+            ),
+            additionalInfoReason:
+              safeProfile.additionalInfoReason || safeProfile.additional_info_reason || null,
+            additionalInfoMissingFields: Array.isArray(additionalInfoMissingFields)
+              ? additionalInfoMissingFields
+              : [],
           };
         };
 
@@ -98,9 +114,11 @@ export const useAuthStore = create(
             set(
               {
                 isLogin: false,
+                isSsoLogin: false,
                 token: null,
                 refreshToken: null,
                 user: null,
+                uuid: null,
                 currentMode: null,
                 currentCompany: null,
                 linkedCompanies: [],
@@ -110,9 +128,12 @@ export const useAuthStore = create(
                 cmpNm: null,
                 companySize: null,
                 companyProfile: null,
+                additionalInfoRequired: false,
+                additionalInfoReason: null,
+                additionalInfoMissingFields: [],
               },
               false,
-              'auth/sync_logout'
+              'auth/sync_logout',
             );
             // 필요 시 리다이렉트 로직 추가 가능 (예: window.location.href = '/')
           }
@@ -120,9 +141,11 @@ export const useAuthStore = create(
 
         return {
           isLogin: false,
+          isSsoLogin: false,
           token: null,
           refreshToken: null,
           user: null,
+          uuid: null,
           currentMode: null,
           currentCompany: null,
           linkedCompanies: [],
@@ -132,6 +155,9 @@ export const useAuthStore = create(
           cmpNm: null,
           companySize: null,
           companyProfile: null,
+          additionalInfoRequired: false,
+          additionalInfoReason: null,
+          additionalInfoMissingFields: [],
           login: ({ token, refreshToken, profile } = {}) => {
             const normalized = normalizeProfile(profile);
             set(
@@ -140,6 +166,7 @@ export const useAuthStore = create(
                 token: token || null,
                 refreshToken: refreshToken || null,
                 user: normalized.user,
+                uuid: normalized.uuid,
                 currentMode: normalized.currentMode,
                 currentCompany: normalized.currentCompany,
                 linkedCompanies: normalized.linkedCompanies,
@@ -149,9 +176,39 @@ export const useAuthStore = create(
                 cmpNm: normalized.cmpNm,
                 companySize: normalized.companySize,
                 companyProfile: normalized.companyProfile,
+                additionalInfoRequired: normalized.additionalInfoRequired,
+                additionalInfoReason: normalized.additionalInfoReason,
+                additionalInfoMissingFields: normalized.additionalInfoMissingFields,
               },
               false,
               'auth/login',
+            );
+          },
+          ssoLogin: ({ token, refreshToken, profile } = {}) => {
+            const normalized = normalizeProfile(profile);
+            set(
+              {
+                isLogin: true,
+                isSsoLogin: true,
+                token: token || null,
+                refreshToken: refreshToken || null,
+                user: normalized.user,
+                uuid: normalized.uuid,
+                currentMode: normalized.currentMode,
+                currentCompany: normalized.currentCompany,
+                linkedCompanies: normalized.linkedCompanies,
+                contextRole: normalized.contextRole,
+                intgMbrSwtcYn: normalized.intgMbrSwtcYn,
+                bizno: normalized.bizno,
+                cmpNm: normalized.cmpNm,
+                companySize: normalized.companySize,
+                companyProfile: normalized.companyProfile,
+                additionalInfoRequired: normalized.additionalInfoRequired,
+                additionalInfoReason: normalized.additionalInfoReason,
+                additionalInfoMissingFields: normalized.additionalInfoMissingFields,
+              },
+              false,
+              'auth/ssoLogin',
             );
           },
           setRefreshToken: (refreshToken) =>
@@ -161,6 +218,7 @@ export const useAuthStore = create(
             set(
               {
                 user: normalized.user,
+                uuid: normalized.uuid,
                 currentMode: normalized.currentMode,
                 currentCompany: normalized.currentCompany,
                 linkedCompanies: normalized.linkedCompanies,
@@ -170,6 +228,9 @@ export const useAuthStore = create(
                 cmpNm: normalized.cmpNm,
                 companySize: normalized.companySize,
                 companyProfile: normalized.companyProfile,
+                additionalInfoRequired: normalized.additionalInfoRequired,
+                additionalInfoReason: normalized.additionalInfoReason,
+                additionalInfoMissingFields: normalized.additionalInfoMissingFields,
               },
               false,
               'auth/update_profile',
@@ -180,9 +241,11 @@ export const useAuthStore = create(
             set(
               {
                 isLogin: false,
+                isSsoLogin: false,
                 token: null,
                 refreshToken: null,
                 user: null,
+                uuid: null,
                 currentMode: null,
                 currentCompany: null,
                 linkedCompanies: [],
@@ -192,6 +255,9 @@ export const useAuthStore = create(
                 cmpNm: null,
                 companySize: null,
                 companyProfile: null,
+                additionalInfoRequired: false,
+                additionalInfoReason: null,
+                additionalInfoMissingFields: [],
               },
               false,
               'auth/logout',

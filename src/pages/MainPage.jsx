@@ -1532,7 +1532,7 @@ const MainPage = () => {
         <div className="main-btm-bar">
           <div className="contents-inner">
             <p className="title">중소기업 유관 시스템을 하나의 통합 ID로 이용할 수 있습니다</p>
-            <button type="button" className="krds-btn primary" onClick={handleOnepassJoinClick}>통합회원 가입하기</button>
+            <button type="button" className="krds-btn primary" onClick={handleOnepassJoinClick}>중기 통합회원 가입하기</button>
           </div>
         </div>
       </div>

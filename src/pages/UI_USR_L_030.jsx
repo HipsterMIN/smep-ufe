@@ -802,7 +802,7 @@ const UI_USR_L_030 = () => {
                     {showLoan && (
                       <div className="on-mw100p">
                         <label className="label" htmlFor="thmTpbizNm">테마업종명</label>
-                        <input id="thmTpbizNm" type="text" className="krds-input medium" value={filters.thmTpbizNm} onChange={(e) => updateFilter('thmTpbizNm', e.target.value)} />
+                        <input id="thmTpbizNm" type="text" className="krds-input small" value={filters.thmTpbizNm} onChange={(e) => updateFilter('thmTpbizNm', e.target.value)} />
                       </div>
                     )}
                     {renderSelectField({
