@@ -773,7 +773,7 @@ const UI_USR_L_030 = () => {
                 </div>
 
                 <div className="sch-filter-box">
-                  <div className="filter-form">
+                  <div className="filter-form w6">
                     {activeTabIndex === 0 && renderSelectField({
                       id: 'plcyFnncGdsTypeCd',
                       label: '상품유형',
@@ -838,7 +838,7 @@ const UI_USR_L_030 = () => {
                   </div>
 
                   {showLoan && (
-                    <div className="filter-form">
+                    <div className="filter-form w6">
                       {renderSelectField({ id: 'plcyFnncRpmtMthdCd', label: '상환방법', value: filters.plcyFnncRpmtMthdCd, onChange: (value) => applyDetailFilter('plcyFnncRpmtMthdCd', value), options: filterOptions.repaymentMethods, placeholder: '전체' })}
                       {renderSelectField({ id: 'flctnIrtYnCn', label: '금리변동여부', value: filters.flctnIrtYnCn, onChange: (value) => applyDetailFilter('flctnIrtYnCn', value), options: filterOptions.interestChangeTypes, placeholder: '전체' })}
                       {renderSelectField({ id: 'plcyFndsLoanMthCn', label: '융자방식', value: filters.plcyFndsLoanMthCn, onChange: (value) => applyDetailFilter('plcyFndsLoanMthCn', value), options: filterOptions.loanMethods, placeholder: '전체' })}
@@ -848,7 +848,7 @@ const UI_USR_L_030 = () => {
                   )}
 
                   {showGrant && (
-                    <div className="filter-form">
+                    <div className="filter-form w6">
                       {renderSelectField({ id: 'plcyFnncSprtTrgtFndsCn', label: '지원대상 자금', value: filters.plcyFnncSprtTrgtFndsCn, onChange: (value) => applyDetailFilter('plcyFnncSprtTrgtFndsCn', value), options: filterOptions.supportTargetFunds, placeholder: '전체' })}
                       {renderSelectField({ id: 'plcyFnncGdsKndCd', label: '상품종류', value: filters.plcyFnncGdsKndCd, onChange: (value) => applyDetailFilter('plcyFnncGdsKndCd', value), options: filterOptions.grantKinds, placeholder: '전체' })}
                       {renderSelectField({ id: 'plcyFnncGrnteRtSmryCn', label: '보증비율', value: filters.plcyFnncGrnteRtSmryCn, onChange: (value) => applyDetailFilter('plcyFnncGrnteRtSmryCn', value), options: filterOptions.grantRateSummaries, placeholder: '전체' })}
@@ -856,7 +856,7 @@ const UI_USR_L_030 = () => {
                   )}
 
                   {showInsurance && (
-                    <div className="filter-form">
+                    <div className="filter-form w6">
                       {renderSelectField({ id: 'plcyFnncCmpnRtSmryCn', label: '보상비율', value: filters.plcyFnncCmpnRtSmryCn, onChange: (value) => applyDetailFilter('plcyFnncCmpnRtSmryCn', value), options: filterOptions.insuranceRateSummaries, placeholder: '전체' })}
                     </div>
                   )}
