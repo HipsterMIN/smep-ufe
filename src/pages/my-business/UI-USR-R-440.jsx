@@ -146,7 +146,7 @@ const UI_USR_R_440 = () => {
           <h4 className="outline-tit">알려드립니다.</h4>
           <ul className="check-list">
             <li>중소벤처24를 이용해 주신 회원님께 진심으로 감사드립니다.</li>
-            <li>탈퇴는 중기통합회원 마이페이지에서 진행 부탁드립니다.</li>
+            <li>탈퇴는 중기 통합회원 마이페이지에서 진행 부탁드립니다.</li>
           </ul>
         </div>
 
@@ -226,7 +226,7 @@ const UI_USR_R_440 = () => {
                 className="krds-btn medium primary"
                 onClick={onOnePassConfig}
               >
-                중기통합회원 마이페이지
+                중기 통합회원 마이페이지
               </button>
             </div>
           </div>
