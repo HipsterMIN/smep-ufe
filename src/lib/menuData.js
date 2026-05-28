@@ -918,7 +918,7 @@ export const mockMenuData = {
       'upMenuId': 'M_PIIO_00063',
       'iconClssNm': null,
       'sortSeq': 5,
-      'upendMenuExpsrYn': 'N',
+      'upendMenuExpsrYn': 'Y',
       'lfsdMenuExpsrYn': 'Y',
       'scrnUseYn': 'Y',
       'scrnId': 'S_PIIO_00068',
