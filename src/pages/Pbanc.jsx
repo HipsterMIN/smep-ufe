@@ -294,8 +294,6 @@ const Pbanc = () => {
                 <option value={10}>10개</option>
                 <option value={20}>20개</option>
                 <option value={30}>30개</option>
-                <option value={40}>40개</option>
-                <option value={50}>50개</option>
               </select>
             </li>
             <li>

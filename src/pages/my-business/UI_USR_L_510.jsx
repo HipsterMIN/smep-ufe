@@ -219,6 +219,7 @@ const UI_USR_L_510 = () => {
                 >
                   <option value={10}>10개</option>
                   <option value={20}>20개</option>
+                  <option value={30}>30개</option>
                 </select>
               </div>
             </li>
