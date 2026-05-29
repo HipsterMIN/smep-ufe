@@ -3,10 +3,10 @@ import '@styles/mypage.scss';
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
-import BusinessSummarySection from './sections/BusinessSummarySection.jsx';
-import InsightSection from './sections/InsightSection.jsx';
-import DeadlineCalendarSection from './sections/DeadlineCalendarSection.jsx';
-import ServiceStatusSection from './sections/ServiceStatusSection.jsx';
+import BusinessSummarySection from './component/BusinessSummarySection.jsx';
+import InsightSection from './component/InsightSection.jsx';
+import DeadlineCalendarSection from './component/DeadlineCalendarSection.jsx';
+import ServiceStatusSection from './component/ServiceStatusSection.jsx';
 
 const MyBusinessDashBoard = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
