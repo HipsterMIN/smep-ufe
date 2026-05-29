@@ -5,8 +5,8 @@ import React, { useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import '@styles/custom.scss';
 import '@styles/mypage.scss';
-import SideNavigation from '@components/ui/SideNavigation';
-import Breadcrumb from '@components/ui/Breadcrumb';
+import SideNavigation from '@components/ui/SideNavigation.jsx';
+import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 
