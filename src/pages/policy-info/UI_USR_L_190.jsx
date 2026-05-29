@@ -87,7 +87,7 @@ const UI_USR_L_190 = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(() => Math.max(0, getNumberSearchParam(location.search, 'page', 1) - 1));
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 10));
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -96,7 +96,7 @@ const UI_USR_L_190 = () => {
   const buildListSearchParams = () => {
     const params = new URLSearchParams();
     setQueryParam(params, 'tab', activeTabIndex, 0);
-    setQueryParam(params, 'page', currentPage + 1, 1);
+    setQueryParam(params, 'size', pageSize, 10);
     setQueryParam(params, 'sortType', sortType, 'REG_DT');
     setQueryParam(params, 'searchType', appliedSearchType, 'ALL');
     setQueryParam(params, 'searchKeyword', appliedSearchKeyword);
@@ -170,6 +170,11 @@ const UI_USR_L_190 = () => {
     window.scrollTo(0, 0);
   };
 
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setCurrentPage(0);
+  };
+
   const handleSortChange = (nextSortType) => {
     setSortType(nextSortType);
     setCurrentPage(0);
@@ -232,29 +237,44 @@ const UI_USR_L_190 = () => {
           </ul>
           <ul className="sch-sort">
             <li>
+              <strong className="sort-label"><label htmlFor="sort1">목록 표시 개수</label></strong>
+              <div>
+                <select
+                  className="krds-form-select-sort"
+                  id="sort1"
+                  value={pageSize}
+                  onChange={handlePageSizeChange}
+                >
+                  <option value={10}>10개</option>
+                  <option value={20}>20개</option>
+                  <option value={30}>30개</option>
+                </select>
+              </div>
+            </li>
+            <li>
               <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
               <div className="w-sort-btn">
                 <button
-                  type="button"
-                  className={sortType === 'REG_DT' ? 'active' : ''}
-                  onClick={() => handleSortChange('REG_DT')}
+                    type="button"
+                    className={sortType === 'REG_DT' ? 'active' : ''}
+                    onClick={() => handleSortChange('REG_DT')}
                 >
                   등록일순{sortType === 'REG_DT' && <span className="sr-only">선택됨</span>}
                 </button>
                 <button
-                  type="button"
-                  className={sortType === 'DEADLINE' ? 'active' : ''}
-                  onClick={() => handleSortChange('DEADLINE')}
+                    type="button"
+                    className={sortType === 'DEADLINE' ? 'active' : ''}
+                    onClick={() => handleSortChange('DEADLINE')}
                 >
                   마감일순{sortType === 'DEADLINE' && <span className="sr-only">선택됨</span>}
                 </button>
               </div>
               <div className="m-sort-btn">
                 <select
-                  className="krds-form-select-sort"
-                  id="sort"
-                  value={sortType}
-                  onChange={(event) => handleSortChange(event.target.value)}
+                    className="krds-form-select-sort"
+                    id="sort"
+                    value={sortType}
+                    onChange={(event) => handleSortChange(event.target.value)}
                 >
                   <option value="REG_DT">등록일순</option>
                   <option value="DEADLINE">마감일순</option>
@@ -268,18 +288,18 @@ const UI_USR_L_190 = () => {
           <table className="tbl col data t-block">
             <caption>행사정보 목록 번호, 지역, 제목, 행사기간, 수행기관, 작성일, 조회수 정보가 제공됩니다.</caption>
             <colgroup>
-              <col style={{ width: '5%' }} />
-              <col style={{ width: '5%' }} />
-              <col />
-              <col style={{ width: '220px' }} />
-              <col style={{ width: '15%' }} />
-              <col style={{ width: '5%' }} />
-              <col style={{ width: '5%' }} />
+              <col style={{width: '5%'}}/>
+              <col style={{width: '5%'}}/>
+              <col/>
+              <col style={{width: '220px'}}/>
+              <col style={{width: '15%'}}/>
+              <col style={{width: '5%'}}/>
+              <col style={{width: '5%'}}/>
             </colgroup>
             <thead>
-              <tr>
-                <th scope="col" className="ac">번호</th>
-                <th scope="col" className="ac">지역</th>
+            <tr>
+              <th scope="col" className="ac">번호</th>
+              <th scope="col" className="ac">지역</th>
                 <th scope="col" className="ac">제목</th>
                 <th scope="col" className="ac">행사기간</th>
                 <th scope="col" className="ac">수행기관</th>

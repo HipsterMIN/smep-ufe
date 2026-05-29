@@ -325,7 +325,6 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
                 <option value={10}>10개</option>
                 <option value={20}>20개</option>
                 <option value={30}>30개</option>
-                <option value={50}>50개</option>
               </select>
             </li>
           </ul>
@@ -338,10 +337,10 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
               <col style={{ width: '7.4%' }}/>
               <col style={{ width: '12%' }}/>
               <col/>
+              <col style={{ width: '18%' }}/>
               <col style={{ width: '12%' }}/>
               <col style={{ width: '12%' }}/>
-              <col style={{ width: '12%' }}/>
-              <col style={{ width: '7.4 %' }}/>
+              <col style={{ width: '7.4%' }}/>
             </colgroup>
             <thead>
               <tr>
@@ -378,6 +377,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
                       <a
                         className="onellipsis-1"
                         style={{ cursor: 'pointer' }}
+                        title={item?.pstTtl || '-'}
                         onClick={(event) => {
                           event.preventDefault();
                           moveToDetail(item?.pstNo);
@@ -390,7 +390,7 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
                     </td>
                     {/* 비로그인 시 작성자명 마스킹 처리 */}
                     <td className="ac">
-                      <span>{isLoggedIn ? (item?.pstRgtrNm || '-') : maskWriterName(item?.pstRgtrNm)}</span>
+                      <span className="onellipsis-1">{isLoggedIn ? (item?.pstRgtrNm || '-') : maskWriterName(item?.pstRgtrNm)}</span>
                     </td>
                     <td className="ac"><span>{getAnswerStatus(item)}</span></td>
                     <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>

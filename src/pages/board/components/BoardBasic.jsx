@@ -9,7 +9,7 @@ import { formatNumberWithCommas } from '@utils/numberUtils.js';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 10;
-const ALLOWED_PAGE_SIZES = new Set([10, 20, 30, 50]);
+const ALLOWED_PAGE_SIZES = new Set([10, 20, 30]);
 const ALLOWED_SEARCH_TYPES = new Set(['TITLE', 'CONTENT', 'WRITER']);
 
 const formatDate = (dateString) => {
@@ -355,7 +355,6 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
                   <option value={10}>10개</option>
                 <option value={20}>20개</option>
                 <option value={30}>30개</option>
-                <option value={50}>50개</option>
               </select>
             </li>
           </ul>
