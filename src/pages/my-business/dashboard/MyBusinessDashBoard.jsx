@@ -107,6 +107,8 @@ const createResource = ({
   ...extra,
 });
 
+const getResourceItems = (resource) => (Array.isArray(resource?.items) ? resource.items : []);
+
 // 회사 요약은 목록이 아니라 단건 item이므로 일반 resource와 별도 factory를 둔다.
 const createCompanySummaryResource = ({ item = EMPTY_COMPANY_SUMMARY, loading = false, error = null } = {}) => ({
   item: { ...EMPTY_COMPANY_SUMMARY, ...item },
@@ -150,6 +152,56 @@ const createScrapResource = ({
     PLCF: createResource(byCategory.PLCF),
   },
 });
+
+const getScrapTypeCd = (item) => item?.dashboardScrapCategory || item?.pbanc_type_se_cd || item?.pbancTypeSeCd;
+
+const getScrapTargetId = (item) => item?.id;
+
+const isActiveScrapItem = (item) => item?.use_yn !== 'N' && item?.useYn !== 'N';
+
+const isSameScrapItem = (item, change) =>
+  getScrapTypeCd(item) === change?.scrapTypeCd && String(getScrapTargetId(item) ?? '') === String(change?.targetId ?? '');
+
+const adjustTotalAfterRemoval = (resource, nextItems, removedCount) => {
+  const totalElements = normalizeCount(resource?.totalElements);
+
+  if (totalElements === null) {
+    return nextItems.length;
+  }
+
+  return Math.max(totalElements - removedCount, nextItems.length);
+};
+
+const removeScrapFromResource = (resource, change) => {
+  const currentItems = getResourceItems(resource);
+  const nextItems = currentItems.filter((item) => !isSameScrapItem(item, change));
+  const removedCount = currentItems.length - nextItems.length;
+
+  return createResource({
+    ...resource,
+    items: nextItems,
+    totalElements: adjustTotalAfterRemoval(resource, nextItems, removedCount),
+  });
+};
+
+const removeScrapFromDashboardResource = (resource, change) => {
+  const byCategory = {
+    ...resource?.byCategory,
+    [change.scrapTypeCd]: removeScrapFromResource(resource?.byCategory?.[change.scrapTypeCd], change),
+  };
+  const items = getResourceItems(resource).filter((item) => !isSameScrapItem(item, change));
+  const totalElements = SCRAP_CATEGORIES.reduce(
+    (sum, category) => sum + (normalizeCount(byCategory[category]?.totalElements) || 0),
+    0,
+  );
+
+  return createScrapResource({
+    ...resource,
+    items,
+    totalElements,
+    byCategory,
+  });
+};
 
 // API 인증키는 전체 신청 이력과 발행완료 이력을 둘 다 쓰므로 두 목록을 같이 들고 간다.
 const createApiKeyResource = ({
@@ -286,7 +338,13 @@ async function loadScraps() {
 
     if (result.status === 'fulfilled') {
       const [category, resource] = result.value;
-      byCategory[category] = resource;
+      const activeItems = getResourceItems(resource).filter(isActiveScrapItem);
+
+      byCategory[category] = createResource({
+        ...resource,
+        items: activeItems,
+        totalElements: activeItems.length,
+      });
       return;
     }
 
@@ -296,7 +354,7 @@ async function loadScraps() {
   });
 
   const items = SCRAP_CATEGORIES.flatMap((category) =>
-    (byCategory[category]?.items || []).map((item) => ({
+    getResourceItems(byCategory[category]).map((item) => ({
       ...item,
       dashboardScrapCategory: category,
     })),
@@ -412,6 +470,18 @@ const MyBusinessDashBoard = () => {
     };
   }, [isLogin, mbrNo, mbrTypeCd]);
 
+  const handleScrapStatusChange = (change) => {
+    if (change?.scrapped !== false) {
+      return;
+    }
+
+    // 관심공고는 요약/캘린더/서비스 현황이 같은 resource를 공유하므로 해제 성공 시 부모 상태에서 제거한다.
+    setDashboardData((prev) => ({
+      ...prev,
+      scraps: removeScrapFromDashboardResource(prev.scraps, change),
+    }));
+  };
+
   return (
     <>
       <SideNavigation
@@ -428,7 +498,7 @@ const MyBusinessDashBoard = () => {
         {/* 관심공고 마감 캘린더 */}
         <DeadlineCalendarSection dashboardData={dashboardData} />
         {/* 서비스 현황 */}
-        <ServiceStatusSection dashboardData={dashboardData} />
+        <ServiceStatusSection dashboardData={dashboardData} onScrapStatusChange={handleScrapStatusChange} />
       </main>
     </>
   );
