@@ -40,7 +40,7 @@ const UI_USR_L_110 = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(() => Math.max(0, getNumberSearchParam(location.search, 'page', 1) - 1));
-  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 20));
+  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 10));
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -55,7 +55,7 @@ const UI_USR_L_110 = () => {
   const buildListSearchParams = () => {
     const params = new URLSearchParams();
     setQueryParam(params, 'page', currentPage + 1, 1);
-    setQueryParam(params, 'size', pageSize, 20);
+    setQueryParam(params, 'size', pageSize, 10);
     setQueryParam(params, 'searchType', appliedSearchType, 'TITLE');
     setQueryParam(params, 'searchKeyword', appliedSearchKeyword);
     return params;
@@ -225,9 +225,9 @@ const UI_USR_L_110 = () => {
                 value={pageSize}
                 onChange={handlePageSizeChange}
               >
+                <option value={10}>10개</option>
                 <option value={20}>20개</option>
                 <option value={30}>30개</option>
-                <option value={40}>40개</option>
               </select>
             </li>
           </ul>

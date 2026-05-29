@@ -69,7 +69,7 @@ const ScrapList = () => {
 
   const [activeTabIndex, setActiveTabIndex] = useState(initialTabIndex);
   const [currentPage, setCurrentPage] = useState(() => getNumberSearchParam(location.search, 'page', 1));
-  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 12));
+  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 10));
   const [searchKeyword, setSearchKeyword] = useState(() => getSearchParam(location.search, 'keyword', ''));
   const [appliedKeyword, setAppliedKeyword] = useState(() => getSearchParam(location.search, 'keyword', ''));
 
@@ -112,7 +112,7 @@ const ScrapList = () => {
     const params = new URLSearchParams();
     setQueryParam(params, 'tab', activeTabIndex, 0);
     setQueryParam(params, 'page', currentPage, 1);
-    setQueryParam(params, 'size', pageSize, 12);
+    setQueryParam(params, 'size', pageSize, 10);
     setQueryParam(params, 'keyword', appliedKeyword);
     setQueryParam(params, 'srchFrDt', formatDate(startDate));
     setQueryParam(params, 'srchToDt', formatDate(endDate));
@@ -309,8 +309,9 @@ const ScrapList = () => {
                 value={String(pageSize)}
                 onChange={handlePageSizeChange}
               >
-                <option value="12">12개</option>
-                <option value="9">9개</option>
+                <option value="10">10개</option>
+                <option value="20">20개</option>
+                <option value="30">30개</option>
               </select>
             </li>
           </ul>

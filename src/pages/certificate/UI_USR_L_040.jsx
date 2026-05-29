@@ -28,7 +28,7 @@ const UI_USR_L_040 = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [topCertificateList, setTopCertificateList] = useState([]);
   const [certificateList, setCertificateList] = useState([]);
-  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(searchParams, 'size', 20));
+  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(searchParams, 'size', 10));
 
   // 입력용 (화면 표시용)
   const [searchType, setSearchType] = useState(() => getSearchParam(searchParams, 'searchType', ''));
@@ -45,7 +45,7 @@ const UI_USR_L_040 = () => {
   const buildListSearchParams = () => {
     const params = new URLSearchParams();
     setQueryParam(params, 'page', currentPage + 1, 1);
-    setQueryParam(params, 'size', pageSize, 20);
+    setQueryParam(params, 'size', pageSize, 10);
     setQueryParam(params, 'searchType', appliedSearchType);
     setQueryParam(params, 'searchKeyword', appliedSearchKeyword);
     return params;
@@ -228,6 +228,7 @@ const UI_USR_L_040 = () => {
                 >
                   <option value={10}>10개</option>
                   <option value={20}>20개</option>
+                  <option value={30}>30개</option>
                 </select>
               </div>
             </li>
@@ -239,7 +240,7 @@ const UI_USR_L_040 = () => {
           <table className="tbl col data t-block">
             <caption>증명 확인서 목록. 번호, 증명(확인)서, 발급기관, 소관기관 정보가 제공됨.</caption>
             <colgroup>
-              <col style={{ width: '7.4%%' }}/>
+              <col style={{ width: '7.4%' }}/>
               <col/>
               <col style={{ width: '26%' }}/>
               <col style={{ width: '26% ' }}/>

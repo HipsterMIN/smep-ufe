@@ -47,10 +47,10 @@ const MyApiRequestList = () => { // mbrNo를 받아옵니다.
 
   const handlePageChange = (page) => setCurrentPage(page);
 
-  const handlePageSizeOptionChange = (event) => {
-    setPageSizeOption(event.target.value);
-    setCurrentPage(1);
-  };
+  // const handlePageSizeOptionChange = (event) => {
+  //   setPageSizeOption(event.target.value);
+  //   setCurrentPage(1);
+  // };
 
   const getLinkSitePath = (apiSeCd) => {
     const pathMap = {
@@ -79,22 +79,22 @@ const MyApiRequestList = () => { // mbrNo를 받아옵니다.
             <ul className="sch-info" aria-live="polite">
               <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>건</li>
             </ul>
-            <ul className="sch-sort">
-              <li>
-                <strong className="sort-label"><label htmlFor="sort1">목록 표시 개수</label></strong>
-                <div>
-                  <select
-                    className="krds-form-select-sort"
-                    id="sort1"
-                    value={pageSizeOption}
-                    onChange={handlePageSizeOptionChange}
-                  >
-                    <option value="ALL">전체</option>
-                    <option value="10">10개</option>
-                  </select>
-                </div>
-              </li>
-            </ul>
+            {/*<ul className="sch-sort">*/}
+            {/*  <li>*/}
+            {/*    <strong className="sort-label"><label htmlFor="sort1">목록 표시 개수</label></strong>*/}
+            {/*    <div>*/}
+            {/*      <select*/}
+            {/*        className="krds-form-select-sort"*/}
+            {/*        id="sort1"*/}
+            {/*        value={pageSizeOption}*/}
+            {/*        onChange={handlePageSizeOptionChange}*/}
+            {/*      >*/}
+            {/*        <option value="ALL">전체</option>*/}
+            {/*        <option value="10">10개</option>*/}
+            {/*      </select>*/}
+            {/*    </div>*/}
+            {/*  </li>*/}
+            {/*</ul>*/}
           </div>
 
           <div className="krds-table-wrap">

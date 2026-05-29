@@ -44,7 +44,7 @@ const UI_USR_L_180 = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(() => Math.max(0, getNumberSearchParam(location.search, 'page', 1) - 1));
-  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 20));
+  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 10));
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -88,7 +88,7 @@ const UI_USR_L_180 = () => {
   const buildListSearchParams = () => {
     const params = new URLSearchParams();
     setQueryParam(params, 'page', currentPage + 1, 1);
-    setQueryParam(params, 'size', pageSize, 20);
+    setQueryParam(params, 'size', pageSize, 10);
 
     if (appliedSearchKeyword.trim()) {
       setQueryParam(params, 'searchType', appliedSearchType, 'TITLE');
@@ -237,9 +237,9 @@ const UI_USR_L_180 = () => {
                 value={pageSize}
                 onChange={handlePageSizeChange}
               >
+                <option value={10}>10개</option>
                 <option value={20}>20개</option>
                 <option value={30}>30개</option>
-                <option value={40}>40개</option>
               </select>
             </li>
           </ul>
@@ -296,7 +296,7 @@ const UI_USR_L_180 = () => {
                         <span>{item?.pstTtl || '-'}</span>
                       </a>
                     </td>
-                    <td className="ac"><span>{item?.pstSrcCn || '-'}</span></td>
+                    <td className="ac"><span className="onellipsis-1">{item?.pstSrcCn || '-'}</span></td>
                     <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
                     <td className="ac views"><span>{item?.inqCnt ?? '-'}</span></td>
                   </tr>
