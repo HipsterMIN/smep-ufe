@@ -5,6 +5,8 @@ const CATEGORY_CLASS_NAMES = ['c1', 'c2', 'c3', 'c4', 'c5'];
 const CATEGORY_SLOT_COUNT = 5;
 const CATEGORY_DIRECT_SLOT_COUNT = CATEGORY_SLOT_COUNT - 1;
 const EMPTY_VALUE = '-';
+// 퍼블 CSS가 button[hidden]의 기본 display:none을 덮는 경우가 있어 보존용 숨김 UI는 display를 고정한다.
+const PRESERVED_HIDDEN_STYLE = { display: 'none' };
 
 const PROGRESS_BUCKETS = [
   { title: '신청중', icon: 'apply', sourceStatuses: ['신청중'] },
@@ -162,7 +164,7 @@ const InsightSection = ({ dashboardData = {} }) => {
         <h2>데이터 인사이트</h2>
         <p>우리 기업의 활동 현황을 한눈에 확인하세요.</p>
         {/* 후속 필터 계약 전까지 기간 선택 UI는 삭제하지 않고 숨김 상태로 보존한다. */}
-        <select title="기간 선택" hidden>
+        <select title="기간 선택" hidden style={PRESERVED_HIDDEN_STYLE}>
           <option>최근 6개월</option>
         </select>
       </div>
@@ -172,7 +174,7 @@ const InsightSection = ({ dashboardData = {} }) => {
           <div className="panel-head">
             <h3>지원사업 신청 진행단계</h3>
             {/* 후속 이동 대상이 확정될 때까지 전체일정보기 CTA는 삭제하지 않고 숨김 상태로 보존한다. */}
-            <button type="button" hidden>전체일정보기 <i className="svg-icon ico-plus"></i></button>
+            <button type="button" hidden style={PRESERVED_HIDDEN_STYLE}>전체일정보기 <i className="svg-icon ico-plus"></i></button>
           </div>
 
           <div className="progress-list">
