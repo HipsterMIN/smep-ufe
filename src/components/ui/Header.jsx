@@ -556,9 +556,9 @@ export default function Header() {
                     <span className="sr-only">중소벤처24</span>
                   </a>
                 </h2>
-                <div className="logo-platform">
+                {/*<div className="logo-platform">
                   <span className="sr-only">모두의 시작, 모두의 성장</span>
-                </div>
+                </div>*/}
                 <div className="header-right">
                   {/* 검색란 */}
                   {showHeaderSearch && (
