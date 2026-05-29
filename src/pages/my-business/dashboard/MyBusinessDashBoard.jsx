@@ -37,7 +37,7 @@ const EMPTY_COMPANY_SUMMARY = {
   industryName: '-',
 };
 
-// 지원사업 API는 목록과 별도로 진행단계 summary를 내려주므로, 인사이트 섹션이 이 구조를 사용한다.
+// 대시보드 전용 지원사업 API는 총건수와 목록을 우선 제공하고, 진행단계 summary는 후속 계약 전까지 비워 둔다.
 const EMPTY_SUPPORT_APPLICATION_SUMMARY = {
   total: null,
   inProgress: null,
@@ -248,25 +248,22 @@ async function loadCompanySummary() {
   });
 }
 
-// 지원사업은 백엔드가 page와 summary를 함께 내려주므로 목록과 진행단계 값을 분리해 보관한다.
-async function loadSupportApplications() {
-  const response = await apiClient.get(`/api/v1/pbanc/support-applications?${buildDashboardQuery({
-    statusGroup: 'ALL',
-    searchType: 'TITLE',
-  })}`);
+// 지원사업 신청이력은 대시보드 전용 API를 쓰고, 로그인 회원번호가 있을 때만 회원 기준으로 필터링한다.
+async function loadSupportApplications(mbrNo) {
+  const queryParams = hasText(mbrNo) ? { mbrNo } : {};
+  const response = await apiClient.get(
+    `/api/v1/dashboard/mybusiness/support-applications?${buildDashboardQuery(queryParams)}`,
+  );
   const payload = unwrapApiData(response);
-  const pageResource = normalizePageResource(payload?.page, '지원사업 신청이력');
-  const summary = payload?.summary || {};
+  const pageResource = normalizePageResource(payload, '지원사업 신청이력');
 
   return createSupportApplicationsResource({
     ...pageResource,
     summary: {
-      total: coerceTotalElements(summary.total, pageResource.totalElements),
-      inProgress: coerceTotalElements(summary.inProgress),
-      completed: coerceTotalElements(summary.completed),
+      total: pageResource.totalElements,
+      inProgress: null,
+      completed: null,
     },
-    partial: Boolean(payload?.partial),
-    failedSources: Array.isArray(payload?.failedSources) ? payload.failedSources : [],
   });
 }
 
@@ -336,7 +333,7 @@ async function loadApiKeys() {
 // 대시보드에서 한 번에 공유할 업무 API 목록이다. key는 dashboardData의 resource 이름과 일치해야 한다.
 const DASHBOARD_RESOURCE_LOADERS = {
   companySummary: loadCompanySummary,
-  supportApplications: loadSupportApplications,
+  supportApplications: ({ mbrNo }) => loadSupportApplications(mbrNo),
   certificateIssuances: () => fetchPagedResource('/api/v1/certificate/issuances', '증명서 발급이력'),
   scraps: loadScraps,
   inquiries: () => fetchPagedResource(`/api/v1/board/${INQUIRY_BOARD_NO}/posts/list`, '나의 질의내역', {
@@ -347,10 +344,10 @@ const DASHBOARD_RESOURCE_LOADERS = {
 };
 
 // 모든 업무 resource를 병렬 조회하고, 실패한 업무만 빈 resource로 격리해 부분 렌더링을 유지한다.
-async function loadDashboardData() {
+async function loadDashboardData(context = {}) {
   const loaderEntries = Object.entries(DASHBOARD_RESOURCE_LOADERS);
   const entries = await Promise.allSettled(
-    loaderEntries.map(async ([key, loader]) => [key, await loader()]),
+    loaderEntries.map(async ([key, loader]) => [key, await loader(context)]),
   );
   const nextData = createEmptyDashboardData();
 
@@ -400,7 +397,7 @@ const MyBusinessDashBoard = () => {
     setDashboardData(createEmptyDashboardData({ loading: true }));
 
     const fetchDashboardData = async () => {
-      const nextDashboardData = await loadDashboardData();
+      const nextDashboardData = await loadDashboardData({ mbrNo });
 
       if (active) {
         setDashboardData(nextDashboardData);
