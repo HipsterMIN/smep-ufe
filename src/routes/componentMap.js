@@ -20,10 +20,7 @@ const PfcIssue = lazy(() => import('@pages/certificate/issue-extra/PfcIssue.jsx'
 const SmtcIssue = lazy(() => import('@pages/certificate/issue-extra/SmtcIssue.jsx'));
 const SmftIssue = lazy(() => import('@pages/certificate/issue-extra/SmftIssue.jsx'));
 const UI_USR_R_031 = lazy(() => import('@pages/UI_USR_R_031.jsx'));
-//const UI_USR_R_480 = lazy(() => import('@pages/my-business/UI_USR_R_480.jsx'));
-/* 마이비즈니스 작업파일명 */
-const MyBussiness = lazy(() => import('@pages/my-business/UI_USR_R_480.jsx'));
-/* 마이비즈니스 작업파일명 */
+const MyBussiness = lazy(() => import('@pages/my-business/dashboard/MyBusinessDashBoard.jsx'));
 const UI_USR_L_510 = lazy(() => import('@pages/my-business/UI_USR_L_510.jsx'));
 const UI_USR_R_060 = lazy(() => import('@pages/certificate/UI_USR_R_060.jsx'));
 const UI_USR_L_050 = lazy(() => import('@pages/certificate/UI_USR_L_050.jsx'));

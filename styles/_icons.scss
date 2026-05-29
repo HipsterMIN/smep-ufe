@@ -1,0 +1,200 @@
+//@import "./_utils";
+//svg img
+@mixin svg-icon($size:2.4rem, $mode: light, $effect: null) {
+	display: inline-flex;
+	width:24px;height:24px;
+	background-color:#000;
+	@if ($effect == 'pure') {
+		background-color: transparent !important;
+	}
+}
+
+//svg icon setting
+@mixin icon-set ($name, $effect: null) {
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-position: center center;
+	-webkit-mask-size: contain;
+	mask-repeat: no-repeat;
+	mask-position: center center;
+	mask-size: contain;
+	-webkit-mask-image: url(./img/component/icon/#{$name}.svg);
+	mask-image: url(./img/component/icon/#{$name}.svg);
+	@if ($effect == 'pure') { //mask 효과 없이 디자인된 svg 그대로 사용
+		-webkit-mask-image: none;
+		mask-image: none;
+		background-image: url(./img/component/icon/#{$name}.svg);
+		background-color: transparent !important;
+		background-size: contain;
+		background-repeat: no-repeat;
+        background-position: center center;
+		-webkit-mask: none;
+		mask: none;
+	}
+}
+
+.svg-icon {
+    width:24px;height:24px;
+    vertical-align: middle;
+	&.ico-angle {
+		@include icon-set(ico_angle);
+		&.disabled {
+			@include icon-set(ico_angle_disabled, $effect: pure);
+		}
+		//default: down
+		&.up {transform: rotate(180deg);}
+		&.left {transform: rotate(90deg);}
+		&.right {transform: rotate(-90deg);}
+	}
+	&.ico-arrow {
+		@include icon-set(ico_arrow);
+		&.up {transform: rotate(180deg);}
+		&.left {transform: rotate(90deg);}
+		&.right {transform: rotate(-90deg);}
+	}
+	&.ico-sch { @include icon-set(ico_sch); }
+	&-upload { @include icon-set(ico_upload); }
+	&.ico-call { @include icon-set(ico_call); }
+	&.ico-faq { @include icon-set(ico_faq); }
+	&.ico-like { @include icon-set(ico_like); }
+	&.ico-share { @include icon-set(ico_share); }
+	&.ico-more { @include icon-set(ico_more);
+		&.up {transform: rotate(-90deg);}
+		&.left {transform: rotate(180deg);}
+		&.down {transform: rotate(90deg);}
+	}
+	&.ico-sch-plus { @include icon-set(ico_sch_plus); }
+	&-go { @include icon-set(ico_go); }
+	&.ico-down { @include icon-set(ico_download); }
+	&.ico-filter { @include icon-set(ico_filter); }
+	&-reset { @include icon-set(ico_reset); }
+	&.ico-log { @include icon-set(ico_login); }
+	&.ico-func { @include icon-set(ico_expand);
+		//default:right
+		&.up { transform: rotate(-90deg);}
+		& {gap: var(--krds-gap-3);}
+	}
+	&.ico-logout { @include icon-set(ico_logout);
+		& {
+			gap: var(--krds-gap-3);	
+		}
+	}
+	&.ico-email { @include icon-set(ico_email);
+		& {
+			gap: var(--krds-gap-3);	
+		}
+	}
+	&.ico-print { @include icon-set(ico_print);
+		& {
+			gap: var(--krds-gap-3);	
+		}
+	}
+	&.ico-scrap { @include icon-set(ico_scrap);
+		& {
+			gap: var(--krds-gap-3);	
+		}
+	}
+	&.ico-del { @include icon-set(ico_delete);
+		& {
+			gap: var(--krds-gap-3);	
+		}
+	}
+	&.ico-popup-close { @include icon-set(ico_close); }
+	&.ico-delete-fill { @include icon-set(ico_delete_fill, pure); }
+	&.ico-plus { @include icon-set(ico_plus);
+		& {
+			gap: var(--krds-gap-3);	
+		}
+	}
+	&.ico-setting { @include icon-set(ico_setting);
+		& {
+			gap: var(--krds-gap-3);	
+		}
+	}
+	&-link { @include icon-set(ico_go);
+		& {
+			gap: var(--krds-gap-3);	
+		}
+	}
+	&-refresh { @include icon-set(ico_reset); }
+	&-toggle { @include icon-set(ico_angle); }
+	&.ico-pw-visible { @include icon-set(ico_pw_visible_off); }
+	&.ico-pw-visible-on { @include icon-set(ico_pw_visible_on); }
+	&-help { @include icon-set(ico_help, pure); }
+	&-page-next { @include icon-set(ico_angle);
+		transform: rotate(-90deg); }
+	&-bread-home { @include icon-set(ico_bread_home); }
+	&-cal-move { @include icon-set(ico_arrow_dropdown);
+        &.up {
+			transform: rotate(180deg);
+		}
+		&.left {
+			transform: rotate(90deg);
+		}
+		&.right {
+			transform: rotate(-90deg);
+		}
+	}
+	
+	&.ico-calendar { @include icon-set(ico_calendar); }
+	&.ico-calendar2 { @include icon-set(ico_calendar2); }
+	&-success-fill { @include icon-set(ico_success_fill, pure); }
+	&.ico-information-fill { @include icon-set(ico_information_fill, pure); }
+	&.ico-error-fill { @include icon-set(ico_error_fill, pure); }
+	&.ico-complete-fill { @include icon-set(ico_complete_fill, pure); }
+	&-modal-close { @include icon-set(ico_close); }
+	&-fold { @include icon-set(ico_foldable);
+		&.right {
+			transform: rotate(-180deg);
+		}
+	}
+	&-ellipsis { @include icon-set(ico_ellipsis); }
+	&-swiper-stop { @include icon-set(ico_swiper_stop); }
+	&-tooltip { @include icon-set(ico_tooltip); }
+	&-urgent-danger { @include icon-set(ico_urgent_badge_danger); }
+	&-blog { @include icon-set(ico_blog); }
+	&-facebook { @include icon-set(ico_facebook); }
+	&-instagram { @include icon-set(ico_instagram); }
+	&-sns-x { @include icon-set(ico_sns_x); }
+	&-youtube { @include icon-set(ico_youtube); }
+	&-all { @include icon-set(ico_all); }
+	&-join { @include icon-set(ico_join); }
+	&-login-go { @include icon-set(ico_login_certify_go); }
+	&-global { @include icon-set(ico_global); }
+	&-view-mode { @include icon-set(ico_view_mode); }
+	&-go-top { @include icon-set(ico_go_top); }
+	&-login-type01 { @include icon-set(ico_login_certify_type_01); }
+	&-login-type02 { @include icon-set(ico_login_certify_type_02); }
+	&-login-type03 { @include icon-set(ico_login_certify_type_03); }
+	&-login-type04 { @include icon-set(ico_login_certify_type_04); }
+	&-login-type05 { @include icon-set(ico_login_certify_type_05); }
+	&-login-type06 { @include icon-set(ico_login_certify_type_06); }
+	&-flag { @include icon-set(ico_flag, $effect: pure); }
+	&-file { @include icon-set(ico_file); }
+	&-checkbox { @include icon-set(ico_checkbox_checked); }
+	&.arrow-long { @include icon-set(arrow-long-right);
+        &.up { transform: rotate(-90deg); }
+        &.down { transform: rotate(90deg); }
+		&.left { transform: rotate(180deg); }
+        &.dash{
+            @include icon-set(arrow-long-dash, $effect: pure);
+        }
+     }
+    &.user{@include icon-set(user);}
+    &.bell{@include icon-set(bell);}
+    &.view-mode{@include icon-set(view-mode);}
+    &.doc-list{@include icon-set(line-icons/doc-list);}
+    &.cert-list{@include icon-set(line-icons/cert-list);}
+    &.heart{@include icon-set(line-icons/heart);
+        &.is-on{@include icon-set(pure-icons/heart-blue, $effect:pure);}
+    }
+    &.chat{@include icon-set(line-icons/chat);}
+    &.key{@include icon-set(line-icons/key);}
+    &.alarm{@include icon-set(line-icons/alarm);
+        &.pure{@include icon-set(pure-icons/alarm,$effect:pure) }
+    }
+    &.pure{
+        &.apply{@include icon-set(pure-icons/apply, $effect:pure);}
+        &.ing{@include icon-set(pure-icons/ing, $effect:pure);}
+        &.doc-check{@include icon-set(pure-icons/doc-check, $effect:pure);}
+    }
+}
