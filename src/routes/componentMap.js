@@ -3,8 +3,6 @@
 // layout 값은 문자열 키로 정의 — 실제 컴포넌트는 dynamicRoutes.jsx에서 resolve
 // (UserMenuContext → componentMap → @layouts → UserMenuContext 순환 의존성 방지)
 
-const AiSmartSearch = lazy(() => import('@pages/ai/AiSmartSearch.jsx'));
-
 const Pbanc = lazy(() => import('@pages/Pbanc.jsx'));
 const PbancView = lazy(() => import('@pages/PbancView.jsx'));
 const SprtBiz = lazy(() => import('@pages/SprtBiz.jsx'));
@@ -166,11 +164,6 @@ export const componentMap = {
 
   // ========== 신청·발급 (M_PIIO_00064) ==========
 
-  // AI 스마트 검색
-  'M_PIIO_00074': {
-    component: AiSmartSearch,
-    layout: 'MenuProviderOnly',
-  },
   // 통합검색
   'M_PIIO_00152': {
     component: TotalSearch,
