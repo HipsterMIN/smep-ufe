@@ -55,7 +55,7 @@ describe('openNiceIdAuth', () => {
     await openNiceIdAuth({ svcTypes: ['M', 'F', 'M'] });
 
     expect(api.post).toHaveBeenCalledTimes(1);
-    expect(api.post).toHaveBeenCalledWith('/v1/nice-id/auth-url', {
+    expect(api.post).toHaveBeenCalledWith('/api/v1/nice-id/auth-url', {
       svcTypes: ['M', 'F'],
     });
   });
