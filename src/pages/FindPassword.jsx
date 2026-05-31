@@ -1,32 +1,135 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import { useNiceIdAuth } from '../hooks/useNiceIdAuth';
+import { api } from '../lib/apiClient';
+
+const PASSWORD_ALLOWED_REGEX = /^[A-Za-z0-9!@#$%^&*()=_+-]{8,20}$/;
+const PASSWORD_LETTER_REGEX = /[A-Za-z]/;
+const PASSWORD_DIGIT_REGEX = /\d/;
+const PASSWORD_SPECIAL_REGEX = /[!@#$%^&*()=_+-]/;
+
+const countPasswordCategories = (password) => {
+  let categoryCount = 0;
+
+  if (PASSWORD_LETTER_REGEX.test(password)) {
+    categoryCount += 1;
+  }
+  if (PASSWORD_DIGIT_REGEX.test(password)) {
+    categoryCount += 1;
+  }
+  if (PASSWORD_SPECIAL_REGEX.test(password)) {
+    categoryCount += 1;
+  }
+
+  return categoryCount;
+};
+
+const validateResetPasswordForm = ({ newPassword, confirmPassword }) => {
+  if (!newPassword.trim()) {
+    return '새 비밀번호를 입력해주세요.';
+  }
+  if (!confirmPassword.trim()) {
+    return '새 비밀번호 확인을 입력해주세요.';
+  }
+  if (!PASSWORD_ALLOWED_REGEX.test(newPassword)) {
+    return '새 비밀번호는 8~20자이며 허용된 영문, 숫자, 특수문자만 사용할 수 있습니다.';
+  }
+  if (countPasswordCategories(newPassword) < 2) {
+    return '새 비밀번호는 영문, 숫자, 특수문자 중 두 가지 이상을 조합해야 합니다.';
+  }
+  if (newPassword !== confirmPassword) {
+    return '새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.';
+  }
+
+  return null;
+};
+
+const resolvePasswordResetErrorMessage = (error) =>
+  error?.data?.message ||
+  error?.data?.error?.message ||
+  error?.message ||
+  '비밀번호 재설정 처리 중 오류가 발생했습니다.';
 
 const FindPassword = () => {
+  const navigate = useNavigate();
   const [memberType, setMemberType] = useState('personal');
   const [businessType, setBusinessType] = useState('corporate');
   const [userId, setUserId] = useState('');
   const [userName, setUserName] = useState('');
   const [personalAuthResult, setPersonalAuthResult] = useState(null);
+  const [resetKey, setResetKey] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isVerifyingPasswordReset, setIsVerifyingPasswordReset] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const { authenticate, reset: resetNiceIdAuth, loading: niceIdAuthLoading } = useNiceIdAuth();
 
   const isPersonal = memberType === 'personal';
   const isCompany = memberType === 'company';
+  const isAuthBusy = niceIdAuthLoading || isVerifyingPasswordReset;
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (isPersonal) {
-      console.log('개인회원 비밀번호 찾기');
+      if (!resetKey) {
+        alert('본인 인증을 완료해주세요.');
+        return;
+      }
+
+      const validationMessage = validateResetPasswordForm({ newPassword, confirmPassword });
+      if (validationMessage) {
+        alert(validationMessage);
+        return;
+      }
+
+      console.info('[FIND_PASSWORD_MARK] reset submit start', {
+        hasResetKey: Boolean(resetKey),
+        hasNewPassword: Boolean(newPassword),
+        hasConfirmPassword: Boolean(confirmPassword),
+      });
+      setIsResettingPassword(true);
+
+      try {
+        await api.post('/api/v1/account/password-reset', {
+          resetKey,
+          newPassword,
+          confirmPassword,
+        });
+        console.info('[FIND_PASSWORD_MARK] reset submit success');
+        alert('비밀번호가 변경되었습니다. 로그인해 주세요.');
+        navigate('/service/login');
+      } catch (error) {
+        console.error('[FIND_PASSWORD_MARK] reset submit failed', {
+          status: error?.status,
+          message: error?.message,
+        });
+        alert(resolvePasswordResetErrorMessage(error));
+      } finally {
+        setIsResettingPassword(false);
+      }
       return;
     }
 
     console.log('기업회원 비밀번호 찾기', businessType);
   };
 
-  const resetPersonalAuthResult = () => {
+  const clearPasswordResetState = () => {
     setPersonalAuthResult(null);
+    setResetKey('');
+    setNewPassword('');
+    setConfirmPassword('');
+  };
+
+  const resetPersonalAuthResult = () => {
+    clearPasswordResetState();
     resetNiceIdAuth();
+  };
+
+  const handleMemberTypeChange = (nextMemberType) => {
+    setMemberType(nextMemberType);
+    resetPersonalAuthResult();
   };
 
   const handleUserIdChange = (event) => {
@@ -50,16 +153,51 @@ const FindPassword = () => {
       return;
     }
 
+    console.info('[FIND_PASSWORD_MARK] personal auth start', {
+      authMethod,
+      loginIdLength: userId.trim().length,
+      memberNameLength: userName.trim().length,
+    });
+
     const authResult = await authenticate({ svcTypes: [authMethod] });
     if (authResult?.success) {
-      setPersonalAuthResult({
+      console.info('[FIND_PASSWORD_MARK] personal auth success', {
         authMethod,
-        resultKey: authResult.resultKey,
+        resultKeyLength: authResult.resultKey?.length || 0,
       });
-      alert('본인 인증이 완료되었습니다.');
+      setIsVerifyingPasswordReset(true);
+
+      try {
+        const verifyResponse = await api.post('/api/v1/account/password-reset/verify', {
+          loginId: userId.trim(),
+          memberName: userName.trim(),
+          resultKey: authResult.resultKey,
+        });
+        setResetKey(verifyResponse.resetKey || '');
+        setPersonalAuthResult({ authMethod });
+        console.info('[FIND_PASSWORD_MARK] personal verify success', {
+          authMethod,
+          hasResetKey: Boolean(verifyResponse.resetKey),
+          expiresInSeconds: verifyResponse.expiresInSeconds,
+        });
+        alert('본인 인증이 완료되었습니다. 새 비밀번호를 입력해주세요.');
+      } catch (error) {
+        console.error('[FIND_PASSWORD_MARK] personal verify failed', {
+          authMethod,
+          status: error?.status,
+          message: error?.message,
+        });
+        alert(resolvePasswordResetErrorMessage(error));
+      } finally {
+        setIsVerifyingPasswordReset(false);
+      }
       return;
     }
 
+    console.info('[FIND_PASSWORD_MARK] personal auth failed', {
+      authMethod,
+      code: authResult?.code,
+    });
     // 이유: 실패 alert를 같은 tick에서 바로 띄우면 React가 loading 해제 렌더를 끝내기 전에 dialog가 화면을 막을 수 있다.
     window.setTimeout(() => {
       alert(authResult?.message || 'NICE ID 인증 처리 중 오류가 발생했습니다.');
@@ -81,12 +219,12 @@ const FindPassword = () => {
           <div className="tab fill full">
             <ul role="tablist" aria-label="회원 유형 선택">
               <li role="tab" aria-selected={isPersonal} className={isPersonal ? 'active' : ''}>
-                <button type="button" className="btn-tab" onClick={() => setMemberType('personal')}>
+                <button type="button" className="btn-tab" onClick={() => handleMemberTypeChange('personal')}>
                   개인회원
                 </button>
               </li>
               <li role="tab" aria-selected={isCompany} className={isCompany ? 'active' : ''}>
-                <button type="button" className="btn-tab" onClick={() => setMemberType('company')}>
+                <button type="button" className="btn-tab" onClick={() => handleMemberTypeChange('company')}>
                   기업회원
                 </button>
               </li>
@@ -172,9 +310,9 @@ const FindPassword = () => {
                       type="button"
                       className="krds-btn large primary"
                       onClick={() => handlePersonalAuthClick('M')}
-                      disabled={niceIdAuthLoading}
+                      disabled={isAuthBusy}
                     >
-                      {niceIdAuthLoading ? '인증 중...' : '인증하기'}
+                      {isAuthBusy ? '인증 중...' : '인증하기'}
                     </button>
                   </div>
 
@@ -188,9 +326,9 @@ const FindPassword = () => {
                       type="button"
                       className="krds-btn large primary"
                       onClick={() => handlePersonalAuthClick('I')}
-                      disabled={niceIdAuthLoading}
+                      disabled={isAuthBusy}
                     >
-                      {niceIdAuthLoading ? '인증 중...' : '인증하기'}
+                      {isAuthBusy ? '인증 중...' : '인증하기'}
                     </button>
                   </div>
                 </div>
@@ -199,6 +337,68 @@ const FindPassword = () => {
                   <p className="auth-complete" role="status">
                     본인 인증이 완료되었습니다.
                   </p>
+                )}
+
+                {resetKey && (
+                  <div className="conts-wrap form-confirm">
+                    <h3 className="sec-tit">새 비밀번호 설정</h3>
+                    <ul className="krds-info-list decimal" role="list">
+                      <li role="listitem">본인 인증이 완료되었습니다. 새 비밀번호를 입력해 주세요.</li>
+                      <li role="listitem">비밀번호는 타인에게 노출되지 않도록 주의해 주세요.</li>
+                    </ul>
+                    <dl className="on-form-row large">
+                      <div className="form-row-item">
+                        <dt className="form-row-label flex-start">
+                          <label htmlFor="find_password_new">새 비밀번호</label>
+                        </dt>
+                        <dd className="form-row-content">
+                          <div className="form-wrapper w-220">
+                            <input
+                              type="password"
+                              id="find_password_new"
+                              name="newPassword"
+                              className="krds-input small"
+                              placeholder="비밀번호를 입력해주세요."
+                              value={newPassword}
+                              onChange={(event) => setNewPassword(event.target.value)}
+                              autoComplete="new-password"
+                              disabled={isResettingPassword}
+                            />
+                          </div>
+                          <p className="form-hint">
+                            비밀번호는 영문자(대·소문자), 숫자, 특수문자중 두가지를 조합하여 8자~20자 이내로 입력하세요. <br />
+                            ( 사용가능 특수문자 : !, @, #, $, %, ^, &, *, (, ), -, =, _, + )
+                          </p>
+                        </dd>
+                      </div>
+                      <div className="form-row-item">
+                        <dt className="form-row-label flex-start">
+                          <label htmlFor="find_password_confirm">새 비밀번호 확인</label>
+                        </dt>
+                        <dd className="form-row-content">
+                          <div className="form-wrapper w-220">
+                            <input
+                              type="password"
+                              id="find_password_confirm"
+                              name="confirmPassword"
+                              className="krds-input small"
+                              placeholder="비밀번호를 입력해주세요."
+                              value={confirmPassword}
+                              onChange={(event) => setConfirmPassword(event.target.value)}
+                              autoComplete="new-password"
+                              disabled={isResettingPassword}
+                            />
+                          </div>
+                          <p className="form-hint point">새 비밀번호는 영문, 숫자, 특수문자 중 두 가지 이상을 조합해 입력해야 합니다.</p>
+                        </dd>
+                      </div>
+                    </dl>
+                    <div className="onboard-btm-btngroup bt-0 btn-single">
+                      <button type="submit" className="krds-btn large primary" disabled={isResettingPassword}>
+                        {isResettingPassword ? '변경 중...' : '비밀번호 변경'}
+                      </button>
+                    </div>
+                  </div>
                 )}
 
                 <ul className="auth-notice">
