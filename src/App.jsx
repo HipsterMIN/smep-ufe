@@ -49,9 +49,10 @@ const SAMPLE_COMPANY_PROFILE = {
 };
 
 // KRDS 스타일과 컴포넌트 불러오기
-import '../styles/output.css';
-import '../styles/onCommon.css';
-import '../styles/onCommon_2.css';
+import '@styles/output.css';
+import '@styles/onCommon.css';
+import '@styles/onCommon_2.css';
+import '@styles/custom.scss';
 // import '@krds-ui/core/dist/style.css';
 
 export const AI_SETTINGS = {
