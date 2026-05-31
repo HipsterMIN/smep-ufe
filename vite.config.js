@@ -2,6 +2,46 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { createReadStream, createWriteStream, readdirSync } from 'fs'
+import { createGzip } from 'zlib'
+import { extname, join } from 'path'
+import { pipeline } from 'stream/promises'
+
+/**
+ * 빌드 완료 후 dist/assets 의 JS/CSS를 .gz로 사전 압축
+ * nginx gzip_static on; 과 함께 사용 — ERR_CONTENT_LENGTH_MISMATCH 방지
+ */
+function gzipStaticPlugin() {
+  return {
+    name: 'vite-plugin-gzip-static',
+    apply: 'build',
+    async closeBundle() {
+      const COMPRESSIBLE = new Set(['.js', '.css', '.html', '.json', '.svg', '.xml'])
+      const dirs = ['dist/assets', 'dist']
+      let count = 0
+
+      for (const dir of dirs) {
+        let files
+        try { files = readdirSync(dir) } catch { continue }
+
+        await Promise.all(
+          files
+            .filter(f => COMPRESSIBLE.has(extname(f)) && !f.endsWith('.gz'))
+            .map(async (f) => {
+              const src = join(dir, f)
+              await pipeline(
+                createReadStream(src),
+                createGzip({ level: 9 }),
+                createWriteStream(src + '.gz')
+              )
+              count++
+            })
+        )
+      }
+      console.log(`\n✓ gzip-static: ${count}개 파일 사전 압축 완료`)
+    },
+  }
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -32,7 +72,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     base,
-    plugins: [react()],
+    plugins: [react(), gzipStaticPlugin()],
     server,
     build: {
       // ─── modulePreload 선택적 적용 ──────────────────────────────────────────
@@ -41,13 +81,12 @@ export default defineConfig(({ mode }) => {
       // → 서버(Nginx) 버퍼 오버플로 → ERR_CONTENT_LENGTH_MISMATCH 유발
       // 해결: 앱 초기화에 반드시 필요한 청크만 preload, 나머지는 실제 사용 시 지연 로드
       modulePreload: {
-        resolveDependencies(_filename, deps) {
-          // vendor-router를 preload 목록에서 제거:
-          // HTTP/1.1 환경에서 다수 청크와 connection 경쟁 시 stalled → vite:preloadError → reload loop 유발
-          // preload 제거 시 index.js 실행 후 순차 로딩되어 connection 경쟁 없이 안정적으로 로딩됨
-          const CRITICAL = ['vendor-react', 'vendor-query', 'index-'];
-          return deps.filter((dep) => CRITICAL.some((key) => dep.includes(key)));
-        },
+        // HTTP/1.1 환경(연결 6개 제한)에서 modulepreload 힌트가 연결 슬롯을 선점하면
+        // CSS 파일이 Pending 상태로 밀려 흰 화면 발생.
+        // preload를 비활성화하면 브라우저가 CSS(stylesheet)를 최우선 처리하고
+        // JS는 index.js 파싱 후 순차적으로 로딩 → 흰 화면 방지.
+        // HTTP/2 전환 시 이 설정을 되돌릴 것.
+        resolveDependencies: () => [],
       },
       rollupOptions: {
         output: {
@@ -56,6 +95,8 @@ export default defineConfig(({ mode }) => {
             if (!id.includes('node_modules')) return;
 
             // 순서 중요: 더 구체적인 패턴을 먼저 검사
+            if (id.includes('/echarts') ||
+                id.includes('/zrender/'))         return 'vendor-echarts';
             if (id.includes('/@tiptap/'))        return 'vendor-tiptap';
             if (id.includes('/swiper/'))          return 'vendor-swiper';
             if (id.includes('/recharts/') ||
@@ -63,11 +104,7 @@ export default defineConfig(({ mode }) => {
                 id.includes('/victory-'))         return 'vendor-recharts';
             if (id.includes('/lucide-react/'))    return 'vendor-lucide';
             if (id.includes('/react-datepicker/')) return 'vendor-datepicker';
-            if (id.includes('/react-markdown/') ||
-                id.includes('/remark') ||
-                id.includes('/unified/') ||
-                id.includes('/micromark') ||
-                id.includes('/mdast-util'))       return 'vendor-markdown';
+            // vendor-markdown 제거 (react-markdown/remark 미사용)
             if (id.includes('/@svar-ui/'))        return 'vendor-grid';
             if (id.includes('/react-router') ||
                 id.includes('/@remix-run/'))      return 'vendor-router';
@@ -95,11 +132,6 @@ export default defineConfig(({ mode }) => {
         '@utils': path.resolve(__dirname, './src/utils'),  // import { formatDate } from '@utils/date'
         '@styles': path.resolve(__dirname, './styles'),  // import { formatDate } from '@style/common.css'
         
-        // SDK Development Alias (빌드 없이 소스 직접 참조)
-        '@cube-i-ax/sdk/react': path.resolve(__dirname, './packages/sdk/src/react.ts'),
-        '@cube-i-ax/sdk/smes/program': path.resolve(__dirname, './packages/sdk/src/smes/program/index.ts'),
-        '@cube-i-ax/sdk/smes': path.resolve(__dirname, './packages/sdk/src/smes/index.ts'),
-        '@cube-i-ax/sdk': path.resolve(__dirname, './packages/sdk/src/index.ts'),
       },
     },
   }

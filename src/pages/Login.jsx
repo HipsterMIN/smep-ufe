@@ -1,5 +1,5 @@
 import Breadcrumb from '../components/ui/Breadcrumb';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { api as apiClient } from '../lib/apiClient.js';
 import { useAuthStore } from '../store/useAuthStore.jsx';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
@@ -7,6 +7,7 @@ import { buildOnePassRegisterUrl } from '../utils/keycloakGetAuthCode.js';
 
 const LOGIN_TYPE_INDIVIDUAL = 'INDIVIDUAL';
 const LOGIN_TYPE_CORPORATE = 'CORPORATE';
+const EMPTY_VALIDATION_ERROR = { field: '', message: '' };
 const LOGIN_ERROR_MESSAGES = {
   INVALID_CREDENTIALS: '아이디 또는 비밀번호가 일치하지 않습니다.',
   PASSWORD_LOCKED: '비밀번호 5회 이상 입력 오류로 계정이 잠겼습니다.',
@@ -36,6 +37,9 @@ const UI_USR_R_002 = () => {
   );
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
+  const [validationError, setValidationError] = useState(EMPTY_VALIDATION_ERROR);
+  const loginIdRef = useRef(null);
+  const passwordRef = useRef(null);
   const navigate = useNavigate();
 
   const breadcrumbItems = [
@@ -45,12 +49,46 @@ const UI_USR_R_002 = () => {
   const handleLoginTypeChange = (nextType) => {
     setLoginType(nextType);
     setLoginId('');
+    setValidationError(EMPTY_VALIDATION_ERROR);
     if (nextType === LOGIN_TYPE_CORPORATE) {
       setPassword('');
     }
   };
 
+  const clearValidationError = (field) => {
+    if (validationError.field === field) {
+      setValidationError(EMPTY_VALIDATION_ERROR);
+    }
+  };
+
+  const validateLoginForm = () => {
+    if (!loginId.trim()) {
+      setValidationError({
+        field: 'loginId',
+        message: '아이디를 입력해 주시길 바랍니다.',
+      });
+      loginIdRef.current?.focus();
+      return false;
+    }
+
+    if (!password.trim()) {
+      setValidationError({
+        field: 'password',
+        message: '비밀번호를 입력해 주시길 바랍니다.',
+      });
+      passwordRef.current?.focus();
+      return false;
+    }
+
+    setValidationError(EMPTY_VALIDATION_ERROR);
+    return true;
+  };
+
   const handleClick = async () => {
+    if (!validateLoginForm()) {
+      return;
+    }
+
     try {
       const response = await apiClient.post('/api/v1/auth/login', {
         id: loginId,
@@ -130,35 +168,57 @@ const UI_USR_R_002 = () => {
               <fieldset>
                 <legend>로그인 폼</legend>
                 <div className="fieldset">
-                  <div className="form-group">
+                  <div className={`form-group ${validationError.field === 'loginId' ? 'is-error' : ''}`}>
                     <div className="form-tit">
                       <label htmlFor="login_id">아이디</label>
                     </div>
                     <input
+                      ref={loginIdRef}
                       type="text"
                       id="login_id"
                       className="krds-input medium"
                       value={loginId}
-                      onChange={(e) => setLoginId(e.target.value)}
+                      onChange={(e) => {
+                        setLoginId(e.target.value);
+                        clearValidationError('loginId');
+                      }}
                       onKeyDown={handleEnterSubmit}
                       placeholder={loginType === LOGIN_TYPE_CORPORATE ? '기업 로그인 ID' : '개인 로그인 ID'}
+                      aria-invalid={validationError.field === 'loginId'}
+                      aria-describedby={validationError.field === 'loginId' ? 'login_id_error' : undefined}
                     />
+                    {validationError.field === 'loginId' && (
+                      <p className="form-hint-invalid" id="login_id_error" role="alert">
+                        {validationError.message}
+                      </p>
+                    )}
                   </div>
-                  <div className="form-group">
+                  <div className={`form-group ${validationError.field === 'password' ? 'is-error' : ''}`}>
                     <div className="form-tit">
                       <label htmlFor="login_pw">비밀번호</label>
                     </div>
                     <div className="form-conts btn-ico-wrap">
                       <input
+                        ref={passwordRef}
                         type="password"
                         id="login_pw"
                         className="krds-input medium"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          clearValidationError('password');
+                        }}
                         onKeyDown={handleEnterSubmit}
                         placeholder="비밀번호를 입력하세요"
+                        aria-invalid={validationError.field === 'password'}
+                        aria-describedby={validationError.field === 'password' ? 'login_pw_error' : undefined}
                       />
                     </div>
+                    {validationError.field === 'password' && (
+                      <p className="form-hint-invalid" id="login_pw_error" role="alert">
+                        {validationError.message}
+                      </p>
+                    )}
                   </div>
                   <div className="form-group krds-check-area">
                     <div className="krds-form-check">
