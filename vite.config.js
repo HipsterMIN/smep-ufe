@@ -35,6 +35,17 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server,
     build: {
+      // ─── modulePreload 선택적 적용 ──────────────────────────────────────────
+      // Vite 기본 동작: 모든 manualChunk 벤더를 index.html에 <link rel="modulepreload">로 삽입
+      // → 메인 페이지에서 recharts(332KB), datepicker(161KB), markdown(157KB) 등을 즉시 다운로드
+      // → 서버(Nginx) 버퍼 오버플로 → ERR_CONTENT_LENGTH_MISMATCH 유발
+      // 해결: 앱 초기화에 반드시 필요한 청크만 preload, 나머지는 실제 사용 시 지연 로드
+      modulePreload: {
+        resolveDependencies(_filename, deps) {
+          const CRITICAL = ['vendor-react', 'vendor-router', 'vendor-query', 'index-'];
+          return deps.filter((dep) => CRITICAL.some((key) => dep.includes(key)));
+        },
+      },
       rollupOptions: {
         output: {
           // 자주 바뀌지 않는 라이브러리를 별도 청크로 분리 → 브라우저 캐시 재사용
