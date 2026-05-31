@@ -31,6 +31,36 @@ export const formatDate = (value, separator = '.') => {
   return raw;
 };
 
+const formatEventPeriodDate = (value) => {
+  if (!value) return '';
+  const raw = String(value).trim();
+  const ymd = raw.match(/^(\d{4})[-./]?(\d{2})[-./]?(\d{2})$/);
+  if (ymd) return `${ymd[1]}.${ymd[2]}.${ymd[3]}`;
+
+  const datePart = raw.slice(0, 10);
+  const isoDate = datePart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoDate) return `${isoDate[1]}.${isoDate[2]}.${isoDate[3]}`;
+
+  return raw;
+};
+
+/*
+ * 의도: 메인 화면 행사정보 탭은 백엔드 원문 기간을 그대로 보여주되, 숫자형 날짜만 사용자가 읽기 쉬운 점 구분 형식으로 통일한다.
+ * 동작: 20260601, 2026-06-01, 2026.06.01, 2026/06/01 형태의 단일 날짜와 '~'로 연결된 기간을 yyyy.mm.dd 형식으로 변환한다.
+ * 주의: '상시', '추후 공지' 같은 문구형 기간은 임의 해석하면 의미가 달라질 수 있으므로 원문을 유지한다.
+ */
+export const formatMainEventPeriod = (value) => {
+  const text = String(value || '').trim();
+  if (!text) return '';
+
+  const parts = text.split('~').map((part) => part.trim());
+  if (parts.length === 2) {
+    return `${formatEventPeriodDate(parts[0])} ~ ${formatEventPeriodDate(parts[1])}`;
+  }
+
+  return formatEventPeriodDate(text);
+};
+
 export const formatLocalDateKey = (date = new Date(), separator = '-') =>
   [
     date.getFullYear(),
