@@ -764,7 +764,7 @@ const MainPage = () => {
                     onClick={handleSearch}
                   >
                     <span className="sr-only">통합검색</span>
-                    <i className="svg-icon ico-sch"></i>
+                    <i className="svg-icon ico-sch-bold"></i>
                   </button>
                 </div>
                 {isFocused && (
@@ -898,7 +898,7 @@ const MainPage = () => {
             </div>
           </div>
         </div>
-        <div className="container">
+        <div className="container responsive-section">
           <section className="main-section main-calendar">
             <div className="calendar-layout">
               <article className="calendar-box today-box">
