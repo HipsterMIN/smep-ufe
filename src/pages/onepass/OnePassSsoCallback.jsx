@@ -38,6 +38,9 @@ const OnePassSsoCallback = () => {
     // savedState 는 onePassJoin()/onePassGetAuthCode()가 외부 인증으로 보내기 직전에 sessionStorage 에 저장한 비교 기준이다.
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
+
+    console.log('IN /sso    code='+ code);
+
     // const state = params.get('state');
     // const savedState = window.sessionStorage.getItem(KEYCLOAK_STATE_KEY);
     const callbackState = {
@@ -115,6 +118,8 @@ const OnePassSsoCallback = () => {
       });
 
       try {
+        console.log('IN /sso  2  code='+ code);
+
         const response = await apiClient.post(callbackEndpoint, { code });
         const responseData = response?.data || response;
         // 성공 로그는 token 원문을 남기지 않고도 응답 shape 를 확인하기 위한 로그다.
