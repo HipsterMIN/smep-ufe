@@ -431,35 +431,13 @@
         border-radius:2rem;
         overflow: hidden;
         img {object-fit: cover; object-position: center center;width:100%;height:100%;}
-
-        // API 응답 전 이미지 URL 미확정 상태: shimmer skeleton 표시
-        &--skeleton {
-            background: linear-gradient(90deg, #f0f2f5 25%, #e4e8ed 50%, #f0f2f5 75%);
-            background-size: 200% 100%;
-            animation: card-news-shimmer 1.5s ease-in-out infinite;
-        }
-
-        // 이미지 로드 완료 시 부드럽게 나타남
-        .card-news-img {
-            animation: card-news-fadein 0.3s ease-in;
-        }
-    }
-
-    @keyframes card-news-shimmer {
-        0%   { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-
-    @keyframes card-news-fadein {
-        from { opacity: 0; }
-        to   { opacity: 1; }
     }
 }
 
 /* 메인 - 자주 찾는 서비스 */
 .main-quick-menu {
   border-radius: 20px;
-  padding:  32px 74px;
+  padding:  32px 64px;
   margin-top:0;
   background: #0074F1;
   backdrop-filter: blur(15px);
@@ -495,7 +473,7 @@
             transition: all .3s ease-in;
             .quick-menu-tit{
                 margin:0;
-                font-size:var(--krds-pc-font-size-heading-medium);
+                font-size:var(--krds-pc-font-size-heading-small);
                 font-weight:500;
             }
             &:hover {
@@ -524,10 +502,10 @@
                 }
             }
             .swiper-button-prev {
-                left:-24px;
+                left:-29px;
             }
             .swiper-button-next {
-                right:-24px;
+                right:-29px;
             }
         }
     }
