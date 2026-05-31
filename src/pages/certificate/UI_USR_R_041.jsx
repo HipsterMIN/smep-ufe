@@ -242,8 +242,7 @@ const UI_USR_R_041 = () => {
               className="krds-btn primary medium"
               onClick={() => {
                 setIsDuplicatePopupOpen(false);
-                // TODO: 발급이력 목록 페이지 경로 확정 후 교체
-                navigate(getFullPath('M_PIIO_00078'));
+                navigate(getFullPath('M_PIIO_00113'));
               }}
             >
               예

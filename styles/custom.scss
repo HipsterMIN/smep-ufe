@@ -1,4 +1,4 @@
-@use "./_icons";
+@import "./_icons";
 *, *::before, *::after {box-sizing:border-box}
 #wrap{overflow-x:hidden}
 .container{padding:0 30px;margin-right:auto;margin-left:auto;}
@@ -285,64 +285,6 @@
         }
     }
 }
-/* =========================================================
-    LNB
-========================================================= */
-
-.lnb {
-    h2 {
-        height: 10rem;
-        margin-bottom:1.6rem !important;
-        border-radius:1rem;
-        background: #1877F2;
-        color: var(--krds-color-light-alpha-white100);
-        font-size:var(--krds-pc-font-size-heading-medium);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-    }
-
-    nav {
-        display: flex;
-        flex-direction: column;
-    }
-    a.is-active {
-        color: #1268e8;
-        font-weight: 800;
-    }
-
-    .lnb-group {
-        margin-top: 16px;
-        padding-top: 14px;
-        border-top: 1px solid #d9d9d9;
-
-        > button {
-            justify-content: space-between;
-            color: #333;
-            font-weight: 700;
-
-            &::after {
-                content: "⌃";
-                color: #777;
-                font-size: 13px;
-            }
-        }
-
-        ul {
-            margin: 8px 0 0;
-            padding: 0;
-            list-style: none;
-        }
-
-        li a {
-            display:block;
-            padding:6px 12px;
-            color: #777;
-            font-size:var(--krds-pc-font-size-body-medium);
-        }
-    }
-}
 
 .support-card {
     .card-title {
@@ -354,8 +296,222 @@
         cursor: pointer;
     }
 }
+// 아이디 비번 찾기
+.find-form-area{display:flex;flex-direction: column;gap:2rem;margin:0 auto;max-width:600px;
+    .form-group{display:flex;flex-direction:row;margin-top:1.2rem;
+        label{flex:0 0 20%;max-width:20%;margin-top:1.6rem;}
+        .krds-input, .field-control{flex:1;}
+        .field-control {
+            p{margin-top:.8rem}
+        }
+    }
+    form{display:flex;flex-direction: column;gap:1.2rem;}
+    .tab.fill.full > ul > li{flex:1;
+        .btn-tab{border: solid 1px var(--krds-tab--fill-button-color-border);}
+    }
+    &.find-pw{max-width:800px;
+        .find-id-fields{
+            padding-left:130px;
+            background:url(./img/bg-find01.jpg) no-repeat 0 0 / 100px;
+        }
+    }
+}
+/* 인증 영역 */
+.auth-section {
+  margin-top: 7.6rem;
+}
 
-@media (max-width: 768px) {
+.auth-title {
+  margin: 0 0 1rem;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #222;
+}
+
+.auth-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid #d9d9d9;
+  border-radius: 0.4rem;
+  overflow: hidden;
+
+  .auth-card + .auth-card {
+    border-left: 1px solid #d9d9d9;
+  }
+}
+
+.auth-card {
+  min-height: 32rem;
+  padding: 3.8rem 2rem 2.8rem;
+  text-align: center;
+  background: #fff;
+
+  h3 {
+    margin: 0 0 1.6rem;
+    color: #222;
+    font-size: 2.4rem;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 1.6rem 0 3.2rem;
+    color: #555;
+    font-size: 1.7rem;
+    line-height: 1.5;
+  }
+
+  &.full {
+    min-height: 30rem;
+    border: 1px solid #d9d9d9;
+    border-radius: 0.4rem;
+  }
+}
+
+.auth-icon {
+  position: relative;
+  width: 8rem;
+  height: 9rem;
+  margin: 0 auto;
+
+  &.phone {
+    &::before {
+      content: '';
+      position: absolute;
+      left: 2.8rem;
+      top: 0;
+      width: 4rem;
+      height: 7.2rem;
+      border: 0.8rem solid #d2d6de;
+      border-radius: 0.6rem;
+      background: #fff;
+    }
+
+    span {
+      position: absolute;
+      left: 1.4rem;
+      top: 4rem;
+      width: 3.8rem;
+      height: 4.3rem;
+      border-radius: 0.8rem;
+      background: #2f98ff;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0.7rem;
+        top: -1.7rem;
+        width: 2.4rem;
+        height: 2.4rem;
+        border-radius: 50%;
+        border: 0.6rem solid #2f98ff;
+        background: #fff;
+      }
+    }
+  }
+
+  &.ipin,
+  &.cert {
+    width: 9rem;
+    height: 10rem;
+
+    &::before {
+      content: '****';
+      position: absolute;
+      left: 1.8rem;
+      top: 0;
+      width: 5.8rem;
+      height: 6.6rem;
+      border: 0.8rem solid #d2d6de;
+      border-bottom: 0;
+      background: #fff;
+      color: #2f98ff;
+      font-weight: 900;
+      font-size: 2rem;
+      letter-spacing: 0.1rem;
+      line-height: 4.2rem;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 1.8rem;
+      top: 5.4rem;
+      width: 5.8rem;
+      height: 3.6rem;
+      background: #d2d6de;
+      clip-path: polygon(0 0, 100% 0, 100% 55%, 50% 100%, 0 55%);
+    }
+
+    span {
+      position: absolute;
+      left: 3.6rem;
+      top: 5.2rem;
+      z-index: 1;
+      width: 2.4rem;
+      height: 2.6rem;
+      border-radius: 0.5rem;
+      background: #2f98ff;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0.5rem;
+        top: -1.3rem;
+        width: 1.4rem;
+        height: 1.7rem;
+        border-radius: 1rem 1rem 0 0;
+        border: 0.4rem solid #2f98ff;
+        border-bottom: 0;
+      }
+    }
+  }
+
+  &.cert {
+    &::before {
+      left: 3rem;
+    }
+
+    &::after {
+      left: 3rem;
+    }
+
+    span {
+      left: 4.8rem;
+    }
+
+    &::marker {
+      display: none;
+    }
+  }
+}
+
+.auth-notice {
+  margin: 2.4rem 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    position: relative;
+    padding-left: 1.6rem;
+    line-height: 1.5;
+
+    &::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: #0b57a0;
+      font-weight: 900;
+    }
+  }
+}
+@media (max-width: 767px) {
+}
+
+.mobile-only{display:none;}
+@media (max-width:767px){
+    .lnb{display:none;}
+    .pc-only{display:none;}
+    .mobile-only{display:block;}
     .notice-layer {
         &__head{
             h3{flex-direction: column;gap:.2rem;}
@@ -367,10 +523,12 @@
         }
     }
 }
+@media (max-width:545px){
+    .find-form-area{
+        .form-group{flex-direction:column;align-items:start;
+            label{margin-top:0;}
+            .krds-input, .field-control{flex:none;width:100%;}
+        }
+    }
 
-.mobile-only{display:none;}
-@media (max-width:767px){
-    .lnb{display:none;}
-    .pc-only{display:none;}
-    .mobile-only{display:block;}
 }
