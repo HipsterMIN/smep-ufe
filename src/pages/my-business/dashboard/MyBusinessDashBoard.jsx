@@ -1,5 +1,5 @@
 import '@styles/mypage.scss';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
@@ -11,7 +11,8 @@ import {
   formatBusinessRegNo,
 } from '@/pages/my-business/member/memberUtils.js';
 import BusinessSummarySection from './component/BusinessSummarySection.jsx';
-import InsightSection from './component/InsightSection.jsx';
+// recharts를 포함하므로 lazy로 분리 → 메인 번들에 recharts가 포함되는 것을 방지
+const InsightSection = lazy(() => import('./component/InsightSection.jsx'));
 import DeadlineCalendarSection from './component/DeadlineCalendarSection.jsx';
 import ServiceStatusSection from './component/ServiceStatusSection.jsx';
 
@@ -492,8 +493,10 @@ const MyBusinessDashBoard = () => {
 
         {/* 기업 요약 */}
         <BusinessSummarySection dashboardData={dashboardData} />
-        {/* 데이터 인사이트 */}
-        <InsightSection dashboardData={dashboardData} />
+        {/* 데이터 인사이트 (recharts lazy) */}
+        <Suspense fallback={<div style={{ height: '200px' }} />}>
+          <InsightSection dashboardData={dashboardData} />
+        </Suspense>
         {/* 관심공고 마감 캘린더 */}
         <DeadlineCalendarSection dashboardData={dashboardData} />
         {/* 서비스 현황 */}
