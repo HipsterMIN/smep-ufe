@@ -77,6 +77,7 @@ const HeaderDesktopGNB = ({ menus }) => {
                 aria-haspopup="true"
                 aria-expanded={openIndex === menu.menuId}
               >
+                <i className="svg-icon pure cube"></i>
                 {menu.menuNm}
               </button>
               <div className={`gnb-toggle-wrap ${openIndex === menu.menuId ? 'is-open' : ''}`}>
