@@ -233,66 +233,61 @@ const FindPassword = () => {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="find-account-visual" aria-hidden="true">
-            <div className="visual-key">
-              <span className="key-ring"></span>
-              <span className="key-shape"></span>
-              <span className="handle"></span>
-            </div>
-          </div>
-          <div className="find-id-fields">
-            <div className="form-group">
-              <label htmlFor="userId">아이디</label>
-              <input
-                id="userId"
-                type="text"
-                className="krds-input"
-                value={userId}
-                onChange={handleUserIdChange}
-              />
-            </div>
-            {isCompany ? (
-              <>
-                <div className="form-group">
-                  <label htmlFor="companyName">기업명</label>
-                  <input id="companyName" type="text" className="krds-input" />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="bizNo">사업자등록번호</label>
-                  <div className="field-control">
-                    <input id="bizNo" type="text" className="krds-input" inputMode="numeric" />
-                    <p>‘-’를 제외하고 입력해주세요.</p>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="managerId">담당자 아이디</label>
-                  <div className="field-control">
-                    <input id="managerId" type="text" className="krds-input" />
-                    <p>담당자의 개인회원 아이디를 입력해주세요.</p>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="managerName">담당자 이름</label>
-                  <div className="field-control">
-                    <input id="managerName" type="text" className="krds-input" />
-                    <p>담당자의 개인회원 이름을 입력해주세요.</p>
-                  </div>
-                </div>
-              </>
-            ) : (
+          <div className={`find-id-fields ${isPersonal ? 'is-personal' : 'is-company'}`}>
+            <div className="form-group-wrap">
               <div className="form-group">
-                <label htmlFor="userName">이름</label>
+                <label htmlFor="userId">아이디</label>
                 <input
-                  id="userName"
+                  id="userId"
                   type="text"
                   className="krds-input"
-                  value={userName}
-                  onChange={handleUserNameChange}
+                  value={userId}
+                  onChange={handleUserIdChange}
                 />
               </div>
-            )}
+              {isCompany ? (
+                <>
+                  <div className="form-group">
+                    <label htmlFor="companyName">기업명</label>
+                    <input id="companyName" type="text" className="krds-input" />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="bizNo">사업자등록번호</label>
+                    <div className="field-control">
+                      <input id="bizNo" type="text" className="krds-input" inputMode="numeric" />
+                      <p>‘-’를 제외하고 입력해주세요.</p>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="managerId">담당자 아이디</label>
+                    <div className="field-control">
+                      <input id="managerId" type="text" className="krds-input" />
+                      <p>담당자의 개인회원 아이디를 입력해주세요.</p>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="managerName">담당자 이름</label>
+                    <div className="field-control">
+                      <input id="managerName" type="text" className="krds-input" />
+                      <p>담당자의 개인회원 이름을 입력해주세요.</p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="form-group">
+                  <label htmlFor="userName">이름</label>
+                  <input
+                    id="userName"
+                    type="text"
+                    className="krds-input"
+                    value={userName}
+                    onChange={handleUserNameChange}
+                  />
+                </div>
+              )}
+            </div>
           </div>
           <section className="auth-section">
             {isPersonal ? (
