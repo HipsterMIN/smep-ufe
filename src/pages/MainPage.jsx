@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -32,6 +32,10 @@ import {
   isNewWindow, isAbsoluteHttpUrl, appendQueryParam, resolveBoardTarget, stripHtmlTags,
   extractPopularKeywords, extractAutoCompleteKeywords,
 } from './main/mainUtils.js';
+// ?inline → 모듈 로드 시점에 CSS 텍스트를 번들에 포함
+// (useEffect 대신 모듈 초기화 시점에 주입 → FOUC 제거)
+import _customScss from '@styles/custom.scss?inline';
+import _mainScss from '@styles/main.scss?inline';
 
 
 const MAIN_MENU_IDS = {
@@ -145,46 +149,19 @@ const MainPage = () => {
   const intgMbrSwtcYn = useAuthStore((state) => state.intgMbrSwtcYn);
   const isLoggedIn = Boolean(authToken);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const removeMainPageStyle = () => {
-      document.getElementById(MAIN_PAGE_STYLE_ELEMENT_ID)?.remove();
-    };
-
-    const injectMainPageStyle = async () => {
-      try {
-        const [customStyleModule, mainStyleModule] = await Promise.all([
-          import('@styles/custom.scss?inline'),
-          import('@styles/main.scss?inline'),
-        ]);
-
-        if (cancelled) return;
-
-        removeMainPageStyle();
-
-        const styleElement = document.createElement('style');
-        styleElement.id = MAIN_PAGE_STYLE_ELEMENT_ID;
-        styleElement.setAttribute('data-main-page-style', 'true');
-        styleElement.textContent = [
-          removeCssCharset(customStyleModule.default),
-          removeCssCharset(mainStyleModule.default),
-        ].join('\n');
-
-        document.head.appendChild(styleElement);
-      } catch (error) {
-        if (!cancelled) {
-          removeMainPageStyle();
-          console.error('Failed to load main page styles.', error);
-        }
-      }
-    };
-
-    injectMainPageStyle();
-
+  // useLayoutEffect: React 커밋 직후, 브라우저 페인트 전에 동기 실행 → FOUC 없음
+  // _customScss / _mainScss는 정적 import로 이미 메모리에 있으므로 동기 주입 가능
+  useLayoutEffect(() => {
+    const existing = document.getElementById(MAIN_PAGE_STYLE_ELEMENT_ID);
+    if (!existing) {
+      const el = document.createElement('style');
+      el.id = MAIN_PAGE_STYLE_ELEMENT_ID;
+      el.setAttribute('data-main-page-style', 'true');
+      el.textContent = [removeCssCharset(_customScss), removeCssCharset(_mainScss)].join('\n');
+      document.head.appendChild(el);
+    }
     return () => {
-      cancelled = true;
-      removeMainPageStyle();
+      document.getElementById(MAIN_PAGE_STYLE_ELEMENT_ID)?.remove();
     };
   }, []);
 
@@ -753,7 +730,7 @@ const MainPage = () => {
                     ref={searchInputRef}
                     type="text"
                     title="통합검색"
-                    placeholder='지원사업·정책금융·확인서·사업공고를 검색하세요'
+                    placeholder='지원사업 공고, 정책자금, 확인서 등을 검색해 보세요'
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={handleKeyDown}

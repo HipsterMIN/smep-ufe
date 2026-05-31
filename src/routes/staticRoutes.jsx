@@ -3,16 +3,45 @@ import { lazy, Suspense } from 'react';
 import { autoPublishingRoutesWithLayout, autoPublishingRoutesWithoutLayout } from './autoRoutes.jsx';
 import { MenuProviderOnly, SubpageLayoutWithMenu } from '@layouts';
 
+const CHUNK_LOAD_TIMEOUT_MS = 12_000;
+const CHUNK_RELOAD_KEY = '__smep_chunk_reload_ts__';
+const RELOAD_COOLDOWN_MS = 15_000;
+
+const reloadOnce = () => {
+  try {
+    const last = Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) || 0);
+    if (Date.now() - last < RELOAD_COOLDOWN_MS) return;
+    sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()));
+  } catch { /* ignore */ }
+  window.location.reload();
+};
+
+// 타임아웃 + 재시도 포함 lazy — HTTP/1.1 커넥션 큐 대기로 인한 Pending 상태 대응
+const lazyWithRetry = (importFn, retries = 1) => {
+  const load = (attemptsLeft) =>
+    Promise.race([
+      importFn(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('ChunkLoadError: load timeout')), CHUNK_LOAD_TIMEOUT_MS),
+      ),
+    ]).catch((err) => {
+      if (attemptsLeft > 0) return load(attemptsLeft - 1);
+      reloadOnce();
+      return new Promise(() => {}); // 재로딩 중 렌더 차단
+    });
+  return lazy(() => load(retries));
+};
+
 // 레이아웃/Provider 컴포넌트는 라우트 구조 정의에 즉시 필요하므로 eager 유지
 // 페이지 컴포넌트는 해당 경로에 진입할 때만 로드
-const MainPage                 = lazy(() => import('../pages/MainPage.jsx'));
-const Login                    = lazy(() => import('../pages/Login.jsx'));
-const SSOLogin                 = lazy(() => import('../pages/SSOLogin.jsx'));
-const OnePassSsoCallback       = lazy(() => import('../pages/onepass/OnePassSsoCallback.jsx'));
-const OnePassSsoLogout         = lazy(() => import('../pages/onepass/OnePassSsoLogout.jsx'));
-const AiChat                   = lazy(() => import('../pages/ai/AiChat.jsx'));
-const IntegratedSearchRouteTest = lazy(() => import('../pages/dev/IntegratedSearchRouteTest.jsx'));
-const PublishingList           = lazy(() => import('../publishing/PublishingList.jsx'));
+const MainPage                 = lazyWithRetry(() => import('../pages/MainPage.jsx'));
+const Login                    = lazyWithRetry(() => import('../pages/Login.jsx'));
+const SSOLogin                 = lazyWithRetry(() => import('../pages/SSOLogin.jsx'));
+const OnePassSsoCallback       = lazyWithRetry(() => import('../pages/onepass/OnePassSsoCallback.jsx'));
+const OnePassSsoLogout         = lazyWithRetry(() => import('../pages/onepass/OnePassSsoLogout.jsx'));
+const AiChat                   = lazyWithRetry(() => import('../pages/ai/AiChat.jsx'));
+const IntegratedSearchRouteTest = lazyWithRetry(() => import('../pages/dev/IntegratedSearchRouteTest.jsx'));
+const PublishingList           = lazyWithRetry(() => import('../publishing/PublishingList.jsx'));
 
 // Suspense fallback — MainPage lazy 로드 중 표시되는 골격 UI
 const pageFallback = (
