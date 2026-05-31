@@ -753,7 +753,7 @@ const MainPage = () => {
                     ref={searchInputRef}
                     type="text"
                     title="통합검색"
-                    placeholder='지원사업·정책금융·확인서·사업공고를 검색하세요'
+                    placeholder='지원사업 공고, 정책자금, 확인서 등을 검색해 보세요'
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
