@@ -1,38 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useLocation, useMatches, useNavigate, useSearchParams } from 'react-router-dom';
+import {useMatches} from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
-import Pagination from '@components/ui/Pagination';
-import { useUserMenu } from '@context/UserMenuContext.jsx';
-import { api as apiClient } from '@lib/apiClient.js';
-import { formatNumberWithCommas } from '@utils/numberUtils.js';
-import { appendListSearchToPath, getNumberSearchParam, getSearchParam, setQueryParam } from '@utils/listNavigation.js';
-import '@styles/custom.scss';
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
+import {useUserMenu} from '@context/UserMenuContext.jsx';
 
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return '-';
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
-};
 
 const UI_USR_L_130 = () => {
   const matches = useMatches();
-  const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '';
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [, setSearchParams] = useSearchParams();
+  const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '중기부 소관 법령';
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
-
-  
 
   return (
     <>
@@ -43,7 +21,7 @@ const UI_USR_L_130 = () => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">중기부 소관 법령</h2>
+          <h2 className="h-tit">{pageTitle}</h2>
         </div>
 
         <div className="PrintArea">

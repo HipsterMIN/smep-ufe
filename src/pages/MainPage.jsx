@@ -34,7 +34,8 @@ import {
 } from './main/mainUtils.js';
 // ?inline → 모듈 로드 시점에 CSS 텍스트를 번들에 포함
 // (useEffect 대신 모듈 초기화 시점에 주입 → FOUC 제거)
-import _customScss from '@styles/custom.scss?inline';
+// custom.scss App.jsx 로 이동으로 주석
+// import _customScss from '@styles/custom.scss?inline';
 import _mainScss from '@styles/main.scss?inline';
 
 
@@ -157,7 +158,8 @@ const MainPage = () => {
       const el = document.createElement('style');
       el.id = MAIN_PAGE_STYLE_ELEMENT_ID;
       el.setAttribute('data-main-page-style', 'true');
-      el.textContent = [removeCssCharset(_customScss), removeCssCharset(_mainScss)].join('\n');
+      /*el.textContent = [removeCssCharset(_customScss), removeCssCharset(_mainScss)].join('\n');*/
+      el.textContent = [removeCssCharset(_mainScss)].join('\n');
       document.head.appendChild(el);
     }
     return () => {

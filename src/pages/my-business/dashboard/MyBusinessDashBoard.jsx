@@ -1,4 +1,3 @@
-import '@styles/custom.scss';
 import '@styles/mypage.scss';
 import { useEffect, useState } from 'react';
 import SideNavigation from '@components/ui/SideNavigation.jsx';

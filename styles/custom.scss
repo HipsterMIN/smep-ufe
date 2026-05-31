@@ -1,6 +1,6 @@
 @use "./_icons";
 *, *::before, *::after {box-sizing:border-box}
-html, body{overflow-x:hidden}
+#wrap{overflow-x:hidden}
 .container{padding:0 30px;margin-right:auto;margin-left:auto;}
 @media(min-width:1400px){
     .container{max-width:1480px;padding:0 50px;}

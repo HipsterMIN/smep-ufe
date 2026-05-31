@@ -5,7 +5,6 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import Header from "@components/ui/Header.jsx";
 import Footer from "@components/ui/Footer.jsx";
-import '@styles/custom.scss';
 import '@styles/main.scss';
 
 
