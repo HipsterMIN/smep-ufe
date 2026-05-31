@@ -72,9 +72,38 @@ describe('openNiceIdAuth', () => {
     });
   });
 
+  it('manual popup close returns controlled failure and cleans up listener', async () => {
+    vi.useFakeTimers();
+    const popup = {
+      closed: false,
+      focus: vi.fn(),
+    };
+    const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
+
+    vi.spyOn(window, 'open').mockReturnValue(popup);
+    api.post.mockResolvedValue({ authUrl: 'https://nice.example.test/auth' });
+
+    const promise = openNiceIdAuth({
+      svcTypes: ['M'],
+      timeoutMs: 1000,
+      closedCheckIntervalMs: 100,
+    });
+    await flushAuthSetup();
+
+    popup.closed = true;
+    await vi.advanceTimersByTimeAsync(100);
+
+    await expect(promise).resolves.toMatchObject({
+      success: false,
+      errorCode: NICE_ID_AUTH_ERROR_CODES.popupClosed,
+    });
+    expect(removeEventListenerSpy).toHaveBeenCalledWith('message', expect.any(Function));
+  });
+
   it('success message resolves resultKey and cleans up listener', async () => {
     vi.useFakeTimers();
     const popup = {
+      closed: false,
       focus: vi.fn(),
     };
     const getMessageHandler = captureMessageHandler();
@@ -103,6 +132,7 @@ describe('openNiceIdAuth', () => {
   it('foreign origin message is ignored until timeout', async () => {
     vi.useFakeTimers();
     const popup = {
+      closed: false,
       focus: vi.fn(),
     };
     const getMessageHandler = captureMessageHandler();
@@ -134,6 +164,7 @@ describe('openNiceIdAuth', () => {
 
   it('backend callback error message returns controlled failure', async () => {
     const popup = {
+      closed: false,
       focus: vi.fn(),
     };
     const getMessageHandler = captureMessageHandler();
