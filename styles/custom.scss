@@ -9,6 +9,11 @@
     .container{padding:0 15px;}
 }
 /* header */
+#krds-masthead {
+    .toggle-head{
+        .nuri-txt{font-size:var(--krds-pc-font-size-body-xsmall)}
+    }
+}
 #krds-header {
     .header-utility {
         .utility-list{
@@ -276,7 +281,7 @@
                 font-size:var(--krds-pc-font-size-heading-small);
                 font-weight:600;
                 .krds-badge{
-                    width:4.4rem;height:4.4rem;padding:0;min-height:none;border-radius:.8rem;display:inline-flex;align-items:center;justify-content:center;
+                    width:4.4rem;height:4.4rem;flex:0 0 4.4rem;padding:0;min-height:none;border-radius:.8rem;display:inline-flex;align-items:center;justify-content:center;
                     margin-left:auto;
                     background-color:#176CF0;
                     .svg-icon{background-color:#fff;width:2.4rem;height:2.4rem;}
@@ -414,6 +419,9 @@
                 dt, dd{flex:none;max-width:100%;}
             }
         }
+    }
+    .jurisdiction_law{
+        ul{ display:flex;flex-direction:column;gap:1.6rem;}
     }
 }
 @media (max-width:545px){
