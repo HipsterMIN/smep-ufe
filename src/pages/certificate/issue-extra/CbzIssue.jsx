@@ -4,13 +4,12 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
-import { useAuthStore } from '@store/useAuthStore.jsx';
 
 const CbzIssue = () => {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn } = location.state || {};
-  const { brno, cmpNm } = useAuthStore((state) => ({ brno: state.bizno, cmpNm: state.cmpNm }));
+  const [enterpriseInfo, setEnterpriseInfo] = useState({ mbrNm: '', rprsvNm: '', brno: '' });
 
   const [records, setRecords]               = useState([]);
   const [selectedCmpId1, setSelectedCmpId1] = useState(null);
@@ -37,6 +36,18 @@ const CbzIssue = () => {
       }
     };
     fetchRecords();
+  }, []);
+
+  useEffect(() => {
+    const fetchEnterpriseInfo = async () => {
+      try {
+        const data = await apiClient.get('/api/v1/member/common/me/enterprise-info');
+        setEnterpriseInfo(data.data);
+      } catch (e) {
+        console.error('기업회원 기본정보 조회 실패:', e);
+      }
+    };
+    fetchEnterpriseInfo();
   }, []);
 
   const validate = () => {
@@ -113,40 +124,46 @@ const CbzIssue = () => {
             </ul>
           </div>
 
-          <dl className="on-form-row mt-24 large">
+          <dl className="on-form-row large mt-24">
             <div className="form-row-item">
               <dt className="form-row-label">
                 <label htmlFor="id_01" className="form-label">
-                    사업자등록번호 <span className="on-required"><span className="sr-only">필수입력</span></span>
+                  사업자등록번호
+                  <span className="on-required"><span className="sr-only">필수입력</span></span>
                 </label>
               </dt>
               <dd className="form-row-content">
-                <div className="form-wrapper w-360">
-                  <input type="text" id="id_01" className="krds-input small" value={brno} readOnly />
+                <div className="form-wrapper w-220">
+                  <input type="text" id="id_01" className="krds-input small"
+                    placeholder="사업자등록번호를 입력해주세요" value={enterpriseInfo.brno} disabled/>
                 </div>
               </dd>
             </div>
             <div className="form-row-item">
               <dt className="form-row-label">
                 <label htmlFor="id_02" className="form-label">
-                    상호 <span className="on-required"><span className="sr-only">필수입력</span></span>
+                  상호
+                  <span className="on-required"><span className="sr-only">필수입력</span></span>
                 </label>
               </dt>
               <dd className="form-row-content">
-                <div className="form-wrapper w-360">
-                  <input type="text" id="id_02" className="krds-input small" value={cmpNm} readOnly />
+                <div className="form-wrapper w-220">
+                  <input type="text" id="id_02" className="krds-input small"
+                    placeholder="상호를 입력해주세요" value={enterpriseInfo.mbrNm} disabled/>
                 </div>
               </dd>
             </div>
             <div className="form-row-item">
               <dt className="form-row-label">
                 <label htmlFor="id_03" className="form-label">
-                    대표자명 <span className="on-required"><span className="sr-only">필수입력</span></span>
+                  대표자명
+                  <span className="on-required"><span className="sr-only">필수입력</span></span>
                 </label>
               </dt>
               <dd className="form-row-content">
-                <div className="form-wrapper w-360">
-                  <input type="text" id="id_03" className="krds-input small" value="홍길동" readOnly />
+                <div className="form-wrapper w-220">
+                  <input type="text" id="id_03" className="krds-input small"
+                    placeholder="대표자명을 입력해주세요" value={enterpriseInfo.rprsvNm} disabled/>
                 </div>
               </dd>
             </div>
@@ -190,7 +207,7 @@ const CbzIssue = () => {
         <div className="onboard-btm-btngroup bt-0">
           <div>
             <button type="button" className="krds-btn tertiary xlarge" onClick={goBack}>
-                취소
+              취소
             </button>
           </div>
           <div>
@@ -200,7 +217,7 @@ const CbzIssue = () => {
               onClick={handleWalletClick}
               disabled={isLoading}
             >
-                전자문서지갑
+              전자문서지갑
             </button>
             <button
               type="button"
