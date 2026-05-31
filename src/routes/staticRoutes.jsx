@@ -36,11 +36,14 @@ const lazyWithRetry = (importFn) =>
 const MainPage                 = lazyWithRetry(() => import('../pages/MainPage.jsx'));
 const Login                    = lazyWithRetry(() => import('../pages/Login.jsx'));
 const SSOLogin                 = lazyWithRetry(() => import('../pages/SSOLogin.jsx'));
+const FindId                   = lazyWithRetry(() => import('../pages/FindId.jsx'));
+const FindIdResult             = lazyWithRetry(() => import('../pages/FindIdResult.jsx'));
 const OnePassSsoCallback       = lazyWithRetry(() => import('../pages/onepass/OnePassSsoCallback.jsx'));
 const OnePassSsoLogout         = lazyWithRetry(() => import('../pages/onepass/OnePassSsoLogout.jsx'));
 const IntegratedSearchRouteTest = lazyWithRetry(() => import('../pages/dev/IntegratedSearchRouteTest.jsx'));
 const FindPassword             = lazyWithRetry(() => import('../pages/FindPassword.jsx'));
 const PublishingList           = lazyWithRetry(() => import('../publishing/PublishingList.jsx'));
+
 
 // Suspense fallback — MainPage lazy 로드 중 표시되는 골격 UI
 const pageFallback = (
@@ -117,6 +120,25 @@ export const staticRoutes = [
       {
         path: '/service/find-password',
         element: <Suspense fallback={pageFallback}><FindPassword /></Suspense>,
+      },
+    ],
+  },
+
+  {
+    element: <SubpageLayoutWithMenu />,
+    children: [
+      {
+        path: '/service/find-id',
+        element: <Suspense fallback={pageFallback}><FindId /></Suspense>,
+      },
+    ],
+  },
+  {
+    element: <SubpageLayoutWithMenu />,
+    children: [
+      {
+        path: '/service/find-id/result',
+        element: <Suspense fallback={pageFallback}><FindIdResult /></Suspense>,
       },
     ],
   },

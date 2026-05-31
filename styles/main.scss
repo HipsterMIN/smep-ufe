@@ -408,14 +408,19 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        height: 3.8rem;
         margin-bottom: 1rem;
-
+        font-size:var(--krds-pc-font-size-heading-medium);
         h3 {
             margin: 0;
             font-size: 2rem;
             font-weight: 800;
             color:var(--krds-color-light-alpha-black100);
+            display:flex;
+            gap:.5rem;
+            &::before{
+                content:'';width:3.2rem;height:3.2rem;
+                background:url(./img/cardnews-icon.svg) no-repeat center center / contain;
+            }
         }
 
         .krds-btn {
