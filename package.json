@@ -12,7 +12,7 @@
     "build:local": "npm run build:packages && vite build --mode localhost",
     "build:dev": "npm run build:packages && vite build --mode development",
     "build:prod": "npm run build:packages && vite build --mode production",
-    "build": "npm run build:packages && vite build --mode production",
+    "build": "npm run build:packages && vite build --mode development",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest",
