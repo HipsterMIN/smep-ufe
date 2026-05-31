@@ -34,14 +34,6 @@ export default defineConfig(({ mode }) => {
     base,
     plugins: [react()],
     server,
-    css: {
-      preprocessorOptions: {
-        scss: {
-          // Dart Sass 2.x legacy-js-api 경고 억제
-          api: 'modern-compiler',
-        },
-      },
-    },
     build: {
       rollupOptions: {
         output: {
