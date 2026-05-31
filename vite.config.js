@@ -60,7 +60,7 @@ export default defineConfig(({ mode }) => {
             if (id.includes('/react/') ||
                 id.includes('/react-dom/') ||
                 id.includes('/scheduler/'))       return 'vendor-react';
-            if (id.includes('/zustand/'))         return 'vendor-zustand';
+            // zustand는 10.5KB로 소형이며 모든 페이지에서 항상 필요 → index 번들에 포함
             if (id.includes('/@tanstack/'))       return 'vendor-query';
           },
         },
