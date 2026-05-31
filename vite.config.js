@@ -2,6 +2,46 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { createReadStream, createWriteStream, readdirSync } from 'fs'
+import { createGzip } from 'zlib'
+import { extname, join } from 'path'
+import { pipeline } from 'stream/promises'
+
+/**
+ * 빌드 완료 후 dist/assets 의 JS/CSS를 .gz로 사전 압축
+ * nginx gzip_static on; 과 함께 사용 — ERR_CONTENT_LENGTH_MISMATCH 방지
+ */
+function gzipStaticPlugin() {
+  return {
+    name: 'vite-plugin-gzip-static',
+    apply: 'build',
+    async closeBundle() {
+      const COMPRESSIBLE = new Set(['.js', '.css', '.html', '.json', '.svg', '.xml'])
+      const dirs = ['dist/assets', 'dist']
+      let count = 0
+
+      for (const dir of dirs) {
+        let files
+        try { files = readdirSync(dir) } catch { continue }
+
+        await Promise.all(
+          files
+            .filter(f => COMPRESSIBLE.has(extname(f)) && !f.endsWith('.gz'))
+            .map(async (f) => {
+              const src = join(dir, f)
+              await pipeline(
+                createReadStream(src),
+                createGzip({ level: 9 }),
+                createWriteStream(src + '.gz')
+              )
+              count++
+            })
+        )
+      }
+      console.log(`\n✓ gzip-static: ${count}개 파일 사전 압축 완료`)
+    },
+  }
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -32,7 +72,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     base,
-    plugins: [react()],
+    plugins: [react(), gzipStaticPlugin()],
     server,
     build: {
       // ─── modulePreload 선택적 적용 ──────────────────────────────────────────
@@ -54,9 +94,9 @@ export default defineConfig(({ mode }) => {
           manualChunks(id) {
             if (!id.includes('node_modules')) return;
 
-            // 순서 중요: 더 구체적인 패턴을 먼저 검사
-            if (id.includes('/echarts') ||
-                id.includes('/zrender/'))         return 'vendor-echarts';
+            // echarts/zrender: InsightSection 하나만 사용하므로 manualChunks 제외
+            // → Rollup이 InsightSection lazy chunk 안에 직접 번들링
+            // → index.js에 정적 import 생기지 않아 메인 페이지 로딩 불필요
             if (id.includes('/@tiptap/'))        return 'vendor-tiptap';
             if (id.includes('/swiper/'))          return 'vendor-swiper';
             if (id.includes('/recharts/') ||
