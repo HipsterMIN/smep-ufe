@@ -4,6 +4,17 @@ import { api as apiClient } from '../lib/apiClient.js';
 import { mockMenuData } from '@lib/menuData.js';
 import { useAuthStore } from './useAuthStore.jsx';
 
+// 스토어 외부에서도 재사용 가능한 flatMap 빌더
+export const buildFlatMap = (menuData) => {
+  const flatMap = {};
+  const build = (node) => {
+    flatMap[node.menuId] = node;
+    (node.children || []).forEach(build);
+  };
+  build(menuData);
+  return flatMap;
+};
+
 const COMPANY_INFO_MANAGEMENT_MENU_ID = 'M_PIIO_00119';
 
 const filterMenuByCurrentMode = (menuData) => {
@@ -38,35 +49,20 @@ const filterMenuByCurrentMode = (menuData) => {
  * - 전체 앱에서 메뉴 데이터 접근 가능
  */
 const menuStoreImpl  = (set, get) => ({
-  // 상태
-  menuTree: null, // 메뉴 트리 데이터
-  flatMenuMap: {}, // menuId를 key로 하는 flat map (빠른 조회용)
-  isLoading: false, // 로딩 상태
-  error: null, // 에러
+  // 상태 — mockMenuData로 즉시 초기화하여 첫 렌더 시 라우터를 동기적으로 생성 가능
+  menuTree: mockMenuData,
+  flatMenuMap: buildFlatMap(mockMenuData),
+  isLoading: false,
+  hasFetched: false, // 서버에서 실제 메뉴를 fetch했는지 여부
+  error: null,
 
-  /**
-   * 메뉴 트리를 평탄화하여 menuId 맵 생성
-   * before : { menuId: 'M1', children: [ { menuId: 'M2', children: [] } ] }
-   * after  : { 'M1': { ... }, 'M2': { ... } }
-   * @param {Object} menuData - 메뉴 트리 데이터 { menuId: 'M1', children: [ { menuId: 'M2', children: [] } ] }
-   */
-  _buildFlatMap: (menuData) => {
-    const flatMap = {};
-    const buildFlatMap = (node) => {
-      flatMap[node.menuId] = node;
-      if (node.children && node.children.length > 0) {
-        node.children.forEach(buildFlatMap);
-      }
-    };
-    buildFlatMap(menuData);
-    return flatMap;
-  },
+  // 하위 호환성을 위해 유지 (내부적으로 module-level buildFlatMap 위임)
+  _buildFlatMap: buildFlatMap,
 
   /**
    * 메뉴 데이터 API 호출 및 상태 업데이트
    */
   fetchMenuData: async () => {
-    // 로딩 상태 설정
     set({ isLoading: true, error: null });
 
     try {
@@ -78,22 +74,19 @@ const menuStoreImpl  = (set, get) => ({
       }
 
       const menuData = filterMenuByCurrentMode(rawMenuData);
+      const flatMap = buildFlatMap(menuData);
 
-      // 메뉴 데이터를 평탄화된 맵으로 변환
-      const flatMap = get()._buildFlatMap(menuData);
-
-      // 상태 업데이트
       set({
         menuTree: menuData,
         flatMenuMap: flatMap,
         isLoading: false,
+        hasFetched: true,
       });
 
       return menuData;
     } catch (error) {
-      // 개발 환경이거나 API 호출 실패 시 목데이터 사용
       const isDev = import.meta.env.MODE === 'development';
-      
+
       if (isDev) {
         console.warn('메뉴 데이터 API 호출 실패, 개발 환경이므로 목데이터를 사용합니다:', error.message);
       } else {
@@ -101,13 +94,14 @@ const menuStoreImpl  = (set, get) => ({
       }
 
       const menuData = filterMenuByCurrentMode(mockMenuData);
-      const flatMap = get()._buildFlatMap(menuData);
+      const flatMap = buildFlatMap(menuData);
 
       set({
         menuTree: menuData,
         flatMenuMap: flatMap,
         isLoading: false,
-        error: isDev ? null : error.message, // 개발환경에서는 에러 상태로 처리하지 않음
+        hasFetched: true,
+        error: isDev ? null : error.message,
       });
 
       return menuData;
@@ -119,9 +113,14 @@ const menuStoreImpl  = (set, get) => ({
     return get().flatMenuMap[menuId] || null;
   },
 
-  // 메뉴 데이터 초기화
+  // 메뉴 데이터 초기화 (모드 전환 시 호출 — mockMenuData로 되돌려 즉시 라우터 유지)
   resetMenu: () => {
-    set({ menuTree: null, flatMenuMap: {}, error: null });
+    set({
+      menuTree: mockMenuData,
+      flatMenuMap: buildFlatMap(mockMenuData),
+      hasFetched: false,
+      error: null,
+    });
   },
 });
 

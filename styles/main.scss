@@ -1,6 +1,8 @@
 .main-container {
     position: relative;
-    .main-toplayout{background: url(../src/assets/main/new/mainTopBg.svg) no-repeat center top / auto 275px;padding:80px 0;
+    .main-toplayout{
+        background:#1877F2; /*url(../src/assets/main/new/mainTopDeco.svg) no-repeat 20px 100% / auto 228px;*/
+        padding:80px 0;
         &::before {content:""; position: absolute; left:0px; top:0px; right:0px; height:275px;z-index: -1;opacity:0;background-color:transparent;}
     }
     .main-top-inner { max-width: 1600px; margin: 0 auto; padding: 0 20px; }
@@ -103,9 +105,9 @@
             right: 20px;
             width: 32px;
             height: 32px;
-        }
-        .ico-sch {
-            background-color: #3A49D6;
+            .svg-icon {
+                background-color: #3A49D6;
+            }
         }
         .ico-clear{
             position: absolute;
@@ -273,7 +275,10 @@
 
     .today-item {
         position: relative;
-        display:block;
+        display:flex;
+        flex-direction: column;
+        align-items:start;
+        width:100%;
         padding:2rem;
         margin-top: 1rem;
         border: 1px solid #5576FF;
@@ -931,6 +936,13 @@
         }
     }
 }
+@media(max-width:1480px){
+    .main-support{
+        .support-card{
+            .card-info-new{flex-direction:column}
+        }
+    }
+}
 @media(max-width:1200px){
     .main-calendar{
         .calendar-layout{display:flex;flex-wrap:wrap;gap:1rem;
@@ -948,9 +960,7 @@
         }
     }
     .main-support{
-        .support-card{
-            .card-info-new{flex-direction:column}
-        }
+        .support-group-scroll{gap:2rem;}
     }
 }
 @media(max-width:1023px){
@@ -962,7 +972,9 @@
             }
         }
         .support-card-grid{display:flex;flex-direction:column;gap:1.2rem}
-        .support-card{padding:2.4rem}
+        .support-card{padding:2.4rem;min-width:290px;
+            .card-info-new{flex-direction:row}
+        }
         .support-board {
             display: block;
             margin: 0 -1.6rem;
@@ -1067,5 +1079,11 @@
         }
     }
 }
-
+.responsive-section{display:flex;flex-direction: column;}
+@media(max-width:767px){
+    .responsive-section{
+        .main-calendar{order:2;}
+        .main-quick-menu{order:1;margin-top:3.2rem;}
+    }
+}
 .main-service, .main-btm-bar{display:none;}

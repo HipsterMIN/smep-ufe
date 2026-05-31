@@ -1,10 +1,10 @@
 ﻿import { lazy } from 'react';
 
-// 즉시 import (페이지 로드 시 바로 필요한 것들)
-import AiSmartSearch from '@pages/ai/AiSmartSearch.jsx';
-import { MenuProviderOnly, SubpageLayoutWithMenu } from '@layouts';
+// layout 값은 문자열 키로 정의 — 실제 컴포넌트는 dynamicRoutes.jsx에서 resolve
+// (UserMenuContext → componentMap → @layouts → UserMenuContext 순환 의존성 방지)
 
-// Lazy import (필요할 때 로드)
+const AiSmartSearch = lazy(() => import('@pages/ai/AiSmartSearch.jsx'));
+
 const Pbanc = lazy(() => import('@pages/Pbanc.jsx'));
 const PbancView = lazy(() => import('@pages/PbancView.jsx'));
 const SprtBiz = lazy(() => import('@pages/SprtBiz.jsx'));
@@ -69,6 +69,7 @@ const UI_USR_L_540 = lazy(() => import('@pages/my-business/UI-USR-L-540.jsx'));
 const MyApiRequestList = lazy(() => import('@pages/my-business/MyApiRequestList.jsx'));
 const UI_USR_L_100 = lazy(() => import('@pages/policy-info/UI_USR_L_100.jsx'));
 const UI_USR_R_101 = lazy(() => import('@pages/policy-info/UI_USR_R_101.jsx'));
+const UI_USR_L_130 = lazy(() => import('@pages/policy-info/UI_USR_L_130.jsx'));
 const UI_USR_L_110 = lazy(() => import('@pages/policy-info/UI_USR_L_110.jsx'));
 const UI_USR_R_111 = lazy(() => import('@pages/policy-info/UI_USR_R_111.jsx'));
 const UI_USR_L_150 = lazy(() => import('@pages/more-service/UI-USR-L-150.jsx'));
@@ -117,14 +118,14 @@ const TermsOfUse = lazy(() => import('@pages/footer/TermsOfUse.jsx'));
  * // 기본 사용 (단일 페이지)
  * 'M_PIIO_00096': {
  *   component: ApiGuide,
- *   layout: SubpageLayoutWithMenu,
+ *   layout: 'SubpageLayoutWithMenu',
  * }
  *
  * @example
  * // 중첩 라우팅 (목록 + 상세)
  * 'M_PIIO_00075': {
  *   component: SprtBizList,              // /req/suprt/suprt
- *   layout: SubpageLayoutWithMenu,
+ *   layout: 'SubpageLayoutWithMenu',
  *   children: [
  *     {
  *       path: ':id',                      // /req/suprt/suprt/123
@@ -137,7 +138,7 @@ const TermsOfUse = lazy(() => import('@pages/footer/TermsOfUse.jsx'));
  * // 복잡한 중첩 라우팅
  * 'M_PIIO_00076': {
  *   component: PbancList,
- *   layout: SubpageLayoutWithMenu,
+ *   layout: 'SubpageLayoutWithMenu',
  *   children: [
  *     { path: ':id', component: PbancView },           // 상세
  *     { path: ':id/edit', component: PbancEdit },      // 수정
@@ -149,7 +150,7 @@ const TermsOfUse = lazy(() => import('@pages/footer/TermsOfUse.jsx'));
  * // 라우트 래퍼 (비밀번호 확인, 권한 확인 등)
  * 'M_PIIO_00115': {
  *   component: VerifyPassword,
- *   layout: SubpageLayoutWithMenu,
+ *   layout: 'SubpageLayoutWithMenu',
  *   wrapChildren: true,
  *   componentProps: {
  *     successPath: 'modify',
@@ -168,18 +169,18 @@ export const componentMap = {
   // AI 스마트 검색
   'M_PIIO_00074': {
     component: AiSmartSearch,
-    layout: MenuProviderOnly,
+    layout: 'MenuProviderOnly',
   },
   // 통합검색
   'M_PIIO_00152': {
     component: TotalSearch,
-    layout: MenuProviderOnly,
+    layout: 'MenuProviderOnly',
   },
 
   // 지원사업
   'M_PIIO_00075': {
     component: SprtBiz,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     // 자식 라우트 정의
     children: [
       {
@@ -193,7 +194,7 @@ export const componentMap = {
   // 사업공고
   'M_PIIO_00076': {
     component: Pbanc,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     // 자식 라우트 정의
     children: [
       {
@@ -217,7 +218,7 @@ export const componentMap = {
   // 정책금융안내
   'M_PIIO_00077': {
     component: UI_USR_L_030,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       {
         path: ':plcyFnncNo',
@@ -229,7 +230,7 @@ export const componentMap = {
   // 증명서 발급
   'M_PIIO_00078': {
     component: UI_USR_L_040, // /req/crtf/UI_USR_L_040
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       {
         path: ':prdocCd',  // 상세 페이지 라우트 추가 /req/crtf/UI_USR_L_040/ABC123
@@ -269,13 +270,13 @@ export const componentMap = {
   // 발급 진위 확인
   'M_PIIO_00079': {
     component: UI_USR_L_050,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 기타증명서
   'M_PIIO_00080': {
     component: UI_USR_R_060,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // ========== 정책정보 (M_PIIO_00065) ==========
@@ -283,7 +284,7 @@ export const componentMap = {
   // 정책뉴스
   'M_PIIO_00084': {
     component: BoardResolver, // /plcy/reprt/UI_USR_L_070
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       { path: ':id', component: BoardPostResolver }, // 공지사항 상세 (게시물 상세 공통 사용)
     ],
@@ -298,7 +299,7 @@ export const componentMap = {
   // 행사정보
   'M_PIIO_00085': {
     component: UI_USR_L_190,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       {
         path: ':id',
@@ -310,7 +311,7 @@ export const componentMap = {
   // 월간중기누리
   'M_PIIO_00086': {
     component: UI_USR_L_100,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       {
         path: ':id',
@@ -319,10 +320,22 @@ export const componentMap = {
     ],
   },
 
+  // 중기부 소관 법령
+  'M_PIIO_00165': {
+    component: UI_USR_L_130,
+    layout: 'SubpageLayoutWithMenu',
+    children: [
+      {
+        path: ':id',
+        component: UI_USR_L_130,
+      },
+    ],
+  },
+    
   // 입법행정예고/고시
   'M_PIIO_00087': {
     component: UI_USR_L_110,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       {
         path: ':id',
@@ -334,7 +347,7 @@ export const componentMap = {
   // 중소벤처기업부 법정민원신청
   'M_PIIO_00089': {
     component: UI_USR_W_130,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       {
         path: ':id',
@@ -346,13 +359,13 @@ export const componentMap = {
   // 기업업무용 서식
   'M_PIIO_00093': {
     component: UI_USR_L_170, //퍼블없음 게시판관리로 해야돼서 없는듯
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 주택특별공급 사업공고
   'M_PIIO_00091': {
     component: Pbanc,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       {
         path: ':id',
@@ -364,7 +377,7 @@ export const componentMap = {
   // 입주기업 모집공고
   'M_PIIO_00094': {
     component: UI_USR_L_180,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       {
         path: ':id',
@@ -376,7 +389,7 @@ export const componentMap = {
   // 품목별 법정의무 인증제도
   'M_PIIO_00088': {
     component: UI_USR_L_120,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       {
         path: ':certSystmSn',
@@ -388,13 +401,13 @@ export const componentMap = {
   // 소재부품장비·뿌리기술·전문연구사업자 조회
   'M_PIIO_00090': {
     component: UI_USR_L_140,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 기업가정신
   'M_PIIO_00149': {
     component: EntrSpt,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       {
         path: ':id',
@@ -406,13 +419,13 @@ export const componentMap = {
   // 유관시스템 둘러보기
   'M_PIIO_00092': {
     component: RelatedSystems,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 통합로그인 시스템
   'M_PIIO_00128': {
     component: UI_USR_R_190,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // ========== 데이터 개방 (M_PIIO_00066) ==========
@@ -420,7 +433,7 @@ export const componentMap = {
   // API 안내
   'M_PIIO_00096': {
     component: ApiInfo,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       { path: 'supportBusinessInfoApi', component: SupportBusinessInfoApi }, // API_지원사업정보 상세
       { path: 'eventInfoApi', component: EventInfoApi }, // API_행사정보 API 상세
@@ -433,13 +446,13 @@ export const componentMap = {
   // 인증키 신청,
   'M_PIIO_00097': {
     component: UI_USR_L_220,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // API Q&A
   'M_PIIO_00098': {
     component: BoardResolver,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       { path: 'save', component: BoardWriteResolver }, // API Q&A 등록
       { path: ':id/edit', component: BoardWriteResolver }, // API Q&A 수정
@@ -452,7 +465,7 @@ export const componentMap = {
   // 공지사항
   'M_PIIO_00101': {
     component: BoardResolver, // (게시판 상세 공통 사용)
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       { path: ':id', component: BoardPostResolver }, // 공지사항 상세 (게시물 상세 공통 사용)
     ],
@@ -464,13 +477,13 @@ export const componentMap = {
   // 자주 묻는 질문 (FAQ)
   'M_PIIO_00102': {
     component: BoardResolver,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // Q&A
   'M_PIIO_00103': {
     component: BoardResolver,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       { path: ':id', component: BoardPostResolver }, // Q&A 상세 (게시물 상세 공통 사용)
       { path: ':id/edit', component: BoardWriteResolver }, // Q&A 수정
@@ -481,25 +494,25 @@ export const componentMap = {
   // 콜센터안내
   'M_PIIO_00104': {
     component: UI_USR_R_340,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 고객 만족도 조사
   'M_PIIO_00105': {
     component: UI_USR_R_341,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 플랫폼 소개
   'M_PIIO_00106': {
     component: PlatformIntro,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 이용가이드
   'M_PIIO_00107': {
     component: UI_USR_R_360,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // ========== 마이비즈니스 (M_PIIO_00068) ==========
@@ -507,25 +520,25 @@ export const componentMap = {
   // 마이비즈니스
   'M_PIIO_00112': {
     component: MyBussiness,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 증명서 발급 조회
   'M_PIIO_00113': {
     component: UI_USR_L_510,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 지원사업 신청 현황
   'M_PIIO_00114': {
     component: UI_USR_L_520,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 회원정보변경
   'M_PIIO_00115': {
     component: VerifyPassword,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     wrapChildren: true,
     componentProps: {
       successPath: 'modify',
@@ -538,25 +551,25 @@ export const componentMap = {
   // 비밀번호 수정
   'M_PIIO_00116': {
     component: UI_USR_R_420,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 인증수단 재설정
   'M_PIIO_00117': {
     component: UI_USR_W_430,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 회원탈퇴
   'M_PIIO_00118': {
     component: UI_USR_R_440,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 기업 기본정보
   'M_PIIO_00119': {
     component: UI_USR_R_450,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
     children: [
       {
         path: 'edit',
@@ -568,62 +581,62 @@ export const componentMap = {
   // 경영현황 분석
   'M_PIIO_00120': {
     component: UI_USR_R_490,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 담당자 관리
   'M_PIIO_00121': {
     component: UI_USR_L_460,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 문의 관리
   'M_PIIO_00122': {
     component: UI_USR_L_020, // from UI_USR_L_470,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 관심 공고
   'M_PIIO_00123': {
     component: ScrapList,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 나의 알림
   'M_PIIO_00124': {
     component: UI_USR_L_540,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // 나의 Open API 신청내역
   'M_PIIO_00125': {
     component: MyApiRequestList,
-    layout: SubpageLayoutWithMenu,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // ========== 푸터화면 ==========
   // 이메일주소 무단수집거부 안내
   'M_PIIO_00153': {
     component: EmailRejection,
-    layout: MenuProviderOnly,
+    layout: 'MenuProviderOnly',
   },
 
   // 저작권 정책
   'M_PIIO_00154': {
     component: CopyrightPolicy,
-    layout: MenuProviderOnly,
+    layout: 'MenuProviderOnly',
   },
 
   // 웹접근성 정책
   'M_PIIO_00155': {
     component: WebAccessibilityPolicy,
-    layout: MenuProviderOnly,
+    layout: 'MenuProviderOnly',
   },
 
   // 이용약관
   'M_PIIO_00156': {
     component: TermsOfUse,
-    layout: MenuProviderOnly,
+    layout: 'MenuProviderOnly',
   },
 
 };

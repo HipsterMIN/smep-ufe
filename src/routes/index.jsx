@@ -4,44 +4,46 @@ import { staticRoutes } from './staticRoutes.jsx';
 import { generateDynamicRoutes } from './dynamicRoutes.jsx';
 import { useMenuStore } from '../store/useMenuStore';
 import { useAuthStore } from '../store/useAuthStore.jsx';
+import { mockMenuData } from '@lib/menuData.js';
 
 /**
  * Router 생성 함수
  */
 const createAppRouter = (menuTree, flatMenuMap) => {
-  // 동적 라우트 생성
   const dynamicRoutes = generateDynamicRoutes(menuTree, flatMenuMap);
-  // 모든 라우트 병합
   const allRoutes = [
-    ...dynamicRoutes, // 동적 라우트
-    ...staticRoutes, // 정적 라우트
+    ...dynamicRoutes,
+    ...staticRoutes,
   ];
 
-  // 개발용 라우트 정보 출력
-  console.log('동적 라우트:', dynamicRoutes);
-  console.log('정적 라우트:', staticRoutes); 
-  console.log(`총 ${allRoutes.length}개 라우트 생성 (동적: ${dynamicRoutes.length}, 정적: ${staticRoutes.length})`);
-
-  // BASE_URL 설정
-  const base = import.meta.env.BASE_URL || '/'; // 기본값 '/'
-  // ✅ React Router의 basename은 트레일링 슬래시가 없어야 함 (단, '/' 자체인 경우는 제외)
-  // 트레일링 슬래시가 있으면 /main-dev (슬래시 없음)와 매칭되지 않는 문제가 발생함
+  // React Router의 basename은 트레일링 슬래시가 없어야 함 (단, '/' 자체인 경우는 제외)
+  const base = import.meta.env.BASE_URL || '/';
   const basename = base.endsWith('/') && base !== '/' ? base.slice(0, -1) : base;
 
-  // 브라우저 라우터 생성
   return createBrowserRouter(allRoutes, { basename });
 };
 
 
 /**
  * AppRouter - 메뉴 로드 및 router 생성을 담당하는 컴포넌트
+ *
+ * 초기화 전략:
+ *  1. useState lazy initializer에서 mockMenuData로 라우터를 동기적으로 생성 → 흰 화면 없이 즉시 렌더
+ *  2. 백그라운드에서 실제 메뉴 API를 fetch
+ *  3. 실제 데이터가 도착하면 라우터를 한 번 교체 (정적 라우트는 동일하므로 MainPage 등 remount 없음)
  */
 function AppRouter() {
   const currentMode = useAuthStore((state) => state.currentMode);
-  const { menuTree, flatMenuMap, fetchMenuData, resetMenu, isLoading } = useMenuStore();
-  const [routerInstance, setRouterInstance] = useState(null);
+  const { menuTree, flatMenuMap, fetchMenuData, resetMenu, hasFetched } = useMenuStore();
   const previousModeRef = useRef(currentMode);
 
+  // mockMenuData로 라우터를 동기적으로 초기화 — 첫 렌더부터 RouterProvider 사용 가능
+  const [routerInstance, setRouterInstance] = useState(() => {
+    const { menuTree: initialTree, flatMenuMap: initialMap } = useMenuStore.getState();
+    return createAppRouter(initialTree, initialMap);
+  });
+
+  // 모드 전환 감지 → resetMenu (hasFetched=false로 복귀 → 재fetch 트리거)
   useEffect(() => {
     if (previousModeRef.current !== currentMode) {
       previousModeRef.current = currentMode;
@@ -49,41 +51,19 @@ function AppRouter() {
     }
   }, [currentMode, resetMenu]);
 
-  /**
-   * menuTree, fetchMenuData 의존성으로 메뉴 데이터 fetch
-   */
+  // 실제 메뉴를 아직 fetch하지 않았을 때만 호출
   useEffect(() => {
-    // 메뉴 트리가 없을 때만 데이터 fetch
-    if (!menuTree) {
-      // 메뉴 데이터 가져오기
+    if (!hasFetched) {
       fetchMenuData();
     }
-  }, [menuTree, fetchMenuData]);
+  }, [hasFetched, fetchMenuData]);
 
-  /**
-   * menuTree, flatMenuMap 의존성으로 라우터 생성
-   */
+  // 실제 메뉴 데이터가 도착하면 라우터 교체 (mockMenuData 상태는 건너뜀)
   useEffect(() => {
-    // 메뉴 트리와 flatMenuMap이 준비되면 라우터 생성
-    if (menuTree && flatMenuMap) {
-      const router = createAppRouter(menuTree, flatMenuMap);
-      setRouterInstance(router);
+    if (menuTree && flatMenuMap && menuTree !== mockMenuData) {
+      setRouterInstance(createAppRouter(menuTree, flatMenuMap));
     }
   }, [menuTree, flatMenuMap]);
-
-  // 로딩 중이거나 라우터 인스턴스가 없으면 로딩 화면 표시 TODO 임의 스타일링이므로 디자인 개선
-  if (isLoading || !routerInstance) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-      }}>
-        {/*<div>라우터 초기화 중...</div>*/}
-      </div>
-    );
-  }
 
   return <RouterProvider router={routerInstance} />;
 }

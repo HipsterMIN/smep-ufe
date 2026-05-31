@@ -51,7 +51,9 @@
 		&.left {transform: rotate(90deg);}
 		&.right {transform: rotate(-90deg);}
 	}
-	&.ico-sch { @include icon-set(ico_sch); }
+	&.ico-sch { @include icon-set(ico_sch);
+        &-bold{@include icon-set(search-bold);}
+    }
 	&-upload { @include icon-set(ico_upload); }
 	&.ico-call { @include icon-set(ico_call); }
 	&.ico-faq { @include icon-set(ico_faq); }
@@ -134,7 +136,6 @@
 			transform: rotate(-90deg);
 		}
 	}
-	
 	&.ico-calendar { @include icon-set(ico_calendar); }
 	&.ico-calendar2 { @include icon-set(ico_calendar2); }
 	&-success-fill { @include icon-set(ico_success_fill, pure); }
@@ -192,9 +193,12 @@
     &.alarm{@include icon-set(line-icons/alarm);
         &.pure{@include icon-set(pure-icons/alarm,$effect:pure) }
     }
+    &.ico-check-tit{@include icon-set(ico_check_tit, $effect:pure);}
     &.pure{
         &.apply{@include icon-set(pure-icons/apply, $effect:pure);}
         &.ing{@include icon-set(pure-icons/ing, $effect:pure);}
         &.doc-check{@include icon-set(pure-icons/doc-check, $effect:pure);}
+        &.cube{@include icon-set(pure-icons/cube, $effect:pure);}
+        &.circle-check{@include icon-set(pure-icons/circle-check, $effect:pure);}
     }
 }

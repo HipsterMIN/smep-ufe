@@ -615,7 +615,7 @@ const weekNoticeCards = [
                             onClick={handleSearch}
                             >
                             <span className="sr-only">통합검색</span>
-                            <i className="svg-icon ico-sch"></i>
+                            <i className="svg-icon ico-sch-bold"></i>
                             </button>
                         </div>
                         {isFocused && (
@@ -708,7 +708,7 @@ const weekNoticeCards = [
                     </div>
                 </div>
             </div>
-            <div className="container">
+            <div className="container responsive-section">
                 {/* S - 사업캘린더 */}
                 <section className="main-section main-calendar">
                     <div className="calendar-layout">

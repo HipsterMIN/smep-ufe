@@ -401,7 +401,7 @@ export const mockMenuData = {
           'depth': 2,
           'children': [
             {
-              'menuId': 'M_PIIO_00165',
+              'menuId': 'M_PIIO_00168',
               'menuNm': '중기부 소관 법령',
               'intgSysSeCd': 'PIIO',
               'menuUseTrgtSeCd': 'USR',
@@ -411,9 +411,10 @@ export const mockMenuData = {
               'upendMenuExpsrYn': 'Y',
               'lfsdMenuExpsrYn': 'Y',
               'scrnUseYn': 'Y',
-              'scrnId': 'S_PIIO_00165',
+              'scrnId': 'S_PIIO_00168',
               'bbsNo': null,
-              'scrnUrlAddr': 'https://www.mss.go.kr/site/smba/contents/view.do?menuCd=20103010000002024122811&siteCd=smba',
+              'scrnUrlAddr': 'UI_USR_L_130',
+              //'scrnUrlAddr': 'https://www.mss.go.kr/site/smba/contents/view.do?menuCd=20103010000002024122811&siteCd=smba',
               'scrnTypeCd': 'T',
               'upScrnId': 'S_PIIO_00082',
               'useYn': 'Y',
@@ -440,6 +441,7 @@ export const mockMenuData = {
               'depth': 3,
               'children': [],
             },
+            
             {
               'menuId': 'M_PIIO_00087',
               'menuNm': '입법·행정예고/고시',
