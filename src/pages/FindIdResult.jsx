@@ -30,7 +30,7 @@ const FindIdResult = () => {
             </button>
           </li>
           <li>
-            <button type="button" className="krds-btn large secondary btn-cancel" onClick={() => navigate('/service/find-pwd')}>
+            <button type="button" className="krds-btn large secondary btn-cancel" onClick={() => navigate('/service/find-password')}>
                             비밀번호 찾기
             </button>
           </li>
