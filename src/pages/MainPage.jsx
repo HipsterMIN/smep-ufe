@@ -72,6 +72,19 @@ const EMPTY_MAIN_DATA = {
   banners: [],
   popups: [],
 };
+// 이미지 없음 placeholder (외부 파일 의존 없이 인라인 SVG)
+const NO_IMAGE_SVG = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+    <rect width="400" height="300" fill="#f0f2f5"/>
+    <g transform="translate(200,135)">
+      <rect x="-36" y="-32" width="72" height="56" rx="6" fill="none" stroke="#c8cdd4" stroke-width="2.5"/>
+      <circle cx="0" cy="-10" r="11" fill="none" stroke="#c8cdd4" stroke-width="2.5"/>
+      <polyline points="-36,24 -18,2 0,16 18,-2 36,24" fill="none" stroke="#c8cdd4" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+    <text x="200" y="192" text-anchor="middle" font-family="Apple SD Gothic Neo,Malgun Gothic,sans-serif" font-size="13" fill="#a0a8b4">이미지 없음</text>
+  </svg>`
+)}`;
+
 const SEARCH_POPULAR_LIMIT = 5;
 const SEARCH_AUTOCOMPLETE_LIMIT = 8;
 const SEARCH_AUTOCOMPLETE_DEBOUNCE_MS = 250;
@@ -998,24 +1011,32 @@ const MainPage = () => {
                 </div>
                 <a
                   href={cardNewsDetailPath}
-                  className={`card-news-thumb${!cardNewsThumbnailUrl ? ' card-news-thumb--skeleton' : ''}`}
+                  className={`card-news-thumb${mainLoading && !cardNewsThumbnailUrl ? ' card-news-thumb--skeleton' : ''}`}
                   onClick={(event) => {
                     event.preventDefault();
                     navigate(cardNewsDetailPath);
                   }}
                 >
-                  {cardNewsThumbnailUrl && (
+                  {cardNewsThumbnailUrl ? (
                     <img
                       src={cardNewsThumbnailUrl}
                       onError={(event) => {
-                        event.currentTarget.removeAttribute('src');
+                        event.currentTarget.src = NO_IMAGE_SVG;
+                        event.currentTarget.classList.add('card-news-img--noimg');
                       }}
                       alt={cardNewsItem?.pstTtl || '카드뉴스'}
                       loading="eager"
                       fetchpriority="high"
                       className="card-news-img"
                     />
-                  )}
+                  ) : !mainLoading ? (
+                    // 로딩 완료 후 데이터/이미지 없음 → 정적 placeholder
+                    <img
+                      src={NO_IMAGE_SVG}
+                      alt="카드뉴스 이미지 없음"
+                      className="card-news-img card-news-img--noimg"
+                    />
+                  ) : null}
                 </a>
               </article>
             </div>
@@ -1424,6 +1445,15 @@ const MainPage = () => {
                             >
                               <img
                                 src={imageSrc || mainBanner01}
+                                onError={(event) => {
+                                  // fallbackImageSrc가 있으면 그것으로, 없으면 no-image placeholder
+                                  if (item.fallbackImageSrc && event.currentTarget.src !== item.fallbackImageSrc) {
+                                    event.currentTarget.src = item.fallbackImageSrc;
+                                  } else if (event.currentTarget.src !== NO_IMAGE_SVG) {
+                                    event.currentTarget.src = NO_IMAGE_SVG;
+                                    event.currentTarget.classList.add('banner-img--noimg');
+                                  }
+                                }}
                                 alt={
                                   item.moblImgSbstPhrsCn ||
                                   item.imgFileSbstPhrsCn ||
