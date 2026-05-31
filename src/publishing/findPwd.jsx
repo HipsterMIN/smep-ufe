@@ -47,64 +47,56 @@ const FindPwd = () => {
             </div>
 
             <form onSubmit={handleSubmit}>
-                <div className="find-account-visual" aria-hidden="true">
-                    <div className="visual-key">
-                        <span className="key-ring"></span>
-                        <span className="key-shape"></span>
-                        <span className="handle"></span>
-                    </div>
-                </div>
-                <div className="find-id-fields">
-                    <div className="form-group">
-                        <label htmlFor="userId">아이디</label>
-                        <input id="userId" type="text" className="krds-input" />
-                    </div>
-                    {isPersonal && (
-                        <>
-                            <div className="form-group">
-                                <label htmlFor="userName">이름</label>
-                                <input id="userName" type="text" className="krds-input" />
-                            </div>
-                        </>
-                    )}
-                    {isCompany ? (
-                        <>
-                            <div className="form-group">
-                                <label htmlFor="companyName">기업명</label>
-                                <input id="companyName" type="text" className="krds-input" />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="bizNo">사업자등록번호</label>
-                                <div className="field-control">
-                                    <input id="bizNo" type="text" className="krds-input" inputMode="numeric" />
-                                    <p>‘-’를 제외하고 입력해주세요.</p>
-                                </div>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="managerId">담당자 아이디</label>
-                                <div className="field-control">
-                                    <input id="managerId" type="text" className="krds-input" />
-                                    <p>담당자의 개인회원 아이디를 입력해주세요.</p>
-                                </div>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="managerName">담당자 이름</label>
-                                <div className="field-control">
-                                    <input id="managerName" type="text" className="krds-input" />
-                                    <p>담당자의 개인회원 이름을 입력해주세요.</p>
-                                </div>
-                            </div>
-                        </>
-                    ) : (
-                        <>
+                <div className={`find-id-fields ${
+                    isPersonal ? 'is-personal' : 'is-company'
+                    }`}
+                    aria-hidden="true"
+                >
+                    <div className="form-group-wrap">
                         <div className="form-group">
-                            <label htmlFor="userName">이름</label>
-                            <input id="userName" type="text" className="krds-input" />
+                            <label htmlFor="userId">아이디</label>
+                            <input id="userId" type="text" className="krds-input" />
                         </div>
-                        </>
-                    )}
+                        {isPersonal && (
+                            <>
+                                <div className="form-group">
+                                    <label htmlFor="userName">이름</label>
+                                    <input id="userName" type="text" className="krds-input" />
+                                </div>
+                            </>
+                        )}
+                        {isCompany && (
+                            <>
+                                <div className="form-group">
+                                    <label htmlFor="companyName">기업명</label>
+                                    <input id="companyName" type="text" className="krds-input" />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="bizNo">사업자등록번호</label>
+                                    <div className="field-control">
+                                        <input id="bizNo" type="text" className="krds-input" inputMode="numeric" />
+                                        <p>‘-’를 제외하고 입력해주세요.</p>
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="managerId">담당자 아이디</label>
+                                    <div className="field-control">
+                                        <input id="managerId" type="text" className="krds-input" />
+                                        <p>담당자의 개인회원 아이디를 입력해주세요.</p>
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="managerName">담당자 이름</label>
+                                    <div className="field-control">
+                                        <input id="managerName" type="text" className="krds-input" />
+                                        <p>담당자의 개인회원 이름을 입력해주세요.</p>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
                 <section className="auth-section">
                 {isPersonal ? (
@@ -117,7 +109,7 @@ const FindPwd = () => {
                             <div className="auth-icon phone">
                                 <span></span>
                             </div>
-                            <p>본인 명의의 휴대폰 정보로 인증 후 가입하실 수 있습니다.</p>
+                            <p>본인 명의의 휴대폰 정보로 인증 후<br />가입하실 수 있습니다.</p>
                             <button type="button" className="krds-btn large primary">인증하기</button>
                         </div>
 
@@ -126,7 +118,7 @@ const FindPwd = () => {
                             <div className="auth-icon ipin">
                                 <span></span>
                             </div>
-                            <p>본인 아이핀 정보로 인증 후 가입하실 수 있습니다.</p>
+                            <p>본인 아이핀 정보로 인증 후<br />가입하실 수 있습니다.</p>
                             <button type="button" className="krds-btn large primary">인증하기</button>
                         </div>
                     </div>
@@ -141,22 +133,59 @@ const FindPwd = () => {
                     <>
                     <div className="krds-check-area gap-4">
                         <span className="krds-form-check">
-                            <input type="radio" name="businessType" id="businessType_01" value="individual" checked={businessType === 'individual'} onChange={() => setBusinessType('individual')} />
+                            <input type="radio" name="businessType" id="businessType_01" value="individual" 
+                                checked={businessType === 'individual'} onChange={() => setBusinessType('individual')} 
+                                onChange={() => setBusinessType('individual')}
+                            />
                             <label htmlFor="businessType_01">개인사업자</label>
                         </span>
                         <span className="krds-form-check">
-                            <input type="radio" name="businessType" value="corporate" checked={businessType === 'corporate'} onChange={() => setBusinessType('corporate')} />
-                            <label htmlFor="businessType_01">법인사업자</label>
+                            <input type="radio" name="businessType" id="businessType_02" value="corporate" 
+                                checked={businessType === 'corporate'} onChange={() => setBusinessType('corporate')}
+                                onChange={() => setBusinessType('corporate')}
+                            />
+                            <label htmlFor="businessType_02">법인사업자</label>
                         </span>
                     </div>
+                    {businessType === 'individual' ? (
+                        <div className="auth-card-grid">
+                            <div className="auth-card">
+                                <h3>공동인증서 인증</h3>
+                                <div className="auth-icon cert">
+                                    <span></span>
+                                </div>
+                                <button type="button" className="krds-btn large primary">인증하기</button>
+                            </div>
 
-                    <div className="auth-card full">
-                        <h3>공동인증서 인증</h3>
-                        <div className="auth-icon cert">
-                            <span></span>
-                        </div>
-                        <button type="button" className="krds-btn large primary">인증하기</button>
-                    </div>
+                            <div className="auth-card">
+                                <h3>사업자등록번호 인증</h3>
+
+                                <div className="bizno-auth-form">
+                                    <div className="form-group">
+                                        <label htmlFor="ownerName">대표자명</label>
+                                        <input id="ownerName" type="text" className="krds-input" placeholder="예) 홍길동" />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="ownerBirth">생년월일</label>
+                                        <input id="ownerBirth" type="text" className="krds-input" placeholder="예) 19920824" />
+                                    </div>
+                                </div>
+
+                                <div className="bizno-auth-btn">
+                                    <button type="button" className="krds-btn large primary">인증하기</button>
+                                </div>
+                            </div>
+                            </div>
+                        ) : (
+                            <div className="auth-card full">
+                                <h3>공동인증서 인증</h3>
+                                <div className="auth-icon cert">
+                                    <span></span>
+                                </div>
+                                <button type="button" className="krds-btn large primary">인증하기</button>
+                            </div>
+                    )}
                     <ul className="auth-notice">
                         <li>인증 관련 문의 : - NICE평가정보(주) 고객센터 Tel : 1600-1522</li>
                     </ul>

@@ -408,14 +408,19 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        height: 3.8rem;
         margin-bottom: 1rem;
-
+        font-size:var(--krds-pc-font-size-heading-medium);
         h3 {
             margin: 0;
             font-size: 2rem;
             font-weight: 800;
             color:var(--krds-color-light-alpha-black100);
+            display:flex;
+            gap:.5rem;
+            &::before{
+                content:'';width:3.2rem;height:3.2rem;
+                background:url(./img/cardnews-icon.svg) no-repeat center center / contain;
+            }
         }
 
         .krds-btn {
@@ -792,17 +797,15 @@
         flex:0 0 490px;max-width:490px;
     }
     .board-list {display:flex;flex-direction:column;
-        li{
-            .board-list-link{display:flex;align-items:center;justify-content:space-between;font-size:var(--krds-pc-font-size-body-medium);padding:8px;
-                &:hover{background-color:var(--krds-color-light-alpha-white100);color:#0B50D0;}
-            }
+        .board-list-link{display:flex;align-items:center;justify-content:space-between;font-size:var(--krds-pc-font-size-body-medium);padding:8px;
+            &:hover{background-color:var(--krds-color-light-alpha-white100);color:#0B50D0;}
         }
     }
     .notice-tab-top {position: relative;display:flex;flex-wrap:wrap;
         .more {margin-left:auto;display:inline-flex;align-items:center;gap:.4rem;}
         .notice-tablist{white-space:nowrap;}
     }
-  }
+}
 .main-banner {position: relative;border: 1px solid #CDD1D5;border-radius: 12px;overflow: hidden;
     .main-banner-item {
     }
@@ -1017,6 +1020,7 @@
             background: transparent;
             box-shadow: none;
             overflow: visible;
+            padding:1.6rem;
         }
 
         .support-content {
@@ -1091,7 +1095,7 @@
             li{
                 .board-list-link{
                     flex-direction: column;
-                    align-items: stretch;
+                    //align-items: stretch;
                     padding:0;
                 }
             }
@@ -1104,12 +1108,25 @@
             }
         }
     }
-}
-@media (max-width:767px){
     .main-quick-menu{
         .quick-menu-item{
             button{
                 .quick-menu-tit{font-size:var(--krds-pc-font-size-body-medium)}
+            }
+        }
+    }
+}
+@media(max-width:545px){
+    .section-notice {
+        .board-list {
+            .board-list-link{align-items:start}
+        }
+    }
+    .main-calendar{
+        .calendar-card{padding:1.2rem}
+        .week-item {
+            .week-list li{flex-direction: column;align-items: start;
+                button{max-width:100%}
             }
         }
     }

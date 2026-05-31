@@ -1338,6 +1338,7 @@
 }
 .main-notice .board-list .board-list-title {
   flex: 1;
+  max-width:100%;
 }
 .main-notice .board-list .board-list-date {
   padding-left: 10px;

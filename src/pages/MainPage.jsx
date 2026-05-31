@@ -26,7 +26,7 @@ import { buildOnePassConversionUrl, buildOnePassRegisterUrl, onePassJoin } from 
 import {
   normalizeResponse, resolveApiErrorMessage, removeCssCharset,
   formatDate, formatLocalDateKey, getLocalYmd,
-  parseYmd, formatCalendarDate, formatWeekItemDate, formatWeekPeriod,
+  formatMainEventPeriod, parseYmd, formatCalendarDate, formatWeekItemDate, formatWeekPeriod,
   getDdayLabel, getDdayBadgeClass, isUrgentDday, getPbancStatusLabel,
   buildMainImageUrl, buildBoardThumbnailUrl,
   isNewWindow, isAbsoluteHttpUrl, appendQueryParam, resolveBoardTarget, stripHtmlTags,
@@ -1333,7 +1333,7 @@ const MainPage = () => {
                                   {item.evntInfoTtlNm || '-'}
                                 </span>
                                 <span className="board-list-date">
-                                  {item.evntPrdCn || item.rcptPrdCn || formatDate(item.regDt)}
+                                  {formatMainEventPeriod(item.evntPrdCn || item.rcptPrdCn) || formatDate(item.regDt)}
                                 </span>
                               </Link>
                             </li>

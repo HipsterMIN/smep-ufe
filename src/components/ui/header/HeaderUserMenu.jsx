@@ -165,11 +165,13 @@ export default function HeaderUserMenu({
           ) : null}
         </div> */}
 
-        <strong>{displayName}</strong>
+        <strong className="pc-only">{displayName}</strong>
 
         {showSessionTimer ? (
           <div className="gnb-sesseion-timer new">
-            <div className="timer"><span className="sr-only">남은 시간</span><i className="svg-icon ico-clock"></i> {sessionTimerLabel}</div>
+            <div className="timer">
+                <span className="sr-only">남은 시간</span>
+                <i className="svg-icon ico-clock"></i> {sessionTimerLabel}</div>
             <button
               type="button"
               className="krds-btn secondary xsmall"
