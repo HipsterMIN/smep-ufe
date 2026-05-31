@@ -8,6 +8,7 @@ export const NICE_ID_AUTH_ERROR_CODES = Object.freeze({
   requestFailed: 'NICE_AUTH_URL_REQUEST_FAILED',
   invalidResponse: 'NICE_AUTH_URL_RESPONSE_INVALID',
   popupBlocked: 'NICE_POPUP_BLOCKED',
+  popupClosed: 'NICE_POPUP_CLOSED',
   timeout: 'NICE_AUTH_TIMEOUT',
   callbackError: 'NICE_AUTH_ERROR',
 });
@@ -17,6 +18,7 @@ const SUPPORTED_SVC_TYPES = new Set(['M', 'F', 'I', 'U']);
 const DEFAULT_POPUP_NAME = 'nice-id-auth-popup';
 const DEFAULT_POPUP_FEATURES = 'width=500,height=720,scrollbars=yes,resizable=yes';
 const DEFAULT_TIMEOUT_MS = 10 * 60 * 1000;
+const DEFAULT_POPUP_CLOSED_CHECK_INTERVAL_MS = 500;
 
 const createFailure = (errorCode, message) => ({
   success: false,
@@ -103,6 +105,7 @@ const isObjectMessage = (data) => data && typeof data === 'object';
  * @param {string} [options.popupName] popup window 이름
  * @param {string} [options.popupFeatures] popup window features
  * @param {number} [options.timeoutMs] callback message 대기 시간
+ * @param {number} [options.closedCheckIntervalMs] popup 수동 닫힘 확인 주기
  * @returns {Promise<{success: true, resultKey: string} | {success: false, errorCode: string, message: string}>}
  */
 export async function openNiceIdAuth({
@@ -110,6 +113,7 @@ export async function openNiceIdAuth({
   popupName = DEFAULT_POPUP_NAME,
   popupFeatures = DEFAULT_POPUP_FEATURES,
   timeoutMs = DEFAULT_TIMEOUT_MS,
+  closedCheckIntervalMs = DEFAULT_POPUP_CLOSED_CHECK_INTERVAL_MS,
 } = {}) {
   const normalizedSvcTypes = normalizeSvcTypes(svcTypes);
   if (!normalizedSvcTypes.valid) {
@@ -144,11 +148,15 @@ export async function openNiceIdAuth({
     let settled = false;
     let popupWindow = null;
     let timeoutId = null;
+    let popupClosedCheckId = null;
 
     const cleanup = () => {
       window.removeEventListener('message', handleMessage);
       if (timeoutId !== null) {
         window.clearTimeout(timeoutId);
+      }
+      if (popupClosedCheckId !== null) {
+        window.clearInterval(popupClosedCheckId);
       }
     };
 
@@ -242,6 +250,18 @@ export async function openNiceIdAuth({
       );
       return;
     }
+
+    // 이유: 사용자가 NICE 표준창을 인증 없이 닫으면 postMessage가 오지 않으므로 loading 상태를 즉시 해제해야 한다.
+    popupClosedCheckId = window.setInterval(() => {
+      if (popupWindow.closed === true) {
+        settle(
+          createFailure(
+            NICE_ID_AUTH_ERROR_CODES.popupClosed,
+            'NICE ID 인증창이 닫혔습니다. 다시 인증해주세요.',
+          ),
+        );
+      }
+    }, closedCheckIntervalMs);
 
     popupWindow.focus?.();
   });
