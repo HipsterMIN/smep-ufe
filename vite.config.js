@@ -42,7 +42,10 @@ export default defineConfig(({ mode }) => {
       // 해결: 앱 초기화에 반드시 필요한 청크만 preload, 나머지는 실제 사용 시 지연 로드
       modulePreload: {
         resolveDependencies(_filename, deps) {
-          const CRITICAL = ['vendor-react', 'vendor-router', 'vendor-query', 'index-'];
+          // vendor-router를 preload 목록에서 제거:
+          // HTTP/1.1 환경에서 다수 청크와 connection 경쟁 시 stalled → vite:preloadError → reload loop 유발
+          // preload 제거 시 index.js 실행 후 순차 로딩되어 connection 경쟁 없이 안정적으로 로딩됨
+          const CRITICAL = ['vendor-react', 'vendor-query', 'index-'];
           return deps.filter((dep) => CRITICAL.some((key) => dep.includes(key)));
         },
       },
