@@ -39,6 +39,7 @@ const SSOLogin                 = lazyWithRetry(() => import('../pages/SSOLogin.j
 const OnePassSsoCallback       = lazyWithRetry(() => import('../pages/onepass/OnePassSsoCallback.jsx'));
 const OnePassSsoLogout         = lazyWithRetry(() => import('../pages/onepass/OnePassSsoLogout.jsx'));
 const IntegratedSearchRouteTest = lazyWithRetry(() => import('../pages/dev/IntegratedSearchRouteTest.jsx'));
+const FindPassword             = lazyWithRetry(() => import('../pages/FindPassword.jsx'));
 const PublishingList           = lazyWithRetry(() => import('../publishing/PublishingList.jsx'));
 
 // Suspense fallback — MainPage lazy 로드 중 표시되는 골격 UI
@@ -112,6 +113,10 @@ export const staticRoutes = [
       {
         path: '/service/login',
         element: <Suspense fallback={pageFallback}><Login /></Suspense>,
+      },
+      {
+        path: '/service/find-password',
+        element: <Suspense fallback={pageFallback}><FindPassword /></Suspense>,
       },
     ],
   },
