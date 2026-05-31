@@ -472,7 +472,7 @@
 /* 메인 - 자주 찾는 서비스 */
 .main-quick-menu {
   border-radius: 20px;
-  padding:  32px 74px;
+  padding:  32px 64px;
   margin-top:0;
   background: #0074F1;
   backdrop-filter: blur(15px);
@@ -508,7 +508,7 @@
             transition: all .3s ease-in;
             .quick-menu-tit{
                 margin:0;
-                font-size:var(--krds-pc-font-size-heading-medium);
+                font-size:var(--krds-pc-font-size-heading-small);
                 font-weight:500;
             }
             &:hover {
@@ -537,10 +537,10 @@
                 }
             }
             .swiper-button-prev {
-                left:-24px;
+                left:-29px;
             }
             .swiper-button-next {
-                right:-24px;
+                right:-29px;
             }
         }
     }
