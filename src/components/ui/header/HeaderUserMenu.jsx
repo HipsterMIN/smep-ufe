@@ -165,14 +165,10 @@ export default function HeaderUserMenu({
           ) : null}
         </div> */}
 
-        <div className="krds-drop-wrap my-drop">
-          <button type="button" className="btn-navi my drop-btn active" onClick={onMyPage}>
-            마이 비즈니스
-          </button>
-        </div>
+        <strong>{displayName}</strong>
 
         {showSessionTimer ? (
-          <div className="gnb-sesseion-timer">
+          <div className="gnb-sesseion-timer new">
             <div className="timer"><span className="sr-only">남은 시간</span><i className="svg-icon ico-clock"></i> {sessionTimerLabel}</div>
             <button
               type="button"
@@ -189,6 +185,12 @@ export default function HeaderUserMenu({
           로그아웃
         </button>
 
+        <button type="button" className="btn-navi mypage on-mobile-none" onClick={onMyPage}>
+          마이페이지
+        </button>
+
+        <div className="top-noti" aria-hidden="true"><span>1</span></div>
+
       </>
     );
   }
@@ -198,29 +200,15 @@ export default function HeaderUserMenu({
       {/*externalLinkButtons*/}
 
       {/* 통합로그인은 로그인 상태와 무관하게 같은 진입점을 사용한다. */}
-        <strong>홍길동</strong>
-        <div className="gnb-sesseion-timer new">
-            <div className="timer"><span className="sr-only">남은 시간</span>29분 51초{/*sessionTimerLabel*/}</div>
-            <button type="button" onClick={onExtendSession} disabled={!canExtendSession || isExtendingSession} >연장</button>
-        </div>
-        <button type="button" className="btn-navi logout on-mobile-none" onClick={onLogout}>
-          로그아웃
-        </button>
-        <button type="button" className="btn-navi mypage on-mobile-none">
-          마이페이지
-        </button>
-        <div className="top-noti"><span>1</span></div>
-        {/*
-        <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
-            중기원패스 통합로그인
-        </button>
-        <button type="button" className="btn-navi login on-mobile-none" onClick={onLogin}>
-            로그인
-        </button>
-        <button type="button" className="btn-navi join" onClick={onOnePassJoin}>
-            회원가입
-        </button>
-      */}
+      <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
+        중기통합회원 로그인
+      </button>
+      <button type="button" className="btn-navi login on-mobile-none" onClick={onLogin}>
+        로그인
+      </button>
+      <button type="button" className="btn-navi join" onClick={onOnePassJoin}>
+        회원가입
+      </button>
     </>
   );
 }
