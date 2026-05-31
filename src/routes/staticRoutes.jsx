@@ -3,9 +3,11 @@ import { lazy, Suspense } from 'react';
 import { autoPublishingRoutesWithLayout, autoPublishingRoutesWithoutLayout } from './autoRoutes.jsx';
 import { MenuProviderOnly, SubpageLayoutWithMenu } from '@layouts';
 
-const CHUNK_LOAD_TIMEOUT_MS = 12_000;
+// HTTP/1.1 커넥션 큐 대기로 인한 Pending 상태 대응
+// — 청크 로드가 TIMEOUT 내에 완료되지 않으면 즉시 강제 새로고침
+const CHUNK_LOAD_TIMEOUT_MS = 8_000;
 const CHUNK_RELOAD_KEY = '__smep_chunk_reload_ts__';
-const RELOAD_COOLDOWN_MS = 15_000;
+const RELOAD_COOLDOWN_MS = 5_000;
 
 const reloadOnce = () => {
   try {
@@ -16,21 +18,18 @@ const reloadOnce = () => {
   window.location.reload();
 };
 
-// 타임아웃 + 재시도 포함 lazy — HTTP/1.1 커넥션 큐 대기로 인한 Pending 상태 대응
-const lazyWithRetry = (importFn, retries = 1) => {
-  const load = (attemptsLeft) =>
+const lazyWithRetry = (importFn) =>
+  lazy(() =>
     Promise.race([
       importFn(),
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error('ChunkLoadError: load timeout')), CHUNK_LOAD_TIMEOUT_MS),
       ),
-    ]).catch((err) => {
-      if (attemptsLeft > 0) return load(attemptsLeft - 1);
+    ]).catch(() => {
       reloadOnce();
       return new Promise(() => {}); // 재로딩 중 렌더 차단
-    });
-  return lazy(() => load(retries));
-};
+    }),
+  );
 
 // 레이아웃/Provider 컴포넌트는 라우트 구조 정의에 즉시 필요하므로 eager 유지
 // 페이지 컴포넌트는 해당 경로에 진입할 때만 로드

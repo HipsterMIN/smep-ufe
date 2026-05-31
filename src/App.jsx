@@ -9,6 +9,11 @@ import { useAuthStore } from './store/useAuthStore.jsx';
 import AdditionalInfoRequiredGate from './components/account/AdditionalInfoRequiredGate.jsx';
 import { queryClient } from './lib/queryClient.js';
 
+// 앱이 정상적으로 마운트되면 청크 리로드 쿨다운 타임스탬프를 제거
+// → 이후 수동 새로고침 시 쿨다운에 막히지 않고 청크 오류를 복구할 수 있음
+const CHUNK_RELOAD_KEY = '__smep_chunk_reload_ts__';
+try { sessionStorage.removeItem(CHUNK_RELOAD_KEY); } catch { /* ignore */ }
+
 const AI_CONFIGS = {
   prod: {
     url: 'https://www.smes-tipa.go.kr/aiax-dev/v1',
