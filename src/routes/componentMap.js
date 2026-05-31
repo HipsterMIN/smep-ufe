@@ -69,6 +69,7 @@ const UI_USR_L_540 = lazy(() => import('@pages/my-business/UI-USR-L-540.jsx'));
 const MyApiRequestList = lazy(() => import('@pages/my-business/MyApiRequestList.jsx'));
 const UI_USR_L_100 = lazy(() => import('@pages/policy-info/UI_USR_L_100.jsx'));
 const UI_USR_R_101 = lazy(() => import('@pages/policy-info/UI_USR_R_101.jsx'));
+const UI_USR_L_130 = lazy(() => import('@pages/policy-info/UI_USR_L_130.jsx'));
 const UI_USR_L_110 = lazy(() => import('@pages/policy-info/UI_USR_L_110.jsx'));
 const UI_USR_R_111 = lazy(() => import('@pages/policy-info/UI_USR_R_111.jsx'));
 const UI_USR_L_150 = lazy(() => import('@pages/more-service/UI-USR-L-150.jsx'));
@@ -319,6 +320,18 @@ export const componentMap = {
     ],
   },
 
+  // 중기부 소관 법령
+  'M_PIIO_00165': {
+    component: UI_USR_L_130,
+    layout: 'SubpageLayoutWithMenu',
+    children: [
+      {
+        path: ':id',
+        component: UI_USR_L_130,
+      },
+    ],
+  },
+    
   // 입법행정예고/고시
   'M_PIIO_00087': {
     component: UI_USR_L_110,
