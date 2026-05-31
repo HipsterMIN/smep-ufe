@@ -34,6 +34,37 @@ export default defineConfig(({ mode }) => {
     base,
     plugins: [react()],
     server,
+    build: {
+      rollupOptions: {
+        output: {
+          // 자주 바뀌지 않는 라이브러리를 별도 청크로 분리 → 브라우저 캐시 재사용
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return;
+
+            // 순서 중요: 더 구체적인 패턴을 먼저 검사
+            if (id.includes('/@tiptap/'))        return 'vendor-tiptap';
+            if (id.includes('/swiper/'))          return 'vendor-swiper';
+            if (id.includes('/recharts/') ||
+                id.includes('/d3-') ||
+                id.includes('/victory-'))         return 'vendor-recharts';
+            if (id.includes('/lucide-react/'))    return 'vendor-lucide';
+            if (id.includes('/react-datepicker/')) return 'vendor-datepicker';
+            if (id.includes('/react-markdown/') ||
+                id.includes('/remark') ||
+                id.includes('/unified/') ||
+                id.includes('/micromark') ||
+                id.includes('/mdast-util'))       return 'vendor-markdown';
+            if (id.includes('/@svar-ui/'))        return 'vendor-grid';
+            if (id.includes('/react-router') ||
+                id.includes('/@remix-run/'))      return 'vendor-router';
+            if (id.includes('/react/') ||
+                id.includes('/react-dom/') ||
+                id.includes('/scheduler/'))       return 'vendor-react';
+            if (id.includes('/zustand/'))         return 'vendor-zustand';
+          },
+        },
+      },
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),  // import Button from '@/components/Button'

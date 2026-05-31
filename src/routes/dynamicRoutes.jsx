@@ -2,6 +2,20 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { componentMap } from './componentMap.js';
 import { Suspense } from 'react';
 import { buildFullPath, findFirstVisibleTMenu, isExternalMenuNode } from '../utils/menuUtils.js';
+import { MenuProviderOnly, SubpageLayoutWithMenu } from '@layouts';
+
+// componentMap의 layout 문자열 키 → 실제 컴포넌트 매핑
+// (componentMap.js에서 @layouts를 직접 import하면 순환 의존성 발생하므로 여기서 resolve)
+const LAYOUT_MAP = {
+  MenuProviderOnly,
+  SubpageLayoutWithMenu,
+};
+
+const resolveLayout = (layout) => {
+  if (!layout) return null;
+  if (typeof layout === 'string') return LAYOUT_MAP[layout] ?? null;
+  return layout; // 이미 컴포넌트 참조인 경우 (하위 호환)
+};
 
 /**
  * =============================================================================
@@ -58,11 +72,12 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
     if (componentConfig) {
       const {
         component: Component,
-        layout: Layout,
+        layout: layoutKey,
         children,
         wrapChildren = false,
         componentProps = {},
       } = componentConfig;
+      const Layout = resolveLayout(layoutKey);
 
       // ✅ children이 있는 경우: 중첩 라우트 구조 (목록 + 상세 등)
       if (children && children.length > 0) {

@@ -1,15 +1,21 @@
 // routes/staticRoutes.jsx
-import MainPage from '../pages/MainPage.jsx';
-import Login from '../pages/Login.jsx';
-import SSOLogin from '../pages/SSOLogin.jsx';
-import OnePassSsoCallback from '../pages/onepass/OnePassSsoCallback.jsx';
-import OnePassSsoLogout from '../pages/onepass/OnePassSsoLogout.jsx';
-import AiChat from '../pages/ai/AiChat.jsx';
-import IntegratedSearchRouteTest from '../pages/dev/IntegratedSearchRouteTest.jsx';
-import PublishingList from '../publishing/PublishingList.jsx';
-import SubpageLayout from '../layouts/SubpageLayout.jsx';
+import { lazy, Suspense } from 'react';
 import { autoPublishingRoutesWithLayout, autoPublishingRoutesWithoutLayout } from './autoRoutes.jsx';
 import { MenuProviderOnly, SubpageLayoutWithMenu } from '@layouts';
+
+// 레이아웃/Provider 컴포넌트는 라우트 구조 정의에 즉시 필요하므로 eager 유지
+// 페이지 컴포넌트는 해당 경로에 진입할 때만 로드
+const MainPage                 = lazy(() => import('../pages/MainPage.jsx'));
+const Login                    = lazy(() => import('../pages/Login.jsx'));
+const SSOLogin                 = lazy(() => import('../pages/SSOLogin.jsx'));
+const OnePassSsoCallback       = lazy(() => import('../pages/onepass/OnePassSsoCallback.jsx'));
+const OnePassSsoLogout         = lazy(() => import('../pages/onepass/OnePassSsoLogout.jsx'));
+const AiChat                   = lazy(() => import('../pages/ai/AiChat.jsx'));
+const IntegratedSearchRouteTest = lazy(() => import('../pages/dev/IntegratedSearchRouteTest.jsx'));
+const PublishingList           = lazy(() => import('../publishing/PublishingList.jsx'));
+
+// Suspense fallback 공통 엘리먼트 — Phase 2에서 Skeleton UI로 교체 예정
+const pageFallback = <div style={{ minHeight: '100vh' }} />;
 
 /**
  * =============================================================================
@@ -36,73 +42,54 @@ export const staticRoutes = [
     children: [
       {
         path: '/',
-        element: <MainPage />,
+        element: <Suspense fallback={pageFallback}><MainPage /></Suspense>,
       },
       {
-        path: '/service/ai-chat', // AI 상담 페이지 (full layout)
-        element: <AiChat/>,
+        path: '/service/ai-chat',
+        element: <Suspense fallback={pageFallback}><AiChat /></Suspense>,
       },
       {
-        path: '/service/SSO-login', // 로그인 페이지
-        element: <SSOLogin/>,
+        path: '/service/SSO-login',
+        element: <Suspense fallback={pageFallback}><SSOLogin /></Suspense>,
       },
       {
-        path: '/service/intg-search-route-test', // 통합검색 라우팅 테스트 페이지
-        element: <IntegratedSearchRouteTest/>,
+        path: '/service/intg-search-route-test',
+        element: <Suspense fallback={pageFallback}><IntegratedSearchRouteTest /></Suspense>,
       },
       {
-        path: '/sso', // 중기원패스/Keycloak callback 라우트
-        element: <OnePassSsoCallback />,
+        path: '/sso',
+        element: <Suspense fallback={pageFallback}><OnePassSsoCallback /></Suspense>,
       },
       {
-        path: '/sso-logout', // 중기원패스/Keycloak logout callback 라우트
-        element: <OnePassSsoLogout />,
+        path: '/sso-logout',
+        element: <Suspense fallback={pageFallback}><OnePassSsoLogout /></Suspense>,
       },
     ],
   },
-
-  /*
-    SubpageLayout 적용 route (without menu)
-   */
-  // {
-  //   element: <SubpageLayout />,
-  //   children:
-  //       [
-  //         {
-  //           path: '/service/login', // 로그인 페이지
-  //           element: <Login/>,
-  //         },
-  //         {
-  //           path: '/service/ai-chat', // AI 상담 페이지
-  //           element: <AiChat/>,
-  //         },
-  //       ],
-  // },
 
   /*
     SubpageLayoutWithMenu 적용 route
    */
   {
     element: <SubpageLayoutWithMenu />,
-    children:
-        [
-          {
-            path: '/service/login', // 로그인 페이지
-            element: <Login/>,
-          },
-        ],
+    children: [
+      {
+        path: '/service/login',
+        element: <Suspense fallback={pageFallback}><Login /></Suspense>,
+      },
+    ],
   },
 
   //=============================================================================
   // 퍼블리싱 관련 라우트
   //=============================================================================
 
-  // 퍼블리싱 전용 라우트 - SubpageLayoutWIthMenu 적용
+  // 퍼블리싱 전용 라우트 - SubpageLayoutWithMenu 적용
   {
     path: 'publishing',
     element: <SubpageLayoutWithMenu />,
     children: [
-      { index: true, element: <PublishingList /> },
+      { index: true, element: <Suspense fallback={pageFallback}><PublishingList /></Suspense> },
       ...autoPublishingRoutesWithLayout,
     ],
   },
