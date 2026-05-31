@@ -172,7 +172,7 @@ const UI_USR_R_002 = () => {
                   <div className="form-group">
                     <ul className="link-group">
                       <li><Link to="#" className="krds-btn medium text">아이디 찾기</Link></li>
-                      <li><Link to="#" className="krds-btn medium text">비밀번호 찾기</Link></li>
+                      <li><Link to="/service/find-password" className="krds-btn medium text">비밀번호 찾기</Link></li>
                       <li><button type="button" className="krds-btn medium text" onClick={handleOnePassJoin}>회원가입</button></li>
                     </ul>
                   </div>
