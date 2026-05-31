@@ -38,7 +38,6 @@ const Login                    = lazyWithRetry(() => import('../pages/Login.jsx'
 const SSOLogin                 = lazyWithRetry(() => import('../pages/SSOLogin.jsx'));
 const OnePassSsoCallback       = lazyWithRetry(() => import('../pages/onepass/OnePassSsoCallback.jsx'));
 const OnePassSsoLogout         = lazyWithRetry(() => import('../pages/onepass/OnePassSsoLogout.jsx'));
-const AiChat                   = lazyWithRetry(() => import('../pages/ai/AiChat.jsx'));
 const IntegratedSearchRouteTest = lazyWithRetry(() => import('../pages/dev/IntegratedSearchRouteTest.jsx'));
 const PublishingList           = lazyWithRetry(() => import('../publishing/PublishingList.jsx'));
 
@@ -84,10 +83,6 @@ export const staticRoutes = [
       {
         path: '/',
         element: <Suspense fallback={pageFallback}><MainPage /></Suspense>,
-      },
-      {
-        path: '/service/ai-chat',
-        element: <Suspense fallback={pageFallback}><AiChat /></Suspense>,
       },
       {
         path: '/service/SSO-login',
