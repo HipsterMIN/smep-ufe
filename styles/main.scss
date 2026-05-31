@@ -443,6 +443,19 @@
         .card-news-img {
             animation: card-news-fadein 0.3s ease-in;
         }
+
+        // 이미지 없음 placeholder
+        .card-news-img--noimg {
+            object-fit: contain;
+            background-color: #f0f2f5;
+            animation: none;
+        }
+    }
+
+    // 배너 이미지 없음 placeholder
+    .banner-img--noimg {
+        object-fit: contain;
+        background-color: #f0f2f5;
     }
 
     @keyframes card-news-shimmer {
