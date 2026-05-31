@@ -14,8 +14,21 @@ const AiChat                   = lazy(() => import('../pages/ai/AiChat.jsx'));
 const IntegratedSearchRouteTest = lazy(() => import('../pages/dev/IntegratedSearchRouteTest.jsx'));
 const PublishingList           = lazy(() => import('../publishing/PublishingList.jsx'));
 
-// Suspense fallback 공통 엘리먼트 — Phase 2에서 Skeleton UI로 교체 예정
-const pageFallback = <div style={{ minHeight: '100vh' }} />;
+// Suspense fallback — MainPage lazy 로드 중 표시되는 골격 UI
+const pageFallback = (
+  <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+    {/* 헤더 자리 */}
+    <div style={{ height: '60px', backgroundColor: '#fff', borderBottom: '1px solid #e5e7eb' }} />
+    {/* 검색 영역 자리 */}
+    <div style={{ height: '260px', backgroundColor: '#1a3a6b' }} />
+    {/* 컨텐츠 자리 */}
+    <div style={{ maxWidth: '1200px', margin: '40px auto', padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {[120, 80, 200].map((h, i) => (
+        <div key={i} style={{ height: `${h}px`, borderRadius: '8px', backgroundColor: '#e5e7eb' }} />
+      ))}
+    </div>
+  </div>
+);
 
 /**
  * =============================================================================

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import AppRouter from './routes/index.jsx';
 import { CubeIAxProvider } from '@cube-i-ax/sdk/react';
 import { ProgramChatProvider } from '@cube-i-ax/sdk/smes/program';
 import { useAuthStore } from './store/useAuthStore.jsx';
 import AdditionalInfoRequiredGate from './components/account/AdditionalInfoRequiredGate.jsx';
+import { queryClient } from './lib/queryClient.js';
 
 const AI_CONFIGS = {
   prod: {
@@ -82,6 +84,7 @@ function App() {
   }, []);
 
   return (
+    <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <CubeIAxProvider
         key={aiEnv}
@@ -103,6 +106,7 @@ function App() {
         </ProgramChatProvider>
       </CubeIAxProvider>
     </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

@@ -34,6 +34,14 @@ export default defineConfig(({ mode }) => {
     base,
     plugins: [react()],
     server,
+    css: {
+      preprocessorOptions: {
+        scss: {
+          // Dart Sass 2.x legacy-js-api 경고 억제
+          api: 'modern-compiler',
+        },
+      },
+    },
     build: {
       rollupOptions: {
         output: {
@@ -61,6 +69,7 @@ export default defineConfig(({ mode }) => {
                 id.includes('/react-dom/') ||
                 id.includes('/scheduler/'))       return 'vendor-react';
             if (id.includes('/zustand/'))         return 'vendor-zustand';
+            if (id.includes('/@tanstack/'))       return 'vendor-query';
           },
         },
       },

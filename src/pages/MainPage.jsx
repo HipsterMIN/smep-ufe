@@ -1,11 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 
 import Header from '@components/ui/Header.jsx';
 import Footer from '@components/ui/Footer.jsx';
-import Work24VirtualKeyboard from '@components/ui/work24-keyboard/Work24VirtualKeyboard.jsx';
+const Work24VirtualKeyboard = lazy(() => import('@components/ui/work24-keyboard/Work24VirtualKeyboard.jsx'));
 import mainBanner01 from '@assets/main/new/main_banner_01.png';
 import mainBanner02 from '@assets/main/new/main_banner_02.png';
 import mainIcon01 from '@assets/main/new/mainIcon_01.svg';
@@ -22,6 +23,15 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import OnepassLoginConversionModal from '@pages/onepass/OnepassLoginConversionModal.jsx';
 import { buildOnePassConversionUrl, buildOnePassRegisterUrl, onePassJoin } from '@utils/keycloakGetAuthCode.js';
+import {
+  normalizeResponse, resolveApiErrorMessage, removeCssCharset,
+  formatDate, formatLocalDateKey, getLocalYmd,
+  parseYmd, formatCalendarDate, formatWeekItemDate, formatWeekPeriod,
+  getDdayLabel, getDdayBadgeClass, isUrgentDday, getPbancStatusLabel,
+  buildMainImageUrl, buildBoardThumbnailUrl,
+  isNewWindow, isAbsoluteHttpUrl, appendQueryParam, resolveBoardTarget, stripHtmlTags,
+  extractPopularKeywords, extractAutoCompleteKeywords,
+} from './main/mainUtils.js';
 
 
 const MAIN_MENU_IDS = {
@@ -34,7 +44,6 @@ const MAIN_MENU_IDS = {
 };
 const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
 const CARD_NEWS_CATEGORY_NO = '2';
-const APP_BASE_URL = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 const MAIN_PAGE_STYLE_ELEMENT_ID = 'smep-main-page-style';
 const EMPTY_MAIN_DATA = {
   pbancs: [],
@@ -58,223 +67,19 @@ const EMPTY_MAIN_DATA = {
   banners: [],
   popups: [],
 };
-const removeCssCharset = (cssText = '') =>
-  String(cssText || '').replace(/@charset\s+["'][^"']+["'];\s*/g, '');
-const normalizeResponse = (response) => {
-  if (!response) return {};
-  if (response.success !== undefined && response.data !== undefined) return response.data;
-  if (response.data !== undefined) return response.data;
-  return response;
-};
-const isNewWindow = (value) => value === 'Y';
-const resolveApiErrorMessage = (error, fallbackMessage) =>
-  error?.data?.message || error?.message || fallbackMessage;
-
-const formatDate = (value, separator = '.') => {
-  if (!value) return '';
-  const raw = String(value).trim();
-  if (/^\d{8}$/.test(raw))
-    return `${raw.slice(0, 4)}${separator}${raw.slice(4, 6)}${separator}${raw.slice(6, 8)}`;
-  const datePart = raw.slice(0, 10);
-  if (/^\d{4}-\d{2}-\d{2}$/.test(datePart))
-    return datePart.replace(/-/g, separator);
-  return raw;
-};
-
-const formatLocalDateKey = (date = new Date(), separator = '-') =>
-  [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, '0'),
-    String(date.getDate()).padStart(2, '0'),
-  ].join(separator);
-
-const getLocalYmd = (date = new Date()) => formatLocalDateKey(date, '');
-
-const getDaysRemaining = (deadline) => {
-  if (!deadline || !/^\d{8}$/.test(String(deadline))) return null;
-  const raw = String(deadline);
-  const target = new Date(
-    Number(raw.slice(0, 4)),
-    Number(raw.slice(4, 6)) - 1,
-    Number(raw.slice(6, 8)),
-  );
-  const today = new Date();
-  target.setHours(0, 0, 0, 0);
-  today.setHours(0, 0, 0, 0);
-  return Math.floor((target.getTime() - today.getTime()) / 86400000);
-};
-
-const getDdayLabel = (deadline) => {
-  //if (!deadline) return '상시';
-  const daysRemaining = getDaysRemaining(deadline);
-  if (daysRemaining === null) return '상시';
-  if (daysRemaining < 0) return '마감';
-  if (daysRemaining === 0) return 'D-Day';
-  return `D-${daysRemaining}`;
-};
-
-const getDdayBadgeClass = (label) => {
-  if (label === 'D-Day') return 'bg-point';
-  if (!label?.startsWith('D-')) return 'bg-primary';
-  const days = Number(label.replace('D-', ''));
-  return Number.isFinite(days) && days <= 10 ? 'bg-point' : 'bg-primary';
-};
-
-const buildMainImageUrl = (type, atchFileId, atchFileSn) => {
-  if (!atchFileId || atchFileSn === null || atchFileSn === undefined)
-    return null;
-  return `${APP_BASE_URL}/api/v1/main/${type}/${atchFileId}/${atchFileSn}/image`.replace(
-    /([^:]\/)\/+/g,
-    '$1',
-  );
-};
-
-const buildBoardThumbnailUrl = (atchFileId, atchFileSn) => {
-  if (!atchFileId || atchFileSn === null || atchFileSn === undefined) {
-    return null;
-  }
-  return `${APP_BASE_URL}/api/v1/board/thumbnails/${atchFileId}/${atchFileSn}`.replace(
-    /([^:]\/)\/+/g,
-    '$1',
-  );
-};
-
-const parseYmd = (value) => {
-  const raw = String(value || '').trim();
-  if (!/^\d{8}$/.test(raw)) return null;
-  const date = new Date(Number(raw.slice(0, 4)), Number(raw.slice(4, 6)) - 1, Number(raw.slice(6, 8)));
-  return Number.isNaN(date.getTime()) ? null : date;
-};
-
-const formatCalendarDate = (value) => {
-  const date = parseYmd(value);
-  if (!date) return '';
-  return `${date.getMonth() + 1}월 ${date.getDate()}일(${['일', '월', '화', '수', '목', '금', '토'][date.getDay()]})`;
-};
-
-const formatWeekItemDate = (value) => {
-  const date = parseYmd(value);
-  if (!date) return { date: '', day: '' };
-  return {
-    date: `${date.getMonth() + 1}.${date.getDate()}.`,
-    day: `(${['일', '월', '화', '수', '목', '금', '토'][date.getDay()]})`,
-  };
-};
-
-const formatWeekPeriod = () => {
-  const today = new Date();
-  const start = new Date(today);
-  const day = today.getDay() || 7;
-  start.setDate(today.getDate() - day + 1);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  const toDot = (date) =>
-    `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
-  return `${toDot(start)}.~${toDot(end)}`;
-};
-
-const isUrgentDday = (dday) => {
-  if (dday === 'D-Day') return true;
-  const day = Number(String(dday || '').replace('D-', ''));
-  return Number.isFinite(day) && day <= 3;
-};
-
-const getPbancStatusLabel = (item) => {
-  const dday = getDdayLabel(item?.bizAplyDdlnYmd);
-  if (dday === 'D-Day' || isUrgentDday(dday)) return '마감임박';
-  return item?.applyStatusText || '접수중';
-};
-
-const isAbsoluteHttpUrl = (value) => /^https?:\/\//i.test(String(value || '').trim());
-
-const resolveBoardTarget = (listPath, item, hasDetail = true) => {
-  const fallbackTo =
-    hasDetail && listPath && item?.pstNo ? `${listPath}/${item.pstNo}` : listPath || '#';
-
-  if (!item) {
-    return { kind: 'internal', to: listPath || '#' };
-  }
-
-  const rawUrl = String(item.pstUrlAddr ?? '').trim();
-  if (isAbsoluteHttpUrl(rawUrl)) {
-    return { kind: 'external', href: rawUrl };
-  }
-
-  return { kind: 'internal', to: fallbackTo };
-};
-
-const appendQueryParam = (path, name, value) => {
-  const rawPath = String(path || '#');
-  if (rawPath === '#') return rawPath;
-
-  const hashIndex = rawPath.indexOf('#');
-  const pathWithoutHash = hashIndex >= 0 ? rawPath.slice(0, hashIndex) : rawPath;
-  const hash = hashIndex >= 0 ? rawPath.slice(hashIndex) : '';
-  const separator = pathWithoutHash.includes('?') ? '&' : '?';
-
-  return `${pathWithoutHash}${separator}${encodeURIComponent(name)}=${encodeURIComponent(value)}${hash}`;
-};
-
-const stripHtmlTags = (value) => {
-  if (!value) return '';
-  return String(value)
-    .replace(/<[^>]*>/g, '')
-    .trim();
-};
-
 const SEARCH_POPULAR_LIMIT = 5;
 const SEARCH_AUTOCOMPLETE_LIMIT = 8;
 const SEARCH_AUTOCOMPLETE_DEBOUNCE_MS = 250;
-const ONEPASS_CONVERSION_MODAL_DISMISSED_KEY =
-  '__onepass_conversion_modal_dismissed__';
+const ONEPASS_CONVERSION_MODAL_DISMISSED_KEY = '__onepass_conversion_modal_dismissed__';
 
-const parseSearchPayload = (payload) => {
-  if (!payload) return null;
-  if (typeof payload === 'string') {
-    try {
-      return parseSearchPayload(JSON.parse(payload));
-    } catch (error) {
-      return null;
-    }
-  }
-  if (payload?.data !== undefined && payload?.data !== null) {
-    return parseSearchPayload(payload.data);
-  }
-  return payload;
-};
-
-const extractPopularKeywords = (payload) => {
-  const parsed = parseSearchPayload(payload);
-  const items = Array.isArray(parsed?.result?.Item) ? parsed.result.Item : [];
-  const seen = new Set();
-
-  return items
-    .map((item) => String(item?.Query || '').trim())
-    .filter(Boolean)
-    .filter((keyword) => {
-      if (seen.has(keyword)) return false;
-      seen.add(keyword);
-      return true;
-    });
-};
-
-const extractAutoCompleteKeywords = (payload) => {
-  const parsed = parseSearchPayload(payload);
-  const groups = Array.isArray(parsed?.result) ? parsed.result : [];
-  const items = groups.flatMap((group) =>
-    Array.isArray(group?.items) ? group.items : [],
-  );
-  const seen = new Set();
-
-  return items
-    .map((item) => String(item?.keyword || '').trim())
-    .filter(Boolean)
-    .filter((keyword) => {
-      if (seen.has(keyword)) return false;
-      seen.add(keyword);
-      return true;
-    });
-};
+// ─── React Query 쿼리 함수 (컴포넌트 외부 정의로 참조 안정성 보장) ─────────
+const fetchMainData = () => apiClient.get('/api/v1/main').then(normalizeResponse);
+const fetchPbancSummary = () => apiClient.get('/api/v1/main/pbanc-summary').then(normalizeResponse);
+const fetchBizCodes = () =>
+  fetchAndConvertCommonCodes([BIZ_PBANC_CLSF_GROUP_ID])
+    .then((res) => normalizeResponse(res)?.[BIZ_PBANC_CLSF_GROUP_ID] || []);
+const fetchPopularKeywords = () =>
+  apiClient.get('/api/v1/search/popword').then(extractPopularKeywords);
 
 const MainPage = () => {
   const navigate = useNavigate();
@@ -290,16 +95,42 @@ const MainPage = () => {
   const [likedAnnounce, setLikedAnnounce] = useState({});
   const [likedPolicy, setLikedPolicy] = useState({});
   const [isPlaying, setIsPlaying] = useState(true);
-  const [mainData, setMainData] = useState(EMPTY_MAIN_DATA);
-  const [mainLoading, setMainLoading] = useState(true);
-  const [bizFieldOptions, setBizFieldOptions] = useState([]);
   const [hiddenPopupIds, setHiddenPopupIds] = useState([]);
-  const [popularKeywords, setPopularKeywords] = useState([]);
   const [autoCompleteKeywords, setAutoCompleteKeywords] = useState([]);
   const [isAutoCompleteEnabled, setIsAutoCompleteEnabled] = useState(true);
-  const [isPopularLoading, setIsPopularLoading] = useState(false);
   const [isAutoLoading, setIsAutoLoading] = useState(false);
+
+  // ─── React Query: 메인 데이터 (stale-while-revalidate 60초) ───────────────
+  const { data: mainDataRaw, isLoading: mainLoading } = useQuery({
+    queryKey: ['main-data'],
+    queryFn: fetchMainData,
+    staleTime: 60_000,
+  });
+  // pbanc-summary는 별도로 먼저 조회 → mainData 도착 전 공고 섹션을 채움
+  const { data: summaryData } = useQuery({
+    queryKey: ['pbanc-summary'],
+    queryFn: fetchPbancSummary,
+    staleTime: 60_000,
+  });
+  // summary 먼저, mainData 도착 후 완전 덮어씀
+  const mainData = { ...EMPTY_MAIN_DATA, ...(summaryData || {}), ...(mainDataRaw || {}) };
+
+  // 공통 코드 (5분 캐시)
+  const { data: bizFieldOptions = [] } = useQuery({
+    queryKey: ['common-codes', BIZ_PBANC_CLSF_GROUP_ID],
+    queryFn: fetchBizCodes,
+    staleTime: 5 * 60_000,
+  });
+
+  // 인기 검색어 (30초 캐시)
+  const { data: popularKeywordsRaw, isLoading: isPopularLoading } = useQuery({
+    queryKey: ['popular-keywords'],
+    queryFn: fetchPopularKeywords,
+    staleTime: 30_000,
+  });
+  const popularKeywords = popularKeywordsRaw?.slice(0, SEARCH_POPULAR_LIMIT) || [];
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [hasOpenedKeyboard, setHasOpenedKeyboard] = useState(false);
   const [isOnepassModalOpen, setIsOnepassModalOpen] = useState(false);
   const [isSearchFixed, setIsSearchFixed] = useState(false);
   const srchInputRef = useRef(null);
@@ -447,32 +278,6 @@ const MainPage = () => {
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const loadPopularKeywords = async () => {
-      try {
-        setIsPopularLoading(true);
-        const response = await apiClient.get('/api/v1/search/popword');
-        if (!isMounted) return;
-        setPopularKeywords(
-          extractPopularKeywords(response).slice(0, SEARCH_POPULAR_LIMIT),
-        );
-      } catch (error) {
-        if (!isMounted) return;
-        setPopularKeywords([]);
-      } finally {
-        if (isMounted) setIsPopularLoading(false);
-      }
-    };
-
-    loadPopularKeywords();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
     if (!isFocused || !isAutoCompleteEnabled) {
       latestAutoQueryRef.current = '';
       setAutoCompleteKeywords([]);
@@ -514,60 +319,6 @@ const MainPage = () => {
 
     return () => window.clearTimeout(timerId);
   }, [searchQuery, isFocused, isAutoCompleteEnabled]);
-
-  useEffect(() => {
-    let isMounted = true;
-    const loadMainData = async () => {
-      const mainDataPromise = apiClient.get('/api/v1/main');
-      const pbancSummaryPromise = apiClient.get('/api/v1/main/pbanc-summary');
-      const codePromise = fetchAndConvertCommonCodes([BIZ_PBANC_CLSF_GROUP_ID]);
-
-      try {
-        setMainLoading(true);
-        pbancSummaryPromise
-          .then((summaryResponse) => {
-            if (!isMounted) return;
-            setMainData((prev) => ({
-              ...prev,
-              ...normalizeResponse(summaryResponse),
-            }));
-          })
-          .catch(() => {
-            // 공고 요약 선조회가 실패해도 전체 메인 API가 동일 데이터를 다시 내려주므로 화면 초기화를 하지 않는다.
-          });
-
-        codePromise
-          .then((codeResponse) => {
-            if (!isMounted) return;
-            setBizFieldOptions(
-              normalizeResponse(codeResponse)?.[BIZ_PBANC_CLSF_GROUP_ID] || [],
-            );
-          })
-          .catch(() => {
-            if (!isMounted) return;
-            setBizFieldOptions([]);
-          });
-
-        const mainResponse = await mainDataPromise;
-        if (!isMounted) return;
-        setMainData({ ...EMPTY_MAIN_DATA, ...normalizeResponse(mainResponse) });
-      } catch (error) {
-        if (!isMounted) return;
-        setMainData((prev) => ({
-          ...EMPTY_MAIN_DATA,
-          todayPbancTotalCount: prev.todayPbancTotalCount,
-          todayPbancs: prev.todayPbancs,
-          weeklyPbancGroups: prev.weeklyPbancGroups,
-        }));
-      } finally {
-        if (isMounted) setMainLoading(false);
-      }
-    };
-    loadMainData();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   useEffect(() => {
     const todayKey = formatLocalDateKey();
@@ -803,6 +554,11 @@ const MainPage = () => {
 
     setIsOnepassModalOpen(true);
   }, [isLogin, intgMbrSwtcYn]);
+
+  // 키보드가 처음 열릴 때 lazy 컴포넌트를 마운트 (이후 isOpen prop으로 제어)
+  useEffect(() => {
+    if (isKeyboardOpen) setHasOpenedKeyboard(true);
+  }, [isKeyboardOpen]);
 
   const handleSearch = () => {
     const keyword = searchQuery.trim();
@@ -1115,16 +871,20 @@ const MainPage = () => {
                   </div>
                 )}
               </div>
-              <Work24VirtualKeyboard
-                isOpen={isKeyboardOpen}
-                sizeOption="SMALL"
-                triggerRef={keyboardButtonRef}
-                inputRef={searchInputRef}
-                value={searchQuery}
-                onValueChange={setSearchQuery}
-                onEnter={handleSearch}
-                onClose={() => setIsKeyboardOpen(false)}
-              />
+              {hasOpenedKeyboard && (
+                <Suspense fallback={null}>
+                  <Work24VirtualKeyboard
+                    isOpen={isKeyboardOpen}
+                    sizeOption="SMALL"
+                    triggerRef={keyboardButtonRef}
+                    inputRef={searchInputRef}
+                    value={searchQuery}
+                    onValueChange={setSearchQuery}
+                    onEnter={handleSearch}
+                    onClose={() => setIsKeyboardOpen(false)}
+                  />
+                </Suspense>
+              )}
 
               {/* 인기 검색어 */}
             </div>
@@ -1271,6 +1031,7 @@ const MainPage = () => {
                       event.currentTarget.removeAttribute('src');
                     }}
                     alt={cardNewsItem?.pstTtl || '카드뉴스'}
+                    loading="lazy"
                   />
                 </a>
               </article>
@@ -1327,7 +1088,7 @@ const MainPage = () => {
                           onClick={() => navigate(item.path)}
                         >
                           <span className="quick-menu-img">
-                            <img src={item.img} alt="" />
+                            <img src={item.img} alt="" loading="lazy" />
                           </span>
                           <span className="quick-menu-tit">{item.title}</span>
                         </button>
@@ -1474,11 +1235,13 @@ const MainPage = () => {
                 src={bannerLine}
                 className="pc-only"
                 alt="2026년 중소벤처기업부 지원사업안내"
+                loading="lazy"
               />
               <img
                 src={bannerLineM}
                 className="mobile-only"
                 alt="2026년 중소벤처기업부 지원사업안내"
+                loading="lazy"
               />
             </a>
           </div>
@@ -1657,7 +1420,7 @@ const MainPage = () => {
                       swiperRef.current = swiper;
                     }}
                   >
-                    {bannerItems.map((item) => {
+                    {bannerItems.map((item, idx) => {
                       const imageSrc =
                         item.fallbackImageSrc ||
                         buildMainImageUrl(
@@ -1685,6 +1448,8 @@ const MainPage = () => {
                                   item.bnrTtl ||
                                   '메인 배너'
                                 }
+                                loading={idx === 0 ? 'eager' : 'lazy'}
+                                fetchpriority={idx === 0 ? 'high' : undefined}
                               />
                             </a>
                           </div>
@@ -1864,6 +1629,7 @@ const MainPage = () => {
                       height: '100%',
                       objectFit: 'cover',
                     }}
+                    loading="lazy"
                   />
                 ) : (
                   <div
