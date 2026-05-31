@@ -2,8 +2,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 
-const CHUNK_RELOAD_KEY = '__smep_chunk_reload_ts__'
-const RELOAD_COOLDOWN_MS = 15_000 // 15초 이내 재로딩은 무시 (무한 루프 방지)
+export const CHUNK_RELOAD_KEY = '__smep_chunk_reload_ts__'
+const RELOAD_COOLDOWN_MS = 5_000 // 5초 이내 자동 재로딩 중복 방지 (무한 루프 차단)
 
 const CHUNK_ERROR_PATTERNS = [
   /Failed to fetch dynamically imported module/i,
@@ -17,7 +17,7 @@ const isChunkLoadError = (errorLike) => {
   return CHUNK_ERROR_PATTERNS.some((pattern) => pattern.test(message))
 }
 
-const reloadOnce = () => {
+export const reloadOnce = () => {
   try {
     const last = Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) || 0)
     if (Date.now() - last < RELOAD_COOLDOWN_MS) return

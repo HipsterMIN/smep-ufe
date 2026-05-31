@@ -996,20 +996,24 @@ const MainPage = () => {
                 </div>
                 <a
                   href={cardNewsDetailPath}
-                  className="card-news-thumb"
+                  className={`card-news-thumb${!cardNewsThumbnailUrl ? ' card-news-thumb--skeleton' : ''}`}
                   onClick={(event) => {
                     event.preventDefault();
                     navigate(cardNewsDetailPath);
                   }}
                 >
-                  <img
-                    src={cardNewsThumbnailUrl || undefined}
-                    onError={(event) => {
-                      event.currentTarget.removeAttribute('src');
-                    }}
-                    alt={cardNewsItem?.pstTtl || '카드뉴스'}
-                    loading="lazy"
-                  />
+                  {cardNewsThumbnailUrl && (
+                    <img
+                      src={cardNewsThumbnailUrl}
+                      onError={(event) => {
+                        event.currentTarget.removeAttribute('src');
+                      }}
+                      alt={cardNewsItem?.pstTtl || '카드뉴스'}
+                      loading="eager"
+                      fetchpriority="high"
+                      className="card-news-img"
+                    />
+                  )}
                 </a>
               </article>
             </div>
