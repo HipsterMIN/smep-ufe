@@ -14,6 +14,8 @@ export const useNiceIdAuth = () => {
   const [result, setResult] = useState(null);
 
   useEffect(() => {
+    // 이유: React StrictMode 개발 렌더링은 effect cleanup 후 재실행되므로 remount 시 mounted flag를 복구해야 한다.
+    mountedRef.current = true;
     return () => {
       mountedRef.current = false;
     };

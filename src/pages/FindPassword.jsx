@@ -60,7 +60,10 @@ const FindPassword = () => {
       return;
     }
 
-    alert(authResult?.message || 'NICE ID 인증 처리 중 오류가 발생했습니다.');
+    // 이유: 실패 alert를 같은 tick에서 바로 띄우면 React가 loading 해제 렌더를 끝내기 전에 dialog가 화면을 막을 수 있다.
+    window.setTimeout(() => {
+      alert(authResult?.message || 'NICE ID 인증 처리 중 오류가 발생했습니다.');
+    }, 0);
   };
 
   const breadcrumbItems = [

@@ -90,29 +90,21 @@ export default defineConfig(({ mode }) => {
       },
       rollupOptions: {
         output: {
-          // 자주 바뀌지 않는 라이브러리를 별도 청크로 분리 → 브라우저 캐시 재사용
+          // HTTP/1.1 환경 최적화: 모든 node_modules를 vendor.js 하나로 통합
+          //
+          // 이전 전략(청크 분리)의 문제:
+          //   index.js 로드 시 vendor-react, vendor-router, vendor-query,
+          //   vendor-recharts, vendor-datepicker가 동시에 정적 import됨
+          //   → 순간 6~8개 동시 요청 → HTTP/1.1 연결 한계 초과 → Pending
+          //
+          // 현재 전략(vendor 통합):
+          //   초기 요청: index.js + vendor.js + CSS 2개 = 4개 (6개 한계 이내)
+          //   → Pending 없음, 안정적 로딩
+          //   → vendor.js는 한 번 캐시되면 이후 재사용
+          //   → HTTP/2 전환 시 다시 청크 분리로 되돌릴 것
           manualChunks(id) {
             if (!id.includes('node_modules')) return;
-
-            // echarts/zrender: InsightSection 하나만 사용하므로 manualChunks 제외
-            // → Rollup이 InsightSection lazy chunk 안에 직접 번들링
-            // → index.js에 정적 import 생기지 않아 메인 페이지 로딩 불필요
-            if (id.includes('/@tiptap/'))        return 'vendor-tiptap';
-            if (id.includes('/swiper/'))          return 'vendor-swiper';
-            if (id.includes('/recharts/') ||
-                id.includes('/d3-') ||
-                id.includes('/victory-'))         return 'vendor-recharts';
-            if (id.includes('/lucide-react/'))    return 'vendor-lucide';
-            if (id.includes('/react-datepicker/')) return 'vendor-datepicker';
-            // vendor-markdown 제거 (react-markdown/remark 미사용)
-            if (id.includes('/@svar-ui/'))        return 'vendor-grid';
-            if (id.includes('/react-router') ||
-                id.includes('/@remix-run/'))      return 'vendor-router';
-            if (id.includes('/react/') ||
-                id.includes('/react-dom/') ||
-                id.includes('/scheduler/'))       return 'vendor-react';
-            // zustand는 10.5KB로 소형이며 모든 페이지에서 항상 필요 → index 번들에 포함
-            if (id.includes('/@tanstack/'))       return 'vendor-query';
+            return 'vendor';
           },
         },
       },

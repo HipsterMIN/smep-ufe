@@ -12,7 +12,7 @@ export const NICE_ID_AUTH_ERROR_CODES = Object.freeze({
   callbackError: 'NICE_AUTH_ERROR',
 });
 
-const NICE_ID_AUTH_URL_ENDPOINT = '/v1/nice-id/auth-url';
+const NICE_ID_AUTH_URL_ENDPOINT = '/api/v1/nice-id/auth-url';
 const SUPPORTED_SVC_TYPES = new Set(['M', 'F', 'I', 'U']);
 const DEFAULT_POPUP_NAME = 'nice-id-auth-popup';
 const DEFAULT_POPUP_FEATURES = 'width=500,height=720,scrollbars=yes,resizable=yes';
