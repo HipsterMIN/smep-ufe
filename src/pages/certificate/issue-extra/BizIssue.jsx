@@ -1,17 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SideNavigation from '@/components/ui/SideNavigation';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
-import { useAuthStore } from '@store/useAuthStore.jsx';
 
 const BizIssue = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { prdocNm, prdocCd, prdocIssuGdCn, supportedLangs = [] } = location.state || {};
-  console.log('supportedLangs:', supportedLangs);
-  const { brno, cmpNm } = useAuthStore((state) => ({ brno: state.bizno, cmpNm: state.cmpNm }));
+  const [enterpriseInfo, setEnterpriseInfo] = useState({ mbrNm: '', rprsvNm: '', brno: '' });
 
   const [outputLang, setOutputLang] = useState('');
   const [isLoading, setIsLoading]   = useState(false);
@@ -33,6 +31,18 @@ const BizIssue = () => {
     if (!prdocCd) { alert('증명서 코드가 없습니다.'); return false; }
     return true;
   };
+
+  useEffect(() => {
+    const fetchEnterpriseInfo = async () => {
+      try {
+        const data = await apiClient.get('/api/v1/member/common/me/enterprise-info');
+        setEnterpriseInfo(data.data);
+      } catch (e) {
+        console.error('기업회원 기본정보 조회 실패:', e);
+      }
+    };
+    fetchEnterpriseInfo();
+  }, []);
 
   const handlePrint = async () => {
     if (!validate()) return;
@@ -114,7 +124,7 @@ const BizIssue = () => {
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
                   <input type="text" id="id_01" className="krds-input small"
-                    placeholder="사업자등록번호를 입력해주세요" value={brno} disabled />
+                    placeholder="사업자등록번호를 입력해주세요" value={enterpriseInfo.brno} disabled/>
                 </div>
               </dd>
             </div>
@@ -129,7 +139,7 @@ const BizIssue = () => {
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
                   <input type="text" id="id_02" className="krds-input small"
-                    placeholder="상호를 입력해주세요" value={cmpNm} disabled />
+                    placeholder="상호를 입력해주세요" value={enterpriseInfo.cmpNm} disabled />
                 </div>
               </dd>
             </div>
@@ -144,7 +154,7 @@ const BizIssue = () => {
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
                   <input type="text" id="id_03" className="krds-input small"
-                    placeholder="대표자명을 입력해주세요" value="김정범" disabled />
+                    placeholder="대표자명을 입력해주세요" value={enterpriseInfo.rprsvNm} disabled/>
                 </div>
               </dd>
             </div>
