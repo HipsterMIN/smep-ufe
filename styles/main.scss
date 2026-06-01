@@ -5,7 +5,7 @@
         padding:80px 0;
         &::before {content:""; position: absolute; left:0px; top:0px; right:0px; height:275px;z-index: -1;opacity:0;background-color:transparent;}
     }
-    .main-top-inner { max-width: 1600px; margin: 0 auto; padding: 0 20px; }
+    .main-top-inner { max-width: 1600px; margin: 0 auto;}
 
     .main-top-srch {
         margin: 0 auto;max-width: 740px;
@@ -272,6 +272,10 @@
             font-weight: 400;
         }
     }
+    .krds-badge{
+        background-color:#0052A7;
+        color:var(--krds-color-light-alpha-white100);
+    }
 
     .today-item {
         position: relative;
@@ -291,10 +295,6 @@
             gap: 0.8rem;
             margin-bottom: 0.8rem;
             * {font-size:var(--krds-pc-font-size-small);font-weight:400;}
-            .krds-badge{
-                background-color:#0052A7;
-                color:var(--krds-color-light-alpha-white100);
-            }
             .category {
                 color: #1E2124;
                 font-weight: 400;
@@ -436,41 +436,6 @@
         border-radius:2rem;
         overflow: hidden;
         img {object-fit: cover; object-position: center center;width:100%;height:100%;}
-
-        // API 응답 전 이미지 URL 미확정 상태: shimmer skeleton 표시
-        &--skeleton {
-            background: linear-gradient(90deg, #f0f2f5 25%, #e4e8ed 50%, #f0f2f5 75%);
-            background-size: 200% 100%;
-            animation: card-news-shimmer 1.5s ease-in-out infinite;
-        }
-
-        // 이미지 로드 완료 시 부드럽게 나타남
-        .card-news-img {
-            animation: card-news-fadein 0.3s ease-in;
-        }
-
-        // 이미지 없음 placeholder
-        .card-news-img--noimg {
-            object-fit: contain;
-            background-color: #f0f2f5;
-            animation: none;
-        }
-    }
-
-    // 배너 이미지 없음 placeholder
-    .banner-img--noimg {
-        object-fit: contain;
-        background-color: #f0f2f5;
-    }
-
-    @keyframes card-news-shimmer {
-        0%   { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-
-    @keyframes card-news-fadein {
-        from { opacity: 0; }
-        to   { opacity: 1; }
     }
 }
 
@@ -1125,8 +1090,13 @@
     .main-calendar{
         .calendar-card{padding:1.2rem}
         .week-item {
-            .week-list li{flex-direction: column;align-items: start;
-                button{max-width:100%}
+            .week-list {
+                gap:.8rem;
+                li{
+                    //flex-direction: column;
+                    align-items: start;flex-wrap:wrap;gap:.4rem;
+                    button{max-width:100%}
+                }
             }
         }
     }
