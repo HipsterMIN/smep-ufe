@@ -10,7 +10,7 @@ import { appendListSearchToPath, getNumberSearchParam, getSearchParam, setQueryP
 import { useUserMenu } from '../context/UserMenuContext';
 
 const DEFAULT_SIZE = 10;
-const DEFAULT_SORT = 'REG';
+const DEFAULT_SORT = '';
 const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
 
 const Pbanc = () => {
