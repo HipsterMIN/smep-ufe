@@ -82,13 +82,27 @@ const NO_IMAGE_SVG = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
       <polyline points="-36,24 -18,2 0,16 18,-2 36,24" fill="none" stroke="#c8cdd4" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
     </g>
     <text x="200" y="192" text-anchor="middle" font-family="Apple SD Gothic Neo,Malgun Gothic,sans-serif" font-size="13" fill="#a0a8b4">이미지 없음</text>
-  </svg>`
+  </svg>`,
 )}`;
 
 const SEARCH_POPULAR_LIMIT = 5;
 const SEARCH_AUTOCOMPLETE_LIMIT = 8;
 const SEARCH_AUTOCOMPLETE_DEBOUNCE_MS = 250;
 const ONEPASS_CONVERSION_MODAL_DISMISSED_KEY = '__onepass_conversion_modal_dismissed__';
+const WEEK_PBANC_SHORT_AGENCY_NAMES = {
+  중소벤처기업부: '중기부',
+};
+
+/*
+ * 의도: 이번 주 공고 행은 날짜·D-day·기관·제목이 한 줄에 배치되어 긴 기관명이 제목 영역을 과하게 줄일 수 있다.
+ * 동작: 화면 표시용 기관명만 축약 목록에 따라 변환하고, 축약 대상이 아니면 API 원문 기관명을 그대로 반환한다.
+ * 주의: 상세 팝업과 다른 공고 영역의 원본 데이터는 바꾸지 않으며, 현재 요청 범위인 이번 주 공고 배지 출력에만 사용한다.
+ */
+const formatWeekPbancAgencyBadge = (agencyName) => {
+  const normalizedName = String(agencyName || '').trim();
+  if (!normalizedName) return '공고';
+  return WEEK_PBANC_SHORT_AGENCY_NAMES[normalizedName] || normalizedName;
+};
 
 // ─── React Query 쿼리 함수 (컴포넌트 외부 정의로 참조 안정성 보장) ─────────
 const fetchMainData = () => apiClient.get('/api/v1/main').then(normalizeResponse);
@@ -678,6 +692,11 @@ const MainPage = () => {
       return Math.min(Math.max(prev + direction, 0), maxIndex);
     });
   };
+  const handleWeekDateKeyDown = (event, dayIndex) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    setActiveWeekIndex(dayIndex);
+  };
   const handlePopupClose = (popupId) =>
     setHiddenPopupIds((prev) => [...new Set([...prev, popupId])]);
   const handlePopupHideToday = (popupId) => {
@@ -790,35 +809,99 @@ const MainPage = () => {
                         <div className="sch-layer-inner">
                           <strong className="sch-layer-title">인기검색어</strong>
                           <ul className="sch-layer-popular-list">
-                            {isPopularLoading && (
-                              <li className="sch-popular-item">
-                                <span className="item-link">Loading...</span>
-                              </li>
-                            )}
-                            {!isPopularLoading &&
-                              popularKeywords.map((keyword, index) => (
-                                <li
-                                  className="sch-popular-item"
-                                  key={`popular-${keyword}-${index}`}
-                                >
-                                  <button
-                                    type="button"
-                                    className="item-link"
-                                    onClick={() => handleKeywordSelect(keyword)}
-                                  >
-                                    <em className="rank">
-                                      <span className="sr-only">인기검색어</span>
-                                      {index + 1}
-                                    </em>
-                                    {keyword}
-                                  </button>
-                                </li>
-                              ))}
-                            {!isPopularLoading && popularKeywords.length === 0 && (
-                              <li className="sch-popular-item">
-                                <span className="item-link">No popular keywords.</span>
-                              </li>
-                            )}
+                            <li
+                              className="sch-popular-item"
+                              key={'popular-1'}
+                            >
+                              <button
+                                type="button"
+                                className="item-link"
+                                onClick={() => handleKeywordSelect('지원사업')}
+                              >
+                                <em className="rank">
+                                  <span className="sr-only">인기검색어</span>
+                                  1
+                                </em>
+                                지원사업
+                              </button>
+                            </li>
+                            <li
+                              className="sch-popular-item"
+                              key={'popular-2'}
+                            >
+                              <button
+                                type="button"
+                                className="item-link"
+                                onClick={() => handleKeywordSelect('정책자금')}
+                              >
+                                <em className="rank">
+                                  <span className="sr-only">인기검색어</span>
+                                  2
+                                </em>
+                                정책자금
+                              </button>
+                            </li>
+                            <li
+                              className="sch-popular-item"
+                              key={'popular-3'}
+                            >
+                              <button
+                                type="button"
+                                className="item-link"
+                                onClick={() => handleKeywordSelect('증명서')}
+                              >
+                                <em className="rank">
+                                  <span className="sr-only">인기검색어</span>
+                                  3
+                                </em>
+                                증명서
+                              </button>
+                            </li>
+                            <li
+                              className="sch-popular-item"
+                              key={'popular-4'}
+                            >
+                              <button
+                                type="button"
+                                className="item-link"
+                                onClick={() => handleKeywordSelect('사업공고')}
+                              >
+                                <em className="rank">
+                                  <span className="sr-only">인기검색어</span>
+                                  4
+                                </em>
+                                사업공고
+                              </button>
+                            </li>
+                            {/*{isPopularLoading && (*/}
+                            {/*  <li className="sch-popular-item">*/}
+                            {/*    <span className="item-link">Loading...</span>*/}
+                            {/*  </li>*/}
+                            {/*)}*/}
+                            {/*{!isPopularLoading &&*/}
+                            {/*  popularKeywords.map((keyword, index) => (*/}
+                            {/*    <li*/}
+                            {/*      className="sch-popular-item"*/}
+                            {/*      key={`popular-${keyword}-${index}`}*/}
+                            {/*    >*/}
+                            {/*      <button*/}
+                            {/*        type="button"*/}
+                            {/*        className="item-link"*/}
+                            {/*        onClick={() => handleKeywordSelect(keyword)}*/}
+                            {/*      >*/}
+                            {/*        <em className="rank">*/}
+                            {/*          <span className="sr-only">인기검색어</span>*/}
+                            {/*          {index + 1}*/}
+                            {/*        </em>*/}
+                            {/*        {keyword}*/}
+                            {/*      </button>*/}
+                            {/*    </li>*/}
+                            {/*  ))}*/}
+                            {/*{!isPopularLoading && popularKeywords.length === 0 && (*/}
+                            {/*  <li className="sch-popular-item">*/}
+                            {/*    <span className="item-link">No popular keywords.</span>*/}
+                            {/*  </li>*/}
+                            {/*)}*/}
                           </ul>
                         </div>
                       </div>
@@ -883,32 +966,68 @@ const MainPage = () => {
             <div className="main-top-keyword">
               <h3>인기 검색어</h3>
               <ul className="keyword-list">
-                {isPopularLoading && (
-                  <li>
-                    <button type="button" className="word" disabled>
-                      Loading...
-                    </button>
-                  </li>
-                )}
-                {!isPopularLoading &&
-                  popularKeywords.map((keyword, index) => (
-                    <li key={`top-popular-${keyword}-${index}`}>
-                      <button
-                        type="button"
-                        className="word"
-                        onClick={() => handleKeywordSelect(keyword)}
-                      >
-                        {keyword}
-                      </button>
-                    </li>
-                  ))}
-                {!isPopularLoading && popularKeywords.length === 0 && (
-                  <li>
-                    <button type="button" className="word" disabled>
-                      No popular keywords.
-                    </button>
-                  </li>
-                )}
+                <li key={'top-popular-1'}>
+                  <button
+                    type="button"
+                    className="word"
+                    onClick={() => handleKeywordSelect('지원사업')}
+                  >
+                    지원사업
+                  </button>
+                </li>
+                <li key={'top-popular-2'}>
+                  <button
+                    type="button"
+                    className="word"
+                    onClick={() => handleKeywordSelect('정책자금')}
+                  >
+                    정책자금
+                  </button>
+                </li>
+                <li key={'top-popular-3'}>
+                  <button
+                    type="button"
+                    className="word"
+                    onClick={() => handleKeywordSelect('증명서')}
+                  >
+                    증명서
+                  </button>
+                </li>
+                <li key={'top-popular-4'}>
+                  <button
+                    type="button"
+                    className="word"
+                    onClick={() => handleKeywordSelect('사업공고')}
+                  >
+                    사업공고
+                  </button>
+                </li>
+                {/*{isPopularLoading && (*/}
+                {/*  <li>*/}
+                {/*    <button type="button" className="word" disabled>*/}
+                {/*      Loading...*/}
+                {/*    </button>*/}
+                {/*  </li>*/}
+                {/*)}*/}
+                {/*{!isPopularLoading &&*/}
+                {/*  popularKeywords.map((keyword, index) => (*/}
+                {/*    <li key={`top-popular-${keyword}-${index}`}>*/}
+                {/*      <button*/}
+                {/*        type="button"*/}
+                {/*        className="word"*/}
+                {/*        onClick={() => handleKeywordSelect(keyword)}*/}
+                {/*      >*/}
+                {/*        {keyword}*/}
+                {/*      </button>*/}
+                {/*    </li>*/}
+                {/*  ))}*/}
+                {/*{!isPopularLoading && popularKeywords.length === 0 && (*/}
+                {/*  <li>*/}
+                {/*    <button type="button" className="word" disabled>*/}
+                {/*      No popular keywords.*/}
+                {/*    </button>*/}
+                {/*  </li>*/}
+                {/*)}*/}
               </ul>
             </div>
           </div>
@@ -936,8 +1055,8 @@ const MainPage = () => {
                       <div className="item-top">
                         <span className="krds-badge">{card.badge}</span>
                         <span className="category">{card.category}</span>
-                        <strong className={`krds-label state ${card.status === '마감임박' ? 'danger' : ''}`}>
-                          {card.status}
+                        <strong className={`krds-label state ${isUrgentDday(card.dday) ? 'danger' : ''}`}>
+                          {card.dday}
                         </strong>
                       </div>
                       <span className="item-title onellipsis-2">
@@ -976,7 +1095,15 @@ const MainPage = () => {
 
                     return (
                       <div className={`week-item ${isActive ? 'is-active' : ''}`} key={day.date || dayIndex}>
-                        <div className="week-date">
+                        <div
+                          className="week-date"
+                          role="button"
+                          tabIndex={0}
+                          aria-pressed={isActive}
+                          aria-label={`${day.date}${day.day} 공고 보기`}
+                          onClick={() => setActiveWeekIndex(dayIndex)}
+                          onKeyDown={(event) => handleWeekDateKeyDown(event, dayIndex)}
+                        >
                           <strong>{day.date}</strong>
                           <span>{day.day}</span>
                         </div>
@@ -986,6 +1113,7 @@ const MainPage = () => {
                               <span className={`krds-label state ${card.status === '마감임박' ? 'danger' : ''}`}>
                                 {card.status}
                               </span>
+                              <span className="krds-badge">{formatWeekPbancAgencyBadge(card.badge)}</span>
                               <button
                                 type="button"
                                 className="week-notice-link onellipsis-1"
