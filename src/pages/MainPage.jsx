@@ -216,7 +216,7 @@ const MainPage = () => {
     },
     {
       img: mainIcon04,
-      title: '정책금융상품',
+      title: '정책금융',
       path: '/req/UI_USR_L_030',
     },
     {
