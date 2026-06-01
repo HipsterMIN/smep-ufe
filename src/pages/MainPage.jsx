@@ -1573,7 +1573,7 @@ const MainPage = () => {
                               rel={external ? 'noopener noreferrer' : undefined}
                             >
                               <img
-                                src='https://www.smes.go.kr/home/api/v1/main/banners/20260601111319_12904/1/image'
+                                src={imageSrc || mainBanner01}
                                 onError={(event) => {
                                   // fallbackImageSrc가 있으면 그것으로, 없으면 no-image placeholder
                                   if (item.fallbackImageSrc && event.currentTarget.src !== item.fallbackImageSrc) {
