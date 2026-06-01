@@ -1082,6 +1082,16 @@
     }
 }
 @media(max-width:545px){
+    .main-container {
+        .top-srch{ 
+            .krds-input{height:5rem;font-size:var(--krds-pc-font-size-body-small);padding-right:4.4rem;padding-left:2.4rem;}
+            .ico-search{width:2.4rem;height:2.4rem;}
+            .ico-clear{right:5.4rem;}
+        }
+        .main-top-srch{
+            .sch-layer{top:5rem;}
+        }
+    }
     .section-notice {
         .board-list {
             .board-list-link{align-items:start}
