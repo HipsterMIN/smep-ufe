@@ -1534,9 +1534,10 @@ const MainPage = () => {
               </div>
 
               <div className="notice-right">
-                <div className="main-banner">
+                <div className="main-banner" style={{ maxHeight: '368px', maxWidth: '490px' }}>
                   <Swiper
                     modules={[Navigation, Pagination, Autoplay]}
+                    style={{maxWidth: '370px'}}
                     navigation={{
                       prevEl: '.main-banner .swiper-button-prev',
                       nextEl: '.main-banner .swiper-button-next',

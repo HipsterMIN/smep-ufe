@@ -98,8 +98,8 @@ const OnePassSsoCallback = () => {
         ...callbackState,
         action: 'alert-and-stop',
       });
-      alert('코드가 없습니다.');
-      return;
+      //alert('코드가 없습니다.');
+      //return;
     }
 
     // callback 처리의 핵심은 "현재 로컬 로그인 상태가 있느냐"에 따라 백엔드 경로를 나누는 것이다.
