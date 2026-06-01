@@ -5,6 +5,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import Header from "@components/ui/Header.jsx";
 import Footer from "@components/ui/Footer.jsx";
+
 import '@styles/main.scss';
 
 
@@ -732,8 +733,11 @@ const weekNoticeCards = [
                                         <div className="item-top">
                                             <span className="krds-badge">{card.badge}</span>
                                             <span className="category">{card.category}</span>
-                                            <strong className={`krds-label state ${card.status === '마감임박' ? 'danger' : ''}`}>
+                                            {/* <strong className={`krds-label state ${card.status === '마감임박' ? 'danger' : ''}`}>
                                                 {card.status}
+                                            </strong> */}
+                                            <strong className={`krds-label state ${isUrgentDday(card.dday) ? 'danger' : ''}`}>
+                                                {card.dday}
                                             </strong>
                                         </div>
 
@@ -782,7 +786,7 @@ const weekNoticeCards = [
                                                     <span className={`krds-label state ${card.status === '마감임박' ? 'danger' : ''}`}>
                                                         {card.status}
                                                     </span>
-
+                                                    <span className="krds-badge">{card.badge}</span>
                                                     <button
                                                         type="button"
                                                         className="week-notice-link onellipsis-1"
