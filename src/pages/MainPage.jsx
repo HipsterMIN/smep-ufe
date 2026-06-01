@@ -1534,9 +1534,10 @@ const MainPage = () => {
               </div>
 
               <div className="notice-right">
-                <div className="main-banner">
+                <div className="main-banner" style={{ maxHeight: '368px', maxWidth: '490px' }}>
                   <Swiper
                     modules={[Navigation, Pagination, Autoplay]}
+                    style={{maxWidth: '370px'}}
                     navigation={{
                       prevEl: '.main-banner .swiper-button-prev',
                       nextEl: '.main-banner .swiper-button-next',
@@ -1572,7 +1573,7 @@ const MainPage = () => {
                               rel={external ? 'noopener noreferrer' : undefined}
                             >
                               <img
-                                src={imageSrc || mainBanner01}
+                                src='https://www.smes.go.kr/home/api/v1/main/banners/20260601111319_12904/1/image'
                                 onError={(event) => {
                                   // fallbackImageSrc가 있으면 그것으로, 없으면 no-image placeholder
                                   if (item.fallbackImageSrc && event.currentTarget.src !== item.fallbackImageSrc) {
