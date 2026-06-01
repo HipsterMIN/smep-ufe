@@ -372,6 +372,20 @@ const PbancView = () => {
               {(item?.bizPbancInqCnt ?? 0).toLocaleString()}
             </span>
           </li>
+          {isLoggedIn && (
+            <li className="bu-type">
+              <span>
+                <button
+                  type="button"
+                  className={`bu-like${isScrapped ? ' active' : ''}`}
+                  onClick={handleToggleScrap}
+                >
+                  <i className="svg-icon ico-like"></i>
+                  <span>{isScrapped ? '관심 공고 해제' : '관심 공고 등록'}</span>
+                </button>
+              </span>
+            </li>
+          )}
         </ul>
 
         <div className="def-list-wrap">
@@ -408,11 +422,12 @@ const PbancView = () => {
                   </>
                 )}
 
-                {renderTextRow('사업수행기관', item?.bizSprvsnInstNm)}
+                {renderTextRow('소관부처·지자체', item?.bizSprvsnInstNm)}
+                {renderTextRow('사업수행기관', item?.bizTelgmInstNm)}
               </>
             ) : (
               <>
-                {renderTextRow('사업수행기관', item?.bizSprvsnInstNm)}
+                {renderTextRow('소관부처·지자체', item?.bizSprvsnInstNm)}
                 {renderExpandableHtmlRow('사업개요', item?.bizPbancOtln)}
                 {renderExpandableHtmlRow('지원규모', item?.bizSprtSclCn)}
                 {renderExpandableHtmlRow('지원내용', item?.bizSprtCn)}
@@ -456,15 +471,15 @@ const PbancView = () => {
         </div>
 
         {activeStreamdocsId && viewerVisible && (
-          <div style={ {width: '100%', marginBottom: '48px'} }>
+          <div style={ { width: '100%', marginBottom: '48px' } }>
             <iframe
               ref={viewerFrameRef}
               title="문서뷰어"
               src={STREAMDOCS_VIEWER_URL}
-              style={ {width: '100%', minHeight: '960px', border: 0} }
+              style={ { width: '100%', minHeight: '960px', border: 0 } }
             />
             {viewerError && (
-              <p style={ {marginTop: '12px', textAlign: 'center'} }>{viewerError}</p>
+              <p style={ { marginTop: '12px', textAlign: 'center' } }>{viewerError}</p>
             )}
           </div>
         )}
@@ -476,37 +491,37 @@ const PbancView = () => {
               {pbancMtxtFiles.map((file, index) => {
                 const previewId = resolveNoticePreviewId(file, index);
                 return (
-                <li key={`${file.atchFileId}-${file.atchFileSn}`}>
-                  <p className="tit">
-                    <i className="svg-icon ico-file2"></i>
-                    {file.orgnlFileNm}
-                  </p>
-                  <div className="btn-wrap">
-                    {previewId && (
-                      <a
-                        href="#"
-                        className="krds-btn medium link basic"
-                        title="문서 미리보기"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          toggleStreamdocsViewer(previewId);
+                  <li key={`${file.atchFileId}-${file.atchFileSn}`}>
+                    <p className="tit">
+                      <i className="svg-icon ico-file2"></i>
+                      {file.orgnlFileNm}
+                    </p>
+                    <div className="btn-wrap">
+                      {previewId && (
+                        <a
+                          href="#"
+                          className="krds-btn medium link basic"
+                          title="문서 미리보기"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            toggleStreamdocsViewer(previewId);
+                          }}
+                        >
+                          <i className="svg-icon ico-sch-plus"></i> 바로보기
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        className="krds-btn medium text on-colorblue"
+                        onClick={() => {
+                          window.location.href = `${apiBaseUrl}/api/v1/files/download/${file.atchFileId}/${file.atchFileSn}`;
                         }}
                       >
-                        <i className="svg-icon ico-sch-plus"></i> 바로보기
-                      </a>
-                    )}
-                    <button
-                      type="button"
-                      className="krds-btn medium text on-colorblue"
-                      onClick={() => {
-                        window.location.href = `${apiBaseUrl}/api/v1/files/download/${file.atchFileId}/${file.atchFileSn}`;
-                      }}
-                    >
-                      <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
-                    </button>
-                  </div>
-                </li>
-              );
+                        <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
+                      </button>
+                    </div>
+                  </li>
+                );
               })}
             </ul>
           </div>

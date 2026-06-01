@@ -469,15 +469,22 @@ const UI_USR_R_031 = () => {
             </span>
           </li>
           <li>
-            <span>
-              <span className="sr-only">관심 공고</span>
-              <i className="svg-icon ico-like"></i>
-              0
-            </span>
-          </li>
-          <li>
             <span>{typeConfig.typeName}</span>
           </li>
+          {isLoggedIn && (
+            <li className="bu-type">
+              <span>
+                <button
+                  type="button"
+                  className={`bu-like${isScrapped ? ' active' : ''}`}
+                  onClick={handleToggleScrap}
+                >
+                  <i className="svg-icon ico-like"></i>
+                  <span>{isScrapped ? '관심 공고 해제' : '관심 공고 등록'}</span>
+                </button>
+              </span>
+            </li>
+          )}
 
         </ul>
 
@@ -608,7 +615,7 @@ const UI_USR_R_031 = () => {
                 onClick={handleToggleScrap}
               >
                 <i className={`svg-icon ico-like${isScrapped ? ' on' : ''}`}></i>
-                관심공고
+                관심
               </button>
             )}
             {detail.plcyFnncInqplUrlAddr && (
