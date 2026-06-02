@@ -155,244 +155,248 @@ useEffect(() => {
   ]
   
 
-  //지금 이용 가능한 서비스 Tab
-  //const [serviceActiveIndex, setServiceActiveIndex] = useState(0); //기본값 0 (사업공고)
-  //const serviceTabMenu = ["창업", "정책자금", "R&D", "소상공인"];
-  //const serviceTabMenu2 = ["수도권", "충청권", "경상권", "전라권"];
-  const supportData = {
-    central: [
-        {
-            title: '창업',
-            cards: [
-                {
-                    badge: '중기부',
-                    category: '창업',
-                    deadline: false,
-                    status: '접수중',
-                    title: '[경북] 울진군 2026년 2차 블루(blue)푸드 산업 활성화 지원사업 기업지원 프로그램 참여기업 모집 공고',
-                    date: '2026.05.13. ~ 2026.05.27.',
-                    dday: 'D-11',
-                    agency: '중소벤처기업부',
-                    region: '경북테크노파크',
-                    desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
-                    target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
-                    detailHref: '#',
-                    liked: true,
-                },
-                {
-                    badge: '중기부',
-                    category: '창업',
-                    deadline: false,
-                    status: '접수중',
-                    title: '[경북] 울진군 2026년 2차 블루(blue)푸드 산업 활성화 지원사업 기업지원 프로그램 참여기업 모집 공고',
-                    date: '2026.05.13. ~ 2026.05.27.',
-                    dday: 'D-11',
-                    agency: '중소벤처기업부',
-                    region: '경북테크노파크',
-                    desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
-                    target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
-                    detailHref: '#',
-                    liked: false,
-                },
-            ],
-        },
-        {
-            title: '정책자금',
-            cards: [
-                {
-                    badge: '중기부',
-                    category: '금융',
-                    deadline: true,
-                    title: '2026년 소상공인 투자연계 지원사업 립스(LIPS) 프로그램 소상공...',
-                    date: '2026.05.06. ~ 2026.05.17',
-                    dday: 'D-3',
-                    agency: '중소벤처기업부',
-                    region: '경북테크노파크',
-                    desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
-                    target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
-                    detailHref: '#',
-                    liked: false,
-                },
-                {
-                    badge: '중기부',
-                    category: '금융',
-                    deadline: true,
-                    title: '2026년 소상공인 투자연계 지원사업 립스(LIPS) 프로그램 소상공...',
-                    date: '2026.05.06. ~ 2026.05.17',
-                    dday: 'D-3',
-                    agency: '중소벤처기업부',
-                    region: '경북테크노파크',
-                    desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
-                    target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
-                    detailHref: '#',
-                    liked: false,
-                },
-            ],
-        },
-        {
-            title: 'R&D',
-            cards: [
-                {
-                    badge: '중기부',
-                    category: '기술',
-                    title: '[경북] 경주시 2026년 2차 e-모빌리티산업 생태계 고도화...',
-                    date: '2026.05.13. ~ 2026.05.26',
-                    dday: 'D-12',
-                    agency: '중소벤처기업부',
-                    region: '경북테크노파크',
-                    desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
-                    target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
-                    detailHref: '#',
-                    liked: false,
-                },
-                {
-                    badge: '중기부',
-                    category: '기술',
-                    title: '[경북] 경주시 2026년 2차 e-모빌리티산업 생태계 고도화...',
-                    date: '2026.05.13. ~ 2026.05.26',
-                    dday: 'D-12',
-                    agency: '중소벤처기업부',
-                    region: '경북테크노파크',
-                    desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
-                    target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
-                    detailHref: '#',
-                    liked: false,
-                },
-            ],
-        },
-        {
-            title: '소상공인',
-            cards: [
-                {
-                    badge: '중기부',
-                    category: '소상공인',
-                    title: '2026년 대한민국 브랜드 소상공인 점포형 사업',
-                    date: '2026.05.11. ~ 2026.05.29',
-                    dday: 'D-15',
-                    agency: '중소벤처기업부',
-                    region: '경북테크노파크',
-                    desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
-                    target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
-                    detailHref: '#',
-                    liked: true,
-                },
-                {
-                    badge: '중기부',
-                    category: '소상공인',
-                    title: '2026년 대한민국 브랜드 소상공인 점포형 사업',
-                    date: '2026.05.11. ~ 2026.05.29',
-                    dday: 'D-15',
-                    agency: '중소벤처기업부',
-                    region: '경북테크노파크',
-                    desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
-                    target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
-                    detailHref: '#',
-                    liked: true,
-                },
-            ],
-        },
-    ],
+    //지금 이용 가능한 서비스 Tab
+    const supportData = {
+        central: [
+            {
+                title: '창업',
+                cards: [
+                    {
+                        badge: '중기부',
+                        category: '창업',
+                        deadline: false,
+                        status: '접수중',
+                        title: '[경북] 울진군 2026년 2차 블루(blue)푸드 산업 활성화 지원사업 기업지원 프로그램 참여기업 모집 공고',
+                        date: '2026.05.13. ~ 2026.05.27.',
+                        dday: 'D-11',
+                        agency: '중소벤처기업부',
+                        region: '경북테크노파크',
+                        desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
+                        target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
+                        detailHref: '#',
+                        liked: true,
+                    },
+                    {
+                        badge: '중기부',
+                        category: '창업',
+                        deadline: false,
+                        status: '접수중',
+                        title: '[경북] 울진군 2026년 2차 블루(blue)푸드 산업 활성화 지원사업 기업지원 프로그램 참여기업 모집 공고',
+                        date: '2026.05.13. ~ 2026.05.27.',
+                        dday: 'D-11',
+                        agency: '중소벤처기업부',
+                        region: '경북테크노파크',
+                        desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
+                        target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
+                        detailHref: '#',
+                        liked: false,
+                    },
+                ],
+            },
+            {
+                title: '정책자금',
+                cards: [
+                    {
+                        badge: '중기부',
+                        category: '금융',
+                        deadline: true,
+                        title: '2026년 소상공인 투자연계 지원사업 립스(LIPS) 프로그램 소상공...',
+                        date: '2026.05.06. ~ 2026.05.17',
+                        dday: 'D-3',
+                        agency: '중소벤처기업부',
+                        region: '경북테크노파크',
+                        desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
+                        target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
+                        detailHref: '#',
+                        liked: false,
+                    },
+                    {
+                        badge: '중기부',
+                        category: '금융',
+                        deadline: true,
+                        title: '2026년 소상공인 투자연계 지원사업 립스(LIPS) 프로그램 소상공...',
+                        date: '2026.05.06. ~ 2026.05.17',
+                        dday: 'D-3',
+                        agency: '중소벤처기업부',
+                        region: '경북테크노파크',
+                        desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
+                        target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
+                        detailHref: '#',
+                        liked: false,
+                    },
+                ],
+            },
+            {
+                title: 'R&D',
+                cards: [
+                    {
+                        badge: '중기부',
+                        category: '기술',
+                        title: '[경북] 경주시 2026년 2차 e-모빌리티산업 생태계 고도화...',
+                        date: '2026.05.13. ~ 2026.05.26',
+                        dday: 'D-12',
+                        agency: '중소벤처기업부',
+                        region: '경북테크노파크',
+                        desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
+                        target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
+                        detailHref: '#',
+                        liked: false,
+                    },
+                    {
+                        badge: '중기부',
+                        category: '기술',
+                        title: '[경북] 경주시 2026년 2차 e-모빌리티산업 생태계 고도화...',
+                        date: '2026.05.13. ~ 2026.05.26',
+                        dday: 'D-12',
+                        agency: '중소벤처기업부',
+                        region: '경북테크노파크',
+                        desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
+                        target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
+                        detailHref: '#',
+                        liked: false,
+                    },
+                ],
+            },
+            {
+                title: '소상공인',
+                cards: [
+                    {
+                        badge: '중기부',
+                        category: '소상공인',
+                        title: '2026년 대한민국 브랜드 소상공인 점포형 사업',
+                        date: '2026.05.11. ~ 2026.05.29',
+                        dday: 'D-15',
+                        agency: '중소벤처기업부',
+                        region: '경북테크노파크',
+                        desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
+                        target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
+                        detailHref: '#',
+                        liked: true,
+                    },
+                    {
+                        badge: '중기부',
+                        category: '소상공인',
+                        title: '2026년 대한민국 브랜드 소상공인 점포형 사업',
+                        date: '2026.05.11. ~ 2026.05.29',
+                        dday: 'D-15',
+                        agency: '중소벤처기업부',
+                        region: '경북테크노파크',
+                        desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
+                        target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
+                        detailHref: '#',
+                        liked: true,
+                    },
+                ],
+            },
+        ],
 
-    local: [
-        {
-            title: '수도권',
-            cards: [
-                {
-                    badge: '서울',
-                    category: '창업',
-                    title: '[서울] 2026년 지역 창업기업 성장지원 사업 참여기업 모집...',
-                    date: '2026.05.12. ~ 2026.05.25',
-                    dday: 'D-11',
-                    liked: true,
-                },
-                {
-                    badge: '경기',
-                    category: '금융',
-                    title: '[경기] 2026년 소상공인 정책자금 지원사업 신청 공고...',
-                    date: '2026.05.06. ~ 2026.05.17',
-                    dday: 'D-3',
-                    deadline: true,
-                },
-            ],
-        },
-        {
-            title: '충청권',
-            cards: [
-                {
-                    badge: '대전',
-                    category: '기술',
-                    title: '[대전] 2026년 지역특화 기술개발 지원사업 참여기업 모집...',
-                    date: '2026.05.13. ~ 2026.05.26',
-                    dday: 'D-12',
-                },
-                {
-                    badge: '충북',
-                    category: '경영',
-                    title: '[충북] 중소기업 경영혁신 바우처 지원사업 참여기업 모집...',
-                    date: '2026.05.08. ~ 2026.06.07',
-                    dday: 'D-15',
-                },
-            ],
-        },
-        {
-            title: '경상권',
-            cards: [
-                {
-                    badge: '대구',
-                    category: '기술',
-                    title: '[대구] 지역특화 기술개발 지원사업 참여기업 모집...',
-                    date: '2026.05.13. ~ 2026.05.26',
-                    dday: 'D-12',
-                },
-                {
-                    badge: '부산',
-                    category: '창업',
-                    title: '[부산] 2026년 스타트업 육성 지원사업 참여기업 모집...',
-                    date: '2026.05.12. ~ 2026.05.25',
-                    dday: 'D-11',
-                },
-            ],
-        },
-        {
-            title: '전라권',
-            cards: [
-                {
-                    badge: '전북',
-                    category: '소상공인',
-                    title: '[전북] 2026년 소상공인 점포환경 개선사업 모집 공고...',
-                    date: '2026.05.11. ~ 2026.05.29',
-                    dday: 'D-15',
-                },
-                {
-                    badge: '광주',
-                    category: '기술',
-                    title: '[광주] 중소기업 기술혁신 지원사업 참여기업 모집...',
-                    date: '2026.05.13. ~ 2026.05.26',
-                    dday: 'D-12',
-                },
-            ],
-        },
-    ],
-  };
+        local: [
+            {
+                title: '수도권',
+                cards: [
+                    {
+                        badge: '서울',
+                        category: '창업',
+                        title: '[서울] 2026년 지역 창업기업 성장지원 사업 참여기업 모집...',
+                        date: '2026.05.12. ~ 2026.05.25',
+                        dday: 'D-11',
+                        liked: true,
+                    },
+                    {
+                        badge: '경기',
+                        category: '금융',
+                        title: '[경기] 2026년 소상공인 정책자금 지원사업 신청 공고...',
+                        date: '2026.05.06. ~ 2026.05.17',
+                        dday: 'D-3',
+                        deadline: true,
+                    },
+                ],
+            },
+            {
+                title: '충청권',
+                cards: [
+                    {
+                        badge: '대전',
+                        category: '기술',
+                        title: '[대전] 2026년 지역특화 기술개발 지원사업 참여기업 모집...',
+                        date: '2026.05.13. ~ 2026.05.26',
+                        dday: 'D-12',
+                    },
+                    {
+                        badge: '충북',
+                        category: '경영',
+                        title: '[충북] 중소기업 경영혁신 바우처 지원사업 참여기업 모집...',
+                        date: '2026.05.08. ~ 2026.06.07',
+                        dday: 'D-15',
+                    },
+                ],
+            },
+            {
+                title: '경상권',
+                cards: [
+                    {
+                        badge: '대구',
+                        category: '기술',
+                        title: '[대구] 지역특화 기술개발 지원사업 참여기업 모집...',
+                        date: '2026.05.13. ~ 2026.05.26',
+                        dday: 'D-12',
+                    },
+                    {
+                        badge: '부산',
+                        category: '창업',
+                        title: '[부산] 2026년 스타트업 육성 지원사업 참여기업 모집...',
+                        date: '2026.05.12. ~ 2026.05.25',
+                        dday: 'D-11',
+                    },
+                ],
+            },
+            {
+                title: '전라권',
+                cards: [
+                    {
+                        badge: '전북',
+                        category: '소상공인',
+                        title: '[전북] 2026년 소상공인 점포환경 개선사업 모집 공고...',
+                        date: '2026.05.11. ~ 2026.05.29',
+                        dday: 'D-15',
+                    },
+                    {
+                        badge: '광주',
+                        category: '기술',
+                        title: '[광주] 중소기업 기술혁신 지원사업 참여기업 모집...',
+                        date: '2026.05.13. ~ 2026.05.26',
+                        dday: 'D-12',
+                    },
+                ],
+            },
+        ],
+    };
 
-  const [activeGovTab, setActiveGovTab] = useState("central");
-  const currentSupportGroups = supportData?.[activeGovTab] || [];
+    const [activeGovTab, setActiveGovTab] = useState("central");
+    const currentSupportGroups = supportData?.[activeGovTab] || [];
 
-  const isUrgentDday = (dday) => {
-  const day = Number(String(dday).replace('D-', ''));
-  return !Number.isNaN(day) && day <= 3;
-};
+    const getNoticeStatus = (dday) => {
+        const day = Number(String(dday).replace('D-', ''));
+        if (!Number.isNaN(day) && day <= 3) {
+            return '마감임박';
+        }
+        return '접수중';
+    };
+    const isUrgentDday = (dday) => {
+        const day = Number(String(dday).replace('D-', ''));
+        return !Number.isNaN(day) && day <= 3;
+    };
 
-  // notice (공지사항, 자주하는 질문, 정책 뉴스)
-  const [noticeActiveIndex, setNoticeActiveIndex] = useState(0); //기본값 0(공지사항)
-  const noticeTabMenu = ["자주찾는 질문", "행사정보", "자료실",  "새로운 뉴스"];
+    // notice (공지사항, 자주하는 질문, 정책 뉴스)
+    const [noticeActiveIndex, setNoticeActiveIndex] = useState(0); //기본값 0(공지사항)
+    const noticeTabMenu = ["자주찾는 질문", "행사정보", "자료실",  "새로운 뉴스"];
 
-  // 지금 이용 가능한 서비스 - 사업공고 좋아요 버튼
+    // 지금 이용 가능한 서비스 - 사업공고 좋아요 버튼
     const [likedAnnounce, setLikedAnnounce] = useState({ 0: true, 4: true });
-  // 지금 이용 가능한 서비스 - 지원사업 소개 좋아요 버튼
-  const [likedBusiness, setLikedBusiness] = useState({});
-  // 지금 이용 가능한 서비스 - 정책금융 좋아요 버튼
-  const [likedPolicy, setLikedPolicy] = useState({});
+    // 지금 이용 가능한 서비스 - 지원사업 소개 좋아요 버튼
+    const [likedBusiness, setLikedBusiness] = useState({});
+    // 지금 이용 가능한 서비스 - 정책금융 좋아요 버튼
+    const [likedPolicy, setLikedPolicy] = useState({});
 
   // 지금 이용 가능한 서비스 - 사업공고 좋아요 toggle
   const handleToggleLike1 = (index) => {
@@ -409,151 +413,165 @@ useEffect(() => {
     }));
   };
   // 지금 이용 가능한 서비스 - 사업공고 좋아요 toggle
-  const handleToggleLike3 = (index) => {
-    setLikedPolicy(prev => ({
-      ...prev,
-      [index]: !prev[index]
-    }));
-  };
+    const handleToggleLike3 = (index) => {
+        setLikedPolicy(prev => ({
+        ...prev,
+        [index]: !prev[index]
+        }));
+    };
 
-  const ddayList = ['D-11', 'D-3', 'D-12', 'D-15', 'D-11', 'D-3', 'D-12', 'D-15'];
+    const ddayList = ['D-11', 'D-3', 'D-12', 'D-15', 'D-11', 'D-3', 'D-12', 'D-15'];
     const supportCards = [
-    { dday: 'D-11' },
-    { dday: 'D-3' },
-    { dday: 'D-12' },
-    { dday: 'D-15' },
-    { dday: 'D-11' },
-    { dday: 'D-3' },
-    { dday: 'D-12' },
-    { dday: 'D-15' },
-];
-  // 주요 소식 및 안내
-  const [isPlaying, setIsPlaying] = useState(true);
-  const swiperRef = useRef(null);
+        { dday: 'D-11' },
+        { dday: 'D-3' },
+        { dday: 'D-12' },
+        { dday: 'D-15' },
+        { dday: 'D-11' },
+        { dday: 'D-3' },
+        { dday: 'D-12' },
+        { dday: 'D-15' },
+    ];
+    // 주요 소식 및 안내
+    const [isPlaying, setIsPlaying] = useState(true);
+    const swiperRef = useRef(null);
 
-  const toggleAutoplay = () => {
-    if (!swiperRef.current) return;
-    if (isPlaying) {
-      swiperRef.current.autoplay.stop();
-    } else {
-      swiperRef.current.autoplay.start();
-    }
-    setIsPlaying(!isPlaying);
-  };
-  const todayNoticeCards = [
-    {
-        badge: '중기부',
-        category: '창업',
-        status: '접수중',
-        title: '[경북] 울진군 2026년 2차 블루(blue)푸드 산업 활성화 지원사업 계획 공고입니다. 일정은 다음과 같습니다.',
-        date: '2026.05.13. ~ 2026.05.27.',
-        dday: 'D-11',
-        agency: '중소벤처기업부',
-        region: '경북테크노파크',
-        desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
-        target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
-        detailHref: '#',
-    },
-    {
-        badge: '중기부',
-        category: '경영',
-        status: '마감임박',
-        title: '[경북] 청주시 2026년 2차 e-모빌리티 산업 생태계 고도화를 위한 기업지원사업 공고',
-        date: '2026.05.13. ~ 2026.05.27.',
-        dday: 'D-3',
-        agency: '중소벤처기업부',
-        region: '경북테크노파크',
-        desc: '지역 중소기업의 경쟁력 강화를 위한 기업지원 프로그램을 안내하오니, 참여를 희망하는 기업은 신청 바랍니다.',
-        target: '해당 지원을 필요로 하는 지역 중소기업',
-        detailHref: '#',
-    },
-];
-const weekNoticeCards = [
-    {
-        date: '5.18.',
-        day: '(월)',
-        list: [
-            {
-                badge: '중기부',
-                category: '창업',
-                status: '접수중',
-                title: '[경북] 울진군 2026년 2차 블루(blue) 푸드산업 활성화 지원사업 기업지원 프로그램 참여기업 모집 공고',
-                dateText: '2026.05.13. ~ 2026.05.27.',
-                dday: 'D-11',
-                agency: '중소벤처기업부',
-                region: '경북테크노파크',
-                desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
-                target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
-                detailHref: '#',
-            },
-            {
-                badge: '중기부',
-                category: '경영',
-                status: '마감임박',
-                title: '[경북] 청주시 2026년 2차 e-모빌리티 산업 생태계 고도화 지원사업 공고',
-                dateText: '2026.05.13. ~ 2026.05.27.',
-                dday: 'D-3',
-                agency: '중소벤처기업부',
-                region: '경북테크노파크',
-                desc: '지역 중소기업의 경쟁력 강화를 위한 기업지원 프로그램을 안내하오니, 참여를 희망하는 기업은 신청 바랍니다.',
-                target: '해당 지원을 필요로 하는 지역 중소기업',
-                detailHref: '#',
-            },
-            {
-                badge: '중기부',
-                category: '기술',
-                status: '접수중',
-                title: '[세종] 2026년 연고자원 활용 푸드테크산업 육성용 지원사업 공고',
-                dateText: '2026.05.13. ~ 2026.05.27.',
-                dday: 'D-12',
-                agency: '중소벤처기업부',
-                region: '세종테크노파크',
-                desc: '지역 연고자원을 활용한 푸드테크산업 육성을 위한 지원사업입니다.',
-                target: '세종 지역 내 푸드테크 관련 중소기업',
-                detailHref: '#',
-            },
-        ],
-    },
-    {
-        date: '5.19.',
-        day: '(화)',
-        list: [
-            {
-                badge: '중기부',
-                category: '기술',
-                status: '마감임박',
-                title: '2026년 AX디바이스 개발ㆍ실증(정규트랙) 사업 공고',
-                dateText: '2026.05.13. ~ 2026.05.27.',
-                dday: 'D-3',
-                agency: '중소벤처기업부',
-                region: '전담기관',
-                desc: 'AX디바이스 개발 및 실증을 지원하기 위한 사업입니다.',
-                target: 'AX디바이스 개발 및 실증을 희망하는 중소기업',
-                detailHref: '#',
-            },
-        ],
-    },
-    {
-        date: '5.20.',
-        day: '(수)',
-        list: [
-            {
-                badge: '중기부',
-                category: '창업',
-                status: '접수중',
-                title: '2026년 창업패키지 AI인재성장형 창업 기업 모집 공고',
-                dateText: '2026.05.13. ~ 2026.05.27.',
-                dday: 'D-12',
-                agency: '중소벤처기업부',
-                region: '창업진흥원',
-                desc: 'AI 분야 창업기업의 성장을 지원하기 위한 창업패키지 사업입니다.',
-                target: 'AI 분야 창업기업 및 예비창업자',
-                detailHref: '#',
-            },
-        ],
-    },
-];
+    const toggleAutoplay = () => {
+        if (!swiperRef.current) return;
+        if (isPlaying) {
+        swiperRef.current.autoplay.stop();
+        } else {
+        swiperRef.current.autoplay.start();
+        }
+        setIsPlaying(!isPlaying);
+    };
+    const todayNoticeCards = [
+        {
+            badge: '중기부',
+            category: '창업',
+            status: '접수중',
+            title: '[경북] 울진군 2026년 2차 블루(blue)푸드 산업 활성화 지원사업 계획 공고입니다. 일정은 다음과 같습니다.',
+            date: '2026.05.13. ~ 2026.05.27.',
+            dday: 'D-11',
+            agency: '중소벤처기업부',
+            region: '경북테크노파크',
+            desc: '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 울진군 지역 중소기업의 많은 신청 바랍니다.',
+            target: '경북 내 블루푸드 관련 지역기업 중 해당 지원을 필요로 하는 기업',
+            detailHref: '#',
+        },
+        {
+            badge: '중기부',
+            category: '경영',
+            status: '마감임박',
+            title: '[경북] 청주시 2026년 2차 e-모빌리티 산업 생태계 고도화를 위한 기업지원사업 공고',
+            date: '2026.05.13. ~ 2026.05.27.',
+            dday: 'D-3',
+            agency: '중소벤처기업부',
+            region: '경북테크노파크',
+            desc: '지역 중소기업의 경쟁력 강화를 위한 기업지원 프로그램을 안내하오니, 참여를 희망하는 기업은 신청 바랍니다.',
+            target: '해당 지원을 필요로 하는 지역 중소기업',
+            detailHref: '#',
+        },
+    ];
+    const currentWeek = {
+    period: '2026.06.01.~2026.06.07',
+    days: [
+        {
+            date: '6.1.',
+            day: '(월)',
+            list: [
+                { dday: 'D-3', status:'마감임박', badge: '중기부', title: '협업형 지역생활경제 활성화 시범사업 공고' },
+                { dday: 'D-2', status:'접수중',badge: '중기부', title: '[경남] 2026년 제30회 중소기업대상 포상...' },
+                { dday: 'D-25', status:'접수중',badge: '중기부', title: '[충청권 · 호남권] 2026년 2차 충청호남권...' },
+            ],
+        },
+        {
+            date: '6.2.',
+            day: '(화)',
+            list: [
+                { dday: 'D-4', status:'접수중',badge: '중기부', title: '2026년 미국 뉴욕 치과 전시회(GNYDM) 참가기업 모집 공고' },
+                { dday: 'D-8', status:'접수중',badge: '중기부', title: '[서울] 창업기업 판로개척 지원사업 모집 공고' },
+                { dday: 'D-12', status:'접수중',badge: '중기부', title: '중소기업 ESG 경영 컨설팅 지원사업 공고' },
+            ],
+        },
+        {
+            date: '6.3.',
+            day: '(수)',
+            list: [
+                { dday: 'D-14', badge: '중기부', title: '2026년 중견기업-스타트업 오픈이노베이션 지원사업 공고' },
+                { dday: 'D-16', badge: '중기부', title: '지역특화산업 육성사업 참여기업 모집' },
+                { dday: 'D-19', badge: '중기부', title: '기술혁신형 중소기업 R&D 지원사업 공고' },
+            ],
+        },
+        {
+            date: '6.4.',
+            day: '(목)',
+            list: [
+                { dday: 'D-9', badge: '중기부', title: '2026년 수출바우처 참여기업 모집 공고' },
+                { dday: 'D-13', badge: '중기부', title: '중소기업 온라인 판로지원 사업 공고' },
+                { dday: 'D-21', badge: '중기부', title: '스마트공장 보급확산 지원사업 모집' },
+            ],
+        },
+        {
+            date: '6.5.',
+            day: '(금)',
+            list: [
+                { dday: 'D-7', badge: '중기부', title: '소상공인 디지털 전환 지원사업 모집 공고' },
+                { dday: 'D-10', badge: '중기부', title: '창업기업 투자연계 지원사업 모집' },
+                { dday: 'D-15', badge: '중기부', title: '글로벌 진출 지원 프로그램 참여기업 모집' },
+            ],
+        },
+        {
+            date: '6.6.',
+            day: '(토)',
+            list: [
+                { dday: 'D-20', badge: '중기부', title: '지역특화산업 육성사업 참여기업 모집' },
+                { dday: 'D-22', badge: '중기부', title: '사회적경제기업 성장지원 사업 공고' },
+                { dday: 'D-26', badge: '중기부', title: '중소기업 브랜드 개발 지원사업 모집' },
+            ],
+        },
+        {
+            date: '6.7.',
+            day: '(일)',
+            list: [
+                { dday: 'D-15', badge: '중기부', title: '창업기업 성장지원 프로그램 참여기업 모집' },
+                { dday: 'D-17', badge: '중기부', title: '소상공인 경영환경 개선사업 공고' },
+                { dday: 'D-23', badge: '중기부', title: '지역 창업생태계 활성화 지원사업 모집' },
+            ],
+        },
+    ],
+    };
+    const [activeDayIndex, setActiveDayIndex] = useState(0);
+    const weekDays = currentWeek.days;
+    const getVisibleStartIndex = () => {
+        if (activeDayIndex <= 2) {
+            return 0;
+        }
+        return activeDayIndex - 2;
+    };
+
+    const visibleStartIndex = getVisibleStartIndex();
+
+    const visibleWeekDays = weekDays.slice(
+        visibleStartIndex,
+        visibleStartIndex + 3
+    );
+
+    const handleWeekRotate = (direction) => {
+        setActiveDayIndex((prev) => {
+            const total = weekDays.length;
+
+            if (direction === 'up') {
+            return prev === 0 ? total - 1 : prev - 1;
+            }
+
+            return prev === total - 1 ? 0 : prev + 1;
+        });
+    };
+    const weekListRef = useRef(null);
+
+
     const [selectedNotice, setSelectedNotice] = useState(null);
+
     const openNoticeLayer = (card) => {
         setSelectedNotice(card);
     };
@@ -733,9 +751,6 @@ const weekNoticeCards = [
                                         <div className="item-top">
                                             <span className="krds-badge">{card.badge}</span>
                                             <span className="category">{card.category}</span>
-                                            {/* <strong className={`krds-label state ${card.status === '마감임박' ? 'danger' : ''}`}>
-                                                {card.status}
-                                            </strong> */}
                                             <strong className={`krds-label state ${isUrgentDday(card.dday) ? 'danger' : ''}`}>
                                                 {card.dday}
                                             </strong>
@@ -763,6 +778,80 @@ const weekNoticeCards = [
                             <div className="calendar-card">
                                 <div className="calendar-card-head">
                                     <h3>이번 주 공고</h3>
+
+                                    <div className="week-controls">
+                                        <button
+                                            type="button"
+                                            className="krds-btn week-rotate-btn up"
+                                            aria-label="이전 날짜 보기"
+                                            onClick={() => handleWeekRotate('up')}
+                                        >
+                                            <i className="svg-icon ico-angle up"></i>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="krds-btn week-rotate-btn down"
+                                            aria-label="다음 날짜 보기"
+                                            onClick={() => handleWeekRotate('down')}
+                                        >
+                                            <i className="svg-icon ico-angle"></i>
+                                        </button>
+                                    </div>
+
+                                    <span className="period">{currentWeek.period}</span>
+                                </div>
+
+                                <div className="week-notice-list">
+                                    {visibleWeekDays.map((day) => {
+                                        const realDayIndex = weekDays.findIndex(
+                                        (item) => item.date === day.date && item.day === day.day
+                                        );
+
+                                        const isActive = realDayIndex === activeDayIndex;
+                                        const visibleList = isActive ? day.list.slice(0, 3) : day.list.slice(0, 1);
+
+                                        return (
+                                        <div
+                                            className={`week-item ${isActive ? 'is-active' : ''}`}
+                                            key={`${day.date}-${day.day}`}
+                                        >
+                                            <div className="week-date">
+                                            <strong>{day.date}</strong>
+                                            <span>{day.day}</span>
+                                            </div>
+
+                                            <ul className="week-list">
+                                            {visibleList.map((card, index) => (
+                                                <li key={index}>
+                                                <strong className={`krds-label state ${isUrgentDday(card.dday) ? 'danger' : ''}`}>
+                                                        {getNoticeStatus(card.dday)}
+                                                    </strong>
+                                                <span className="krds-badge bg-primary">{card.badge}</span>
+
+                                                <button
+                                                    type="button"
+                                                    className="week-notice-link onellipsis-1"
+                                                    onClick={() => openNoticeLayer(card)}
+                                                >
+                                                    {card.title}
+                                                </button>
+                                                </li>
+                                            ))}
+                                            </ul>
+                                        </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </article>
+                        <article className="calendar-box week-box" style={{ display: "none" }}>
+                            <div className="calendar-title-wrap">
+                                <h2 className="calendar-title">사업캘린더</h2>
+                            </div>
+                            <div className="calendar-card">
+                                <div className="calendar-card-head">
+                                    <h3>이번 주 공고</h3>
                                     <div className="week-controls">
                                         <button type="button" className="krds-btn" aria-label="이전 주">
                                             <i className="svg-icon ico-angle up"></i>
@@ -773,7 +862,7 @@ const weekNoticeCards = [
                                     </div>
                                     <span className="period">2026.05.18.~2026.05.24</span>
                                 </div>
-                                {weekNoticeCards.map((day, dayIndex) => (
+                                {/*weekNoticeCards.map((day, dayIndex) => (
                                     <div className={`week-item ${dayIndex === 0 ? 'is-active' : ''}`} key={dayIndex}>
                                         <div className="week-date">
                                             <strong>{day.date}</strong>
@@ -798,7 +887,7 @@ const weekNoticeCards = [
                                             ))}
                                         </ul>
                                     </div>
-                                ))}
+                                ))*/}
                             </div>
                         </article>
 
