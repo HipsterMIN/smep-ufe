@@ -245,10 +245,10 @@ export default function Header() {
     window.location.href = onePassJoinUrl;
   };
 
+
+  const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
   const handleLogout = async () => {
     let logoutUrl = null;
-
-    const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
 
     // if(isSsoLogin) {
     //   try {
