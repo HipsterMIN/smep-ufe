@@ -1,4 +1,4 @@
-@import "./_icons";
+@use "./_icons";
 *, *::before, *::after {box-sizing:border-box}
 #wrap{overflow-x:hidden}
 .container{padding:0 30px;margin-right:auto;margin-left:auto;}

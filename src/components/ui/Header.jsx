@@ -437,10 +437,10 @@ export default function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (isMobile()) {
+      /*if (isMobile()) {
         setIsHeaderVisible(true);
         return;
-      }
+      }*/
 
       const currentScrollY = Math.max(0, window.scrollY); // 음수 방지
       const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;

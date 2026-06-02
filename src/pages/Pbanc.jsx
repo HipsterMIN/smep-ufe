@@ -10,7 +10,7 @@ import { appendListSearchToPath, getNumberSearchParam, getSearchParam, setQueryP
 import { useUserMenu } from '../context/UserMenuContext';
 
 const DEFAULT_SIZE = 10;
-const DEFAULT_SORT = 'REG';
+const DEFAULT_SORT = '';
 const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
 
 const Pbanc = () => {
@@ -214,13 +214,13 @@ const Pbanc = () => {
             <select className="krds-form-select medium" aria-label="검색구분 선택" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
               <option value="">전체</option>
               <option value="pbancnm">공고명</option>
-              <option value="sprvsnInstNm">사업수행기관</option>
+              <option value="sprvsnInstNm">소관부처·지자체</option>
             </select>
             <div className="sch-input">
               <input
                 type="text"
                 className="krds-input medium"
-                placeholder="공고명, 사업수행기관으로 검색해 주세요."
+                placeholder="공고명, 소관부처·지자체로 검색해 주세요."
                 title="검색어 입력"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
@@ -331,7 +331,7 @@ const Pbanc = () => {
                 <th scope="col" className="ac">제목</th>
                 <th scope="col" className="ac">신청기간</th>
                 <th scope="col" className="ac">신청</th>
-                <th scope="col" className="ac">사업수행기관</th>
+                <th scope="col" className="ac">소관부처·지자체</th>
                 <th scope="col" className="ac">조회수</th>
               </tr>
             </thead>

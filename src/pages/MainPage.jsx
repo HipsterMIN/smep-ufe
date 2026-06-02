@@ -216,7 +216,7 @@ const MainPage = () => {
     },
     {
       img: mainIcon04,
-      title: '정책금융상품',
+      title: '정책금융',
       path: '/req/UI_USR_L_030',
     },
     {
@@ -692,6 +692,11 @@ const MainPage = () => {
       return Math.min(Math.max(prev + direction, 0), maxIndex);
     });
   };
+  const handleWeekDateKeyDown = (event, dayIndex) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    setActiveWeekIndex(dayIndex);
+  };
   const handlePopupClose = (popupId) =>
     setHiddenPopupIds((prev) => [...new Set([...prev, popupId])]);
   const handlePopupHideToday = (popupId) => {
@@ -1090,7 +1095,15 @@ const MainPage = () => {
 
                     return (
                       <div className={`week-item ${isActive ? 'is-active' : ''}`} key={day.date || dayIndex}>
-                        <div className="week-date">
+                        <div
+                          className="week-date"
+                          role="button"
+                          tabIndex={0}
+                          aria-pressed={isActive}
+                          aria-label={`${day.date}${day.day} 공고 보기`}
+                          onClick={() => setActiveWeekIndex(dayIndex)}
+                          onKeyDown={(event) => handleWeekDateKeyDown(event, dayIndex)}
+                        >
                           <strong>{day.date}</strong>
                           <span>{day.day}</span>
                         </div>
@@ -1521,9 +1534,10 @@ const MainPage = () => {
               </div>
 
               <div className="notice-right">
-                <div className="main-banner">
+                <div className="main-banner" style={{ maxHeight: '368px', maxWidth: '490px' }}>
                   <Swiper
                     modules={[Navigation, Pagination, Autoplay]}
+                    style={{maxWidth: '370px'}}
                     navigation={{
                       prevEl: '.main-banner .swiper-button-prev',
                       nextEl: '.main-banner .swiper-button-next',
