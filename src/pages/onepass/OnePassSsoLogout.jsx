@@ -15,18 +15,32 @@ const OnePassSsoLogout = () => {
     });
 
     window.sessionStorage.removeItem('keycloak_state');
+
     useAuthStore.getState().logout();
+    
     console.log(`${LOG_PREFIX} local logout completed`, {
       isLogin: Boolean(useAuthStore.getState().isLogin),
     });
-
     console.log(`${LOG_PREFIX} navigate home`, {
       to: '/',
       reason: 'onepass-logout-callback-complete',
     });
+
     navigate('/', { replace: true });
+    
   }, [navigate]);
 
+
+
+
+
+
+
+
+
+
+
+  
   return (
     <div
       style={{

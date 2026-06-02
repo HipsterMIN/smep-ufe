@@ -248,6 +248,28 @@ export default function Header() {
   const handleLogout = async () => {
     let logoutUrl = null;
 
+    const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
+
+    // if(isSsoLogin) {
+    //   try {
+    //     const response = await apiClient.post('/api/v1/auth/keycloak/getIdTokenStr');
+    //     console.log('/api/v1/auth/keycloak/getIdTokenStr response = ' + response);  
+
+    //     logoutUrl = 'https://isso.smes.go.kr/qsign/realms/ucube-qsign/protocol/openid-connect/logout?';
+    //     logoutUrl = logoutUrl + 'id_token_hint=' + response;
+    //     logoutUrl = logoutUrl + 'post_logout_redirect_uri=https://www.smes.go.kr/home-dev/sso-logout';
+
+    //     logout();   // 로컬 logout 수행
+
+    //     if (logoutUrl) {
+    //       window.location.href = logoutUrl;
+    //       return;
+    //     }
+    //   } catch (error) {
+
+    //   }
+    // }
+
     try {
       const response = await apiClient.post('/api/v1/auth/keycloak/logout');
       const responseData = response?.data || response;
@@ -265,12 +287,15 @@ export default function Header() {
 
     // 로컬 로그아웃은 항상 수행하고, OnePass 세션이 있으면 외부 logout redirect를 이어서 태운다.
     logout();
+    
     if (logoutUrl) {
       window.location.href = logoutUrl;
       return;
+    } else {
+      navigate('/');
     }
 
-    navigate('/');
+    //navigate('/');
   };
 
   const handleExtendSession = async () => {
