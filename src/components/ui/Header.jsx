@@ -245,55 +245,64 @@ export default function Header() {
     window.location.href = onePassJoinUrl;
   };
 
-
+  const readEnv = (key) => String(import.meta.env[key] || '').trim();
+  const trimTrailingSlash = (value) => value.replace(/\/+$/, '');
   const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
   const handleLogout = async () => {
-    let logoutUrl = null;
+    let logoutUrl = "";
 
-    // if(isSsoLogin) {
-    //   try {
-    //     const response = await apiClient.post('/api/v1/auth/keycloak/getIdTokenStr');
-    //     console.log('/api/v1/auth/keycloak/getIdTokenStr response = ' + response);  
+    if(isSsoLogin) {
+      try {
+        const response = await apiClient.post('/api/v1/auth/keycloak/getIdTokenStr');
+        console.log('/api/v1/auth/keycloak/getIdTokenStr response = ' + response);  
 
-    //     logoutUrl = 'https://isso.smes.go.kr/qsign/realms/ucube-qsign/protocol/openid-connect/logout?';
-    //     logoutUrl = logoutUrl + 'id_token_hint=' + response;
-    //     logoutUrl = logoutUrl + 'post_logout_redirect_uri=https://www.smes.go.kr/home-dev/sso-logout';
+        const qsignUrl = trimTrailingSlash(readEnv('VITE_QSIGN_URL'));
+        const redirUrl = trimTrailingSlash(readEnv('VITE_ONEPASS_REDIRECT_HOME_URI'));
+        //const qsignRealm = trimTrailingSlash(readEnv('VITE_QSIGN_REALM'));
 
-    //     logout();   // 로컬 logout 수행
+        logoutUrl = qsignUrl + '/qsign/realms/ucube-qsign/protocol/openid-connect/logout?';
+        logoutUrl = logoutUrl + 'id_token_hint=' + response;
+        logoutUrl = logoutUrl + 'post_logout_redirect_uri=' + redirUrl + 'sso-logout';
 
-    //     if (logoutUrl) {
-    //       window.location.href = logoutUrl;
-    //       return;
-    //     }
-    //   } catch (error) {
+        logout();   // 로컬 logout 수행
 
-    //   }
-    // }
+        if (logoutUrl) {
+          window.location.href = logoutUrl;
+          return;
+        }
+      } catch (error) {
 
-    try {
-      const response = await apiClient.post('/api/v1/auth/keycloak/logout');
-      const responseData = response?.data || response;
-      logoutUrl = responseData?.logoutUrl || responseData?.data?.logoutUrl || null;
-      console.log('[Header] keycloak logout url resolved', {
-        hasLogoutUrl: Boolean(logoutUrl),
-        logoutUrlLength: logoutUrl?.length ?? 0,
-      });
-    } catch (error) {
-      console.error('[Header] failed to fetch keycloak logout url', {
-        message: error?.message ?? 'unknown-error',
-        status: error?.status ?? null,
-      });
+      }
     }
-
-    // 로컬 로그아웃은 항상 수행하고, OnePass 세션이 있으면 외부 logout redirect를 이어서 태운다.
-    logout();
-    
-    if (logoutUrl) {
-      window.location.href = logoutUrl;
-      return;
-    } else {
+    else {
+      logout();   // 로컬 logout 수행
       navigate('/');
     }
+
+    // try {
+    //   const response = await apiClient.post('/api/v1/auth/keycloak/logout');
+    //   const responseData = response?.data || response;
+    //   logoutUrl = responseData?.logoutUrl || responseData?.data?.logoutUrl || null;
+    //   console.log('[Header] keycloak logout url resolved', {
+    //     hasLogoutUrl: Boolean(logoutUrl),
+    //     logoutUrlLength: logoutUrl?.length ?? 0,
+    //   });
+    // } catch (error) {
+    //   console.error('[Header] failed to fetch keycloak logout url', {
+    //     message: error?.message ?? 'unknown-error',
+    //     status: error?.status ?? null,
+    //   });
+    // }
+
+    // // 로컬 로그아웃은 항상 수행하고, OnePass 세션이 있으면 외부 logout redirect를 이어서 태운다.
+    // logout();
+    
+    // if (logoutUrl) {
+    //   window.location.href = logoutUrl;
+    //   return;
+    // } else {
+    //   navigate('/');
+    // }
 
     //navigate('/');
   };
