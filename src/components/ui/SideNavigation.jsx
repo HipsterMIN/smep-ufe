@@ -1,13 +1,25 @@
 // src/components/ui/SideNavigation.jsx
 
 import React, { useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useSidebarStore } from '@store/useSidebarStore';
 import { extractExternalUrl } from '@utils/menuUtils.js';
+
+const SERVICE_USAGE_HISTORY_MENU_ID = 'M_PIIO_00108';
 
 const SideNavigation = ({ pageTitle, menuItems = [] }) => {
   const { openMenus, toggleMenu, setOpenMenu } = useSidebarStore();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleParentMenuClick = (item, index) => {
+    if (item.menuId === SERVICE_USAGE_HISTORY_MENU_ID && item.link) {
+      navigate(item.link);
+      return;
+    }
+
+    toggleMenu(index);
+  };
 
   useEffect(() => {
     menuItems.forEach((item, index) => {
@@ -48,7 +60,7 @@ const SideNavigation = ({ pageTitle, menuItems = [] }) => {
                     role="menuitem"
                     aria-controls={menuId}
                     aria-expanded={isOpen ? 'true' : 'false'}
-                    onClick={() => toggleMenu(index)}
+                    onClick={() => handleParentMenuClick(item, index)}
                   >
                     {item.menuNm}
                   </button>
