@@ -576,9 +576,14 @@ export default function AdditionalInfoRequiredGate() {
 
     let logoutUrl = null;
     try {
-      const response = await apiClient.post('/api/v1/auth/keycloak/logout');
+      // kcIdToken: SSO callback 시 수신하여 store에 보관 중인 Keycloak id_token.
+      // 서버는 HttpSession에서 id_token을 읽지 않으므로(STATELESS) body로 전달한다.
+      const kcIdToken = useAuthStore.getState().kcIdToken;
+      const response = await apiClient.post('/api/v1/auth/keycloak/logout', {
+        idToken: kcIdToken || null,
+      });
       const responseData = response?.data || response;
-      logoutUrl = responseData?.logoutUrl || responseData?.data?.logoutUrl || null;
+      logoutUrl = responseData?.logoutUrl || null;
     } catch (error) {
       console.error('Failed to fetch keycloak logout url from additional-info modal:', {
         message: error?.message ?? 'unknown-error',

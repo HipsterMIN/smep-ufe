@@ -41,15 +41,19 @@ const OnePassSsoCallback = () => {
 
     console.log('IN /sso    code='+ code);
 
-    // const state = params.get('state');
+    // state 파라미터를 수신하는지 로그로 관찰한다 (검증 재활성화 여부 판단 근거).
+    // OnePass SDK가 콜백에 state를 포함하는지 확인 후 검증 재활성화 여부를 결정한다.
+    // hasState=true 가 확인되면 검증 재활성화 PR을 별도로 진행한다.
+    const state = params.get('state');
     // const savedState = window.sessionStorage.getItem(KEYCLOAK_STATE_KEY);
     const callbackState = {
       queryKeys: Array.from(params.keys()),
       hasCode: Boolean(code),
       codeLength: code?.length ?? 0,
       stateValidationBypassed: true,
-      // hasState: Boolean(state),
-      // stateLength: state?.length ?? 0,
+      // OnePass 콜백에 state 파라미터가 포함되는지 관찰용
+      hasState: Boolean(state),
+      stateLength: state?.length ?? 0,
       // hasSavedState: Boolean(savedState),
       // savedStateLength: savedState?.length ?? 0,
       // stateMatches: Boolean(state && savedState && state === savedState),
@@ -90,16 +94,17 @@ const OnePassSsoCallback = () => {
     console.log(`${LOG_PREFIX} callback code check start`, callbackState);
 
     // state 검증은 임시 비활성화되어 있으며, code 자체가 없으면 백엔드가 authorization_code 교환을 할 수 없다.
-    // 이 분기는 원본처럼 alert 후 return만 수행한다.
+    // code 가 없는 비정상 콜백은 즉시 로그인 페이지로 이동해 불필요한 서버 요청을 방지한다.
     if (!code) {
       // 이 warn 는 code 가 비어 있는 비정상 콜백을 분리해서 보기 위한 로그다.
       // codeLength=0 인지와 queryKeys 에 code 자체가 없는지 함께 보면 외부 redirect 형식 문제를 빠르게 볼 수 있다.
       console.warn(`${LOG_PREFIX} missing code branch`, {
         ...callbackState,
-        action: 'alert-and-stop',
+        action: 'redirect-login',
       });
       //alert('코드가 없습니다.');
-      //return;
+      navigate('/service/login', { replace: true });
+      return;
     }
 
     // callback 처리의 핵심은 "현재 로컬 로그인 상태가 있느냐"에 따라 백엔드 경로를 나누는 것이다.
@@ -155,6 +160,11 @@ const OnePassSsoCallback = () => {
 
         const accessToken = responseData?.accessToken;
         const refreshToken = responseData?.refreshToken;
+        // kcIdToken: SSO callback 응답에서 수신한 Keycloak id_token.
+        // sessionStorage(Zustand persist)에 보관하고 로그아웃 시 서버에 전달한다.
+        // 서버는 HttpSession에 id_token을 저장하지 않으므로(STATELESS) FE가 보관 책임을 갖는다.
+        const kcIdToken = responseData?.kcIdToken || null;
+
         if (!accessToken || !refreshToken) {
           throw new Error('Case1 callback/local-login token response is incomplete');
         }
@@ -162,6 +172,7 @@ const OnePassSsoCallback = () => {
         console.log(`${LOG_PREFIX} account me start`, {
           endpoint: '/api/v1/account/me',
           hasAccessToken: Boolean(accessToken),
+          hasKcIdToken: Boolean(kcIdToken),
         });
         const profileResponse = await apiClient.get('/api/v1/account/me', { token: accessToken });
         const profile = profileResponse?.data || profileResponse;
@@ -170,7 +181,7 @@ const OnePassSsoCallback = () => {
           profileKeys: profile && typeof profile === 'object' ? Object.keys(profile) : [],
         });
 
-        useAuthStore.getState().ssoLogin({ token: accessToken, refreshToken, profile });
+        useAuthStore.getState().ssoLogin({ token: accessToken, refreshToken, kcIdToken, profile });
         //useAuthStore.getState().login({ token: accessToken, refreshToken, profile });
 
         console.log(`${LOG_PREFIX} auth store login saved`, {

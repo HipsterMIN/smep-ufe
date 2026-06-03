@@ -227,7 +227,7 @@ export default function Header() {
       return;
     }
 
-    if (currentMode === 'CORPORATE') {
+    if(currentMode === 'CORPORATE') {
       const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-business/information?redirect_uri=https://www.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-tipa-01&uuid=${uuid}`;
       console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
@@ -237,7 +237,7 @@ export default function Header() {
       window.location.href = onePassJoinUrl;
     }
     
-  };
+  }
 
   const handleOnePassJoin = () => {
     const onePassJoinUrl = buildOnePassRegisterUrl('member');
@@ -245,66 +245,54 @@ export default function Header() {
     window.location.href = onePassJoinUrl;
   };
 
-  const readEnv = (key) => String(import.meta.env[key] || '').trim();
-  const trimTrailingSlash = (value) => value.replace(/\/+$/, '');
   const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
-  const handleLogout = async () => {
-    let logoutUrl = '';
 
+  /**
+   * 로그아웃 핸들러.
+   *
+   * SSO 로그인인 경우:
+   *   1. store에 보관 중인 kcIdToken을 서버에 전달하여 Keycloak logout URL을 수신한다.
+   *   2. 로컬 상태(Zustand + sessionStorage)를 초기화한다.
+   *   3. 반환된 logoutUrl로 리다이렉트하여 Keycloak 세션도 종료한다.
+   *
+   * 일반 로그인인 경우:
+   *   로컬 상태만 초기화하고 홈으로 이동한다.
+   *
+   * 서버는 HttpSession에 id_token을 저장하지 않으므로(STATELESS)
+   * FE가 kcIdToken을 보관하여 전달하는 방식으로 동작한다.
+   */
+  const handleLogout = async () => {
     if (isSsoLogin) {
       try {
-        const response = await apiClient.post('/api/v1/auth/keycloak/getIdTokenStr');
-        console.log('/api/v1/auth/keycloak/getIdTokenStr response = ' + response);  
+        const kcIdToken = useAuthStore.getState().kcIdToken;
+        const response = await apiClient.post('/api/v1/auth/keycloak/logout', {
+          idToken: kcIdToken || null,
+        });
+        const responseData = response?.data || response;
+        const logoutUrl = responseData?.logoutUrl || null;
 
-        const qsignUrl = trimTrailingSlash(readEnv('VITE_QSIGN_URL'));
-        const redirUrl = trimTrailingSlash(readEnv('VITE_ONEPASS_REDIRECT_HOME_URI'));
-        //const qsignRealm = trimTrailingSlash(readEnv('VITE_QSIGN_REALM'));
+        console.log('[Header] SSO logout url resolved', {
+          hasLogoutUrl: Boolean(logoutUrl),
+          logoutUrlLength: logoutUrl?.length ?? 0,
+        });
 
-        logoutUrl = qsignUrl + '/qsign/realms/ucube-qsign/protocol/openid-connect/logout?';
-        logoutUrl = logoutUrl + 'id_token_hint=' + response;
-        logoutUrl = logoutUrl + 'post_logout_redirect_uri=' + redirUrl + 'sso-logout';
-
-        logout();   // 로컬 logout 수행
+        logout(); // 로컬 상태 초기화 (kcIdToken 포함)
 
         if (logoutUrl) {
           window.location.href = logoutUrl;
           return;
         }
       } catch (error) {
-
+        console.error('[Header] SSO logout failed, falling back to local logout', {
+          message: error?.message ?? 'unknown-error',
+          status: error?.status ?? null,
+        });
+        logout();
       }
+    } else {
+      logout();
     }
-    else {
-      logout();   // 로컬 logout 수행
-      navigate('/');
-    }
-
-    // try {
-    //   const response = await apiClient.post('/api/v1/auth/keycloak/logout');
-    //   const responseData = response?.data || response;
-    //   logoutUrl = responseData?.logoutUrl || responseData?.data?.logoutUrl || null;
-    //   console.log('[Header] keycloak logout url resolved', {
-    //     hasLogoutUrl: Boolean(logoutUrl),
-    //     logoutUrlLength: logoutUrl?.length ?? 0,
-    //   });
-    // } catch (error) {
-    //   console.error('[Header] failed to fetch keycloak logout url', {
-    //     message: error?.message ?? 'unknown-error',
-    //     status: error?.status ?? null,
-    //   });
-    // }
-
-    // // 로컬 로그아웃은 항상 수행하고, OnePass 세션이 있으면 외부 logout redirect를 이어서 태운다.
-    // logout();
-    
-    // if (logoutUrl) {
-    //   window.location.href = logoutUrl;
-    //   return;
-    // } else {
-    //   navigate('/');
-    // }
-
-    //navigate('/');
+    navigate('/');
   };
 
   const handleExtendSession = async () => {
@@ -679,7 +667,6 @@ export default function Header() {
           onLogin={handleServiceLogin}
           onOnePassLogin={handleOnePassIntegratedLogin}
           onOnePassConfig={handleOnePassConfig}
-          onOnePassJoin={handleOnePassJoin}
           onMyPage={handleMyPage}
           onLogout={handleLogout}
           isLogin={isLogin}
