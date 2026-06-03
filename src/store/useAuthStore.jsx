@@ -117,6 +117,7 @@ export const useAuthStore = create(
                 isSsoLogin: false,
                 token: null,
                 refreshToken: null,
+                kcIdToken: null,
                 user: null,
                 uuid: null,
                 currentMode: null,
@@ -144,6 +145,14 @@ export const useAuthStore = create(
           isSsoLogin: false,
           token: null,
           refreshToken: null,
+          /**
+           * Keycloak id_token.
+           * SSO callback(/callback/local-login) 응답의 kcIdToken 필드에서 수신하여 보관한다.
+           * 로그아웃 시 POST /api/v1/auth/keycloak/logout 요청 body에 담아 전달하고,
+           * 서버가 id_token_hint를 이용해 Keycloak logout URL을 조립한다.
+           * 서버는 이 값을 HttpSession에 저장하지 않는다(STATELESS).
+           */
+          kcIdToken: null,
           user: null,
           uuid: null,
           currentMode: null,
@@ -184,7 +193,7 @@ export const useAuthStore = create(
               'auth/login',
             );
           },
-          ssoLogin: ({ token, refreshToken, profile } = {}) => {
+          ssoLogin: ({ token, refreshToken, kcIdToken, profile } = {}) => {
             const normalized = normalizeProfile(profile);
             set(
               {
@@ -192,6 +201,7 @@ export const useAuthStore = create(
                 isSsoLogin: true,
                 token: token || null,
                 refreshToken: refreshToken || null,
+                kcIdToken: kcIdToken || null,
                 user: normalized.user,
                 uuid: normalized.uuid,
                 currentMode: normalized.currentMode,
@@ -244,6 +254,7 @@ export const useAuthStore = create(
                 isSsoLogin: false,
                 token: null,
                 refreshToken: null,
+                kcIdToken: null,
                 user: null,
                 uuid: null,
                 currentMode: null,

@@ -155,6 +155,11 @@ const OnePassSsoCallback = () => {
 
         const accessToken = responseData?.accessToken;
         const refreshToken = responseData?.refreshToken;
+        // kcIdToken: SSO callback 응답에서 수신한 Keycloak id_token.
+        // sessionStorage(Zustand persist)에 보관하고 로그아웃 시 서버에 전달한다.
+        // 서버는 HttpSession에 id_token을 저장하지 않으므로(STATELESS) FE가 보관 책임을 갖는다.
+        const kcIdToken = responseData?.kcIdToken || null;
+
         if (!accessToken || !refreshToken) {
           throw new Error('Case1 callback/local-login token response is incomplete');
         }
@@ -162,6 +167,7 @@ const OnePassSsoCallback = () => {
         console.log(`${LOG_PREFIX} account me start`, {
           endpoint: '/api/v1/account/me',
           hasAccessToken: Boolean(accessToken),
+          hasKcIdToken: Boolean(kcIdToken),
         });
         const profileResponse = await apiClient.get('/api/v1/account/me', { token: accessToken });
         const profile = profileResponse?.data || profileResponse;
@@ -170,7 +176,7 @@ const OnePassSsoCallback = () => {
           profileKeys: profile && typeof profile === 'object' ? Object.keys(profile) : [],
         });
 
-        useAuthStore.getState().ssoLogin({ token: accessToken, refreshToken, profile });
+        useAuthStore.getState().ssoLogin({ token: accessToken, refreshToken, kcIdToken, profile });
         //useAuthStore.getState().login({ token: accessToken, refreshToken, profile });
 
         console.log(`${LOG_PREFIX} auth store login saved`, {
