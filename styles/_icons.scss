@@ -201,4 +201,11 @@
         &.cube{@include icon-set(pure-icons/cube, $effect:pure);}
         &.circle-check{@include icon-set(pure-icons/circle-check, $effect:pure);}
     }
+    &.sns{
+        &.instagram{@include icon-set(instagram);}
+        &.facebook{@include icon-set(facebook);}
+        &.x{@include icon-set(x-logo);}
+        &.youtube{@include icon-set(youtube);}
+        &.blog{@include icon-set(naver-blog);}
+    }
 }
