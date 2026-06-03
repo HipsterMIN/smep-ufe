@@ -12,6 +12,8 @@ import { useUserMenu } from '../context/UserMenuContext';
 const DEFAULT_SIZE = 10;
 const DEFAULT_SORT = '';
 const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
+const CENTRAL_PBANC_MENU_ID = 'M_PIIO_00076';
+const LOCAL_PBANC_MENU_ID = 'M_PIIO_00169';
 
 const Pbanc = () => {
   const matches = useMatches();
@@ -36,6 +38,12 @@ const Pbanc = () => {
   const latestRequestIdRef = useRef(0);
   const skipInitialSortEffectRef = useRef(true);
   const bizPbancTypeCd = currentMenu?.menuId === 'M_PIIO_00091' ? 'HSSPLY' : 'BIZPBN';
+  const govType =
+    currentMenu?.menuId === CENTRAL_PBANC_MENU_ID
+      ? 'central'
+      : currentMenu?.menuId === LOCAL_PBANC_MENU_ID
+        ? 'local'
+        : '';
 
   const fieldLabelMap = useMemo(
     () => Object.fromEntries(bizFieldOptions.map((option) => [option.value, option.label])),
@@ -60,6 +68,7 @@ const Pbanc = () => {
       params.set('size', String(nextSize));
       params.set('sortType', nextSortType);
       params.set('bizPbancTypeCd', bizPbancTypeCd);
+      if (govType) params.set('govType', govType);
 
       if (nextSearchText.trim()) params.set('searchText', nextSearchText.trim());
       if (nextSearchType) params.set('searchType', nextSearchType);
@@ -68,7 +77,7 @@ const Pbanc = () => {
 
       return params.toString();
     },
-    [applyStatus, bizPbancClsfCd, bizPbancTypeCd, searchText, searchType, size, sortType],
+    [applyStatus, bizPbancClsfCd, bizPbancTypeCd, govType, searchText, searchType, size, sortType],
   );
 
   const buildListSearchParams = useCallback((pageParam, overrides = {}) => {
