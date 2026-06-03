@@ -79,6 +79,7 @@ const HeaderMobileGNB = forwardRef(({
   canExtendSession,
   isExtendingSession,
   onExtendSession,
+  onOnePassJoin,
 }, ref) => {
   const [activeMobileTab, setActiveMobileTab] = useState(0);
   const gnbBodyRef = useRef(null);
@@ -186,6 +187,10 @@ const HeaderMobileGNB = forwardRef(({
     onClose?.();
     onMyPage?.();
   };
+  const handleOnePassJoinClick = () => {
+    onClose?.();
+    onOnePassJoin?.();
+  };
 
   return (
     <>
@@ -234,7 +239,7 @@ const HeaderMobileGNB = forwardRef(({
                   {/* 로그인 전 */}
                   <button type="button" className="krds-btn large text" onClick={handleOnePassLoginClick}><i className="svg-icon ico-onepass"></i> 중기 통합회원</button>
                   <button type="button" className="krds-btn large text" onClick={handleLoginClick}><i className="svg-icon ico-log"></i> 로그인</button>
-                  <button type="button" className="krds-btn large text"><i className="svg-icon ico-join"></i> 회원가입</button>
+                  <button type="button" className="krds-btn large text" onClick={handleOnePassJoinClick }><i className="svg-icon ico-join"></i> 회원가입</button>
                   
                 </>
               )}
