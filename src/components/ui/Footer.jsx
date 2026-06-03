@@ -68,8 +68,69 @@ export default function Footer() {
           </div>
         </div>
         <div className="inner">
-          <div className="f-logo sample">
-            <span className="sr-only">중소벤처24</span>
+          <div className="footer-top">
+            <div className="f-logo sample">
+              <span className="sr-only">중소벤처24</span>
+            </div>
+            <div className="footer-sns-list">
+              <ul>
+                <li>
+                  <a
+                    href="https://www.instagram.com/"
+                    className="footer-sns-item instagram"
+                    aria-label="인스타그램 새창 열림"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="svg-icon sns instagram"></span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.facebook.com/"
+                    className="footer-sns-item facebook"
+                    aria-label="페이스북 새창 열림"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="svg-icon sns facebook"></span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://x.com/"
+                    className="footer-sns-item x"
+                    aria-label="X 새창 열림"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="svg-icon sns x">𝕏</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.youtube.com/"
+                    className="footer-sns-item youtube"
+                    aria-label="유튜브 새창 열림"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="svg-icon sns youtube"></span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://blog.naver.com/"
+                    className="footer-sns-item blog"
+                    aria-label="블로그 새창 열림"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="svg-icon sns blog"></span>
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
           <div className="f-cnt">
             <div className="f-info">
@@ -88,7 +149,6 @@ export default function Footer() {
               </ul>
             </div>
           </div>
-
           <div className="f-btm">
             <div className="f-btm-text">
               <p className="f-copy">copyright ⓒ 중소벤처기업부. All rights reserved.</p>

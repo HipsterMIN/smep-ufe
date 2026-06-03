@@ -579,51 +579,6 @@ useEffect(() => {
     const closeNoticeLayer = () => {
         setSelectedNotice(null);
     };
-    const renderSupportCard = (card, keyIndex) => {
-  const isLiked = likedAnnounce[keyIndex] ?? card.liked ?? false;
-
-  return (
-    <article className="support-card" key={`${card.title}-${keyIndex}`}>
-      <div className="card-top">
-        <span className="krds-badge bg-primary">{card.badge}</span>
-        <span className="category">{card.category}</span>
-
-        {isUrgentDday(card.dday) && (
-          <span className="krds-badge text danger">마감임박</span>
-        )}
-
-        <button
-          type="button"
-          className={`svg-icon heart like-btn on-bgcolorgray ${isLiked ? 'is-on' : ''}`}
-          aria-label={`${card.title} 찜하기`}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleToggleLike1(keyIndex);
-          }}
-        />
-      </div>
-
-      <button
-        type="button"
-        className="card-title onellipsis-2"
-        onClick={() => openNoticeLayer(card)}
-      >
-        {card.title}
-      </button>
-
-      <div className="card-info-new">
-        <span>
-          <i className="svg-icon ico-calendar"></i>
-          {card.date}
-        </span>
-
-        <strong className={`dday ${isUrgentDday(card.dday) ? 'danger' : ''}`}>
-          {card.dday}
-        </strong>
-      </div>
-    </article>
-  );
-};
   return (
     <div id="wrap">
         <Header />{ /* 임시 해더 */}
@@ -1029,57 +984,89 @@ useEffect(() => {
             <section className="main-section main-support">
                 <div className="container">
                     <h2 className="section-tit">주요 지원 사업 공고</h2>
-                </div>
-                <div className="support-board support-board-all">
-                    {/* 중앙정부 */}
-                    <section className="support-gov-section support-gov-central">
-                        <div className="container">
-                            <h3 className="support-gov-title">중앙정부</h3>
-                            <div className="support-content">
-                                <div className="support-group-scroll">
-                                    {supportData.central.map((group, groupIndex) => (
-                                        <section className="support-group" key={`central-${group.title}`}>
-                                            <h4 className="support-group-title">{group.title}</h4>
-                                            <div className="support-group-cards">
-                                                {group.cards.map((card, cardIndex) => {
-                                                    const keyIndex = groupIndex * 10 + cardIndex;
-                                                    return renderSupportCard(card, keyIndex);
-                                                })}
-                                            </div>
-                                        </section>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="more-btn support-more">
-                                <button type="button" className="krds-btn text medium">사업공고 더보기 <i className="svg-icon ico-angle right"></i></button>
-                            </div>
+
+                    <div className="support-board">
+                        <div className="support-side-tab">
+                            <button
+                                type="button"
+                                role="tab"
+                                className={activeGovTab === 'central' ? 'is-active' : ''}
+                                aria-selected={activeGovTab === 'central'}
+                                onClick={() => setActiveGovTab('central')}
+                            >
+                                중앙<br />정부
+                            </button>
+                            <button
+                                type="button"
+                                role="tab"
+                                className={activeGovTab === 'local' ? 'is-active' : ''}
+                                aria-selected={activeGovTab === 'local'}
+                                onClick={() => setActiveGovTab('local')}
+                            >
+                                지방<br />정부
+                            </button>
                         </div>
-                    </section>
 
-                    {/* 지방정부 */}
-                    <section className="support-gov-section support-gov-local">
-                        <div className="container">
-                            <h3 className="support-gov-title">지방정부</h3>
+                        <div className="support-content">
                             <div className="support-group-scroll">
-                                {supportData.local.map((group, groupIndex) => (
-                                    <section className="support-group" key={`local-${group.title}`}>
-                                    <h4 className="support-group-title">{group.title}</h4>
-                                    <div className="support-group-cards">
-                                        {group.cards.map((card, cardIndex) => {
-                                        const keyIndex = 100 + groupIndex * 10 + cardIndex;
+                                {currentSupportGroups.map((group, groupIndex) => (
+                                    <section className="support-group" key={group.title}>
+                                        <h3 className="support-group-title">{group.title}</h3>
 
-                                        return renderSupportCard(card, keyIndex);
-                                        })}
-                                    </div>
+                                        <div className="support-group-cards">
+                                            {group.cards.map((card, cardIndex) => {
+                                                const keyIndex = groupIndex * 2 + cardIndex;
+
+                                                return (
+                                                    <article className="support-card" key={`${group.title}-${cardIndex}`}>
+                                                        <div className="card-top">
+                                                            <span className="krds-badge bg-primary">{card.badge}</span>
+                                                            <span className="category">{card.category}</span>
+
+                                                            {card.deadline && (
+                                                                <span className="krds-badge text danger">마감임박</span>
+                                                            )}
+
+                                                            <button
+                                                                type="button"
+                                                                className={`svg-icon heart like-btn on-bgcolorgray ${
+                                                                        likedAnnounce[keyIndex] || card.liked ? 'is-on' : ''
+                                                                    }`}
+                                                                aria-label={`${card.title} 찜하기`}
+                                                                onClick={() => handleToggleLike1(keyIndex)}
+                                                            >
+                                                            </button>
+                                                        </div>
+
+                                                        <a href="#" className="card-title onellipsis-2">
+                                                            {card.title}
+                                                        </a>
+
+                                                        <div className="card-info-new">
+                                                            <span>
+                                                                <i className="svg-icon ico-calendar"></i>
+                                                                {card.date}
+                                                            </span>
+                                                            <strong className={`dday ${isUrgentDday(card.dday) ? 'danger' : ''}`}>
+                                                                {card.dday}
+                                                            </strong>
+                                                        </div>
+                                                    </article>
+                                                );
+                                            })}
+                                        </div>
                                     </section>
                                 ))}
                             </div>
 
                             <div className="more-btn support-more">
-                                <button type="button" className="krds-btn text medium">사업공고 더보기 <i className="svg-icon ico-angle right"></i></button>
+                                <button type="button" className="krds-btn text medium">
+                                    사업공고 더보기
+                                    <i className="svg-icon ico-angle right"></i>
+                                </button>
                             </div>
                         </div>
-                    </section>
+                    </div>
                 </div>
             </section>
             {/* E - 주요 지원 사업 공고 */}
