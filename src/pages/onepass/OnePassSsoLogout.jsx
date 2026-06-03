@@ -14,19 +14,53 @@ const OnePassSsoLogout = () => {
       hasSearch: Boolean(window.location.search),
     });
 
-    window.sessionStorage.removeItem('keycloak_state');
     useAuthStore.getState().logout();
+
     console.log(`${LOG_PREFIX} local logout completed`, {
       isLogin: Boolean(useAuthStore.getState().isLogin),
     });
 
-    console.log(`${LOG_PREFIX} navigate home`, {
-      to: '/',
+    // Keycloak 로그아웃 후 특정 페이지로 복귀해야 하는 경우 처리.
+    // 예: 증명서 발급 화면에서 비기업회원이 로그아웃 요청 → /service/login(기업회원)으로 복귀.
+    // post_logout_redirect_uri는 BE 설정 고정값(/sso-logout)이므로 FE에서 직접 지정 불가.
+    // 로그아웃 출발지에서 sessionStorage에 의도를 저장하고 여기서 읽어 분기한다.
+    const redirectRaw = sessionStorage.getItem('post_logout_redirect');
+    sessionStorage.removeItem('post_logout_redirect');
+
+    let redirectPath = '/';
+    let redirectState = undefined;
+    if (redirectRaw) {
+      try {
+        const { path, state } = JSON.parse(redirectRaw);
+        redirectPath = path || '/';
+        redirectState = state;
+      } catch {
+        // 파싱 실패 시 홈으로
+        console.warn(`${LOG_PREFIX} post_logout_redirect parse failed, fallback to /`);
+      }
+    }
+
+    console.log(`${LOG_PREFIX} navigate`, {
+      to: redirectPath,
+      hasState: Boolean(redirectState),
       reason: 'onepass-logout-callback-complete',
     });
-    navigate('/', { replace: true });
+
+    navigate(redirectPath, { state: redirectState, replace: true });
+    
   }, [navigate]);
 
+
+
+
+
+
+
+
+
+
+
+  
   return (
     <div
       style={{

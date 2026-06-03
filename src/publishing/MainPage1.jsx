@@ -209,6 +209,7 @@ const MainPage = () => {
     }
     setIsPlaying(!isPlaying);
   };
+  
 
   return (
     <div id="wrap">

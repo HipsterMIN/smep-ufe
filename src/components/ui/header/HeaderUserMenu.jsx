@@ -22,6 +22,8 @@ export default function HeaderUserMenu({
   onMyPage,
   onSwitchContext,
 }) {
+  const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
+
   const handleCollaborationInfoSystemClick = () => {
     const url = buildCobizAuthUrl();
     if (!url) {
@@ -101,21 +103,15 @@ export default function HeaderUserMenu({
         ? currentCompany?.companyName || '기업'
         : user?.name || currentCompany?.companyName || '사용자';
 
-    const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
-
     return (
       <>
         {/*externalLinkButtons*/}
 
-        
-        {!isSsoLogin ? (
-        <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
-          중기통합회원 로그인
-        </button>
-          ) : (
-        <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassConfig}>
-          중기통합회원 관리
-        </button>
+
+        {isSsoLogin && (
+          <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassConfig}>
+              중기 통합회원 관리
+          </button>
         )}
 
 
@@ -168,13 +164,13 @@ export default function HeaderUserMenu({
         <strong className="pc-only">{displayName}</strong>
 
         {showSessionTimer ? (
-          <div className="gnb-sesseion-timer new">
+          <div className="gnb-sesseion-timer new pc-only">
             <div className="timer">
-                <span className="sr-only">남은 시간</span>
-                <i className="svg-icon ico-clock"></i> {sessionTimerLabel}</div>
+              <span className="sr-only">남은 시간</span>
+              <i className="svg-icon ico-clock"></i> {sessionTimerLabel}
+            </div>
             <button
               type="button"
-              className="krds-btn secondary xsmall"
               onClick={onExtendSession}
               disabled={!canExtendSession || isExtendingSession}
             >
@@ -188,11 +184,9 @@ export default function HeaderUserMenu({
         </button>
 
         <button type="button" className="btn-navi mypage on-mobile-none" onClick={onMyPage}>
-          마이페이지
+          마이 비즈니스
         </button>
-
         <div className="top-noti" aria-hidden="true"><span>1</span></div>
-
       </>
     );
   }
@@ -203,7 +197,7 @@ export default function HeaderUserMenu({
 
       {/* 통합로그인은 로그인 상태와 무관하게 같은 진입점을 사용한다. */}
       <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
-        중기통합회원 로그인
+        중기 통합회원 로그인
       </button>
       <button type="button" className="btn-navi login on-mobile-none" onClick={onLogin}>
         로그인

@@ -3,9 +3,9 @@ import Breadcrumb from "../components/ui/Breadcrumb";
 import Tab from "../components/ui/Tab";
 import Pagination from "../components/ui/Pagination";
 
-const FindPwd = () => {
+const FindPwdAction = () => {
   const breadcrumbItems = [
-    { label: "아이디 찾기 완료", link: "#" },
+    { label: "임시 비밀번호 발송", link: "#" },
   ];
 
   return (
@@ -14,21 +14,19 @@ const FindPwd = () => {
     <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">아이디 찾기 완료</h2>
+          <h2 className="h-tit">임시 비밀번호 발송</h2>
         </div>
         <div className="find-form-area find-result">
             <p>
-                회원님의 아이디는<br />
-                <strong className="primary">Larble</strong> 로 등록되어 있습니다.<br />
-                비밀번호가 기억나지 않으실 경우 <button type="button" className="krds-btn text primary">[비밀번호 찾기]</button>에서 확인하시기 바랍니다.
+                <strong className="primary">이정주</strong>님의 이메일(<span className="primary">larb*e@*ave*.com</span>)으로 임시 비밀번호가 발송되었습니다.<br />
+                임시 비밀번호로 로그인 후 <button type="button" className="krds-btn text primary">[회원정보관리]</button> 메뉴에서 새로운 비밀번호로 변경하시기 바랍니다.
             </p>
             <ul className="btn-group">
                 <li><button type="submit" className="krds-btn large primary btn-confirm">로그인</button></li>
-                <li><button type="button" className="krds-btn large secondary btn-cancel">비밀번호 찾기</button></li>
             </ul>
         </div>
     </div>
     </>
   );
 };
-export default FindPwd;
+export default FindPwdAction;

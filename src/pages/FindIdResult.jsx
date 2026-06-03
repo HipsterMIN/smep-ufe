@@ -21,7 +21,7 @@ const FindIdResult = () => {
         <p>
                     회원님의 아이디는<br />
           <strong className="primary">{lgnId}</strong> 로 등록되어 있습니다.<br />
-                    비밀번호가 기억나지 않으실 경우 <button type="button" className="krds-btn text primary">[비밀번호 찾기]</button>에서 확인하시기 바랍니다.
+                    비밀번호가 기억나지 않으실 경우 <button type="button" className="krds-btn text primary" onClick={() => navigate('/service/find-password')}>[비밀번호 찾기]</button>에서 확인하시기 바랍니다.
         </p>
         <ul className="btn-group">
           <li>

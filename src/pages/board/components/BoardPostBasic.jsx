@@ -195,30 +195,33 @@ const BoardPostBasic = ({ boardDetail, bbsNo, pstNo }) => {
         {/* 이전글, 다음글 */}
         <ul className="post-nav-list mt-40">
           {/* 이전글 */}
-          <li className="post-nav-item prev">
-            <Link
-              to={buildPostLink(prevPost?.pstNo)}
-              className="post-nav-link"
-              onClick={(event) => handleNavigationClick(event, prevPost?.pstNo)}
-            >
-              <i className="svg-icon ico-angle left"></i>
-              <span className="post-nav-label">이전글</span>
-              <span className="post-nav-title onellipsis-1">{prevPost?.pstTtl || '-'}</span>
-            </Link>
-          </li>
-
+          {prevPost && (
+            <li className="post-nav-item prev">
+              <Link
+                to={buildPostLink(prevPost?.pstNo)}
+                className="post-nav-link"
+                onClick={(event) => handleNavigationClick(event, prevPost?.pstNo)}
+              >
+                <i className="svg-icon ico-angle left"></i>
+                <span className="post-nav-label">이전글</span>
+                <span className="post-nav-title onellipsis-1">{prevPost?.pstTtl || '-'}</span>
+              </Link>
+            </li>)
+          }
           {/* 다음글 */}
-          <li className="post-nav-item next">
-            <Link
-              to={buildPostLink(nextPost?.pstNo)}
-              className="post-nav-link"
-              onClick={(event) => handleNavigationClick(event, nextPost?.pstNo)}
-            >
-              <span className="post-nav-label">다음글</span>
-              <span className="post-nav-title onellipsis-1">{nextPost?.pstTtl || '-'}</span>
-              <i className="svg-icon ico-angle right"></i>
-            </Link>
-          </li>
+          {nextPost && (
+            <li className="post-nav-item next">
+              <Link
+                to={buildPostLink(nextPost?.pstNo)}
+                className="post-nav-link"
+                onClick={(event) => handleNavigationClick(event, nextPost?.pstNo)}
+              >
+                <span className="post-nav-label">다음글</span>
+                <span className="post-nav-title onellipsis-1">{nextPost?.pstTtl || '-'}</span>
+                <i className="svg-icon ico-angle right"></i>
+              </Link>
+            </li>)
+          }
         </ul>
 
 

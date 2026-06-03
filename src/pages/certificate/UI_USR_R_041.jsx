@@ -67,17 +67,27 @@ const UI_USR_R_041 = () => {
       if (window.confirm('기업회원 로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?\n로그인 페이지 이동시 로그아웃 됩니다.')) {
         // 로그아웃 처리 후 로그인 페이지로 이동
         try {
-          const response = await apiClient.post('/api/v1/auth/keycloak/logout');
+          // kcIdToken: SSO callback 시 수신하여 store에 보관 중인 Keycloak id_token.
+          // 서버는 HttpSession에서 id_token을 읽지 않으므로(STATELESS) body로 전달한다.
+          const kcIdToken = useAuthStore.getState().kcIdToken;
+          const response = await apiClient.post('/api/v1/auth/keycloak/logout', {
+            idToken: kcIdToken || null,
+          });
           const responseData = response?.data || response;
-          const logoutUrl = responseData?.logoutUrl || responseData?.data?.logoutUrl || null;
+          const logoutUrl = responseData?.logoutUrl || null;
 
           logout(); // 로컬 로그아웃은 항상 수행
 
           if (logoutUrl) {
-            // OnePass 세션이 있으면 외부 logout redirect 처리
-            // → keycloak 로그아웃 완료 후 로그인 페이지로 돌아오도록 redirect_uri 파라미터 추가
-            const redirectAfterLogout = `${window.location.origin}/service/login`;
-            window.location.href = `${logoutUrl}&redirect_uri=${encodeURIComponent(redirectAfterLogout)}`;
+            // OnePass 세션이 있으면 외부 logout redirect 처리.
+            // post_logout_redirect_uri는 BE 설정 고정값(/sso-logout)이므로 FE에서 직접 변경 불가.
+            // Keycloak 로그아웃 완료 후 /sso-logout 경유 시 /service/login으로 복귀하도록
+            // sessionStorage에 의도를 저장하고 OnePassSsoLogout에서 읽어 처리한다.
+            sessionStorage.setItem(
+              'post_logout_redirect',
+              JSON.stringify({ path: '/service/login', state: { loginType: 'CORPORATE' } }),
+            );
+            window.location.href = logoutUrl;
             return;
           }
         } catch (error) {
