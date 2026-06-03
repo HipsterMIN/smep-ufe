@@ -22,6 +22,8 @@ export default function HeaderUserMenu({
   onMyPage,
   onSwitchContext,
 }) {
+  const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
+
   const handleCollaborationInfoSystemClick = () => {
     const url = buildCobizAuthUrl();
     if (!url) {
@@ -101,21 +103,15 @@ export default function HeaderUserMenu({
         ? currentCompany?.companyName || '기업'
         : user?.name || currentCompany?.companyName || '사용자';
 
-    const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
-
     return (
       <>
         {/*externalLinkButtons*/}
 
-        
-        {!isSsoLogin ? (
-        <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
-          중기 통합회원 로그인
-        </button>
-          ) : (
-        <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassConfig}>
-          중기 통합회원 관리
-        </button>
+
+        {isSsoLogin && (
+          <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassConfig}>
+              중기 통합회원 관리
+          </button>
         )}
 
 

@@ -227,7 +227,7 @@ export default function Header() {
       return;
     }
 
-    if(currentMode === 'CORPORATE') {
+    if (currentMode === 'CORPORATE') {
       const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-business/information?redirect_uri=https://www.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-tipa-01&uuid=${uuid}`;
       console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
@@ -237,7 +237,7 @@ export default function Header() {
       window.location.href = onePassJoinUrl;
     }
     
-  }
+  };
 
   const handleOnePassJoin = () => {
     const onePassJoinUrl = buildOnePassRegisterUrl('member');
@@ -249,9 +249,9 @@ export default function Header() {
   const trimTrailingSlash = (value) => value.replace(/\/+$/, '');
   const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
   const handleLogout = async () => {
-    let logoutUrl = "";
+    let logoutUrl = '';
 
-    if(isSsoLogin) {
+    if (isSsoLogin) {
       try {
         const response = await apiClient.post('/api/v1/auth/keycloak/getIdTokenStr');
         console.log('/api/v1/auth/keycloak/getIdTokenStr response = ' + response);  
@@ -679,6 +679,7 @@ export default function Header() {
           onLogin={handleServiceLogin}
           onOnePassLogin={handleOnePassIntegratedLogin}
           onOnePassConfig={handleOnePassConfig}
+          onOnePassJoin={handleOnePassJoin}
           onMyPage={handleMyPage}
           onLogout={handleLogout}
           isLogin={isLogin}
