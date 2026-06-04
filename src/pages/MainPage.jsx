@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -61,6 +61,7 @@ const EMPTY_MAIN_DATA = {
   todayPbancTotalCount: null,
   todayPbancs: [],
   weeklyPbancGroups: [],
+  weeklyPbancWeekGroups: [],
   supportPbancGroups: {
     central: [],
     local: [],
@@ -89,6 +90,11 @@ const SEARCH_POPULAR_LIMIT = 5;
 const SEARCH_AUTOCOMPLETE_LIMIT = 8;
 const SEARCH_AUTOCOMPLETE_DEBOUNCE_MS = 250;
 const ONEPASS_CONVERSION_MODAL_DISMISSED_KEY = '__onepass_conversion_modal_dismissed__';
+const EMPTY_LIST = Object.freeze([]);
+const EMPTY_SUPPORT_PBANC_GROUPS = Object.freeze({
+  central: EMPTY_LIST,
+  local: EMPTY_LIST,
+});
 const WEEK_PBANC_SHORT_AGENCY_NAMES = {
   중소벤처기업부: '중기부',
 };
@@ -186,6 +192,7 @@ const MainPage = () => {
   const originTopRef = useRef(0);
   const swiperRef = useRef(null);
   const latestAutoQueryRef = useRef('');
+  const weekGroupInitializedRef = useRef(false);
   const authToken = useAuthStore((state) => state.token);
   const isLogin = useAuthStore((state) => state.isLogin);
   const intgMbrSwtcYn = useAuthStore((state) => state.intgMbrSwtcYn);
@@ -371,16 +378,17 @@ const MainPage = () => {
     getFullPath(MAIN_MENU_IDS.eventInfo) || '/plcy/reprt/UI_USR_L_190';
   const monthlyNuriListPath =
     getFullPath(MAIN_MENU_IDS.monthlyNuri) || '/plcy/reprt/UI_USR_L_100';
-  const pbancItems = mainData.pbancs || [];
-  const sprtBizItems = mainData.sprtBizs || [];
-  const certificateItems = mainData.certificates || [];
-  const financePolicyItems = mainData.financePolicies || [];
-  const noticeItems = mainData.notices || [];
-  const faqItems = mainData.faqs || [];
-  const adminInfoItems = mainData.adminInfos || [];
-  const todayPbancItems = mainData.todayPbancs || [];
-  const weeklyPbancGroups = mainData.weeklyPbancGroups || [];
-  const supportPbancGroups = mainData.supportPbancGroups || {};
+  const pbancItems = mainData.pbancs || EMPTY_LIST;
+  const sprtBizItems = mainData.sprtBizs || EMPTY_LIST;
+  const certificateItems = mainData.certificates || EMPTY_LIST;
+  const financePolicyItems = mainData.financePolicies || EMPTY_LIST;
+  const noticeItems = mainData.notices || EMPTY_LIST;
+  const faqItems = mainData.faqs || EMPTY_LIST;
+  const adminInfoItems = mainData.adminInfos || EMPTY_LIST;
+  const todayPbancItems = mainData.todayPbancs || EMPTY_LIST;
+  const weeklyPbancGroups = mainData.weeklyPbancGroups || EMPTY_LIST;
+  const weeklyPbancWeekGroups = mainData.weeklyPbancWeekGroups || EMPTY_LIST;
+  const supportPbancGroups = mainData.supportPbancGroups || EMPTY_SUPPORT_PBANC_GROUPS;
   const cardNewsItem = mainData.cardNews;
   const parsedTodayPbancTotalCount = Number(mainData.todayPbancTotalCount);
   const todayPbancTotalCount =
@@ -400,7 +408,7 @@ const MainPage = () => {
   const eventInfoItems = mainData.eventInfos || [];
   const archiveItems = mainData.archiveItems || [];
   const newNewsItems = mainData.newNews || [];
-  const toPbancNoticeCard = (item, options = {}) => {
+  const toPbancNoticeCard = useCallback((item, options = {}) => {
     const dday = getDdayLabel(item?.bizAplyDdlnYmd);
     const category = bizFieldMap[item?.bizPbancClsfCd] || item?.bizPbancClsfCd || '';
     const detailPathPrefix = options.detailPathPrefix || '/req/pbanc';
@@ -423,26 +431,78 @@ const MainPage = () => {
       detailPath,
       liked: Boolean(likedAnnounce[String(item?.bizPbancNo)]),
     };
-  };
+  }, [bizFieldMap, likedAnnounce]);
   const todayNoticeCards = useMemo(
     () => todayPbancItems.map(toPbancNoticeCard),
-    [todayPbancItems, bizFieldMap, likedAnnounce],
+    [todayPbancItems, toPbancNoticeCard],
   );
-  const weekNoticeCards = useMemo(
-    () =>
-      weeklyPbancGroups.map((group) => {
-        const displayDate = formatWeekItemDate(group.date || group.title);
-        return {
-          date: displayDate.date || group.title || '-',
-          day: displayDate.day || '',
-          list: (group.items || []).map(toPbancNoticeCard),
-        };
-      }),
-    [weeklyPbancGroups, bizFieldMap, likedAnnounce],
+  const weekNoticeGroups = useMemo(
+    () => {
+      if (weeklyPbancWeekGroups.length > 0) {
+        return weeklyPbancWeekGroups.map((week, weekIndex) => ({
+          offset: week.offset ?? weekIndex,
+          label: week.label || '',
+          period: week.period || formatWeekPeriod(week.startYmd, week.endYmd),
+          startYmd: week.startYmd,
+          endYmd: week.endYmd,
+          days: (week.days || []).map((group) => {
+            const displayDate = formatWeekItemDate(group.date || group.title);
+            return {
+              date: displayDate.date || group.title || '-',
+              dateKey: group.date || group.title || '',
+              day: displayDate.day || '',
+              list: (group.items || []).slice(0, 1).map(toPbancNoticeCard),
+            };
+          }),
+        }));
+      }
+
+      return [
+        {
+          offset: 0,
+          label: '이번주',
+          period: formatWeekPeriod(),
+          days: weeklyPbancGroups.map((group) => {
+            const displayDate = formatWeekItemDate(group.date || group.title);
+            return {
+              date: displayDate.date || group.title || '-',
+              dateKey: group.date || group.title || '',
+              day: displayDate.day || '',
+              list: (group.items || []).slice(0, 1).map(toPbancNoticeCard),
+            };
+          }),
+        },
+      ];
+    },
+    [weeklyPbancWeekGroups, weeklyPbancGroups, toPbancNoticeCard],
   );
+  const activeWeekGroup = weekNoticeGroups[activeWeekIndex] || weekNoticeGroups[0] || null;
+  const defaultWeekIndex = Math.max(
+    weekNoticeGroups.findIndex((week) => Number(week.offset) === 0),
+    0,
+  );
+  const weekNoticeCards = activeWeekGroup?.days || [];
+  const activeWeekPeriod = activeWeekGroup?.period || formatWeekPeriod();
+  const isPrevWeekDisabled = activeWeekIndex <= 0;
+  const isNextWeekDisabled = activeWeekIndex >= Math.max(weekNoticeGroups.length - 1, 0);
   useEffect(() => {
-    setActiveWeekIndex((prev) => Math.min(prev, Math.max(weekNoticeCards.length - 1, 0)));
-  }, [weekNoticeCards.length]);
+    const maxIndex = Math.max(weekNoticeGroups.length - 1, 0);
+    if (weeklyPbancWeekGroups.length > 0) {
+      if (!weekGroupInitializedRef.current) {
+        weekGroupInitializedRef.current = true;
+        setActiveWeekIndex(Math.min(defaultWeekIndex, maxIndex));
+        return;
+      }
+
+      setActiveWeekIndex((prev) => Math.min(prev, maxIndex));
+      return;
+    }
+
+    weekGroupInitializedRef.current = false;
+    setActiveWeekIndex((prev) => {
+      return Math.min(prev, maxIndex);
+    });
+  }, [defaultWeekIndex, weekNoticeGroups.length, weeklyPbancWeekGroups.length]);
   const centralSupportGroups = useMemo(
     () =>
       (supportPbancGroups.central || []).map((group) => ({
@@ -451,7 +511,7 @@ const MainPage = () => {
           toPbancNoticeCard(item, { detailPathPrefix: '/req/pbanc' }),
         ),
       })),
-    [supportPbancGroups, bizFieldMap, likedAnnounce],
+    [supportPbancGroups, toPbancNoticeCard],
   );
   const localSupportGroups = useMemo(
     () =>
@@ -461,7 +521,7 @@ const MainPage = () => {
           toPbancNoticeCard(item, { detailPathPrefix: '/req/pbancProvincial' }),
         ),
       })),
-    [supportPbancGroups, bizFieldMap, likedAnnounce],
+    [supportPbancGroups, toPbancNoticeCard],
   );
   const supportPbancItems = useMemo(
     () =>
@@ -472,11 +532,15 @@ const MainPage = () => {
     [supportPbancGroups],
   );
   const calendarPbancItems = useMemo(
-    () => [
-      ...todayPbancItems,
-      ...weeklyPbancGroups.flatMap((group) => group.items || []),
-    ],
-    [todayPbancItems, weeklyPbancGroups],
+    () => {
+      const weeklyItems = weeklyPbancWeekGroups.length > 0
+        ? weeklyPbancWeekGroups.flatMap((week) =>
+          (week.days || []).flatMap((group) => group.items || []),
+        )
+        : weeklyPbancGroups.flatMap((group) => group.items || []);
+      return [...todayPbancItems, ...weeklyItems];
+    },
+    [todayPbancItems, weeklyPbancWeekGroups, weeklyPbancGroups],
   );
   const bannerItems =
     (mainData.banners || []).length > 0
@@ -731,15 +795,10 @@ const MainPage = () => {
   };
   const handleWeekMove = (direction) => {
     setActiveWeekIndex((prev) => {
-      const maxIndex = Math.max(weekNoticeCards.length - 1, 0);
+      const maxIndex = Math.max(weekNoticeGroups.length - 1, 0);
       if (maxIndex === 0) return 0;
       return Math.min(Math.max(prev + direction, 0), maxIndex);
     });
-  };
-  const handleWeekDateKeyDown = (event, dayIndex) => {
-    if (event.key !== 'Enter' && event.key !== ' ') return;
-    event.preventDefault();
-    setActiveWeekIndex(dayIndex);
   };
   const handlePopupClose = (popupId) =>
     setHiddenPopupIds((prev) => [...new Set([...prev, popupId])]);
@@ -1161,53 +1220,59 @@ const MainPage = () => {
                   <div className="calendar-card-head">
                     <h3>이번 주 공고</h3>
                     <div className="week-controls">
-                      <button type="button" className="krds-btn" aria-label="이전 주" onClick={() => handleWeekMove(-1)}>
-                        <i className="svg-icon ico-angle up"></i>
+                      <button
+                        type="button"
+                        className="krds-btn week-move-btn prev"
+                        aria-label="이전주 보기"
+                        onClick={() => handleWeekMove(-1)}
+                        disabled={isPrevWeekDisabled}
+                      >
+                        <i className="svg-icon ico-angle left"></i>
                       </button>
-                      <button type="button" className="krds-btn" aria-label="다음 주" onClick={() => handleWeekMove(1)}>
-                        <i className="svg-icon ico-angle"></i>
+                      <button
+                        type="button"
+                        className="krds-btn week-move-btn next"
+                        aria-label="다음주 보기"
+                        onClick={() => handleWeekMove(1)}
+                        disabled={isNextWeekDisabled}
+                      >
+                        <i className="svg-icon ico-angle right"></i>
                       </button>
                     </div>
-                    <span className="period">{formatWeekPeriod()}</span>
+                    <span className="period">{activeWeekPeriod}</span>
                   </div>
-                  {weekNoticeCards.map((day, dayIndex) => {
-                    const isActive = dayIndex === activeWeekIndex;
-                    const visibleList = day.list.slice(0, isActive ? 3 : 1);
+                  <div className="week-notice-list">
+                    {weekNoticeCards.map((day, dayIndex) => {
+                      const isActive = dayIndex === 0;
+                      const visibleList = day.list.slice(0, 1);
 
-                    return (
-                      <div className={`week-item ${isActive ? 'is-active' : ''}`} key={day.date || dayIndex}>
-                        <div
-                          className="week-date"
-                          role="button"
-                          tabIndex={0}
-                          aria-pressed={isActive}
-                          aria-label={`${day.date}${day.day} 공고 보기`}
-                          onClick={() => setActiveWeekIndex(dayIndex)}
-                          onKeyDown={(event) => handleWeekDateKeyDown(event, dayIndex)}
-                        >
-                          <strong>{day.date}</strong>
-                          <span>{day.day}</span>
+                      return (
+                        <div className={`week-item ${isActive ? 'is-active' : ''}`} key={day.date || dayIndex}>
+                          <div className="week-date">
+                            <strong>{day.date}</strong>
+                            <span>{day.day}</span>
+                          </div>
+                          <ul className="week-list">
+                            {visibleList.map((card, index) => (
+                              <li key={card.id || index}>
+                                <span className={`krds-label state ${card.status === '마감임박' ? 'danger' : ''}`}>
+                                  {card.status}
+                                </span>
+                                <span className="krds-badge">{formatWeekPbancAgencyBadge(card.badge)}</span>
+                                <button
+                                  type="button"
+                                  className="week-notice-link onellipsis-1"
+                                  onClick={() => openNoticeLayer(card)}
+                                >
+                                  {card.title}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                        <ul className="week-list">
-                          {visibleList.map((card, index) => (
-                            <li key={card.id || index}>
-                              <span className={`krds-label state ${isUrgentDday(card.dday) ? 'danger' : ''}`}>
-                                {card.dday}
-                              </span>
-                              <span className="krds-badge">{formatWeekPbancAgencyBadge(card.badge)}</span>
-                              <button
-                                type="button"
-                                className="week-notice-link onellipsis-1"
-                                onClick={() => openNoticeLayer(card)}
-                              >
-                                {card.title}
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </article>
 
