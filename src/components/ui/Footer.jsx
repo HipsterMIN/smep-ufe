@@ -134,14 +134,15 @@ export default function Footer() {
           </div>
           <div className="f-cnt">
             <div className="f-info">
-              <p className="info-addr">30121, 세종특별자치시 가름로 180(어진동), 세종파이낸스센터3차 4층~6층</p>
+              {/*<p className="info-addr">30121, 세종특별자치시 가름로 180(어진동), 세종파이낸스센터3차 4층~6층</p>*/}
               <ul className="info-cs">
                 <li>
                   <strong className="key-info">중소벤처24 시스템 장애 문의 <span>(044) 300-0990, (044) 300-0991</span></strong>
                   <strong className="more-info">메일문의 <span>smeshelp@tipa.or.kr</span></strong>
                 </li>
                 <li>
-                  <strong className="key-info">중소벤처기업부 <span>대표전화 국번없이 1357</span></strong>
+                  <strong className="key-info">중소벤처기업부 <span>30121, 세종특별자치시 가름로 180(어진동), 세종파이낸스센터3차 4층~6층</span></strong>대표전화 국번없이 1357
+                  <strong className="more-info">대표전화 <span>국번없이 1357</span></strong>
                 </li>
                 <li>
                   <strong className="key-info">[운영기관] 중소기업기술정보진흥원 <span>(30141, 세종특별자치시 집현중앙로 79, 중소기업기술정보진흥원(TIPA))</span></strong>
