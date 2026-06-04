@@ -74,6 +74,24 @@ function AppRouter() {
   // 실제 메뉴 데이터가 도착하면 라우터 교체 (mockMenuData 상태는 건너뜀)
   useEffect(() => {
     if (menuTree && flatMenuMap && menuTree !== mockMenuData) {
+      // [SSO 콜백 중 라우터 교체 방지]
+      //
+      // 문제: fetchMenuData()가 빠르게 완료되면 (~23ms) OnePassSsoCallback의 exchangeCode()
+      // (~200ms) 실행 중에 setRouterInstance()가 호출된다.
+      // → 새 라우터가 /sso 경로로 초기화되어 OnePassSsoCallback이 리마운트되고
+      //   useRef(false)로 초기화된 hasHandledRef가 리셋되어 동일 code로 exchangeCode()가 재실행된다.
+      // → OAuth2 Authorization Code는 1회용이므로 두 번째 교환이 실패 → catch → /service/login 리다이렉트.
+      //
+      // 수정: /sso?code=... 경로에서는 라우터 교체를 건너뛴다.
+      // SSO 성공 후 ssoLogin() → currentMode 변경 → resetMenu() → fetchMenuData() 재실행 시
+      // 이 effect가 다시 발동되는데, 그 때는 window.location이 /home 이므로 정상 교체가 이루어진다.
+      if (
+        window.location.pathname.endsWith('/sso') &&
+        new URLSearchParams(window.location.search).has('code')
+      ) {
+        return;
+      }
+
       // [타이밍 경쟁 수정 — router replace race condition fix]
       //
       // 문제: React Router의 navigate()는 router.state.location을 즉시 갱신하지만,

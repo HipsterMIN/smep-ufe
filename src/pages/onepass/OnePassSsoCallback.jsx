@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api as apiClient } from '../../lib/apiClient.js';
 import { useAuthStore } from '../../store/useAuthStore.jsx';
@@ -8,9 +8,19 @@ import { buildOnePassConversionUrl } from '../../utils/keycloakGetAuthCode.js';
 // const KEYCLOAK_STATE_KEY = 'keycloak_state';
 const LOG_PREFIX = '[OnePassSsoCallback]';
 
+// [라우터 remount 중복 실행 방지 — 모듈 레벨 플래그]
+//
+// useRef는 컴포넌트 인스턴스 단위로 초기화되므로 라우터 교체(setRouterInstance)로
+// 컴포넌트가 리마운트될 때 false로 리셋된다.
+// 모듈 레벨 변수는 페이지 세션 동안 유지되므로 remount에도 중복 실행을 막을 수 있다.
+//
+// 현재 처리 중인 SSO URL(pathname + search)을 저장한다.
+// OAuth2 Authorization Code는 1회용이므로 동일 URL 재처리는 반드시 차단해야 한다.
+// 새 SSO 시도는 항상 새로운 code 파라미터를 포함하므로 URL이 달라져 정상 진입된다.
+let _handledSsoUrl = null;
+
 const OnePassSsoCallback = () => {
   const navigate = useNavigate();
-  const hasHandledRef = useRef(false);
 
   useEffect(() => {
     // 라우터 인스턴스 교체(메뉴 로드 후 setRouterInstance) 시 /sso가 아닌 경로에서 잘못 마운트되는 것을 방어한다.
@@ -21,25 +31,22 @@ const OnePassSsoCallback = () => {
       return;
     }
 
-    // 첫 진입 로그다. 실제 /sso 콜백 진입 여부와 search 존재 여부, 그리고 StrictMode 재실행 여부를 가장 먼저 확인할 때 본다.
-    console.log(`${LOG_PREFIX} effect start`, {
-      pathname: window.location.pathname,
-      hasSearch: Boolean(window.location.search),
-      hasHandled: hasHandledRef.current,
-    });
-
-    // dev StrictMode 에서는 mount 직후 effect 가 한 번 더 돌 수 있어 callback POST가 중복될 수 있다.
-    // state/code 분기 단순화와 별개로, 같은 진입에서 교환 요청을 한 번만 보내기 위한 가드만 유지한다.
-    if (hasHandledRef.current) {
-      console.log(`${LOG_PREFIX} duplicate effect blocked`, {
-        reason: 'strict-mode-or-remount',
+    // [모듈 레벨 중복 실행 방지]
+    // 라우터 교체로 인한 remount 또는 StrictMode 재실행 시 동일 URL을 재처리하지 않는다.
+    const currentUrl = currentPathname + window.location.search;
+    if (_handledSsoUrl === currentUrl) {
+      console.log(`${LOG_PREFIX} duplicate blocked (remount or strict-mode)`, {
+        url: currentUrl,
       });
       return;
     }
+    _handledSsoUrl = currentUrl;
 
-    hasHandledRef.current = true;
-    console.log(`${LOG_PREFIX} mark handled`, {
-      hasHandled: hasHandledRef.current,
+    // 첫 진입 로그다. 실제 /sso 콜백 진입 여부와 search 존재 여부를 가장 먼저 확인할 때 본다.
+    console.log(`${LOG_PREFIX} effect start`, {
+      pathname: window.location.pathname,
+      hasSearch: Boolean(window.location.search),
+      handledUrl: _handledSsoUrl,
     });
 
     // 임시 연동 계약: 현재 프론트는 state/sessionStorage 검증 없이 code 존재 여부만 확인한다.
@@ -54,7 +61,6 @@ const OnePassSsoCallback = () => {
     // OnePass SDK가 콜백에 state를 포함하는지 확인 후 검증 재활성화 여부를 결정한다.
     // hasState=true 가 확인되면 검증 재활성화 PR을 별도로 진행한다.
     const state = params.get('state');
-    // const savedState = window.sessionStorage.getItem(KEYCLOAK_STATE_KEY);
     const callbackState = {
       queryKeys: Array.from(params.keys()),
       hasCode: Boolean(code),
@@ -63,11 +69,6 @@ const OnePassSsoCallback = () => {
       // OnePass 콜백에 state 파라미터가 포함되는지 관찰용
       hasState: Boolean(state),
       stateLength: state?.length ?? 0,
-      // hasSavedState: Boolean(savedState),
-      // savedStateLength: savedState?.length ?? 0,
-      // stateMatches: Boolean(state && savedState && state === savedState),
-      // missingState: !state,
-      // mismatchedState: Boolean(state && savedState && state !== savedState),
     };
 
     // 이 스냅샷 로그는 raw code/token 값을 남기지 않고도 분기 원인을 볼 수 있게 만든 메타 로그다.
@@ -104,25 +105,24 @@ const OnePassSsoCallback = () => {
 
     // state 검증은 임시 비활성화되어 있으며, code 자체가 없으면 백엔드가 authorization_code 교환을 할 수 없다.
     // code 가 없는 비정상 콜백은 즉시 로그인 페이지로 이동해 불필요한 서버 요청을 방지한다.
-     if (!code) {
-    //   // 이 warn 는 code 가 비어 있는 비정상 콜백을 분리해서 보기 위한 로그다.
-    //   // codeLength=0 인지와 queryKeys 에 code 자체가 없는지 함께 보면 외부 redirect 형식 문제를 빠르게 볼 수 있다.
-    //   console.warn(`${LOG_PREFIX} missing code branch`, {
-    //     ...callbackState,
-    //     action: 'redirect-login',
-    //   });
-    //   //alert('코드가 없습니다.');
-      const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
+    if (!code) {
+      // useEffect 내부에서는 훅(useAuthStore)을 직접 호출할 수 없다 (Rules of Hooks 위반).
+      // getState()를 사용해 현재 스토어 상태를 동기적으로 읽는다.
+      const isSsoLogin = useAuthStore.getState().isSsoLogin;
+      console.log(`${LOG_PREFIX} missing code branch`, {
+        ...callbackState,
+        isSsoLogin,
+        action: isSsoLogin ? 'navigate-home' : 'navigate-login',
+      });
 
-      if(isSsoLogin) {
+      if (isSsoLogin) {
+        // SSO 로그인이 이미 완료된 상태에서 code 없이 /sso에 재진입 → 메인으로
         navigate('/', { replace: true });
-        return;
       } else {
         navigate('/service/login', { replace: true });
-        return;
       }
-       
-     }
+      return;
+    }
 
     // callback 처리의 핵심은 "현재 로컬 로그인 상태가 있느냐"에 따라 백엔드 경로를 나누는 것이다.
     // 케이스1(로컬 비로그인)은 callback/local-login one-shot endpoint가 code 교환과 local token 발급을 한 번에 끝내고,
@@ -235,6 +235,8 @@ const OnePassSsoCallback = () => {
           to: '/service/login',
           reason: 'keycloak-case1-flow-failed',
         });
+        // 실패 시 플래그 해제: 사용자가 재시도하면 동일 URL로 돌아올 수 있으므로
+        _handledSsoUrl = null;
         navigate('/service/login', { replace: true });
       }
     };
