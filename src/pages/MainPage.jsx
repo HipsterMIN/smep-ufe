@@ -132,7 +132,17 @@ const MainPage = () => {
   const [likedAnnounce, setLikedAnnounce] = useState({});
   const [likedPolicy, setLikedPolicy] = useState({});
   const [isPlaying, setIsPlaying] = useState(true);
-  const [hiddenPopupIds, setHiddenPopupIds] = useState([]);
+  const [hiddenPopupIds, setHiddenPopupIds] = useState(() => {
+    try {
+      const todayKey = formatLocalDateKey();
+      return Object.keys(localStorage)
+        .filter((key) => key.startsWith('main-popup-hide-'))
+        .filter((key) => localStorage.getItem(key) === todayKey)
+        .map((key) => Number(key.replace('main-popup-hide-', '')));
+    } catch {
+      return [];
+    }
+  });
   const [autoCompleteKeywords, setAutoCompleteKeywords] = useState([]);
   const [isAutoCompleteEnabled, setIsAutoCompleteEnabled] = useState(true);
   const [isAutoLoading, setIsAutoLoading] = useState(false);
@@ -167,7 +177,7 @@ const MainPage = () => {
   });
   //자주 찾는 증명서(Top 5)
   const fetchTop5Certificates = () =>
-      apiClient.get('/api/v1/certificate/top5').then(normalizeResponse);
+    apiClient.get('/api/v1/certificate/top5').then(normalizeResponse);
 
   const { data: top5Certificates = [], isLoading: isTop5Loading } = useQuery({
     queryKey: ['top5-certificates'],
@@ -346,19 +356,6 @@ const MainPage = () => {
 
     return () => window.clearTimeout(timerId);
   }, [searchQuery, isFocused, isAutoCompleteEnabled]);
-
-  useEffect(() => {
-    const todayKey = formatLocalDateKey();
-    setHiddenPopupIds(
-      (mainData.popups || [])
-        .filter(
-          (popup) =>
-            window.localStorage.getItem(`main-popup-hide-${popup.popupId}`) ===
-            todayKey,
-        )
-        .map((popup) => popup.popupId),
-    );
-  }, [mainData.popups]);
 
   const bizFieldMap = useMemo(
     () =>
@@ -1154,19 +1151,19 @@ const MainPage = () => {
               <h3>자주 찾는 증명서</h3>
               <ul className="keyword-list">
                 {isTop5Loading && (
-                    <li>
-                      <button type="button" className="word" disabled>
+                  <li>
+                    <button type="button" className="word" disabled>
                         로딩 중...
-                      </button>
-                    </li>
+                    </button>
+                  </li>
                 )}
 
                 {!isTop5Loading && top5Certificates.length === 0 && (
-                    <li>
-                      <button type="button" className="word" disabled>
+                  <li>
+                    <button type="button" className="word" disabled>
                         추천 증명서가 없습니다.
-                      </button>
-                    </li>
+                    </button>
+                  </li>
                 )}
 
                 {!isTop5Loading &&
@@ -1174,15 +1171,15 @@ const MainPage = () => {
                       const certTitle = cert.prdocTtl || '증명서';
 
                       return (
-                          <li key={`top-cert-${cert.prdocCd || index}`}>
-                            <button
-                                type="button"
-                                className="word"
-                                onClick={() => handleCertificateClick(cert.prdocCd)}
-                            >
-                              {certTitle}
-                            </button>
-                          </li>
+                        <li key={`top-cert-${cert.prdocCd || index}`}>
+                          <button
+                            type="button"
+                            className="word"
+                            onClick={() => handleCertificateClick(cert.prdocCd)}
+                          >
+                            {certTitle}
+                          </button>
+                        </li>
                       );
                     })}
               </ul>
