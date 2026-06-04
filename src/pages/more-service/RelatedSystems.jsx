@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Tab from '@components/ui/Tab';
@@ -9,6 +9,8 @@ import { api as apiClient } from '@lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import { onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
+import { getSearchParam } from '@utils/listNavigation.js';
+import { useLocation } from 'react-router-dom';
 
 const appBaseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
@@ -34,6 +36,7 @@ const resolveThumbnailSrc = (item) => {
 };
 
 const RelatedSystems = () => {
+  const location = useLocation();
   const schFormWrapRef = useRef(null);
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
@@ -52,7 +55,15 @@ const RelatedSystems = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(12);
   const [viewType, setViewType] = useState('card'); // card | list
+  const [sortType, setSortType] = useState(() => getSearchParam(location.search, 'sortType', 'UP'));
+  const getRowNumber = (index) => (
+    sortType === 'DOWN'
+      ? totalElements - currentPage * pageSize - index
+      : currentPage * pageSize + index + 1
+  );
+  const getSortButtonClassName = (value) => (sortType === value ? 'active' : '');
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -125,7 +136,7 @@ const RelatedSystems = () => {
 
         const params = new URLSearchParams({
           page: String(currentPage + 1),
-          size: String(12),
+          size: String(pageSize),
         });
 
         if (activeBizTypeCd && activeBizTypeCd !== 'ALL') {
@@ -134,6 +145,10 @@ const RelatedSystems = () => {
         if (appliedSearchKeyword.trim()) {
           params.append('searchKeyword', appliedSearchKeyword.trim());
         }
+        if (sortType) {
+          params.append('sortType', sortType);
+        }
+
         selectedInstNmList.forEach((instNm) => params.append('instNm', instNm));
 
         const response = await apiClient.get(`/api/v1/rlvntSys/list?${params.toString()}`);
@@ -160,7 +175,7 @@ const RelatedSystems = () => {
     return () => {
       isMounted = false;
     };
-  }, [activeBizTypeCd, appliedSearchKeyword, currentPage, selectedInstNmList]);
+  }, [activeBizTypeCd, appliedSearchKeyword, currentPage, pageSize, selectedInstNmList, sortType]);
 
   const handleToggleFilter = () => {
     const node = schFormWrapRef.current;
@@ -199,6 +214,11 @@ const RelatedSystems = () => {
 
   const handleResetInstitutions = () => {
     setSelectedInstNmList([]);
+    setCurrentPage(0);
+  };
+
+  const handlePageSizeChange = (event) => {
+    setPageSize(Number(event.target.value));
     setCurrentPage(0);
   };
 
@@ -352,6 +372,40 @@ const RelatedSystems = () => {
                       </button>
                     </div>
                   </li>
+                  <li>
+                    <strong className="sort-label"><label htmlFor="related_system_page_size">목록 표시 개수</label></strong>
+                    <select
+                      className="krds-form-select-sort"
+                      id="related_system_page_size"
+                      value={pageSize}
+                      onChange={handlePageSizeChange}
+                    >
+                      <option value={12}>12개</option>
+                      <option value={24}>24개</option>
+                      <option value={36}>36개</option>
+                      <option value={48}>48개</option>
+                      <option value={60}>60개</option>
+                    </select>
+                  </li>
+                  <li>
+                    <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
+                    <div className="w-sort-btn">
+                      <button type="button" className={getSortButtonClassName('UP')}
+                        onClick={() => setSortType('UP')}>오름차순
+                      </button>
+                      <button type="button" className={getSortButtonClassName('DOWN')}
+                        onClick={() => setSortType('DOWN')}>내림차순
+                      </button>
+                    </div>
+                    <div className="m-sort-btn">
+                      <select className="krds-form-select-sort" id="sort" value={sortType}
+                        onChange={(e) => setSortType(e.target.value)}>
+                        <option value="REG">등록일순</option>
+                        <option value="DEADLINE">마감일순</option>
+                        <option value="VIEW">조회순</option>
+                      </select>
+                    </div>
+                  </li>
                 </ul>
               </div>
 
@@ -440,7 +494,7 @@ const RelatedSystems = () => {
                       <tbody>
                         {list.map((item, index) => (
                           <tr key={item?.rlvntInstSysMngSn ?? `${item?.rlvntInstSysNm ?? 'system'}-${index}`}>
-                            <td className="ac">{totalElements - currentPage * 12 - index}</td>
+                            <td className="ac">{getRowNumber(index)}</td>
                             <td>
                               <button
                                 type="button"
