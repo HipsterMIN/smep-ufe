@@ -104,17 +104,25 @@ const OnePassSsoCallback = () => {
 
     // state 검증은 임시 비활성화되어 있으며, code 자체가 없으면 백엔드가 authorization_code 교환을 할 수 없다.
     // code 가 없는 비정상 콜백은 즉시 로그인 페이지로 이동해 불필요한 서버 요청을 방지한다.
-    if (!code) {
-      // 이 warn 는 code 가 비어 있는 비정상 콜백을 분리해서 보기 위한 로그다.
-      // codeLength=0 인지와 queryKeys 에 code 자체가 없는지 함께 보면 외부 redirect 형식 문제를 빠르게 볼 수 있다.
-      console.warn(`${LOG_PREFIX} missing code branch`, {
-        ...callbackState,
-        action: 'redirect-login',
-      });
-      //alert('코드가 없습니다.');
-      navigate('/service/login', { replace: true });
-      return;
-    }
+     if (!code) {
+    //   // 이 warn 는 code 가 비어 있는 비정상 콜백을 분리해서 보기 위한 로그다.
+    //   // codeLength=0 인지와 queryKeys 에 code 자체가 없는지 함께 보면 외부 redirect 형식 문제를 빠르게 볼 수 있다.
+    //   console.warn(`${LOG_PREFIX} missing code branch`, {
+    //     ...callbackState,
+    //     action: 'redirect-login',
+    //   });
+    //   //alert('코드가 없습니다.');
+      const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
+
+      if(isSsoLogin) {
+        navigate('/', { replace: true });
+        return;
+      } else {
+        navigate('/service/login', { replace: true });
+        return;
+      }
+       
+     }
 
     // callback 처리의 핵심은 "현재 로컬 로그인 상태가 있느냐"에 따라 백엔드 경로를 나누는 것이다.
     // 케이스1(로컬 비로그인)은 callback/local-login one-shot endpoint가 code 교환과 local token 발급을 한 번에 끝내고,
