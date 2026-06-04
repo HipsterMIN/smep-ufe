@@ -355,12 +355,12 @@ const UI_USR_W_411 = () => {
       window.alert(error?.message || '저장에 실패했습니다.');
     } finally {
       setSaving(false);
-      navigate('..', { replace: true });
+      navigate('/', { replace: true });
     }
   };
 
   const handleCancel = () => {
-    navigate('..', { replace: true });
+    navigate('/', { replace: true });
   };
 
   return (
