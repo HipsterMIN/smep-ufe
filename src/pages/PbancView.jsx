@@ -391,7 +391,8 @@ const PbancView = () => {
         <div className="def-list-wrap">
           <dl className="def-list">
             {renderTextRow('분야', item?.bizPbancClsfCd ? fieldLabelMap[item.bizPbancClsfCd] || item.bizPbancClsfCd : '')}
-            {currentMenu?.menuNm === '사업공고' ? (
+            {/* currentMenu?.menuId : M_PIIO_00076 (중앙정부), M_PIIO_00169 (지방정부)*/}
+            {currentMenu?.menuId === 'M_PIIO_00076' || currentMenu?.menuId === 'M_PIIO_00169' ? (
               <>
                 {renderExpandableHtmlRow('사업개요', item?.bizPbancOtln)}
                 {renderExpandableHtmlRow('지원대상', item?.bizSprtTrgtCn)}
