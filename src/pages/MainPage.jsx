@@ -1720,26 +1720,25 @@ const MainPage = () => {
                       <div className="notice-tab-cont">
                         <ul className="board-list">
                           {newNewsItems.map((item) => {
-                            const target = resolveBoardTarget(policyNewsListPath, item, true);
                             const newsDate = formatDate(item.pstgBgngYmd || item.pstRegDt);
+
+                            const internalPath = `${policyNewsListPath}/${item.pstNo}`;
+
                             return (
                               <li className="board-list-item" key={String(item.pstNo)}>
-                                {renderBoardLink(
-                                  target,
-                                  <>
-                                    {item.ctgryNm && (
-                                      <span className="krds-badge bg-light-primary">
-                                        {item.ctgryNm}
-                                      </span>
-                                    )}
-                                    <span className="board-list-title onellipsis-1">
-                                      {item.pstTtl}
+                                <Link to={internalPath} className="board-list-link">
+                                  {item.ctgryNm && (
+                                    <span className="krds-badge bg-light-primary">
+                                      {item.ctgryNm}
                                     </span>
-                                    <span className="board-list-date">
-                                      {newsDate}
-                                    </span>
-                                  </>,
-                                )}
+                                  )}
+                                  <span className="board-list-title onellipsis-1">
+                                    {item.pstTtl}
+                                  </span>
+                                  <span className="board-list-date">
+                                    {newsDate}
+                                  </span>
+                                </Link>
                               </li>
                             );
                           })}
