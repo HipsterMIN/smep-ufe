@@ -139,7 +139,7 @@ const UI_USR_L_050 = () => {
         <div className="txt-box outline">
           <h4 className="outline-tit">알려드립니다.</h4>
           <ul className="check-list">
-            <li>중소벤처24 <a href="http://smes.go.kr/" target="_blank" rel="noopener noreferrer" className="on-linktxt2">(www.smes.go.kr)</a>를 통해 출력된 증명/확인서의 진위확인 서비스입니다.</li>
+            <li>중소벤처24 <a href="https://portal.smes.go.kr/home/" target="_blank" rel="noopener noreferrer" className="on-linktxt2">(https://portal.smes.go.kr/home/)</a>를 통해 출력된 증명/확인서의 진위확인 서비스입니다.</li>
             <li>발급된 증명/확인서의 종류를 선택한 후 발급문서 우측 상단의 문서확인번호 17자리를 입력하세요.</li>
           </ul>
         </div>
