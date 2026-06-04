@@ -159,13 +159,13 @@ const MainPage = () => {
     queryFn: fetchPopularKeywords,
     staleTime: 30_000,
   });
-  //자주 찾는 증명서(Top 4)
-  const fetchTop4Certificates = () =>
-      apiClient.get('/api/v1/certificate/top4').then(normalizeResponse);
+  //자주 찾는 증명서(Top 5)
+  const fetchTop5Certificates = () =>
+      apiClient.get('/api/v1/certificate/top5').then(normalizeResponse);
 
-  const { data: top4Certificates = [], isLoading: isTop4Loading } = useQuery({
-    queryKey: ['top4-certificates'],
-    queryFn: fetchTop4Certificates,
+  const { data: top5Certificates = [], isLoading: isTop5Loading } = useQuery({
+    queryKey: ['top5-certificates'],
+    queryFn: fetchTop5Certificates,
     staleTime: 5 * 60_000, //5분 캐시
   });
 
@@ -1077,7 +1077,7 @@ const MainPage = () => {
             <div className="main-top-keyword fav">
               <h3>자주 찾는 증명서</h3>
               <ul className="keyword-list">
-                {isTop4Loading && (
+                {isTop5Loading && (
                     <li>
                       <button type="button" className="word" disabled>
                         로딩 중...
@@ -1085,7 +1085,7 @@ const MainPage = () => {
                     </li>
                 )}
 
-                {!isTop4Loading && top4Certificates.length === 0 && (
+                {!isTop5Loading && top5Certificates.length === 0 && (
                     <li>
                       <button type="button" className="word" disabled>
                         추천 증명서가 없습니다.
@@ -1093,8 +1093,8 @@ const MainPage = () => {
                     </li>
                 )}
 
-                {!isTop4Loading &&
-                    top4Certificates.map((cert, index) => {
+                {!isTop5Loading &&
+                    top5Certificates.map((cert, index) => {
                       const certTitle = cert.prdocTtl || '증명서';
 
                       return (
