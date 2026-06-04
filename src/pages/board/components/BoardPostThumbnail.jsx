@@ -13,6 +13,8 @@ import {
   mergeBoardPostFiles,
 } from '@utils/boardPostFileUtils.js';
 
+import styles from './BoardPostThumbnail.module.css';
+
 const formatDate = (dateString) => {
   if (!dateString) return '-';
 
@@ -179,7 +181,10 @@ const BoardPostThumbnail = ({ boardDetail, bbsNo, pstNo }) => {
         {/* 게시글 내용 */}
 
         <div className="onboard-conts-area">
-          <p dangerouslySetInnerHTML={{ __html: contentHtml }} />
+          <div
+            className={styles.contentHtml}
+            dangerouslySetInnerHTML={{ __html: contentHtml }}
+          />
           <br /><br />
         </div>
 
