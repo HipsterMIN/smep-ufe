@@ -285,7 +285,7 @@ const UI_USR_R_111 = () => {
                           target="_blank"
                           rel="noreferrer"
                         >
-                          <i className="svg-icon ico-sch-plus"></i> 바로가기
+                          <i className="svg-icon ico-sch-plus"></i> 바로보기
                         </a>
                       )}
                       <a className="krds-btn medium text on-colorblue" onClick={(e) => handleDownload(e, file)}>
