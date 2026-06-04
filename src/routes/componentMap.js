@@ -508,7 +508,7 @@ export const componentMap = {
     layout: 'SubpageLayoutWithMenu',
   },
 
-  // 플랫폼 소개
+  // 중소벤처24 소개
   'M_PIIO_00106': {
     component: PlatformIntro,
     layout: 'SubpageLayoutWithMenu',
