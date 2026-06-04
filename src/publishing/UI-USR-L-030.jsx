@@ -85,199 +85,64 @@ const UI_USR_L_030 = () => {
 
         <div className="krds-tab-area layer">
             <Tab tabData={tabData.current} onTabChange={handleTabChange}></Tab>
+            <p className="conts-desc">
+                중소기업 성장과 경영 안정을 위해 제공하는 다양한 정책금융 상품을 조회할 수 있습니다.
+            </p>
 
-<div className="conts-desc">
-  중소기업 성장과 경영 안정을 위해 제공하는 다양한 정책금융 지원사업을 조회할 수 있습니다.
-</div>
+            <div className="krds-check-group ">
+                <div className="krds-check-area gap-2">
+                    <div className="krds-form-chip small fill">
+                        <input type="radio" name="financeAgency" id="financeAgency_all" defaultChecked />
+                        <label className="krds-form-chip" htmlFor="financeAgency_all">전체</label>
+                    </div>
+                </div>
+                <div className="krds-check-area gap-2">
+                    <div className="krds-form-chip small">
+                        <input type="radio" name="financeAgency" id="financeAgency_01" />
+                        <label className="krds-form-chip-outline" htmlFor="financeAgency_01">중소벤처기업진흥공단(19)</label>
+                    </div>
 
-<div className="finance-agency-chip-wrap">
-  <div className="krds-form-chip small">
-    <input type="radio" name="financeAgency" id="financeAgency_all" defaultChecked />
-    <label className="krds-form-chip-outline" htmlFor="financeAgency_all">전체</label>
-  </div>
+                    <div className="krds-form-chip small">
+                        <input type="radio" name="financeAgency" id="financeAgency_02" />
+                        <label className="krds-form-chip-outline" htmlFor="financeAgency_02">기술보증기금(51)</label>
+                    </div>
 
-  <div className="krds-form-chip small">
-    <input type="radio" name="financeAgency" id="financeAgency_01" />
-    <label className="krds-form-chip-outline" htmlFor="financeAgency_01">중소벤처기업진흥공단(19)</label>
-  </div>
+                    <div className="krds-form-chip small">
+                        <input type="radio" name="financeAgency" id="financeAgency_03" />
+                        <label className="krds-form-chip-outline" htmlFor="financeAgency_03">한국수출입은행(13)</label>
+                    </div>
 
-  <div className="krds-form-chip small">
-    <input type="radio" name="financeAgency" id="financeAgency_02" />
-    <label className="krds-form-chip-outline" htmlFor="financeAgency_02">기술보증기금(51)</label>
-  </div>
+                    <div className="krds-form-chip small">
+                        <input type="radio" name="financeAgency" id="financeAgency_04" />
+                        <label className="krds-form-chip-outline" htmlFor="financeAgency_04">신용보증기금(45)</label>
+                    </div>
 
-  <div className="krds-form-chip small">
-    <input type="radio" name="financeAgency" id="financeAgency_03" />
-    <label className="krds-form-chip-outline" htmlFor="financeAgency_03">한국수출입은행(13)</label>
-  </div>
+                    <div className="krds-form-chip small">
+                        <input type="radio" name="financeAgency" id="financeAgency_05" />
+                        <label className="krds-form-chip-outline" htmlFor="financeAgency_05">한국무역보험공사(31)</label>
+                    </div>
 
-  <div className="krds-form-chip small">
-    <input type="radio" name="financeAgency" id="financeAgency_04" />
-    <label className="krds-form-chip-outline" htmlFor="financeAgency_04">신용보증기금(45)</label>
-  </div>
+                    <div className="krds-form-chip small">
+                        <input type="radio" name="financeAgency" id="financeAgency_06" />
+                        <label className="krds-form-chip-outline" htmlFor="financeAgency_06">한국산업은행(35)</label>
+                    </div>
 
-  <div className="krds-form-chip small">
-    <input type="radio" name="financeAgency" id="financeAgency_05" />
-    <label className="krds-form-chip-outline" htmlFor="financeAgency_05">한국무역보험공사(31)</label>
-  </div>
+                    <div className="krds-form-chip small">
+                        <input type="radio" name="financeAgency" id="financeAgency_07" />
+                        <label className="krds-form-chip-outline" htmlFor="financeAgency_07">소상공인시장진흥공단(13)</label>
+                    </div>
 
-  <div className="krds-form-chip small">
-    <input type="radio" name="financeAgency" id="financeAgency_06" />
-    <label className="krds-form-chip-outline" htmlFor="financeAgency_06">한국산업은행(35)</label>
-  </div>
+                    <div className="krds-form-chip small">
+                        <input type="radio" name="financeAgency" id="financeAgency_08" />
+                        <label className="krds-form-chip-outline" htmlFor="financeAgency_08">지역신용보증재단(81)</label>
+                    </div>
 
-  <div className="krds-form-chip small">
-    <input type="radio" name="financeAgency" id="financeAgency_07" />
-    <label className="krds-form-chip-outline" htmlFor="financeAgency_07">소상공인시장진흥공단(13)</label>
-  </div>
-
-  <div className="krds-form-chip small">
-    <input type="radio" name="financeAgency" id="financeAgency_08" />
-    <label className="krds-form-chip-outline" htmlFor="financeAgency_08">지역신용보증재단(81)</label>
-  </div>
-
-  <div className="krds-form-chip small">
-    <input type="radio" name="financeAgency" id="financeAgency_09" />
-    <label className="krds-form-chip-outline" htmlFor="financeAgency_09">중소기업은행(10)</label>
-  </div>
-</div>
-
-<div className="search-top-box finance-search-box">
-  <div className="sch-form-wrap" ref={schFormWrapRef1}>
-    <div className="sch-form-row">
-      <select className="krds-form-select medium" aria-label="검색 구분 선택">
-        <option value="">전체</option>
-        <option value="">상품명</option>
-        <option value="">해시태그</option>
-      </select>
-
-      <div className="sch-input">
-        <input
-          type="text"
-          className="krds-input medium"
-          placeholder="공고명·사업명·기관명으로 검색하세요"
-          title="검색어 입력"
-        />
-        <button type="button" className="krds-btn medium icon ico-search">
-          <span className="sr-only">검색</span>
-          <i className="svg-icon ico-sch"></i>
-        </button>
-      </div>
-
-      <button
-        type="button"
-        className="krds-btn small text"
-        onClick={() => handleToggleFilter(0)}
-      >
-        <i className="svg-icon ico-sch-plus"></i>
-        상세검색
-        <span className="onfilter-open sr-only">열기</span>
-        <span className="onfilter-close sr-only">닫기</span>
-      </button>
-    </div>
-
-    <p className="finance-search-help">
-      금융상품검색 예시 <strong>청년창업기업, 매출채권보험</strong>
-    </p>
-
-    <div className="sch-filter-box">
-      <div className="filter-form finance-detail-filter">
-        <div>
-          <label className="label" htmlFor="finance-filter-type">상품유형</label>
-          <select id="finance-filter-type" className="krds-form-select small">
-            <option value="">전체</option>
-            <option value="">융자</option>
-            <option value="">보증</option>
-            <option value="">보험</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="label" htmlFor="finance-filter-size">기업규모</label>
-          <select id="finance-filter-size" className="krds-form-select small">
-            <option value="">전체</option>
-            <option value="">소상공인</option>
-            <option value="">소기업</option>
-            <option value="">중기업</option>
-            <option value="">중견기업</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="label" htmlFor="finance-filter-status">접수상태</label>
-          <select id="finance-filter-status" className="krds-form-select small">
-            <option value="">전체</option>
-            <option value="">접수중</option>
-            <option value="">접수예정</option>
-            <option value="">접수마감</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="label" htmlFor="finance-filter-prefer">우대기업</label>
-          <select id="finance-filter-prefer" className="krds-form-select small">
-            <option value="">전체</option>
-            <option value="">여성기업</option>
-            <option value="">장애인기업</option>
-            <option value="">수출기업</option>
-            <option value="">창업기업</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="label" htmlFor="finance-filter-apply">신청방식</label>
-          <select id="finance-filter-apply" className="krds-form-select small">
-            <option value="">전체</option>
-            <option value="">온라인</option>
-            <option value="">방문접수</option>
-            <option value="">우편접수</option>
-          </select>
-        </div>
-
-        <div className="on-mw100p filter-sect">
-          <span className="label">업종</span>
-
-          <button
-            type="button"
-            className="krds-btn small primary"
-            onClick={() => setIsPopupOpen02(true)}
-          >
-            선택
-          </button>
-
-          <button type="button" className="krds-btn xlarge icon border">
-            <span className="sr-only">초기화</span>
-            <i className="svg-icon ico-refresh"></i>
-          </button>
-
-          <div className="chip-wrap krds-tag-wrap large">
-            <span className="krds-btn-tag">
-              금융
-              <button type="button" className="btn-delete">
-                <span className="sr-only">삭제</span>
-              </button>
-            </span>
-
-            <span className="krds-btn-tag">
-              서울
-              <button type="button" className="btn-delete">
-                <span className="sr-only">삭제</span>
-              </button>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-            <Tab tabData={tabData.current} onTabChange={handleTabChange}></Tab>
-            <div className="conts-desc">
-              장애아동수당은 현금 지급형 서비스로 한 달에 한 번, 현금으로 지급합니다.
-              지급 금액은 장애 유형이나 소득 수준에 따라 달라질 수 있습니다.
+                    <div className="krds-form-chip small">
+                        <input type="radio" name="financeAgency" id="financeAgency_09" />
+                        <label className="krds-form-chip-outline" htmlFor="financeAgency_09">중소기업은행(10)</label>
+                    </div>
+                </div>
             </div>
-
-
             <div className="tab-conts-wrap">
               <section className={`tab-conts ${activeTabIndex === 0 ? 'active' : ''}`}>
                  <h3 className="sr-only">사업유형별</h3>
@@ -300,7 +165,7 @@ const UI_USR_L_030 = () => {
                       </button>
                     </div>
                     <div className="sch-filter-box">
-                      <div className="filter-form">
+                      <div className="filter-form row">
                         <div>
                           <label className="label" htmlFor="appl-sch-sel1">상품유형</label>
                           <select id="appl-sch-sel1" className="krds-form-select small">
@@ -309,15 +174,9 @@ const UI_USR_L_030 = () => {
                             <option value="">항목</option>
                           </select>
                         </div>
-                        <div>
-                          <label className="label" htmlFor="appl-sch-sel2">금융기관</label>
-                          <select id="appl-sch-sel2" className="krds-form-select small">
-                            <option value="">전체</option>
-                            <option value="">항목</option>
-                            <option value="">항목</option>
-                          </select>
-                        </div>
-                        <div className="on-fit-width">
+                        <div className="ghost"></div>
+
+                        <div className="on-fit-width-">
                           <label className="label" htmlFor="appl-sch-sel3">기업규모</label>
                           <select id="appl-sch-sel3" className="krds-form-select small">
                             <option value="">전체</option>

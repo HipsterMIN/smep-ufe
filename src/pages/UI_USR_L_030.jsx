@@ -229,6 +229,56 @@ const renderSelectField = ({ id, label, value, onChange, options, placeholder, d
   </div>
 );
 
+const renderInstitutionChips = ({ options, value, onChange }) => {
+  const selectedValue = value || '';
+  const chipOptions = options || [];
+  const renderChip = (optionValue, label, index) => {
+    const checked = selectedValue === optionValue;
+    const id = index === null ? 'financeAgency_all' : `financeAgency_${index + 1}`;
+    const handleSelect = () => {
+      if (!checked) {
+        onChange(optionValue);
+      }
+    };
+
+    return (
+      <div key={id} className={`krds-form-chip small${checked ? ' fill' : ''}`}>
+        <input
+          type="radio"
+          name="financeAgency"
+          id={id}
+          value={optionValue}
+          checked={checked}
+          onChange={(event) => event.target.checked && handleSelect()}
+        />
+        <label
+          className={checked ? 'krds-form-chip' : 'krds-form-chip-outline'}
+          htmlFor={id}
+          onClick={(event) => {
+            event.preventDefault();
+            handleSelect();
+          }}
+        >
+          {label}
+        </label>
+      </div>
+    );
+  };
+
+  return (
+    <div className="krds-check-group policy-finance-agency-chips" role="radiogroup" aria-label="금융기관">
+      <div className="krds-check-area gap-2">
+        {renderChip('', '전체', null)}
+      </div>
+      {chipOptions.length > 0 && (
+        <div className="krds-check-area gap-2">
+          {chipOptions.map((item, index) => renderChip(item.code, item.name, index))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const renderIndustryFilterSection = ({ items, onOpen, onReset, onRemove }) => (
   <div className="on-mw100p filter-sect">
     <span className="label">업종</span>
@@ -721,7 +771,7 @@ const UI_USR_L_030 = () => {
   return (
     <>
       <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />
-      <div className="contents">
+      <div className="contents policy-finance-page">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
           <h2 className="h-tit">정책금융</h2>
@@ -729,9 +779,15 @@ const UI_USR_L_030 = () => {
 
         <div className="krds-tab-area layer">
           <Tab tabData={TAB_LABELS} onTabChange={handleTabChange} activeIndex={activeTabIndex} />
-          <div className="conts-desc">
-            중소기업 성장과 경영 안정을 위해 제공하는 다양한 정책금융 지원사업을 조회할 수 있습니다.
-          </div>
+          <p className="conts-desc">
+            중소기업 성장과 경영 안정을 위해 제공하는 다양한 정책금융 상품을 조회할 수 있습니다.
+          </p>
+
+          {renderInstitutionChips({
+            options: filterOptions.financialInsts,
+            value: filters.plcyFnncBizFlfmtInstNm,
+            onChange: (nextValue) => applyDetailFilter('plcyFnncBizFlfmtInstNm', nextValue),
+          })}
 
           <div className="tab-conts-wrap">
             <section className="tab-conts active">
@@ -749,7 +805,7 @@ const UI_USR_L_030 = () => {
                     <input
                       type="text"
                       className="krds-input medium"
-                      placeholder="금융상품 검색어를 입력해 주세요"
+                      placeholder="금융상품 조회를 위한 검색어를 입력해주세요"
                       title="검색어 입력"
                       value={filters.plcyFnncSrchKwdCn}
                       onChange={(e) => updateFilter('plcyFnncSrchKwdCn', e.target.value)}
@@ -773,7 +829,7 @@ const UI_USR_L_030 = () => {
                 </div>
 
                 <div className="sch-filter-box">
-                  <div className="filter-form w6">
+                  <div className="filter-form row w6">
                     {activeTabIndex === 0 && renderSelectField({
                       id: 'plcyFnncGdsTypeCd',
                       label: '상품유형',
@@ -782,14 +838,7 @@ const UI_USR_L_030 = () => {
                       options: filterOptions.supportTypes,
                       placeholder: '전체',
                     })}
-                    {renderSelectField({
-                      id: `plcyFnncBizFlfmtInstNm-${activeTabIndex}`,
-                      label: '금융기관',
-                      value: filters.plcyFnncBizFlfmtInstNm,
-                      onChange: (value) => applyDetailFilter('plcyFnncBizFlfmtInstNm', value),
-                      options: filterOptions.financialInsts,
-                      placeholder: '전체',
-                    })}
+                    {activeTabIndex === 0 && <div className="ghost" aria-hidden="true"></div>}
                     {renderSelectField({
                       id: 'plcyFnncEntSclCd',
                       label: '기업규모',
@@ -798,7 +847,7 @@ const UI_USR_L_030 = () => {
                       options: filterOptions.companySizes,
                       placeholder: '전체',
                     })}
-                    
+
                     {showLoan && (
                       <div className="on-mw100p">
                         <label className="label" htmlFor="thmTpbizNm">테마업종명</label>
@@ -838,7 +887,7 @@ const UI_USR_L_030 = () => {
                   </div>
 
                   {showLoan && (
-                    <div className="filter-form w6">
+                    <div className="filter-form w6 row">
                       {renderSelectField({ id: 'plcyFnncRpmtMthdCd', label: '상환방법', value: filters.plcyFnncRpmtMthdCd, onChange: (value) => applyDetailFilter('plcyFnncRpmtMthdCd', value), options: filterOptions.repaymentMethods, placeholder: '전체' })}
                       {renderSelectField({ id: 'flctnIrtYnCn', label: '금리변동여부', value: filters.flctnIrtYnCn, onChange: (value) => applyDetailFilter('flctnIrtYnCn', value), options: filterOptions.interestChangeTypes, placeholder: '전체' })}
                       {renderSelectField({ id: 'plcyFndsLoanMthCn', label: '융자방식', value: filters.plcyFndsLoanMthCn, onChange: (value) => applyDetailFilter('plcyFndsLoanMthCn', value), options: filterOptions.loanMethods, placeholder: '전체' })}
@@ -848,7 +897,7 @@ const UI_USR_L_030 = () => {
                   )}
 
                   {showGrant && (
-                    <div className="filter-form w6">
+                    <div className="filter-form w6 row">
                       {renderSelectField({ id: 'plcyFnncSprtTrgtFndsCn', label: '지원대상 자금', value: filters.plcyFnncSprtTrgtFndsCn, onChange: (value) => applyDetailFilter('plcyFnncSprtTrgtFndsCn', value), options: filterOptions.supportTargetFunds, placeholder: '전체' })}
                       {renderSelectField({ id: 'plcyFnncGdsKndCd', label: '상품종류', value: filters.plcyFnncGdsKndCd, onChange: (value) => applyDetailFilter('plcyFnncGdsKndCd', value), options: filterOptions.grantKinds, placeholder: '전체' })}
                       {renderSelectField({ id: 'plcyFnncGrnteRtSmryCn', label: '보증비율', value: filters.plcyFnncGrnteRtSmryCn, onChange: (value) => applyDetailFilter('plcyFnncGrnteRtSmryCn', value), options: filterOptions.grantRateSummaries, placeholder: '전체' })}
@@ -856,7 +905,7 @@ const UI_USR_L_030 = () => {
                   )}
 
                   {showInsurance && (
-                    <div className="filter-form w6">
+                    <div className="filter-form w6 row">
                       {renderSelectField({ id: 'plcyFnncCmpnRtSmryCn', label: '보상비율', value: filters.plcyFnncCmpnRtSmryCn, onChange: (value) => applyDetailFilter('plcyFnncCmpnRtSmryCn', value), options: filterOptions.insuranceRateSummaries, placeholder: '전체' })}
                     </div>
                   )}

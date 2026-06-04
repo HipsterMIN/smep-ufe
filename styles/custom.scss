@@ -484,12 +484,70 @@
     display: block;
   }
 }
-.krds-form-chip-wrap{display:flex;flex-wrap:wrap;gap:.8rem;
-
-}
+.krds-form-chip-wrap{display:flex;flex-wrap:wrap;gap:.8rem;}
 .search-top-box {
     .sch-filter-box {
         .filter-form{display:flex;flex-direction:column;gap:2.4rem;}
+    }
+
+}
+.policy-finance-page{
+    .search-top-box {
+        .sch-filter-box {
+            .filter-form{
+                &.row{flex-direction:row;flex-wrap:wrap;
+                    > div{flex:0 0 calc(50% - 1.2rem);}
+                }
+                .filter-sect{flex:0 0 100% !important;}
+            }
+        }
+    }
+    .policy-finance-agency-chips{display:flex;gap:.8rem;margin-bottom:2.4rem;
+        .krds-check-area{display:flex;flex-direction:row;align-items:stretch;flex-wrap:wrap;gap:.8rem;
+            .krds-form-chip{
+                input[type=radio], input[type=checkbox]{
+                    ~ label{
+                        &::before {display:none !important}
+                    }
+                }
+                &.fill{
+                    input[type=radio], input[type=checkbox]{
+                        ~ label{
+                            &::before {display:none}
+                        }
+                        &:checked ~ label{background-color:#3A49D6;color:#fff;}
+                    }
+                }
+            }
+        }
+    }
+    .search-list-top {
+        .sch-sort {flex-wrap:wrap;
+            .margin-top13{margin:0 }
+        }
+    }
+    .conts-desc{margin:2.4rem auto;}
+}
+@media(max-width:767px){
+    .policy-finance-page{
+        .policy-finance-agency-chips{flex-direction:column;}
+        .search-top-box{
+            .sch-filter-box{
+                .filter-form{
+                    &.row{flex-direction:column;
+                        > div{flex:none;width:100%;}
+                        > .ghost{display:none;}
+                    }
+                }
+            }
+        }
+        .search-top-box{
+            .sch-filter-box{
+                .filter-form{
+                > div{row-gap:.4rem;}
+                }
+            }
+        }
     }
 }
 .sch-sort{display:flex;justify-content:flex-end;
