@@ -16,6 +16,7 @@ export const buildFlatMap = (menuData) => {
 };
 
 const COMPANY_INFO_MANAGEMENT_MENU_ID = 'M_PIIO_00119';
+const MY_DASHBOARD_MENU_ID = 'M_PIIO_00112';
 
 const filterMenuByCurrentMode = (menuData) => {
   if (useAuthStore.getState().currentMode !== 'INDIVIDUAL') {
@@ -26,7 +27,7 @@ const filterMenuByCurrentMode = (menuData) => {
     ...node,
     children: (node.children || [])
       .filter((child) => {
-        if (child.menuId === COMPANY_INFO_MANAGEMENT_MENU_ID) {
+        if (child.menuId === COMPANY_INFO_MANAGEMENT_MENU_ID || child.menuId === MY_DASHBOARD_MENU_ID) {
           return false;
         }
 
