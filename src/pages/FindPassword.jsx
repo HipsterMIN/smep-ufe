@@ -4,42 +4,13 @@ import Breadcrumb from '../components/ui/Breadcrumb';
 import { useNiceIdAuth } from '../hooks/useNiceIdAuth';
 import { api } from '../lib/apiClient';
 import { unwrapApiResponseData } from '../lib/apiResponsePayload';
-
-const PASSWORD_FIND_SEND_OPTIONS = [
-  {
-    type: 'EMAIL',
-    channelKey: 'email',
-    label: '이메일',
-    unavailableLabel: '등록된 이메일 없음',
-  },
-  {
-    type: 'SMS',
-    channelKey: 'sms',
-    label: '문자',
-    unavailableLabel: '등록된 휴대전화 없음',
-  },
-];
-
-const SEND_TYPE_LABELS = PASSWORD_FIND_SEND_OPTIONS.reduce(
-  (labels, option) => ({ ...labels, [option.type]: option.label }),
-  {},
-);
-
-const resolvePasswordFindErrorMessage = (error) =>
-  error?.data?.message ||
-  error?.data?.error?.message ||
-  error?.message ||
-  '임시비밀번호 발송 처리 중 오류가 발생했습니다.';
-
-const isObjectPayload = (value) => value !== null && typeof value === 'object';
-
-const getPayloadKeys = (value) => (isObjectPayload(value) ? Object.keys(value) : []);
-
-const createResponseShapeMarker = (response, payload) => ({
-  wrapped: isObjectPayload(response?.data),
-  topLevelKeys: getPayloadKeys(response),
-  payloadKeys: getPayloadKeys(payload),
-});
+import {
+  PASSWORD_FIND_SEND_OPTIONS,
+  createResponseShapeMarker,
+  getPayloadKeys,
+  isObjectPayload,
+  resolvePasswordFindErrorMessage,
+} from '../lib/passwordFindDelivery';
 
 const FindPassword = () => {
   const navigate = useNavigate();
@@ -47,78 +18,18 @@ const FindPassword = () => {
   const [businessType, setBusinessType] = useState('corporate');
   const [userId, setUserId] = useState('');
   const [userName, setUserName] = useState('');
-  const [personalAuthResult, setPersonalAuthResult] = useState(null);
-  const [passwordFindKey, setPasswordFindKey] = useState('');
-  const [passwordFindChannels, setPasswordFindChannels] = useState(null);
-  const [selectedSendType, setSelectedSendType] = useState('EMAIL');
   const [isVerifyingPasswordFind, setIsVerifyingPasswordFind] = useState(false);
-  const [isSendingTemporaryPassword, setIsSendingTemporaryPassword] = useState(false);
   const { authenticate, reset: resetNiceIdAuth, loading: niceIdAuthLoading } = useNiceIdAuth();
 
   const isPersonal = memberType === 'personal';
   const isCompany = memberType === 'company';
   const isAuthBusy = niceIdAuthLoading || isVerifyingPasswordFind;
 
-  const getSendTypeOption = (sendType) =>
-    PASSWORD_FIND_SEND_OPTIONS.find((option) => option.type === sendType) || PASSWORD_FIND_SEND_OPTIONS[0];
-
-  const getChannel = (sendType) => {
-    const { channelKey } = getSendTypeOption(sendType);
-    return passwordFindChannels?.[channelKey] || { available: false, maskedAddress: null };
-  };
-
-  const getVisibleSendOptions = () => PASSWORD_FIND_SEND_OPTIONS;
-
-  const isSelectedSendTypeAvailable = () => Boolean(getChannel(selectedSendType).available);
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (isPersonal) {
-      if (!passwordFindKey) {
-        alert('본인 인증을 완료해주세요.');
-        return;
-      }
-
-      if (!isSelectedSendTypeAvailable()) {
-        alert('임시비밀번호를 받을 수 있는 발송 방법을 선택해주세요.');
-        return;
-      }
-
-      console.info('[FIND_PASSWORD_MARK] temporary password send start', {
-        hasFindKey: Boolean(passwordFindKey),
-        sendType: selectedSendType,
-      });
-      setIsSendingTemporaryPassword(true);
-
-      try {
-        const sendResponse = await api.post('/api/v1/account/password-find/send', {
-          findKey: passwordFindKey,
-          sendType: selectedSendType,
-        });
-        const sendPayload = unwrapApiResponseData(sendResponse);
-        console.info('[FIND_PASSWORD_MARK] temporary password send response unwrapped', {
-          ...createResponseShapeMarker(sendResponse, sendPayload),
-          hasSendType: Boolean(sendPayload?.sendType),
-          hasMaskedAddress: Boolean(sendPayload?.maskedAddress),
-        });
-        console.info('[FIND_PASSWORD_MARK] temporary password send success', {
-          sendType: sendPayload?.sendType,
-          hasMaskedAddress: Boolean(sendPayload?.maskedAddress),
-        });
-        const sendTypeLabel = SEND_TYPE_LABELS[sendPayload?.sendType] || SEND_TYPE_LABELS[selectedSendType];
-        const maskedAddress = sendPayload?.maskedAddress ? ` (${sendPayload.maskedAddress})` : '';
-        alert(`${sendTypeLabel}${maskedAddress}로 임시비밀번호가 발송되었습니다. 로그인해 주세요.`);
-        navigate('/service/login');
-      } catch (error) {
-        console.error('[FIND_PASSWORD_MARK] temporary password send failed', {
-          status: error?.status,
-          message: error?.message,
-        });
-        alert(resolvePasswordFindErrorMessage(error));
-      } finally {
-        setIsSendingTemporaryPassword(false);
-      }
+      alert('본인 인증을 완료해주세요.');
       return;
     }
 
@@ -126,15 +37,11 @@ const FindPassword = () => {
   };
 
   const clearPasswordFindState = () => {
-    setPersonalAuthResult(null);
-    setPasswordFindKey('');
-    setPasswordFindChannels(null);
-    setSelectedSendType('EMAIL');
+    resetNiceIdAuth();
   };
 
   const resetPersonalAuthResult = () => {
     clearPasswordFindState();
-    resetNiceIdAuth();
   };
 
   const handleMemberTypeChange = (nextMemberType) => {
@@ -202,10 +109,6 @@ const FindPassword = () => {
         const defaultSendOption =
           PASSWORD_FIND_SEND_OPTIONS.find((option) => channels[option.channelKey]?.available) ||
           PASSWORD_FIND_SEND_OPTIONS[0];
-        setPasswordFindKey(findKey);
-        setPasswordFindChannels(channels);
-        setSelectedSendType(defaultSendOption.type);
-        setPersonalAuthResult({ authMethod });
         console.info('[FIND_PASSWORD_MARK] personal verify success', {
           authMethod,
           hasFindKey: Boolean(findKey),
@@ -213,7 +116,15 @@ const FindPassword = () => {
           emailAvailable: Boolean(channels.email?.available),
           smsAvailable: Boolean(channels.sms?.available),
         });
-        alert('본인 인증이 완료되었습니다. 임시비밀번호를 받을 방법을 선택해주세요.');
+        navigate('/service/find-password/send', {
+          replace: true,
+          state: {
+            findKey,
+            channels,
+            defaultSendType: defaultSendOption.type,
+            expiresInSeconds: verifyPayload.expiresInSeconds,
+          },
+        });
       } catch (error) {
         console.error('[FIND_PASSWORD_MARK] personal verify failed', {
           authMethod,
@@ -360,68 +271,6 @@ const FindPassword = () => {
                     </button>
                   </div>
                 </div>
-
-                {personalAuthResult && (
-                  <p className="auth-complete" role="status">
-                    본인 인증이 완료되었습니다.
-                  </p>
-                )}
-
-                {passwordFindKey && (
-                  <div className="conts-wrap form-confirm">
-                    <h3 className="sec-tit">임시비밀번호 발급</h3>
-                    <ul className="krds-info-list decimal" role="list">
-                      <li role="listitem">본인 인증이 완료되었습니다. 임시비밀번호를 받을 방법을 선택해 주세요.</li>
-                      <li role="listitem">발급된 임시비밀번호로 로그인한 뒤 비밀번호를 변경해 주세요.</li>
-                    </ul>
-                    <dl className="on-form-row large">
-                      <div className="form-row-item">
-                        <dt className="form-row-label flex-start">
-                          <span>발송 방법</span>
-                        </dt>
-                        <dd className="form-row-content">
-                          <div className="krds-check-area gap-4">
-                            {getVisibleSendOptions().map((option) => {
-                              const channel = getChannel(option.type);
-                              const optionId = `temporaryPasswordSend${option.type}`;
-                              const channelLabel = channel.maskedAddress
-                                ? ` (${channel.maskedAddress})`
-                                : ` (${option.unavailableLabel})`;
-
-                              return (
-                                <span className="krds-form-check" key={option.type}>
-                                  <input
-                                    type="radio"
-                                    name="temporaryPasswordSendType"
-                                    id={optionId}
-                                    value={option.type}
-                                    checked={selectedSendType === option.type}
-                                    onChange={() => setSelectedSendType(option.type)}
-                                    disabled={!channel.available || isSendingTemporaryPassword}
-                                  />
-                                  <label htmlFor={optionId}>
-                                    {option.label}
-                                    {channelLabel}
-                                  </label>
-                                </span>
-                              );
-                            })}
-                          </div>
-                          <p className="form-hint point">선택한 방법으로 임시비밀번호가 발송됩니다.</p>
-                        </dd>
-                      </div>
-                    </dl>
-                    <div className="onboard-btm-btngroup bt-0 btn-single">
-                      <button
-                        type="submit"
-                        className="krds-btn large primary"
-                        disabled={isSendingTemporaryPassword || !isSelectedSendTypeAvailable()}
-                      >
-                        {isSendingTemporaryPassword ? '발송 중...' : '임시비밀번호 발송'}
-                      </button>
-                    </div>
-                  </div>
-                )}
 
                 <ul className="auth-notice">
                   <li>입력하신 인증정보는 실명인증을 위한 자료로 사용되며 이외의 용도로 사용 또는 제공되지 않습니다.</li>

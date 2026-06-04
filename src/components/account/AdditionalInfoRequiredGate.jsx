@@ -741,7 +741,7 @@ export default function AdditionalInfoRequiredGate() {
       <h3 className="sec-tit3">맞춤 알림 서비스 선택</h3>
       <ul className="krds-info-list decimal" role="list">
         <li role="listitem">
-          중소벤처24의 정책금융 상품, 사업공고, 증명서 발급 현황 등의 맞춤형 알림 서비스를 받아
+          중소벤처24의 정책금융 지원사업, 사업공고, 증명서 발급 현황 등의 맞춤형 알림 서비스를 받아
           보실 수 있습니다. 알림 수신 방법은 알림 수신 동의에서 선택하신 방법으로 발송됩니다.
         </li>
       </ul>
@@ -790,7 +790,7 @@ export default function AdditionalInfoRequiredGate() {
 
           <div className="form-row-item">
             <dt className="form-row-label">
-              <span className="label-title" id="additional-policy-label">정책금융 상품</span>
+              <span className="label-title" id="additional-policy-label">정책금융 지원사업</span>
             </dt>
             <dd className="form-row-content">
               <div className="form-wrapper">

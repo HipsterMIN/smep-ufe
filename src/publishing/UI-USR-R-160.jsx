@@ -45,14 +45,14 @@ const UI_USR_R_160 = () => {
     depth1Title: "더 많은 서비스",
     depth: [
       {
-        depth2: "유관기관 둘러보기",
+        depth2: "유관시스템 둘러보기",
       },
     ],
   };
 
   const breadcrumbItems = [
     { label: "더 많은 서비스", link: "#" },
-    { label: "유관기관 둘러보기", link: "#" },
+    { label: "유관시스템 둘러보기", link: "#" },
   ];
 
   const agencyOptions = [
@@ -113,7 +113,7 @@ const UI_USR_R_160 = () => {
         <Breadcrumb items={breadcrumbItems} />
 
         <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">유관기관 둘러보기</h2>
+          <h2 className="h-tit">유관시스템 둘러보기</h2>
         </div>
 
         <div className="krds-tab-area layer">
@@ -250,7 +250,7 @@ const UI_USR_R_160 = () => {
                           ))}
                         </div>
 
-                        <button type="button" className="krds-btn small tertiary go-btn">
+                        <button type="button" className="krds-btn small primary go-btn">
                           바로가기 <i className="svg-icon ico-angle right" />
                         </button>
                       </div>

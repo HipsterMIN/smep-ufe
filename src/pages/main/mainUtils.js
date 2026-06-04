@@ -96,13 +96,18 @@ export const formatWeekItemDate = (value) => {
   };
 };
 
-export const formatWeekPeriod = () => {
+export const formatWeekPeriod = (startYmd, endYmd) => {
   const today = new Date();
-  const start = new Date(today);
-  const day = today.getDay() || 7;
-  start.setDate(today.getDate() - day + 1);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
+  const start = parseYmd(startYmd) || new Date(today);
+  if (!startYmd) {
+    const day = today.getDay() || 7;
+    start.setDate(today.getDate() - day + 1);
+  }
+  const end = parseYmd(endYmd) || new Date(start);
+  if (!endYmd) {
+    // 퍼블 기준 이번 주 공고 fallback 기간은 월~금 5영업일이다.
+    end.setDate(start.getDate() + 4);
+  }
   const toDot = (d) =>
     `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
   return `${toDot(start)}.~${toDot(end)}`;
@@ -138,16 +143,20 @@ export const getDdayBadgeClass = (label) => {
   return Number.isFinite(days) && days <= 10 ? 'bg-point' : 'bg-primary';
 };
 
+// 메인 공고 영역은 퍼블 컨벤션에 맞춰 D-3부터 마감임박으로 표시한다.
+const MAIN_PBANC_URGENT_DDAY_THRESHOLD = 3;
+
 export const isUrgentDday = (dday) => {
   if (dday === 'D-Day') return true;
   const day = Number(String(dday || '').replace('D-', ''));
-  return Number.isFinite(day) && day <= 3;
+  return Number.isFinite(day) && day <= MAIN_PBANC_URGENT_DDAY_THRESHOLD;
 };
 
 // ─── 사업공고 ──────────────────────────────────────────────────────────────
 export const getPbancStatusLabel = (item) => {
   const dday = getDdayLabel(item?.bizAplyDdlnYmd);
   if (dday === 'D-Day' || isUrgentDday(dday)) return '마감임박';
+  if (item?.applyStatusText === '신청가능') return '접수중';
   return item?.applyStatusText || '접수중';
 };
 

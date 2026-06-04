@@ -143,14 +143,13 @@ const UI_USR_L_040 = () => {
           </h2>
         </div>
 
-        <p className="guide-txt">
-            중소벤처기업 경영활동에 필요한 각종 증명서를 개별 시스템 방문 없이 출력하실 수 있습니다.
-            각 증명(확인)서는 해당시스템과 연계를 통해 중소벤처24에서 출력되어지며, 최초 발급은 해당 시스템을 통해 가능합니다.
+        <p className="guide-txt custom">
+          각 증명(확인)서는 해당시스템과 <b>연계하여</b> 중소벤처24에서 출력 가능하고, 최초 발급은 해당 <b>시스템에서</b> 가능합니다.
         </p>
 
         {/* guide */}
         <div class="conts-wrap mt-40"><h3 class="sec-tit">자주 찾는 증명(확인)서</h3>
-        <p class="conts-desc">아래 증명(확인서)는 <strong>최근 누적 발급건수가 많은 증명(확인서)</strong>목록입니다.</p></div>
+        <p class="conts-desc">아래 증명(확인)서는 <strong>최근 누적 발급건수가 많은 증명(확인)서</strong>목록입니다.</p></div>
 
         <ul className="krds-structured-list small mt-24">
           {topCertificateList.map((item, index) => (

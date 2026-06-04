@@ -34,6 +34,7 @@ const lazyWithRetry = (importFn) =>
 // 레이아웃/Provider 컴포넌트는 라우트 구조 정의에 즉시 필요하므로 eager 유지
 // 페이지 컴포넌트는 해당 경로에 진입할 때만 로드
 const MainPage                 = lazyWithRetry(() => import('../pages/MainPage.jsx'));
+const LoginBefore              = lazyWithRetry(() => import('../pages/LoginBefore.jsx'));
 const Login                    = lazyWithRetry(() => import('../pages/Login.jsx'));
 const SSOLogin                 = lazyWithRetry(() => import('../pages/SSOLogin.jsx'));
 const FindId                   = lazyWithRetry(() => import('../pages/FindId.jsx'));
@@ -42,6 +43,7 @@ const OnePassSsoCallback       = lazyWithRetry(() => import('../pages/onepass/On
 const OnePassSsoLogout         = lazyWithRetry(() => import('../pages/onepass/OnePassSsoLogout.jsx'));
 const IntegratedSearchRouteTest = lazyWithRetry(() => import('../pages/dev/IntegratedSearchRouteTest.jsx'));
 const FindPassword             = lazyWithRetry(() => import('../pages/FindPassword.jsx'));
+const FindPasswordSend         = lazyWithRetry(() => import('../pages/FindPasswordSend.jsx'));
 const PublishingList           = lazyWithRetry(() => import('../publishing/PublishingList.jsx'));
 
 
@@ -114,12 +116,20 @@ export const staticRoutes = [
     element: <SubpageLayoutWithMenu />,
     children: [
       {
+        path: '/service/loginBef',
+        element: <Suspense fallback={pageFallback}><LoginBefore /></Suspense>,
+      },
+      {
         path: '/service/login',
         element: <Suspense fallback={pageFallback}><Login /></Suspense>,
       },
       {
         path: '/service/find-password',
         element: <Suspense fallback={pageFallback}><FindPassword /></Suspense>,
+      },
+      {
+        path: '/service/find-password/send',
+        element: <Suspense fallback={pageFallback}><FindPasswordSend /></Suspense>,
       },
     ],
   },

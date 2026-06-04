@@ -31,6 +31,7 @@ sequenceDiagram
     autonumber
     actor User as "사용자"
     participant FE as "FindPassword.jsx"
+    participant SendFE as "FindPasswordSend.jsx"
     participant NiceHook as "useNiceIdAuth"
     participant NiceLib as "niceIdAuth.js"
     participant NiceBE as "BE NICE API"
@@ -83,12 +84,12 @@ sequenceDiagram
     PasswordFindSvc-->>PasswordFindBE: "findKey + expiresInSeconds + channels"
     PasswordFindBE-->>FE: "ApiResponse(data=PasswordFindVerifyResponse)"
     FE->>FE: "unwrapApiResponseData(verifyResponse)"
-    FE->>FE: "findKey 저장 + 이메일/SMS 선택 UI 표시"
+    FE->>SendFE: "navigate('/service/find-password/send', state)"
 
-    User->>FE: "이메일 또는 문자 선택"
-    User->>FE: "임시비밀번호 발송 클릭"
-    FE->>PasswordFindBE: "POST /api/v1/account/password-find/send"
-    Note over FE,PasswordFindBE: "payload: findKey, sendType"
+    User->>SendFE: "이메일 또는 문자 선택"
+    User->>SendFE: "임시비밀번호 발송 클릭"
+    SendFE->>PasswordFindBE: "POST /api/v1/account/password-find/send"
+    Note over SendFE,PasswordFindBE: "payload: findKey, sendType"
     PasswordFindBE->>PasswordFindSvc: "sendTemporaryPassword(request)"
     PasswordFindSvc->>Redis: "findKey 1회성 소비"
     Redis-->>PasswordFindSvc: "PasswordFindSession"
@@ -103,10 +104,10 @@ sequenceDiagram
     Notify-->>PasswordFindSvc: "발송 결과"
     PasswordFindSvc->>DB: "refresh token revoke"
     PasswordFindSvc-->>PasswordFindBE: "sendType + maskedAddress"
-    PasswordFindBE-->>FE: "ApiResponse(data=PasswordFindSendResponse)"
-    FE->>FE: "unwrapApiResponseData(sendResponse)"
-    FE->>User: "발송 완료 alert"
-    FE->>User: "로그인 화면 이동"
+    PasswordFindBE-->>SendFE: "ApiResponse(data=PasswordFindSendResponse)"
+    SendFE->>SendFE: "unwrapApiResponseData(sendResponse)"
+    SendFE->>User: "발송 완료 alert"
+    SendFE->>User: "로그인 화면 이동"
 ```
 
 ## 4) 프론트엔드 흐름
@@ -123,7 +124,7 @@ sequenceDiagram
 
 이름이 비어 있으면 `이름을 입력해주세요.` alert를 표시합니다.
 
-사용자가 아이디나 이름을 수정하면 기존 인증 결과, `findKey`, 발송 채널 상태를 초기화합니다.
+사용자가 아이디나 이름을 수정하면 기존 NICE 인증 상태를 초기화합니다.
 
 ### 4.2 NICE 인증 popup 단계
 
@@ -151,13 +152,19 @@ NICE 인증 성공 후 `FindPassword.jsx`는 `/api/v1/account/password-find/veri
 
 응답은 전역 `ApiResponse`로 감싸질 수 있으므로 `unwrapApiResponseData(verifyResponse)`로 payload를 정규화한 뒤 읽습니다.
 
-`findKey`가 없으면 응답 형식 오류로 처리하고 임시비밀번호 발송 UI를 표시하지 않습니다.
+`findKey`가 없으면 응답 형식 오류로 처리하고 임시비밀번호 발송 화면으로 이동하지 않습니다.
 
-`findKey`가 있으면 같은 화면 안에서 임시비밀번호 발송 방법 선택 UI를 표시합니다.
+`findKey`가 있으면 `/service/find-password/send`로 이동하고, `findKey`, `channels`, `defaultSendType`, `expiresInSeconds`를 React Router `location.state`로 전달합니다.
 
 이메일 또는 SMS 채널은 회원 연락처 존재 여부에 따라 `available` 상태로 내려옵니다.
 
 ### 4.4 임시비밀번호 발송 단계
+
+`FindPasswordSend.jsx`는 `/service/find-password/send` 화면에서 발송 방법 선택과 발송 요청만 담당합니다.
+
+`findKey`는 URL, query string, localStorage, sessionStorage에 저장하지 않고 route state에서만 읽습니다.
+
+route state가 없거나 `findKey`가 비어 있으면 인증 정보 만료로 보고 `/service/find-password`로 되돌립니다.
 
 사용자는 이메일 또는 문자 중 사용 가능한 발송 방법을 선택합니다.
 
@@ -280,9 +287,20 @@ PasswordFindSession은 NICE 검증을 통과한 회원에게만 임시비밀번�
 `src/pages/FindPassword.jsx`
 
 - 비밀번호 찾기 화면입니다.
-- 아이디/이름 입력, NICE 인증 시작, `findKey` 수신, 발송 채널 선택, 임시비밀번호 발송 API 호출을 담당합니다.
-- 공통 응답 wrapper가 적용된 verify/send 응답을 unwrap한 뒤 화면 상태에 반영합니다.
+- 아이디/이름 입력, NICE 인증 시작, verify 응답 unwrap, 발송 전용 route 이동을 담당합니다.
+- verify 성공 시 `findKey`와 발송 채널 정보를 URL/storage가 아닌 route state로만 전달합니다.
 - 응답 shape 확인용 marker 로그를 남기되 원문 key와 개인정보는 출력하지 않습니다.
+
+`src/pages/FindPasswordSend.jsx`
+
+- `/service/find-password/send` 전용 화면입니다.
+- route state의 `findKey`, `channels`, `defaultSendType`을 사용해 이메일/SMS 발송 방법 선택 UI를 표시합니다.
+- 임시비밀번호 발송 API 호출, send 응답 unwrap, 성공 alert, 로그인 화면 이동을 담당합니다.
+- route state가 없으면 `/service/find-password`로 되돌려 재인증을 유도합니다.
+
+`src/lib/passwordFindDelivery.js`
+
+- 비밀번호 찾기 발송 옵션, 응답 shape marker helper, 에러 메시지 fallback을 공유합니다.
 
 `src/lib/apiResponsePayload.js`
 
@@ -439,13 +457,19 @@ FE는 `findKey`가 없는 verify payload를 malformed 응답으로 보고 성공
 
 사용자는 NICE 인증부터 다시 진행해야 합니다.
 
-### 10.9 선택 채널 수신처 없음
+### 10.9 발송 route state 누락
+
+`/service/find-password/send`에 직접 접근하거나 새로고침으로 route state가 사라지면 FE는 인증 정보 만료 alert를 표시하고 `/service/find-password`로 이동합니다.
+
+이는 `findKey`를 URL이나 storage에 남기지 않기 위한 의도된 실패 정책입니다.
+
+### 10.10 선택 채널 수신처 없음
 
 FE는 사용할 수 없는 발송 방법 선택을 막습니다.
 
 BE도 선택 채널의 수신처가 없으면 실패 처리합니다.
 
-### 10.10 이메일 또는 SMS 발송 실패
+### 10.11 이메일 또는 SMS 발송 실패
 
 BE는 발송 실패를 외부 API 오류로 처리합니다.
 
@@ -473,6 +497,8 @@ T-427 후속 검증에서 `git diff --check -- document/Find-Password-NICE-Flow.
 
 T-425 수정 검증에서 `npm run build`가 성공했으며 기존 API Extractor/Sass/runtime asset/publishing duplicate `onChange`/chunk-size warning은 남았습니다.
 
+T-433 구현은 NICE verify 성공 후 발송 방법 선택을 `/service/find-password/send` 전용 route로 분리합니다.
+
 ## 12) 배포 dev 확인 항목
 
 개발서버 배포 후 실제 NICE 인증 성공 뒤 `[FIND_PASSWORD_MARK] personal verify response unwrapped`가 찍히는지 확인합니다.
@@ -481,7 +507,7 @@ T-425 수정 검증에서 `npm run build`가 성공했으며 기존 API Extracto
 
 개발서버 배포 후 이메일 또는 SMS availability가 실제 회원 연락처 상태대로 찍히는지 확인합니다.
 
-개발서버 배포 후 임시비밀번호 발송 UI가 표시되는지 확인합니다.
+개발서버 배포 후 NICE verify 성공 뒤 `/home-dev/service/find-password/send`로 이동하고 입력/인증 카드 없이 임시비밀번호 발송 UI만 표시되는지 확인합니다.
 
 개발서버 배포 후 이메일 또는 SMS 선택 발송이 성공 alert와 로그인 화면 이동으로 이어지는지 확인합니다.
 

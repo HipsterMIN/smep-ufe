@@ -730,7 +730,7 @@ const UI_USR_L_030 = () => {
         <div className="krds-tab-area layer">
           <Tab tabData={TAB_LABELS} onTabChange={handleTabChange} activeIndex={activeTabIndex} />
           <div className="conts-desc">
-            중소기업 성장과 경영 안정을 위해 제공하는 다양한 정책금융 상품을 조회할 수 있습니다.
+            중소기업 성장과 경영 안정을 위해 제공하는 다양한 정책금융 지원사업을 조회할 수 있습니다.
           </div>
 
           <div className="tab-conts-wrap">
@@ -1162,7 +1162,7 @@ const UI_USR_L_030 = () => {
         <div className="conts-wrap">
           <div className="krds-table-wrap">
             <table className="tbl col data tbl-row">
-              <caption>정책금융 상품비교 표. 항목명과 선택한 두 상품의 비교 정보를 제공합니다.</caption>
+              <caption>정책금융 지원사업비교 표. 항목명과 선택한 두 상품의 비교 정보를 제공합니다.</caption>
               <colgroup>
                 <col style={{ width: '18%' }} />
                 <col />

@@ -504,12 +504,16 @@
     .card-body {
         .c-date {display:flex;gap:2.4rem}
     }
+    &.relate .structured-item{
+        &:hover {
+            .card-body {
+                .go-btn{bottom:0;}
+            }
+        }
+    }
 }
-@media (max-width: 767px) {
-}
-
 .mobile-only{display:none;}
-@media (max-width:767px){
+@media (max-width: 767px) {
     .lnb{display:none;}
     .pc-only{display:none;}
     .mobile-only{display:block;}
@@ -536,9 +540,8 @@
         }
     }
     .krds-structured-list {
-    .card-body {
-        .c-date {flex-direction:column;gap:1.2rem}
+        .card-body {
+            .c-date {flex-direction:column;gap:1.2rem}
+        }
     }
-}
-
 }
