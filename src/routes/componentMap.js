@@ -208,6 +208,18 @@ export const componentMap = {
     ],
   },
 
+  // 사업공고(지방정부)
+  'M_PIIO_00169': {
+    component: Pbanc,
+    layout: 'SubpageLayoutWithMenu',
+    children: [
+      {
+        path: ':id',
+        component: PbancView,
+      },
+    ],
+  },
+
   // 정책금융안내
   'M_PIIO_00077': {
     component: UI_USR_L_030,

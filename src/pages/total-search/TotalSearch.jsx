@@ -83,6 +83,17 @@ const createInitialPageState = () =>
 
 const toTrimmedString = (value) => String(value ?? '').trim();
 
+const resolveInitialTabIndex = (collectionKey) => {
+  const normalizedCollectionKey = toTrimmedString(collectionKey);
+  if (!normalizedCollectionKey) return 0;
+
+  const collectionIndex = COLLECTION_SECTION_CONFIG.findIndex(
+    (config) => config.collectionKey === normalizedCollectionKey,
+  );
+
+  return collectionIndex >= 0 ? collectionIndex + 1 : 0;
+};
+
 const normalizeFieldKey = (value) =>
   toTrimmedString(value)
     .toLowerCase()
@@ -417,12 +428,16 @@ const TotalSearch = () => {
 
   useEffect(() => {
     const stateQuery = toTrimmedString(location.state?.q);
-    const queryParam = toTrimmedString(new URLSearchParams(location.search).get('q'));
+    const searchParams = new URLSearchParams(location.search);
+    const queryParam = toTrimmedString(searchParams.get('q'));
     const nextQuery = stateQuery || queryParam;
+    const stateCollectionKey = toTrimmedString(location.state?.collectionKey);
+    const queryCollectionKey = toTrimmedString(searchParams.get('collection'));
+    const nextInitialTabIndex = resolveInitialTabIndex(stateCollectionKey || queryCollectionKey);
 
     setSearchInput(nextQuery);
     setSearchKeyword(nextQuery);
-    setActiveTabIndex(0);
+    setActiveTabIndex(nextInitialTabIndex);
     setTabPageByCollection(createInitialPageState());
   }, [location.key, location.search, location.state]);
 

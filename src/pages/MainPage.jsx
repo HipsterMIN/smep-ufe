@@ -122,7 +122,6 @@ const MainPage = () => {
   const [isEnd, setIsEnd] = useState(false);
   const [noticeActiveIndex, setNoticeActiveIndex] = useState(0);
   const [activeWeekIndex, setActiveWeekIndex] = useState(0);
-  const [activeGovTab, setActiveGovTab] = useState('central');
   const [selectedNotice, setSelectedNotice] = useState(null);
   const [likedAnnounce, setLikedAnnounce] = useState({});
   const [likedPolicy, setLikedPolicy] = useState({});
@@ -386,10 +385,11 @@ const MainPage = () => {
   const eventInfoItems = mainData.eventInfos || [];
   const archiveItems = mainData.archiveItems || [];
   const newNewsItems = mainData.newNews || [];
-  const toPbancNoticeCard = (item) => {
+  const toPbancNoticeCard = (item, options = {}) => {
     const dday = getDdayLabel(item?.bizAplyDdlnYmd);
     const category = bizFieldMap[item?.bizPbancClsfCd] || item?.bizPbancClsfCd || '';
-    const detailPath = item?.bizPbancNo ? `/req/pbanc/${item.bizPbancNo}` : '#';
+    const detailPathPrefix = options.detailPathPrefix || '/req/pbanc';
+    const detailPath = item?.bizPbancNo ? `${detailPathPrefix}/${item.bizPbancNo}` : '#';
 
     return {
       id: item?.bizPbancNo,
@@ -428,13 +428,25 @@ const MainPage = () => {
   useEffect(() => {
     setActiveWeekIndex((prev) => Math.min(prev, Math.max(weekNoticeCards.length - 1, 0)));
   }, [weekNoticeCards.length]);
-  const currentSupportGroups = useMemo(
+  const centralSupportGroups = useMemo(
     () =>
-      (supportPbancGroups[activeGovTab] || []).map((group) => ({
+      (supportPbancGroups.central || []).map((group) => ({
         title: group.title,
-        cards: (group.items || []).map(toPbancNoticeCard),
+        cards: (group.items || []).map((item) =>
+          toPbancNoticeCard(item, { detailPathPrefix: '/req/pbanc' }),
+        ),
       })),
-    [supportPbancGroups, activeGovTab, bizFieldMap, likedAnnounce],
+    [supportPbancGroups, bizFieldMap, likedAnnounce],
+  );
+  const localSupportGroups = useMemo(
+    () =>
+      (supportPbancGroups.local || []).map((group) => ({
+        title: group.title,
+        cards: (group.items || []).map((item) =>
+          toPbancNoticeCard(item, { detailPathPrefix: '/req/pbancProvincial' }),
+        ),
+      })),
+    [supportPbancGroups, bizFieldMap, likedAnnounce],
   );
   const supportPbancItems = useMemo(
     () =>
@@ -594,6 +606,23 @@ const MainPage = () => {
     setIsKeyboardOpen(false);
     navigate('/totalSearch', {
       state: { q: nextKeyword },
+    });
+  };
+  const handleCertificateKeywordSelect = (keyword) => {
+    const nextKeyword = String(keyword || '').trim();
+    if (!nextKeyword) return;
+
+    setSearchQuery(nextKeyword);
+    setIsFocused(false);
+    setIsKeyboardOpen(false);
+
+    const params = new URLSearchParams({
+      q: nextKeyword,
+      collection: 'smep_cert',
+    });
+
+    navigate(`/totalSearch?${params.toString()}`, {
+      state: { q: nextKeyword, collectionKey: 'smep_cert' },
     });
   };
   const handleAutoCompleteToggle = (e) => {
@@ -1030,6 +1059,47 @@ const MainPage = () => {
                 {/*)}*/}
               </ul>
             </div>
+            <div className="main-top-keyword fav">
+              <h3>자주 찾는 검색어</h3>
+              <ul className="keyword-list">
+                <li>
+                  <button
+                    type="button"
+                    className="word"
+                    onClick={() => handleCertificateKeywordSelect('중소기업(소상공인) 확인서')}
+                  >
+                    중소기업(소상공인) 확인서
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    className="word"
+                    onClick={() => handleCertificateKeywordSelect('벤처확인서')}
+                  >
+                    벤처확인서
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    className="word"
+                    onClick={() => handleCertificateKeywordSelect('메인비즈확인서')}
+                  >
+                    메인비즈확인서
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    className="word"
+                    onClick={() => handleCertificateKeywordSelect('이노비즈확인서')}
+                  >
+                    이노비즈확인서
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
         <div className="container responsive-section">
@@ -1253,41 +1323,98 @@ const MainPage = () => {
         <section className="main-section main-support">
           <div className="container">
             <h2 className="section-tit">주요 지원 사업 공고</h2>
+          </div>
+          <div className="support-board support-board-all">
+            <section className="support-gov-section support-gov-central">
+              <div className="container">
+                <h3 className="support-gov-title">중앙정부</h3>
+                <div className="support-content">
+                  <div className="support-group-scroll">
+                    {centralSupportGroups.map((group, groupIndex) => (
+                      <section
+                        className="support-group"
+                        key={`central-${group.title}`}
+                      >
+                        <h4 className="support-group-title">{group.title}</h4>
 
-            <div className="support-board">
-              <div className="support-side-tab">
-                <button
-                  type="button"
-                  role="tab"
-                  className={activeGovTab === 'central' ? 'is-active' : ''}
-                  aria-selected={activeGovTab === 'central'}
-                  onClick={() => setActiveGovTab('central')}
-                >
-                  중앙<br />정부
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  className={activeGovTab === 'local' ? 'is-active' : ''}
-                  aria-selected={activeGovTab === 'local'}
-                  onClick={() => setActiveGovTab('local')}
-                >
-                  지방<br />정부
-                </button>
+                        <div className="support-group-cards">
+                          {group.cards.map((card, cardIndex) => {
+                            const keyIndex = groupIndex * 10 + cardIndex;
+
+                            return (
+                              <article className="support-card" key={`${group.title}-${cardIndex}`}>
+                                <div className="card-top">
+                                  <span className="krds-badge bg-primary">{card.badge}</span>
+                                  <span className="category">{card.category}</span>
+
+                                  {card.deadline && (
+                                    <span className="krds-badge text danger">마감임박</span>
+                                  )}
+
+                                  <button
+                                    type="button"
+                                    className={`svg-icon heart like-btn on-bgcolorgray ${
+                                      likedAnnounce[String(card.id)] || card.liked ? 'is-on' : ''
+                                    }`}
+                                    aria-label={`${card.title} 찜하기`}
+                                    onClick={() => handleToggleLike1(card.id || keyIndex)}
+                                  >
+                                  </button>
+                                </div>
+
+                                <a
+                                  href={card.detailHref || '#'}
+                                  className="card-title onellipsis-2"
+                                  onClick={(event) => {
+                                    if (!card.detailPath || card.detailPath === '#') return;
+                                    event.preventDefault();
+                                    navigate(card.detailPath);
+                                  }}
+                                >
+                                  {card.title}
+                                </a>
+
+                                <div className="card-info-new">
+                                  <span>
+                                    <i className="svg-icon ico-calendar"></i>
+                                    {card.date}
+                                  </span>
+                                  <strong className={`dday ${isUrgentDday(card.dday) ? 'danger' : ''}`}>
+                                    {card.dday}
+                                  </strong>
+                                </div>
+                              </article>
+                            );
+                          })}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="more-btn support-more">
+                  <button
+                    type="button"
+                    className="krds-btn text medium"
+                    onClick={() => navigate('/req/pbanc')}
+                  >
+                    사업공고 더보기
+                    <i className="svg-icon ico-angle right"></i>
+                  </button>
+                </div>
               </div>
-
-              <div className="support-content">
+            </section>
+            <section className="support-gov-section support-gov-local">
+              <div className="container">
+                <h3 className="support-gov-title">지방정부</h3>
                 <div className="support-group-scroll">
-                  {currentSupportGroups.map((group, groupIndex) => (
-                    <section
-                      className="support-group"
-                      key={group.title}
-                    >
-                      <h3 className="support-group-title">{group.title}</h3>
+                  {localSupportGroups.map((group, groupIndex) => (
+                    <section className="support-group" key={`local-${group.title}`}>
+                      <h4 className="support-group-title">{group.title}</h4>
 
                       <div className="support-group-cards">
                         {group.cards.map((card, cardIndex) => {
-                          const keyIndex = groupIndex * 2 + cardIndex;
+                          const keyIndex = 100 + groupIndex * 10 + cardIndex;
 
                           return (
                             <article className="support-card" key={`${group.title}-${cardIndex}`}>
@@ -1343,14 +1470,14 @@ const MainPage = () => {
                   <button
                     type="button"
                     className="krds-btn text medium"
-                    onClick={() => navigate('/req/pbanc')}
+                    onClick={() => navigate('/req/pbancProvincial')}
                   >
                     사업공고 더보기
                     <i className="svg-icon ico-angle right"></i>
                   </button>
                 </div>
               </div>
-            </div>
+            </section>
           </div>
         </section>
         {/* E - 주요 지원 사업 공고 */}
@@ -1537,7 +1664,7 @@ const MainPage = () => {
                 <div className="main-banner" style={{ maxHeight: '368px', maxWidth: '490px' }}>
                   <Swiper
                     modules={[Navigation, Pagination, Autoplay]}
-                    style={{maxWidth: '370px'}}
+                    style={{ maxWidth: '370px' }}
                     navigation={{
                       prevEl: '.main-banner .swiper-button-prev',
                       nextEl: '.main-banner .swiper-button-next',

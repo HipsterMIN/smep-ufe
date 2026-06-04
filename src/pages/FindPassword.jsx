@@ -4,52 +4,31 @@ import Breadcrumb from '../components/ui/Breadcrumb';
 import { useNiceIdAuth } from '../hooks/useNiceIdAuth';
 import { api } from '../lib/apiClient';
 
-const PASSWORD_ALLOWED_REGEX = /^[A-Za-z0-9!@#$%^&*()=_+-]{8,20}$/;
-const PASSWORD_LETTER_REGEX = /[A-Za-z]/;
-const PASSWORD_DIGIT_REGEX = /\d/;
-const PASSWORD_SPECIAL_REGEX = /[!@#$%^&*()=_+-]/;
+const PASSWORD_FIND_SEND_OPTIONS = [
+  {
+    type: 'EMAIL',
+    channelKey: 'email',
+    label: '이메일',
+    unavailableLabel: '등록된 이메일 없음',
+  },
+  {
+    type: 'SMS',
+    channelKey: 'sms',
+    label: '문자',
+    unavailableLabel: '등록된 휴대전화 없음',
+  },
+];
 
-const countPasswordCategories = (password) => {
-  let categoryCount = 0;
+const SEND_TYPE_LABELS = PASSWORD_FIND_SEND_OPTIONS.reduce(
+  (labels, option) => ({ ...labels, [option.type]: option.label }),
+  {},
+);
 
-  if (PASSWORD_LETTER_REGEX.test(password)) {
-    categoryCount += 1;
-  }
-  if (PASSWORD_DIGIT_REGEX.test(password)) {
-    categoryCount += 1;
-  }
-  if (PASSWORD_SPECIAL_REGEX.test(password)) {
-    categoryCount += 1;
-  }
-
-  return categoryCount;
-};
-
-const validateResetPasswordForm = ({ newPassword, confirmPassword }) => {
-  if (!newPassword.trim()) {
-    return '새 비밀번호를 입력해주세요.';
-  }
-  if (!confirmPassword.trim()) {
-    return '새 비밀번호 확인을 입력해주세요.';
-  }
-  if (!PASSWORD_ALLOWED_REGEX.test(newPassword)) {
-    return '새 비밀번호는 8~20자이며 허용된 영문, 숫자, 특수문자만 사용할 수 있습니다.';
-  }
-  if (countPasswordCategories(newPassword) < 2) {
-    return '새 비밀번호는 영문, 숫자, 특수문자 중 두 가지 이상을 조합해야 합니다.';
-  }
-  if (newPassword !== confirmPassword) {
-    return '새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.';
-  }
-
-  return null;
-};
-
-const resolvePasswordResetErrorMessage = (error) =>
+const resolvePasswordFindErrorMessage = (error) =>
   error?.data?.message ||
   error?.data?.error?.message ||
   error?.message ||
-  '비밀번호 재설정 처리 중 오류가 발생했습니다.';
+  '임시비밀번호 발송 처리 중 오류가 발생했습니다.';
 
 const FindPassword = () => {
   const navigate = useNavigate();
@@ -58,56 +37,70 @@ const FindPassword = () => {
   const [userId, setUserId] = useState('');
   const [userName, setUserName] = useState('');
   const [personalAuthResult, setPersonalAuthResult] = useState(null);
-  const [resetKey, setResetKey] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isVerifyingPasswordReset, setIsVerifyingPasswordReset] = useState(false);
-  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [passwordFindKey, setPasswordFindKey] = useState('');
+  const [passwordFindChannels, setPasswordFindChannels] = useState(null);
+  const [selectedSendType, setSelectedSendType] = useState('EMAIL');
+  const [isVerifyingPasswordFind, setIsVerifyingPasswordFind] = useState(false);
+  const [isSendingTemporaryPassword, setIsSendingTemporaryPassword] = useState(false);
   const { authenticate, reset: resetNiceIdAuth, loading: niceIdAuthLoading } = useNiceIdAuth();
 
   const isPersonal = memberType === 'personal';
   const isCompany = memberType === 'company';
-  const isAuthBusy = niceIdAuthLoading || isVerifyingPasswordReset;
+  const isAuthBusy = niceIdAuthLoading || isVerifyingPasswordFind;
+
+  const getSendTypeOption = (sendType) =>
+    PASSWORD_FIND_SEND_OPTIONS.find((option) => option.type === sendType) || PASSWORD_FIND_SEND_OPTIONS[0];
+
+  const getChannel = (sendType) => {
+    const { channelKey } = getSendTypeOption(sendType);
+    return passwordFindChannels?.[channelKey] || { available: false, maskedAddress: null };
+  };
+
+  const getVisibleSendOptions = () => PASSWORD_FIND_SEND_OPTIONS;
+
+  const isSelectedSendTypeAvailable = () => Boolean(getChannel(selectedSendType).available);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (isPersonal) {
-      if (!resetKey) {
+      if (!passwordFindKey) {
         alert('본인 인증을 완료해주세요.');
         return;
       }
 
-      const validationMessage = validateResetPasswordForm({ newPassword, confirmPassword });
-      if (validationMessage) {
-        alert(validationMessage);
+      if (!isSelectedSendTypeAvailable()) {
+        alert('임시비밀번호를 받을 수 있는 발송 방법을 선택해주세요.');
         return;
       }
 
-      console.info('[FIND_PASSWORD_MARK] reset submit start', {
-        hasResetKey: Boolean(resetKey),
-        hasNewPassword: Boolean(newPassword),
-        hasConfirmPassword: Boolean(confirmPassword),
+      console.info('[FIND_PASSWORD_MARK] temporary password send start', {
+        hasFindKey: Boolean(passwordFindKey),
+        sendType: selectedSendType,
       });
-      setIsResettingPassword(true);
+      setIsSendingTemporaryPassword(true);
 
       try {
-        await api.post('/api/v1/account/password-reset', {
-          resetKey,
-          newPassword,
-          confirmPassword,
+        const sendResponse = await api.post('/api/v1/account/password-find/send', {
+          findKey: passwordFindKey,
+          sendType: selectedSendType,
         });
-        console.info('[FIND_PASSWORD_MARK] reset submit success');
-        alert('비밀번호가 변경되었습니다. 로그인해 주세요.');
+        console.info('[FIND_PASSWORD_MARK] temporary password send success', {
+          sendType: sendResponse?.sendType,
+          hasMaskedAddress: Boolean(sendResponse?.maskedAddress),
+        });
+        const sendTypeLabel = SEND_TYPE_LABELS[sendResponse?.sendType] || SEND_TYPE_LABELS[selectedSendType];
+        const maskedAddress = sendResponse?.maskedAddress ? ` (${sendResponse.maskedAddress})` : '';
+        alert(`${sendTypeLabel}${maskedAddress}로 임시비밀번호가 발송되었습니다. 로그인해 주세요.`);
         navigate('/service/login');
       } catch (error) {
-        console.error('[FIND_PASSWORD_MARK] reset submit failed', {
+        console.error('[FIND_PASSWORD_MARK] temporary password send failed', {
           status: error?.status,
           message: error?.message,
         });
-        alert(resolvePasswordResetErrorMessage(error));
+        alert(resolvePasswordFindErrorMessage(error));
       } finally {
-        setIsResettingPassword(false);
+        setIsSendingTemporaryPassword(false);
       }
       return;
     }
@@ -115,15 +108,15 @@ const FindPassword = () => {
     console.log('기업회원 비밀번호 찾기', businessType);
   };
 
-  const clearPasswordResetState = () => {
+  const clearPasswordFindState = () => {
     setPersonalAuthResult(null);
-    setResetKey('');
-    setNewPassword('');
-    setConfirmPassword('');
+    setPasswordFindKey('');
+    setPasswordFindChannels(null);
+    setSelectedSendType('EMAIL');
   };
 
   const resetPersonalAuthResult = () => {
-    clearPasswordResetState();
+    clearPasswordFindState();
     resetNiceIdAuth();
   };
 
@@ -165,31 +158,39 @@ const FindPassword = () => {
         authMethod,
         resultKeyLength: authResult.resultKey?.length || 0,
       });
-      setIsVerifyingPasswordReset(true);
+      setIsVerifyingPasswordFind(true);
 
       try {
-        const verifyResponse = await api.post('/api/v1/account/password-reset/verify', {
+        const verifyResponse = await api.post('/api/v1/account/password-find/verify', {
           loginId: userId.trim(),
           memberName: userName.trim(),
           resultKey: authResult.resultKey,
         });
-        setResetKey(verifyResponse.resetKey || '');
+        const channels = verifyResponse.channels || {};
+        const defaultSendOption =
+          PASSWORD_FIND_SEND_OPTIONS.find((option) => channels[option.channelKey]?.available) ||
+          PASSWORD_FIND_SEND_OPTIONS[0];
+        setPasswordFindKey(verifyResponse.findKey || '');
+        setPasswordFindChannels(channels);
+        setSelectedSendType(defaultSendOption.type);
         setPersonalAuthResult({ authMethod });
         console.info('[FIND_PASSWORD_MARK] personal verify success', {
           authMethod,
-          hasResetKey: Boolean(verifyResponse.resetKey),
+          hasFindKey: Boolean(verifyResponse.findKey),
           expiresInSeconds: verifyResponse.expiresInSeconds,
+          emailAvailable: Boolean(channels.email?.available),
+          smsAvailable: Boolean(channels.sms?.available),
         });
-        alert('본인 인증이 완료되었습니다. 새 비밀번호를 입력해주세요.');
+        alert('본인 인증이 완료되었습니다. 임시비밀번호를 받을 방법을 선택해주세요.');
       } catch (error) {
         console.error('[FIND_PASSWORD_MARK] personal verify failed', {
           authMethod,
           status: error?.status,
           message: error?.message,
         });
-        alert(resolvePasswordResetErrorMessage(error));
+        alert(resolvePasswordFindErrorMessage(error));
       } finally {
-        setIsVerifyingPasswordReset(false);
+        setIsVerifyingPasswordFind(false);
       }
       return;
     }
@@ -334,63 +335,57 @@ const FindPassword = () => {
                   </p>
                 )}
 
-                {resetKey && (
+                {passwordFindKey && (
                   <div className="conts-wrap form-confirm">
-                    <h3 className="sec-tit">새 비밀번호 설정</h3>
+                    <h3 className="sec-tit">임시비밀번호 발급</h3>
                     <ul className="krds-info-list decimal" role="list">
-                      <li role="listitem">본인 인증이 완료되었습니다. 새 비밀번호를 입력해 주세요.</li>
-                      <li role="listitem">비밀번호는 타인에게 노출되지 않도록 주의해 주세요.</li>
+                      <li role="listitem">본인 인증이 완료되었습니다. 임시비밀번호를 받을 방법을 선택해 주세요.</li>
+                      <li role="listitem">발급된 임시비밀번호로 로그인한 뒤 비밀번호를 변경해 주세요.</li>
                     </ul>
                     <dl className="on-form-row large">
                       <div className="form-row-item">
                         <dt className="form-row-label flex-start">
-                          <label htmlFor="find_password_new">새 비밀번호</label>
+                          <span>발송 방법</span>
                         </dt>
                         <dd className="form-row-content">
-                          <div className="form-wrapper w-220">
-                            <input
-                              type="password"
-                              id="find_password_new"
-                              name="newPassword"
-                              className="krds-input small"
-                              placeholder="비밀번호를 입력해주세요."
-                              value={newPassword}
-                              onChange={(event) => setNewPassword(event.target.value)}
-                              autoComplete="new-password"
-                              disabled={isResettingPassword}
-                            />
+                          <div className="krds-check-area gap-4">
+                            {getVisibleSendOptions().map((option) => {
+                              const channel = getChannel(option.type);
+                              const optionId = `temporaryPasswordSend${option.type}`;
+                              const channelLabel = channel.maskedAddress
+                                ? ` (${channel.maskedAddress})`
+                                : ` (${option.unavailableLabel})`;
+
+                              return (
+                                <span className="krds-form-check" key={option.type}>
+                                  <input
+                                    type="radio"
+                                    name="temporaryPasswordSendType"
+                                    id={optionId}
+                                    value={option.type}
+                                    checked={selectedSendType === option.type}
+                                    onChange={() => setSelectedSendType(option.type)}
+                                    disabled={!channel.available || isSendingTemporaryPassword}
+                                  />
+                                  <label htmlFor={optionId}>
+                                    {option.label}
+                                    {channelLabel}
+                                  </label>
+                                </span>
+                              );
+                            })}
                           </div>
-                          <p className="form-hint">
-                            비밀번호는 영문자(대·소문자), 숫자, 특수문자중 두가지를 조합하여 8자~20자 이내로 입력하세요. <br />
-                            ( 사용가능 특수문자 : !, @, #, $, %, ^, &, *, (, ), -, =, _, + )
-                          </p>
-                        </dd>
-                      </div>
-                      <div className="form-row-item">
-                        <dt className="form-row-label flex-start">
-                          <label htmlFor="find_password_confirm">새 비밀번호 확인</label>
-                        </dt>
-                        <dd className="form-row-content">
-                          <div className="form-wrapper w-220">
-                            <input
-                              type="password"
-                              id="find_password_confirm"
-                              name="confirmPassword"
-                              className="krds-input small"
-                              placeholder="비밀번호를 입력해주세요."
-                              value={confirmPassword}
-                              onChange={(event) => setConfirmPassword(event.target.value)}
-                              autoComplete="new-password"
-                              disabled={isResettingPassword}
-                            />
-                          </div>
-                          <p className="form-hint point">새 비밀번호는 영문, 숫자, 특수문자 중 두 가지 이상을 조합해 입력해야 합니다.</p>
+                          <p className="form-hint point">선택한 방법으로 임시비밀번호가 발송됩니다.</p>
                         </dd>
                       </div>
                     </dl>
                     <div className="onboard-btm-btngroup bt-0 btn-single">
-                      <button type="submit" className="krds-btn large primary" disabled={isResettingPassword}>
-                        {isResettingPassword ? '변경 중...' : '비밀번호 변경'}
+                      <button
+                        type="submit"
+                        className="krds-btn large primary"
+                        disabled={isSendingTemporaryPassword || !isSelectedSendTypeAvailable()}
+                      >
+                        {isSendingTemporaryPassword ? '발송 중...' : '임시비밀번호 발송'}
                       </button>
                     </div>
                   </div>

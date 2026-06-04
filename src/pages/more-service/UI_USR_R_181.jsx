@@ -220,7 +220,7 @@ const UI_USR_R_181 = () => {
         menuItems={sidebarData}
       />
       <div className="contents">
-        <Breadcrumb items={breadcrumbItems} />
+        <Breadcrumb items={breadcrumbItems}/>
         <div className="page-title-wrap" data-type="responsive">
           <p className="on-p1 on-colorblue">{boardTitle}</p>
           <h2 className="h-tit2">{postTitle}</h2>
@@ -244,11 +244,11 @@ const UI_USR_R_181 = () => {
         </ul>
 
         <div className="onboard-conts-area">
-          <p dangerouslySetInnerHTML={{ __html: contentHtml }} />
-          <br /><br />
+          <p dangerouslySetInnerHTML={{ __html: contentHtml }}/>
+          <br/><br/>
         </div>
 
-        <StreamDocsInlineViewer streamdocsId={inlinePreviewStreamdocsId} />
+        <StreamDocsInlineViewer streamdocsId={inlinePreviewStreamdocsId}/>
 
         {boardPostFiles.length > 0 && (
           <div className="onbox-group-areawrap">
@@ -288,29 +288,33 @@ const UI_USR_R_181 = () => {
         )}
 
         <ul className="post-nav-list mt-40">
-          <li className="post-nav-item prev">
-            <Link
-              to={buildPostLink(prevPost?.pstNo)}
-              className="post-nav-link"
-              onClick={(event) => handleNavigationClick(event, prevPost?.pstNo)}
-            >
-              <i className="svg-icon ico-angle left"></i>
-              <span className="post-nav-label">이전글</span>
-              <span className="post-nav-title onellipsis-1">{prevPost?.pstTtl || '-'}</span>
-            </Link>
-          </li>
+          {prevPost && (
+            <li className="post-nav-item prev">
+              <Link
+                to={buildPostLink(prevPost?.pstNo)}
+                className="post-nav-link"
+                onClick={(event) => handleNavigationClick(event, prevPost?.pstNo)}
+              >
+                <i className="svg-icon ico-angle left"></i>
+                <span className="post-nav-label">이전글</span>
+                <span className="post-nav-title onellipsis-1">{prevPost?.pstTtl || '-'}</span>
+              </Link>
+            </li>
+          )}
 
-          <li className="post-nav-item next">
-            <Link
-              to={buildPostLink(nextPost?.pstNo)}
-              className="post-nav-link"
-              onClick={(event) => handleNavigationClick(event, nextPost?.pstNo)}
-            >
-              <span className="post-nav-label">다음글</span>
-              <span className="post-nav-title onellipsis-1">{nextPost?.pstTtl || '-'}</span>
-              <i className="svg-icon ico-angle right"></i>
-            </Link>
-          </li>
+          {nextPost && (
+            <li className="post-nav-item next">
+              <Link
+                to={buildPostLink(nextPost?.pstNo)}
+                className="post-nav-link"
+                onClick={(event) => handleNavigationClick(event, nextPost?.pstNo)}
+              >
+                <span className="post-nav-label">다음글</span>
+                <span className="post-nav-title onellipsis-1">{nextPost?.pstTtl || '-'}</span>
+                <i className="svg-icon ico-angle right"></i>
+              </Link>
+            </li>
+          )}
         </ul>
 
         <div className="onboard-btm-btngroup bt-0">

@@ -2769,19 +2769,20 @@ caption {
   .tab.fill.full .btn-tab {
     border-color: var(--krds-tab--fill-button-color-border);
     padding: 0 var(--krds-padding-5);
-    border-width: 0;
+    /* border-width: 0; */
   }
   .tab.fill.full > ul {
-    gap: var(--krds-gap-3);
+    /* gap: var(--krds-gap-3); */
     flex-wrap: nowrap;
   }
   .tab.fill.full > ul > li {
     width: fit-content;
     flex: none;
   }
+  /*
   .tab.fill.full > ul > li .btn-tab {
     border-radius: var(--krds-tab--fill-button-radius);
-  }
+  }*/
 }
 [data-krds-mode=high-contrast] .tab {
   --krds-tab--button-color-action: var(--krds-high-contrast-color-action-secondary);

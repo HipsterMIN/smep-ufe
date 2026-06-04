@@ -8,6 +8,7 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
+import { onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
 
 const appBaseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
@@ -231,11 +232,17 @@ const RelatedSystems = () => {
 
         <div className="krds-tab-area layer">
           <p className="guide-txt custom">
-            중소벤처기업부 및 산하 유관 시스템을 별도 가입 없이,
-            <br />
-            <b>중소벤처24</b> 통합 ID 하나로 이용하세요.
+            <b
+              onClick={onePassGetAuthCode}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && onePassGetAuthCode()}
+              style={{ cursor: 'pointer' }}
+            >
+              중기통합회원
+            </b>
+            으로 전환하고, <b>64개의 시스템</b>을 하나의 아이디로 편리하게 이용해 보세요.
           </p>
-
           <div className="tab-conts-wrap mt-40">
             <section className={`tab-conts ${activeTabIndex >= 0 ? 'active' : ''}`}>
               <h3 className="sr-only">유관기관 시스템 목록</h3>
@@ -408,7 +415,7 @@ const RelatedSystems = () => {
                   totalPages={totalPages}
                   currentPage={currentPage + 1}
                   onPageChange={handlePageChange}
-                syncUrl
+                  syncUrl
                 />
               )}
             </section>

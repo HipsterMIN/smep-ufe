@@ -1,4 +1,4 @@
-@use "./_icons";
+@import "./_icons";
 *, *::before, *::after {box-sizing:border-box}
 #wrap{overflow-x:hidden}
 .container{padding:0 30px;margin-right:auto;margin-left:auto;}
@@ -136,7 +136,64 @@
         }
     }
 }
+//custom tab
+.region-tab-wrap {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  margin-top: 2.4rem;
+  border: 1px solid var(--krds-light-color-border-gray);
+  border-radius: 0.8rem;
+  overflow: hidden;
+}
 
+.region-tab {
+  height: 3.6rem;
+  border: 0;
+  border-right: 1px solid var(--krds-light-color-border-gray);
+  border-bottom: 1px solid var(--krds-light-color-border-gray);
+  background: #fff;
+  color:#464C53;
+  font-size:var(--krds-pc-font-size-body-large);
+  font-weight: 400;
+
+  &:nth-child(9n) {
+    border-right: 0;
+  }
+
+  &:nth-last-child(-n + 9) {
+    border-bottom: 0;
+  }
+
+  &.is-active {
+    background: #3A49D6;
+    color: #fff;
+    font-weight: 800;
+  }
+}
+
+@media (max-width: 768px) {
+  .region-tab-wrap {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .region-tab {
+    &:nth-child(9n) {
+      border-right: 1px solid var(--krds-light-color-border-gray);
+    }
+
+    &:nth-child(3n) {
+      border-right: 0;
+    }
+
+    &:nth-last-child(-n + 9) {
+      border-bottom: 1px solid var(--krds-light-color-border-gray);
+    }
+
+    &:nth-last-child(-n + 3) {
+      border-bottom: 0;
+    }
+  }
+}
 //공고 팝업
 .notice-layer {
     position: fixed;
@@ -312,7 +369,7 @@
     }
     form{display:flex;flex-direction: column;gap:1.2rem;}
     .tab.fill.full > ul > li{flex:1;
-        .btn-tab{border: solid 1px var(--krds-tab--fill-button-color-border);}
+        .btn-tab{border: solid 1px var(--krds-light-color-border-gray);}
     }
     &.find-pw{max-width:800px;
         .find-id-fields{
@@ -402,6 +459,21 @@
     }
   }
 }
+.footer-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+.footer-sns-list{
+    ul, li{list-style:none;margin:0;padding:0;}
+    ul{display:flex;gap:1rem;
+        a{display:flex;align-items:center;justify-content:center;width:4rem;height:4rem;border-radius:100%;background-color:#fff;border:solid 1px var(--krds-color-light-gray-20);
+            .svg-icon{width:22px;height:22px;}
+        }
+    }
+
+}
 @media (max-width: 767px) {
 }
 
@@ -425,6 +497,7 @@
     }
 }
 @media (max-width:545px){
+    .footer-top {flex-direction:column;}
     .find-form-area{
         .form-group{flex-direction:column;align-items:start;
             label{margin-top:0;}
