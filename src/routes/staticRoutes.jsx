@@ -42,6 +42,7 @@ const OnePassSsoCallback       = lazyWithRetry(() => import('../pages/onepass/On
 const OnePassSsoLogout         = lazyWithRetry(() => import('../pages/onepass/OnePassSsoLogout.jsx'));
 const IntegratedSearchRouteTest = lazyWithRetry(() => import('../pages/dev/IntegratedSearchRouteTest.jsx'));
 const FindPassword             = lazyWithRetry(() => import('../pages/FindPassword.jsx'));
+const FindPasswordSend         = lazyWithRetry(() => import('../pages/FindPasswordSend.jsx'));
 const PublishingList           = lazyWithRetry(() => import('../publishing/PublishingList.jsx'));
 
 
@@ -120,6 +121,10 @@ export const staticRoutes = [
       {
         path: '/service/find-password',
         element: <Suspense fallback={pageFallback}><FindPassword /></Suspense>,
+      },
+      {
+        path: '/service/find-password/send',
+        element: <Suspense fallback={pageFallback}><FindPasswordSend /></Suspense>,
       },
     ],
   },
