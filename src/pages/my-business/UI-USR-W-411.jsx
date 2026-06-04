@@ -623,7 +623,7 @@ const UI_USR_W_411 = () => {
             </dl>
           </div>
           <ul className="info-list-point">
-            <li><i className="svg-icon ico-checkbox"></i>정보변경은 법인 공동인증서 인증 후 변경이 가능합니다.</li>
+            <li><i className="svg-icon ico-checkbox"></i>정보변경은 인증수단으로 인증 후 변경이 가능합니다.</li>
           </ul>
         </div>
 
