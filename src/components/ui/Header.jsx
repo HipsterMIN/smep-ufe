@@ -218,6 +218,8 @@ export default function Header() {
     onePassGetAuthCode();
   };
 
+  const readEnv = (key) => String(import.meta.env[key] || '').trim();
+  const trimTrailingSlash = (value) => value.replace(/\/+$/, '');
 
   const fullUrl = trimTrailingSlash(readEnv('VITE_FULL_URL'));
   const clientId = trimTrailingSlash(readEnv('VITE_CLIENT_ID'));
