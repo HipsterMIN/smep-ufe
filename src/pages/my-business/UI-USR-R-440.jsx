@@ -119,11 +119,11 @@ const UI_USR_R_440 = () => {
     // }
 
     if(currentMode === 'CORPORATE') {
-      const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-business/information?redirect_uri=https://www.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-prd&uuid=${uuid}`;
+      const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-business/information?redirect_uri=https://portal.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-prd&uuid=${uuid}`;
       console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     } else {
-      const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-member/information?redirect_uri=https://www.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-prd&uuid=${uuid}`;
+      const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-member/information?redirect_uri=https://portal.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-prd&uuid=${uuid}`;
       console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     }
