@@ -179,7 +179,9 @@ const HeaderMobileGNB = forwardRef(({
   };
 
   const handleOnePassLoginClick = () => {
-    // 통합로그인 이동 전 모바일 GNB 오버레이를 먼저 닫아 배경 상태를 정리한다.
+    // 왜 필요한지: 모바일 중기 통합회원 로그인 버튼은 현재 숨김 처리하지만, 기존 연결 동작을 보존해야 재노출 시 기능이 살아 있다.
+    // 무엇을 하는지: 모바일 GNB를 먼저 닫은 뒤 기존 헤더의 통합회원 로그인 콜백을 호출한다.
+    // 주의할 점: 아래 JSX에서 렌더 조건을 false로 막고 있으므로 현재 화면에는 표시되지 않지만, 조건 제거 시 바로 다시 동작한다.
     onClose?.();
     onOnePassLogin?.();
   };
@@ -229,7 +231,9 @@ const HeaderMobileGNB = forwardRef(({
                     </div>
                   ) : null}
                   <div className="gnb-header-link">
-                    <button type="button" className="krds-btn large text" onClick={handleOnePassLoginClick}><i className="svg-icon ico-onepass"></i> 중기 통합회원</button>
+                    {false && (
+                      <button type="button" className="krds-btn large text" onClick={handleOnePassLoginClick}><i className="svg-icon ico-onepass"></i> 중기 통합회원</button>
+                    )}
                     <button type="button" className="krds-btn large text" onClick={handleMyPageClick}><i className="svg-icon ico-my"></i> 마이비즈니스</button>
                     <button type="button" className="krds-btn large text" onClick={handleLogoutClick}><i className="svg-icon ico-logout"></i> 로그아웃</button>
                   </div>
@@ -237,7 +241,9 @@ const HeaderMobileGNB = forwardRef(({
               ) : (
                 <>
                   {/* 로그인 전 */}
-                  <button type="button" className="krds-btn large text" onClick={handleOnePassLoginClick}><i className="svg-icon ico-onepass"></i> 중기 통합회원</button>
+                  {false && (
+                    <button type="button" className="krds-btn large text" onClick={handleOnePassLoginClick}><i className="svg-icon ico-onepass"></i> 중기 통합회원</button>
+                  )}
                   <button type="button" className="krds-btn large text" onClick={handleLoginClick}><i className="svg-icon ico-log"></i> 로그인</button>
                   <button type="button" className="krds-btn large text" onClick={handleOnePassJoinClick }><i className="svg-icon ico-join"></i> 회원가입</button>
                   

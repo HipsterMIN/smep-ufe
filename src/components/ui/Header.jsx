@@ -107,7 +107,10 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const isMainPage = location.pathname === '/';
-  const isLoginPage = location.pathname.endsWith('/service/login');
+  // 왜 필요한지: 헤더 검색 영역은 로그인 관련 화면에서는 숨겨야 하는데, 신규 진입 화면(/service/loginBef)도 같은 로그인 흐름에 속한다.
+  // 무엇을 하는지: 기존 ID/PW 로그인 화면과 신규 로그인 진입 화면을 모두 로그인 페이지로 판정한다.
+  // 주의할 점: 세션 만료 복귀 등 기존 /service/login 직접 진입 흐름은 아래 navigate 로직에서 별도로 유지한다.
+  const isLoginPage = ['/service/login', '/service/loginBef'].includes(location.pathname);
   const showHeaderSearch = !isMainPage && !isLoginPage;
   const [remainingSeconds, setRemainingSeconds] = useState(null);
   const [isExtendingSession, setIsExtendingSession] = useState(false);
@@ -211,7 +214,7 @@ export default function Header() {
   }, [token, refreshToken, logout, navigate]);
 
   const handleServiceLogin = () => {
-    navigate('/service/login');
+    navigate('/service/loginBef');
   };
 
   const handleOnePassIntegratedLogin = () => {
@@ -235,7 +238,7 @@ export default function Header() {
       return;
     }
 
-    if(currentMode === 'CORPORATE') {
+    if (currentMode === 'CORPORATE') {
       const onePassJoinUrl = `${tagetBizMypageUrl}?redirect_uri=${fullUrl}/mb/dash/UI_USR_L_510&client_id=${clientId}&uuid=${uuid}`;
       console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
@@ -245,7 +248,7 @@ export default function Header() {
       window.location.href = onePassJoinUrl;
     }
     
-  }
+  };
 
   const handleOnePassJoin = () => {
     const onePassJoinUrl = buildOnePassRegisterUrl('member');
@@ -674,7 +677,7 @@ export default function Header() {
           onClose={handleCloseMobGnb} 
           onLogin={handleServiceLogin}
           onOnePassLogin={handleOnePassIntegratedLogin}
-          onOnePassConfig={handleOnePassConfig}
+          onOnePassJoin={handleOnePassJoin}
           onMyPage={handleMyPage}
           onLogout={handleLogout}
           isLogin={isLogin}

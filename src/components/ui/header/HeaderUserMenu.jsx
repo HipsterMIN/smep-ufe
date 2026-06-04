@@ -195,10 +195,14 @@ export default function HeaderUserMenu({
     <>
       {/*externalLinkButtons*/}
 
-      {/* 통합로그인은 로그인 상태와 무관하게 같은 진입점을 사용한다. */}
-      <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
-        중기 통합회원 로그인
-      </button>
+      {false && (
+        // 왜 필요한지: 요구사항상 헤더에서는 중기 통합회원 로그인 버튼을 숨기지만, 재노출 가능성이 있어 기존 연결 코드를 완전히 제거하지 않는다.
+        // 무엇을 하는지: 렌더 조건만 false로 막아 화면에는 보이지 않게 하고, 기존 onOnePassLogin 연결은 JSX 안에 그대로 보존한다.
+        // 주의할 점: 이 버튼을 다시 노출해야 하면 false 조건만 제거하면 되며, SSO 시작 함수 자체는 Header.jsx에 남아 있다.
+        <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassLogin}>
+          중기 통합회원 로그인
+        </button>
+      )}
       <button type="button" className="btn-navi login on-mobile-none" onClick={onLogin}>
         로그인
       </button>
