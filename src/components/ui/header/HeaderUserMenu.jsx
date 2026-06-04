@@ -186,7 +186,7 @@ export default function HeaderUserMenu({
         <button type="button" className="btn-navi mypage on-mobile-none" onClick={onMyPage}>
           마이 비즈니스
         </button>
-        <div className="top-noti" aria-hidden="true"><span>1</span></div>
+        <div className="top-noti" aria-hidden="true" style={{ display: 'none' }} ><span>1</span></div>
       </>
     );
   }

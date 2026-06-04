@@ -145,7 +145,7 @@ const UI_USR_R_031 = () => {
           
           <div className="page-title-wrap on-btmline" data-type="responsive">
             <h3 className="h-tit3">상품안내</h3>
-            <p className="conts-desc mb-0">본 상품은 해당 금융기관에서 제공하는 정책금융 상품이며, 정확한 조건 및 한도는 금융기관을 통해 확인하시기 바랍니다.</p>
+            <p className="conts-desc mb-0">본 상품은 해당 금융기관에서 제공하는 정책금융 지원사업이며, 정확한 조건 및 한도는 금융기관을 통해 확인하시기 바랍니다.</p>
           </div>
           <div className="def-list-wrap">
             <dl className="def-list">

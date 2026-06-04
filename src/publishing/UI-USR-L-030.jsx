@@ -87,7 +87,7 @@ const UI_USR_L_030 = () => {
             <Tab tabData={tabData.current} onTabChange={handleTabChange}></Tab>
 
 <div className="conts-desc">
-  중소기업 성장과 경영 안정을 위해 제공하는 다양한 정책금융 상품을 조회할 수 있습니다.
+  중소기업 성장과 경영 안정을 위해 제공하는 다양한 정책금융 지원사업을 조회할 수 있습니다.
 </div>
 
 <div className="finance-agency-chip-wrap">

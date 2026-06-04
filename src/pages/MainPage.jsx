@@ -222,7 +222,7 @@ const MainPage = () => {
   const platformMenus = [
     {
       img: mainIcon01,
-      title: '사업공고 찾기',
+      title: '사업공고',
       path: '/req/pbanc',
     },
     {
@@ -231,14 +231,14 @@ const MainPage = () => {
       path: '/crtf/UI_USR_L_040',
     },
     {
-      img: mainIcon03,
-      title: '정책뉴스',
-      path: '/plcy/reprt/plcyNews',
-    },
-    {
       img: mainIcon04,
       title: '정책금융',
       path: '/req/UI_USR_L_030',
+    },
+    {
+      img: mainIcon03,
+      title: '정책뉴스',
+      path: '/plcy/reprt/plcyNews',
     },
     {
       img: mainIcon05,
