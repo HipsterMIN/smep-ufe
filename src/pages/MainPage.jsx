@@ -159,6 +159,21 @@ const MainPage = () => {
     queryFn: fetchPopularKeywords,
     staleTime: 30_000,
   });
+  //자주 찾는 증명서(Top 4)
+  const fetchTop4Certificates = () =>
+      apiClient.get('/api/v1/certificate/top4').then(normalizeResponse);
+
+  const { data: top4Certificates = [], isLoading: isTop4Loading } = useQuery({
+    queryKey: ['top4-certificates'],
+    queryFn: fetchTop4Certificates,
+    staleTime: 5 * 60_000, //5분 캐시
+  });
+
+  const handleCertificateClick = (prdocCd) => {
+    if (!prdocCd) return;
+    navigate(`/crtf/UI_USR_L_040/${prdocCd}`);
+  };
+
   const popularKeywords = popularKeywordsRaw?.slice(0, SEARCH_POPULAR_LIMIT) || [];
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [hasOpenedKeyboard, setHasOpenedKeyboard] = useState(false);
@@ -1060,44 +1075,40 @@ const MainPage = () => {
               </ul>
             </div>
             <div className="main-top-keyword fav">
-              <h3>자주 찾는 검색어</h3>
+              <h3>자주 찾는 증명서</h3>
               <ul className="keyword-list">
-                <li>
-                  <button
-                    type="button"
-                    className="word"
-                    onClick={() => handleCertificateKeywordSelect('중소기업(소상공인) 확인서')}
-                  >
-                    중소기업(소상공인) 확인서
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="word"
-                    onClick={() => handleCertificateKeywordSelect('벤처확인서')}
-                  >
-                    벤처확인서
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="word"
-                    onClick={() => handleCertificateKeywordSelect('메인비즈확인서')}
-                  >
-                    메인비즈확인서
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="word"
-                    onClick={() => handleCertificateKeywordSelect('이노비즈확인서')}
-                  >
-                    이노비즈확인서
-                  </button>
-                </li>
+                {isTop4Loading && (
+                    <li>
+                      <button type="button" className="word" disabled>
+                        로딩 중...
+                      </button>
+                    </li>
+                )}
+
+                {!isTop4Loading && top4Certificates.length === 0 && (
+                    <li>
+                      <button type="button" className="word" disabled>
+                        추천 증명서가 없습니다.
+                      </button>
+                    </li>
+                )}
+
+                {!isTop4Loading &&
+                    top4Certificates.map((cert, index) => {
+                      const certTitle = cert.prdocTtl || '증명서';
+
+                      return (
+                          <li key={`top-cert-${cert.prdocCd || index}`}>
+                            <button
+                                type="button"
+                                className="word"
+                                onClick={() => handleCertificateClick(cert.prdocCd)}
+                            >
+                              {certTitle}
+                            </button>
+                          </li>
+                      );
+                    })}
               </ul>
             </div>
           </div>
