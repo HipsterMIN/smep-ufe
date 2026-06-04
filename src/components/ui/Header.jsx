@@ -218,6 +218,12 @@ export default function Header() {
     onePassGetAuthCode();
   };
 
+
+  const fullUrl = trimTrailingSlash(readEnv('VITE_FULL_URL'));
+  const clientId = trimTrailingSlash(readEnv('VITE_CLIENT_ID'));
+  const tagetBizMypageUrl = trimTrailingSlash(readEnv('VITE_BIZ_TARGET_MYPAGE_URL'));
+  const tagetMbrMypageUrl = trimTrailingSlash(readEnv('VITE_MBR_TARGET_MYPAGE_URL'));
+
   const handleOnePassConfig = () => {
 
     const { isLogin, currentMode, uuid } = useAuthStore.getState(); 
@@ -228,11 +234,11 @@ export default function Header() {
     }
 
     if(currentMode === 'CORPORATE') {
-      const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-business/information?redirect_uri=https://www.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-tipa-01&uuid=${uuid}`;
+      const onePassJoinUrl = `${tagetBizMypageUrl}?redirect_uri=${fullUrl}/mb/dash/UI_USR_L_510&client_id=${clientId}&uuid=${uuid}`;
       console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     } else {
-      const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-member/information?redirect_uri=https://www.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-tipa-01&uuid=${uuid}`;
+      const onePassJoinUrl = `${tagetMbrMypageUrl}?redirect_uri=${fullUrl}/mb/dash/UI_USR_L_510&client_id=${clientId}&uuid=${uuid}`;
       console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     }
