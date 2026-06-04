@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api as apiClient } from '../../lib/apiClient.js';
 import { useAuthStore } from '../../store/useAuthStore.jsx';
+import { buildOnePassConversionUrl } from '../../utils/keycloakGetAuthCode.js';
 
 // 임시 연동 계약: 외부 출발 콜백 대응을 위해 프론트 state 검증을 비활성화한다.
 // const KEYCLOAK_STATE_KEY = 'keycloak_state';
@@ -209,6 +210,18 @@ const OnePassSsoCallback = () => {
           status: error?.status ?? null,
           hasData: Boolean(error?.data),
         });
+
+        // 404: Q-Sign UUID와 연결된 로컬 회원이 없음 → OnePass 전환(연동) 페이지로 이동
+        // 이 케이스는 기술적 오류가 아니라 아직 통합 전환을 완료하지 않은 사용자이다.
+        if (error?.status === 404) {
+          console.log(`${LOG_PREFIX} navigate conversion`, {
+            to: 'onepass-conversion',
+            reason: 'local-member-not-linked-to-keycloak-uuid',
+          });
+          window.location.href = buildOnePassConversionUrl();
+          return;
+        }
+
         alert('중기 통합회원 로그인 처리에 실패했습니다. 다시 시도해 주세요.');
         console.log(`${LOG_PREFIX} navigate login`, {
           to: '/service/login',
@@ -231,6 +244,13 @@ const OnePassSsoCallback = () => {
 
 
   
+  // 라우터 교체(setRouterInstance) 타이밍에 따라 /sso가 아닌 경로에서 잠깐 마운트될 수 있다.
+  // useEffect 가드는 SSO 로직 중복 실행을 막지만, JSX는 항상 반환하므로 로딩 화면이 남아버린다.
+  // 경로가 /sso가 아니면 null을 반환하여 로딩 화면이 표시되지 않도록 한다.
+  if (!window.location.pathname.endsWith('/sso')) {
+    return null;
+  }
+
   return (
     <div
       style={{
