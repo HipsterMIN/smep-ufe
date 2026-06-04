@@ -1272,8 +1272,8 @@ const MainPage = () => {
                           <ul className="week-list">
                             {visibleList.map((card, index) => (
                               <li key={card.id || index}>
-                                <span className={`krds-label state ${card.status === '마감임박' ? 'danger' : ''}`}>
-                                  {card.status}
+                                <span className={`krds-label state ${isUrgentDday(card.dday) ? 'danger' : ''}`}>
+                                  {card.dday}
                                 </span>
                                 <span className="krds-badge">{formatWeekPbancAgencyBadge(card.badge)}</span>
                                 <button
