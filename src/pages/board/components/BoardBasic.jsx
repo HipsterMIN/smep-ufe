@@ -346,13 +346,13 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
           <ul className="sch-sort">
             <li>
               <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
-                <select
-                  className="krds-form-select-sort"
-                  id="search_result_count"
-                  value={normalizedQueryState.size}
-                  onChange={handlePageSizeChange}
-                >
-                  <option value={10}>10개</option>
+              <select
+                className="krds-form-select-sort"
+                id="search_result_count"
+                value={normalizedQueryState.size}
+                onChange={handlePageSizeChange}
+              >
+                <option value={10}>10개</option>
                 <option value={20}>20개</option>
                 <option value={30}>30개</option>
               </select>
@@ -400,7 +400,11 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
                           <span className="sr-only">고정 게시글</span>
                         </>
                       ) : (
-                        <span>{item?.pstNo ?? '-'}</span>
+                        <span>
+                          {item?.upendPstgYn === 'Y'
+                            ? item?.pstNo ?? '-'
+                            : (normalizedQueryState.page - 1) * normalizedQueryState.size + (index + 1)}
+                        </span>
                       )}
                     </th>
                     <td>
