@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import { useNiceIdAuth } from '../hooks/useNiceIdAuth';
 import { api } from '../lib/apiClient';
+import { unwrapApiResponseData } from '../lib/apiResponsePayload';
 
 const PASSWORD_FIND_SEND_OPTIONS = [
   {
@@ -29,6 +30,16 @@ const resolvePasswordFindErrorMessage = (error) =>
   error?.data?.error?.message ||
   error?.message ||
   '임시비밀번호 발송 처리 중 오류가 발생했습니다.';
+
+const isObjectPayload = (value) => value !== null && typeof value === 'object';
+
+const getPayloadKeys = (value) => (isObjectPayload(value) ? Object.keys(value) : []);
+
+const createResponseShapeMarker = (response, payload) => ({
+  wrapped: isObjectPayload(response?.data),
+  topLevelKeys: getPayloadKeys(response),
+  payloadKeys: getPayloadKeys(payload),
+});
 
 const FindPassword = () => {
   const navigate = useNavigate();
@@ -85,12 +96,18 @@ const FindPassword = () => {
           findKey: passwordFindKey,
           sendType: selectedSendType,
         });
-        console.info('[FIND_PASSWORD_MARK] temporary password send success', {
-          sendType: sendResponse?.sendType,
-          hasMaskedAddress: Boolean(sendResponse?.maskedAddress),
+        const sendPayload = unwrapApiResponseData(sendResponse);
+        console.info('[FIND_PASSWORD_MARK] temporary password send response unwrapped', {
+          ...createResponseShapeMarker(sendResponse, sendPayload),
+          hasSendType: Boolean(sendPayload?.sendType),
+          hasMaskedAddress: Boolean(sendPayload?.maskedAddress),
         });
-        const sendTypeLabel = SEND_TYPE_LABELS[sendResponse?.sendType] || SEND_TYPE_LABELS[selectedSendType];
-        const maskedAddress = sendResponse?.maskedAddress ? ` (${sendResponse.maskedAddress})` : '';
+        console.info('[FIND_PASSWORD_MARK] temporary password send success', {
+          sendType: sendPayload?.sendType,
+          hasMaskedAddress: Boolean(sendPayload?.maskedAddress),
+        });
+        const sendTypeLabel = SEND_TYPE_LABELS[sendPayload?.sendType] || SEND_TYPE_LABELS[selectedSendType];
+        const maskedAddress = sendPayload?.maskedAddress ? ` (${sendPayload.maskedAddress})` : '';
         alert(`${sendTypeLabel}${maskedAddress}로 임시비밀번호가 발송되었습니다. 로그인해 주세요.`);
         navigate('/service/login');
       } catch (error) {
@@ -166,18 +183,33 @@ const FindPassword = () => {
           memberName: userName.trim(),
           resultKey: authResult.resultKey,
         });
-        const channels = verifyResponse.channels || {};
+        const verifyPayload = unwrapApiResponseData(verifyResponse);
+        const findKey = verifyPayload.findKey || '';
+        if (!findKey) {
+          console.warn('[FIND_PASSWORD_MARK] personal verify response malformed', {
+            ...createResponseShapeMarker(verifyResponse, verifyPayload),
+            hasFindKey: false,
+            hasChannels: isObjectPayload(verifyPayload.channels),
+          });
+          throw new Error('비밀번호 찾기 응답 형식이 올바르지 않습니다.');
+        }
+        const channels = verifyPayload.channels || {};
+        console.info('[FIND_PASSWORD_MARK] personal verify response unwrapped', {
+          ...createResponseShapeMarker(verifyResponse, verifyPayload),
+          hasFindKey: Boolean(findKey),
+          channelKeys: getPayloadKeys(channels),
+        });
         const defaultSendOption =
           PASSWORD_FIND_SEND_OPTIONS.find((option) => channels[option.channelKey]?.available) ||
           PASSWORD_FIND_SEND_OPTIONS[0];
-        setPasswordFindKey(verifyResponse.findKey || '');
+        setPasswordFindKey(findKey);
         setPasswordFindChannels(channels);
         setSelectedSendType(defaultSendOption.type);
         setPersonalAuthResult({ authMethod });
         console.info('[FIND_PASSWORD_MARK] personal verify success', {
           authMethod,
-          hasFindKey: Boolean(verifyResponse.findKey),
-          expiresInSeconds: verifyResponse.expiresInSeconds,
+          hasFindKey: Boolean(findKey),
+          expiresInSeconds: verifyPayload.expiresInSeconds,
           emailAvailable: Boolean(channels.email?.available),
           smsAvailable: Boolean(channels.sms?.available),
         });

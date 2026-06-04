@@ -12,6 +12,14 @@ const OnePassSsoCallback = () => {
   const hasHandledRef = useRef(false);
 
   useEffect(() => {
+    // 라우터 인스턴스 교체(메뉴 로드 후 setRouterInstance) 시 /sso가 아닌 경로에서 잘못 마운트되는 것을 방어한다.
+    // 실제 /sso 경로가 아니면 SSO 처리를 하지 않는다.
+    const currentPathname = window.location.pathname;
+    if (!currentPathname.endsWith('/sso')) {
+      console.log(`${LOG_PREFIX} not on /sso path, skipping`, { pathname: currentPathname });
+      return;
+    }
+
     // 첫 진입 로그다. 실제 /sso 콜백 진입 여부와 search 존재 여부, 그리고 StrictMode 재실행 여부를 가장 먼저 확인할 때 본다.
     console.log(`${LOG_PREFIX} effect start`, {
       pathname: window.location.pathname,
