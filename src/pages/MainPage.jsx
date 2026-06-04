@@ -1484,10 +1484,10 @@ const MainPage = () => {
         <section className="main-section">
           <div className="container">
             <a
-              href="/req/sprt"
+              href="/plcy/reprt/sprt"
               onClick={(event) => {
                 event.preventDefault();
-                navigate('/req/sprt');
+                navigate('/plcy/reprt/sprt');
               }}
             >
               <img
