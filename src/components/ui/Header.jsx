@@ -506,6 +506,14 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
+    // 이유: 라우트 전환은 Header를 remount하지 않아 접힘 상태와 이전 scroll 기준값이 다음 화면에 남을 수 있다.
+    // 영향: 새 화면은 펼친 header로 시작하고, 이후 스크롤 방향 판정은 현재 위치에서 다시 시작한다.
+    lastScrollY.current = Math.max(0, window.scrollY);
+    isLocked.current = false;
+    setIsHeaderVisible(true);
+  }, [location.pathname]);
+
+  useEffect(() => {
     const handleResize = () => {
       if (isMobile()) setIsHeaderVisible(true);
       updateContainerMargin(isHeaderVisible);
