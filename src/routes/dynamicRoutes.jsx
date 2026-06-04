@@ -55,6 +55,14 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
   }
 
   const fullPath = buildFullPath(menuNode, flatMenuMap);
+
+  // '/'는 정적 라우트(MainPage)에서 사용하는 예약 경로이다.
+  // scrnUrlAddr이 비어있는 메뉴 노드가 있으면 buildFullPath가 '/'를 반환할 수 있는데,
+  // 이 경우 동적 라우트로 등록하면 MainPage를 덮어쓰는 M타입 리다이렉트가 생성된다.
+  if (!fullPath || fullPath === '/') {
+    return null;
+  }
+
   const routeConfig = {
     path: fullPath,
     // 메타데이터 저장 (나중에 breadcrumb 등에서 사용)

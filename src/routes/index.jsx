@@ -11,9 +11,16 @@ import { mockMenuData } from '@lib/menuData.js';
  */
 const createAppRouter = (menuTree, flatMenuMap) => {
   const dynamicRoutes = generateDynamicRoutes(menuTree, flatMenuMap);
+  // [라우트 우선순위 수정]
+  // staticRoutes를 먼저 배치하여 '/'(MainPage), '/sso', '/service/login' 등 핵심 경로가
+  // 동적 메뉴 라우트보다 높은 우선순위를 갖도록 한다.
+  // 이전: [...dynamicRoutes, ...staticRoutes] → 동적 M타입 '/' 리다이렉트가 MainPage를 덮어씀
+  //   → navigate('/') 후 동적 <Navigate to="/home" replace /> 발동 → URL이 /home/home으로 변경
+  // 수정: staticRoutes가 먼저 오면 '/'는 항상 MainPage, React Router 스코어 기반 매칭으로
+  //   '/req/pbanc' 등 동적 경로는 정상 동작, '*' catch-all은 여전히 최하위.
   const allRoutes = [
-    ...dynamicRoutes,
     ...staticRoutes,
+    ...dynamicRoutes,
   ];
 
   // React Router의 basename은 트레일링 슬래시가 없어야 함 (단, '/' 자체인 경우는 제외)
