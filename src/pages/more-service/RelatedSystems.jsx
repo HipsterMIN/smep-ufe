@@ -52,7 +52,7 @@ const RelatedSystems = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(12);
+  const [viewType, setViewType] = useState('card'); // card | list
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -125,7 +125,7 @@ const RelatedSystems = () => {
 
         const params = new URLSearchParams({
           page: String(currentPage + 1),
-          size: String(pageSize),
+          size: String(12),
         });
 
         if (activeBizTypeCd && activeBizTypeCd !== 'ALL') {
@@ -160,7 +160,7 @@ const RelatedSystems = () => {
     return () => {
       isMounted = false;
     };
-  }, [activeBizTypeCd, appliedSearchKeyword, currentPage, pageSize, selectedInstNmList]);
+  }, [activeBizTypeCd, appliedSearchKeyword, currentPage, selectedInstNmList]);
 
   const handleToggleFilter = () => {
     const node = schFormWrapRef.current;
@@ -207,11 +207,6 @@ const RelatedSystems = () => {
     window.scrollTo(0, 0);
   };
 
-  const handlePageSizeChange = (event) => {
-    setPageSize(Number(event.target.value));
-    setCurrentPage(0);
-  };
-
   const moveToRlvntSystem = (url) => {
     const targetUrl = String(url ?? '').trim();
     if (!targetUrl) return;
@@ -233,15 +228,15 @@ const RelatedSystems = () => {
         <div className="krds-tab-area layer">
           <p className="guide-txt custom">
             <b
-              onClick={onePassGetAuthCode}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && onePassGetAuthCode()}
-              style={{ cursor: 'pointer' }}
+              // onClick={onePassGetAuthCode}
+              // role="button"
+              // tabIndex={0}
+              // onKeyDown={(e) => e.key === 'Enter' && onePassGetAuthCode()}
+              // style={{ cursor: 'pointer' }}
             >
-              중기통합회원
+                중기통합회원
             </b>
-            으로 전환하고, <b>64개의 시스템</b>을 하나의 아이디로 편리하게 이용해 보세요.
+              으로 전환하고, <b>64개의 시스템</b>을 하나의 아이디로 편리하게 이용해 보세요.
           </p>
           <div className="tab-conts-wrap mt-40">
             <section className={`tab-conts ${activeTabIndex >= 0 ? 'active' : ''}`}>
@@ -265,9 +260,10 @@ const RelatedSystems = () => {
                     </button>
                   </div>
 
-                  <button type="button" className={`krds-btn medium text ${isOpen ? 'on' : ''}`} onClick={handleToggleFilter}>
+                  <button type="button" className={`krds-btn medium text ${isOpen ? 'on' : ''}`}
+                    onClick={handleToggleFilter}>
                     기관선택
-                    <i className={`svg-icon ico-angle ${isOpen ? 'up' : ''}`} />
+                    <i className={`svg-icon ico-angle ${isOpen ? 'up' : ''}`}/>
                     <span className="onfilter-open sr-only">열기</span>
                     <span className="onfilter-close sr-only">닫기</span>
                   </button>
@@ -303,10 +299,11 @@ const RelatedSystems = () => {
                   {selectedInstNmList.length > 0 && (
                     <dl className="filter-chip">
                       <dt>
-                        선택된 필터 <span className="num">{selectedInstNmList.length}</span>
+                          선택된 필터 <span className="num">{selectedInstNmList.length}</span>
                       </dt>
                       <dd>
-                        <button type="button" className="krds-btn xlarge icon border" onClick={handleResetInstitutions}>
+                        <button type="button" className="krds-btn xlarge icon border"
+                          onClick={handleResetInstitutions}>
                           <span className="sr-only">필터 초기화</span>
                           <i className="svg-icon ico-refresh"></i>
                         </button>
@@ -314,7 +311,8 @@ const RelatedSystems = () => {
                           {selectedInstNmList.map((instNm) => (
                             <span className="krds-btn-tag" key={instNm}>
                               {instNm}
-                              <button type="button" className="btn-delete" onClick={() => handleInstitutionChange(instNm)}>
+                              <button type="button" className="btn-delete"
+                                onClick={() => handleInstitutionChange(instNm)}>
                                 <span className="sr-only">삭제</span>
                               </button>
                             </span>
@@ -326,7 +324,7 @@ const RelatedSystems = () => {
                 </div>
               </div>
 
-              <Tab tabData={tabItems.map((item) => item.label)} onTabChange={handleTabChange} />
+              <Tab tabData={tabItems.map((item) => item.label)} onTabChange={handleTabChange}/>
 
               <div className="search-list-top mt-40">
                 <ul className="sch-info" aria-live="polite">
@@ -336,79 +334,131 @@ const RelatedSystems = () => {
                 </ul>
                 <ul className="sch-sort">
                   <li>
-                    <strong className="sort-label"><label htmlFor="related_system_page_size">목록 표시 개수</label></strong>
-                    <select
-                      className="krds-form-select-sort"
-                      id="related_system_page_size"
-                      value={pageSize}
-                      onChange={handlePageSizeChange}
-                    >
-                      <option value={12}>12개</option>
-                      <option value={24}>24개</option>
-                      <option value={36}>36개</option>
-                    </select>
+                    <strong className="sort-label"><span>조회방식</span></strong>
+                    <div className="w-sort-btn">
+                      <button
+                        type="button"
+                        className={`view-btn ${viewType === 'card' ? 'active' : ''}`}
+                        onClick={() => setViewType('card')}
+                      >
+                        카드형
+                      </button>
+                      <button
+                        type="button"
+                        className={`view-btn ${viewType === 'list' ? 'active' : ''}`}
+                        onClick={() => setViewType('list')}
+                      >
+                        목록형
+                      </button>
+                    </div>
                   </li>
                 </ul>
               </div>
 
-              <ul className="krds-structured-list relate mt-40">
-                {loading ? (
-                  <li className="structured-item">
-                    <div className="card-body">
-                      <p className="no-icon c-bold-tit">
-                        <span className="onellipsis-1">로딩 중입니다.</span>
-                      </p>
-                    </div>
-                  </li>
-                ) : list.length === 0 ? (
-                  <li className="structured-item">
-                    <div className="card-body">
-                      <p className="no-icon c-bold-tit">
-                        <span className="onellipsis-1">조회된 유관기관 시스템이 없습니다.</span>
-                      </p>
-                    </div>
-                  </li>
-                ) : (
-                  list.map((item, index) => {
-                    const thumbnailSrc = resolveThumbnailSrc(item);
-                    const bizTypeCd = String(item?.rlvntInstSysBizTypeCd ?? '').trim();
-                    return (
-                      <li className="structured-item" key={item?.rlvntInstSysMngSn ?? `${item?.rlvntInstSysNm ?? 'system'}-${index}`}>
-                        <div className="card-top">
-                          <div className="corp-imgs">
-                            <img
-                              src={thumbnailSrc || noImg}
-                              alt={item?.rlvntInstSysNm || '유관기관 로고'}
-                              onError={(event) => {
-                                if (event.currentTarget.src !== noImg) {
-                                  event.currentTarget.src = noImg;
-                                }
-                              }}
-                            />
+              {viewType === 'card' ? (
+                <ul className="krds-structured-list relate mt-40">
+                  {loading ? (
+                    <li className="structured-item">
+                      <div className="card-body">
+                        <p className="no-icon c-bold-tit">
+                          <span className="onellipsis-1">로딩 중입니다.</span>
+                        </p>
+                      </div>
+                    </li>
+                  ) : list.length === 0 ? (
+                    <li className="structured-item">
+                      <div className="card-body">
+                        <p className="no-icon c-bold-tit">
+                          <span className="onellipsis-1">조회된 유관기관 시스템이 없습니다.</span>
+                        </p>
+                      </div>
+                    </li>
+                  ) : (
+                    list.map((item, index) => {
+                      const thumbnailSrc = resolveThumbnailSrc(item);
+                      return (
+                        <li className="structured-item"
+                          key={item?.rlvntInstSysMngSn ?? `${item?.rlvntInstSysNm ?? 'system'}-${index}`}>
+                          <div className="card-top">
+                            <div className="corp-imgs">
+                              <img
+                                src={thumbnailSrc || noImg}
+                                alt={item?.rlvntInstSysNm || '유관기관 로고'}
+                                onError={(event) => {
+                                  if (event.currentTarget.src !== noImg) {
+                                    event.currentTarget.src = noImg;
+                                  }
+                                }}
+                              />
+                            </div>
                           </div>
-                        </div>
-                        <div className="card-body">
-                          <p className="no-icon c-sub-tit">
-                            <span className="onellipsis-1">{item?.rlvntInstInstNm || '-'}</span>
-                          </p>
-                          <p className="no-icon c-bold-tit">
-                            <span className="onellipsis-2">{item?.rlvntInstSysNm || '-'}</span>
-                          </p>
-                          <p className="no-icon c-normal-tit mb-20">
-                            <span className="onellipsis-2">{item?.rlvntInstSysExplnCn || '-'}</span>
-                          </p>
-                          {/*<div className="hash-box">
-                            {bizTypeCd && <span className="hashtag">#{bizTypeCd}</span>}
-                          </div>*/}
-                          <button type="button" className="krds-btn small tertiary go-btn" onClick={() => moveToRlvntSystem(item?.rlvntInstUrlAddr)}>
-                            바로가기<i className="svg-icon ico-angle right" />
-                          </button>
-                        </div>
-                      </li>
-                    );
-                  })
-                )}
-              </ul>
+                          <div className="card-body">
+                            <p className="no-icon c-sub-tit">
+                              <span className="onellipsis-1">{item?.rlvntInstInstNm || '-'}</span>
+                            </p>
+                            <p className="no-icon c-bold-tit">
+                              <span className="onellipsis-2">{item?.rlvntInstSysNm || '-'}</span>
+                            </p>
+                            <p className="no-icon c-normal-tit mb-20">
+                              <span className="onellipsis-2">{item?.rlvntInstSysExplnCn || '-'}</span>
+                            </p>
+                            <button type="button" className="krds-btn small tertiary go-btn"
+                              onClick={() => moveToRlvntSystem(item?.rlvntInstUrlAddr)}>
+                                    바로가기<i className="svg-icon ico-angle right"/>
+                            </button>
+                          </div>
+                        </li>
+                      );
+                    })
+                  )}
+                </ul>
+              ) : (
+                <div className="krds-table-wrap mt-40">
+                  {loading ? (
+                    <p className="no-icon c-bold-tit">로딩 중입니다.</p>
+                  ) : list.length === 0 ? (
+                    <p className="no-icon c-bold-tit">조회된 유관기관 시스템이 없습니다.</p>
+                  ) : (
+                    <table className="tbl col data">
+                      <caption>
+                            유관기관 목록 번호, 유관시스템명, 유관기관, 시스템 업무 정보가 제공됩니다.
+                      </caption>
+                      <colgroup>
+                        <col style={{ width: '8%' }}/>
+                        <col style={{ width: '28%' }}/>
+                        <col style={{ width: '24%' }}/>
+                        <col/>
+                      </colgroup>
+                      <thead>
+                        <tr>
+                          <th scope="col" className="ac">번호</th>
+                          <th scope="col" className="ac">유관시스템명</th>
+                          <th scope="col" className="ac">유관기관</th>
+                          <th scope="col" className="ac">시스템 업무</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {list.map((item, index) => (
+                          <tr key={item?.rlvntInstSysMngSn ?? `${item?.rlvntInstSysNm ?? 'system'}-${index}`}>
+                            <td className="ac">{totalElements - currentPage * 12 - index}</td>
+                            <td>
+                              <button
+                                type="button"
+                                className="krds-btn small text"
+                                onClick={() => moveToRlvntSystem(item?.rlvntInstUrlAddr)}
+                              >
+                                {item?.rlvntInstSysNm || '-'}
+                              </button>
+                            </td>
+                            <td>{item?.rlvntInstInstNm || '-'}</td>
+                            <td>{item?.rlvntInstSysExplnCn || '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              )}
 
               {!loading && totalPages > 0 && (
                 <Pagination
