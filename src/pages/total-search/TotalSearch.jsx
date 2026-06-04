@@ -23,6 +23,24 @@ const CERT_BUTTON_LABEL_BY_HINT = Object.freeze({
 
 // 컬렉션별 필드 매핑은 이 블록만 수정하면 되도록 분리
 const COLLECTION_SECTION_CONFIG = [
+  /*{
+    collectionKey: 'smep_notibiz',
+    tabLabel: '사업공고',
+    defaultDepth1MenuNm: '사업공고',
+    defaultDepth2MenuNm: '사업공고소개',
+  },
+  {
+    collectionKey: 'smep_finance',
+    tabLabel: '정책금융',
+    defaultDepth1MenuNm: '정책금융',
+    defaultDepth2MenuNm: '정책금융소개',
+  },
+  {
+    collectionKey: 'smep_etc',
+    tabLabel: '기타공고',
+    defaultDepth1MenuNm: '기타공고',
+    defaultDepth2MenuNm: '기타공고소개',
+  },*/
   {
     collectionKey: 'smep_sprtbiz',
     tabLabel: '지원사업',
@@ -82,17 +100,6 @@ const createInitialPageState = () =>
   }, {});
 
 const toTrimmedString = (value) => String(value ?? '').trim();
-
-const resolveInitialTabIndex = (collectionKey) => {
-  const normalizedCollectionKey = toTrimmedString(collectionKey);
-  if (!normalizedCollectionKey) return 0;
-
-  const collectionIndex = COLLECTION_SECTION_CONFIG.findIndex(
-    (config) => config.collectionKey === normalizedCollectionKey,
-  );
-
-  return collectionIndex >= 0 ? collectionIndex + 1 : 0;
-};
 
 const normalizeFieldKey = (value) =>
   toTrimmedString(value)
@@ -339,6 +346,7 @@ const TotalSearch = () => {
   const [allCollections, setAllCollections] = useState(createInitialCollectionState);
   const [tabCollections, setTabCollections] = useState(createInitialCollectionState);
   const [tabPageByCollection, setTabPageByCollection] = useState(createInitialPageState);
+  const [sortType, setSortType] = useState('REG_DT');
   const [isAllLoading, setIsAllLoading] = useState(false);
   const [isTabLoading, setIsTabLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -364,6 +372,7 @@ const TotalSearch = () => {
       const params = new URLSearchParams({
         query: keyword,
         collection: 'ALL',
+        sortType,
       });
       const response = await apiClient.get(`/api/v1/search/totalSearch?${params.toString()}`);
       if (requestSerial !== allRequestSerialRef.current) return;
@@ -381,7 +390,7 @@ const TotalSearch = () => {
         setIsAllLoading(false);
       }
     }
-  }, []);
+  }, [sortType]);
 
   const fetchTabResults = useCallback(async ({ keyword, collectionKey, page }) => {
     const requestSerial = ++tabRequestSerialRef.current;
@@ -393,6 +402,7 @@ const TotalSearch = () => {
         query: keyword,
         collection: collectionKey,
         startCount: String(Math.max(0, page - 1)),
+        sortType,
       });
       const response = await apiClient.get(`/api/v1/search/totalSearch?${params.toString()}`);
       if (requestSerial !== tabRequestSerialRef.current) return;
@@ -418,7 +428,7 @@ const TotalSearch = () => {
         setIsTabLoading(false);
       }
     }
-  }, []);
+  }, [sortType]);
 
   useEffect(() => {
     preloadIntegratedSearchRouteResources().catch(() => {
@@ -428,16 +438,12 @@ const TotalSearch = () => {
 
   useEffect(() => {
     const stateQuery = toTrimmedString(location.state?.q);
-    const searchParams = new URLSearchParams(location.search);
-    const queryParam = toTrimmedString(searchParams.get('q'));
+    const queryParam = toTrimmedString(new URLSearchParams(location.search).get('q'));
     const nextQuery = stateQuery || queryParam;
-    const stateCollectionKey = toTrimmedString(location.state?.collectionKey);
-    const queryCollectionKey = toTrimmedString(searchParams.get('collection'));
-    const nextInitialTabIndex = resolveInitialTabIndex(stateCollectionKey || queryCollectionKey);
 
     setSearchInput(nextQuery);
     setSearchKeyword(nextQuery);
-    setActiveTabIndex(nextInitialTabIndex);
+    setActiveTabIndex(0);
     setTabPageByCollection(createInitialPageState());
   }, [location.key, location.search, location.state]);
 
@@ -502,6 +508,11 @@ const TotalSearch = () => {
       ...prev,
       [collectionKey]: page,
     }));
+  };
+
+  const handleSortChange = (nextSortType) => {
+    setSortType(nextSortType);
+    setTabPageByCollection(createInitialPageState());
   };
 
   const navigateByItem = useCallback(async (item) => {
@@ -615,8 +626,12 @@ const TotalSearch = () => {
               className="c-text c-date"
               onClick={(event) => handleItemClick(event, item)}
             >
+              {/*<p className="c-date">
+                <span>게시일 : 26-05-29</span>
+                <span>신청기간: 26-05-29 ~ 26-06-12</span>
+              </p>*/}
               <p className="c-tit no-icon">
-                <h4 className="onellipsis-2">{renderHighlightedText(item.title, '-')}</h4>
+                <span className="span onellipsis-2">{renderHighlightedText(item.title, '-')}</span>
               </p>
               <p className="c-txt onellipsis-2">{renderHighlightedText(item.content, '-')}</p>
               {!showCertificateButton && renderBreadcrumb(item)}
@@ -742,7 +757,38 @@ const TotalSearch = () => {
             <div className="search-tab-wrap">
               <Tab tabData={tabData} onTabChange={handleTabChange} activeIndex={activeTabIndex} />
             </div>
-
+            <ul className="sch-sort only-child">
+              <li>
+                <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
+                <div className="w-sort-btn">
+                  <button
+                    type="button"
+                    className={sortType === 'REG_DT' ? 'active' : ''}
+                    onClick={() => handleSortChange('REG_DT')}
+                  >
+                    등록일순{sortType === 'REG_DT' && <span className="sr-only">선택됨</span>}
+                  </button>
+                  <button
+                    type="button"
+                    className={sortType === 'DEADLINE' ? 'active' : ''}
+                    onClick={() => handleSortChange('DEADLINE')}
+                  >
+                    마감일순{sortType === 'DEADLINE' && <span className="sr-only">선택됨</span>}
+                  </button>
+                </div>
+                <div className="m-sort-btn">
+                  <select
+                    className="krds-form-select-sort"
+                    id="sort"
+                    value={sortType}
+                    onChange={(event) => handleSortChange(event.target.value)}
+                  >
+                    <option value="REG_DT">등록일순</option>
+                    <option value="DEADLINE">마감일순</option>
+                  </select>
+                </div>
+              </li>
+            </ul>
             <div className="tab-conts-wrap">
               <section className={`tab-conts ${activeTabIndex === 0 ? 'active' : ''}`}>
                 {isAllLoading && (

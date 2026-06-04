@@ -472,94 +472,145 @@ useEffect(() => {
             detailHref: '#',
         },
     ];
-    const currentWeek = {
-    period: '2026.06.01.~2026.06.07',
-    days: [
+    const weekNoticeGroups = [
         {
-            date: '6.1.',
-            day: '(월)',
-            list: [
-                { dday: 'D-3', status:'마감임박', badge: '중기부', title: '협업형 지역생활경제 활성화 시범사업 공고' },
-                //{ dday: 'D-2', status:'접수중',badge: '중기부', title: '[경남] 2026년 제30회 중소기업대상 포상...' },
-                //{ dday: 'D-25', status:'접수중',badge: '중기부', title: '[충청권 · 호남권] 2026년 2차 충청호남권...' },
+            period: '2026.05.25.~2026.05.29',
+            label: '이전주',
+            days: [
+            {
+                date: '5.25.',
+                day: '(월)',
+                list: [
+                { dday: 'D-18', badge: '중기부', title: '2026년 지역 창업기업 성장지원 사업 공고' },
+                ],
+            },
+            {
+                date: '5.26.',
+                day: '(화)',
+                list: [
+                { dday: 'D-14', badge: '중기부', title: '중소기업 기술혁신 지원사업 모집 공고' },
+                ],
+            },
+            {
+                date: '5.27.',
+                day: '(수)',
+                list: [
+                { dday: 'D-10', badge: '중기부', title: '수출바우처 참여기업 모집 공고' },
+                ],
+            },
+            {
+                date: '5.28.',
+                day: '(목)',
+                list: [
+                { dday: 'D-7', badge: '중기부', title: '소상공인 판로개척 지원사업 모집 공고' },
+                ],
+            },
+            {
+                date: '5.29.',
+                day: '(금)',
+                list: [
+                { dday: 'D-5', badge: '중기부', title: '중소기업 ESG 경영 컨설팅 지원사업 공고' },
+                ],
+            },
             ],
         },
         {
-            date: '6.2.',
-            day: '(화)',
-            list: [
-                { dday: 'D-4', status:'접수중',badge: '중기부', title: '2026년 미국 뉴욕 치과 전시회(GNYDM) 참가기업 모집 공고' },
-                //{ dday: 'D-8', status:'접수중',badge: '중기부', title: '[서울] 창업기업 판로개척 지원사업 모집 공고' },
-                //{ dday: 'D-12', status:'접수중',badge: '중기부', title: '중소기업 ESG 경영 컨설팅 지원사업 공고' },
-            ],
-        },
-        {
-            date: '6.3.',
-            day: '(수)',
-            list: [
+            period: '2026.06.01.~2026.06.07',
+            label: '금주',
+            days: [
+            {
+                date: '6.1.',
+                day: '(월)',
+                list: [
+                { dday: 'D-3', badge: '중기부', title: '협업형 지역생활경제 활성화 시범사업 공고' },
+                ],
+            },
+            {
+                date: '6.2.',
+                day: '(화)',
+                list: [
+                { dday: 'D-4', badge: '중기부', title: '2026년 미국 뉴욕 치과 전시회(GNYDM) 참가기업 모집 공고' },
+                ],
+            },
+            {
+                date: '6.3.',
+                day: '(수)',
+                list: [
                 { dday: 'D-14', badge: '중기부', title: '2026년 중견기업-스타트업 오픈이노베이션 지원사업 공고' },
-                //{ dday: 'D-16', badge: '중기부', title: '지역특화산업 육성사업 참여기업 모집' },
-                //{ dday: 'D-19', badge: '중기부', title: '기술혁신형 중소기업 R&D 지원사업 공고' },
+                ],
+            },
+            {
+                date: '6.4.',
+                day: '(목)',
+                list: [
+                { dday: 'D-9', badge: '중기부', title: '2026년 수출바우처 참여기업 모집 공고' },
+                ],
+            },
+            {
+                date: '6.5.',
+                day: '(금)',
+                list: [
+                { dday: 'D-7', badge: '중기부', title: '소상공인 디지털 전환 지원사업 모집 공고' },
+                ],
+            },
             ],
         },
         {
-            date: '6.4.',
-            day: '(목)',
-            list: [
-                { dday: 'D-9', badge: '중기부', title: '2026년 수출바우처 참여기업 모집 공고' }
+            period: '2026.06.08.~2026.06.12',
+            label: '다음주',
+            days: [
+            {
+                date: '6.8.',
+                day: '(월)',
+                list: [
+                { dday: 'D-11', badge: '중기부', title: '창업기업 성장지원 프로그램 참여기업 모집 공고' },
+                ],
+            },
+            {
+                date: '6.9.',
+                day: '(화)',
+                list: [
+                { dday: 'D-12', badge: '중기부', title: '중소기업 온라인 판로지원 사업 공고' },
+                ],
+            },
+            {
+                date: '6.10.',
+                day: '(수)',
+                list: [
+                { dday: 'D-15', badge: '중기부', title: '글로벌 진출 지원 프로그램 참여기업 모집 공고' },
+                ],
+            },
+            {
+                date: '6.11.',
+                day: '(목)',
+                list: [
+                { dday: 'D-20', badge: '중기부', title: '지역특화산업 육성사업 참여기업 모집 공고' },
+                ],
+            },
+            {
+                date: '6.12.',
+                day: '(금)',
+                list: [
+                { dday: 'D-23', badge: '중기부', title: '중소기업 브랜드 개발 지원사업 모집 공고' },
+                ],
+            },
             ],
         },
-        {
-            date: '6.5.',
-            day: '(금)',
-            list: [
-                { dday: 'D-7', badge: '중기부', title: '소상공인 디지털 전환 지원사업 모집 공고' }
-            ],
-        },
-        {
-            date: '6.6.',
-            day: '(토)',
-            list: [
-                { dday: 'D-20', badge: '중기부', title: '지역특화산업 육성사업 참여기업 모집' }
-            ],
-        },
-        {
-            date: '6.7.',
-            day: '(일)',
-            list: [
-                { dday: 'D-15', badge: '중기부', title: '창업기업 성장지원 프로그램 참여기업 모집' }
-            ],
-        },
-    ],
+    ];
+        const [weekGroupIndex, setWeekGroupIndex] = useState(1); // 0 이전주, 1 금주, 2 다음주
+
+    const currentWeek = weekNoticeGroups[weekGroupIndex];
+
+    const handlePrevWeek = () => {
+    setWeekGroupIndex((prev) => Math.max(prev - 1, 0));
     };
-    const [activeDayIndex, setActiveDayIndex] = useState(0);
-    const weekDays = currentWeek.days;
-    const getVisibleStartIndex = () => {
-        if (activeDayIndex <= 2) {
-            return 0;
-        }
-        return activeDayIndex - 2;
+
+    const handleNextWeek = () => {
+    setWeekGroupIndex((prev) => Math.min(prev + 1, weekNoticeGroups.length - 1));
     };
 
-    const visibleStartIndex = getVisibleStartIndex();
-
-    const visibleWeekDays = weekDays.slice(
-        visibleStartIndex,
-        visibleStartIndex + 5
-    );
-
-    const handleWeekRotate = (direction) => {
-        setActiveDayIndex((prev) => {
-            const total = weekDays.length;
-
-            if (direction === 'up') {
-            return prev === 0 ? total - 1 : prev - 1;
-            }
-
-            return prev === total - 1 ? 0 : prev + 1;
-        });
-    };
-    const weekListRef = useRef(null);
+    const isPrevDisabled = weekGroupIndex === 0;
+    const isNextDisabled = weekGroupIndex === weekNoticeGroups.length - 1;
 
 
     const [selectedNotice, setSelectedNotice] = useState(null);
@@ -762,12 +813,12 @@ useEffect(() => {
                         </ul>
                     </div>
                     <div className="main-top-keyword fav">
-                        <h3>자주 찾는 검색어</h3>
+                        <h3>자주 찾는 증명서</h3>
                         <ul className="keyword-list">
-                        <li><button type="button" className="word">중소기업(소상공인) 확인서</button></li>
-                        <li><button type="button" className="word">벤처확인서</button></li>
-                        <li><button type="button" className="word">이노비즈확인서</button></li>
-                        <li><button type="button" className="word">메인비즈확인서</button></li>
+                        <li><a className="word" href="/home-dev/crtf/UI_USR_L_040/Y107">중소기업(소상공인) 확인서</a></li>
+                        <li><a className="word" href="/home-dev/crtf/UI_USR_L_040/Y106">벤처확인서</a></li>
+                        <li><a className="word" href="/home-dev/crtf/UI_USR_L_040/Y105">이노비즈확인서</a></li>
+                        <li><a className="word" href="/home-dev/crtf/UI_USR_L_040/Y104">메인비즈확인서</a></li>
                         </ul>
                     </div>
                 </div>
@@ -828,39 +879,36 @@ useEffect(() => {
                                     <div className="week-controls">
                                         <button
                                             type="button"
-                                            className="krds-btn week-rotate-btn up"
-                                            aria-label="이전 날짜 보기"
-                                            onClick={() => handleWeekRotate('up')}
+                                            className="krds-btn week-move-btn prev"
+                                            aria-label="이전주 보기"
+                                            onClick={handlePrevWeek}
+                                            disabled={isPrevDisabled}
                                         >
-                                            <i className="svg-icon ico-angle up"></i>
+                                            <i className="svg-icon ico-angle left"></i>
                                         </button>
 
                                         <button
                                             type="button"
-                                            className="krds-btn week-rotate-btn down"
-                                            aria-label="다음 날짜 보기"
-                                            onClick={() => handleWeekRotate('down')}
+                                            className="krds-btn week-move-btn next"
+                                            aria-label="다음주 보기"
+                                            onClick={handleNextWeek}
+                                            disabled={isNextDisabled}
                                         >
-                                            <i className="svg-icon ico-angle"></i>
+                                            <i className="svg-icon ico-angle right"></i>
                                         </button>
                                     </div>
-
                                     <span className="period">{currentWeek.period}</span>
                                 </div>
 
                                 <div className="week-notice-list">
-                                    {visibleWeekDays.map((day) => {
-                                        const realDayIndex = weekDays.findIndex(
-                                        (item) => item.date === day.date && item.day === day.day
-                                        );
-
-                                        const isActive = realDayIndex === activeDayIndex;
-                                        const visibleList = isActive ? day.list.slice(0, 3) : day.list.slice(0, 1);
+                                    {currentWeek.days.map((day, dayIndex) => {
+                                        const card = day.list[0];
+                                        const isActive = dayIndex === 0;
 
                                         return (
                                         <div
                                             className={`week-item ${isActive ? 'is-active' : ''}`}
-                                            key={`${day.date}-${day.day}`}
+                                            key={`${currentWeek.period}-${day.date}`}
                                         >
                                             <div className="week-date">
                                             <strong>{day.date}</strong>
@@ -868,27 +916,26 @@ useEffect(() => {
                                             </div>
 
                                             <ul className="week-list">
-                                            {visibleList.map((card, index) => (
-                                                <li key={index}>
-                                                <strong className={`krds-label state ${isUrgentDday(card.dday) ? 'danger' : ''}`}>
-                                                        {getNoticeStatus(card.dday)}
-                                                    </strong>
+                                            <li>
+                                                <span className={`krds-label state ${isUrgentDday(card.dday) ? 'danger' : ''}`}>
+                                                {getNoticeStatus(card.dday)}
+                                                </span>
+
                                                 <span className="krds-badge bg-primary">{card.badge}</span>
 
                                                 <button
-                                                    type="button"
-                                                    className="week-notice-link onellipsis-1"
-                                                    onClick={() => openNoticeLayer(card)}
+                                                type="button"
+                                                className="week-notice-link onellipsis-1"
+                                                onClick={() => openNoticeLayer(card)}
                                                 >
-                                                    {card.title}
+                                                {card.title}
                                                 </button>
-                                                </li>
-                                            ))}
+                                            </li>
                                             </ul>
                                         </div>
                                         );
                                     })}
-                                </div>
+                                    </div>
                             </div>
                         </article>
                         <article className="calendar-box week-box" style={{ display: "none" }}>
