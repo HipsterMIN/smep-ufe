@@ -482,6 +482,23 @@ const MainPage = () => {
     0,
   );
   const weekNoticeCards = activeWeekGroup?.days || [];
+  const activeWeekItemIndex = useMemo(() => {
+    if (weekNoticeCards.length === 0) return -1;
+
+    const today = new Date();
+    const activeDate = new Date(today);
+    const dayOfWeek = today.getDay();
+
+    if (dayOfWeek === 0) activeDate.setDate(today.getDate() + 1);
+    if (dayOfWeek === 6) activeDate.setDate(today.getDate() - 1);
+
+    const activeDateKey = getLocalYmd(activeDate);
+    const matchedIndex = weekNoticeCards.findIndex((day) => day.dateKey === activeDateKey);
+    if (matchedIndex >= 0) return matchedIndex;
+
+    const businessDayIndex = dayOfWeek === 0 ? 0 : dayOfWeek === 6 ? 4 : dayOfWeek - 1;
+    return Math.min(businessDayIndex, weekNoticeCards.length - 1);
+  }, [weekNoticeCards]);
   const activeWeekPeriod = activeWeekGroup?.period || formatWeekPeriod();
   const isPrevWeekDisabled = activeWeekIndex <= 0;
   const isNextWeekDisabled = activeWeekIndex >= Math.max(weekNoticeGroups.length - 1, 0);
@@ -1243,7 +1260,7 @@ const MainPage = () => {
                   </div>
                   <div className="week-notice-list">
                     {weekNoticeCards.map((day, dayIndex) => {
-                      const isActive = dayIndex === 0;
+                      const isActive = dayIndex === activeWeekItemIndex;
                       const visibleList = day.list.slice(0, 1);
 
                       return (
@@ -1340,8 +1357,8 @@ const MainPage = () => {
                     },
                     1200: {
                       enabled: true,
-                      slidesPerView: 5,
-                      spaceBetween: 20,
+                      slidesPerView: 6,
+                      spaceBetween: 5,
                     },
                   }}
                   modules={[Navigation]}
