@@ -14,6 +14,12 @@ const DEFAULT_SORT = '';
 const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
 const CENTRAL_PBANC_MENU_ID = 'M_PIIO_00076';
 const LOCAL_PBANC_MENU_ID = 'M_PIIO_00169';
+const APPLY_STATUS_OPTIONS = [
+  { label: '전체', value: '' },
+  { label: '신청가능', value: 'AVAILABLE' },
+  { label: '진행예정', value: 'PLANNED' },
+  { label: '신청마감', value: 'CLOSED' },
+];
 
 const Pbanc = () => {
   const matches = useMatches();
@@ -33,6 +39,7 @@ const Pbanc = () => {
   const [applyStatus, setApplyStatus] = useState(() => getSearchParam(location.search, 'applyStatus', 'AVAILABLE'));
   const [size, setSize] = useState(() => getNumberSearchParam(location.search, 'size', DEFAULT_SIZE));
   const [sortType, setSortType] = useState(() => getSearchParam(location.search, 'sortType', DEFAULT_SORT));
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const schFormWrapRef = useRef(null);
   const latestRequestIdRef = useRef(0);
@@ -52,6 +59,7 @@ const Pbanc = () => {
 
   const handleToggleFilter = () => {
     schFormWrapRef.current?.classList.toggle('on');
+    setIsFilterOpen((prev) => !prev);
   };
 
   const buildParams = useCallback(
@@ -243,6 +251,7 @@ const Pbanc = () => {
             <button
               type="button"
               className={`krds-btn small text${hasDetailedSearchInput ? ' primary' : ''}`}
+              aria-expanded={isFilterOpen}
               onClick={handleToggleFilter}
             >
               <i className="svg-icon ico-sch-plus"></i>
@@ -254,34 +263,64 @@ const Pbanc = () => {
 
           <div className="sch-filter-box">
             <div className="filter-form">
-              <div>
-                <label className="label" htmlFor="appl-sch-sel1">분야</label>
-                <select
-                  id="appl-sch-sel1"
-                  className="krds-form-select small"
-                  value={bizPbancClsfCd}
-                  onChange={(e) => handleBizFieldChange(e.target.value)}
-                >
-                  <option value="">전체</option>
-                  {bizFieldOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
+              <div className="filter-row">
+                <strong className="label">분야</strong>
+
+                <div className="krds-form-chip-wrap flex flex-column gap-4">
+                  <div className="krds-form-chip">
+                    <input
+                      type="radio"
+                      name="bizPbancClsfCd"
+                      id="bizPbancClsfCd_all"
+                      value=""
+                      checked={bizPbancClsfCd === ''}
+                      onChange={() => handleBizFieldChange('')}
+                    />
+                    <label htmlFor="bizPbancClsfCd_all">전체</label>
+                  </div>
+
+                  {bizFieldOptions.map((option) => {
+                    const optionId = `bizPbancClsfCd_${String(option.value).replace(/[^A-Za-z0-9_-]/g, '_')}`;
+
+                    return (
+                      <div className="krds-form-chip" key={option.value}>
+                        <input
+                          type="radio"
+                          name="bizPbancClsfCd"
+                          id={optionId}
+                          value={option.value}
+                          checked={bizPbancClsfCd === option.value}
+                          onChange={() => handleBizFieldChange(option.value)}
+                        />
+                        <label htmlFor={optionId}>{option.label}</label>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div>
-                <label className="label" htmlFor="appl-sch-sel2">신청</label>
-                <select
-                  id="appl-sch-sel2"
-                  className="krds-form-select small"
-                  value={applyStatus}
-                  onChange={(e) => handleApplyStatusChange(e.target.value)}
-                >
-                  <option value="">전체</option>
-                  <option value="AVAILABLE">신청가능</option>
-                  <option value="PLANNED">진행예정</option>
-                  <option value="CLOSED">신청마감</option>
-                </select>
+              <div className="filter-row">
+                <strong className="label">신청</strong>
+
+                <div className="krds-check-area">
+                  {APPLY_STATUS_OPTIONS.map((option) => {
+                    const optionId = option.value ? `applyStatus_${option.value.toLowerCase()}` : 'applyStatus_all';
+
+                    return (
+                      <div className="krds-form-check" key={optionId}>
+                        <input
+                          type="radio"
+                          name="applyStatus"
+                          id={optionId}
+                          value={option.value}
+                          checked={applyStatus === option.value}
+                          onChange={() => handleApplyStatusChange(option.value)}
+                        />
+                        <label htmlFor={optionId}>{option.label}</label>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>

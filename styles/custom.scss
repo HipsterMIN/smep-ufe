@@ -41,6 +41,7 @@
                 background-color:#5F7EFC;
             }
         }
+        .btn-go{background-color:#F4F6FF;border:solid 1px #B6CDDD;border-radius:.8rem;padding:1rem;color:#1877F2;font-size:var(--krds-pc-font-size-body-large);font-weight:600;}
         .top-noti{
             width:2.3rem;height:2rem;
             background:url(./img/component/icon/bell.svg) no-repeat left center / auto 100%;
@@ -474,6 +475,36 @@
     }
 
 }
+.sch-filter-box {
+  display: none;
+}
+
+.sch-form-wrap.on {
+  .sch-filter-box {
+    display: block;
+  }
+}
+.krds-form-chip-wrap{display:flex;flex-wrap:wrap;gap:.8rem;
+
+}
+.search-top-box {
+    .sch-filter-box {
+        .filter-form{display:flex;flex-direction:column;gap:2.4rem;}
+    }
+}
+.sch-sort{display:flex;justify-content:flex-end;
+    li{display:flex;gap:.8rem;align-items:center;justify-content:flex-end;
+        .w-sort-btn{display:flex;gap:.8rem; align-items:center;
+            .active{color:var(--krds-color-light-primary-50)}
+        }
+    }
+    &:only-child, &.only-child{width:100%;}
+}
+.krds-structured-list {
+    .card-body {
+        .c-date {display:flex;gap:2.4rem}
+    }
+}
 @media (max-width: 767px) {
 }
 
@@ -504,5 +535,10 @@
             .krds-input, .field-control{flex:none;width:100%;}
         }
     }
+    .krds-structured-list {
+    .card-body {
+        .c-date {flex-direction:column;gap:1.2rem}
+    }
+}
 
 }
