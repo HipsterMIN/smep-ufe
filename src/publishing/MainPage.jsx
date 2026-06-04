@@ -480,8 +480,8 @@ useEffect(() => {
             day: '(월)',
             list: [
                 { dday: 'D-3', status:'마감임박', badge: '중기부', title: '협업형 지역생활경제 활성화 시범사업 공고' },
-                { dday: 'D-2', status:'접수중',badge: '중기부', title: '[경남] 2026년 제30회 중소기업대상 포상...' },
-                { dday: 'D-25', status:'접수중',badge: '중기부', title: '[충청권 · 호남권] 2026년 2차 충청호남권...' },
+                //{ dday: 'D-2', status:'접수중',badge: '중기부', title: '[경남] 2026년 제30회 중소기업대상 포상...' },
+                //{ dday: 'D-25', status:'접수중',badge: '중기부', title: '[충청권 · 호남권] 2026년 2차 충청호남권...' },
             ],
         },
         {
@@ -489,8 +489,8 @@ useEffect(() => {
             day: '(화)',
             list: [
                 { dday: 'D-4', status:'접수중',badge: '중기부', title: '2026년 미국 뉴욕 치과 전시회(GNYDM) 참가기업 모집 공고' },
-                { dday: 'D-8', status:'접수중',badge: '중기부', title: '[서울] 창업기업 판로개척 지원사업 모집 공고' },
-                { dday: 'D-12', status:'접수중',badge: '중기부', title: '중소기업 ESG 경영 컨설팅 지원사업 공고' },
+                //{ dday: 'D-8', status:'접수중',badge: '중기부', title: '[서울] 창업기업 판로개척 지원사업 모집 공고' },
+                //{ dday: 'D-12', status:'접수중',badge: '중기부', title: '중소기업 ESG 경영 컨설팅 지원사업 공고' },
             ],
         },
         {
@@ -498,44 +498,36 @@ useEffect(() => {
             day: '(수)',
             list: [
                 { dday: 'D-14', badge: '중기부', title: '2026년 중견기업-스타트업 오픈이노베이션 지원사업 공고' },
-                { dday: 'D-16', badge: '중기부', title: '지역특화산업 육성사업 참여기업 모집' },
-                { dday: 'D-19', badge: '중기부', title: '기술혁신형 중소기업 R&D 지원사업 공고' },
+                //{ dday: 'D-16', badge: '중기부', title: '지역특화산업 육성사업 참여기업 모집' },
+                //{ dday: 'D-19', badge: '중기부', title: '기술혁신형 중소기업 R&D 지원사업 공고' },
             ],
         },
         {
             date: '6.4.',
             day: '(목)',
             list: [
-                { dday: 'D-9', badge: '중기부', title: '2026년 수출바우처 참여기업 모집 공고' },
-                { dday: 'D-13', badge: '중기부', title: '중소기업 온라인 판로지원 사업 공고' },
-                { dday: 'D-21', badge: '중기부', title: '스마트공장 보급확산 지원사업 모집' },
+                { dday: 'D-9', badge: '중기부', title: '2026년 수출바우처 참여기업 모집 공고' }
             ],
         },
         {
             date: '6.5.',
             day: '(금)',
             list: [
-                { dday: 'D-7', badge: '중기부', title: '소상공인 디지털 전환 지원사업 모집 공고' },
-                { dday: 'D-10', badge: '중기부', title: '창업기업 투자연계 지원사업 모집' },
-                { dday: 'D-15', badge: '중기부', title: '글로벌 진출 지원 프로그램 참여기업 모집' },
+                { dday: 'D-7', badge: '중기부', title: '소상공인 디지털 전환 지원사업 모집 공고' }
             ],
         },
         {
             date: '6.6.',
             day: '(토)',
             list: [
-                { dday: 'D-20', badge: '중기부', title: '지역특화산업 육성사업 참여기업 모집' },
-                { dday: 'D-22', badge: '중기부', title: '사회적경제기업 성장지원 사업 공고' },
-                { dday: 'D-26', badge: '중기부', title: '중소기업 브랜드 개발 지원사업 모집' },
+                { dday: 'D-20', badge: '중기부', title: '지역특화산업 육성사업 참여기업 모집' }
             ],
         },
         {
             date: '6.7.',
             day: '(일)',
             list: [
-                { dday: 'D-15', badge: '중기부', title: '창업기업 성장지원 프로그램 참여기업 모집' },
-                { dday: 'D-17', badge: '중기부', title: '소상공인 경영환경 개선사업 공고' },
-                { dday: 'D-23', badge: '중기부', title: '지역 창업생태계 활성화 지원사업 모집' },
+                { dday: 'D-15', badge: '중기부', title: '창업기업 성장지원 프로그램 참여기업 모집' }
             ],
         },
     ],
@@ -553,7 +545,7 @@ useEffect(() => {
 
     const visibleWeekDays = weekDays.slice(
         visibleStartIndex,
-        visibleStartIndex + 3
+        visibleStartIndex + 5
     );
 
     const handleWeekRotate = (direction) => {
@@ -774,7 +766,7 @@ useEffect(() => {
                         <ul className="keyword-list">
                         <li><button type="button" className="word">중소기업(소상공인) 확인서</button></li>
                         <li><button type="button" className="word">벤처확인서</button></li>
-                        <li><button type="button" className="word">벤처확인서</button></li>
+                        <li><button type="button" className="word">이노비즈확인서</button></li>
                         <li><button type="button" className="word">메인비즈확인서</button></li>
                         </ul>
                     </div>
@@ -968,9 +960,9 @@ useEffect(() => {
                         <Swiper
                             breakpoints={{
                                 320: {
-                                    enabled: true,
-                                    slidesPerView: 2,
-                                    spaceBetween: 8
+                                    enabled: false,
+                                    slidesPerView: 6,
+                                    spaceBetween: 0
                                 },
                                 546: {
                                     enabled: true,
