@@ -88,11 +88,23 @@ function AppRouter() {
       // window.location이 다르면 window.history.replaceState로 동기화한다.
       const prevRouter = routerInstanceRef.current;
       if (prevRouter?.state?.location?.pathname != null) {
-        const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, ''); // e.g. '/home'
-        const internalPathname = prevRouter.state.location.pathname; // basename이 제거된 내부 경로
-        // 내부 경로 '/' → 브라우저 경로 '/home'
-        // 내부 경로 '/dashboard' → 브라우저 경로 '/home/dashboard'
-        const expectedBrowserPath = internalPathname === '/' ? base : base + internalPathname;
+        const rawBase = import.meta.env.BASE_URL || '/'; // e.g. '/home/'
+        const base = rawBase.endsWith('/') && rawBase !== '/' ? rawBase.slice(0, -1) : rawBase; // e.g. '/home'
+        const internalPathname = prevRouter.state.location.pathname;
+
+        // internalPathname이 basename 제거 전/후 어떤 형태로 오더라도
+        // 브라우저 경로를 중복 접두사 없이 안정적으로 계산한다.
+        let expectedBrowserPath = internalPathname;
+        if (!base || base === '/') {
+          expectedBrowserPath = internalPathname || '/';
+        } else if (internalPathname === '/' || internalPathname === '') {
+          expectedBrowserPath = base;
+        } else if (internalPathname === base || internalPathname.startsWith(`${base}/`)) {
+          expectedBrowserPath = internalPathname;
+        } else {
+          expectedBrowserPath = `${base}${internalPathname}`;
+        }
+
         if (window.location.pathname !== expectedBrowserPath) {
           window.history.replaceState(window.history.state, '', expectedBrowserPath);
         }
