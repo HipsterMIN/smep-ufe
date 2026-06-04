@@ -108,6 +108,10 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
   const [loading, setLoading] = useState(false);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const nonPinnedPosts = useMemo(
+    () => postList.filter((item) => item?.upendPstgYn !== 'Y'),
+    [postList],
+  );
 
   const isCategoryEnabled = useMemo(() => {
     const raw = boardDetail?.ctgryUseYn ?? boardDetail?.ctgry_use_yn ?? '';
@@ -364,10 +368,10 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
           <table className="tbl col data t-block">
             <caption>공지사항 목록. 번호, 제목, 등록일, 조회수 정보가 제공됩니다.</caption>
             <colgroup>
-              <col style={{ width: '7.4 %' }} />
-              <col />
-              <col style={{ width: '14%' }} />
-              <col style={{ width: '7.4 %' }} />
+              <col style={{ width: '7.4 %' }}/>
+              <col/>
+              <col style={{ width: '14%' }}/>
+              <col style={{ width: '7.4 %' }}/>
             </colgroup>
             <thead>
               <tr>
@@ -391,39 +395,50 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
                   </td>
                 </tr>
               ) : (
-                postList.map((item, index) => (
-                  <tr key={item?.pstNo ?? `${item?.pstTtl ?? 'post'}-${index}`}>
-                    <th scope="row" className="ac">
-                      {item?.upendPstgYn === 'Y' ? (
-                        <>
-                          <i className="svg-icon ico-pin"></i>
-                          <span className="sr-only">고정 게시글</span>
-                        </>
-                      ) : (
-                        <span>
-                          {item?.upendPstgYn === 'Y'
-                            ? item?.pstNo ?? '-'
-                            : (normalizedQueryState.page - 1) * normalizedQueryState.size + (index + 1)}
-                        </span>
-                      )}
-                    </th>
-                    <td>
-                      <a
-                        className={`onellipsis-1 ${item?.upendPstgYn === 'Y' ? 'notice-pinned' : ''} flex-row`}
-                        href="#"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          moveToDetail(item?.pstNo);
-                        }}
-                      >
-                        {item?.upendPstgYn === 'Y' && <span className="krds-badge bg-light-primary">공지</span>}
-                        <span>{item?.pstTtl || '-'}</span>
-                      </a>
-                    </td>
-                    <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
-                    <td className="ac views"><span>{item?.inqCnt ?? 0}</span></td>
-                  </tr>
-                ))
+                postList.map((item, index) => {
+                  const nonPinnedIndex = nonPinnedPosts.findIndex(
+                    (nonPinnedItem) => nonPinnedItem?.pstNo === item?.pstNo,
+                  );
+
+                  const rowNo =
+                      nonPinnedIndex === -1
+                        ? '-'
+                        : (normalizedQueryState.page - 1) * normalizedQueryState.size + (nonPinnedIndex + 1);
+
+                  return (
+                    <tr key={item?.pstNo ?? `${item?.pstTtl ?? 'post'}-${index}`}>
+                      <th scope="row" className="ac">
+                        {item?.upendPstgYn === 'Y' ? (
+                          <>
+                            <i className="svg-icon ico-pin"></i>
+                            <span className="sr-only">고정 게시글</span>
+                          </>
+                        ) : (
+                          <span>{rowNo}</span>
+                        )}
+                      </th>
+                      <td>
+                        <a
+                          className={`onellipsis-1 ${item?.upendPstgYn === 'Y' ? 'notice-pinned' : ''} flex-row`}
+                          href="#"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            moveToDetail(item?.pstNo);
+                          }}
+                        >
+                          {item?.upendPstgYn === 'Y' && <span className="krds-badge bg-light-primary">공지</span>}
+                          <span>{item?.pstTtl || '-'}</span>
+                        </a>
+                      </td>
+                      <td className="ac">
+                        <span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span>
+                      </td>
+                      <td className="ac views">
+                        <span>{item?.inqCnt ?? 0}</span>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
