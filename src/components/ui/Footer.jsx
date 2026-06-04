@@ -20,7 +20,7 @@ export default function Footer() {
             >
               개인정보처리방침
             </button>
-            <button
+            {/*<button
               type="button"
               className="link open-modal"
               title="이메일주소 무단수집거부안내 레이어"
@@ -53,7 +53,7 @@ export default function Footer() {
               }}
             >
               웹접근성 정책
-            </button>
+            </button>*/}
             <button
               type="button"
               className="link open-modal"
