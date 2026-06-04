@@ -5,7 +5,7 @@ import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient, apiBaseUrl } from '@lib/apiClient.js';
 import { resolveListBackPath } from '@utils/listNavigation.js';
-import { useAuthStore } from "@store/useAuthStore.jsx";
+import { useAuthStore } from '@store/useAuthStore.jsx';
 
 const EMPTY_HTML_PATTERNS = new Set([
   '<p style="text-align: left;"></p>',
@@ -34,6 +34,16 @@ const formatDate = (dateString) => {
   const day = String(date.getDate()).padStart(2, '0');
 
   return `${year}.${month}.${day}`;
+};
+
+// 작성자명 마스킹: 첫글자 + 중간 마스킹 + 마지막글자, 2글자 이하는 전체 마스킹
+const maskWriterName = (name) => {
+  if (!name || typeof name !== 'string') return '-';
+  const trimmed = name.trim();
+  if (trimmed.length === 0) return '-';
+  if (trimmed.length <= 2) return '*'.repeat(trimmed.length);
+  const middle = '*'.repeat(trimmed.length - 2);
+  return `${trimmed[0]}${middle}${trimmed[trimmed.length - 1]}`;
 };
 
 const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
@@ -163,7 +173,7 @@ const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
     if (!isLoggedIn || !postDetail) return false;
 
     return (
-        String(postDetail.pstRegMbrNo) === String(user.id) && !hasAnswer
+      String(postDetail.pstRegMbrNo) === String(user.id) && !hasAnswer
     );
   }, [isLoggedIn, postDetail, user, hasAnswer]);
 
@@ -193,7 +203,7 @@ const BoardPostQna = ({ boardDetail, bbsNo, pstNo }) => {
             <span>{regDate}</span>
           </li>
           <li>
-            <span>{`작성자 ${writerName}`}</span>
+            <span>{`작성자 ${isLoggedIn ? (writerName || '-') : maskWriterName(writerName)}`}</span>
           </li>
         </ul>
 
