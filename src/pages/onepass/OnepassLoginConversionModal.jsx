@@ -1,7 +1,7 @@
 import React from 'react';
 import modalIntegratedLoginImg from '@assets/sub/modal_integrated_login_img.png';
 import styles from './OnepassLoginConversionModal.module.css';
-import { onePassGetAuthCode, onePassJoin } from '../../utils/keycloakGetAuthCode';
+import { onePassJoin } from '../../utils/keycloakGetAuthCode';
 
 const noop = () => {};
 
@@ -21,7 +21,6 @@ export default function OnepassLoginConversionModal({
 
   const handleIntegratedLoginClick = () => {
     onLater();
-    onePassGetAuthCode();
   };
 
   return (
@@ -54,7 +53,7 @@ export default function OnepassLoginConversionModal({
             </button>
           </div>
           <button type="button" className={`${styles.button} ${styles.secondaryButton}`} onClick={handleIntegratedLoginClick}>
-            <span>중기 통합회원 로그인 바로가기</span>
+            <span>다음에 전환하기</span>
             <i className={styles.iconWrap} aria-hidden="true" />
           </button>
         </div>
