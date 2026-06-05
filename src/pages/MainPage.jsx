@@ -90,6 +90,7 @@ const SEARCH_POPULAR_LIMIT = 5;
 const SEARCH_AUTOCOMPLETE_LIMIT = 8;
 const SEARCH_AUTOCOMPLETE_DEBOUNCE_MS = 250;
 const ONEPASS_CONVERSION_MODAL_DISMISSED_KEY = '__onepass_conversion_modal_dismissed__';
+const MOBILE_POPUP_MEDIA_QUERY = '(max-width: 767px)';
 const EMPTY_LIST = Object.freeze([]);
 const EMPTY_SUPPORT_PBANC_GROUPS = Object.freeze({
   central: EMPTY_LIST,
@@ -138,7 +139,7 @@ const MainPage = () => {
       return Object.keys(localStorage)
         .filter((key) => key.startsWith('main-popup-hide-'))
         .filter((key) => localStorage.getItem(key) === todayKey)
-        .map((key) => Number(key.replace('main-popup-hide-', '')));
+        .map((key) => key.replace('main-popup-hide-', ''));
     } catch {
       return [];
     }
@@ -146,6 +147,7 @@ const MainPage = () => {
   const [autoCompleteKeywords, setAutoCompleteKeywords] = useState([]);
   const [isAutoCompleteEnabled, setIsAutoCompleteEnabled] = useState(true);
   const [isAutoLoading, setIsAutoLoading] = useState(false);
+  const [isMobilePopupViewport, setIsMobilePopupViewport] = useState(false);
 
   // ─── React Query: 메인 데이터 (stale-while-revalidate 60초) ───────────────
   const { data: mainDataRaw, isLoading: mainLoading } = useQuery({
@@ -261,6 +263,27 @@ const MainPage = () => {
       path: '/plcy/icr/UI_USR_L_110',
     },
   ];
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia(MOBILE_POPUP_MEDIA_QUERY);
+    const handleViewportChange = (event) => {
+      setIsMobilePopupViewport(event.matches);
+    };
+
+    setIsMobilePopupViewport(mediaQuery.matches);
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handleViewportChange);
+      return () => mediaQuery.removeEventListener('change', handleViewportChange);
+    }
+
+    mediaQuery.addListener(handleViewportChange);
+    return () => mediaQuery.removeListener(handleViewportChange);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -578,8 +601,9 @@ const MainPage = () => {
         },
       ];
   const visiblePopups = (mainData.popups || []).filter(
-    (popup) => !hiddenPopupIds.includes(popup.popupId),
+    (popup) => !hiddenPopupIds.includes(String(popup.popupId)),
   );
+  const mobilePopup = isMobilePopupViewport ? visiblePopups[0] : null;
   const pbancScrapTargetIds = useMemo(
     () =>
       [...pbancItems, ...calendarPbancItems, ...supportPbancItems]
@@ -815,7 +839,7 @@ const MainPage = () => {
     });
   };
   const handlePopupClose = (popupId) =>
-    setHiddenPopupIds((prev) => [...new Set([...prev, popupId])]);
+    setHiddenPopupIds((prev) => [...new Set([...prev, String(popupId)])]);
   const handlePopupHideToday = (popupId) => {
     window.localStorage.setItem(
       `main-popup-hide-${popupId}`,
@@ -1924,118 +1948,176 @@ const MainPage = () => {
         onClose={handleOnepassModalDismiss}
       />
       <Footer />
-      {visiblePopups.map((popup) => {
-        const imageSrc = buildMainImageUrl(
-          'popups',
-          popup.imgAtchFileId,
-          popup.imgAtchFileSn,
-        );
-        const href = popup.imgLnkgUrlAddr || '#';
-        const external = isNewWindow(popup.imgLnkgNpagYn);
-
-        return (
+      {isMobilePopupViewport ? (
+        mobilePopup ? (
           <div
-            key={popup.popupId}
-            className="main-popup-item"
+            className="main-popup-snackbar"
             style={{
               position: 'fixed',
-              top: `${popup.upendPstnNvl || 120}px`,
-              left: `${popup.lfsdPstnNvl || 40}px`,
-              width: `${popup.wdthLen || 360}px`,
-              height: `${popup.vrtcLen || 420}px`,
+              left: '12px',
+              right: '12px',
+              bottom: '16px',
               zIndex: 1000,
-              backgroundColor: '#fff',
-              border: '1px solid #d8d8d8',
-              boxShadow: '0 12px 28px rgba(0, 0, 0, 0.18)',
+              backgroundColor: '#111',
+              color: '#fff',
+              borderRadius: '8px',
+              boxShadow: '0 12px 24px rgba(0, 0, 0, 0.35)',
+              padding: '12px',
               display: 'flex',
               flexDirection: 'column',
+              gap: '10px',
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 16px',
-                borderBottom: '1px solid #eee',
-              }}
-            >
-              <strong style={{ fontSize: '16px', lineHeight: 1.4 }}>
-                {popup.popupTtl}
-              </strong>
-              <button
-                type="button"
-                className="krds-btn text small"
-                onClick={() => handlePopupClose(popup.popupId)}
-              >
-                닫기
-              </button>
+            <strong style={{ fontSize: '14px', lineHeight: 1.4 }}>
+              {mobilePopup.popupTtl}
+            </strong>
+            <div style={{ fontSize: '13px', opacity: 0.9, lineHeight: 1.4 }}>
+              {mobilePopup.imgSbstTxtCn || '자세한 내용은 팝업 안내를 확인해 주세요.'}
             </div>
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-              <a
-                href={href}
-                target={external ? '_blank' : undefined}
-                rel={external ? 'noreferrer' : undefined}
-                style={{ display: 'block', width: '100%', height: '100%' }}
-              >
-                {imageSrc ? (
-                  <img
-                    src={imageSrc}
-                    alt={popup.imgSbstTxtCn || popup.popupTtl}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '24px',
-                    }}
-                  >
-                    {popup.imgSbstTxtCn || popup.popupTtl}
-                  </div>
-                )}
-              </a>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '12px 16px',
-                borderTop: '1px solid #eee',
-              }}
-            >
-              {popup.vwngStopUseYn === 'Y' ? (
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+              {mobilePopup.imgLnkgUrlAddr ? (
+                <a
+                  href={mobilePopup.imgLnkgUrlAddr}
+                  target={isNewWindow(mobilePopup.imgLnkgNpagYn) ? '_blank' : undefined}
+                  rel={isNewWindow(mobilePopup.imgLnkgNpagYn) ? 'noopener noreferrer' : undefined}
+                  className="krds-btn primary small"
+                >
+                  자세히
+                </a>
+              ) : null}
+              {mobilePopup.vwngStopUseYn === 'Y' ? (
                 <button
                   type="button"
                   className="krds-btn tertiary small"
-                  onClick={() => handlePopupHideToday(popup.popupId)}
+                  onClick={() => handlePopupHideToday(mobilePopup.popupId)}
                 >
                   오늘 하루 보지 않기
                 </button>
-              ) : (
-                <span></span>
-              )}
+              ) : null}
               <button
                 type="button"
                 className="krds-btn secondary small"
-                onClick={() => handlePopupClose(popup.popupId)}
+                onClick={() => handlePopupClose(mobilePopup.popupId)}
               >
                 닫기
               </button>
             </div>
           </div>
-        );
-      })}
+        ) : null
+      ) : (
+        visiblePopups.map((popup) => {
+          const imageSrc = buildMainImageUrl(
+            'popups',
+            popup.imgAtchFileId,
+            popup.imgAtchFileSn,
+          );
+          const href = popup.imgLnkgUrlAddr || '#';
+          const external = isNewWindow(popup.imgLnkgNpagYn);
+
+          return (
+            <div
+              key={popup.popupId}
+              className="main-popup-item"
+              style={{
+                position: 'fixed',
+                top: `${popup.upendPstnNvl || 120}px`,
+                left: `${popup.lfsdPstnNvl || 40}px`,
+                width: `${popup.wdthLen || 360}px`,
+                height: `${popup.vrtcLen || 420}px`,
+                zIndex: 1000,
+                backgroundColor: '#fff',
+                border: '1px solid #d8d8d8',
+                boxShadow: '0 12px 28px rgba(0, 0, 0, 0.18)',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 16px',
+                  borderBottom: '1px solid #eee',
+                }}
+              >
+                <strong style={{ fontSize: '16px', lineHeight: 1.4 }}>
+                  {popup.popupTtl}
+                </strong>
+                <button
+                  type="button"
+                  className="krds-btn text small"
+                  onClick={() => handlePopupClose(popup.popupId)}
+                >
+                  닫기
+                </button>
+              </div>
+              <div style={{ flex: 1, overflow: 'hidden' }}>
+                <a
+                  href={href}
+                  target={external ? '_blank' : undefined}
+                  rel={external ? 'noreferrer' : undefined}
+                  style={{ display: 'block', width: '100%', height: '100%' }}
+                >
+                  {imageSrc ? (
+                    <img
+                      src={imageSrc}
+                      alt={popup.imgSbstTxtCn || popup.popupTtl}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '24px',
+                      }}
+                    >
+                      {popup.imgSbstTxtCn || popup.popupTtl}
+                    </div>
+                  )}
+                </a>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '12px 16px',
+                  borderTop: '1px solid #eee',
+                }}
+              >
+                {popup.vwngStopUseYn === 'Y' ? (
+                  <button
+                    type="button"
+                    className="krds-btn tertiary small"
+                    onClick={() => handlePopupHideToday(popup.popupId)}
+                  >
+                    오늘 하루 보지 않기
+                  </button>
+                ) : (
+                  <span></span>
+                )}
+                <button
+                  type="button"
+                  className="krds-btn secondary small"
+                  onClick={() => handlePopupClose(popup.popupId)}
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          );
+        })
+      )}
     </div>
   );
 };
