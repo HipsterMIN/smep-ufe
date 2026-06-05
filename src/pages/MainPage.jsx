@@ -50,6 +50,29 @@ const MAIN_MENU_IDS = {
 const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
 const CARD_NEWS_CATEGORY_NO = '2';
 const MAIN_PAGE_STYLE_ELEMENT_ID = 'smep-main-page-style';
+/*
+ * 의도: 메인 배너는 관리자 업로드 이미지의 원본 비율이 서로 달라도 공지 영역의 높이가 흔들리지 않아야 한다.
+ * 동작: 스타일 파일과 마크업 구조를 바꾸지 않고 JSX 인라인 스타일만으로 기본 배너 비율(560:440)을 유지하며 이미지는 전체가 보이도록 맞춘다.
+ * 주의: 정사각형 이미지처럼 프레임과 비율이 다른 이미지는 잘리지 않는 대신 좌우 여백이 생길 수 있고, CSS의 object-fit: cover는 이미지 인라인 스타일로만 덮어쓴다.
+ */
+const MAIN_BANNER_FRAME_STYLE = {
+  width: '100%',
+  aspectRatio: '560 / 440',
+  backgroundColor: '#fff',
+};
+const MAIN_BANNER_FILL_STYLE = {
+  width: '100%',
+  height: '100%',
+};
+const MAIN_BANNER_HEIGHT_STYLE = {
+  height: '100%',
+};
+const MAIN_BANNER_IMAGE_STYLE = {
+  ...MAIN_BANNER_FILL_STYLE,
+  display: 'block',
+  objectFit: 'contain',
+  objectPosition: 'center',
+};
 const EMPTY_MAIN_DATA = {
   pbancs: [],
   sprtBizs: [],
@@ -1824,10 +1847,10 @@ const MainPage = () => {
               </div>
 
               <div className="notice-right">
-                <div className="main-banner" style={{ maxHeight: '368px', maxWidth: '490px' }}>
+                <div className="main-banner" style={MAIN_BANNER_FRAME_STYLE}>
                   <Swiper
                     modules={[Navigation, Pagination, Autoplay]}
-                    style={{ maxWidth: '370px' }}
+                    style={MAIN_BANNER_FILL_STYLE}
                     navigation={{
                       prevEl: '.main-banner .swiper-button-prev',
                       nextEl: '.main-banner .swiper-button-next',
@@ -1854,16 +1877,18 @@ const MainPage = () => {
                       const href = item.imgLnkgUrlAddr || '#';
                       const external = isNewWindow(item.imgLnkgNpagYn);
                       return (
-                        <SwiperSlide key={String(item.bnrId)}>
-                          <div className="main-banner-item">
+                        <SwiperSlide key={String(item.bnrId)} style={MAIN_BANNER_HEIGHT_STYLE}>
+                          <div className="main-banner-item" style={MAIN_BANNER_HEIGHT_STYLE}>
                             <a
                               href={href}
                               className="main-banner-link"
+                              style={MAIN_BANNER_HEIGHT_STYLE}
                               target={external ? '_blank' : undefined}
                               rel={external ? 'noopener noreferrer' : undefined}
                             >
                               <img
                                 src={imageSrc || mainBanner01}
+                                style={MAIN_BANNER_IMAGE_STYLE}
                                 onError={(event) => {
                                   // fallbackImageSrc가 있으면 그것으로, 없으면 no-image placeholder
                                   if (item.fallbackImageSrc && event.currentTarget.src !== item.fallbackImageSrc) {

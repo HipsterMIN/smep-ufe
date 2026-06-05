@@ -603,6 +603,9 @@ export default function Header() {
                   <span className="sr-only">모두의 시작, 모두의 성장</span>
                 </div>*/}
                 <div className="header-right">
+                  <a className="btn-go" href="https://smes.go.kr/main" target="_blank" style={{ padding: '0.5rem' }}>
+                    기존 중소벤처24 이동
+                  </a>
                   {/* 검색란 */}
                   {showHeaderSearch && (
                     <div className="sch-input">

@@ -40,9 +40,12 @@ const UI_USR_L_050 = () => {
     }
   };
 
-  const fetchCertificateTypes = async () => {
+  const fetchCertificateTypes = async (issuInstNm = '') => {
     try {
-      const response = await api.get('/api/v1/certificate/certificate-types');
+      const params = issuInstNm
+        ? `?issuInstNm=${encodeURIComponent(issuInstNm)}`
+        : '';
+      const response = await api.get(`/api/v1/certificate/certificate-types${params}`);
       setCertificateTypes(response.data || []);
     } catch (err) {
       console.error('증명서 종류 조회 실패:', err);
@@ -52,8 +55,19 @@ const UI_USR_L_050 = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // 숫자만 허용 (숫자 외 문자 자동 제거)
+    // 숫자만 허용
     const sanitized = name === 'prdocIssuAplyNo' ? value.replace(/\D/g, '') : value;
+
+    if (name === 'issuInstNm') {
+      setFormData(prev => ({
+        ...prev,
+        issuInstNm: value,
+        prdocCd: '',      // 기관 바뀌면 증명서 선택 초기화
+      }));
+      setError('');
+      fetchCertificateTypes(value); // 선택한 기관 기준으로 재조회
+      return;
+    }
 
     setFormData(prev => ({
       ...prev,

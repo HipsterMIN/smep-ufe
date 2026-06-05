@@ -2777,7 +2777,7 @@ caption {
   }
   .tab.fill.full > ul > li {
     width: fit-content;
-    /*flex: none;*/ /* 모바일의 경우 tab size 줄어듦으로 인해 주석 2026.06.05 jjlee  */
+    flex: none;
   }
   /*
   .tab.fill.full > ul > li .btn-tab {
