@@ -106,10 +106,6 @@ export default function HeaderUserMenu({
     return (
       <>
         {/*externalLinkButtons*/}
-
-        <a className="btn-go on-mobile-none" href="https://smes.go.kr/main" target="_blank">
-          기존 중소벤처24 이동
-        </a>
         {isSsoLogin && (
           <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassConfig}>
               중기 통합회원 관리
@@ -204,10 +200,6 @@ export default function HeaderUserMenu({
           중기 통합회원 로그인
         </button>
       )}
-
-      <a className="btn-go on-mobile-none" href="https://smes.go.kr/main" target="_blank">
-        기존 중소벤처24 이동
-      </a>
       <button type="button" className="btn-navi login on-mobile-none" onClick={onLogin}>
         로그인
       </button>
