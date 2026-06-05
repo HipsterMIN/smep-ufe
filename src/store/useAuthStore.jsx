@@ -4,6 +4,22 @@ import { persist, devtools, createJSONStorage } from 'zustand/middleware';
 // BroadcastChannel 생성 (싱글톤)
 const authChannel = new BroadcastChannel('auth_channel');
 
+/**
+ * JWT access token의 만료 시각(exp 클레임, Unix seconds)을 파싱한다.
+ * 파싱 실패 시 null을 반환한다.
+ */
+const parseTokenExpiry = (token) => {
+  if (!token) return null;
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(base64));
+    return typeof payload.exp === 'number' ? payload.exp : null;
+  } catch {
+    return null;
+  }
+};
+
 export const useAuthStore = create( 
   devtools(
     persist(
@@ -116,6 +132,7 @@ export const useAuthStore = create(
                 isLogin: false,
                 isSsoLogin: false,
                 token: null,
+                tokenExpiresAt: null,
                 refreshToken: null,
                 kcIdToken: null,
                 user: null,
@@ -136,14 +153,33 @@ export const useAuthStore = create(
               false,
               'auth/sync_logout',
             );
-            // 필요 시 리다이렉트 로직 추가 가능 (예: window.location.href = '/')
+            // 다른 탭 로그아웃 시에도 저장소 정리
+            try { sessionStorage.removeItem('auth-storage'); } catch { /* ignore */ }
+            try { localStorage.removeItem('ai-search-storage'); } catch { /* ignore */ }
           }
         };
 
         return {
           isLogin: false,
           isSsoLogin: false,
+          /**
+           * access token: 메모리 전용 (sessionStorage에 저장하지 않음).
+           * XSS 공격으로 sessionStorage 탈취 시 access token 노출을 방지하기 위해
+           * partialize 옵션으로 persist 대상에서 제외된다.
+           * 페이지 리로드 후에는 refreshToken으로 재발급받아 메모리에만 저장한다
+           * (TokenRefreshInitializer 컴포넌트 담당).
+           */
           token: null,
+          /**
+           * access token의 만료 시각 (JWT exp 클레임, Unix seconds).
+           * token과 함께 메모리에만 존재하며 sessionStorage에 저장되지 않는다.
+           * Header.jsx 세션 타이머가 이 값을 사용한다.
+           */
+          tokenExpiresAt: null,
+          /**
+           * refresh token: sessionStorage에 저장.
+           * 페이지 리로드 후 access token 재발급에 사용한다.
+           */
           refreshToken: null,
           /**
            * Keycloak id_token.
@@ -173,6 +209,7 @@ export const useAuthStore = create(
               {
                 isLogin: true,
                 token: token || null,
+                tokenExpiresAt: parseTokenExpiry(token),
                 refreshToken: refreshToken || null,
                 user: normalized.user,
                 uuid: normalized.uuid,
@@ -200,6 +237,7 @@ export const useAuthStore = create(
                 isLogin: true,
                 isSsoLogin: true,
                 token: token || null,
+                tokenExpiresAt: parseTokenExpiry(token),
                 refreshToken: refreshToken || null,
                 kcIdToken: kcIdToken || null,
                 user: normalized.user,
@@ -246,13 +284,18 @@ export const useAuthStore = create(
               'auth/update_profile',
             );
           },
-          setToken: (token) => set({ token: token || null }, false, 'auth/set_token'),
+          setToken: (token) => set(
+            { token: token || null, tokenExpiresAt: parseTokenExpiry(token) },
+            false,
+            'auth/set_token',
+          ),
           logout: () => {
             set(
               {
                 isLogin: false,
                 isSsoLogin: false,
                 token: null,
+                tokenExpiresAt: null,
                 refreshToken: null,
                 kcIdToken: null,
                 user: null,
@@ -276,14 +319,18 @@ export const useAuthStore = create(
             // 다른 탭에 로그아웃 이벤트 전파
             authChannel.postMessage({ type: 'LOGOUT' });
 
-            // 세션 스토리지 강제 삭제 (persist 미들웨어 키)
-            sessionStorage.removeItem('auth-storage');
-            // AI 채팅 관련 세션 스토리지 정리
-            Object.keys(sessionStorage).forEach((key) => {
-              if (key.startsWith('ai-chat-payload:')) {
-                sessionStorage.removeItem(key);
-              }
-            });
+            // sessionStorage 강제 삭제 (persist 미들웨어 키)
+            try { sessionStorage.removeItem('auth-storage'); } catch { /* ignore */ }
+            // AI 채팅 관련 sessionStorage 정리
+            try {
+              Object.keys(sessionStorage).forEach((key) => {
+                if (key.startsWith('ai-chat-payload:')) {
+                  sessionStorage.removeItem(key);
+                }
+              });
+            } catch { /* ignore */ }
+            // 로그인 사용자 검색 결과 localStorage 정리
+            try { localStorage.removeItem('ai-search-storage'); } catch { /* ignore */ }
           },
           setBizno: (bizno) => set({ bizno, isLogin: true }, false, 'auth/setBizno'),
           setCompanyProfile: (companyProfile) => set({ companyProfile }, false, 'auth/setCompanyProfile'),
@@ -291,7 +338,40 @@ export const useAuthStore = create(
       },
       {
         name: 'auth-storage',
-        storage: createJSONStorage(() => sessionStorage), // sessionStorage 사용 설정
+        storage: createJSONStorage(() => sessionStorage),
+        /**
+         * access token(token, tokenExpiresAt)은 sessionStorage에 저장하지 않는다.
+         *
+         * 이유: sessionStorage는 JavaScript로 접근 가능하므로 XSS 공격 시 탈취 위험이 있다.
+         *       refresh token은 페이지 리로드 후 access token 재발급에 필요하므로 유지한다.
+         *       access token은 재발급 후 메모리(Zustand 상태)에만 존재한다.
+         *
+         * 페이지 리로드 후 복구 흐름:
+         *   isLogin=true & token=null & refreshToken=있음
+         *   → TokenRefreshInitializer가 /api/v1/account/refresh 호출
+         *   → 새 access token을 setToken()으로 메모리에만 저장
+         */
+        partialize: (state) => ({
+          isLogin: state.isLogin,
+          isSsoLogin: state.isSsoLogin,
+          // token, tokenExpiresAt 은 제외 (메모리 전용)
+          refreshToken: state.refreshToken,
+          kcIdToken: state.kcIdToken,
+          user: state.user,
+          uuid: state.uuid,
+          currentMode: state.currentMode,
+          currentCompany: state.currentCompany,
+          linkedCompanies: state.linkedCompanies,
+          contextRole: state.contextRole,
+          intgMbrSwtcYn: state.intgMbrSwtcYn,
+          bizno: state.bizno,
+          cmpNm: state.cmpNm,
+          companySize: state.companySize,
+          companyProfile: state.companyProfile,
+          additionalInfoRequired: state.additionalInfoRequired,
+          additionalInfoReason: state.additionalInfoReason,
+          additionalInfoMissingFields: state.additionalInfoMissingFields,
+        }),
       },
     ),
     {

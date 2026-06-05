@@ -90,6 +90,7 @@ export default function Header() {
   const {
     isLogin,
     token,
+    tokenExpiresAt,
     refreshToken,
     user,
     currentMode,
@@ -185,7 +186,8 @@ export default function Header() {
     }
 
     const updateRemainingSeconds = () => {
-      const expirationTime = getTokenExpirationTime(token);
+      // store에서 파싱된 만료 시각을 우선 사용, 없으면 token 직접 파싱 (구버전 호환)
+      const expirationTime = tokenExpiresAt ?? getTokenExpirationTime(token);
       if (!expirationTime) {
         setRemainingSeconds(null);
         return;
@@ -211,7 +213,7 @@ export default function Header() {
     return () => {
       window.clearInterval(timerId);
     };
-  }, [token, refreshToken, logout, navigate]);
+  }, [token, tokenExpiresAt, refreshToken, logout, navigate]);
 
   const handleServiceLogin = () => {
     navigate('/service/loginBef');

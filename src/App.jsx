@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import AppRouter from './routes/index.jsx';
 import AdditionalInfoRequiredGate from './components/account/AdditionalInfoRequiredGate.jsx';
+import { TokenRefreshInitializer } from './components/account/TokenRefreshInitializer.jsx';
 import { queryClient } from './lib/queryClient.js';
 
 // 앱이 정상적으로 마운트되면 청크 리로드 쿨다운 타임스탬프를 제거
@@ -21,6 +22,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        {/* 페이지 리로드 후 access token 복구 (AppRouter보다 먼저 실행) */}
+        <TokenRefreshInitializer />
         <AppRouter />
         <AdditionalInfoRequiredGate />
       </AuthProvider>
