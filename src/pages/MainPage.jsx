@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 
@@ -122,6 +122,7 @@ const fetchPopularKeywords = () =>
 
 const MainPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { getFullPath } = useUserMenu();
   const [searchQuery, setSearchQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -144,6 +145,7 @@ const MainPage = () => {
       return [];
     }
   });
+  const [closedPopupIds, setClosedPopupIds] = useState([]);
   const [autoCompleteKeywords, setAutoCompleteKeywords] = useState([]);
   const [isAutoCompleteEnabled, setIsAutoCompleteEnabled] = useState(true);
   const [isAutoLoading, setIsAutoLoading] = useState(false);
@@ -284,6 +286,12 @@ const MainPage = () => {
     mediaQuery.addListener(handleViewportChange);
     return () => mediaQuery.removeListener(handleViewportChange);
   }, []);
+
+  useEffect(() => {
+    if (location.pathname === '/') {
+      setClosedPopupIds([]);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -601,7 +609,9 @@ const MainPage = () => {
         },
       ];
   const visiblePopups = (mainData.popups || []).filter(
-    (popup) => !hiddenPopupIds.includes(String(popup.popupId)),
+    (popup) =>
+      !hiddenPopupIds.includes(String(popup.popupId))
+      && !closedPopupIds.includes(String(popup.popupId)),
   );
   const mobilePopup = isMobilePopupViewport ? visiblePopups[0] : null;
   const pbancScrapTargetIds = useMemo(
@@ -839,13 +849,13 @@ const MainPage = () => {
     });
   };
   const handlePopupClose = (popupId) =>
-    setHiddenPopupIds((prev) => [...new Set([...prev, String(popupId)])]);
+    setClosedPopupIds((prev) => [...new Set([...prev, String(popupId)])]);
   const handlePopupHideToday = (popupId) => {
     window.localStorage.setItem(
       `main-popup-hide-${popupId}`,
       formatLocalDateKey(),
     );
-    handlePopupClose(popupId);
+    setHiddenPopupIds((prev) => [...new Set([...prev, String(popupId)])]);
   };
   const openNoticeLayer = (card) => {
     setSelectedNotice(card);
