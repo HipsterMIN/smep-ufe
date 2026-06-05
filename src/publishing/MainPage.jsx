@@ -9,8 +9,8 @@ import Footer from "@components/ui/Footer.jsx";
 import '@styles/main.scss';
 
 
-import mainBanner01 from "../assets/main/new/main_banner_01.png"
-import mainBanner02 from "../assets/main/new/main_banner_02.png"
+import mainBanner01 from "../assets/main/new/main-banner-01.png"
+import mainBanner02 from "../assets/main/new/main-banner-02.png"
 import mainIcon01 from "../assets/main/new/mainIcon_01.svg";
 import mainIcon02 from "../assets/main/new/mainIcon_02.svg";
 import mainIcon03 from "../assets/main/new/mainIcon_03.svg";
