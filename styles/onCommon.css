@@ -4359,6 +4359,16 @@ textarea.krds-input::placeholder {
     align-items: flex-start;
     padding: 0;
     gap: var(--krds-gap-3);
+    min-width: 0;
+    max-width: 100%;
+  }
+  /* iOS Safari keeps long file names at intrinsic width unless the flex item can shrink. */
+  .box-group-area > li .tit {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   .box-group-area > li .btn-wrap {
     justify-content: flex-end;
