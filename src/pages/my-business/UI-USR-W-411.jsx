@@ -100,11 +100,12 @@ const splitEmail = (value) => {
 };
 
 // 기업회원 상세 응답을 화면 입력값 상태로 변환한다.
-const buildCorporateFormValues = (detail, tokenPayload) => {
+// loginIdFallback: JWT login_id 클레임이 없을 때 사용할 값 (store.user.loginId 등)
+const buildCorporateFormValues = (detail, tokenPayload, loginIdFallback = '') => {
   const [emailLocal, emailDomain] = splitEmail(detail?.emlAddr);
   return {
     ...EMPTY_FORM_VALUES,
-    loginId: tokenPayload?.login_id || '',
+    loginId: tokenPayload?.login_id || loginIdFallback,
     mbrNm: detail?.mbrNm || '',
     brno: detail?.brno || '',
     crno: detail?.crno || '',
@@ -122,11 +123,12 @@ const buildCorporateFormValues = (detail, tokenPayload) => {
 };
 
 // 개인회원 상세 응답을 화면 입력값 상태로 변환한다.
-const buildIndividualFormValues = (detail, tokenPayload) => {
+// loginIdFallback: JWT login_id 클레임이 없을 때 사용할 값 (store.user.loginId 등)
+const buildIndividualFormValues = (detail, tokenPayload, loginIdFallback = '') => {
   const [emailLocal, emailDomain] = splitEmail(detail?.indvEmlAddr);
   return {
     ...EMPTY_FORM_VALUES,
-    loginId: tokenPayload?.login_id || '',
+    loginId: tokenPayload?.login_id || loginIdFallback,
     mbrNm: detail?.mbrNm || '',
     indvMblTelno: detail?.indvMblTelno || '',
     indvGnrlTelnoParts: splitPhoneNumber(detail?.indvGnrlTelno),
@@ -198,7 +200,11 @@ const UI_USR_W_411 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const currentMode = useAuthStore((state) => state.currentMode);
   const authToken = useAuthStore((state) => state.token);
+  const storeUser = useAuthStore((state) => state.user);
   const tokenPayload = decodeJwtPayload(authToken);
+  // token이 메모리 전용이므로 페이지 리로드 직후 잠시 null일 수 있음.
+  // JWT 클레임보다 store.user를 우선 fallback으로 사용한다.
+  const resolvedLoginId = tokenPayload?.login_id || storeUser?.loginId || storeUser?.username || '';
   const [formValues, setFormValues] = useState(EMPTY_FORM_VALUES);
   const [managerContact, setManagerContact] = useState(null);
   const [infoReceptionAgreements, setInfoReceptionAgreements] = useState(
@@ -217,11 +223,13 @@ const UI_USR_W_411 = () => {
 
   useEffect(() => {
     const currentTokenPayload = decodeJwtPayload(authToken);
+    // token이 메모리 전용 → 리로드 직후 잠시 null일 수 있으므로 store.user fallback 사용
+    const currentLoginId = currentTokenPayload?.login_id || storeUser?.loginId || storeUser?.username || '';
 
     if (!authToken || !currentMode) {
       setFormValues({
         ...EMPTY_FORM_VALUES,
-        loginId: currentTokenPayload?.login_id || '',
+        loginId: currentLoginId,
       });
       setManagerContact(null);
       setInfoReceptionAgreements(DEFAULT_INFO_RECEPTION_AGREEMENTS);
@@ -239,7 +247,7 @@ const UI_USR_W_411 = () => {
         if (!active) {
           return;
         }
-        setFormValues(buildCorporateFormValues(detail, currentTokenPayload));
+        setFormValues(buildCorporateFormValues(detail, currentTokenPayload, currentLoginId));
       } catch (error) {
         console.error('Failed to load corporate member detail:', error);
       }
@@ -252,7 +260,7 @@ const UI_USR_W_411 = () => {
         if (!active) {
           return;
         }
-        setFormValues(buildIndividualFormValues(detail, currentTokenPayload));
+        setFormValues(buildIndividualFormValues(detail, currentTokenPayload, currentLoginId));
       } catch (error) {
         console.error('Failed to load individual member detail:', error);
       }
@@ -304,7 +312,7 @@ const UI_USR_W_411 = () => {
     return () => {
       active = false;
     };
-  }, [authToken, currentMode]);
+  }, [authToken, currentMode, storeUser]);
 
   // 단일 정보수신 동의 radio 값을 갱신한다.
   const setInfoReceptionAgreement = (infoRcptnMnsCd, infoRcptnAgreYn) => {
@@ -341,11 +349,11 @@ const UI_USR_W_411 = () => {
       if (currentMode === 'CORPORATE') {
         const payload = buildCorporateMemberInfoUpdatePayload(formValues, infoReceptionAgreements);
         const detail = await updateCorporateMemberInfo(apiClient, payload);
-        setFormValues(buildCorporateFormValues(detail, tokenPayload));
+        setFormValues(buildCorporateFormValues(detail, tokenPayload, resolvedLoginId));
       } else if (currentMode === 'INDIVIDUAL') {
         const payload = buildIndividualMemberInfoUpdatePayload(formValues, infoReceptionAgreements);
         const detail = await updateIndividualMemberInfo(apiClient, payload);
-        setFormValues(buildIndividualFormValues(detail, tokenPayload));
+        setFormValues(buildIndividualFormValues(detail, tokenPayload, resolvedLoginId));
       } else {
         throw new Error('지원하지 않는 회원유형입니다.');
       }
