@@ -149,7 +149,13 @@ const MainPage = () => {
   const [autoCompleteKeywords, setAutoCompleteKeywords] = useState([]);
   const [isAutoCompleteEnabled, setIsAutoCompleteEnabled] = useState(true);
   const [isAutoLoading, setIsAutoLoading] = useState(false);
-  const [isMobilePopupViewport, setIsMobilePopupViewport] = useState(false);
+  const [isMobilePopupViewport, setIsMobilePopupViewport] = useState(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return false;
+    }
+    return window.matchMedia(MOBILE_POPUP_MEDIA_QUERY).matches;
+  });
+  const [isMobilePopupExpanded, setIsMobilePopupExpanded] = useState(false);
 
   // ─── React Query: 메인 데이터 (stale-while-revalidate 60초) ───────────────
   const { data: mainDataRaw, isLoading: mainLoading } = useQuery({
@@ -207,6 +213,7 @@ const MainPage = () => {
   const swiperRef = useRef(null);
   const latestAutoQueryRef = useRef('');
   const weekGroupInitializedRef = useRef(false);
+  const mobilePopupTouchStartYRef = useRef(null);
   const authToken = useAuthStore((state) => state.token);
   const isLogin = useAuthStore((state) => state.isLogin);
   const intgMbrSwtcYn = useAuthStore((state) => state.intgMbrSwtcYn);
@@ -614,6 +621,21 @@ const MainPage = () => {
       && !closedPopupIds.includes(String(popup.popupId)),
   );
   const mobilePopup = isMobilePopupViewport ? visiblePopups[0] : null;
+  const mobilePopupImageSrc = mobilePopup
+    ? buildMainImageUrl('popups', mobilePopup.imgAtchFileId, mobilePopup.imgAtchFileSn)
+    : '';
+  const mobilePopupHref = mobilePopup?.imgLnkgUrlAddr || '';
+  const mobilePopupExternal = mobilePopup ? isNewWindow(mobilePopup.imgLnkgNpagYn) : false;
+  const mobilePopupBodyText = [
+    mobilePopup?.popupCn,
+    mobilePopup?.popupDtlCn,
+    mobilePopup?.popupExplnCn,
+    mobilePopup?.popupCntnCn,
+  ].find((value) => String(value || '').trim());
+
+  useEffect(() => {
+    setIsMobilePopupExpanded(false);
+  }, [mobilePopup?.popupId]);
   const pbancScrapTargetIds = useMemo(
     () =>
       [...pbancItems, ...calendarPbancItems, ...supportPbancItems]
@@ -847,6 +869,24 @@ const MainPage = () => {
       if (maxIndex === 0) return 0;
       return Math.min(Math.max(prev + direction, 0), maxIndex);
     });
+  };
+  const handleMobilePopupTouchStart = (event) => {
+    mobilePopupTouchStartYRef.current = event.touches?.[0]?.clientY ?? null;
+  };
+  const handleMobilePopupTouchEnd = (event) => {
+    const startY = mobilePopupTouchStartYRef.current;
+    const endY = event.changedTouches?.[0]?.clientY ?? null;
+    mobilePopupTouchStartYRef.current = null;
+    if (startY == null || endY == null) return;
+
+    const deltaY = endY - startY;
+    if (deltaY <= -40) {
+      setIsMobilePopupExpanded(true);
+      return;
+    }
+    if (deltaY >= 40) {
+      setIsMobilePopupExpanded(false);
+    }
   };
   const handlePopupClose = (popupId) =>
     setClosedPopupIds((prev) => [...new Set([...prev, String(popupId)])]);
@@ -1961,35 +2001,93 @@ const MainPage = () => {
       {isMobilePopupViewport ? (
         mobilePopup ? (
           <div
-            className="main-popup-snackbar"
+            className="main-popup-bottomsheet"
             style={{
               position: 'fixed',
-              left: '12px',
-              right: '12px',
-              bottom: '16px',
+              left: 0,
+              right: 0,
+              bottom: 0,
               zIndex: 1000,
-              backgroundColor: '#111',
-              color: '#fff',
-              borderRadius: '8px',
-              boxShadow: '0 12px 24px rgba(0, 0, 0, 0.35)',
-              padding: '12px',
+              backgroundColor: '#fff',
+              color: '#1f2937',
+              borderTopLeftRadius: '14px',
+              borderTopRightRadius: '14px',
+              borderTop: '1px solid #d8dee6',
+              boxShadow: '0 -8px 24px rgba(0, 0, 0, 0.16)',
+              padding: '10px 12px 12px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '10px',
+              gap: '8px',
+              maxHeight: isMobilePopupExpanded ? '82vh' : '240px',
+              minHeight: '160px',
+              transition: 'max-height 180ms ease',
             }}
+            onTouchStart={handleMobilePopupTouchStart}
+            onTouchEnd={handleMobilePopupTouchEnd}
           >
-            <strong style={{ fontSize: '14px', lineHeight: 1.4 }}>
-              {mobilePopup.popupTtl}
-            </strong>
-            <div style={{ fontSize: '13px', opacity: 0.9, lineHeight: 1.4 }}>
-              {mobilePopup.imgSbstTxtCn || '자세한 내용은 팝업 안내를 확인해 주세요.'}
+            <button
+              type="button"
+              onClick={() => setIsMobilePopupExpanded((prev) => !prev)}
+              aria-label={isMobilePopupExpanded ? '팝업 접기' : '팝업 펼치기'}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                padding: 0,
+                alignSelf: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              <span
+                style={{
+                  display: 'block',
+                  width: '44px',
+                  height: '5px',
+                  borderRadius: '999px',
+                  backgroundColor: '#c5ced8',
+                }}
+              />
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+              <strong style={{ fontSize: '15px', lineHeight: 1.4 }}>
+                {mobilePopup.popupTtl}
+              </strong>
+              <button
+                type="button"
+                className="krds-btn text small"
+                onClick={() => handlePopupClose(mobilePopup.popupId)}
+              >
+                닫기
+              </button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', paddingRight: '2px' }}>
+              {mobilePopupImageSrc ? (
+                <img
+                  src={mobilePopupImageSrc}
+                  alt={mobilePopup.popupTtl || '메인 팝업'}
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    maxHeight: isMobilePopupExpanded ? '55vh' : '120px',
+                    objectFit: 'contain',
+                    borderRadius: '8px',
+                    border: '1px solid #e5e7eb',
+                    backgroundColor: '#fff',
+                  }}
+                  loading="lazy"
+                />
+              ) : null}
+              {mobilePopupBodyText ? (
+                <p style={{ marginTop: '10px', marginBottom: 0, fontSize: '13px', lineHeight: 1.5 }}>
+                  {mobilePopupBodyText}
+                </p>
+              ) : null}
             </div>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-              {mobilePopup.imgLnkgUrlAddr ? (
+              {mobilePopupHref ? (
                 <a
-                  href={mobilePopup.imgLnkgUrlAddr}
-                  target={isNewWindow(mobilePopup.imgLnkgNpagYn) ? '_blank' : undefined}
-                  rel={isNewWindow(mobilePopup.imgLnkgNpagYn) ? 'noopener noreferrer' : undefined}
+                  href={mobilePopupHref}
+                  target={mobilePopupExternal ? '_blank' : undefined}
+                  rel={mobilePopupExternal ? 'noopener noreferrer' : undefined}
                   className="krds-btn primary small"
                 >
                   자세히
