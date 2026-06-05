@@ -11,6 +11,24 @@ import Popup from '@components/ui/Popup.jsx';
 import { resolveListBackPath } from '@utils/listNavigation.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 
+const alignCertificateDetailTableConvention = (html) => {
+  if (!html || typeof document === 'undefined') {
+    return html;
+  }
+
+  const template = document.createElement('template');
+  template.innerHTML = html;
+
+  // DB에서 내려온 상세 HTML도 기존 모바일 테이블 컨벤션을 타도록 class만 보정한다.
+  template.content
+    .querySelectorAll('.krds-table-wrap table.tbl.data:not(.t-block):not(.tbl-row)')
+    .forEach((table) => {
+      table.classList.add('t-block');
+    });
+
+  return template.innerHTML;
+};
+
 const UI_USR_R_041 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent, getFullPath } = useUserMenu();
 
@@ -165,6 +183,8 @@ const UI_USR_R_041 = () => {
   if (loading) return <div>로딩 중...</div>;
   if (!data) return <div>데이터를 찾을 수 없습니다.</div>;
 
+  const prdocExplnHtml = alignCertificateDetailTableConvention(data.prdocExpln);
+
   return (
     <>
       <SideNavigation
@@ -180,7 +200,7 @@ const UI_USR_R_041 = () => {
 
         <div
           className="detail-list-wrap"
-          dangerouslySetInnerHTML={{ __html: data.prdocExpln }}
+          dangerouslySetInnerHTML={{ __html: prdocExplnHtml }}
         />
 
         <div className="onboard-btm-btngroup bt-0">
