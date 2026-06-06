@@ -120,6 +120,8 @@ export const useAuthStore = create(
             additionalInfoMissingFields: Array.isArray(additionalInfoMissingFields)
               ? additionalInfoMissingFields
               : [],
+            suggestedLoginId:
+              safeProfile.suggestedLoginId || safeProfile.suggested_login_id || null,
           };
         };
 
@@ -149,6 +151,7 @@ export const useAuthStore = create(
                 additionalInfoRequired: false,
                 additionalInfoReason: null,
                 additionalInfoMissingFields: [],
+                suggestedLoginId: null,
               },
               false,
               'auth/sync_logout',
@@ -203,6 +206,7 @@ export const useAuthStore = create(
           additionalInfoRequired: false,
           additionalInfoReason: null,
           additionalInfoMissingFields: [],
+          suggestedLoginId: null,
           login: ({ token, refreshToken, profile } = {}) => {
             const normalized = normalizeProfile(profile);
             set(
@@ -225,6 +229,7 @@ export const useAuthStore = create(
                 additionalInfoRequired: normalized.additionalInfoRequired,
                 additionalInfoReason: normalized.additionalInfoReason,
                 additionalInfoMissingFields: normalized.additionalInfoMissingFields,
+                suggestedLoginId: normalized.suggestedLoginId,
               },
               false,
               'auth/login',
@@ -254,6 +259,7 @@ export const useAuthStore = create(
                 additionalInfoRequired: normalized.additionalInfoRequired,
                 additionalInfoReason: normalized.additionalInfoReason,
                 additionalInfoMissingFields: normalized.additionalInfoMissingFields,
+                suggestedLoginId: normalized.suggestedLoginId,
               },
               false,
               'auth/ssoLogin',
@@ -279,6 +285,7 @@ export const useAuthStore = create(
                 additionalInfoRequired: normalized.additionalInfoRequired,
                 additionalInfoReason: normalized.additionalInfoReason,
                 additionalInfoMissingFields: normalized.additionalInfoMissingFields,
+                suggestedLoginId: normalized.suggestedLoginId,
               },
               false,
               'auth/update_profile',
@@ -312,6 +319,7 @@ export const useAuthStore = create(
                 additionalInfoRequired: false,
                 additionalInfoReason: null,
                 additionalInfoMissingFields: [],
+                suggestedLoginId: null,
               },
               false,
               'auth/logout',
@@ -371,6 +379,7 @@ export const useAuthStore = create(
           additionalInfoRequired: state.additionalInfoRequired,
           additionalInfoReason: state.additionalInfoReason,
           additionalInfoMissingFields: state.additionalInfoMissingFields,
+          suggestedLoginId: state.suggestedLoginId,
         }),
       },
     ),

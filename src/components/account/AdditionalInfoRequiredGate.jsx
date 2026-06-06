@@ -302,9 +302,11 @@ export default function AdditionalInfoRequiredGate() {
   const currentMode = useAuthStore((state) => state.currentMode);
   const additionalInfoRequired = useAuthStore((state) => state.additionalInfoRequired);
   const additionalInfoMissingFields = useAuthStore((state) => state.additionalInfoMissingFields);
+  const suggestedLoginId = useAuthStore((state) => state.suggestedLoginId);
   const updateProfile = useAuthStore((state) => state.updateProfile);
   const logout = useAuthStore((state) => state.logout);
   const [loginId, setLoginId] = useState('');
+  const [loginIdCheckStatus, setLoginIdCheckStatus] = useState(null); // null | 'checking' | 'available' | 'taken'
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [formValues, setFormValues] = useState(EMPTY_FORM_VALUES);
@@ -321,16 +323,25 @@ export default function AdditionalInfoRequiredGate() {
   const loginIdMissing = missingFields.includes(MISSING_FIELD_LOGIN_ID);
   const canRender = isLogin && token && additionalInfoRequired;
   const memberTypeLabel = currentMode === 'CORPORATE' ? '기업회원' : '개인회원';
+  const loginIdConfirmed = loginIdCheckStatus === 'available';
 
   useEffect(() => {
     if (!canRender) {
       setLoginId('');
+      setLoginIdCheckStatus(null);
       setPassword('');
       setPasswordConfirm('');
       return;
     }
-    setLoginId(loginIdMissing ? '' : user?.loginId || '');
-  }, [canRender, loginIdMissing, user?.loginId]);
+    // loginId 초기값: Q-IM 제안값 우선, 없으면 기존 loginId 사용
+    const initialLoginId = loginIdMissing
+      ? (suggestedLoginId || '')
+      : (user?.loginId || '');
+    setLoginId(initialLoginId);
+    setLoginIdCheckStatus(null);
+  // suggestedLoginId와 canRender 변경 시에만 재초기화
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canRender, loginIdMissing, suggestedLoginId]);
 
   useEffect(() => {
     if (!token || !additionalInfoRequired || !currentMode) {
@@ -445,6 +456,41 @@ export default function AdditionalInfoRequiredGate() {
     return true;
   };
 
+  const handleLoginIdChange = (value) => {
+    setLoginId(value);
+    if (loginIdMissing) {
+      setLoginIdCheckStatus(null);
+    }
+  };
+
+  const handleCheckLoginId = async () => {
+    const trimmed = loginId.trim();
+    if (!trimmed) {
+      window.alert('로그인 ID를 입력해 주세요.');
+      return;
+    }
+    if (trimmed.length > LOGIN_ID_MAX_LENGTH) {
+      window.alert('로그인 ID는 50자를 초과할 수 없습니다.');
+      return;
+    }
+    setLoginIdCheckStatus('checking');
+    try {
+      const res = await apiClient.get(
+        `/api/v1/account/check-login-id?loginId=${encodeURIComponent(trimmed)}`,
+        { token },
+      );
+      const data = res?.data || res;
+      if (data?.available === true) {
+        setLoginIdCheckStatus('available');
+      } else {
+        setLoginIdCheckStatus('taken');
+      }
+    } catch {
+      setLoginIdCheckStatus(null);
+      window.alert('중복 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+    }
+  };
+
   const validateLoginCredentialForm = () => {
     if (!loginId.trim()) {
       window.alert('로그인 ID를 입력해 주세요.');
@@ -452,6 +498,10 @@ export default function AdditionalInfoRequiredGate() {
     }
     if (loginId.trim().length > LOGIN_ID_MAX_LENGTH) {
       window.alert('로그인 ID는 50자를 초과할 수 없습니다.');
+      return false;
+    }
+    if (loginIdMissing && !loginIdConfirmed) {
+      window.alert('로그인 ID 중복 확인을 완료해 주세요.');
       return false;
     }
     if (!password || !passwordConfirm) {
@@ -880,6 +930,20 @@ export default function AdditionalInfoRequiredGate() {
     </div>
   );
 
+  const renderLoginIdCheckMessage = () => {
+    if (!loginIdMissing) return null;
+    if (loginIdCheckStatus === 'checking') {
+      return <span className="form-hint">확인 중...</span>;
+    }
+    if (loginIdCheckStatus === 'available') {
+      return <span className="form-hint success">사용 가능한 아이디입니다.</span>;
+    }
+    if (loginIdCheckStatus === 'taken') {
+      return <span className="form-hint error">이미 사용 중인 아이디입니다. 다른 아이디를 입력해 주세요.</span>;
+    }
+    return null;
+  };
+
   const renderLoginInfoForm = () => (
     <div className="conts-wrap mt-64">
       <div className="on-form-register">
@@ -890,17 +954,28 @@ export default function AdditionalInfoRequiredGate() {
               <label htmlFor="additional_login_id">로그인 ID</label>
             </dt>
             <dd className="form-row-content">
-              <div className="form-wrapper w-220">
+              <div className="form-wrapper row-small">
                 <input
                   type="text"
                   id="additional_login_id"
-                  className="krds-input small"
+                  className="krds-input small w-220"
                   maxLength={LOGIN_ID_MAX_LENGTH}
                   value={loginId}
                   disabled={!loginIdMissing || saving}
-                  onChange={(event) => setLoginId(event.target.value)}
+                  onChange={(event) => handleLoginIdChange(event.target.value)}
                 />
+                {loginIdMissing && (
+                  <button
+                    type="button"
+                    className="krds-btn secondary small"
+                    disabled={saving || loginIdCheckStatus === 'checking'}
+                    onClick={handleCheckLoginId}
+                  >
+                    중복확인
+                  </button>
+                )}
               </div>
+              {renderLoginIdCheckMessage()}
             </dd>
           </div>
           <div className="form-row-item">
@@ -1357,7 +1432,11 @@ export default function AdditionalInfoRequiredGate() {
                 >
                   닫기
                 </button>
-                <button type="submit" className="krds-btn primary" disabled={saving || detailLoading}>
+                <button
+                  type="submit"
+                  className="krds-btn primary"
+                  disabled={saving || detailLoading || (loginIdMissing && !loginIdConfirmed)}
+                >
                   {saving ? '저장 중' : '저장하고 계속하기'}
                 </button>
               </div>
