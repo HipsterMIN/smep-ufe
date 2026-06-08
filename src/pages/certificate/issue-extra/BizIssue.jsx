@@ -139,7 +139,7 @@ const BizIssue = () => {
               <dd className="form-row-content">
                 <div className="form-wrapper w-220">
                   <input type="text" id="id_02" className="krds-input small"
-                    placeholder="상호를 입력해주세요" value={enterpriseInfo.cmpNm} disabled />
+                    placeholder="상호를 입력해주세요" value={enterpriseInfo.mbrNm} disabled />
                 </div>
               </dd>
             </div>
