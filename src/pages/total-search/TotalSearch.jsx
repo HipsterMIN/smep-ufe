@@ -250,6 +250,8 @@ const renderHighlightedText = (value, fallback = '-') => {
   return <>{nodes}</>;
 };
 
+const hasRenderableResultText = (value) => Boolean(stripHtmlExceptHighlight(value));
+
 const sumVisibleCollectionCounts = (collections) =>
   COLLECTION_SECTION_CONFIG.reduce((sum, config) => {
     return sum + toCount(collections?.[config.collectionKey]?.count);
@@ -669,6 +671,7 @@ const TotalSearch = () => {
       const keyBase = item.docId || item.workId || item.title || 'item';
       const key = `${config.collectionKey}-${keyBase}-${index}`;
       const buttonLabel = showCertificateButton ? getCertificateButtonLabel(item) : '';
+      const shouldRenderContent = hasRenderableResultText(item.content);
 
       return (
         <div className="in" key={key}>
@@ -684,7 +687,9 @@ const TotalSearch = () => {
               <p className="c-tit no-icon">
                 <span className="span onellipsis-2">{renderHighlightedText(item.title, '-')}</span>
               </p>
-              <p className="c-txt onellipsis-2">{renderHighlightedText(item.content, '-')}</p>
+              {shouldRenderContent && (
+                <p className="c-txt onellipsis-2">{renderHighlightedText(item.content, '')}</p>
+              )}
               {!showCertificateButton && renderBreadcrumb(item)}
             </a>
           </div>
