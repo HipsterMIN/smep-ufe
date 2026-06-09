@@ -403,7 +403,7 @@ const TotalSearch = () => {
   const [allCollections, setAllCollections] = useState(createInitialCollectionState);
   const [tabCollections, setTabCollections] = useState(createInitialCollectionState);
   const [tabPageByCollection, setTabPageByCollection] = useState(createInitialPageState);
-  const [sortType, setSortType] = useState('REG_DT');
+  const [sortType, setSortType] = useState('Date');
   const [isAllLoading, setIsAllLoading] = useState(false);
   const [isTabLoading, setIsTabLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -814,17 +814,17 @@ const TotalSearch = () => {
                 <div className="w-sort-btn">
                   <button
                     type="button"
-                    className={sortType === 'REG_DT' ? 'active' : ''}
-                    onClick={() => handleSortChange('REG_DT')}
+                    className={sortType === 'Date' ? 'active' : ''}
+                    onClick={() => handleSortChange('Date')}
                   >
-                    등록일순{sortType === 'REG_DT' && <span className="sr-only">선택됨</span>}
+                    등록일순{sortType === 'Date' && <span className="sr-only">선택됨</span>}
                   </button>
                   <button
                     type="button"
-                    className={sortType === 'DEADLINE' ? 'active' : ''}
-                    onClick={() => handleSortChange('DEADLINE')}
+                    className={sortType === 'DDLN' ? 'active' : ''}
+                    onClick={() => handleSortChange('DDLN')}
                   >
-                    마감일순{sortType === 'DEADLINE' && <span className="sr-only">선택됨</span>}
+                    마감일순{sortType === 'DDLN' && <span className="sr-only">선택됨</span>}
                   </button>
                 </div>
                 <div className="m-sort-btn">
@@ -834,8 +834,8 @@ const TotalSearch = () => {
                     value={sortType}
                     onChange={(event) => handleSortChange(event.target.value)}
                   >
-                    <option value="REG_DT">등록일순</option>
-                    <option value="DEADLINE">마감일순</option>
+                    <option value="Date">등록일순</option>
+                    <option value="DDLN">마감일순</option>
                   </select>
                 </div>
               </li>
