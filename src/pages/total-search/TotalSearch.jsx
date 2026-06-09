@@ -783,8 +783,8 @@ const TotalSearch = () => {
                     value={sortType}
                     onChange={(event) => handleSortChange(event.target.value)}
                   >
-                    <option value="REG_DT">등록일순</option>
-                    <option value="DEADLINE">마감일순</option>
+                    <option value="Date">등록일순</option>
+                    <option value="DDLN">마감일순</option>
                   </select>
                 </div>
               </li>
