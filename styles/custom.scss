@@ -557,6 +557,11 @@
     }
 
 }
+#wrap.integrated-search .integrated-result .search-tab-wrap {
+    // 검색어별 결과 수가 탭명에 붙으므로 라벨 최소폭은 보존하고 남는 폭은 full 탭처럼 채운다.
+    .tab.fill.full > ul {flex-wrap: nowrap;}
+    .tab.fill.full > ul > li {flex: 1 0 auto; min-width: max-content; width: auto;}
+}
 .search-list-top {
     .sch-sort {flex-wrap:wrap;
         .margin-top13{margin:0 }
