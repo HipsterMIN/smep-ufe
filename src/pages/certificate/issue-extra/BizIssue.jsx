@@ -57,7 +57,7 @@ const BizIssue = () => {
       });
 
       window.open(
-        `https://www.smes.go.kr/e-page?prdocCd=${getReportPrdocCd()}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
+        `https://portal.smes.go.kr/e-page?prdocCd=${getReportPrdocCd()}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
         '_blank',
       );
 

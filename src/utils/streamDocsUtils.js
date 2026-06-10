@@ -1,10 +1,10 @@
 export const STREAMDOCS_VIEWER_URL =
   import.meta.env.VITE_STREAMDOCS_VIEWER_URL
-  || 'https://www.smes.go.kr/e-paper/view/sd';
+  || 'https://portal.smes.go.kr/e-paper/view/sd';
 
 export const STREAMDOCS_ADAPTER_URL =
   import.meta.env.VITE_STREAMDOCS_ADAPTER_URL
-  || 'https://www.smes.go.kr/e-paper/adapter.js';
+  || 'https://portal.smes.go.kr/e-paper/adapter.js';
 
 // 의도: StreamDocs 새창 미리보기 URL 조합 규칙을 화면마다 따로 두면 파라미터 인코딩 방식이 달라질 수 있어 공통화한다.
 // 동작: StreamDocs viewer 기본 URL 뒤에 streamdocsId를 안전하게 인코딩해 붙인다.
