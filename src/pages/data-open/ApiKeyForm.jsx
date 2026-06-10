@@ -11,7 +11,7 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit,submitting, errorMessage, mbrNo,
   const [appliedApis, setAppliedApis] = useState([]); // 1. 이미 신청된 API 코드들을 담을 상태
   const currentMode = useAuthStore((state) => state.currentMode);
   const [apiMasterList, setApiMasterList] = useState({});
-  const INDIVIDUAL_API_CODES = ['AD01', 'AD02'];
+  const INDIVIDUAL_API_CODES = ['AD05', 'AD02'];
   const initialFormState = {
     siteNm: '',
     apiRegAplyCn: '',

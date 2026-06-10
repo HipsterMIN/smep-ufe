@@ -203,7 +203,7 @@ const ApiInfo = () => {
                 <div className="card-body">
                   <Link to="supportBusinessInfoApi" className="c-text">
                     <p className="c-tit">
-                      <span className="span">지원사업정보 API</span>
+                      <span className="span">공고정보 API</span>
                     </p>
                     <p className="c-txt">기관별, 분야별 최신 지원사업 공고 정보 제공</p>
                     <div className="c-txt">

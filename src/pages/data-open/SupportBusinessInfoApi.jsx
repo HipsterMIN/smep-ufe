@@ -90,7 +90,7 @@ const SupportBusinessInfoApi = () => {
           <Breadcrumb items={breadcrumbItems} />
           <div className="page-title-wrap" data-type="responsive">
             <p className="on-p1 on-colorblue">API안내</p>
-            <h2 className="h-tit">지원사업정보 API</h2>
+            <h2 className="h-tit">공고정보 API</h2>
           </div>
 
           <div className="search-top-box no-details">
@@ -173,7 +173,7 @@ const SupportBusinessInfoApi = () => {
           </div>
 
           <div className="conts-wrap mt-64">
-            <h3 className="sec-tit">지원사업정보 API</h3>
+            <h3 className="sec-tit">공고정보 API</h3>
             <div className="def-list-wrap border">
               <dl className="def-list">
                 <dt>URL</dt>

@@ -9,7 +9,7 @@ const SCRAP_TYPE_LABELS = {
 };
 
 const API_GUIDE_PATH_BY_CODE = {
-  AD01: 'supportBusinessInfoApi',
+  AD05: 'supportBusinessInfoApi',
   AD02: 'eventInfoApi',
   Y105: 'innoBizCertificateApi',
   Y106: 'ventureCertificateApi',
