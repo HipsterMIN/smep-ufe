@@ -204,7 +204,7 @@ const MainPage = () => {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [hasOpenedKeyboard, setHasOpenedKeyboard] = useState(false);
   const [isOnepassModalOpen, setIsOnepassModalOpen] = useState(false);
-  const [hasCi, setHasCi] = useState(true);
+  const [hasCi, setHasCi] = useState(null);
   const [isSearchFixed, setIsSearchFixed] = useState(false);
   const srchInputRef = useRef(null);
   const keyboardButtonRef = useRef(null);
@@ -700,9 +700,13 @@ const MainPage = () => {
   }, [isLoggedIn, pbancScrapTargetIds, policyScrapTargetIds]);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const syncOnepassModalState = async () => {
     if (!isLogin) {
       window.sessionStorage.removeItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY);
       setIsOnepassModalOpen(false);
+        setHasCi(null);
       return;
     }
 
@@ -720,27 +724,38 @@ const MainPage = () => {
       return;
     }
 
-    setIsOnepassModalOpen(true);
-  }, [isLogin, intgMbrSwtcYn]);
+      // CI 조회 이전에는 모달을 열지 않는다. (기본 true 분기 노출 방지)
+      setIsOnepassModalOpen(false);
 
-  // 전환 팝업 진입 시 A203 CI 존재 여부 확인 → 없으면 "준비 중" 안내 표시
-  useEffect(() => {
-    if (!isOnepassModalOpen) return;
-
-    let isMounted = true;
-    apiClient.get('/api/v1/account/me/ci-status')
-      .then((data) => {
+      try {
+        const data = await apiClient.get('/api/v1/account/me/ci-status');
         if (!isMounted) return;
-        setHasCi(data?.hasCi !== false);
-      })
-      .catch(() => {
+        const payload = normalizeResponse(data);
+        const hasCiRaw = payload?.hasCi;
+
+        // hasCi는 boolean/string("true"/"false")/Y/N 형식이 섞여 들어올 수 있어 명시적으로 정규화한다.
+        const normalizedHasCi =
+          typeof hasCiRaw === 'boolean'
+            ? hasCiRaw
+            : typeof hasCiRaw === 'string'
+              ? ['true', 'y', 'yes', '1'].includes(hasCiRaw.trim().toLowerCase())
+              : Boolean(hasCiRaw);
+
+        setHasCi(normalizedHasCi);
+      } catch {
         if (!isMounted) return;
         // 오류 시 기본 전환 팝업 표시 (CI 있는 것으로 간주)
         setHasCi(true);
-      });
+      }
+
+      if (!isMounted) return;
+      setIsOnepassModalOpen(true);
+    };
+
+    void syncOnepassModalState();
 
     return () => { isMounted = false; };
-  }, [isOnepassModalOpen]);
+  }, [isLogin, intgMbrSwtcYn]);
 
   // 키보드가 처음 열릴 때 lazy 컴포넌트를 마운트 (이후 isOpen prop으로 제어)
   useEffect(() => {

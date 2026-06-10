@@ -1,7 +1,7 @@
 import React from 'react';
 import modalIntegratedLoginImg from '@assets/sub/modal_integrated_login_img.png';
 import styles from './OnepassLoginConversionModal.module.css';
-import { onePassJoin } from '../../utils/keycloakGetAuthCode';
+import { onePassJoin } from '@utils/keycloakGetAuthCode.js';
 
 const noop = () => {};
 
@@ -10,7 +10,7 @@ export default function OnepassLoginConversionModal({
   onConvert = noop,
   onLater = noop,
   onClose = noop,
-  hasCi = true,
+  hasCi = false,
 }) {
   if (!isOpen) {
     return null;

@@ -1,6 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
+import {
+  finishSilentSso,
+  hasSilentSsoAttempted,
+  isSilentSsoInProgress,
+  markSilentSsoStart,
+} from '@utils/onepassSilentSso.js';
 
 const LOG_PREFIX = '[TokenRefreshInitializer]';
 
@@ -30,41 +36,86 @@ export function TokenRefreshInitializer() {
     if (hasRun.current) return;
     hasRun.current = true;
 
-    const { isLogin, token, refreshToken, setToken, setRefreshToken, logout } =
-      useAuthStore.getState();
+    const restoreOrSilentLogin = async () => {
+      const {
+        isLogin,
+        token,
+        refreshToken,
+        setToken,
+        setRefreshToken,
+        logout,
+      } = useAuthStore.getState();
 
-    // 리로드 후 복구가 필요한 경우: 로그인 상태인데 access token이 메모리에 없음
-    if (!isLogin || token || !refreshToken) {
-      return;
-    }
-
-    console.log(`${LOG_PREFIX} access token missing after reload — restoring session via refresh`);
-
-    apiClient
-      .post('/api/v1/account/refresh', { refreshToken })
-      .then((response) => {
-        const newToken = response.accessToken || response.data?.accessToken;
-        const newRefreshToken = response.refreshToken || response.data?.refreshToken;
-
-        if (!newToken) {
-          throw new Error('No access token in refresh response');
+      const startSilentSso = async () => {
+        // /sso 콜백 라우트에서는 silent 시작을 재시도하지 않는다.
+        if (window.location.pathname.endsWith('/sso')) {
+          return;
         }
 
-        setToken(newToken); // 메모리에만 저장 (sessionStorage 비저장)
-        if (newRefreshToken) {
-          setRefreshToken(newRefreshToken);
+        // 이미 시도한 탭 세션에서는 반복 리다이렉트를 막는다.
+        if (isSilentSsoInProgress() || hasSilentSsoAttempted()) {
+          return;
         }
 
-        console.log(`${LOG_PREFIX} session restored successfully`);
-      })
-      .catch((err) => {
-        console.error(`${LOG_PREFIX} session restore failed — logging out`, {
-          message: err?.message ?? 'unknown',
-          status: err?.status ?? null,
-        });
-        // refresh 실패 = 세션 만료 → 로컬 상태·저장소 정리
-        logout();
-      });
+        try {
+          markSilentSsoStart();
+          const response = await apiClient.get('/api/v1/auth/keycloak/login-url?silent=true');
+          const loginUrl = response?.data?.loginUrl || response?.loginUrl;
+
+          if (!loginUrl) {
+            throw new Error('Silent login URL is missing');
+          }
+
+          window.location.href = loginUrl;
+        } catch (err) {
+          // silent 복구 실패는 비치명 처리한다.
+          finishSilentSso();
+          console.info(`${LOG_PREFIX} silent SSO skipped`, {
+            message: err?.message ?? 'unknown',
+            status: err?.status ?? null,
+          });
+        }
+      };
+
+      // access token이 이미 있으면 아무 작업도 하지 않는다.
+      if (token) {
+        return;
+      }
+
+      // 리로드 후 복구가 필요한 경우: 로그인 상태인데 access token이 메모리에 없음
+      if (isLogin && refreshToken) {
+        console.log(`${LOG_PREFIX} access token missing after reload — restoring session via refresh`);
+
+        try {
+          const response = await apiClient.post('/api/v1/account/refresh', { refreshToken });
+          const newToken = response.accessToken || response.data?.accessToken;
+          const newRefreshToken = response.refreshToken || response.data?.refreshToken;
+
+          if (!newToken) {
+            throw new Error('No access token in refresh response');
+          }
+
+          setToken(newToken); // 메모리에만 저장 (sessionStorage 비저장)
+          if (newRefreshToken) {
+            setRefreshToken(newRefreshToken);
+          }
+
+          console.log(`${LOG_PREFIX} session restored successfully`);
+          return;
+        } catch (err) {
+          console.error(`${LOG_PREFIX} session restore failed — logging out`, {
+            message: err?.message ?? 'unknown',
+            status: err?.status ?? null,
+          });
+          // refresh 실패 = 세션 만료 → 로컬 상태·저장소 정리
+          logout();
+        }
+      }
+
+      await startSilentSso();
+    };
+
+    void restoreOrSilentLogin();
   }, []);
 
   return null;

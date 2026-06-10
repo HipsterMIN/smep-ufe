@@ -1,5 +1,6 @@
 // src/utils/keycloakGetAuthCode.js
 import { useAuthStore } from '../store/useAuthStore.jsx';
+import { resetSilentSsoFlags } from './onepassSilentSso.js';
 
 const readEnv = (key) => String(import.meta.env[key] || '').trim();
 const trimTrailingSlash = (value) => value.replace(/\/+$/, '');
@@ -89,6 +90,9 @@ const resolveOnePassJoinUserType = () => {
 
 // 로그인후 원패스 가입 유도시
 export function onePassJoin() {
+  // 명시 로그인/전환 진입 시 silent 복구 루프 방지 플래그를 초기화한다.
+  resetSilentSsoFlags();
+
   // 가입 유도 플로우는 현재 우리 사이트에 로그인된 회원만 타므로,
   // 상대가 요구하는 mbrId 는 로그인 ID를 우선 전달하고, 없을 때만 기존 mbr_no로 폴백한다.
   const memberId = resolveOnePassJoinMemberId();
@@ -125,6 +129,9 @@ export function onePassJoin() {
 
 // 비로그인/로그인 상시표기
 export function onePassGetAuthCode() {
+  // 명시 로그인 진입은 silent 복구 상태와 분리한다.
+  resetSilentSsoFlags();
+
   // 임시 연동 계약: 외부 출발 콜백과 맞추기 위해 state 저장과 auth URL state 전달을 중단한다.
   // CSRF 방지용 state 값 생성 및 저장
   // const state = crypto.randomUUID();

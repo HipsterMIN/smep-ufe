@@ -3,10 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import { api as apiClient } from '../../lib/apiClient.js';
 import { useAuthStore } from '../../store/useAuthStore.jsx';
 import { buildOnePassConversionUrl } from '../../utils/keycloakGetAuthCode.js';
+import {
+  finishSilentSso,
+  getSilentSsoReturnUrl,
+  isSilentSsoInProgress,
+} from '../../utils/onepassSilentSso.js';
 
 // 임시 연동 계약: 외부 출발 콜백 대응을 위해 프론트 state 검증을 비활성화한다.
 // const KEYCLOAK_STATE_KEY = 'keycloak_state';
 const LOG_PREFIX = '[OnePassSsoCallback]';
+
+const resolveErrorCode = (error) =>
+  String(
+    error?.data?.code ||
+      error?.data?.error ||
+      error?.data?.errorCode ||
+      error?.error ||
+      '',
+  ).toLowerCase();
+
+const isLoginRequiredError = (error) =>
+  resolveErrorCode(error) === 'login_required' ||
+  String(error?.message || '').toLowerCase().includes('login_required');
 
 // [라우터 remount 중복 실행 방지 — 모듈 레벨 플래그]
 //
@@ -54,13 +72,16 @@ const OnePassSsoCallback = () => {
     // savedState 는 onePassJoin()/onePassGetAuthCode()가 외부 인증으로 보내기 직전에 sessionStorage 에 저장한 비교 기준이다.
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
+    const state = params.get('state');
+    const callbackError = params.get('error');
+    const callbackErrorDescription = params.get('error_description');
+    const isSilentFlow = isSilentSsoInProgress();
 
     console.log('IN /sso    code='+ code);
 
     // state 파라미터를 수신하는지 로그로 관찰한다 (검증 재활성화 여부 판단 근거).
     // OnePass SDK가 콜백에 state를 포함하는지 확인 후 검증 재활성화 여부를 결정한다.
     // hasState=true 가 확인되면 검증 재활성화 PR을 별도로 진행한다.
-    const state = params.get('state');
     const callbackState = {
       queryKeys: Array.from(params.keys()),
       hasCode: Boolean(code),
@@ -69,6 +90,9 @@ const OnePassSsoCallback = () => {
       // OnePass 콜백에 state 파라미터가 포함되는지 관찰용
       hasState: Boolean(state),
       stateLength: state?.length ?? 0,
+      callbackError: callbackError || null,
+      callbackErrorDescription: callbackErrorDescription || null,
+      isSilentFlow,
     };
 
     // 이 스냅샷 로그는 raw code/token 값을 남기지 않고도 분기 원인을 볼 수 있게 만든 메타 로그다.
@@ -103,6 +127,14 @@ const OnePassSsoCallback = () => {
     // });
     console.log(`${LOG_PREFIX} callback code check start`, callbackState);
 
+    if (isSilentFlow && callbackError === 'login_required') {
+      const returnUrl = getSilentSsoReturnUrl() || '/';
+      finishSilentSso();
+      console.log(`${LOG_PREFIX} silent login skipped (login_required)`, { returnUrl });
+      navigate(returnUrl, { replace: true });
+      return;
+    }
+
     // state 검증은 임시 비활성화되어 있으며, code 자체가 없으면 백엔드가 authorization_code 교환을 할 수 없다.
     // code 가 없는 비정상 콜백은 즉시 로그인 페이지로 이동해 불필요한 서버 요청을 방지한다.
     if (!code) {
@@ -119,6 +151,13 @@ const OnePassSsoCallback = () => {
         // SSO 로그인이 이미 완료된 상태에서 code 없이 /sso에 재진입 → 메인으로
         navigate('/', { replace: true });
       } else {
+        if (isSilentFlow) {
+          const returnUrl = getSilentSsoReturnUrl() || '/';
+          finishSilentSso();
+          console.log(`${LOG_PREFIX} silent login skipped (missing code)`, { returnUrl });
+          navigate(returnUrl, { replace: true });
+          return;
+        }
         navigate('/service/login', { replace: true });
       }
       return;
@@ -142,7 +181,11 @@ const OnePassSsoCallback = () => {
       try {
         console.log('IN /sso  2  code='+ code);
 
-        const response = await apiClient.post(callbackEndpoint, { code });
+        const requestBody =
+          callbackEndpoint === '/api/v1/auth/keycloak/callback/local-login'
+            ? { code, ...(state !== null ? { state } : {}) }
+            : { code };
+        const response = await apiClient.post(callbackEndpoint, requestBody);
         const responseData = response?.data || response;
         // 성공 로그는 token 원문을 남기지 않고도 응답 shape 를 확인하기 위한 로그다.
         // 케이스1은 local token 응답, 케이스2는 raw Keycloak token 응답이므로 endpoint와 키 목록을 함께 본다.
@@ -167,6 +210,9 @@ const OnePassSsoCallback = () => {
         // 케이스2(이미 로컬 로그인된 상태의 연결 플로우)는 아직 별도 구현 범위가 아니다.
         // 따라서 현재 로컬 로그인이 이미 있으면 raw callback 성공만 확인하고 홈으로 복귀한다.
         if (hasLocalLogin) {
+          if (isSilentFlow) {
+            finishSilentSso();
+          }
           console.log(`${LOG_PREFIX} navigate home`, {
             to: '/',
             reason: 'callback-success-existing-local-login',
@@ -205,11 +251,16 @@ const OnePassSsoCallback = () => {
           hasToken: Boolean(useAuthStore.getState().token),
           isLogin: Boolean(useAuthStore.getState().isLogin),
         });
+
+        const returnUrl = isSilentFlow ? (getSilentSsoReturnUrl() || '/') : '/';
+        if (isSilentFlow) {
+          finishSilentSso();
+        }
         console.log(`${LOG_PREFIX} navigate home`, {
-          to: '/',
+          to: returnUrl,
           reason: 'case1-local-login-success',
         });
-        navigate('/', { replace: true });
+        navigate(returnUrl, { replace: true });
       } catch (error) {
         // 이 단계는 raw callback 교환, local-login 브리지, /account/me 저장까지 한 덩어리다.
         // 여기서는 어느 단계에서든 실패하면 현재 케이스1 로컬 로그인 생성은 중단하고 로그인 화면으로 복귀시킨다.
@@ -218,6 +269,25 @@ const OnePassSsoCallback = () => {
           status: error?.status ?? null,
           hasData: Boolean(error?.data),
         });
+
+        if (isSilentFlow && isLoginRequiredError(error)) {
+          const returnUrl = getSilentSsoReturnUrl() || '/';
+          finishSilentSso();
+          console.log(`${LOG_PREFIX} silent login skipped (backend login_required)`, { returnUrl });
+          navigate(returnUrl, { replace: true });
+          return;
+        }
+
+        if (isSilentFlow) {
+          const returnUrl = getSilentSsoReturnUrl() || '/';
+          finishSilentSso();
+          console.log(`${LOG_PREFIX} silent login skipped (non-fatal failure)`, {
+            returnUrl,
+            status: error?.status ?? null,
+          });
+          navigate(returnUrl, { replace: true });
+          return;
+        }
 
         // 404: Q-Sign UUID와 연결된 로컬 회원이 없음 → OnePass 전환(연동) 페이지로 이동
         // 이 케이스는 기술적 오류가 아니라 아직 통합 전환을 완료하지 않은 사용자이다.
