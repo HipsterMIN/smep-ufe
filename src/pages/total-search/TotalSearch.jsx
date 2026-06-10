@@ -21,31 +21,45 @@ const CERT_BUTTON_LABEL_BY_HINT = Object.freeze({
   ISRH0012: '발급안내',
 });
 
-// 컬렉션별 필드 매핑은 이 블록만 수정하면 되도록 분리
+const PBANC_COLLECTION_KEYS = new Set(['smep_pbanc_central', 'smep_pbanc_local']);
+
+const PBANC_DETAIL_PATH_PREFIX_BY_COLLECTION = Object.freeze({
+  smep_pbanc_central: '/req/pbanc',
+  smep_pbanc_local: '/req/pbancProvincial',
+});
+
+const PBANC_RESULT_FIELDS = Object.freeze({
+  pbancNo: 'BIZ_PBANC_NO',
+  pbancName: 'BIZ_PBANC_NM',
+  applyPeriod: 'BIZ_APLY_DT',
+  applyStatus: 'APLY_STTS_NM',
+  agency: 'BIZ_SPRVSN_INST_NM',
+  deadline: 'BIZ_APLY_DDLN_YMD',
+  regDate: 'REG_DT',
+});
+
+const COMMON_SEARCH_SORT_PARAM = 'SCORE/DESC,Date/DESC';
+const PBANC_DEADLINE_SORT_PARAM = 'BIZ_APLY_DDLN_YMD/ASC,SCORE/DESC,Date/DESC';
+
+// 화면에 노출할 컬렉션 순서와 기본 메뉴명은 이 설정에서 관리한다.
 const COLLECTION_SECTION_CONFIG = [
-  /*{
-    collectionKey: 'smep_notibiz',
-    tabLabel: '사업공고',
+  {
+    collectionKey: 'smep_pbanc_central',
+    tabLabel: '사업공고(중앙정부)',
     defaultDepth1MenuNm: '사업공고',
-    defaultDepth2MenuNm: '사업공고소개',
+    defaultDepth2MenuNm: '중앙정부',
   },
   {
-    collectionKey: 'smep_finance',
+    collectionKey: 'smep_pbanc_local',
+    tabLabel: '사업공고(지방정부)',
+    defaultDepth1MenuNm: '사업공고',
+    defaultDepth2MenuNm: '지방정부',
+  },
+  {
+    collectionKey: 'smep_plcy_fnnc',
     tabLabel: '정책금융',
     defaultDepth1MenuNm: '정책금융',
-    defaultDepth2MenuNm: '정책금융소개',
-  },
-  {
-    collectionKey: 'smep_etc',
-    tabLabel: '기타공고',
-    defaultDepth1MenuNm: '기타공고',
-    defaultDepth2MenuNm: '기타공고소개',
-  },*/
-  {
-    collectionKey: 'smep_sprtbiz',
-    tabLabel: '지원사업',
-    defaultDepth1MenuNm: '지원사업',
-    defaultDepth2MenuNm: '지원사업소개',
+    defaultDepth2MenuNm: '정책금융',
   },
   {
     collectionKey: 'smep_cert',
@@ -58,12 +72,6 @@ const COLLECTION_SECTION_CONFIG = [
     tabLabel: '정책법령정보',
     defaultDepth1MenuNm: '정책법령정보',
     defaultDepth2MenuNm: '정책금융',
-  },
-  {
-    collectionKey: 'smep_more',
-    tabLabel: '더많은서비스',
-    defaultDepth1MenuNm: '더많은서비스',
-    defaultDepth2MenuNm: '공지사항',
   },
   {
     collectionKey: 'smep_cust',
@@ -242,8 +250,51 @@ const renderHighlightedText = (value, fallback = '-') => {
   return <>{nodes}</>;
 };
 
+const hasRenderableResultText = (value) => Boolean(stripHtmlExceptHighlight(value));
+
+const sumVisibleCollectionCounts = (collections) =>
+  COLLECTION_SECTION_CONFIG.reduce((sum, config) => {
+    return sum + toCount(collections?.[config.collectionKey]?.count);
+  }, 0);
+
+const isPbancCollection = (collectionKey) => PBANC_COLLECTION_KEYS.has(collectionKey);
+
+const buildPbancDetailPath = (collectionKey, pbancNo) => {
+  const pathPrefix = PBANC_DETAIL_PATH_PREFIX_BY_COLLECTION[collectionKey];
+  if (!pathPrefix || !pbancNo) return '';
+  return `${pathPrefix}/${encodeURIComponent(pbancNo)}`;
+};
+
+const buildPbancContent = (raw) => {
+  const agency = pickResultFieldValue(raw, PBANC_RESULT_FIELDS.agency);
+  const applyStatus = pickResultFieldValue(raw, PBANC_RESULT_FIELDS.applyStatus);
+  const applyPeriod = pickResultFieldValue(raw, PBANC_RESULT_FIELDS.applyPeriod);
+  const parts = [
+    agency && `주관기관: ${agency}`,
+    applyStatus && `상태: ${applyStatus}`,
+    applyPeriod && `신청기간: ${applyPeriod}`,
+  ].filter(Boolean);
+
+  return parts.join(' · ');
+};
+
+const getSearchStartCount = (page) => {
+  // Wisenut pageInfo의 startCount는 결과 offset이 아니라 0-base page index다.
+  return String(Math.max(0, toCount(page) - 1));
+};
+
+const getSearchSortParam = (sortType, collectionKey = '') => {
+  if (sortType === 'DEADLINE' && isPbancCollection(collectionKey)) {
+    return PBANC_DEADLINE_SORT_PARAM;
+  }
+
+  // ALL 검색은 여러 컬렉션에 하나의 sort 문자열을 적용하므로 공통 필드만 보낸다.
+  return COMMON_SEARCH_SORT_PARAM;
+};
+
 const normalizeSearchItem = (rawItem, config) => {
   const raw = rawItem && typeof rawItem === 'object' ? rawItem : {};
+  const isPbanc = isPbancCollection(config.collectionKey);
 
   const depth1MenuId = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.depth1MenuId);
   const depth1MenuNm = pickResultFieldValue(
@@ -259,15 +310,23 @@ const normalizeSearchItem = (rawItem, config) => {
   );
   const depth3MenuId = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.depth3MenuId);
   const depth3MenuNm = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.depth3MenuNm);
-  const title = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.title, '-');
-  const content = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.content);
-  const workId = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.dataKey);
+  const pbancNo = isPbanc ? pickResultFieldValue(raw, PBANC_RESULT_FIELDS.pbancNo) : '';
+  const title = isPbanc
+    ? pickResultFieldValue(raw, PBANC_RESULT_FIELDS.pbancName, '-')
+    : pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.title, '-');
+  const content = isPbanc
+    ? buildPbancContent(raw)
+    : pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.content);
+  const workId = isPbanc
+    ? pbancNo
+    : pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.dataKey);
   const intgSrchRouteHintCd = pickResultFieldValue(
     raw,
     SEARCH_RESULT_FIELDS.intgSrchRouteHintCd,
   );
   const bbsCategoryId = pickResultFieldValue(raw, SEARCH_RESULT_FIELDS.dataCategory);
   const docId = workId;
+  const linkUrl = isPbanc ? buildPbancDetailPath(config.collectionKey, pbancNo) : '';
 
   return {
     collectionKey: config.collectionKey,
@@ -282,7 +341,7 @@ const normalizeSearchItem = (rawItem, config) => {
     workId,
     intgSrchRouteHintCd,
     bbsCategoryId,
-    linkUrl: '',
+    linkUrl,
     docId,
     raw,
   };
@@ -346,7 +405,7 @@ const TotalSearch = () => {
   const [allCollections, setAllCollections] = useState(createInitialCollectionState);
   const [tabCollections, setTabCollections] = useState(createInitialCollectionState);
   const [tabPageByCollection, setTabPageByCollection] = useState(createInitialPageState);
-  const [sortType, setSortType] = useState('REG_DT');
+  const [sortType, setSortType] = useState('Date');
   const [isAllLoading, setIsAllLoading] = useState(false);
   const [isTabLoading, setIsTabLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -372,14 +431,15 @@ const TotalSearch = () => {
       const params = new URLSearchParams({
         query: keyword,
         collection: 'ALL',
-        sortType,
+        sort: getSearchSortParam(sortType),
       });
       const response = await apiClient.get(`/api/v1/search/totalSearch?${params.toString()}`);
       if (requestSerial !== allRequestSerialRef.current) return;
 
       const payload = normalizeApiPayload(response);
-      setTotalCount(toCount(payload?.totalCount));
-      setAllCollections(buildCollectionResultMap(payload, SEARCH_ALL_PREVIEW_COUNT));
+      const nextCollections = buildCollectionResultMap(payload, SEARCH_ALL_PREVIEW_COUNT);
+      setTotalCount(sumVisibleCollectionCounts(nextCollections));
+      setAllCollections(nextCollections);
     } catch (error) {
       if (requestSerial !== allRequestSerialRef.current) return;
       setTotalCount(0);
@@ -401,8 +461,8 @@ const TotalSearch = () => {
       const params = new URLSearchParams({
         query: keyword,
         collection: collectionKey,
-        startCount: String(Math.max(0, page - 1)),
-        sortType,
+        startCount: getSearchStartCount(page),
+        sort: getSearchSortParam(sortType, collectionKey),
       });
       const response = await apiClient.get(`/api/v1/search/totalSearch?${params.toString()}`);
       if (requestSerial !== tabRequestSerialRef.current) return;
@@ -564,10 +624,7 @@ const TotalSearch = () => {
   };
 
   const totalCountByCollections = useMemo(
-    () =>
-      COLLECTION_SECTION_CONFIG.reduce((sum, config) => {
-        return sum + toCount(allCollections[config.collectionKey]?.count);
-      }, 0),
+    () => sumVisibleCollectionCounts(allCollections),
     [allCollections],
   );
 
@@ -614,6 +671,7 @@ const TotalSearch = () => {
       const keyBase = item.docId || item.workId || item.title || 'item';
       const key = `${config.collectionKey}-${keyBase}-${index}`;
       const buttonLabel = showCertificateButton ? getCertificateButtonLabel(item) : '';
+      const shouldRenderContent = hasRenderableResultText(item.content);
 
       return (
         <div className="in" key={key}>
@@ -626,14 +684,12 @@ const TotalSearch = () => {
               className="c-text c-date"
               onClick={(event) => handleItemClick(event, item)}
             >
-              {/*<p className="c-date">
-                <span>게시일 : 26-05-29</span>
-                <span>신청기간: 26-05-29 ~ 26-06-12</span>
-              </p>*/}
               <p className="c-tit no-icon">
                 <span className="span onellipsis-2">{renderHighlightedText(item.title, '-')}</span>
               </p>
-              <p className="c-txt onellipsis-2">{renderHighlightedText(item.content, '-')}</p>
+              {shouldRenderContent && (
+                <p className="c-txt onellipsis-2">{renderHighlightedText(item.content, '')}</p>
+              )}
               {!showCertificateButton && renderBreadcrumb(item)}
             </a>
           </div>
@@ -763,17 +819,17 @@ const TotalSearch = () => {
                 <div className="w-sort-btn">
                   <button
                     type="button"
-                    className={sortType === 'REG_DT' ? 'active' : ''}
-                    onClick={() => handleSortChange('REG_DT')}
+                    className={sortType === 'Date' ? 'active' : ''}
+                    onClick={() => handleSortChange('Date')}
                   >
-                    등록일순{sortType === 'REG_DT' && <span className="sr-only">선택됨</span>}
+                    등록일순{sortType === 'Date' && <span className="sr-only">선택됨</span>}
                   </button>
                   <button
                     type="button"
-                    className={sortType === 'DEADLINE' ? 'active' : ''}
-                    onClick={() => handleSortChange('DEADLINE')}
+                    className={sortType === 'DDLN' ? 'active' : ''}
+                    onClick={() => handleSortChange('DDLN')}
                   >
-                    마감일순{sortType === 'DEADLINE' && <span className="sr-only">선택됨</span>}
+                    마감일순{sortType === 'DDLN' && <span className="sr-only">선택됨</span>}
                   </button>
                 </div>
                 <div className="m-sort-btn">
@@ -783,8 +839,8 @@ const TotalSearch = () => {
                     value={sortType}
                     onChange={(event) => handleSortChange(event.target.value)}
                   >
-                    <option value="REG_DT">등록일순</option>
-                    <option value="DEADLINE">마감일순</option>
+                    <option value="Date">등록일순</option>
+                    <option value="DDLN">마감일순</option>
                   </select>
                 </div>
               </li>

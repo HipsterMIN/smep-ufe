@@ -114,7 +114,7 @@ const ApiKeyDetailView = ({ isOpen, onClose, detailData }) => {
                                     <input
                                         type="text"
                                         className="krds-input small bg-readonly"
-                                        value={data.apiCertTkn || '-'}
+                                        value={data.apiAplySttsCd !== 'REQ' ? (data.apiCertTkn || '-') : '-'}
                                         readOnly
                                     />
                                 </div>

@@ -16,11 +16,11 @@ const EMPTY_HTML_PATTERNS = new Set([
 
 const STREAMDOCS_VIEWER_URL =
   import.meta.env.VITE_STREAMDOCS_VIEWER_URL
-  || 'https://www.smes.go.kr/e-paper/view/sd';
+  || 'https://portal.smes.go.kr/e-paper/view/sd';
 
 const STREAMDOCS_ADAPTER_URL =
   import.meta.env.VITE_STREAMDOCS_ADAPTER_URL
-  || 'https://www.smes.go.kr/e-paper/adapter.js';
+  || 'https://portal.smes.go.kr/e-paper/adapter.js';
 
 // 의도: 첨부파일 바로보기는 공고문 인라인 미리보기와 분리해 새 창으로 열고, 본문 뷰어의 열림/닫힘 상태를 건드리지 않는다.
 // 동작: StreamDocs viewer URL에 streamdocsId를 붙여 새 창 링크 href로 사용할 주소를 만든다.

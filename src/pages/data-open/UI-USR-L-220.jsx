@@ -27,7 +27,7 @@ const UI_USR_L_220 = () => {
     memberInfo,
     openPopup,
     closePopup,
-    submitApply
+    submitApply,
   } = useApiKeyApply();
 
   const sidebarData = getSideNavigationData();
@@ -64,21 +64,37 @@ const UI_USR_L_220 = () => {
   // 1. 실제 데이터 호출 (useEffect)
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    let isMounted = true;
+
     const fetchHistory = async () => {
       try {
         setIsLoading(true);
         // MyApiRequestList와 동일한 엔드포인트 사용
         const res = await apiClient.get(`/api/v1/apikey/history/list?mbrNo=${mbrNo}`);
+        if (!isMounted) return;
         setHistoryList(res.data || []);
       } catch (error) {
+        if (!isMounted) return;
         console.error('신청 내역 조회 실패:', error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
-    if (mbrNo) fetchHistory();
-  }, [mbrNo]);
+    if (isLoggedIn && mbrNo) {
+      fetchHistory();
+    } else {
+      setIsLoading(false);
+      setHistoryList([]); // 이력 초기화
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [mbrNo, isLoggedIn]);
 
   // 2. 페이징 계산
   const totalElements = historyList.length;
