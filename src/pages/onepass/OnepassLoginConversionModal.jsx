@@ -9,6 +9,8 @@ export default function OnepassLoginConversionModal({
   isOpen = true,
   onConvert = noop,
   onLater = noop,
+  onClose = noop,
+  hasCi = true,
 }) {
   if (!isOpen) {
     return null;
@@ -22,6 +24,42 @@ export default function OnepassLoginConversionModal({
   const handleIntegratedLoginClick = () => {
     onLater();
   };
+
+  // CI 없는 회원: 개인인증 유도 + "준비 중" 안내
+  if (!hasCi) {
+    return (
+      <div id="wrap" className={styles.wrap}>
+        <div
+          id="popup-container"
+          className={styles.popupContainer}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="onepassLoginConversionTitle"
+        >
+          <div className={styles.popupInner}>
+            <h2 id="onepassLoginConversionTitle" className={styles.popupTitle}>
+              통합로그인
+            </h2>
+            <figure className={styles.visual}>
+              <img className={styles.visualImage} src={modalIntegratedLoginImg} alt="통합로그인 안내" />
+            </figure>
+            <div className={styles.conversionContent}>
+              <p className={styles.conversionTitle}>본인인증이 필요합니다</p>
+              <p className={styles.guideText}>
+                <strong>통합회원 전환을 위해 본인인증이 필요합니다.</strong>
+                <br />
+                해당 서비스는 현재 준비 중입니다. 준비가 완료되는 대로 안내해 드리겠습니다.
+              </p>
+            </div>
+            <button type="button" className={`${styles.button} ${styles.secondaryButton}`} onClick={onClose}>
+              <span>확인</span>
+              <i className={styles.iconWrap} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div id="wrap" className={styles.wrap}>

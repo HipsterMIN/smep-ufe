@@ -204,6 +204,7 @@ const MainPage = () => {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [hasOpenedKeyboard, setHasOpenedKeyboard] = useState(false);
   const [isOnepassModalOpen, setIsOnepassModalOpen] = useState(false);
+  const [hasCi, setHasCi] = useState(true);
   const [isSearchFixed, setIsSearchFixed] = useState(false);
   const srchInputRef = useRef(null);
   const keyboardButtonRef = useRef(null);
@@ -721,6 +722,25 @@ const MainPage = () => {
 
     setIsOnepassModalOpen(true);
   }, [isLogin, intgMbrSwtcYn]);
+
+  // 전환 팝업 진입 시 A203 CI 존재 여부 확인 → 없으면 "준비 중" 안내 표시
+  useEffect(() => {
+    if (!isOnepassModalOpen) return;
+
+    let isMounted = true;
+    apiClient.get('/api/v1/account/me/ci-status')
+      .then((data) => {
+        if (!isMounted) return;
+        setHasCi(data?.hasCi !== false);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        // 오류 시 기본 전환 팝업 표시 (CI 있는 것으로 간주)
+        setHasCi(true);
+      });
+
+    return () => { isMounted = false; };
+  }, [isOnepassModalOpen]);
 
   // 키보드가 처음 열릴 때 lazy 컴포넌트를 마운트 (이후 isOpen prop으로 제어)
   useEffect(() => {
@@ -1995,6 +2015,7 @@ const MainPage = () => {
         onConvert={handleOnepassModalConvert}
         onLater={handleOnepassModalDismiss}
         onClose={handleOnepassModalDismiss}
+        hasCi={hasCi}
       />
       <Footer />
       {!isMobilePopupViewport && (
