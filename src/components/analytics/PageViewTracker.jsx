@@ -68,7 +68,7 @@ const inferPageKindCd = (pathname, pageRoute, params = {}) => {
     return 'LOGIN';
   }
   if (path.startsWith('/service/find-id')) return 'FIND_ID';
-  if (path.startsWith('/service/find-password')) return 'FIND_PASSWORD';
+  if (path.startsWith('/service/find-password')) return 'FIND_PW';
   if (route.endsWith('/edit')) return 'EDIT';
   if (route.endsWith('/create') || route.endsWith('/save')) return 'CREATE';
   if (route.includes('/:') || Object.keys(params).length > 0) return 'DETAIL';
