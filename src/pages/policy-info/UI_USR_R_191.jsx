@@ -9,11 +9,11 @@ import { formatEventRegionForDetail } from '@utils/stringUtils.js';
 
 const STREAMDOCS_VIEWER_URL =
   import.meta.env.VITE_STREAMDOCS_VIEWER_URL
-  || 'https://www.smes.go.kr/e-paper/view/sd';
+  || 'https://portal.smes.go.kr/e-paper/view/sd';
 
 const STREAMDOCS_ADAPTER_URL =
   import.meta.env.VITE_STREAMDOCS_ADAPTER_URL
-  || 'https://www.smes.go.kr/e-paper/adapter.js';
+  || 'https://portal.smes.go.kr/e-paper/adapter.js';
 
 // 의도: 첨부파일 바로보기는 행사 공고문 인라인 미리보기와 분리해 새 창으로 열고, 본문 뷰어의 열림/닫힘 상태를 건드리지 않는다.
 // 동작: StreamDocs viewer URL에 streamdocsId를 붙여 새 창 링크 href로 사용할 주소를 만든다.
@@ -266,35 +266,35 @@ const UI_USR_R_191 = () => {
               {pbancDocFiles.map((file, index) => {
                 const previewId = resolveNoticePreviewId(file, index);
                 return (
-                <li key={`${file?.atchFileId ?? 'pbanc'}-${file?.atchFileSn ?? index}`}>
-                  <p className="tit">
-                    <i className="svg-icon ico-file2"></i>
-                    {file?.orgnlFileNm || '-'}
-                  </p>
-                  <div className="btn-wrap">
-                    {previewId && (
-                      <a
-                        href="#"
-                        className="krds-btn medium link basic"
-                        title="문서 미리보기"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          toggleStreamdocsViewer(previewId);
-                        }}
+                  <li key={`${file?.atchFileId ?? 'pbanc'}-${file?.atchFileSn ?? index}`}>
+                    <p className="tit">
+                      <i className="svg-icon ico-file2"></i>
+                      {file?.orgnlFileNm || '-'}
+                    </p>
+                    <div className="btn-wrap">
+                      {previewId && (
+                        <a
+                          href="#"
+                          className="krds-btn medium link basic"
+                          title="문서 미리보기"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            toggleStreamdocsViewer(previewId);
+                          }}
+                        >
+                          <i className="svg-icon ico-sch-plus"></i> 바로보기
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        className="krds-btn medium text on-colorblue"
+                        onClick={() => downloadFile(file?.atchFileId, file?.atchFileSn)}
                       >
-                        <i className="svg-icon ico-sch-plus"></i> 바로보기
-                      </a>
-                    )}
-                    <button
-                      type="button"
-                      className="krds-btn medium text on-colorblue"
-                      onClick={() => downloadFile(file?.atchFileId, file?.atchFileSn)}
-                    >
-                      <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
-                    </button>
-                  </div>
-                </li>
-              );
+                        <i className="svg-icon ico-down on-bgcolorblue"></i> 다운로드
+                      </button>
+                    </div>
+                  </li>
+                );
               })}
             </ul>
           </div>

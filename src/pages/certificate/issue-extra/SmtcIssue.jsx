@@ -45,7 +45,7 @@ const SmtcIssue = () => {
       });
 
       window.open(
-        `https://www.smes.go.kr/e-page?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
+        `https://portal.smes.go.kr/e-page?prdocCd=${prdocCd}&prdocIssuAplyNo=${prdocIssuAplyNo}`,
         '_blank',
       );
 
