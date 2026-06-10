@@ -54,7 +54,7 @@ const MyApiRequestList = () => { // mbrNo를 받아옵니다.
 
   const getLinkSitePath = (apiSeCd) => {
     const pathMap = {
-      AD01: 'supportBusinessInfoApi',
+      AD05: 'supportBusinessInfoApi',
       AD02: 'eventInfoApi',
       Y105: 'innoBizCertificateApi',
       Y106: 'ventureCertificateApi',
