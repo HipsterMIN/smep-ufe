@@ -1,7 +1,7 @@
-import {useMatches} from 'react-router-dom';
+import { useMatches } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
-import {useUserMenu} from '@context/UserMenuContext.jsx';
+import { useUserMenu } from '@context/UserMenuContext.jsx';
 
 
 const UI_USR_L_130 = () => {
@@ -28,7 +28,7 @@ const UI_USR_L_130 = () => {
           <div className="info-box">
             <h5 className="tit"><i className="svg-icon ico-check-tit"></i>소관법률</h5>
             <div className="txt">
-              <i className="svg-icon pure circle-check"></i>
+              {/*<i className="svg-icon pure circle-check"></i>*/}
               <p>중소벤처기업부 소관법령(법률/시행령/시행규칙)자료는 법제처 "<b className="txt_bold">국가법령정보센터</b>"와 연계하여 제공하고 있으며, 좀더 자세한 정보를 확인 하시려면 "<b className="txt_bold">국가법령정보센터</b>" 에서 확인 하시기 바랍니다.
               </p>
             </div>
