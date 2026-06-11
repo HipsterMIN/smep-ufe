@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, devtools, createJSONStorage } from 'zustand/middleware';
+import { resetSilentSsoFlags } from '../utils/onepassSilentSso.js';
 
 // BroadcastChannel 생성 (싱글톤)
 const authChannel = new BroadcastChannel('auth_channel');
@@ -159,6 +160,8 @@ export const useAuthStore = create(
             // 다른 탭 로그아웃 시에도 저장소 정리
             try { sessionStorage.removeItem('auth-storage'); } catch { /* ignore */ }
             try { localStorage.removeItem('ai-search-storage'); } catch { /* ignore */ }
+            // 재로그인 시 silent SSO가 다시 동작하도록 attempted 플래그 초기화
+            resetSilentSsoFlags();
           }
         };
 
@@ -329,6 +332,8 @@ export const useAuthStore = create(
 
             // sessionStorage 강제 삭제 (persist 미들웨어 키)
             try { sessionStorage.removeItem('auth-storage'); } catch { /* ignore */ }
+            // 재로그인 시 silent SSO가 다시 동작하도록 attempted 플래그 초기화
+            resetSilentSsoFlags();
             // AI 채팅 관련 sessionStorage 정리
             try {
               Object.keys(sessionStorage).forEach((key) => {
