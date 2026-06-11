@@ -33,7 +33,7 @@ export function buildOnePassRegisterUrl(type = 'member') {
 export function buildOnePassConversionUrl() {
   const params = new URLSearchParams({
     return_client: CLIENT_ID,
-    return_uri: REDIRECT_HOME_URI,
+    redirect_uri: REDIRECT_HOME_URI,
   });
 
   return `${KEYCLOAK_JOIN}?${params}`;
