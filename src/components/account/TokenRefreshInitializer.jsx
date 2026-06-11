@@ -11,6 +11,65 @@ import {
 const LOG_PREFIX = '[TokenRefreshInitializer]';
 
 /**
+ * 숨겨진 iframe으로 silent SSO를 백그라운드 실행한다.
+ * 메인 윈도우 이동 없이 SSO 인증을 완료하여 화면 깜빡임을 방지한다.
+ *
+ * 흐름:
+ *   1. 숨겨진 iframe에 SSO 프로바이더 URL 로드
+ *   2. SSO 프로바이더가 /sso?code=... 로 iframe 리다이렉트
+ *   3. iframe의 OnePassSsoCallback이 코드 교환 후 postMessage('SILENT_SSO_RESULT')
+ *   4. 부모(메인 윈도우)가 메시지 수신 후 ssoLogin() 호출
+ */
+const runSilentSsoViaIframe = (loginUrl) =>
+  new Promise((resolve) => {
+    const TIMEOUT_MS = 30_000;
+
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.style.cssText =
+      'position:fixed;top:0;left:0;width:0;height:0;border:none;visibility:hidden;';
+    document.body.appendChild(iframe);
+
+    let done = false;
+    const cleanup = () => {
+      if (done) return;
+      done = true;
+      window.removeEventListener('message', onMessage);
+      try { iframe.remove(); } catch { /* ignore */ }
+    };
+
+    const timer = setTimeout(() => {
+      console.info(`${LOG_PREFIX} silent SSO iframe timeout`);
+      cleanup();
+      finishSilentSso();
+      resolve();
+    }, TIMEOUT_MS);
+
+    const onMessage = (event) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== 'SILENT_SSO_RESULT') return;
+
+      clearTimeout(timer);
+      cleanup();
+
+      if (event.data.success) {
+        const { accessToken, refreshToken, kcIdToken, profile } = event.data;
+        useAuthStore.getState().ssoLogin({ token: accessToken, refreshToken, kcIdToken, profile });
+        console.log(`${LOG_PREFIX} silent SSO success via iframe`);
+      } else {
+        console.info(`${LOG_PREFIX} silent SSO skipped via iframe`, {
+          reason: event.data.reason ?? 'unknown',
+        });
+      }
+      finishSilentSso();
+      resolve();
+    };
+
+    window.addEventListener('message', onMessage);
+    iframe.src = loginUrl;
+  });
+
+/**
  * 페이지 리로드 후 access token 세션 복구를 담당하는 컴포넌트.
  *
  * 배경:
@@ -66,7 +125,8 @@ export function TokenRefreshInitializer() {
             throw new Error('Silent login URL is missing');
           }
 
-          window.location.href = loginUrl;
+          // 숨겨진 iframe으로 백그라운드 처리 — 메인 윈도우 이동 없음
+          await runSilentSsoViaIframe(loginUrl);
         } catch (err) {
           // silent 복구 실패는 비치명 처리한다.
           finishSilentSso();
