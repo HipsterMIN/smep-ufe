@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
@@ -28,6 +28,13 @@ const SEARCH_OPTIONS = [
   { label: '지역', value: 'AREA' },
   { label: '해시태그', value: 'HASHTAG' },
 ];
+
+const EVENT_STATUS_VALUES = ['ONGOING', 'PAST'];
+
+const getInitialEventStatus = (search) => {
+  const eventStatus = getSearchParam(search, 'eventStatus', 'ONGOING').toUpperCase();
+  return EVENT_STATUS_VALUES.includes(eventStatus) ? eventStatus : 'ONGOING';
+};
 
 const formatDateDot = (value) => {
   if (!value) return '-';
@@ -80,6 +87,7 @@ const UI_USR_L_190 = () => {
   const [searchKeyword, setSearchKeyword] = useState(() => getSearchParam(location.search, 'searchKeyword', ''));
   const [appliedSearchType, setAppliedSearchType] = useState(() => getSearchParam(location.search, 'searchType', 'ALL'));
   const [appliedSearchKeyword, setAppliedSearchKeyword] = useState(() => getSearchParam(location.search, 'searchKeyword', ''));
+  const [eventStatus, setEventStatus] = useState(() => getInitialEventStatus(location.search));
   const [sortType, setSortType] = useState(() => getSearchParam(location.search, 'sortType', 'REG_DT'));
 
   const [list, setList] = useState([]);
@@ -93,15 +101,17 @@ const UI_USR_L_190 = () => {
   const depth1Menu = getDepth1Parent();
   const selectedAreaGroup = AREA_TABS[activeTabIndex]?.value || 'ALL';
 
-  const buildListSearchParams = () => {
+  const buildListSearchParams = useCallback(() => {
     const params = new URLSearchParams();
     setQueryParam(params, 'tab', activeTabIndex, 0);
+    setQueryParam(params, 'page', currentPage + 1, 1);
     setQueryParam(params, 'size', pageSize, 10);
+    params.set('eventStatus', eventStatus);
     setQueryParam(params, 'sortType', sortType, 'REG_DT');
     setQueryParam(params, 'searchType', appliedSearchType, 'ALL');
     setQueryParam(params, 'searchKeyword', appliedSearchKeyword);
     return params;
-  };
+  }, [activeTabIndex, appliedSearchKeyword, appliedSearchType, currentPage, eventStatus, pageSize, sortType]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -115,6 +125,7 @@ const UI_USR_L_190 = () => {
         const params = new URLSearchParams({
           page: String(currentPage + 1),
           size: String(pageSize),
+          eventStatus,
           sortType,
           areaGroup: selectedAreaGroup,
         });
@@ -148,7 +159,17 @@ const UI_USR_L_190 = () => {
     return () => {
       mounted = false;
     };
-  }, [currentPage, pageSize, appliedSearchType, appliedSearchKeyword, sortType, selectedAreaGroup]);
+  }, [
+    appliedSearchKeyword,
+    appliedSearchType,
+    buildListSearchParams,
+    currentPage,
+    eventStatus,
+    pageSize,
+    selectedAreaGroup,
+    setSearchParams,
+    sortType,
+  ]);
 
   const handleTabChange = (index) => {
     setActiveTabIndex(index);
@@ -177,6 +198,11 @@ const UI_USR_L_190 = () => {
 
   const handleSortChange = (nextSortType) => {
     setSortType(nextSortType);
+    setCurrentPage(0);
+  };
+
+  const handleEventStatusToggle = () => {
+    setEventStatus((currentStatus) => (currentStatus === 'PAST' ? 'ONGOING' : 'PAST'));
     setCurrentPage(0);
   };
 
@@ -210,7 +236,7 @@ const UI_USR_L_190 = () => {
             <div className="sch-input">
               <input
                 type="text"
-                 className="krds-input medium"
+                className="krds-input medium"
                 placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}
@@ -234,6 +260,18 @@ const UI_USR_L_190 = () => {
             <li>
               검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>건
             </li>
+            <li>
+              <button
+                type="button"
+                className="krds-btn medium text"
+                aria-pressed={eventStatus === 'PAST'}
+                onClick={handleEventStatusToggle}
+              >
+                <i className="svg-icon ico-event-cal"></i>
+                {' '}
+                {eventStatus === 'PAST' ? '진행중 행사보기' : '지난 행사보기'}
+              </button>
+            </li>
           </ul>
           <ul className="sch-sort">
             <li>
@@ -255,26 +293,26 @@ const UI_USR_L_190 = () => {
               <strong className="sort-label"><label htmlFor="sort">정렬기준</label></strong>
               <div className="w-sort-btn">
                 <button
-                    type="button"
-                    className={sortType === 'REG_DT' ? 'active' : ''}
-                    onClick={() => handleSortChange('REG_DT')}
+                  type="button"
+                  className={sortType === 'REG_DT' ? 'active' : ''}
+                  onClick={() => handleSortChange('REG_DT')}
                 >
                   등록일순{sortType === 'REG_DT' && <span className="sr-only">선택됨</span>}
                 </button>
                 <button
-                    type="button"
-                    className={sortType === 'DEADLINE' ? 'active' : ''}
-                    onClick={() => handleSortChange('DEADLINE')}
+                  type="button"
+                  className={sortType === 'DEADLINE' ? 'active' : ''}
+                  onClick={() => handleSortChange('DEADLINE')}
                 >
                   마감일순{sortType === 'DEADLINE' && <span className="sr-only">선택됨</span>}
                 </button>
               </div>
               <div className="m-sort-btn">
                 <select
-                    className="krds-form-select-sort"
-                    id="sort"
-                    value={sortType}
-                    onChange={(event) => handleSortChange(event.target.value)}
+                  className="krds-form-select-sort"
+                  id="sort"
+                  value={sortType}
+                  onChange={(event) => handleSortChange(event.target.value)}
                 >
                   <option value="REG_DT">등록일순</option>
                   <option value="DEADLINE">마감일순</option>
@@ -288,18 +326,18 @@ const UI_USR_L_190 = () => {
           <table className="tbl col data t-block">
             <caption>행사정보 목록 번호, 지역, 제목, 행사기간, 수행기관, 작성일, 조회수 정보가 제공됩니다.</caption>
             <colgroup>
-              <col style={{width: '5%'}}/>
-              <col style={{width: '5%'}}/>
+              <col style={{ width: '5%' }}/>
+              <col style={{ width: '5%' }}/>
               <col/>
-              <col style={{width: '220px'}}/>
-              <col style={{width: '15%'}}/>
-              <col style={{width: '5%'}}/>
-              <col style={{width: '5%'}}/>
+              <col style={{ width: '220px' }}/>
+              <col style={{ width: '15%' }}/>
+              <col style={{ width: '5%' }}/>
+              <col style={{ width: '5%' }}/>
             </colgroup>
             <thead>
-            <tr>
-              <th scope="col" className="ac">번호</th>
-              <th scope="col" className="ac">지역</th>
+              <tr>
+                <th scope="col" className="ac">번호</th>
+                <th scope="col" className="ac">지역</th>
                 <th scope="col" className="ac">제목</th>
                 <th scope="col" className="ac">행사기간</th>
                 <th scope="col" className="ac">수행기관</th>
