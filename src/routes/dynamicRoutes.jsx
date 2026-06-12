@@ -63,6 +63,16 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
     return null;
   }
 
+  // basename과 동일한 내부 경로는 등록하지 않는다.
+  // 예: basename='/home-dev', fullPath='/home-dev' → 브라우저 URL이 /home-dev/home-dev가 됨
+  // 메뉴 DB에 scrnUrlAddr='home-dev'인 노드가 있으면 이 경로가 생성될 수 있다.
+  const rawBase = import.meta.env.BASE_URL || '/';
+  const base = rawBase.endsWith('/') && rawBase !== '/' ? rawBase.slice(0, -1) : rawBase;
+  if (base && base !== '/' && (fullPath === base || fullPath.startsWith(base + '/'))) {
+    console.warn(`[dynamicRoutes] basename 충돌 경로 필터링: fullPath=${fullPath} base=${base}`, menuNode);
+    return null;
+  }
+
   const routeConfig = {
     path: fullPath,
     // 메타데이터 저장 (나중에 breadcrumb 등에서 사용)

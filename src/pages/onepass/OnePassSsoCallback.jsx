@@ -1,13 +1,22 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api as apiClient } from '../../lib/apiClient.js';
-import { useAuthStore } from '../../store/useAuthStore.jsx';
-import { buildOnePassConversionUrl } from '../../utils/keycloakGetAuthCode.js';
+import { useAuthStore } from '@store/useAuthStore.jsx';
+import { buildOnePassConversionUrl } from '@utils/keycloakGetAuthCode.js';
 import {
   finishSilentSso,
   getSilentSsoReturnUrl,
   isSilentSsoInProgress,
-} from '../../utils/onepassSilentSso.js';
+} from '@utils/onepassSilentSso.js';
+
+// silent SSO 복귀 시 navigate() 대신 window.location.replace()를 사용한다.
+// navigate(path)는 React Router가 prependBasename(basename, path)를 적용하여
+// '/home-dev/' → '/home-dev/home-dev/' 이중화를 유발하지만,
+// window.location.replace(storedBrowserPath)는 브라우저 URL을 그대로 설정하므로 이중화가 없다.
+// 복귀 후 페이지 리로드 시 TokenRefreshInitializer가 isLogin+refreshToken을 감지하여 토큰을 복원한다.
+const silentSsoReturn = (returnUrl) => {
+  window.location.replace(returnUrl || import.meta.env.BASE_URL || '/');
+};
 
 // 임시 연동 계약: 외부 출발 콜백 대응을 위해 프론트 state 검증을 비활성화한다.
 const LOG_PREFIX = '[OnePassSsoCallback]';
@@ -101,9 +110,10 @@ const OnePassSsoCallback = () => {
         notifyParent({ success: false, reason: 'login_required' });
         return;
       }
-      const returnUrl = getSilentSsoReturnUrl() || '/';
+      const returnUrl = getSilentSsoReturnUrl() || import.meta.env.BASE_URL || '/';
+      console.log(`${LOG_PREFIX} silent SSO return (login_required)`, { returnUrl, stored: window.sessionStorage.getItem('__onepass_silent_sso_return_url__') });
       finishSilentSso();
-      navigate(returnUrl, { replace: true });
+      silentSsoReturn(returnUrl);
       return;
     }
 
@@ -129,9 +139,9 @@ const OnePassSsoCallback = () => {
             notifyParent({ success: false, reason: 'missing_code' });
             return;
           }
-          const returnUrl = getSilentSsoReturnUrl() || '/';
+          const returnUrl = getSilentSsoReturnUrl() || import.meta.env.BASE_URL || '/';
           finishSilentSso();
-          navigate(returnUrl, { replace: true });
+          silentSsoReturn(returnUrl);
           return;
         }
         navigate('/service/login', { replace: true });
@@ -228,13 +238,17 @@ const OnePassSsoCallback = () => {
           isLogin: Boolean(useAuthStore.getState().isLogin),
         });
 
-        const returnUrl = isSilentFlow ? (getSilentSsoReturnUrl() || '/') : '/';
-        if (isSilentFlow) finishSilentSso();
         console.log(`${LOG_PREFIX} navigate home`, {
-          to: returnUrl,
+          isSilentFlow,
           reason: 'case1-local-login-success',
         });
-        navigate(returnUrl, { replace: true });
+        if (isSilentFlow) {
+          const returnUrl = getSilentSsoReturnUrl() || import.meta.env.BASE_URL || '/';
+          finishSilentSso();
+          silentSsoReturn(returnUrl);
+        } else {
+          navigate('/', { replace: true });
+        }
       } catch (error) {
         console.error(`${LOG_PREFIX} exchange failed`, {
           message: error?.message ?? 'unknown-error',
@@ -248,9 +262,9 @@ const OnePassSsoCallback = () => {
             notifyParent({ success: false, reason: 'login_required' });
             return;
           }
-          const returnUrl = getSilentSsoReturnUrl() || '/';
+          const returnUrl = getSilentSsoReturnUrl() || import.meta.env.BASE_URL || '/';
           finishSilentSso();
-          navigate(returnUrl, { replace: true });
+          silentSsoReturn(returnUrl);
           return;
         }
 
@@ -262,9 +276,9 @@ const OnePassSsoCallback = () => {
             notifyParent({ success: false, reason: 'error' });
             return;
           }
-          const returnUrl = getSilentSsoReturnUrl() || '/';
+          const returnUrl = getSilentSsoReturnUrl() || import.meta.env.BASE_URL || '/';
           finishSilentSso();
-          navigate(returnUrl, { replace: true });
+          silentSsoReturn(returnUrl);
           return;
         }
 

@@ -123,6 +123,9 @@ export const useAuthStore = create(
               : [],
             suggestedLoginId:
               safeProfile.suggestedLoginId || safeProfile.suggested_login_id || null,
+            initialPassword: Boolean(
+              safeProfile.initialPassword || safeProfile.initial_password,
+            ),
           };
         };
 
@@ -153,6 +156,8 @@ export const useAuthStore = create(
                 additionalInfoReason: null,
                 additionalInfoMissingFields: [],
                 suggestedLoginId: null,
+                initialPassword: false,
+                initialPasswordNoticeDismissed: false,
               },
               false,
               'auth/sync_logout',
@@ -210,6 +215,8 @@ export const useAuthStore = create(
           additionalInfoReason: null,
           additionalInfoMissingFields: [],
           suggestedLoginId: null,
+          initialPassword: false,
+          initialPasswordNoticeDismissed: false,
           login: ({ token, refreshToken, profile } = {}) => {
             const normalized = normalizeProfile(profile);
             set(
@@ -233,6 +240,8 @@ export const useAuthStore = create(
                 additionalInfoReason: normalized.additionalInfoReason,
                 additionalInfoMissingFields: normalized.additionalInfoMissingFields,
                 suggestedLoginId: normalized.suggestedLoginId,
+                initialPassword: normalized.initialPassword,
+                initialPasswordNoticeDismissed: false,
               },
               false,
               'auth/login',
@@ -263,6 +272,8 @@ export const useAuthStore = create(
                 additionalInfoReason: normalized.additionalInfoReason,
                 additionalInfoMissingFields: normalized.additionalInfoMissingFields,
                 suggestedLoginId: normalized.suggestedLoginId,
+                initialPassword: normalized.initialPassword,
+                initialPasswordNoticeDismissed: false,
               },
               false,
               'auth/ssoLogin',
@@ -289,6 +300,7 @@ export const useAuthStore = create(
                 additionalInfoReason: normalized.additionalInfoReason,
                 additionalInfoMissingFields: normalized.additionalInfoMissingFields,
                 suggestedLoginId: normalized.suggestedLoginId,
+                initialPassword: normalized.initialPassword,
               },
               false,
               'auth/update_profile',
@@ -323,6 +335,8 @@ export const useAuthStore = create(
                 additionalInfoReason: null,
                 additionalInfoMissingFields: [],
                 suggestedLoginId: null,
+                initialPassword: false,
+                initialPasswordNoticeDismissed: false,
               },
               false,
               'auth/logout',
@@ -347,6 +361,7 @@ export const useAuthStore = create(
           },
           setBizno: (bizno) => set({ bizno, isLogin: true }, false, 'auth/setBizno'),
           setCompanyProfile: (companyProfile) => set({ companyProfile }, false, 'auth/setCompanyProfile'),
+          dismissInitialPasswordNotice: () => set({ initialPasswordNoticeDismissed: true }, false, 'auth/dismissInitialPasswordNotice'),
         };
       },
       {

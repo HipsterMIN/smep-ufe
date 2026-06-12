@@ -183,7 +183,7 @@ export const staticRoutes = [
       <div style={{ padding: '2rem', textAlign: 'center' }}>
         <h1>404</h1>
         <p>페이지를 찾을 수 없습니다.</p>
-        <a href="/">홈으로 돌아가기</a>
+        <a href={import.meta.env.BASE_URL || '/'}>홈으로 돌아가기</a>
       </div>
     ),
   },
