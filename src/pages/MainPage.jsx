@@ -22,6 +22,7 @@ import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import OnepassLoginConversionModal from '@pages/onepass/OnepassLoginConversionModal.jsx';
+import InitialPasswordNoticeModal from '@components/account/InitialPasswordNoticeModal.jsx';
 import { buildOnePassConversionUrl, buildOnePassRegisterUrl, onePassJoin } from '@utils/keycloakGetAuthCode.js';
 import {
   normalizeResponse, resolveApiErrorMessage, removeCssCharset,
@@ -2028,6 +2029,7 @@ const MainPage = () => {
           </div>
         </div>
       )}
+      <InitialPasswordNoticeModal />
       <OnepassLoginConversionModal
         isOpen={isOnepassModalOpen}
         onConvert={handleOnepassModalConvert}

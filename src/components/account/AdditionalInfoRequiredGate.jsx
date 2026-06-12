@@ -19,10 +19,11 @@ import { useEffect, useState } from 'react';
 import styles from './AdditionalInfoRequiredGate.module.css';
 
 const MISSING_FIELD_LOGIN_ID = 'LOGIN_ID';
-const REASON_INITIAL_PASSWORD_CHANGE = 'INITIAL_PASSWORD_CHANGE';
+const REASON_INITIAL_PASSWORD_CHANGE = 'INITIAL_PASSWORD_CHANGE'; // ENT 전용 — IND는 백엔드에서 gate 제외
 const LOGIN_ID_MAX_LENGTH = 50;
-const PASSWORD_ALLOWED_PATTERN = /^[A-Za-z0-9!@#$%^&*()=_+-]{8,20}$/;
-const PASSWORD_LETTER_PATTERN = /[A-Za-z]/;
+const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_MAX_LENGTH = 20;
+const PASSWORD_ALLOWED_PATTERN = /^[A-Za-z0-9!@#$%^&*()=_+-]+$/;
 const PASSWORD_DIGIT_PATTERN = /\d/;
 const PASSWORD_SPECIAL_PATTERN = /[!@#$%^&*()=_+-]/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -149,20 +150,42 @@ const joinEmailParts = (localPart, domainPart) => {
   return local && domain ? `${local}@${domain}` : '';
 };
 
-const getPasswordCategoryCount = (value) =>
-  [
-    PASSWORD_LETTER_PATTERN.test(value),
-    PASSWORD_DIGIT_PATTERN.test(value),
-    PASSWORD_SPECIAL_PATTERN.test(value),
-  ].filter(Boolean).length;
+const hasConsecutiveChars = (value) => {
+  for (let i = 0; i < value.length - 2; i++) {
+    const c1 = value.charCodeAt(i);
+    const c2 = value.charCodeAt(i + 1);
+    const c3 = value.charCodeAt(i + 2);
+    if (c1 === c2 && c2 === c3) return true;           // aaa, 111
+    if (c2 === c1 + 1 && c3 === c1 + 2) return true;  // abc, 123
+    if (c2 === c1 - 1 && c3 === c1 - 2) return true;  // cba, 321
+  }
+  return false;
+};
 
-const validatePasswordPolicy = (value) => {
-  if (!PASSWORD_ALLOWED_PATTERN.test(value)) {
-    window.alert('비밀번호는 8~20자이며 허용된 영문, 숫자, 특수문자만 사용할 수 있습니다.');
+const validatePasswordPolicy = (value, loginId) => {
+  if (value.length < PASSWORD_MIN_LENGTH || value.length > PASSWORD_MAX_LENGTH) {
+    window.alert(`비밀번호는 ${PASSWORD_MIN_LENGTH}~${PASSWORD_MAX_LENGTH}자여야 합니다.`);
     return false;
   }
-  if (getPasswordCategoryCount(value) < 2) {
-    window.alert('비밀번호는 영문, 숫자, 특수문자 중 두 가지 이상을 조합해야 합니다.');
+  if (!PASSWORD_ALLOWED_PATTERN.test(value)) {
+    window.alert('비밀번호는 영문, 숫자, 특수문자(!@#$%^&*()=_+-)만 사용할 수 있습니다.');
+    return false;
+  }
+  if (!PASSWORD_DIGIT_PATTERN.test(value)) {
+    window.alert('비밀번호에 숫자를 포함해야 합니다.');
+    return false;
+  }
+  if (!PASSWORD_SPECIAL_PATTERN.test(value)) {
+    window.alert('비밀번호에 특수문자(!@#$%^&*()=_+-)를 포함해야 합니다.');
+    return false;
+  }
+  if (hasConsecutiveChars(value)) {
+    window.alert('비밀번호에 연속된 문자(예: abc, 123, aaa)를 3개 이상 사용할 수 없습니다.');
+    return false;
+  }
+  const trimmedLoginId = loginId ? loginId.trim() : '';
+  if (trimmedLoginId && value.toLowerCase().includes(trimmedLoginId.toLowerCase())) {
+    window.alert('비밀번호에 로그인 ID를 포함할 수 없습니다.');
     return false;
   }
   return true;
@@ -421,7 +444,7 @@ export default function AdditionalInfoRequiredGate() {
       window.alert('새 비밀번호와 새 비밀번호 확인을 입력해 주세요.');
       return;
     }
-    if (!validatePasswordPolicy(initialNewPassword)) {
+    if (!validatePasswordPolicy(initialNewPassword, user?.loginId)) {
       return;
     }
     if (initialNewPassword !== initialNewPasswordConfirm) {
@@ -521,7 +544,7 @@ export default function AdditionalInfoRequiredGate() {
                 <ul className="info-list-point">
                   <li>
                     <i className="svg-icon ico-checkbox" />
-                    비밀번호는 8~20자이며 영문, 숫자, 특수문자 중 두 가지 이상을 조합해야 합니다.
+                    비밀번호는 8~20자이며 숫자·특수문자를 필수 포함해야 하고, 연속된 문자 3개 이상 및 로그인 ID 포함은 사용할 수 없습니다.
                   </li>
                 </ul>
               </div>
@@ -647,7 +670,7 @@ export default function AdditionalInfoRequiredGate() {
       window.alert('비밀번호와 비밀번호 확인을 입력해 주세요.');
       return false;
     }
-    if (!validatePasswordPolicy(password)) {
+    if (!validatePasswordPolicy(password, loginId)) {
       return false;
     }
     if (password !== passwordConfirm) {
