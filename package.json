@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --mode localhost",
     "build:core": "npm run build --prefix packages/core",
     "build:icon": "npm run build --prefix packages/icon",
     "build:packages": "npm run build:core && npm run build:icon",
