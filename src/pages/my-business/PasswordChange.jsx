@@ -7,28 +7,48 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 
-const PASSWORD_ALLOWED_REGEX = /^[A-Za-z0-9!@#$%^&*()=_+-]{8,20}$/;
-const PASSWORD_LETTER_REGEX = /[A-Za-z]/;
-const PASSWORD_DIGIT_REGEX = /\d/;
-const PASSWORD_SPECIAL_REGEX = /[!@#$%^&*()=_+-]/;
+const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_MAX_LENGTH = 20;
+const PASSWORD_ALLOWED_PATTERN = /^[A-Za-z0-9!@#$%^&*()=_+-]+$/;
+const PASSWORD_DIGIT_PATTERN = /\d/;
+const PASSWORD_SPECIAL_PATTERN = /[!@#$%^&*()=_+-]/;
 
-const countPasswordCategories = (password) => {
-  let categoryCount = 0;
-
-  if (PASSWORD_LETTER_REGEX.test(password)) {
-    categoryCount += 1;
+const hasConsecutiveChars = (value) => {
+  for (let i = 0; i < value.length - 2; i++) {
+    const c1 = value.charCodeAt(i);
+    const c2 = value.charCodeAt(i + 1);
+    const c3 = value.charCodeAt(i + 2);
+    if (c1 === c2 && c2 === c3) return true;
+    if (c2 === c1 + 1 && c3 === c1 + 2) return true;
+    if (c2 === c1 - 1 && c3 === c1 - 2) return true;
   }
-  if (PASSWORD_DIGIT_REGEX.test(password)) {
-    categoryCount += 1;
-  }
-  if (PASSWORD_SPECIAL_REGEX.test(password)) {
-    categoryCount += 1;
-  }
-
-  return categoryCount;
+  return false;
 };
 
-const validatePasswordChangeForm = ({ currentPassword, newPassword, confirmPassword }) => {
+const validateNewPassword = (newPassword, loginId) => {
+  if (newPassword.length < PASSWORD_MIN_LENGTH || newPassword.length > PASSWORD_MAX_LENGTH) {
+    return `새 비밀번호는 ${PASSWORD_MIN_LENGTH}~${PASSWORD_MAX_LENGTH}자여야 합니다.`;
+  }
+  if (!PASSWORD_ALLOWED_PATTERN.test(newPassword)) {
+    return '새 비밀번호는 영문, 숫자, 특수문자(!@#$%^&*()=_+-)만 사용할 수 있습니다.';
+  }
+  if (!PASSWORD_DIGIT_PATTERN.test(newPassword)) {
+    return '새 비밀번호에 숫자를 포함해야 합니다.';
+  }
+  if (!PASSWORD_SPECIAL_PATTERN.test(newPassword)) {
+    return '새 비밀번호에 특수문자(!@#$%^&*()=_+-)를 포함해야 합니다.';
+  }
+  if (hasConsecutiveChars(newPassword)) {
+    return '새 비밀번호에 연속된 문자(예: abc, 123, aaa)를 3개 이상 사용할 수 없습니다.';
+  }
+  const trimmedLoginId = loginId ? loginId.trim() : '';
+  if (trimmedLoginId && newPassword.toLowerCase().includes(trimmedLoginId.toLowerCase())) {
+    return '새 비밀번호에 로그인 ID를 포함할 수 없습니다.';
+  }
+  return null;
+};
+
+const validatePasswordChangeForm = ({ currentPassword, newPassword, confirmPassword, loginId }) => {
   if (!currentPassword.trim()) {
     return '현재 비밀번호를 입력해주세요.';
   }
@@ -41,11 +61,9 @@ const validatePasswordChangeForm = ({ currentPassword, newPassword, confirmPassw
   if (newPassword === currentPassword) {
     return '새 비밀번호는 현재 비밀번호와 달라야 합니다.';
   }
-  if (!PASSWORD_ALLOWED_REGEX.test(newPassword)) {
-    return '새 비밀번호는 8~20자이며 허용된 영문, 숫자, 특수문자만 사용할 수 있습니다.';
-  }
-  if (countPasswordCategories(newPassword) < 2) {
-    return '새 비밀번호는 영문, 숫자, 특수문자 중 두 가지 이상을 조합해야 합니다.';
+  const policyError = validateNewPassword(newPassword, loginId);
+  if (policyError) {
+    return policyError;
   }
   if (newPassword !== confirmPassword) {
     return '새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.';
@@ -63,6 +81,7 @@ const resolvePasswordChangeErrorMessage = (error) =>
 const UI_USR_R_420 = () => {
   const navigate = useNavigate();
   const logout = useAuthStore((state) => state.logout);
+  const user = useAuthStore((state) => state.user);
 
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const [currentPassword, setCurrentPassword] = useState('');
@@ -79,6 +98,7 @@ const UI_USR_R_420 = () => {
       currentPassword,
       newPassword,
       confirmPassword,
+      loginId: user?.loginId,
     });
 
     if (validationMessage) {
@@ -181,8 +201,9 @@ const UI_USR_R_420 = () => {
                     />
                   </div>
                   <p className="form-hint">
-                  비밀번호는 영문자(대·소문자), 숫자, 특수문자중 두가지를 조합하여 8자~20자 이내로 입력하세요. <br />
-                 ( 사용가능 특수문자 : !, @, #, $, %, ^, &, *, (, ), -, =, _, + )</p>
+                    영문·숫자·특수문자를 포함하여 8~20자로 입력하세요. 숫자와 특수문자는 필수입니다.<br />
+                    ( 사용가능 특수문자 : !, @, #, $, %, ^, &amp;, *, (, ), -, =, _, + ) / 연속된 문자 3개 이상 사용 불가
+                  </p>
                 </dd>
               </div>
               <div className="form-row-item">
@@ -205,7 +226,7 @@ const UI_USR_R_420 = () => {
                       disabled={isSubmitting}
                     />
                   </div>
-                  <p className="form-hint point">새 비밀번호는 영문, 숫자, 특수문자 중 두 가지 이상을 조합해 입력해야 합니다.</p>
+                  <p className="form-hint point">새 비밀번호와 새 비밀번호 확인이 일치해야 합니다.</p>
                 </dd>
               </div>
             </dl>

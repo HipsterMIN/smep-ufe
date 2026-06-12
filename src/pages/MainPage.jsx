@@ -22,6 +22,7 @@ import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import OnepassLoginConversionModal from '@pages/onepass/OnepassLoginConversionModal.jsx';
+import InitialPasswordNoticeModal from '@components/account/InitialPasswordNoticeModal.jsx';
 import { buildOnePassConversionUrl, buildOnePassRegisterUrl, onePassJoin } from '@utils/keycloakGetAuthCode.js';
 import {
   normalizeResponse, resolveApiErrorMessage, removeCssCharset,
@@ -187,7 +188,10 @@ const MainPage = () => {
   });
   //자주 찾는 증명서(Top 5)
   const fetchTop5Certificates = () =>
-    apiClient.get('/api/v1/certificate/top5').then(normalizeResponse);
+    apiClient.get('/api/v1/certificate/top5').then((res) => {
+      const data = normalizeResponse(res);
+      return Array.isArray(data) ? data : [];
+    });
 
   const { data: top5Certificates = [], isLoading: isTop5Loading } = useQuery({
     queryKey: ['top5-certificates'],
@@ -1267,7 +1271,7 @@ const MainPage = () => {
                   </li>
                 )}
 
-                {!isTop5Loading && top5Certificates.length === 0 && (
+                {!isTop5Loading && (!top5Certificates || top5Certificates.length === 0) && (
                   <li>
                     <button type="button" className="word" disabled>
                         추천 증명서가 없습니다.
@@ -1276,7 +1280,7 @@ const MainPage = () => {
                 )}
 
                 {!isTop5Loading &&
-                    top5Certificates.map((cert, index) => {
+                    Array.isArray(top5Certificates) && top5Certificates.map((cert, index) => {
                       const certTitle = cert.prdocTtl || '증명서';
 
                       return (
@@ -2025,6 +2029,7 @@ const MainPage = () => {
           </div>
         </div>
       )}
+      <InitialPasswordNoticeModal />
       <OnepassLoginConversionModal
         isOpen={isOnepassModalOpen}
         onConvert={handleOnepassModalConvert}

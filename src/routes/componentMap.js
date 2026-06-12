@@ -77,6 +77,9 @@ const UI_USR_L_120 = lazy(() => import('@pages/more-service/UI-USR-L-120.jsx'));
 const UI_USR_R_121 = lazy(() => import('@pages/more-service/UI-USR-R-121.jsx'));
 const UI_USR_R_190 = lazy(() => import('@pages/more-service/UI-USR-R-190.jsx'));
 const UI_USR_R_360 = lazy(() => import('@pages/customer-support/UI-USR-R-360.jsx'));
+const EventParticipationList = lazy(() => import('@pages/customer-support/EventParticipationList.jsx'));
+const EventParticipationDetail = lazy(() => import('@pages/customer-support/EventParticipationDetail.jsx'));
+const EventParticipationWrite = lazy(() => import('@pages/customer-support/EventParticipationWrite.jsx'));
 
 const TotalSearch = lazy(() => import('@pages/total-search/TotalSearch.jsx'));
 
@@ -106,7 +109,7 @@ const TermsOfUse = lazy(() => import('@pages/footer/TermsOfUse.jsx'));
  *         path: 'relative-path',        // 상대 경로 (:id, :slug 등 동적 파라미터 가능)
  *         component: ChildComponent,    // 자식 컴포넌트
  *         componentProps: {},           // 자식 컴포넌트에 전달할 props (옵션)
- *         layout: ChildLayout,          // 자식 레이아웃 (현재는 부모 상속, TODO : 구현예정)
+ *         layout: ChildLayout,          // 자식 레이아웃 (현재는 부모 상속)
  *       }
  *     ]
  *   }
@@ -518,6 +521,27 @@ export const componentMap = {
   'M_PIIO_00107': {
     component: UI_USR_R_360,
     layout: 'SubpageLayoutWithMenu',
+  },
+
+  // 이벤트 참여
+  'M_PIIO_00171': {
+    component: EventParticipationList,
+    layout: 'SubpageLayoutWithMenu',
+    children: [
+      {
+        path: 'save',
+        component: EventParticipationWrite,
+      },
+      {
+        path: ':id/edit',
+        component: EventParticipationWrite,
+        componentProps: { mode: 'edit' },
+      },
+      {
+        path: ':id',
+        component: EventParticipationDetail,
+      },
+    ],
   },
 
   // ========== 마이비즈니스 (M_PIIO_00068) ==========

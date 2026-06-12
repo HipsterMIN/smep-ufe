@@ -116,7 +116,12 @@ function AppRouter() {
         if (!base || base === '/') {
           expectedBrowserPath = internalPathname || '/';
         } else if (internalPathname === '/' || internalPathname === '') {
-          expectedBrowserPath = base;
+          // root 경로는 반드시 trailing slash 형태(/home-dev/)로 유지한다.
+          // React Router v7은 navigate('/') 후 router.state.location.pathname = '/'를 저장하지만
+          // 초기화 시엔 window.location.pathname(/home-dev/)을 그대로 저장하는 불일치가 있다.
+          // base('/home-dev')로 replaceState하면 createBrowserRouter가 basename과 정확히 동일한
+          // URL에서 초기화되어 엣지 케이스를 유발한다. trailing slash를 유지하면 이 문제를 방지한다.
+          expectedBrowserPath = base + '/';
         } else if (internalPathname === base || internalPathname.startsWith(`${base}/`)) {
           expectedBrowserPath = internalPathname;
         } else {

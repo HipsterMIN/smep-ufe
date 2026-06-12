@@ -19,9 +19,11 @@ import { useEffect, useState } from 'react';
 import styles from './AdditionalInfoRequiredGate.module.css';
 
 const MISSING_FIELD_LOGIN_ID = 'LOGIN_ID';
+const REASON_INITIAL_PASSWORD_CHANGE = 'INITIAL_PASSWORD_CHANGE'; // ENT 전용 — IND는 백엔드에서 gate 제외
 const LOGIN_ID_MAX_LENGTH = 50;
-const PASSWORD_ALLOWED_PATTERN = /^[A-Za-z0-9!@#$%^&*()=_+-]{8,20}$/;
-const PASSWORD_LETTER_PATTERN = /[A-Za-z]/;
+const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_MAX_LENGTH = 20;
+const PASSWORD_ALLOWED_PATTERN = /^[A-Za-z0-9!@#$%^&*()=_+-]+$/;
 const PASSWORD_DIGIT_PATTERN = /\d/;
 const PASSWORD_SPECIAL_PATTERN = /[!@#$%^&*()=_+-]/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -148,20 +150,42 @@ const joinEmailParts = (localPart, domainPart) => {
   return local && domain ? `${local}@${domain}` : '';
 };
 
-const getPasswordCategoryCount = (value) =>
-  [
-    PASSWORD_LETTER_PATTERN.test(value),
-    PASSWORD_DIGIT_PATTERN.test(value),
-    PASSWORD_SPECIAL_PATTERN.test(value),
-  ].filter(Boolean).length;
+const hasConsecutiveChars = (value) => {
+  for (let i = 0; i < value.length - 2; i++) {
+    const c1 = value.charCodeAt(i);
+    const c2 = value.charCodeAt(i + 1);
+    const c3 = value.charCodeAt(i + 2);
+    if (c1 === c2 && c2 === c3) return true;           // aaa, 111
+    if (c2 === c1 + 1 && c3 === c1 + 2) return true;  // abc, 123
+    if (c2 === c1 - 1 && c3 === c1 - 2) return true;  // cba, 321
+  }
+  return false;
+};
 
-const validatePasswordPolicy = (value) => {
-  if (!PASSWORD_ALLOWED_PATTERN.test(value)) {
-    window.alert('비밀번호는 8~20자이며 허용된 영문, 숫자, 특수문자만 사용할 수 있습니다.');
+const validatePasswordPolicy = (value, loginId) => {
+  if (value.length < PASSWORD_MIN_LENGTH || value.length > PASSWORD_MAX_LENGTH) {
+    window.alert(`비밀번호는 ${PASSWORD_MIN_LENGTH}~${PASSWORD_MAX_LENGTH}자여야 합니다.`);
     return false;
   }
-  if (getPasswordCategoryCount(value) < 2) {
-    window.alert('비밀번호는 영문, 숫자, 특수문자 중 두 가지 이상을 조합해야 합니다.');
+  if (!PASSWORD_ALLOWED_PATTERN.test(value)) {
+    window.alert('비밀번호는 영문, 숫자, 특수문자(!@#$%^&*()=_+-)만 사용할 수 있습니다.');
+    return false;
+  }
+  if (!PASSWORD_DIGIT_PATTERN.test(value)) {
+    window.alert('비밀번호에 숫자를 포함해야 합니다.');
+    return false;
+  }
+  if (!PASSWORD_SPECIAL_PATTERN.test(value)) {
+    window.alert('비밀번호에 특수문자(!@#$%^&*()=_+-)를 포함해야 합니다.');
+    return false;
+  }
+  if (hasConsecutiveChars(value)) {
+    window.alert('비밀번호에 연속된 문자(예: abc, 123, aaa)를 3개 이상 사용할 수 없습니다.');
+    return false;
+  }
+  const trimmedLoginId = loginId ? loginId.trim() : '';
+  if (trimmedLoginId && value.toLowerCase().includes(trimmedLoginId.toLowerCase())) {
+    window.alert('비밀번호에 로그인 ID를 포함할 수 없습니다.');
     return false;
   }
   return true;
@@ -301,6 +325,7 @@ export default function AdditionalInfoRequiredGate() {
   const user = useAuthStore((state) => state.user);
   const currentMode = useAuthStore((state) => state.currentMode);
   const additionalInfoRequired = useAuthStore((state) => state.additionalInfoRequired);
+  const additionalInfoReason = useAuthStore((state) => state.additionalInfoReason);
   const additionalInfoMissingFields = useAuthStore((state) => state.additionalInfoMissingFields);
   const suggestedLoginId = useAuthStore((state) => state.suggestedLoginId);
   const updateProfile = useAuthStore((state) => state.updateProfile);
@@ -309,6 +334,8 @@ export default function AdditionalInfoRequiredGate() {
   const [loginIdCheckStatus, setLoginIdCheckStatus] = useState(null); // null | 'checking' | 'available' | 'taken'
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [initialNewPassword, setInitialNewPassword] = useState('');
+  const [initialNewPasswordConfirm, setInitialNewPasswordConfirm] = useState('');
   const [formValues, setFormValues] = useState(EMPTY_FORM_VALUES);
   const [infoReceptionAgreements, setInfoReceptionAgreements] = useState(
     DEFAULT_INFO_RECEPTION_AGREEMENTS,
@@ -321,6 +348,7 @@ export default function AdditionalInfoRequiredGate() {
     ? additionalInfoMissingFields
     : [];
   const loginIdMissing = missingFields.includes(MISSING_FIELD_LOGIN_ID);
+  const isInitialPasswordChange = additionalInfoReason === REASON_INITIAL_PASSWORD_CHANGE;
   const canRender = isLogin && token && additionalInfoRequired;
   const memberTypeLabel = currentMode === 'CORPORATE' ? '기업회원' : '개인회원';
   const loginIdConfirmed = loginIdCheckStatus === 'available';
@@ -331,6 +359,8 @@ export default function AdditionalInfoRequiredGate() {
       setLoginIdCheckStatus(null);
       setPassword('');
       setPasswordConfirm('');
+      setInitialNewPassword('');
+      setInitialNewPasswordConfirm('');
       return;
     }
     // loginId 초기값: Q-IM 제안값 우선, 없으면 기존 loginId 사용
@@ -408,8 +438,140 @@ export default function AdditionalInfoRequiredGate() {
     };
   }, [additionalInfoRequired, currentMode, token, user]);
 
+  const handleInitialPasswordSubmit = async (event) => {
+    event.preventDefault();
+    if (!initialNewPassword || !initialNewPasswordConfirm) {
+      window.alert('새 비밀번호와 새 비밀번호 확인을 입력해 주세요.');
+      return;
+    }
+    if (!validatePasswordPolicy(initialNewPassword, user?.loginId)) {
+      return;
+    }
+    if (initialNewPassword !== initialNewPasswordConfirm) {
+      window.alert('새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.');
+      return;
+    }
+    try {
+      setSaving(true);
+      await apiClient.post(
+        '/api/v1/account/password/initial',
+        { newPassword: initialNewPassword, newPasswordConfirm: initialNewPasswordConfirm },
+        { token },
+      );
+      window.alert('비밀번호가 변경되었습니다. 다시 로그인해 주세요.');
+      logout();
+      window.location.href = import.meta.env.BASE_URL ? `${import.meta.env.BASE_URL}service/login` : '/service/login';
+    } catch (error) {
+      window.alert(error?.data?.message || error?.message || '비밀번호 변경 중 오류가 발생했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const renderInitialPasswordChangeForm = () => (
+    <div className={styles.page}>
+      <section
+        id="modal_initial_password_change"
+        className={styles.modalWrap}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="initialPasswordChangeTitle"
+      >
+        <div className={styles.modalDialog}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <p className={styles.eyebrow}>{memberTypeLabel}</p>
+              <h1 id="initialPasswordChangeTitle" className={styles.modalTitle}>
+                초기 비밀번호 변경이 필요합니다.
+              </h1>
+              <p className={styles.guideText}>
+                발급된 초기 비밀번호로 로그인하셨습니다. 안전한 서비스 이용을 위해 새 비밀번호로 변경해 주세요.
+              </p>
+            </div>
+
+            <form onSubmit={handleInitialPasswordSubmit}>
+              <div className="conts-wrap mt-64">
+                <div className="on-form-register">
+                  <dl className="on-form-row large">
+                    <div className="form-row-item">
+                      <dt className="form-row-label">
+                        <label htmlFor="initial_login_id_display">로그인 ID</label>
+                      </dt>
+                      <dd className="form-row-content">
+                        <span id="initial_login_id_display" className="text-value">
+                          {user?.loginId || '-'}
+                        </span>
+                      </dd>
+                    </div>
+                    <div className="form-row-item">
+                      <dt className="form-row-label">
+                        <label htmlFor="initial_new_password">새 비밀번호</label>
+                      </dt>
+                      <dd className="form-row-content">
+                        <div className="form-wrapper w-220">
+                          <input
+                            type="password"
+                            id="initial_new_password"
+                            className="krds-input small"
+                            value={initialNewPassword}
+                            disabled={saving}
+                            autoComplete="new-password"
+                            onChange={(event) => setInitialNewPassword(event.target.value)}
+                          />
+                        </div>
+                      </dd>
+                    </div>
+                    <div className="form-row-item">
+                      <dt className="form-row-label">
+                        <label htmlFor="initial_new_password_confirm">새 비밀번호 확인</label>
+                      </dt>
+                      <dd className="form-row-content">
+                        <div className="form-wrapper w-220">
+                          <input
+                            type="password"
+                            id="initial_new_password_confirm"
+                            className="krds-input small"
+                            value={initialNewPasswordConfirm}
+                            disabled={saving}
+                            autoComplete="new-password"
+                            onChange={(event) => setInitialNewPasswordConfirm(event.target.value)}
+                          />
+                        </div>
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+                <ul className="info-list-point">
+                  <li>
+                    <i className="svg-icon ico-checkbox" />
+                    비밀번호는 8~20자이며 숫자·특수문자를 필수 포함해야 하고, 연속된 문자 3개 이상 및 로그인 ID 포함은 사용할 수 없습니다.
+                  </li>
+                </ul>
+              </div>
+
+              <div className={styles.buttonGroup}>
+                <button
+                  type="submit"
+                  className="krds-btn primary"
+                  disabled={saving}
+                >
+                  {saving ? '변경 중' : '비밀번호 변경'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div className={styles.modalBackdrop} />
+      </section>
+    </div>
+  );
+
   if (!canRender) {
     return null;
+  }
+
+  if (isInitialPasswordChange) {
+    return renderInitialPasswordChangeForm();
   }
 
   const setFormValue = (field, value) => {
@@ -508,7 +670,7 @@ export default function AdditionalInfoRequiredGate() {
       window.alert('비밀번호와 비밀번호 확인을 입력해 주세요.');
       return false;
     }
-    if (!validatePasswordPolicy(password)) {
+    if (!validatePasswordPolicy(password, loginId)) {
       return false;
     }
     if (password !== passwordConfirm) {

@@ -52,22 +52,17 @@ export default defineConfig(({ mode }) => {
   const apiHost = env.VITE_API_HOST || 'http://localhost:8081'
   //const apiContext = env.VITE_API_CONTEXT || '/main-dev'
 
-  const server = {}
-  if (mode === 'development') {
-    const apiPrefix = `${base}api`.replace(/\/+$/, '')
-    server.proxy = {
-      // 프론트엔드에서 /main-dev/api/... 로 요청하면 백엔드의 /... 로 전달
+  const apiPrefix = `${base}api`.replace(/\/+$/, '')
+  const server = {
+    proxy: {
+      // 프론트엔드에서 /home-dev/api/... 로 요청하면 백엔드의 /api/... 로 전달
       [apiPrefix]: {
         target: apiHost,
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(new RegExp(`^${base.replace(/\/$/, '')}`), ''),
-        configure: (proxy) => {
-          // eslint-disable-next-line no-unused-vars
-          proxy.on('proxyReq', (_proxyReq) => {})
-        },
       },
-    }
+    },
   }
 
   return {
