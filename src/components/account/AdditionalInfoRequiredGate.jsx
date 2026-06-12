@@ -415,6 +415,134 @@ export default function AdditionalInfoRequiredGate() {
     };
   }, [additionalInfoRequired, currentMode, token, user]);
 
+  const handleInitialPasswordSubmit = async (event) => {
+    event.preventDefault();
+    if (!initialNewPassword || !initialNewPasswordConfirm) {
+      window.alert('새 비밀번호와 새 비밀번호 확인을 입력해 주세요.');
+      return;
+    }
+    if (!validatePasswordPolicy(initialNewPassword)) {
+      return;
+    }
+    if (initialNewPassword !== initialNewPasswordConfirm) {
+      window.alert('새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.');
+      return;
+    }
+    try {
+      setSaving(true);
+      await apiClient.post(
+        '/api/v1/account/password/initial',
+        { newPassword: initialNewPassword, newPasswordConfirm: initialNewPasswordConfirm },
+        { token },
+      );
+      window.alert('비밀번호가 변경되었습니다. 다시 로그인해 주세요.');
+      logout();
+      window.location.href = import.meta.env.BASE_URL ? `${import.meta.env.BASE_URL}service/login` : '/service/login';
+    } catch (error) {
+      window.alert(error?.data?.message || error?.message || '비밀번호 변경 중 오류가 발생했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const renderInitialPasswordChangeForm = () => (
+    <div className={styles.page}>
+      <section
+        id="modal_initial_password_change"
+        className={styles.modalWrap}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="initialPasswordChangeTitle"
+      >
+        <div className={styles.modalDialog}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <p className={styles.eyebrow}>{memberTypeLabel}</p>
+              <h1 id="initialPasswordChangeTitle" className={styles.modalTitle}>
+                초기 비밀번호 변경이 필요합니다.
+              </h1>
+              <p className={styles.guideText}>
+                발급된 초기 비밀번호로 로그인하셨습니다. 안전한 서비스 이용을 위해 새 비밀번호로 변경해 주세요.
+              </p>
+            </div>
+
+            <form onSubmit={handleInitialPasswordSubmit}>
+              <div className="conts-wrap mt-64">
+                <div className="on-form-register">
+                  <dl className="on-form-row large">
+                    <div className="form-row-item">
+                      <dt className="form-row-label">
+                        <label htmlFor="initial_login_id_display">로그인 ID</label>
+                      </dt>
+                      <dd className="form-row-content">
+                        <span id="initial_login_id_display" className="text-value">
+                          {user?.loginId || '-'}
+                        </span>
+                      </dd>
+                    </div>
+                    <div className="form-row-item">
+                      <dt className="form-row-label">
+                        <label htmlFor="initial_new_password">새 비밀번호</label>
+                      </dt>
+                      <dd className="form-row-content">
+                        <div className="form-wrapper w-220">
+                          <input
+                            type="password"
+                            id="initial_new_password"
+                            className="krds-input small"
+                            value={initialNewPassword}
+                            disabled={saving}
+                            autoComplete="new-password"
+                            onChange={(event) => setInitialNewPassword(event.target.value)}
+                          />
+                        </div>
+                      </dd>
+                    </div>
+                    <div className="form-row-item">
+                      <dt className="form-row-label">
+                        <label htmlFor="initial_new_password_confirm">새 비밀번호 확인</label>
+                      </dt>
+                      <dd className="form-row-content">
+                        <div className="form-wrapper w-220">
+                          <input
+                            type="password"
+                            id="initial_new_password_confirm"
+                            className="krds-input small"
+                            value={initialNewPasswordConfirm}
+                            disabled={saving}
+                            autoComplete="new-password"
+                            onChange={(event) => setInitialNewPasswordConfirm(event.target.value)}
+                          />
+                        </div>
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+                <ul className="info-list-point">
+                  <li>
+                    <i className="svg-icon ico-checkbox" />
+                    비밀번호는 8~20자이며 영문, 숫자, 특수문자 중 두 가지 이상을 조합해야 합니다.
+                  </li>
+                </ul>
+              </div>
+
+              <div className={styles.buttonGroup}>
+                <button
+                  type="submit"
+                  className="krds-btn primary"
+                  disabled={saving}
+                >
+                  {saving ? '변경 중' : '비밀번호 변경'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div className={styles.modalBackdrop} />
+      </section>
+    </div>
+  );
+
   if (!canRender) {
     return null;
   }
@@ -628,134 +756,6 @@ export default function AdditionalInfoRequiredGate() {
       setSaving(false);
     }
   };
-
-  const handleInitialPasswordSubmit = async (event) => {
-    event.preventDefault();
-    if (!initialNewPassword || !initialNewPasswordConfirm) {
-      window.alert('새 비밀번호와 새 비밀번호 확인을 입력해 주세요.');
-      return;
-    }
-    if (!validatePasswordPolicy(initialNewPassword)) {
-      return;
-    }
-    if (initialNewPassword !== initialNewPasswordConfirm) {
-      window.alert('새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.');
-      return;
-    }
-    try {
-      setSaving(true);
-      await apiClient.post(
-        '/api/v1/account/password/initial',
-        { newPassword: initialNewPassword, newPasswordConfirm: initialNewPasswordConfirm },
-        { token },
-      );
-      window.alert('비밀번호가 변경되었습니다. 다시 로그인해 주세요.');
-      logout();
-      window.location.href = import.meta.env.BASE_URL ? `${import.meta.env.BASE_URL}service/login` : '/service/login';
-    } catch (error) {
-      window.alert(error?.data?.message || error?.message || '비밀번호 변경 중 오류가 발생했습니다.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const renderInitialPasswordChangeForm = () => (
-    <div className={styles.page}>
-      <section
-        id="modal_initial_password_change"
-        className={styles.modalWrap}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="initialPasswordChangeTitle"
-      >
-        <div className={styles.modalDialog}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <p className={styles.eyebrow}>{memberTypeLabel}</p>
-              <h1 id="initialPasswordChangeTitle" className={styles.modalTitle}>
-                초기 비밀번호 변경이 필요합니다.
-              </h1>
-              <p className={styles.guideText}>
-                발급된 초기 비밀번호로 로그인하셨습니다. 안전한 서비스 이용을 위해 새 비밀번호로 변경해 주세요.
-              </p>
-            </div>
-
-            <form onSubmit={handleInitialPasswordSubmit}>
-              <div className="conts-wrap mt-64">
-                <div className="on-form-register">
-                  <dl className="on-form-row large">
-                    <div className="form-row-item">
-                      <dt className="form-row-label">
-                        <label htmlFor="initial_login_id_display">로그인 ID</label>
-                      </dt>
-                      <dd className="form-row-content">
-                        <span id="initial_login_id_display" className="text-value">
-                          {user?.loginId || '-'}
-                        </span>
-                      </dd>
-                    </div>
-                    <div className="form-row-item">
-                      <dt className="form-row-label">
-                        <label htmlFor="initial_new_password">새 비밀번호</label>
-                      </dt>
-                      <dd className="form-row-content">
-                        <div className="form-wrapper w-220">
-                          <input
-                            type="password"
-                            id="initial_new_password"
-                            className="krds-input small"
-                            value={initialNewPassword}
-                            disabled={saving}
-                            autoComplete="new-password"
-                            onChange={(event) => setInitialNewPassword(event.target.value)}
-                          />
-                        </div>
-                      </dd>
-                    </div>
-                    <div className="form-row-item">
-                      <dt className="form-row-label">
-                        <label htmlFor="initial_new_password_confirm">새 비밀번호 확인</label>
-                      </dt>
-                      <dd className="form-row-content">
-                        <div className="form-wrapper w-220">
-                          <input
-                            type="password"
-                            id="initial_new_password_confirm"
-                            className="krds-input small"
-                            value={initialNewPasswordConfirm}
-                            disabled={saving}
-                            autoComplete="new-password"
-                            onChange={(event) => setInitialNewPasswordConfirm(event.target.value)}
-                          />
-                        </div>
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-                <ul className="info-list-point">
-                  <li>
-                    <i className="svg-icon ico-checkbox" />
-                    비밀번호는 8~20자이며 영문, 숫자, 특수문자 중 두 가지 이상을 조합해야 합니다.
-                  </li>
-                </ul>
-              </div>
-
-              <div className={styles.buttonGroup}>
-                <button
-                  type="submit"
-                  className="krds-btn primary"
-                  disabled={saving}
-                >
-                  {saving ? '변경 중' : '비밀번호 변경'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-        <div className={styles.modalBackdrop} />
-      </section>
-    </div>
-  );
 
   const handleCloseForTest = async () => {
     const confirmed = window.confirm('팝업을 닫을경우 로그아웃됩니다. 로그아웃 하시겠습니까?');
