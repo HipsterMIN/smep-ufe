@@ -231,7 +231,10 @@
         gap: 2rem;
         align-items: stretch;
         .calendar-box{flex:1;min-width:0;
-            &.today-box, &.card-news-box{flex:0 0 38rem;max-width:38rem;}
+            &.today-box{flex:0 0 38rem;max-width:38rem;}
+            &.card-news-box{flex:0 0 38rem;max-width:38rem;
+                img{aspect-ratio: 1/1;object-fit: cover;object-position: top center;}
+            }
         }
     }
     .calendar-title-wrap {
@@ -497,6 +500,8 @@
                 margin:0;
                 font-size:var(--krds-pc-font-size-heading-small);
                 font-weight:500;
+                text-align:left;
+                line-height:1.2;
             }
             &:hover {
                 background-color:var(--krds-color-light-alpha-white100);
@@ -1042,7 +1047,7 @@
     .main-quick-menu{padding-right:40px;padding-left:40px;
         .quick-menu-item{
             button{flex-direction:column;
-                .quick-menu-tit{font-size:var(--krds-pc-font-size-body-large)}
+                .quick-menu-tit{font-size:var(--krds-pc-font-size-body-medium)}
             }
         }
     }
@@ -1103,8 +1108,64 @@
             }
         }
     }
+    .responsive-section{
+        .main-calendar{order:2;}
+        .main-quick-menu{order:1;margin-top:3.2rem;}
+    }
+    .quick-menu-swiper {
+        .swiper {
+            overflow: visible;
+        }
+
+        .swiper-wrapper {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1.2rem;
+            transform: none !important;
+        }
+
+        .swiper-slide {
+            width: auto !important;
+            margin-right: 0 !important;
+        }
+
+        .swiper-nav-wrap {
+            display: none;
+        }
+
+        .quick-menu-item {
+            height: 100%;
+            button {
+                width: 100%;
+                height: 100%;
+                //flex-direction: column;
+                gap: 0.8rem;
+            }
+        }
+
+        .quick-menu-img {
+        width: 5.6rem;
+        height: 5.6rem;
+        flex: 0 0 5.6rem;
+        }
+
+        .quick-menu-tit {
+            white-space: normal;line-height:1;font-size:var(--krds-pc-font-size-body-small) !important;
+        }
+    }
 }
 @media(max-width:545px){
+    .quick-menu-swiper {
+        .quick-menu-item {
+            height: 100%;
+            button {
+                width: 100%;
+                height: 100%;
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+        }
+    }
     .main-container {
         .top-srch{ 
             .krds-input{height:5rem;font-size:var(--krds-pc-font-size-body-small);padding-right:4.4rem;padding-left:2.4rem;}
@@ -1137,55 +1198,8 @@
     .responsive-section {
         .main-quick-menu{padding-right:2rem;padding-left:2rem;}
     }
-    .quick-menu-swiper {
-        .swiper {
-            overflow: visible;
-        }
-
-        .swiper-wrapper {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 1.2rem;
-            transform: none !important;
-        }
-
-        .swiper-slide {
-            width: auto !important;
-            margin-right: 0 !important;
-        }
-
-        .swiper-nav-wrap {
-            display: none;
-        }
-
-        .quick-menu-item {
-            height: 100%;
-            button {
-                width: 100%;
-                height: 100%;
-                flex-direction: column;
-                gap: 0.8rem;
-            }
-        }
-
-        .quick-menu-img {
-        width: 5.6rem;
-        height: 5.6rem;
-        flex: 0 0 5.6rem;
-        }
-
-        .quick-menu-tit {
-            white-space: normal;line-height:1;font-size:var(--krds-pc-font-size-body-small) !important;
-        }
-    }
 }
 .responsive-section{display:flex;flex-direction: column;}
-@media(max-width:767px){
-    .responsive-section{
-        .main-calendar{order:2;}
-        .main-quick-menu{order:1;margin-top:3.2rem;}
-    }
-}
 .main-service, 
 .main-btm-bar
 {display:none;}
