@@ -122,7 +122,8 @@ const EventParticipationList = () => {
   );
 
   const boardDescription = useMemo(
-    () => stripHtmlTags(boardDetail?.bbsExplnCn),
+    // () => stripHtmlTags(boardDetail?.bbsExplnCn),
+    () => boardDetail?.bbsExplnCn,
     [boardDetail],
   );
 
@@ -325,9 +326,10 @@ const EventParticipationList = () => {
         </div>
 
         {boardDescription && (
-          <div className="guide-txt custom mb-40">
-            <p>{boardDescription}</p>
-          </div>
+          <div
+            className="guide-txt custom mb-40"
+            dangerouslySetInnerHTML={{ __html: boardDescription }}
+          />
         )}
 
         <div className="search-top-box">
