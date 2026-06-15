@@ -226,7 +226,9 @@ const UI_USR_R_420 = () => {
                       disabled={isSubmitting}
                     />
                   </div>
-                  <p className="form-hint point">새 비밀번호와 새 비밀번호 확인이 일치해야 합니다.</p>
+                  {confirmPassword && newPassword !== confirmPassword && (
+                    <p className="form-hint point">새 비밀번호와 새 비밀번호 확인이 일치해야 합니다.</p>
+                  )}
                 </dd>
               </div>
             </dl>
