@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useMemo, useCallback } fro
 import { useLocation } from 'react-router-dom';
 import { useMenuStore } from '../store/useMenuStore';
 import { buildFullPath } from '../utils/menuUtils';
-import { componentMap } from '../routes/componentMap';
+import routeChildrenMeta from '../routes/routeChildrenMeta';
 
 /**
  * =============================================================================
@@ -191,7 +191,7 @@ export function UserMenuProvider({ children }) {
     for (const menuId in flatMenuMap) {
       const node = flatMenuMap[menuId];
       const nodePath = buildFullPath(node, flatMenuMap);
-      const componentConfig = componentMap[menuId];
+      const componentConfig = routeChildrenMeta[menuId];
 
       if (componentConfig?.children) {
         for (const child of componentConfig.children) {
