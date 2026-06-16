@@ -18,7 +18,7 @@ import mainIcon04 from "../assets/main/new/mainIcon_04.svg";
 import mainIcon05 from "../assets/main/new/mainIcon_05.svg";
 import mainIcon06 from "../assets/main/mainIcon_06.svg";
 import mainIcon07 from "../assets/main/mainIcon_07.svg";
-import cardNews01 from "../assets/main/new/card-news-sample.png";
+import cardNews01 from "../assets/main/new/card-news-01.png";
 import bannerLine from "../assets/main/new/banner-support-biz.png";
 import bannerLineM from "../assets/main/new/banner-support-biz-m.png";
 
@@ -1001,62 +1001,60 @@ useEffect(() => {
                 {/* E - 사업캘린더 */}
                 {/* S - 자주 찾는 서비스  */}
                 <section className="main-quick-menu">
-                    <div className="flex-box">
-                        <h2 className="section-tit white sr-only">자주 찾는 <br />서비스 </h2>
-                        <div className="quick-menu-swiper">
-                        <Swiper
-                            breakpoints={{
-                                320: {
-                                    enabled: false,
-                                    slidesPerView: 6,
-                                    spaceBetween: 0
-                                },
-                                546: {
-                                    enabled: true,
-                                    slidesPerView: 3,
-                                    spaceBetween: 10
-                                },
-                                768: {
-                                    enabled: true,
-                                    slidesPerView: 4,
-                                    spaceBetween: 10
-                                },
-                                1200: {
-                                    enabled: true,
-                                    slidesPerView: 5,
-                                    spaceBetween: 20
-                                },
-                            }}
-                            modules={[Navigation]}
-                                navigation={{
-                                prevEl: '.quick-menu-swiper .swiper-button-prev',
-                                nextEl: '.quick-menu-swiper .swiper-button-next',
-                            }}
-                            onSwiper={(swiper) => {
-                                setIsBeginning(swiper.isBeginning);
-                                setIsEnd(swiper.isEnd);
-                            }}
-                            onSlideChange={(swiper) => {
-                                setIsBeginning(swiper.isBeginning);
-                                setIsEnd(swiper.isEnd);
-                            }}
-                        >
-                            {platformMenus.map((item, index) => (
-                            <SwiperSlide key={index}>
-                                <div className="quick-menu-item">
-                                <button type="button">
-                                    <span className="quick-menu-img"><img src={item.img} alt="" /></span>
-                                    <span className="quick-menu-tit">{item.title}</span>
-                                </button>
-                                </div>
-                            </SwiperSlide>
-                            ))}
-                        </Swiper>
-                        {/* navigation */}
-                            <div className="swiper-nav-wrap">
-                                <button type="button" className={`swiper-button-prev ${isBeginning && "hide"}`}><span className="sr-only">이전</span></button>
-                                <button type="button" className={`swiper-button-next ${isEnd && "hide"}`}><span className="sr-only">다음</span></button>
+                    <h2 className="section-tit white sr-only">자주 찾는 <br />서비스 </h2>
+                    <div className="quick-menu-swiper">
+                    <Swiper
+                        breakpoints={{
+                            320: {
+                                enabled: false,
+                                slidesPerView: 6,
+                                spaceBetween: 0
+                            },
+                            546: {
+                                enabled: false,
+                                slidesPerView: 6,
+                                spaceBetween: 0
+                            },
+                            768: {
+                                enabled: false,
+                                slidesPerView: 6,
+                                spaceBetween: 10
+                            },
+                            1200: {
+                                enabled: true,
+                                slidesPerView: 5,
+                                spaceBetween: 20
+                            },
+                        }}
+                        modules={[Navigation]}
+                            navigation={{
+                            prevEl: '.quick-menu-swiper .swiper-button-prev',
+                            nextEl: '.quick-menu-swiper .swiper-button-next',
+                        }}
+                        onSwiper={(swiper) => {
+                            setIsBeginning(swiper.isBeginning);
+                            setIsEnd(swiper.isEnd);
+                        }}
+                        onSlideChange={(swiper) => {
+                            setIsBeginning(swiper.isBeginning);
+                            setIsEnd(swiper.isEnd);
+                        }}
+                    >
+                        {platformMenus.map((item, index) => (
+                        <SwiperSlide key={index}>
+                            <div className="quick-menu-item">
+                            <button type="button">
+                                <span className="quick-menu-img"><img src={item.img} alt="" /></span>
+                                <span className="quick-menu-tit">{item.title}</span>
+                            </button>
                             </div>
+                        </SwiperSlide>
+                        ))}
+                    </Swiper>
+                    {/* navigation */}
+                        <div className="swiper-nav-wrap">
+                            <button type="button" className={`swiper-button-prev ${isBeginning && "hide"}`}><span className="sr-only">이전</span></button>
+                            <button type="button" className={`swiper-button-next ${isEnd && "hide"}`}><span className="sr-only">다음</span></button>
                         </div>
                     </div>
                 </section>

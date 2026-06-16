@@ -1,4 +1,30 @@
-import React, {lazy, Suspense} from 'react';
+import React, { lazy, Suspense } from 'react';
+
+const CHUNK_LOAD_TIMEOUT_MS = 8_000;
+const CHUNK_RELOAD_KEY = '__smep_chunk_reload_ts__';
+const RELOAD_COOLDOWN_MS = 5_000;
+
+const reloadOnce = () => {
+  try {
+    const last = Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) || 0);
+    if (Date.now() - last < RELOAD_COOLDOWN_MS) return;
+    sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()));
+  } catch { /* ignore */ }
+  window.location.reload();
+};
+
+const lazyWithRetry = (importFn) =>
+  lazy(() =>
+    Promise.race([
+      importFn(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('ChunkLoadError: load timeout')), CHUNK_LOAD_TIMEOUT_MS),
+      ),
+    ]).catch(() => {
+      reloadOnce();
+      return new Promise(() => {});
+    }),
+  );
 
 // src/publishing 하위의 모든 .jsx 파일을 가져옵니다.
 const modules = import.meta.glob('../publishing/*.jsx');
@@ -15,7 +41,7 @@ export const autoPublishingRoutes = Object.keys(modules).map((path) => {
     // 여기서는 PublishingList를 제외하고 index로 직접 설정하는 방식을 사용하거나 포함시킵니다.
     if (fileName === 'PublishingList') return null;
 
-    const PageComponent = lazy(modules[path]);
+    const PageComponent = lazyWithRetry(modules[path]);
 
     // 2. URL로 사용하기 위해 파일명을 기반으로 경로 생성
     // 예: "AiSmartSearch" -> "AiSmartSearch" (또는 소문자/하이픈 변환)
