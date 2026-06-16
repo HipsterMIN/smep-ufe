@@ -324,7 +324,6 @@ const BoardBasic = ({ boardDetail, bbsNo }) => {
               <option value="">전체</option>
               <option value="TITLE">제목</option>
               <option value="CONTENT">내용</option>
-              <option value="WRITER">작성자</option>
             </select>
             <div className="sch-input">
               <input
