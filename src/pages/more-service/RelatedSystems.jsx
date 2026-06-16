@@ -422,9 +422,7 @@ const RelatedSystems = () => {
                   ) : list.length === 0 ? (
                     <li className="structured-item">
                       <div className="card-body">
-                        <p className="no-icon c-bold-tit">
-                          <span className="onellipsis-1">조회된 유관기관 시스템이 없습니다.</span>
-                        </p>
+                        <p className="no-icon c-bold-tit">조회된 유관기관 시스템이 없습니다.</p>
                       </div>
                     </li>
                   ) : (
