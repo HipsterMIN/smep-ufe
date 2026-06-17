@@ -566,15 +566,8 @@ export const componentMap = {
 
   // 회원정보변경
   'M_PIIO_00115': {
-    component: VerifyPassword,
+    component: UI_USR_W_411,
     layout: 'SubpageLayoutWithMenu',
-    wrapChildren: true,
-    componentProps: {
-      successPath: 'modify',
-    },
-    children: [
-      { path: 'modify', component: UI_USR_W_411 }, // 기업 회원정보 변경
-    ],
   },
 
   // 비밀번호 수정

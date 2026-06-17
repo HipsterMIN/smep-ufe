@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode localhost",
+    "predev": "vite --mode predev",
     "build:core": "npm run build --prefix packages/core",
     "build:icon": "npm run build --prefix packages/icon",
     "build:packages": "npm run build:core && npm run build:icon",

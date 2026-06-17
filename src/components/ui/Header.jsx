@@ -642,7 +642,7 @@ export default function Header() {
                       canExtendSession={canExtendSession}
                       isExtendingSession={isExtendingSession}
                       onExtendSession={handleExtendSession}
-                      onLogin={handleServiceLogin}
+                      onLogin={handleOnePassIntegratedLogin}
                       onOnePassLogin={handleOnePassIntegratedLogin}
                       onOnePassConfig={handleOnePassConfig}
                       onOnePassJoin={handleOnePassJoin}
@@ -688,7 +688,7 @@ export default function Header() {
           ref={mobGnbRef} 
           menus={mobileMenus}
           onClose={handleCloseMobGnb} 
-          onLogin={handleServiceLogin}
+          onLogin={handleOnePassIntegratedLogin}
           onOnePassLogin={handleOnePassIntegratedLogin}
           onOnePassJoin={handleOnePassJoin}
           onMyPage={handleMyPage}
