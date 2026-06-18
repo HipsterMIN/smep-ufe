@@ -5,7 +5,8 @@ import Pagination from '@components/ui/Pagination';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import { api as apiClient } from '@lib/apiClient.js';
-import { useNavigate } from 'react-router-dom'; // API 클라이언트 임포트
+import { useNavigate } from 'react-router-dom';
+import {useAuthStore} from "@store/useAuthStore.jsx"; // API 클라이언트 임포트
 
 const MyApiRequestList = () => { // mbrNo를 받아옵니다.
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -18,22 +19,42 @@ const MyApiRequestList = () => { // mbrNo를 받아옵니다.
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  const authToken = useAuthStore((state) => state.token);
+
+  const isLoggedIn = Boolean(authToken);
+
   // 1. 백엔드 API로부터 데이터 호출
   useEffect(() => {
+    window.scrollTo(0, 0);
+
+    let isMounted = true;
+
     const fetchHistory = async () => {
       try {
         setIsLoading(true);
         const res = await apiClient.get(`/api/v1/apikey/history/list?mbrNo=${mbrNo}`);
+        if (!isMounted) return;
         setHistoryList(res.data);
       } catch (error) {
+        if (!isMounted) return;
         console.error('신청 내역 조회 실패:', error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
-    if (mbrNo) fetchHistory();
-  }, [mbrNo]);
+    if (isLoggedIn && mbrNo) {
+      fetchHistory();
+    } else {
+      setIsLoading(false);
+      setHistoryList([]); // 로그인 상태가 아니면 이력 초기화
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [mbrNo, isLoggedIn]);
 
   // 2. 페이징 계산 로직
   const totalElements = historyList.length;
