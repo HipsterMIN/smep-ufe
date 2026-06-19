@@ -4,13 +4,30 @@ import { useEffect, useRef, useState, useCallback } from 'react';
  * 팝업 통신을 위한 Custom Hook
  * Sender(부모창)와 Receiver(자식창) 로직을 모두 포함합니다.
  */
+let popupPayloadSequence = 0;
+
+const createPayloadId = () => {
+  const cryptoApi = globalThis.crypto;
+  if (cryptoApi?.randomUUID) {
+    return cryptoApi.randomUUID();
+  }
+  if (cryptoApi?.getRandomValues) {
+    const values = new Uint32Array(2);
+    cryptoApi.getRandomValues(values);
+    return `${Date.now()}-${Array.from(values, (value) => value.toString(36)).join('')}`;
+  }
+
+  // crypto API가 없는 구형 브라우저에서는 동일 세션 안의 key 충돌 방지만 보장한다.
+  popupPayloadSequence = (popupPayloadSequence + 1) % Number.MAX_SAFE_INTEGER;
+  return `${Date.now()}-${popupPayloadSequence}`;
+};
 
 // Sender Hook (부모창용)
 export const usePopupSender = () => {
   const timerRef = useRef(null);
 
   const openPopup = useCallback((path, payload, windowFeatures) => {
-    const payloadId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const payloadId = createPayloadId();
     const baseUrl = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
     const targetUrl = `${baseUrl}${path}?payloadId=${payloadId}`;
     
