@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode localhost",
+    "predev": "vite --mode predev",
     "build:core": "npm run build --prefix packages/core",
     "build:icon": "npm run build --prefix packages/icon",
     "build:packages": "npm run build:core && npm run build:icon",
     "build:local": "npm run build:packages && vite build --mode localhost",
+    "build:predev": "npm run build:packages && vite build --mode predev",
     "build:dev": "npm run build:packages && vite build --mode development",
     "build:prod": "npm run build:packages && vite build --mode production",
     "build": "npm run build:packages && vite build --mode development",
