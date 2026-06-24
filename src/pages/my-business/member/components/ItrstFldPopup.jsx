@@ -119,7 +119,6 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
           certification: commonCodes[COMMON_CODE_GROUPS.certification] || [],
         });
       } catch (error) {
-        console.error('관심분야 공통코드 조회 실패:', error);
         if (active) {
           setCommonCodeOptions(EMPTY_COMMON_CODE_OPTIONS);
         }
@@ -155,7 +154,6 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
           setSelectedSigunguCd(nextLocationFields.sigunguCd);
         }
       } catch (error) {
-        console.error('저장된 관심분야 조회 실패:', error);
         if (active) {
           setSavedInterestFields({});
           setSavedLocationFields({ sidoCd: '', sigunguCd: '' });
@@ -188,7 +186,6 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
           setSidoList(Array.isArray(responseData) ? responseData : []);
         }
       } catch (error) {
-        console.error('시도 목록 조회 실패:', error);
         if (active) {
           setSidoList([]);
         }
@@ -222,7 +219,6 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
           setSigunguList(Array.isArray(responseData) ? responseData : []);
         }
       } catch (error) {
-        console.error('시군구 목록 조회 실패:', error);
         if (active) {
           setSigunguList([]);
         }
@@ -305,7 +301,6 @@ const ItrstFldPopup = ({ isOpen = false, onClose }) => {
       window.alert('저장되었습니다.');
       handleClose();
     } catch (error) {
-      console.error('관심분야 저장 실패:', error);
       window.alert(error?.message || '관심분야 저장에 실패했습니다.');
     } finally {
       setSaving(false);

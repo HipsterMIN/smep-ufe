@@ -103,7 +103,6 @@ const EventParticipationWrite = ({ mode = 'create' }) => {
       } catch (error) {
         if (!isMounted) return;
         setBoardDetail(null);
-        console.error('이벤트 참여 게시판 상세 조회 실패:', error);
       }
     };
 
@@ -141,7 +140,6 @@ const EventParticipationWrite = ({ mode = 'create' }) => {
       } catch (error) {
         if (!isMounted) return;
         setCategories([]);
-        console.error('이벤트 참여 카테고리 조회 실패:', error);
       } finally {
         if (isMounted) {
           setLoadingCategories(false);

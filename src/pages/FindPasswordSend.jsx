@@ -76,10 +76,6 @@ const FindPasswordSend = () => {
       return;
     }
 
-    console.info('[FIND_PASSWORD_MARK] temporary password send start', {
-      hasFindKey: Boolean(findKey),
-      sendType: selectedSendType,
-    });
     setIsSendingTemporaryPassword(true);
 
     try {
@@ -88,24 +84,12 @@ const FindPasswordSend = () => {
         sendType: selectedSendType,
       });
       const sendPayload = unwrapApiResponseData(sendResponse);
-      console.info('[FIND_PASSWORD_MARK] temporary password send response unwrapped', {
-        ...createResponseShapeMarker(sendResponse, sendPayload),
-        hasSendType: Boolean(sendPayload?.sendType),
-        hasMaskedAddress: Boolean(sendPayload?.maskedAddress),
-      });
-      console.info('[FIND_PASSWORD_MARK] temporary password send success', {
-        sendType: sendPayload?.sendType,
-        hasMaskedAddress: Boolean(sendPayload?.maskedAddress),
-      });
+
       const sendTypeLabel = SEND_TYPE_LABELS[sendPayload?.sendType] || SEND_TYPE_LABELS[selectedSendType];
       const maskedAddress = sendPayload?.maskedAddress ? ` (${sendPayload.maskedAddress})` : '';
       alert(`${sendTypeLabel}${maskedAddress}로 임시비밀번호가 발송되었습니다. 로그인해 주세요.`);
       navigate('/service/login', { replace: true });
     } catch (error) {
-      console.error('[FIND_PASSWORD_MARK] temporary password send failed', {
-        status: error?.status,
-        message: error?.message,
-      });
       alert(resolvePasswordFindErrorMessage(error));
     } finally {
       setIsSendingTemporaryPassword(false);

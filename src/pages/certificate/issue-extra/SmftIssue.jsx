@@ -41,7 +41,6 @@ const SmftIssue = () => {
           setSelectedCrtfIssuNo(data.records[0].crtfIssuNo);
         }
       } catch (e) {
-        console.error('스마트공장수준확인서 목록 조회 실패:', e);
         alert('발급 가능한 스마트공장수준확인서가 없습니다.');
       } finally {
         setIsFetching(false);
@@ -83,7 +82,6 @@ const SmftIssue = () => {
 
       navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
-      console.error('증명서 발급 실패:', e);
       alert('증명서 발급 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
@@ -104,7 +102,6 @@ const SmftIssue = () => {
 
       navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
-      console.error('증명서 발급 실패:', e);
       alert('증명서 발급 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);

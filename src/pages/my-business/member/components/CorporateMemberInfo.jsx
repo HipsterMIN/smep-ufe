@@ -45,7 +45,6 @@ const CorporateMemberInfo = ({
   };
 
   const handleAddressSearchError = (error) => {
-    console.error('Failed to search address:', error);
     window.alert(error?.message || '주소검색 중 오류가 발생했습니다.');
   };
 

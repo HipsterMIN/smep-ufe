@@ -9,16 +9,8 @@ const OnePassSsoLogout = () => {
 
   useEffect(() => {
     // 외부 OnePass logout 복귀 시점에도 로컬 상태를 한 번 더 비워 stale 세션을 남기지 않는다.
-    console.log(`${LOG_PREFIX} effect start`, {
-      pathname: window.location.pathname,
-      hasSearch: Boolean(window.location.search),
-    });
 
     useAuthStore.getState().logout();
-
-    console.log(`${LOG_PREFIX} local logout completed`, {
-      isLogin: Boolean(useAuthStore.getState().isLogin),
-    });
 
     // Keycloak 로그아웃 후 특정 페이지로 복귀해야 하는 경우 처리.
     // 예: 증명서 발급 화면에서 비기업회원이 로그아웃 요청 → /service/login(기업회원)으로 복귀.
@@ -35,16 +27,9 @@ const OnePassSsoLogout = () => {
         redirectPath = path || '/';
         redirectState = state;
       } catch {
-        // 파싱 실패 시 홈으로
-        console.warn(`${LOG_PREFIX} post_logout_redirect parse failed, fallback to /`);
+        return null;
       }
     }
-
-    console.log(`${LOG_PREFIX} navigate`, {
-      to: redirectPath,
-      hasState: Boolean(redirectState),
-      reason: 'onepass-logout-callback-complete',
-    });
 
     navigate(redirectPath, { state: redirectState, replace: true });
     

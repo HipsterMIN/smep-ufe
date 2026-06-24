@@ -65,7 +65,6 @@ function parseJwt(token) {
 
     return JSON.parse(jsonPayload);
   } catch (e) {
-    console.error('Failed to parse JWT:', e);
     return null;
   }
 }
@@ -242,11 +241,9 @@ export default function Header() {
 
     if (currentMode === 'CORPORATE') {
       const onePassJoinUrl = `${tagetBizMypageUrl}?redirect_uri=${fullUrl}/mb/dash/UI_USR_L_510&client_id=${clientId}&uuid=${uuid}`;
-      console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     } else {
       const onePassJoinUrl = `${tagetMbrMypageUrl}?redirect_uri=${fullUrl}/mb/dash/UI_USR_L_510&client_id=${clientId}&uuid=${uuid}`;
-      console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     }
     
@@ -254,7 +251,6 @@ export default function Header() {
 
   const handleOnePassJoin = () => {
     const onePassJoinUrl = buildOnePassRegisterUrl('member');
-    console.log('onOnePassJoin : ', onePassJoinUrl);
     window.location.href = onePassJoinUrl;
   };
 
@@ -284,11 +280,6 @@ export default function Header() {
         const responseData = response?.data || response;
         const logoutUrl = responseData?.logoutUrl || null;
 
-        console.log('[Header] SSO logout url resolved', {
-          hasLogoutUrl: Boolean(logoutUrl),
-          logoutUrlLength: logoutUrl?.length ?? 0,
-        });
-
         logout(); // 로컬 상태 초기화 (kcIdToken 포함)
 
         if (logoutUrl) {
@@ -296,10 +287,6 @@ export default function Header() {
           return;
         }
       } catch (error) {
-        console.error('[Header] SSO logout failed, falling back to local logout', {
-          message: error?.message ?? 'unknown-error',
-          status: error?.status ?? null,
-        });
         logout();
       }
     } else {
@@ -324,7 +311,6 @@ export default function Header() {
       setToken(newAccessToken);
       setRefreshToken(newRefreshToken);
     } catch (error) {
-      console.error('Failed to extend session:', error);
       logout();
       alert('로그인 유효시간 연장에 실패했습니다. 다시 로그인해주세요.');
       navigate('/service/login');
@@ -367,12 +353,11 @@ export default function Header() {
             const response = await apiClient.get('/api/v1/account/me', { token: receivedToken });
             const userInfo = response.data || response;
             if (userInfo) {
-              console.log('userInfo: ', userInfo);
               login({ token: receivedToken, profile: userInfo });
               return;
             }
           } catch (error) {
-            console.error('Failed to fetch user info:', error);
+            return null;
           }
 
           if (brno) {
@@ -387,8 +372,6 @@ export default function Header() {
           }
 
           alert('사용자 정보를 불러올 수 없습니다.');
-        } else {
-          console.error('Invalid login event data: No token or user data found.', event.data);
         }
       }
     };
@@ -424,11 +407,10 @@ export default function Header() {
             allowedOrigins.add(new URL(redirectUri).origin);
           }
         } catch (error) {
-          console.warn('Failed to parse login URL for redirect origin.', error);
+          return null;
         }
         openFallback(loginUrl);
       } catch (error) {
-        console.error('Failed to fetch login URL:', error);
         const basePath = BASE_URL.endsWith('/') ? BASE_URL : BASE_URL + '/';
         openFallback(`${basePath}service/SSO-login`);
       }
@@ -668,7 +650,7 @@ export default function Header() {
                           const profile = profileResponse.data || profileResponse;
                           login({ token: newToken, profile });
                         } catch (error) {
-                          console.error('Failed to switch context:', error);
+                          return null;
                         }
                       }}
                     />

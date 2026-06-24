@@ -59,7 +59,6 @@ export function AuthProvider({ children }) {
       setLocalUser(profile);
       return { success: true, user: profile };
     } catch (error) {
-      console.error('Login failed:', error);
       return { success: false, error: error.message };
     } finally {
       setLoading(false);

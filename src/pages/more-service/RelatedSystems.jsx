@@ -88,7 +88,6 @@ const RelatedSystems = () => {
       } catch (error) {
         if (!isMounted) return;
         setTabItems([allTab]);
-        console.error('bizType common code load failed:', error);
       }
     };
 
@@ -116,7 +115,6 @@ const RelatedSystems = () => {
       } catch (error) {
         if (!isMounted) return;
         setInstitutionOptions([]);
-        console.error('기관 선택 목록 조회 실패:', error);
       }
     };
 
@@ -163,7 +161,6 @@ const RelatedSystems = () => {
         setList([]);
         setTotalElements(0);
         setTotalPages(0);
-        console.error('유관기관 시스템 목록 조회 실패:', error);
       } finally {
         if (isMounted) {
           setLoading(false);

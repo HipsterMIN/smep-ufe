@@ -20,7 +20,6 @@ export const useApiKeyApply = () => {
       // 3. 조회가 성공하면 그때 팝업을 연다
       setIsOpen(true);
     } catch (err) {
-      console.error('회원 정보 조회 실패:', err);
       alert('회원 정보를 불러올 수 없습니다.');
 
       // 혹시라도 열려있을지 모를 팝업을 닫힘 상태로 유지

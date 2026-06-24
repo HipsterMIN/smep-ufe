@@ -36,7 +36,7 @@ const UI_USR_L_050 = () => {
       const response = await api.get('/api/v1/certificate/institutions');
       setInstitutions(response.data || []);
     } catch (err) {
-      console.error('발급기관 조회 실패:', err);
+      return null;
     }
   };
 
@@ -48,7 +48,7 @@ const UI_USR_L_050 = () => {
       const response = await api.get(`/api/v1/certificate/certificate-types${params}`);
       setCertificateTypes(response.data || []);
     } catch (err) {
-      console.error('증명서 종류 조회 실패:', err);
+      return null;
     }
   };
 
@@ -122,7 +122,6 @@ const UI_USR_L_050 = () => {
       setIsPopupOpen(true); // 팝업 열기
 
     } catch (err) {
-      console.error('진위확인 실패:', err);
       // 에러 발생 시 실패 팝업
       setVerificationResult({
         isSuccess: false,
