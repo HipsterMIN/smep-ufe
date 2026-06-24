@@ -9,6 +9,7 @@ import { appendListSearchToPath } from '@utils/listNavigation.js';
 
 const normalizeText = (value) => String(value ?? '').trim();
 const unwrapApiData = (response, fallback = null) => response?.data?.data ?? response?.data ?? fallback;
+const BOARD_SUBMIT_TOKEN_HEADER = 'X-Board-Submit-Token';
 
 // 의미/출처: 이벤트 참여 메뉴 M_PIIO_00171은 현재 bbs_no 69 전용이며, 메뉴 API bbsNo 누락 시에만 fallback으로 사용한다.
 const EVENT_PARTICIPATION_BBS_NO = 69;
@@ -274,6 +275,16 @@ const EventParticipationWrite = ({ mode = 'create' }) => {
     };
   };
 
+  const fetchSubmitToken = async () => {
+    const response = await apiClient.post(`/api/v1/board/${bbsNo}/posts/submit-token`);
+    const data = unwrapApiData(response, {});
+    const submitToken = normalizeText(data?.submitToken);
+    if (submitToken === '') {
+      throw new Error('등록 요청을 처리하지 못했습니다.');
+    }
+    return submitToken;
+  };
+
   const moveToDetail = () => {
     navigate(appendListSearchToPath('..', location.search));
   };
@@ -307,7 +318,10 @@ const EventParticipationWrite = ({ mode = 'create' }) => {
         await apiClient.post(`/api/v1/board/${bbsNo}/posts/${pstNo}`, buildRequestBody(finalAtchFileId));
         alert('수정되었습니다.');
       } else {
-        await apiClient.post(`/api/v1/board/${bbsNo}/posts`, buildRequestBody(finalAtchFileId));
+        const submitToken = await fetchSubmitToken();
+        await apiClient.post(`/api/v1/board/${bbsNo}/posts`, buildRequestBody(finalAtchFileId), {
+          headers: { [BOARD_SUBMIT_TOKEN_HEADER]: submitToken },
+        });
         alert('등록되었습니다.');
       }
       moveToDetail();
