@@ -74,7 +74,6 @@ const UI_USR_L_180 = () => {
       } catch (error) {
         if (!isMounted) return;
         setBoardDetail(null);
-        console.error('게시판 상세 조회 실패:', error);
       }
     };
 
@@ -137,7 +136,6 @@ const UI_USR_L_180 = () => {
         setPostList([]);
         setTotalElements(0);
         setTotalPages(0);
-        console.error('게시물 목록 조회 실패:', error);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -209,7 +207,7 @@ const UI_USR_L_180 = () => {
             <div className="sch-input">
               <input
                 type="text"
-                 className="krds-input medium"
+                className="krds-input medium"
                 placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}

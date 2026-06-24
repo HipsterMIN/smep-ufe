@@ -56,7 +56,6 @@ const UI_USR_R_450 = () => {
         if (!active) {
           return;
         }
-        console.error('기업회원 상세 조회 실패:', error);
         setErrorMessage(error?.message || '기업회원 정보를 불러오지 못했습니다.');
       } finally {
         if (active) {

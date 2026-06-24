@@ -34,7 +34,7 @@ const UI_USR_R_121 = () => {
         );
         setCertification(response.data);
       } catch (error) {
-        console.error('상세 조회 실패:', error);
+        return null;
       } finally {
         setLoading(false);
       }

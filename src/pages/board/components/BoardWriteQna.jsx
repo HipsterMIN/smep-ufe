@@ -69,7 +69,6 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
       } catch (error) {
         if (!isMounted) return;
         setCategories([]);
-        console.error('Q&A 등록 카테고리 조회 실패:', error);
       } finally {
         if (isMounted) {
           setLoadingCategories(false);

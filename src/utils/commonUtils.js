@@ -1,7 +1,7 @@
 // 사용예시: onChange={(event) => setValue(keepDigitsOnly(event.target.value))}
 // 입출력예시: keepDigitsOnly('12ab가34') => '1234'
 // 기능: 입력값에서 숫자 외 문자를 제거하고 숫자만 반환한다.
-import {normalizeDigits} from '@pages/my-business/member/memberUtils.js';
+import { normalizeDigits } from '@pages/my-business/member/memberUtils.js';
 
 export const keepDigitsOnly = (value) => String(value ?? '').replace(/[^0-9]/g, '');
 
@@ -99,13 +99,12 @@ export const decodeJwtPayload = (token) => {
 
     const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
     const paddedPayload = normalizedPayload.padEnd(
-        normalizedPayload.length + ((4 - normalizedPayload.length % 4) % 4),
-        '=',
+      normalizedPayload.length + ((4 - normalizedPayload.length % 4) % 4),
+      '=',
     );
 
     return JSON.parse(atob(paddedPayload));
   } catch (error) {
-    console.warn('Failed to decode access token payload.', error);
     return null;
   }
 };

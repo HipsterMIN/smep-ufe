@@ -1,18 +1,18 @@
-import { useEditor, EditorContent } from '@tiptap/react'
-import { useEffect, useMemo, useState } from 'react'
-import StarterKit from '@tiptap/starter-kit'
-import Placeholder from '@tiptap/extension-placeholder'
-import Table from '@tiptap/extension-table'
-import TableRow from '@tiptap/extension-table-row'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
-import TextAlign from '@tiptap/extension-text-align'
-import Underline from '@tiptap/extension-underline'
-import TextStyle from '@tiptap/extension-text-style'
-import { Extension, Node } from '@tiptap/core'
-import Image from '@tiptap/extension-image'
-import Link from '@tiptap/extension-link'
-import Youtube from '@tiptap/extension-youtube'
+import { useEditor, EditorContent } from '@tiptap/react';
+import { useEffect, useMemo, useState } from 'react';
+import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
+import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import TextAlign from '@tiptap/extension-text-align';
+import Underline from '@tiptap/extension-underline';
+import TextStyle from '@tiptap/extension-text-style';
+import { Extension, Node } from '@tiptap/core';
+import Image from '@tiptap/extension-image';
+import Link from '@tiptap/extension-link';
+import Youtube from '@tiptap/extension-youtube';
 
 // 간단한 아이콘 컴포넌트들 (인라인 SVG)
 const Icon = {
@@ -111,7 +111,7 @@ const Icon = {
       <path d="M5 20h14v-2H5v2Zm7-16-5 5h3v4h4v-4h3l-5-5Z"/>
     </svg>
   ),
-}
+};
 
 export default function RichEditor({
   theme = 'dark',
@@ -182,16 +182,16 @@ export default function RichEditor({
             fontSize: {
               default: null,
               renderHTML: attributes => {
-                if (!attributes.fontSize) return {}
-                return { style: `font-size: ${attributes.fontSize}` }
+                if (!attributes.fontSize) return {};
+                return { style: `font-size: ${attributes.fontSize}` };
               },
               parseHTML: element => ({ fontSize: element.style.fontSize || null }),
             },
           },
         },
-      ]
+      ];
     },
-  }), [] )
+  }), [] );
 
   // RowHeight Extension: apply min-height style to all cells in the current row
   const RowHeight = useMemo(() => Extension.create({
@@ -204,48 +204,48 @@ export default function RichEditor({
             rowMinHeight: {
               default: null,
               renderHTML: attrs => {
-                if (!attrs.rowMinHeight) return {}
-                const v = String(attrs.rowMinHeight)
-                const px = /px$/i.test(v) ? v : `${v}px`
-                return { style: `min-height: ${px}` }
+                if (!attrs.rowMinHeight) return {};
+                const v = String(attrs.rowMinHeight);
+                const px = /px$/i.test(v) ? v : `${v}px`;
+                return { style: `min-height: ${px}` };
               },
               parseHTML: element => ({ rowMinHeight: element.style?.minHeight || null }),
             },
           },
         },
-      ]
+      ];
     },
     addCommands() {
       return {
         setRowMinHeight:
           (value) => ({ state, dispatch }) => {
-            const { selection } = state
-            const $from = selection.$from
+            const { selection } = state;
+            const $from = selection.$from;
             // find parent tableRow
             for (let d = $from.depth; d > 0; d--) {
-              const node = $from.node(d)
+              const node = $from.node(d);
               if (node.type.name === 'tableRow') {
-                const rowPos = $from.before(d)
-                const rowNode = state.doc.nodeAt(rowPos)
-                if (!rowNode) return false
-                const tr = state.tr
-                let pos = rowPos + 1 // first child of row
-                const v = value == null || value === '' ? null : (/px$/i.test(String(value)) ? String(value) : `${value}px`)
+                const rowPos = $from.before(d);
+                const rowNode = state.doc.nodeAt(rowPos);
+                if (!rowNode) return false;
+                const tr = state.tr;
+                let pos = rowPos + 1; // first child of row
+                const v = value == null || value === '' ? null : (/px$/i.test(String(value)) ? String(value) : `${value}px`);
                 for (let i = 0; i < rowNode.childCount; i++) {
-                  const cell = rowNode.child(i)
-                  const attrs = { ...cell.attrs, rowMinHeight: v }
-                  tr.setNodeMarkup(pos, cell.type, attrs, cell.marks)
-                  pos += cell.nodeSize
+                  const cell = rowNode.child(i);
+                  const attrs = { ...cell.attrs, rowMinHeight: v };
+                  tr.setNodeMarkup(pos, cell.type, attrs, cell.marks);
+                  pos += cell.nodeSize;
                 }
-                if (tr.docChanged && dispatch) dispatch(tr)
-                return true
+                if (tr.docChanged && dispatch) dispatch(tr);
+                return true;
               }
             }
-            return false
+            return false;
           },
-      }
+      };
     },
-  }), [])
+  }), []);
 
   // IframeEmbed Node: render <div className="embed"><iframe .../></div> as an atom block
   const IframeEmbed = useMemo(() => Node.create({
@@ -266,19 +266,19 @@ export default function RichEditor({
         // 크기 조절을 위해 고정 px 사이즈를 저장 (없으면 responsive)
         width: { default: null },
         height: { default: null },
-      }
+      };
     },
     parseHTML() {
       return [
         {
           tag: 'div.embed > iframe',
           getAttrs: (element) => {
-            const el = element
-            const parent = el?.parentElement
+            const el = element;
+            const parent = el?.parentElement;
             // wrapper(div.embed)에 인라인 width/height가 있으면 읽어옴
-            const wrapStyle = parent?.getAttribute('style') || ''
-            const widthMatch = /width:\s*([0-9.]+)px/i.exec(wrapStyle)
-            const heightMatch = /height:\s*([0-9.]+)px/i.exec(wrapStyle)
+            const wrapStyle = parent?.getAttribute('style') || '';
+            const widthMatch = /width:\s*([0-9.]+)px/i.exec(wrapStyle);
+            const heightMatch = /height:\s*([0-9.]+)px/i.exec(wrapStyle);
             return {
               src: el.getAttribute('src') || null,
               title: el.getAttribute('title') || null,
@@ -289,13 +289,13 @@ export default function RichEditor({
               allowfullscreen: el.hasAttribute('allowfullscreen') ? true : null,
               width: widthMatch ? `${widthMatch[1]}px` : null,
               height: heightMatch ? `${heightMatch[1]}px` : null,
-            }
+            };
           },
         },
-      ]
+      ];
     },
     renderHTML({ HTMLAttributes }) {
-      const attrs = { ...HTMLAttributes }
+      const attrs = { ...HTMLAttributes };
       // Tip: boolean allowfullscreen는 속성만 존재해도 true 처리
       const iframeAttrs = {
         src: attrs.src,
@@ -305,175 +305,175 @@ export default function RichEditor({
         loading: attrs.loading || 'lazy',
         allowfullscreen: '',
         style: 'width:100%; height:100%; border:0;',
-      }
-      const wrapStyle = []
-      if (attrs.width) wrapStyle.push(`width:${attrs.width}`)
-      if (attrs.height) wrapStyle.push(`height:${attrs.height}`)
-      const wrapAttrs = { class: 'embed', style: wrapStyle.join('; ') || undefined }
-      return ['div', wrapAttrs, ['iframe', iframeAttrs]]
+      };
+      const wrapStyle = [];
+      if (attrs.width) wrapStyle.push(`width:${attrs.width}`);
+      if (attrs.height) wrapStyle.push(`height:${attrs.height}`);
+      const wrapAttrs = { class: 'embed', style: wrapStyle.join('; ') || undefined };
+      return ['div', wrapAttrs, ['iframe', iframeAttrs]];
     },
     addCommands() {
       return {
         setEmbed:
           (embedAttrs) => ({ chain }) => {
-            if (!embedAttrs || !embedAttrs.src) return false
-            return chain().insertContent({ type: 'iframeEmbed', attrs: embedAttrs }).run()
+            if (!embedAttrs || !embedAttrs.src) return false;
+            return chain().insertContent({ type: 'iframeEmbed', attrs: embedAttrs }).run();
           },
-      }
+      };
     },
     addNodeView() {
-      const allowResize = !!allowEmbedResize
-      const keepRatio = !!embedKeepRatio
-      const MIN_W = Number.isFinite(embedMinWidth) ? embedMinWidth : 200
-      const MIN_H = Number.isFinite(embedMinHeight) ? embedMinHeight : 112
-      const MAX_W = Number.isFinite(embedMaxWidth) ? embedMaxWidth : 1280
-      const MAX_H = Number.isFinite(embedMaxHeight) ? embedMaxHeight : 720
+      const allowResize = !!allowEmbedResize;
+      const keepRatio = !!embedKeepRatio;
+      const MIN_W = Number.isFinite(embedMinWidth) ? embedMinWidth : 200;
+      const MIN_H = Number.isFinite(embedMinHeight) ? embedMinHeight : 112;
+      const MAX_W = Number.isFinite(embedMaxWidth) ? embedMaxWidth : 1280;
+      const MAX_H = Number.isFinite(embedMaxHeight) ? embedMaxHeight : 720;
       return ({ node, getPos, editor }) => {
-        const dom = document.createElement('div')
-        dom.className = 'embed'
-        const iframe = document.createElement('iframe')
-        iframe.setAttribute('src', node.attrs.src || '')
-        if (node.attrs.title) iframe.setAttribute('title', node.attrs.title)
-        if (node.attrs.allow) iframe.setAttribute('allow', node.attrs.allow)
-        if (node.attrs.referrerpolicy) iframe.setAttribute('referrerpolicy', node.attrs.referrerpolicy)
-        iframe.setAttribute('loading', node.attrs.loading || 'lazy')
-        iframe.setAttribute('allowfullscreen', '')
-        iframe.setAttribute('style', 'width:100%; height:100%; border:0;')
+        const dom = document.createElement('div');
+        dom.className = 'embed';
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('src', node.attrs.src || '');
+        if (node.attrs.title) iframe.setAttribute('title', node.attrs.title);
+        if (node.attrs.allow) iframe.setAttribute('allow', node.attrs.allow);
+        if (node.attrs.referrerpolicy) iframe.setAttribute('referrerpolicy', node.attrs.referrerpolicy);
+        iframe.setAttribute('loading', node.attrs.loading || 'lazy');
+        iframe.setAttribute('allowfullscreen', '');
+        iframe.setAttribute('style', 'width:100%; height:100%; border:0;');
 
         // 초기 크기 적용
         const applySizeToDom = (w, h) => {
-          if (w) dom.style.width = String(w)
-          else dom.style.removeProperty('width')
-          if (h) dom.style.height = String(h)
-          else dom.style.removeProperty('height')
-          if (w || h) dom.setAttribute('data-fixed-size', 'true')
-          else dom.removeAttribute('data-fixed-size')
-        }
-        applySizeToDom(node.attrs.width, node.attrs.height)
+          if (w) dom.style.width = String(w);
+          else dom.style.removeProperty('width');
+          if (h) dom.style.height = String(h);
+          else dom.style.removeProperty('height');
+          if (w || h) dom.setAttribute('data-fixed-size', 'true');
+          else dom.removeAttribute('data-fixed-size');
+        };
+        applySizeToDom(node.attrs.width, node.attrs.height);
 
-        dom.appendChild(iframe)
+        dom.appendChild(iframe);
 
-        let handle
+        let handle;
         if (allowResize) {
-          handle = document.createElement('div')
-          handle.className = 'embed-resize-handle'
-          dom.appendChild(handle)
+          handle = document.createElement('div');
+          handle.className = 'embed-resize-handle';
+          dom.appendChild(handle);
         }
 
-        let dragging = false
-        let startX = 0, startY = 0
-        let startW = 0, startH = 0
-        let ratio = 16 / 9
-        let activePointerId = null
+        let dragging = false;
+        let startX = 0, startY = 0;
+        let startW = 0, startH = 0;
+        let ratio = 16 / 9;
+        let activePointerId = null;
 
         const commitSize = () => {
           // 커밋: 현재 dom 스타일을 attrs로 저장
-          const w = dom.style.width || null
-          const h = dom.style.height || null
+          const w = dom.style.width || null;
+          const h = dom.style.height || null;
           try {
-            const pos = typeof getPos === 'function' ? getPos() : null
+            const pos = typeof getPos === 'function' ? getPos() : null;
             if (pos != null) {
-              const tr = editor.state.tr
-              tr.setNodeMarkup(pos, undefined, { ...node.attrs, width: w, height: h })
-              editor.view.dispatch(tr)
+              const tr = editor.state.tr;
+              tr.setNodeMarkup(pos, undefined, { ...node.attrs, width: w, height: h });
+              editor.view.dispatch(tr);
             }
           } catch {}
-        }
+        };
 
         const finishDrag = () => {
-          if (!dragging) return
-          dragging = false
-          commitSize()
-          try { if (activePointerId != null) handle.releasePointerCapture(activePointerId) } catch {}
-          activePointerId = null
-          window.removeEventListener('blur', finishDrag)
-        }
+          if (!dragging) return;
+          dragging = false;
+          commitSize();
+          try { if (activePointerId != null) handle.releasePointerCapture(activePointerId); } catch {}
+          activePointerId = null;
+          window.removeEventListener('blur', finishDrag);
+        };
 
         const onPointerMove = (e) => {
-          if (!dragging) return
-          e.preventDefault()
-          const dx = e.clientX - startX
-          const dy = e.clientY - startY
-          let newW = Math.max(MIN_W, Math.min(MAX_W, startW + dx))
-          let newH
+          if (!dragging) return;
+          e.preventDefault();
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          let newW = Math.max(MIN_W, Math.min(MAX_W, startW + dx));
+          let newH;
           if (keepRatio && (e.shiftKey === false)) {
-            newH = Math.round(newW / ratio)
+            newH = Math.round(newW / ratio);
           } else {
-            newH = Math.max(MIN_H, Math.min(MAX_H, startH + dy))
+            newH = Math.max(MIN_H, Math.min(MAX_H, startH + dy));
           }
-          applySizeToDom(`${newW}px`, `${newH}px`)
-        }
+          applySizeToDom(`${newW}px`, `${newH}px`);
+        };
 
         const onPointerDown = (e) => {
-          if (e.pointerType === 'mouse' && e.button !== 0) return
-          e.preventDefault()
-          dragging = true
-          startX = e.clientX
-          startY = e.clientY
-          const rect = dom.getBoundingClientRect()
-          startW = rect.width
-          startH = rect.height
-          ratio = startW && startH ? startW / startH : 16 / 9
-          activePointerId = e.pointerId
-          try { handle.setPointerCapture(e.pointerId) } catch {}
-          window.addEventListener('blur', finishDrag)
-        }
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          e.preventDefault();
+          dragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          const rect = dom.getBoundingClientRect();
+          startW = rect.width;
+          startH = rect.height;
+          ratio = startW && startH ? startW / startH : 16 / 9;
+          activePointerId = e.pointerId;
+          try { handle.setPointerCapture(e.pointerId); } catch {}
+          window.addEventListener('blur', finishDrag);
+        };
 
         const onPointerUp = (e) => {
-          e.preventDefault()
-          finishDrag()
-        }
+          e.preventDefault();
+          finishDrag();
+        };
         const onDblClickHandle = (e) => {
-          e.preventDefault()
+          e.preventDefault();
           // 리셋: responsive로 복귀
-          applySizeToDom(null, null)
+          applySizeToDom(null, null);
           try {
-            const pos = typeof getPos === 'function' ? getPos() : null
+            const pos = typeof getPos === 'function' ? getPos() : null;
             if (pos != null) {
-              const tr = editor.state.tr
-              tr.setNodeMarkup(pos, undefined, { ...node.attrs, width: null, height: null })
-              editor.view.dispatch(tr)
+              const tr = editor.state.tr;
+              tr.setNodeMarkup(pos, undefined, { ...node.attrs, width: null, height: null });
+              editor.view.dispatch(tr);
             }
           } catch {}
-        }
+        };
 
         if (handle) {
-          handle.style.touchAction = 'none'
-          handle.addEventListener('pointerdown', onPointerDown)
-          handle.addEventListener('pointermove', onPointerMove)
-          handle.addEventListener('pointerup', onPointerUp)
-          handle.addEventListener('pointercancel', onPointerUp)
-          handle.addEventListener('dblclick', onDblClickHandle)
+          handle.style.touchAction = 'none';
+          handle.addEventListener('pointerdown', onPointerDown);
+          handle.addEventListener('pointermove', onPointerMove);
+          handle.addEventListener('pointerup', onPointerUp);
+          handle.addEventListener('pointercancel', onPointerUp);
+          handle.addEventListener('dblclick', onDblClickHandle);
         }
 
         return {
           dom,
           update: (updatedNode) => {
-            if (updatedNode.type.name !== 'iframeEmbed') return false
+            if (updatedNode.type.name !== 'iframeEmbed') return false;
             // src가 바뀌면 교체
             if (updatedNode.attrs.src !== node.attrs.src) {
-              iframe.setAttribute('src', updatedNode.attrs.src || '')
+              iframe.setAttribute('src', updatedNode.attrs.src || '');
             }
-            applySizeToDom(updatedNode.attrs.width, updatedNode.attrs.height)
-            node = updatedNode
-            return true
+            applySizeToDom(updatedNode.attrs.width, updatedNode.attrs.height);
+            node = updatedNode;
+            return true;
           },
           selectNode: () => dom.classList.add('ProseMirror-selectednode'),
           deselectNode: () => dom.classList.remove('ProseMirror-selectednode'),
           destroy: () => {
             if (handle) {
-              handle.removeEventListener('pointerdown', onPointerDown)
-              handle.removeEventListener('pointermove', onPointerMove)
-              handle.removeEventListener('pointerup', onPointerUp)
-              handle.removeEventListener('pointercancel', onPointerUp)
-              handle.removeEventListener('dblclick', onDblClickHandle)
+              handle.removeEventListener('pointerdown', onPointerDown);
+              handle.removeEventListener('pointermove', onPointerMove);
+              handle.removeEventListener('pointerup', onPointerUp);
+              handle.removeEventListener('pointercancel', onPointerUp);
+              handle.removeEventListener('dblclick', onDblClickHandle);
             }
-            window.removeEventListener('blur', finishDrag)
+            window.removeEventListener('blur', finishDrag);
           },
-        }
-      }
+        };
+      };
     },
-  }), [])
+  }), []);
 
   // Youtube 노드를 확장해 리사이즈(마우스 그립) 지원 + width/height 보존
   const YoutubeResizable = useMemo(() => Youtube.extend({
@@ -484,7 +484,7 @@ export default function RichEditor({
         width: { default: null },
         height: { default: null },
         // 기존 Youtube 확장에서는 src만 있으면 동작
-      }
+      };
     },
     parseHTML() {
       // div.embed > iframe[src*="youtube"] 형태 또는 독립 iframe에서 width/height 스타일을 읽어옴
@@ -492,39 +492,39 @@ export default function RichEditor({
         {
           tag: 'div.embed > iframe',
           getAttrs: (el) => {
-            const iframe = el
-            const parent = iframe?.parentElement
-            const wrapStyle = parent?.getAttribute('style') || ''
-            const widthMatch = /width:\s*([0-9.]+)px/i.exec(wrapStyle)
-            const heightMatch = /height:\s*([0-9.]+)px/i.exec(wrapStyle)
-            const src = iframe?.getAttribute('src') || null
-            if (!src || !/(youtube-nocookie\.com|youtube\.com|youtu\.be)/.test(src)) return false
+            const iframe = el;
+            const parent = iframe?.parentElement;
+            const wrapStyle = parent?.getAttribute('style') || '';
+            const widthMatch = /width:\s*([0-9.]+)px/i.exec(wrapStyle);
+            const heightMatch = /height:\s*([0-9.]+)px/i.exec(wrapStyle);
+            const src = iframe?.getAttribute('src') || null;
+            if (!src || !/(youtube-nocookie\.com|youtube\.com|youtu\.be)/.test(src)) return false;
             return {
               src,
               width: widthMatch ? `${widthMatch[1]}px` : null,
               height: heightMatch ? `${heightMatch[1]}px` : null,
-            }
+            };
           },
         },
         {
           tag: 'iframe',
           getAttrs: (iframe) => {
-            const src = iframe?.getAttribute('src') || null
-            if (!src || !/(youtube-nocookie\.com|youtube\.com|youtu\.be)/.test(src)) return false
-            const style = iframe?.getAttribute('style') || ''
-            const widthMatch = /width:\s*([0-9.]+)px/i.exec(style)
-            const heightMatch = /height:\s*([0-9.]+)px/i.exec(style)
+            const src = iframe?.getAttribute('src') || null;
+            if (!src || !/(youtube-nocookie\.com|youtube\.com|youtu\.be)/.test(src)) return false;
+            const style = iframe?.getAttribute('style') || '';
+            const widthMatch = /width:\s*([0-9.]+)px/i.exec(style);
+            const heightMatch = /height:\s*([0-9.]+)px/i.exec(style);
             return {
               src,
               width: widthMatch ? `${widthMatch[1]}px` : null,
               height: heightMatch ? `${heightMatch[1]}px` : null,
-            }
+            };
           },
         },
-      ]
+      ];
     },
     renderHTML({ HTMLAttributes }) {
-      const attrs = { ...HTMLAttributes }
+      const attrs = { ...HTMLAttributes };
       // youtube 확장은 내부적으로 iframe을 출력하지만, 여기서는 공통 임베드 래퍼를 사용
       const iframeAttrs = {
         src: toYouTubeEmbedUrl(attrs.src, youtubeNoCookie) || attrs.src,
@@ -534,197 +534,197 @@ export default function RichEditor({
         allowfullscreen: '',
         loading: 'lazy',
         style: 'width:100%; height:100%; border:0;',
-      }
-      const wrapStyle = []
-      if (attrs.width) wrapStyle.push(`width:${attrs.width}`)
-      if (attrs.height) wrapStyle.push(`height:${attrs.height}`)
-      const wrapAttrs = { class: 'embed', style: wrapStyle.join('; ') || undefined }
-      return ['div', wrapAttrs, ['iframe', iframeAttrs]]
+      };
+      const wrapStyle = [];
+      if (attrs.width) wrapStyle.push(`width:${attrs.width}`);
+      if (attrs.height) wrapStyle.push(`height:${attrs.height}`);
+      const wrapAttrs = { class: 'embed', style: wrapStyle.join('; ') || undefined };
+      return ['div', wrapAttrs, ['iframe', iframeAttrs]];
     },
     addNodeView() {
-      const allowResize = !!allowEmbedResize
-      const keepRatio = !!embedKeepRatio
-      const MIN_W = Number.isFinite(embedMinWidth) ? embedMinWidth : 200
-      const MIN_H = Number.isFinite(embedMinHeight) ? embedMinHeight : 112
-      const MAX_W = Number.isFinite(embedMaxWidth) ? embedMaxWidth : 1280
-      const MAX_H = Number.isFinite(embedMaxHeight) ? embedMaxHeight : 720
+      const allowResize = !!allowEmbedResize;
+      const keepRatio = !!embedKeepRatio;
+      const MIN_W = Number.isFinite(embedMinWidth) ? embedMinWidth : 200;
+      const MIN_H = Number.isFinite(embedMinHeight) ? embedMinHeight : 112;
+      const MAX_W = Number.isFinite(embedMaxWidth) ? embedMaxWidth : 1280;
+      const MAX_H = Number.isFinite(embedMaxHeight) ? embedMaxHeight : 720;
       return ({ node, getPos, editor }) => {
-        const dom = document.createElement('div')
-        dom.className = 'embed'
-        const iframe = document.createElement('iframe')
-        iframe.setAttribute('src', toYouTubeEmbedUrl(node.attrs.src, youtubeNoCookie) || node.attrs.src || '')
-        iframe.setAttribute('frameborder', '0')
+        const dom = document.createElement('div');
+        dom.className = 'embed';
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('src', toYouTubeEmbedUrl(node.attrs.src, youtubeNoCookie) || node.attrs.src || '');
+        iframe.setAttribute('frameborder', '0');
         iframe.setAttribute(
           'allow',
           'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen',
-        )
-        iframe.setAttribute('allowfullscreen', '')
-        iframe.setAttribute('loading', 'lazy')
-        iframe.setAttribute('style', 'width:100%; height:100%; border:0;')
+        );
+        iframe.setAttribute('allowfullscreen', '');
+        iframe.setAttribute('loading', 'lazy');
+        iframe.setAttribute('style', 'width:100%; height:100%; border:0;');
 
         const applySizeToDom = (w, h) => {
-          if (w) dom.style.width = String(w)
-          else dom.style.removeProperty('width')
-          if (h) dom.style.height = String(h)
-          else dom.style.removeProperty('height')
-          if (w || h) dom.setAttribute('data-fixed-size', 'true')
-          else dom.removeAttribute('data-fixed-size')
-        }
-        applySizeToDom(node.attrs.width, node.attrs.height)
-        dom.appendChild(iframe)
+          if (w) dom.style.width = String(w);
+          else dom.style.removeProperty('width');
+          if (h) dom.style.height = String(h);
+          else dom.style.removeProperty('height');
+          if (w || h) dom.setAttribute('data-fixed-size', 'true');
+          else dom.removeAttribute('data-fixed-size');
+        };
+        applySizeToDom(node.attrs.width, node.attrs.height);
+        dom.appendChild(iframe);
 
-        let handle
+        let handle;
         if (allowResize) {
-          handle = document.createElement('div')
-          handle.className = 'embed-resize-handle'
-          dom.appendChild(handle)
+          handle = document.createElement('div');
+          handle.className = 'embed-resize-handle';
+          dom.appendChild(handle);
         }
 
-        let dragging = false
-        let startX = 0, startY = 0
-        let startW = 0, startH = 0
-        let ratio = 16 / 9
-        let activePointerId = null
+        let dragging = false;
+        let startX = 0, startY = 0;
+        let startW = 0, startH = 0;
+        let ratio = 16 / 9;
+        let activePointerId = null;
 
         const commitSize = () => {
-          const w = dom.style.width || null
-          const h = dom.style.height || null
+          const w = dom.style.width || null;
+          const h = dom.style.height || null;
           try {
-            const pos = typeof getPos === 'function' ? getPos() : null
+            const pos = typeof getPos === 'function' ? getPos() : null;
             if (pos != null) {
-              const tr = editor.state.tr
-              tr.setNodeMarkup(pos, undefined, { ...node.attrs, width: w, height: h })
-              editor.view.dispatch(tr)
+              const tr = editor.state.tr;
+              tr.setNodeMarkup(pos, undefined, { ...node.attrs, width: w, height: h });
+              editor.view.dispatch(tr);
             }
           } catch {}
-        }
+        };
         const finishDrag = () => {
-          if (!dragging) return
-          dragging = false
-          commitSize()
-          try { if (activePointerId != null) handle.releasePointerCapture(activePointerId) } catch {}
-          activePointerId = null
-          window.removeEventListener('blur', finishDrag)
-        }
+          if (!dragging) return;
+          dragging = false;
+          commitSize();
+          try { if (activePointerId != null) handle.releasePointerCapture(activePointerId); } catch {}
+          activePointerId = null;
+          window.removeEventListener('blur', finishDrag);
+        };
         const onPointerMove = (e) => {
-          if (!dragging) return
-          e.preventDefault()
-          const dx = e.clientX - startX
-          const dy = e.clientY - startY
-          let newW = Math.max(MIN_W, Math.min(MAX_W, startW + dx))
-          let newH
+          if (!dragging) return;
+          e.preventDefault();
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          let newW = Math.max(MIN_W, Math.min(MAX_W, startW + dx));
+          let newH;
           if (keepRatio && (e.shiftKey === false)) {
-            newH = Math.round(newW / ratio)
+            newH = Math.round(newW / ratio);
           } else {
-            newH = Math.max(MIN_H, Math.min(MAX_H, startH + dy))
+            newH = Math.max(MIN_H, Math.min(MAX_H, startH + dy));
           }
-          applySizeToDom(`${newW}px`, `${newH}px`)
-        }
+          applySizeToDom(`${newW}px`, `${newH}px`);
+        };
         const onPointerDown = (e) => {
-          if (e.pointerType === 'mouse' && e.button !== 0) return
-          e.preventDefault()
-          dragging = true
-          startX = e.clientX
-          startY = e.clientY
-          const rect = dom.getBoundingClientRect()
-          startW = rect.width
-          startH = rect.height
-          ratio = startW && startH ? startW / startH : 16 / 9
-          activePointerId = e.pointerId
-          try { handle.setPointerCapture(e.pointerId) } catch {}
-          window.addEventListener('blur', finishDrag)
-        }
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          e.preventDefault();
+          dragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          const rect = dom.getBoundingClientRect();
+          startW = rect.width;
+          startH = rect.height;
+          ratio = startW && startH ? startW / startH : 16 / 9;
+          activePointerId = e.pointerId;
+          try { handle.setPointerCapture(e.pointerId); } catch {}
+          window.addEventListener('blur', finishDrag);
+        };
         const onPointerUp = (e) => {
-          e.preventDefault()
-          finishDrag()
-        }
+          e.preventDefault();
+          finishDrag();
+        };
         const onDblClickHandle = (e) => {
-          e.preventDefault()
-          applySizeToDom(null, null)
+          e.preventDefault();
+          applySizeToDom(null, null);
           try {
-            const pos = typeof getPos === 'function' ? getPos() : null
+            const pos = typeof getPos === 'function' ? getPos() : null;
             if (pos != null) {
-              const tr = editor.state.tr
-              tr.setNodeMarkup(pos, undefined, { ...node.attrs, width: null, height: null })
-              editor.view.dispatch(tr)
+              const tr = editor.state.tr;
+              tr.setNodeMarkup(pos, undefined, { ...node.attrs, width: null, height: null });
+              editor.view.dispatch(tr);
             }
           } catch {}
-        }
+        };
 
         if (handle) {
-          handle.style.touchAction = 'none'
-          handle.addEventListener('pointerdown', onPointerDown)
-          handle.addEventListener('pointermove', onPointerMove)
-          handle.addEventListener('pointerup', onPointerUp)
-          handle.addEventListener('pointercancel', onPointerUp)
-          handle.addEventListener('dblclick', onDblClickHandle)
+          handle.style.touchAction = 'none';
+          handle.addEventListener('pointerdown', onPointerDown);
+          handle.addEventListener('pointermove', onPointerMove);
+          handle.addEventListener('pointerup', onPointerUp);
+          handle.addEventListener('pointercancel', onPointerUp);
+          handle.addEventListener('dblclick', onDblClickHandle);
         }
 
         return {
           dom,
           update: (updatedNode) => {
-            if (updatedNode.type.name !== this.name) return false
+            if (updatedNode.type.name !== this.name) return false;
             if (updatedNode.attrs.src !== node.attrs.src) {
-              iframe.setAttribute('src', toYouTubeEmbedUrl(updatedNode.attrs.src, youtubeNoCookie) || updatedNode.attrs.src || '')
+              iframe.setAttribute('src', toYouTubeEmbedUrl(updatedNode.attrs.src, youtubeNoCookie) || updatedNode.attrs.src || '');
             }
-            applySizeToDom(updatedNode.attrs.width, updatedNode.attrs.height)
-            node = updatedNode
-            return true
+            applySizeToDom(updatedNode.attrs.width, updatedNode.attrs.height);
+            node = updatedNode;
+            return true;
           },
           selectNode: () => dom.classList.add('ProseMirror-selectednode'),
           deselectNode: () => dom.classList.remove('ProseMirror-selectednode'),
           destroy: () => {
             if (handle) {
-              handle.removeEventListener('pointerdown', onPointerDown)
-              handle.removeEventListener('pointermove', onPointerMove)
-              handle.removeEventListener('pointerup', onPointerUp)
-              handle.removeEventListener('pointercancel', onPointerUp)
-              handle.removeEventListener('dblclick', onDblClickHandle)
+              handle.removeEventListener('pointerdown', onPointerDown);
+              handle.removeEventListener('pointermove', onPointerMove);
+              handle.removeEventListener('pointerup', onPointerUp);
+              handle.removeEventListener('pointercancel', onPointerUp);
+              handle.removeEventListener('dblclick', onDblClickHandle);
             }
-            window.removeEventListener('blur', finishDrag)
+            window.removeEventListener('blur', finishDrag);
           },
-        }
-      }
+        };
+      };
     },
-  }), [allowEmbedResize, embedKeepRatio, embedMinWidth, embedMinHeight, embedMaxWidth, embedMaxHeight, youtubeNoCookie])
+  }), [allowEmbedResize, embedKeepRatio, embedMinWidth, embedMinHeight, embedMaxWidth, embedMaxHeight, youtubeNoCookie]);
 
-  const [isDark, setIsDark] = useState(theme === 'dark')
-  const [fontSizeValue, setFontSizeValue] = useState('')
-  const [rowHeightValue, setRowHeightValue] = useState('') // e.g., '40px' or ''
-  const [isHtmlView, setIsHtmlView] = useState(false)
-  const [htmlSource, setHtmlSource] = useState('')
-  const [isFormatting, setIsFormatting] = useState(false)
-  const prettierRef = useMemo(() => ({ loaded: false, prettier: null, plugins: null }), [])
-  const [fileInputKey, setFileInputKey] = useState(0) // 파일 입력 초기화용
+  const [isDark, setIsDark] = useState(theme === 'dark');
+  const [fontSizeValue, setFontSizeValue] = useState('');
+  const [rowHeightValue, setRowHeightValue] = useState(''); // e.g., '40px' or ''
+  const [isHtmlView, setIsHtmlView] = useState(false);
+  const [htmlSource, setHtmlSource] = useState('');
+  const [isFormatting, setIsFormatting] = useState(false);
+  const prettierRef = useMemo(() => ({ loaded: false, prettier: null, plugins: null }), []);
+  const [fileInputKey, setFileInputKey] = useState(0); // 파일 입력 초기화용
   
   // Prettier 로딩 (1회)
   async function ensurePrettierLoaded() {
-    if (prettierRef.loaded) return
-    let prettierMod
-    let htmlPluginMod
+    if (prettierRef.loaded) return;
+    let prettierMod;
+    let htmlPluginMod;
     try {
-      prettierMod = await import('prettier/standalone.mjs')
+      prettierMod = await import('prettier/standalone.mjs');
     } catch (_) {
-      prettierMod = await import('prettier/standalone')
+      prettierMod = await import('prettier/standalone');
     }
     try {
-      htmlPluginMod = await import('prettier/plugins/html.mjs')
+      htmlPluginMod = await import('prettier/plugins/html.mjs');
     } catch (_) {
-      htmlPluginMod = await import('prettier/plugins/html')
+      htmlPluginMod = await import('prettier/plugins/html');
     }
-    const format = prettierMod.format || (prettierMod.default && prettierMod.default.format)
-    const pluginHtml = htmlPluginMod.default ?? htmlPluginMod
-    if (!format) throw new Error('Prettier format function not found')
-    prettierRef.prettier = { format }
-    prettierRef.plugins = [pluginHtml]
-    prettierRef.loaded = true
+    const format = prettierMod.format || (prettierMod.default && prettierMod.default.format);
+    const pluginHtml = htmlPluginMod.default ?? htmlPluginMod;
+    if (!format) throw new Error('Prettier format function not found');
+    prettierRef.prettier = { format };
+    prettierRef.plugins = [pluginHtml];
+    prettierRef.loaded = true;
   }
 
   // 주어진 문자열을 포맷해서 반환 (state에 직접 쓰지 않음)
   async function formatHtmlString(source) {
     try {
-      setIsFormatting(true)
-      await ensurePrettierLoaded()
+      setIsFormatting(true);
+      await ensurePrettierLoaded();
       const opts = {
         parser: 'html',
         plugins: prettierRef.plugins,
@@ -733,20 +733,19 @@ export default function RichEditor({
         useTabs: htmlFormatOptions?.useTabs ?? false,
         htmlWhitespaceSensitivity: htmlFormatOptions?.htmlWhitespaceSensitivity ?? 'css',
         bracketSameLine: htmlFormatOptions?.bracketSameLine ?? false,
-      }
-      return await prettierRef.prettier.format(source ?? '', opts)
+      };
+      return await prettierRef.prettier.format(source ?? '', opts);
     } catch (e) {
-      console.warn('[RichEditor] HTML format failed:', e)
-      return source ?? ''
+      return source ?? '';
     } finally {
-      setIsFormatting(false)
+      setIsFormatting(false);
     }
   }
 
   // 기존 단축키/버튼에서 사용하는 편의 함수: 현재 state를 포맷하여 state에 반영
   async function formatHtmlSource() {
-    const formatted = await formatHtmlString(htmlSource)
-    setHtmlSource(formatted)
+    const formatted = await formatHtmlString(htmlSource);
+    setHtmlSource(formatted);
   }
   const editor = useEditor({
     extensions: [
@@ -781,38 +780,38 @@ export default function RichEditor({
     onCreate: ({ editor }) => {
       // 기본 정렬 적용
       try {
-        editor.chain().setTextAlign(defaultTextAlign).run()
+        editor.chain().setTextAlign(defaultTextAlign).run();
       } catch (_) {
         // 무시: 지원하지 않는 값일 경우 안전하게 패스
       }
       // 기본 글자 크기 적용(옵션)
       if (defaultFontSize) {
-        const sizeVal = typeof defaultFontSize === 'number' ? `${defaultFontSize}px` : String(defaultFontSize)
-        editor.chain().focus().setMark('textStyle', { fontSize: sizeVal }).run()
+        const sizeVal = typeof defaultFontSize === 'number' ? `${defaultFontSize}px` : String(defaultFontSize);
+        editor.chain().focus().setMark('textStyle', { fontSize: sizeVal }).run();
         // 초기 셀렉트 표시값 동기화
-        setFontSizeValue(/px$/.test(sizeVal) ? sizeVal : `${sizeVal}px`)
+        setFontSizeValue(/px$/.test(sizeVal) ? sizeVal : `${sizeVal}px`);
       }
       // 기본 행 높이 적용(옵션, 표 내부에서 의미 있음)
       if (defaultRowHeight != null && defaultRowHeight !== '') {
-        const rh = typeof defaultRowHeight === 'number' ? `${defaultRowHeight}px` : String(defaultRowHeight)
+        const rh = typeof defaultRowHeight === 'number' ? `${defaultRowHeight}px` : String(defaultRowHeight);
         // 현재 커서가 표 안이 아닐 수 있으므로, 적용은 사용자가 표 셀에 포커스했을 때 진행하는 편이 안전함
         // 여기서는 초기 셀렉트 값만 세팅
-        setRowHeightValue(/px$/i.test(rh) ? rh : `${rh}px`)
+        setRowHeightValue(/px$/i.test(rh) ? rh : `${rh}px`);
       }
     },
     editorProps: {
       handlePaste: (view, event) => {
-        if (isHtmlView) return false
+        if (isHtmlView) return false;
         // 이미지 붙여넣기
         if (allowPasteDropImage) {
-          const items = event.clipboardData?.items
+          const items = event.clipboardData?.items;
           if (items && items.length > 0) {
             for (const it of items) {
               if (it.type && it.type.startsWith('image/')) {
-                const file = it.getAsFile()
+                const file = it.getAsFile();
                 if (file) {
-                  insertImageFromFile(file)
-                  return true
+                  insertImageFromFile(file);
+                  return true;
                 }
               }
             }
@@ -820,14 +819,14 @@ export default function RichEditor({
         }
         // 비디오 붙여넣기(일부 브라우저에서 동작)
         if (allowPasteDropVideo) {
-          const items = event.clipboardData?.items
+          const items = event.clipboardData?.items;
           if (items && items.length > 0) {
             for (const it of items) {
               if (it.type && it.type.startsWith('video/')) {
-                const file = it.getAsFile()
+                const file = it.getAsFile();
                 if (file) {
-                  insertVideoFromFile(file)
-                  return true
+                  insertVideoFromFile(file);
+                  return true;
                 }
               }
             }
@@ -835,314 +834,314 @@ export default function RichEditor({
         }
         // 텍스트에 동영상 서비스 URL이 있으면 자동 임베드 (YouTube 우선, 그 외 제공자 처리)
         try {
-          const text = event.clipboardData?.getData('text/plain')?.trim()
+          const text = event.clipboardData?.getData('text/plain')?.trim();
           if (text) {
             // 1) YouTube
-            const yt = getYouTubeSrc(text)
+            const yt = getYouTubeSrc(text);
             if (yt) {
-              event.preventDefault()
-              editor.chain().focus().setYoutubeVideo({ src: yt }).run()
-              return true
+              event.preventDefault();
+              editor.chain().focus().setYoutubeVideo({ src: yt }).run();
+              return true;
             }
             // 2) TikTok/Vimeo/Dailymotion 등
-            const attrs = getEmbedAttrsForUrl(text)
+            const attrs = getEmbedAttrsForUrl(text);
             if (attrs) {
-              event.preventDefault()
-              editor.chain().focus().setEmbed(attrs).run()
-              return true
+              event.preventDefault();
+              editor.chain().focus().setEmbed(attrs).run();
+              return true;
             }
           }
         } catch {}
-        const items = event.clipboardData?.items
-        if (!items || items.length === 0) return false
-        return false
+        const items = event.clipboardData?.items;
+        if (!items || items.length === 0) return false;
+        return false;
       },
       handleDrop: (view, event, _slice, moved) => {
-        if (isHtmlView) return false
-        if (moved) return false
-        const files = event.dataTransfer?.files
-        if (!files || files.length === 0) return false
+        if (isHtmlView) return false;
+        if (moved) return false;
+        const files = event.dataTransfer?.files;
+        if (!files || files.length === 0) return false;
         if (allowPasteDropImage) {
           for (const file of files) {
             if (file.type && file.type.startsWith('image/')) {
-              insertImageFromFile(file)
-              event.preventDefault()
-              return true
+              insertImageFromFile(file);
+              event.preventDefault();
+              return true;
             }
           }
         }
         if (allowPasteDropVideo) {
           for (const file of files) {
             if (file.type && file.type.startsWith('video/')) {
-              insertVideoFromFile(file)
-              event.preventDefault()
-              return true
+              insertVideoFromFile(file);
+              event.preventDefault();
+              return true;
             }
           }
         }
-        return false
+        return false;
       },
     },
-  })
+  });
 
   // 파일을 이미지로 삽입하는 헬퍼
   async function insertImageFromFile(file) {
-    if (!editor || !file) return
+    if (!editor || !file) return;
     try {
       // 1) 사용자 제공 업로드 핸들러 우선
       if (typeof onImageUpload === 'function') {
-        const url = await onImageUpload(file)
+        const url = await onImageUpload(file);
         if (url) {
-          editor.chain().focus().setImage({ src: url, alt: file.name }).run()
-          return
+          editor.chain().focus().setImage({ src: url, alt: file.name }).run();
+          return;
         }
       }
       // 2) 업로드 모드가 'upload'이고 endpoint가 있으면 서버 업로드
       if (imageUploadMode === 'upload' && imageUploadEndpoint) {
-        const fd = new FormData()
-        fd.append(imageFieldName || 'file', file)
-        const res = await fetch(imageUploadEndpoint, { method: 'POST', body: fd })
-        if (!res.ok) throw new Error(`Upload failed: ${res.status}`)
-        const data = await res.json().catch(() => null)
-        const url = data?.url || data?.location || data?.src
-        if (!url) throw new Error('No image URL in response')
-        editor.chain().focus().setImage({ src: url, alt: file.name }).run()
-        return
+        const fd = new FormData();
+        fd.append(imageFieldName || 'file', file);
+        const res = await fetch(imageUploadEndpoint, { method: 'POST', body: fd });
+        if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+        const data = await res.json().catch(() => null);
+        const url = data?.url || data?.location || data?.src;
+        if (!url) throw new Error('No image URL in response');
+        editor.chain().focus().setImage({ src: url, alt: file.name }).run();
+        return;
       }
       // 3) 기본: data URL로 삽입 (POC)
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = () => {
-        const src = reader.result
+        const src = reader.result;
         if (typeof src === 'string') {
-          editor.chain().focus().setImage({ src, alt: file.name }).run()
+          editor.chain().focus().setImage({ src, alt: file.name }).run();
         }
-      }
-      reader.readAsDataURL(file)
+      };
+      reader.readAsDataURL(file);
     } catch (e) {
-      console.warn('[RichEditor] insertImageFromFile failed:', e)
+      return null;
     } finally {
       // 같은 파일 재선택 가능하도록 input 초기화 키 변경
-      setFileInputKey(k => k + 1)
+      setFileInputKey(k => k + 1);
     }
   }
 
   // 파일을 비디오로 삽입하는 헬퍼
   async function insertVideoFromFile(file) {
-    if (!editor || !file) return
+    if (!editor || !file) return;
     try {
       // 1) 사용자 제공 업로드 핸들러 우선
       if (typeof onVideoUpload === 'function') {
-        const url = await onVideoUpload(file)
+        const url = await onVideoUpload(file);
         if (url) {
-          insertVideoBySrc(url, { alt: file.name })
-          return
+          insertVideoBySrc(url, { alt: file.name });
+          return;
         }
       }
       // 2) 업로드 모드가 'upload'
       if (videoUploadMode === 'upload' && videoUploadEndpoint) {
-        const fd = new FormData()
-        fd.append(videoFieldName || 'file', file)
-        const res = await fetch(videoUploadEndpoint, { method: 'POST', body: fd })
-        if (!res.ok) throw new Error(`Video upload failed: ${res.status}`)
-        const data = await res.json().catch(() => null)
-        const url = data?.url || data?.location || data?.src
-        if (!url) throw new Error('No video URL in response')
-        insertVideoBySrc(url, { alt: file.name })
-        return
+        const fd = new FormData();
+        fd.append(videoFieldName || 'file', file);
+        const res = await fetch(videoUploadEndpoint, { method: 'POST', body: fd });
+        if (!res.ok) throw new Error(`Video upload failed: ${res.status}`);
+        const data = await res.json().catch(() => null);
+        const url = data?.url || data?.location || data?.src;
+        if (!url) throw new Error('No video URL in response');
+        insertVideoBySrc(url, { alt: file.name });
+        return;
       }
       // 3) 로컬 미리보기: object URL 또는 data URL
       if (videoUploadMode === 'dataUrl') {
-        const reader = new FileReader()
+        const reader = new FileReader();
         reader.onload = () => {
-          const src = reader.result
-          if (typeof src === 'string') insertVideoBySrc(src, { alt: file.name })
-        }
-        reader.readAsDataURL(file)
+          const src = reader.result;
+          if (typeof src === 'string') insertVideoBySrc(src, { alt: file.name });
+        };
+        reader.readAsDataURL(file);
       } else {
         // 기본: object URL (세션 한정 유효)
-        const url = URL.createObjectURL(file)
-        insertVideoBySrc(url, { alt: file.name })
+        const url = URL.createObjectURL(file);
+        insertVideoBySrc(url, { alt: file.name });
       }
     } catch (e) {
-      console.warn('[RichEditor] insertVideoFromFile failed:', e)
+      return null;
     }
   }
 
   // 주어진 입력에서 YouTube 영상 src(URL)를 생성
   function getYouTubeSrc(input) {
-    if (!input) return ''
-    const toSrcFromId = (id) => (id ? `https://www.youtube.com/watch?v=${id}` : '')
+    if (!input) return '';
+    const toSrcFromId = (id) => (id ? `https://www.youtube.com/watch?v=${id}` : '');
     try {
-      const u = new URL(input)
-      const host = u.hostname.replace(/^www\./, '')
+      const u = new URL(input);
+      const host = u.hostname.replace(/^www\./, '');
       if (host === 'youtu.be') {
-        const id = u.pathname.replace(/^\//, '')
-        return toSrcFromId(id)
+        const id = u.pathname.replace(/^\//, '');
+        return toSrcFromId(id);
       }
       if (host === 'youtube.com' || host.endsWith('.youtube.com')) {
         // shorts
         if (u.pathname.startsWith('/shorts/')) {
-          const id = u.pathname.split('/')[2]
-          return toSrcFromId(id)
+          const id = u.pathname.split('/')[2];
+          return toSrcFromId(id);
         }
         // watch?v=
-        const id = u.searchParams.get('v')
-        if (id) return toSrcFromId(id)
+        const id = u.searchParams.get('v');
+        if (id) return toSrcFromId(id);
       }
       // ID만 들어온 경우도 지원
-      return /^[-_A-Za-z0-9]{6,}$/.test(input) ? toSrcFromId(input) : ''
+      return /^[-_A-Za-z0-9]{6,}$/.test(input) ? toSrcFromId(input) : '';
     } catch {
       // URL 파싱 실패 시 ID처럼 취급 시도
-      return /^[-_A-Za-z0-9]{6,}$/.test(input) ? `https://www.youtube.com/watch?v=${input}` : ''
+      return /^[-_A-Za-z0-9]{6,}$/.test(input) ? `https://www.youtube.com/watch?v=${input}` : '';
     }
   }
 
   // YouTube watch/shorts/youtu.be/ID → embed URL 변환 (nocookie 옵션 지원)
   function toYouTubeEmbedUrl(input, useNoCookie = true) {
-    if (!input) return ''
+    if (!input) return '';
     // 먼저 ID를 뽑아낸다
-    let id = ''
+    let id = '';
     try {
-      const u = new URL(input)
-      const host = u.hostname.replace(/^www\./, '')
+      const u = new URL(input);
+      const host = u.hostname.replace(/^www\./, '');
       if (host === 'youtu.be') {
-        id = u.pathname.replace(/^\//, '')
+        id = u.pathname.replace(/^\//, '');
       } else if (host === 'youtube.com' || host.endsWith('.youtube.com')) {
         if (u.pathname.startsWith('/shorts/')) {
-          id = u.pathname.split('/')[2] || ''
+          id = u.pathname.split('/')[2] || '';
         } else {
-          id = u.searchParams.get('v') || ''
+          id = u.searchParams.get('v') || '';
         }
       }
     } catch {
       // input이 순수 ID일 수도 있음
-      if (/^[-_A-Za-z0-9]{6,}$/.test(input)) id = input
+      if (/^[-_A-Za-z0-9]{6,}$/.test(input)) id = input;
     }
-    if (!id) return ''
-    const origin = useNoCookie ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com'
-    return `${origin}/embed/${id}`
+    if (!id) return '';
+    const origin = useNoCookie ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com';
+    return `${origin}/embed/${id}`;
   }
 
   function insertVideoBySrc(src, attrs = {}) {
-    if (!editor || !src) return
+    if (!editor || !src) return;
     // TipTap에 기본 video 노드가 없으므로 HTML 삽입을 사용
     // 안전하게 <video controls src="...">를 삽입
-    const safe = String(src).replace(/"/g, '&quot;')
-    editor.chain().focus().insertContent(`<video src="${safe}" controls style="max-width:100%; height:auto;"></video>`).run()
+    const safe = String(src).replace(/"/g, '&quot;');
+    editor.chain().focus().insertContent(`<video src="${safe}" controls style="max-width:100%; height:auto;"></video>`).run();
   }
 
   // 공급자별(URL) 임베드 iframe attrs 생성기: TikTok/Vimeo/Dailymotion 지원
   function getEmbedAttrsForUrl(input) {
-    if (!input) return null
-    let u
+    if (!input) return null;
+    let u;
     try {
-      u = new URL(input)
+      u = new URL(input);
     } catch {
-      return null
+      return null;
     }
-    const host = u.hostname.replace(/^www\./, '')
-    const path = u.pathname
+    const host = u.hostname.replace(/^www\./, '');
+    const path = u.pathname;
     // TikTok: tiktok.com/@user/video/{id}
     if (host === 'tiktok.com' || host.endsWith('.tiktok.com')) {
-      const m = path.match(/\/video\/(\d+)/)
-      const vid = m?.[1]
+      const m = path.match(/\/video\/(\d+)/);
+      const vid = m?.[1];
       if (vid) {
-        const src = `https://www.tiktok.com/embed/v2/${vid}`
-        return { src, provider: 'tiktok', allow: 'encrypted-media; picture-in-picture; fullscreen', referrerpolicy: 'no-referrer-when-downgrade', loading: 'lazy' }
+        const src = `https://www.tiktok.com/embed/v2/${vid}`;
+        return { src, provider: 'tiktok', allow: 'encrypted-media; picture-in-picture; fullscreen', referrerpolicy: 'no-referrer-when-downgrade', loading: 'lazy' };
       }
     }
     // Vimeo: vimeo.com/{id}
     if (host === 'vimeo.com' || host.endsWith('.vimeo.com')) {
-      const m = path.match(/\/(\d+)/)
-      const id = m?.[1]
+      const m = path.match(/\/(\d+)/);
+      const id = m?.[1];
       if (id) {
-        const src = `https://player.vimeo.com/video/${id}`
-        return { src, provider: 'vimeo', allow: 'autoplay; fullscreen; picture-in-picture', loading: 'lazy' }
+        const src = `https://player.vimeo.com/video/${id}`;
+        return { src, provider: 'vimeo', allow: 'autoplay; fullscreen; picture-in-picture', loading: 'lazy' };
       }
     }
     // Dailymotion: dailymotion.com/video/{id} 또는 dai.ly/{id}
     if (host === 'dailymotion.com' || host.endsWith('.dailymotion.com')) {
-      const m = path.match(/\/video\/([A-Za-z0-9]+)/)
-      const id = m?.[1]
+      const m = path.match(/\/video\/([A-Za-z0-9]+)/);
+      const id = m?.[1];
       if (id) {
-        const src = `https://www.dailymotion.com/embed/video/${id}`
-        return { src, provider: 'dailymotion', allow: 'autoplay; fullscreen; picture-in-picture', loading: 'lazy' }
+        const src = `https://www.dailymotion.com/embed/video/${id}`;
+        return { src, provider: 'dailymotion', allow: 'autoplay; fullscreen; picture-in-picture', loading: 'lazy' };
       }
     }
     if (host === 'dai.ly') {
-      const m = path.match(/\/([A-Za-z0-9]+)/)
-      const id = m?.[1]
+      const m = path.match(/\/([A-Za-z0-9]+)/);
+      const id = m?.[1];
       if (id) {
-        const src = `https://www.dailymotion.com/embed/video/${id}`
-        return { src, provider: 'dailymotion', allow: 'autoplay; fullscreen; picture-in-picture', loading: 'lazy' }
+        const src = `https://www.dailymotion.com/embed/video/${id}`;
+        return { src, provider: 'dailymotion', allow: 'autoplay; fullscreen; picture-in-picture', loading: 'lazy' };
       }
     }
-    return null
+    return null;
   }
 
   function insertEmbedByUrl(url) {
-    if (!editor) return false
-    const attrs = getEmbedAttrsForUrl(url)
-    if (!attrs) return false
-    editor.chain().focus().setEmbed(attrs).run()
-    return true
+    if (!editor) return false;
+    const attrs = getEmbedAttrsForUrl(url);
+    if (!attrs) return false;
+    editor.chain().focus().setEmbed(attrs).run();
+    return true;
   }
 
   // 현재 커서/선택의 글자 크기를 셀렉트에 동기화
   useEffect(() => {
-    if (!editor) return
+    if (!editor) return;
 
     const normalize = (v) => {
-      if (!v) return ''
-      const trimmed = String(v).trim()
-      if (trimmed === '') return ''
-      return /px$/i.test(trimmed) ? trimmed : `${trimmed}px`
-    }
+      if (!v) return '';
+      const trimmed = String(v).trim();
+      if (trimmed === '') return '';
+      return /px$/i.test(trimmed) ? trimmed : `${trimmed}px`;
+    };
 
     const updateFromSelection = () => {
       try {
-        const attrs = editor.getAttributes('textStyle') || {}
-        setFontSizeValue(normalize(attrs.fontSize))
+        const attrs = editor.getAttributes('textStyle') || {};
+        setFontSizeValue(normalize(attrs.fontSize));
         // Row height: read current row's common value (if all cells share same rowMinHeight)
-        const { state } = editor
-        const $from = state.selection.$from
-        let value = ''
+        const { state } = editor;
+        const $from = state.selection.$from;
+        let value = '';
         for (let d = $from.depth; d > 0; d--) {
-          const node = $from.node(d)
+          const node = $from.node(d);
           if (node.type.name === 'tableRow') {
-            const rowPos = $from.before(d)
-            const rowNode = state.doc.nodeAt(rowPos)
+            const rowPos = $from.before(d);
+            const rowNode = state.doc.nodeAt(rowPos);
             if (rowNode) {
-              let same = undefined
+              let same = undefined;
               for (let i = 0; i < rowNode.childCount; i++) {
-                const cell = rowNode.child(i)
-                const v = cell?.attrs?.rowMinHeight || ''
-                if (same === undefined) same = v
-                else if (same !== v) { same = '' ; break }
+                const cell = rowNode.child(i);
+                const v = cell?.attrs?.rowMinHeight || '';
+                if (same === undefined) same = v;
+                else if (same !== v) { same = '' ; break; }
               }
-              value = same || ''
+              value = same || '';
             }
-            break
+            break;
           }
         }
-        setRowHeightValue(normalize(value))
+        setRowHeightValue(normalize(value));
       } catch {
-        setFontSizeValue('')
-        setRowHeightValue('')
+        setFontSizeValue('');
+        setRowHeightValue('');
       }
-    }
+    };
 
-    updateFromSelection()
-    editor.on('selectionUpdate', updateFromSelection)
-    editor.on('transaction', updateFromSelection)
-    editor.on('update', updateFromSelection)
+    updateFromSelection();
+    editor.on('selectionUpdate', updateFromSelection);
+    editor.on('transaction', updateFromSelection);
+    editor.on('update', updateFromSelection);
 
     return () => {
-      editor.off('selectionUpdate', updateFromSelection)
-      editor.off('transaction', updateFromSelection)
-      editor.off('update', updateFromSelection)
-    }
-  }, [editor])
+      editor.off('selectionUpdate', updateFromSelection);
+      editor.off('transaction', updateFromSelection);
+      editor.off('update', updateFromSelection);
+    };
+  }, [editor]);
 
   const contentStyle = useMemo(() => ({
     minHeight: typeof minHeight === 'number' ? `${minHeight}px` : String(minHeight),
@@ -1150,7 +1149,7 @@ export default function RichEditor({
     height: height != null ? (typeof height === 'number' ? `${height}px` : String(height)) : undefined,
     resize: resizable ? 'vertical' : 'none',
     overflow: 'auto',
-  }), [minHeight, maxHeight, height, resizable])
+  }), [minHeight, maxHeight, height, resizable]);
 
   return (
     <div className={`tiptap-wrap ${isDark ? 'dark' : 'light'} ${className}`}>
@@ -1251,33 +1250,32 @@ export default function RichEditor({
               title={isHtmlView ? 'WYSIWYG로 돌아가기' : 'HTML 보기'}
               aria-label={isHtmlView ? 'Switch to WYSIWYG view' : 'Switch to HTML view'}
               onClick={async () => {
-                if (!editor) return
+                if (!editor) return;
                 if (!isHtmlView) {
                   // 진입: 에디터의 현재 HTML을 로드하고(필요 시) 포맷한 뒤 표시
-                  let raw = ''
-                  try { raw = editor.getHTML() } catch { raw = '' }
-                  let toShow = raw
+                  let raw = '';
+                  try { raw = editor.getHTML(); } catch { raw = ''; }
+                  let toShow = raw;
                   if (autoFormatHtmlOnOpen) {
-                    toShow = await formatHtmlString(raw)
+                    toShow = await formatHtmlString(raw);
                   }
-                  setHtmlSource(toShow)
-                  setIsHtmlView(true)
+                  setHtmlSource(toShow);
+                  setIsHtmlView(true);
                 } else {
                   // 복귀: 수정된 HTML을 적용(편집 허용 시)
                   if (allowHtmlEdit) {
-                    let sourceToApply = htmlSource
+                    let sourceToApply = htmlSource;
                     if (autoFormatHtmlOnApply) {
-                      sourceToApply = await formatHtmlString(sourceToApply)
+                      sourceToApply = await formatHtmlString(sourceToApply);
                     }
                     try {
-                      editor.commands.setContent(sourceToApply || '', false)
-                      setIsHtmlView(false)
+                      editor.commands.setContent(sourceToApply || '', false);
+                      setIsHtmlView(false);
                     } catch (e) {
-                      console.warn('[RichEditor] setContent failed, stay in HTML view:', e)
-                      // 적용 실패 시 HTML 보기 유지
+                      return null;
                     }
                   } else {
-                    setIsHtmlView(false)
+                    setIsHtmlView(false);
                   }
                 }
               }}
@@ -1291,7 +1289,7 @@ export default function RichEditor({
               className={`btn wide ${isHtmlView ? '' : 'disabled'}`}
               title="소스 정렬 (Ctrl/Cmd+Shift+F)"
               aria-label="Format HTML source"
-              onClick={async () => { if (isHtmlView && allowHtmlEdit) await formatHtmlSource() }}
+              onClick={async () => { if (isHtmlView && allowHtmlEdit) await formatHtmlSource(); }}
               disabled={!isHtmlView || !allowHtmlEdit || isFormatting}
             >
               {/* 간단한 마법봉 아이콘 */}
@@ -1348,10 +1346,10 @@ export default function RichEditor({
                 title="이미지(URL)"
                 aria-label="Insert image by URL"
                 onClick={() => {
-                  if (!editor || isHtmlView) return
-                  const url = window.prompt('이미지 URL을 입력하세요')
-                  if (!url) return
-                  try { editor.chain().focus().setImage({ src: url }).run() } catch {}
+                  if (!editor || isHtmlView) return;
+                  const url = window.prompt('이미지 URL을 입력하세요');
+                  if (!url) return;
+                  try { editor.chain().focus().setImage({ src: url }).run(); } catch {}
                 }}
                 disabled={!editor || isHtmlView}
               >
@@ -1362,8 +1360,8 @@ export default function RichEditor({
                 title="이미지 업로드"
                 aria-label="Upload image from computer"
                 onClick={() => {
-                  const input = document.getElementById('rte-image-file-input')
-                  input?.click()
+                  const input = document.getElementById('rte-image-file-input');
+                  input?.click();
                 }}
                 disabled={!editor || isHtmlView}
               >
@@ -1376,8 +1374,8 @@ export default function RichEditor({
                 accept="image/*"
                 style={{ display: 'none' }}
                 onChange={(e) => {
-                  const file = e.target.files?.[0]
-                  if (file) insertImageFromFile(file)
+                  const file = e.target.files?.[0];
+                  if (file) insertImageFromFile(file);
                 }}
               />
               <span className="divider" />
@@ -1390,14 +1388,14 @@ export default function RichEditor({
                 title="링크 추가/편집"
                 aria-label="Add or edit link"
                 onClick={() => {
-                  if (!editor || isHtmlView) return
-                  const prev = editor.getAttributes('link')?.href || ''
-                  const url = window.prompt('링크 URL을 입력하세요', prev)
-                  if (url === null) return
+                  if (!editor || isHtmlView) return;
+                  const prev = editor.getAttributes('link')?.href || '';
+                  const url = window.prompt('링크 URL을 입력하세요', prev);
+                  if (url === null) return;
                   if (url === '') {
-                    editor.chain().focus().unsetLink().run()
+                    editor.chain().focus().unsetLink().run();
                   } else {
-                    editor.chain().focus().setLink({ href: url, target: '_blank', rel: 'noopener nofollow' }).run()
+                    editor.chain().focus().setLink({ href: url, target: '_blank', rel: 'noopener nofollow' }).run();
                   }
                 }}
                 disabled={!editor || isHtmlView}
@@ -1425,13 +1423,13 @@ export default function RichEditor({
                 title="YouTube 삽입"
                 aria-label="Insert YouTube"
                 onClick={() => {
-                  if (!editor || isHtmlView) return
-                  const url = window.prompt('YouTube URL 또는 영상 ID를 입력하세요')
-                  if (!url) return
-                  const src = getYouTubeSrc(url)
-                  if (!src) return
+                  if (!editor || isHtmlView) return;
+                  const url = window.prompt('YouTube URL 또는 영상 ID를 입력하세요');
+                  if (!url) return;
+                  const src = getYouTubeSrc(url);
+                  if (!src) return;
                   try {
-                    editor.chain().focus().setYoutubeVideo({ src }).run()
+                    editor.chain().focus().setYoutubeVideo({ src }).run();
                   } catch {}
                 }}
                 disabled={!editor || isHtmlView}
@@ -1448,12 +1446,12 @@ export default function RichEditor({
                 title="임베드(URL)"
                 aria-label="Insert embed by URL"
                 onClick={() => {
-                  if (!editor || isHtmlView) return
-                  const url = window.prompt('임베드할 동영상/콘텐츠 URL을 입력하세요 (TikTok/Vimeo/Dailymotion)')
-                  if (!url) return
-                  const ok = insertEmbedByUrl(url)
+                  if (!editor || isHtmlView) return;
+                  const url = window.prompt('임베드할 동영상/콘텐츠 URL을 입력하세요 (TikTok/Vimeo/Dailymotion)');
+                  if (!url) return;
+                  const ok = insertEmbedByUrl(url);
                   if (!ok) {
-                    window.alert('지원하지 않는 URL 형식입니다. TikTok/Vimeo/Dailymotion 주소를 입력해 주세요.')
+                    window.alert('지원하지 않는 URL 형식입니다. TikTok/Vimeo/Dailymotion 주소를 입력해 주세요.');
                   }
                 }}
                 disabled={!editor || isHtmlView}
@@ -1470,10 +1468,10 @@ export default function RichEditor({
                 title="비디오(URL) 삽입"
                 aria-label="Insert video by URL"
                 onClick={() => {
-                  if (!editor || isHtmlView) return
-                  const url = window.prompt('비디오 파일 URL을 입력하세요 (mp4 등)')
-                  if (!url) return
-                  insertVideoBySrc(url)
+                  if (!editor || isHtmlView) return;
+                  const url = window.prompt('비디오 파일 URL을 입력하세요 (mp4 등)');
+                  if (!url) return;
+                  insertVideoBySrc(url);
                 }}
                 disabled={!editor || isHtmlView}
               >
@@ -1485,8 +1483,8 @@ export default function RichEditor({
                 title="비디오 업로드"
                 aria-label="Upload video from computer"
                 onClick={() => {
-                  const input = document.getElementById('rte-video-file-input')
-                  input?.click()
+                  const input = document.getElementById('rte-video-file-input');
+                  input?.click();
                 }}
                 disabled={!editor || isHtmlView}
               >
@@ -1498,120 +1496,120 @@ export default function RichEditor({
                 accept="video/*"
                 style={{ display: 'none' }}
                 onChange={(e) => {
-                  const file = e.target.files?.[0]
-                  if (file) insertVideoFromFile(file)
-                  e.currentTarget.value = ''
+                  const file = e.target.files?.[0];
+                  if (file) insertVideoFromFile(file);
+                  e.currentTarget.value = '';
                 }}
               />
               <span className="divider" />
             </>
           )}
           {showFontSize && (
-              <>
-                <label htmlFor="font-size" className="sr-only">Font size</label>
-                <select
-                  id="font-size"
-                  className="select"
-                  title="글자 크기"
-                  aria-label="Font size"
-                  onChange={(e) => {
-                    const v = e.target.value
-                    if (!v) {
-                      editor?.chain().focus().unsetMark('textStyle').run()
-                      setFontSizeValue('')
-                    } else {
-                      const sizeVal = /px$/i.test(v) ? v : `${v}px`
-                      editor?.chain().focus().setMark('textStyle', { fontSize: sizeVal }).run()
-                      setFontSizeValue(sizeVal)
-                    }
-                  }}
-                  value={fontSizeValue}
-                  disabled={!editor || isHtmlView}
-                >
-                  <option value="">기본</option>
-                  {fontSizes.map((s) => (
-                    <option key={s} value={`${s}px`}>{s}px</option>
-                  ))}
-                </select>
-                <span className="divider" />
-              </>
-            )}
-            {showRowHeight && (
-              <>
-                <label htmlFor="row-height" className="sr-only">Row height</label>
-                <select
-                  id="row-height"
-                  className="select"
-                  title="행 높이(선택된 행)"
-                  aria-label="Row height (selected row)"
-                  onChange={(e) => {
-                    const v = e.target.value
-                    if (!editor) return
-                    if (!v) {
-                      editor.chain().focus().setRowMinHeight('').run()
-                      setRowHeightValue('')
-                    } else {
-                      const px = /px$/i.test(v) ? v : `${v}px`
-                      editor.chain().focus().setRowMinHeight(px).run()
-                      setRowHeightValue(px)
-                    }
-                  }}
-                  value={rowHeightValue}
-                  disabled={!editor || isHtmlView}
-                >
-                  <option value="">행 높이: 기본</option>
-                  {rowHeights.map((h) => (
-                    <option key={h} value={`${h}px`}>{h}px</option>
-                  ))}
-                </select>
-                <span className="divider" />
-              </>
-            )}
-            <button
-              className={`btn ${editor?.isActive('bold') ? 'active' : ''}`}
-              title="굵게"
-              aria-label="Bold"
-              onClick={() => editor?.chain().focus().toggleBold().run()}
-              disabled={!editor || isHtmlView}
-            >
-              <Icon.Bold />
-            </button>
-            <button
-              className={`btn ${editor?.isActive('italic') ? 'active' : ''}`}
-              title="기울임"
-              aria-label="Italic"
-              onClick={() => editor?.chain().focus().toggleItalic().run()}
-              disabled={!editor || isHtmlView}
-            >
-              <Icon.Italic />
-            </button>
-            <button
-              className={`btn ${editor?.isActive('underline') ? 'active' : ''}`}
-              title="밑줄"
-              aria-label="Underline"
-              onClick={() => editor?.chain().focus().toggleUnderline().run()}
-              disabled={!editor || isHtmlView}
-            >
-              <Icon.Underline />
-            </button>
-            <button
-              className={`btn ${editor?.isActive('strike') ? 'active' : ''}`}
-              title="취소선"
-              aria-label="Strikethrough"
-              onClick={() => editor?.chain().focus().toggleStrike().run()}
-              disabled={!editor || isHtmlView}
-            >
-              <Icon.Strike />
-            </button>
-            <button
-              className={`btn ${editor?.isActive('bulletList') ? 'active' : ''}`}
-              title="글머리 기호"
-              aria-label="Bullet list"
-              onClick={() => editor?.chain().focus().toggleBulletList().run()}
-              disabled={!editor || isHtmlView}
-            >
-              <Icon.UL />
-            </button>
+            <>
+              <label htmlFor="font-size" className="sr-only">Font size</label>
+              <select
+                id="font-size"
+                className="select"
+                title="글자 크기"
+                aria-label="Font size"
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (!v) {
+                    editor?.chain().focus().unsetMark('textStyle').run();
+                    setFontSizeValue('');
+                  } else {
+                    const sizeVal = /px$/i.test(v) ? v : `${v}px`;
+                    editor?.chain().focus().setMark('textStyle', { fontSize: sizeVal }).run();
+                    setFontSizeValue(sizeVal);
+                  }
+                }}
+                value={fontSizeValue}
+                disabled={!editor || isHtmlView}
+              >
+                <option value="">기본</option>
+                {fontSizes.map((s) => (
+                  <option key={s} value={`${s}px`}>{s}px</option>
+                ))}
+              </select>
+              <span className="divider" />
+            </>
+          )}
+          {showRowHeight && (
+            <>
+              <label htmlFor="row-height" className="sr-only">Row height</label>
+              <select
+                id="row-height"
+                className="select"
+                title="행 높이(선택된 행)"
+                aria-label="Row height (selected row)"
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (!editor) return;
+                  if (!v) {
+                    editor.chain().focus().setRowMinHeight('').run();
+                    setRowHeightValue('');
+                  } else {
+                    const px = /px$/i.test(v) ? v : `${v}px`;
+                    editor.chain().focus().setRowMinHeight(px).run();
+                    setRowHeightValue(px);
+                  }
+                }}
+                value={rowHeightValue}
+                disabled={!editor || isHtmlView}
+              >
+                <option value="">행 높이: 기본</option>
+                {rowHeights.map((h) => (
+                  <option key={h} value={`${h}px`}>{h}px</option>
+                ))}
+              </select>
+              <span className="divider" />
+            </>
+          )}
+          <button
+            className={`btn ${editor?.isActive('bold') ? 'active' : ''}`}
+            title="굵게"
+            aria-label="Bold"
+            onClick={() => editor?.chain().focus().toggleBold().run()}
+            disabled={!editor || isHtmlView}
+          >
+            <Icon.Bold />
+          </button>
+          <button
+            className={`btn ${editor?.isActive('italic') ? 'active' : ''}`}
+            title="기울임"
+            aria-label="Italic"
+            onClick={() => editor?.chain().focus().toggleItalic().run()}
+            disabled={!editor || isHtmlView}
+          >
+            <Icon.Italic />
+          </button>
+          <button
+            className={`btn ${editor?.isActive('underline') ? 'active' : ''}`}
+            title="밑줄"
+            aria-label="Underline"
+            onClick={() => editor?.chain().focus().toggleUnderline().run()}
+            disabled={!editor || isHtmlView}
+          >
+            <Icon.Underline />
+          </button>
+          <button
+            className={`btn ${editor?.isActive('strike') ? 'active' : ''}`}
+            title="취소선"
+            aria-label="Strikethrough"
+            onClick={() => editor?.chain().focus().toggleStrike().run()}
+            disabled={!editor || isHtmlView}
+          >
+            <Icon.Strike />
+          </button>
+          <button
+            className={`btn ${editor?.isActive('bulletList') ? 'active' : ''}`}
+            title="글머리 기호"
+            aria-label="Bullet list"
+            onClick={() => editor?.chain().focus().toggleBulletList().run()}
+            disabled={!editor || isHtmlView}
+          >
+            <Icon.UL />
+          </button>
           <button
             className={`btn ${editor?.isActive('orderedList') ? 'active' : ''}`}
             title="번호 목록"
@@ -1657,11 +1655,11 @@ export default function RichEditor({
               value={htmlSource}
               onChange={(e) => setHtmlSource(e.target.value)}
               onKeyDown={async (e) => {
-                const isMac = navigator.platform.toUpperCase().includes('MAC')
-                const mod = isMac ? e.metaKey : e.ctrlKey
+                const isMac = navigator.platform.toUpperCase().includes('MAC');
+                const mod = isMac ? e.metaKey : e.ctrlKey;
                 if (mod && e.shiftKey && (e.key === 'F' || e.key === 'f')) {
-                  e.preventDefault()
-                  if (allowHtmlEdit) await formatHtmlSource()
+                  e.preventDefault();
+                  if (allowHtmlEdit) await formatHtmlSource();
                 }
               }}
               readOnly={!allowHtmlEdit}
@@ -1675,5 +1673,5 @@ export default function RichEditor({
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -41,7 +41,7 @@ const DpcIssue = () => {
           setProductList(response.data.records);
         }
       } catch (e) {
-        console.error('제품목록 조회 실패:', e);
+        return null;
       } finally {
         setIsFetching(false);
       }
@@ -79,7 +79,6 @@ const DpcIssue = () => {
 
       navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
-      console.error('증명서 발급 실패:', e);
       alert('증명서 발급 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
@@ -101,7 +100,6 @@ const DpcIssue = () => {
 
       navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
-      console.error('증명서 발급 실패:', e);
       alert('전자문서지갑 주소를 조회할 수 없습니다. 지갑 등록 여부를 확인해주세요.');
     } finally {
       setIsLoading(false);
@@ -117,7 +115,6 @@ const DpcIssue = () => {
       setSurveyData(response.data.record);
       setIsSurveyOpen(true);
     } catch (e) {
-      console.error('설문조사 항목 조회 실패:', e);
       alert('설문조사 항목 조회 중 오류가 발생했습니다.');
     } finally {
       setIsSurveyLoading(false);
@@ -172,7 +169,6 @@ const DpcIssue = () => {
       setSurveyProduct(null);
       setSurveyAnswers({});
     } catch (e) {
-      console.error('설문조사 제출 실패:', e);
       const status = e?.response?.status;
       const message = e?.response?.data?.message;
       if (status === 400 && message) {

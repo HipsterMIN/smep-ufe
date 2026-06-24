@@ -51,7 +51,6 @@ const SmtcIssue = () => {
 
       navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
-      console.error('증명서 발급 실패:', e);
       alert('조회된 데이터가 없습니다. SMTECH 홈페이지에 문의해주세요.(https://www.smtech.go.kr)');
     } finally {
       setIsLoading(false);
@@ -76,7 +75,6 @@ const SmtcIssue = () => {
 
       navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
-      console.error('증명서 발급 실패:', e);
       alert('조회된 데이터가 없습니다. SMTECH 홈페이지에 문의해주세요.(https://www.smtech.go.kr)');
     } finally {
       setIsLoading(false);

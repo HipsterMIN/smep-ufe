@@ -257,7 +257,6 @@ const createFailedResource = (key, error) => {
 // 제품 전제는 30건 미만이지만, 운영 데이터가 상한을 넘으면 화면은 유지하고 개발자 경고만 남긴다.
 const warnIfDashboardPageTruncated = (label, totalElements, items) => {
   if (Number.isFinite(totalElements) && totalElements > items.length) {
-    console.warn(`대시보드 ${label} 목록이 ${items.length}/${totalElements}건만 로드되었습니다.`);
   }
 };
 
@@ -349,7 +348,6 @@ async function loadScraps() {
     }
 
     hasFailedCategory = true;
-    console.error(`대시보드 관심공고 조회 실패(${fallbackCategory}):`, result.reason);
     byCategory[fallbackCategory] = createResource({ error: toErrorMessage(result.reason) });
   });
 
@@ -418,7 +416,6 @@ async function loadDashboardData(context = {}) {
       return;
     }
 
-    console.error(`대시보드 데이터 조회 실패(${key}):`, result.reason);
     nextData[key] = createFailedResource(key, result.reason);
   });
 

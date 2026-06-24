@@ -91,7 +91,6 @@ const BusinessSummarySection = ({ dashboardData } = {}) => {
     const path = resolveMenuPath(getFullPath, menuId);
 
     if (!path) {
-      console.error(`대시보드 ${label} 메뉴 경로를 찾을 수 없습니다.`, { menuId });
       return;
     }
 

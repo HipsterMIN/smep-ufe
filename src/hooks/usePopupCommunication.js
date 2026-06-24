@@ -40,7 +40,7 @@ export const usePopupSender = () => {
         sessionStorage.setItem(`ai-chat-payload:${payloadId}`, JSON.stringify(payload));
         window.location.href = targetUrl;
       } catch (e) {
-        console.warn('Failed to use sessionStorage fallback', e);
+        return null;
       }
       return null;
     }
@@ -131,7 +131,7 @@ export const usePopupReceiver = (onPayloadReceived) => {
         processPayload(JSON.parse(json));
         return;
       } catch (e) {
-        console.error('Failed to decode payload', e);
+        return null;
       }
     }
 
@@ -146,7 +146,7 @@ export const usePopupReceiver = (onPayloadReceived) => {
           return;
         }
       } catch (e) {
-        console.warn('SessionStorage read failed', e);
+        return null;
       }
     }
 
@@ -179,7 +179,6 @@ export const usePopupReceiver = (onPayloadReceived) => {
     const timer = setTimeout(() => {
       if (!processedRef.current) {
         // 필요 시 에러 상태 처리 가능
-        console.warn('Payload receive timeout');
       }
     }, 5000);
 

@@ -39,7 +39,6 @@ export const useTotalSearch = (endpoint = '/api/v1/search/total') => {
       setTotalCount(total);
     } catch (err) {
       if (err.name === 'AbortError') return;
-      console.error('Total search failed:', err);
       setResults([]);
       setTotalCount(0);
       setError(err);

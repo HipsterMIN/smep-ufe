@@ -73,7 +73,6 @@ const UI_USR_R_101 = () => {
       } catch (error) {
         if (!isMounted) return;
         setBoardDetail(null);
-        console.error('게시판 상세 조회 실패:', error);
       }
     };
 
@@ -176,7 +175,6 @@ const UI_USR_R_101 = () => {
 
       const downloadName = file.fileName || file.orgnlFileNm || 'download';
 
-      console.log(downloadName);
       const url = window.URL.createObjectURL(blob.data);
       const a = document.createElement('a');
       a.href = url;
@@ -186,7 +184,6 @@ const UI_USR_R_101 = () => {
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('파일 다운로드 실패:', error);
       alert('파일 다운로드 중 오류가 발생했습니다.');
     }
   };

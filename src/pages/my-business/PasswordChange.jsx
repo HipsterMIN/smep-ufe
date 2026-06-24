@@ -117,7 +117,6 @@ const UI_USR_R_420 = () => {
       logout();
       navigate('/service/login');
     } catch (error) {
-      console.error('Password change failed:', error);
       alert(resolvePasswordChangeErrorMessage(error));
     } finally {
       setIsSubmitting(false);

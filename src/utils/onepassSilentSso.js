@@ -15,6 +15,7 @@ const writeSession = (key, value) => {
     window.sessionStorage.setItem(key, value);
   } catch {
     // ignore
+    alert('세션 저장에 실패했습니다.');
   }
 };
 
@@ -23,6 +24,7 @@ const removeSession = (key) => {
     window.sessionStorage.removeItem(key);
   } catch {
     // ignore
+    alert('세션 삭제에 실패했습니다.');
   }
 };
 

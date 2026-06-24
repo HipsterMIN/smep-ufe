@@ -319,7 +319,6 @@ const UI_USR_R_031 = () => {
         setFilterOptions(toPolicyFilterOptions(commonCodes));
       })
       .catch((error) => {
-        console.error('Failed to load finance policy common codes:', error);
         setFilterOptions(DEFAULT_FILTER_OPTIONS);
       });
   }, []);
@@ -330,7 +329,6 @@ const UI_USR_R_031 = () => {
         setIndustryGroups(buildIndustryGroupMap(unwrapResponse(response) || []));
       })
       .catch((error) => {
-        console.error('Failed to load finance policy industries:', error);
         setIndustryGroups({});
       });
   }, []);
@@ -353,7 +351,6 @@ const UI_USR_R_031 = () => {
     apiClient.get(detailUrl)
       .then((response) => setDetail(unwrapResponse(response)))
       .catch((error) => {
-        console.error('정책금융 상세 조회 실패:', error);
         setDetail(null);
       })
       .finally(() => setLoading(false));
@@ -413,7 +410,6 @@ const UI_USR_R_031 = () => {
     apiClient
       .post(`/api/v1/finance-policy/inquiry?${params.toString()}`, null, { keepalive: true })
       .catch((error) => {
-        console.error('Failed to track policy-finance inquiry history:', error);
       });
   };
 
