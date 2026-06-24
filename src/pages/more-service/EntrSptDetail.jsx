@@ -156,7 +156,6 @@ const UI_USR_R_111 = () => {
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('파일 다운로드 실패:', error);
       alert('파일 다운로드 중 오류가 발생했습니다.');
     }
   };

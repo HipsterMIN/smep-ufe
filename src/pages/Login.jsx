@@ -107,7 +107,6 @@ const UI_USR_R_002 = () => {
       login({ token: accessToken, refreshToken, profile });
       navigate('/');
     } catch (error) {
-      console.error('Login failed:', error);
       alert(resolveLoginErrorMessage(error));
     }
   };
@@ -127,7 +126,6 @@ const UI_USR_R_002 = () => {
     const typeStr = (loginType === LOGIN_TYPE_INDIVIDUAL) ? 'member' : 'business';
       
     const onePassJoinUrl = buildOnePassRegisterUrl(typeStr);
-    console.log('onOnePassJoin (Current Type: ' + loginType + ') : ', onePassJoinUrl);
     window.location.href = onePassJoinUrl;
   };
 

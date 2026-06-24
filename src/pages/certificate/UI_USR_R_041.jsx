@@ -57,7 +57,7 @@ const UI_USR_R_041 = () => {
         const response = await apiClient.get(`/api/v1/certificate/detail/${prdocCd}`);
         setData(response.data);
       } catch (error) {
-        console.error('상세 조회 실패:', error);
+        return null;
       } finally {
         setLoading(false);
       }
@@ -109,10 +109,6 @@ const UI_USR_R_041 = () => {
             return;
           }
         } catch (error) {
-          console.error('[Certificate] failed to fetch keycloak logout url', {
-            message: error?.message ?? 'unknown-error',
-            status: error?.status ?? null,
-          });
           logout(); // API 실패해도 로컬 로그아웃은 수행
         }
 
@@ -148,7 +144,6 @@ const UI_USR_R_041 = () => {
       }
       supportedLangs = result.data.supportedLangs || [];
     } catch (error) {
-      console.error('발급 가능 여부 확인 실패:', error);
       alert('발급 가능 여부 확인 중 오류가 발생했습니다.');
       return;
     }

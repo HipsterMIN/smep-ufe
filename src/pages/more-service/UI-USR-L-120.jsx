@@ -61,7 +61,7 @@ const UI_USR_L_120 = () => {
         setCertSystmFldNmList(fldRes.data || []);
         setTkcgMaoNmList(maoRes.data || []);
       } catch (error) {
-        console.error('필터 옵션 조회 실패:', error);
+        return null;
       }
     };
     fetchFilterOptions();
@@ -107,7 +107,6 @@ const UI_USR_L_120 = () => {
         setTotalElements(data.totalElements || 0);
         setTotalPages(data.totalPages || 0);
       } catch (error) {
-        console.error('조회 실패:', error);
         setCertifications([]);
       } finally {
         setLoading(false);
@@ -193,7 +192,7 @@ const UI_USR_L_120 = () => {
             <div className="sch-input w-322">
               <input
                 type="text"
-                 className="krds-input medium"
+                className="krds-input medium"
                 placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}

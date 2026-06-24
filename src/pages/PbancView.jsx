@@ -79,7 +79,7 @@ const PbancView = () => {
         );
         setItem(response?.data || response);
       } catch (error) {
-        console.error('상세 조회 실패:', error);
+        return null;
       }
     };
 
@@ -98,7 +98,6 @@ const PbancView = () => {
 
         setBizFieldOptions(commonCodes[BIZ_PBANC_CLSF_GROUP_ID] || []);
       } catch (error) {
-        console.error('공통코드 조회 실패:', error);
         if (mounted) {
           setBizFieldOptions([]);
         }

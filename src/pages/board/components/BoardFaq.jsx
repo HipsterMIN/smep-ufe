@@ -75,7 +75,6 @@ const BoardFaq = ({ bbsNo }) => {const matches = useMatches();
       } catch (error) {
         if (!isMounted) return;
         setCategories([]);
-        console.error('게시판 카테고리 조회 실패:', error);
       }
     };
 
@@ -130,7 +129,6 @@ const BoardFaq = ({ bbsNo }) => {const matches = useMatches();
         setPostList([]);
         setTotalElements(0);
         setTotalPages(0);
-        console.error('FAQ 목록 조회 실패:', error);
       } finally {
         if (isMounted) {
           setLoading(false);

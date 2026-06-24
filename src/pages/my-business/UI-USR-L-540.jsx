@@ -100,7 +100,7 @@ const UI_USR_L_540 = () => {
         setTotalElements(data.totalElements);
         setTotalPages(data.totalPages);
       } catch (error) {
-        console.error('알림 목록 조회 실패:', error);
+        return null;
       } finally {
         setLoading(false);
       }

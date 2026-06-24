@@ -146,7 +146,6 @@ const UI_USR_L_190 = () => {
         setTotalPages(pageData.totalPages || 0);
       } catch (error) {
         if (!mounted) return;
-        console.error('행사정보 목록 조회 실패:', error);
         setList([]);
         setTotalElements(0);
         setTotalPages(0);
