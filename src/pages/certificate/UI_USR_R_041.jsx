@@ -103,7 +103,7 @@ const UI_USR_R_041 = () => {
             // sessionStorage에 의도를 저장하고 OnePassSsoLogout에서 읽어 처리한다.
             sessionStorage.setItem(
               'post_logout_redirect',
-              JSON.stringify({ path: '/service/login', state: { loginType: 'CORPORATE' } }),
+              JSON.stringify({ path: '/', state: { loginType: 'CORPORATE' } }),
             );
             window.location.href = logoutUrl;
             return;
