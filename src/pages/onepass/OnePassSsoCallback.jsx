@@ -121,7 +121,7 @@ const OnePassSsoCallback = () => {
           silentSsoReturn(returnUrl);
           return;
         }
-        navigate('/service/login', { replace: true });
+        navigate('/', { replace: true });
       }
       return;
     }
