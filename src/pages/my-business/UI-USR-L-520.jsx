@@ -229,7 +229,6 @@ const UI_USR_L_520 = () => {
           [BIZ_PBANC_SPRT_INST_GROUP_ID]: commonCodes[BIZ_PBANC_SPRT_INST_GROUP_ID] || [],
         });
       } catch (error) {
-        console.error('지원사업 신청현황 공통코드 조회 실패:', error);
         if (mounted) {
           setSourceOptionsByCategory(DEFAULT_SOURCE_OPTIONS_BY_CATEGORY);
         }
@@ -362,7 +361,6 @@ const UI_USR_L_520 = () => {
           return;
         }
 
-        console.error('Failed to load support application status list:', error);
         setSummary(DEFAULT_SUMMARY);
         setPageData(DEFAULT_PAGE);
         setErrorMessage(error?.message || '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');

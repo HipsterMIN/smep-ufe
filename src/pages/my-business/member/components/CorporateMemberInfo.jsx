@@ -45,7 +45,6 @@ const CorporateMemberInfo = ({
   };
 
   const handleAddressSearchError = (error) => {
-    console.error('Failed to search address:', error);
     window.alert(error?.message || '주소검색 중 오류가 발생했습니다.');
   };
 
@@ -234,64 +233,64 @@ const CorporateMemberInfo = ({
       </div>
 
       {/* 기업관리자 정보 */}
-      <div className="conts-wrap mt-64">
-        <div className="on-form-register">
-          <h3 className="form-title">기업관리자 정보</h3>
-          <dl className="on-form-row large">
-            <div className="form-row-item">
-              <dt className="form-row-label">
-                <span className="form-tit">담당자</span>
-              </dt>
-              <dd className="form-row-content">
-                <span className="text-value">{renderManagerValue(managerContact?.mbrNm)}</span>
-              </dd>
-            </div>
-            <div className="form-row-item">
-              <dt className="form-row-label">
-                <span className="form-tit">휴대전화번호</span>
-              </dt>
-              <dd className="form-row-content">
-                <span className="text-value">{renderManagerPhoneNumber(managerContact?.picMblTelno)}</span>
-              </dd>
-            </div>
-            <div className="form-row-item">
-              <dt className="form-row-label">
-                <span className="form-tit">유선전화</span>
-              </dt>
-              <dd className="form-row-content">
-                <span className="text-value">{renderManagerPhoneNumber(managerContact?.picTelno)}</span>
-              </dd>
-            </div>
-            <div className="form-row-item">
-              <dt className="form-row-label">
-                <span className="form-tit">이메일</span>
-              </dt>
-              <dd className="form-row-content">
-                <span className="text-value">{renderManagerValue(managerContact?.picEmlAddr)}</span>
-              </dd>
-            </div>
-            <div className="form-row-item">
-              <dt className="form-row-label">
-                <span className="form-tit">부서명</span>
-              </dt>
-              <dd className="form-row-content">
-                <span className="text-value">{renderManagerValue(managerContact?.picDeptNm)}</span>
-              </dd>
-            </div>
-            <div className="form-row-item">
-              <dt className="form-row-label">
-                <span className="form-tit">직위</span>
-              </dt>
-              <dd className="form-row-content">
-                <span className="text-value">{renderManagerValue(managerContact?.picJbpsNm)}</span>
-              </dd>
-            </div>
-          </dl>
-        </div>
-        <ul className="info-list-point">
-          <li><i className="svg-icon ico-checkbox"></i>기업관리자 정보변경은 개인회원 마이페이지에서 변경이 가능합니다.</li>
-        </ul>
-      </div>
+      {/*<div className="conts-wrap mt-64">*/}
+      {/*  <div className="on-form-register">*/}
+      {/*    <h3 className="form-title">기업관리자 정보</h3>*/}
+      {/*    <dl className="on-form-row large">*/}
+      {/*      <div className="form-row-item">*/}
+      {/*        <dt className="form-row-label">*/}
+      {/*          <span className="form-tit">담당자</span>*/}
+      {/*        </dt>*/}
+      {/*        <dd className="form-row-content">*/}
+      {/*          <span className="text-value">{renderManagerValue(managerContact?.mbrNm)}</span>*/}
+      {/*        </dd>*/}
+      {/*      </div>*/}
+      {/*      <div className="form-row-item">*/}
+      {/*        <dt className="form-row-label">*/}
+      {/*          <span className="form-tit">휴대전화번호</span>*/}
+      {/*        </dt>*/}
+      {/*        <dd className="form-row-content">*/}
+      {/*          <span className="text-value">{renderManagerPhoneNumber(managerContact?.picMblTelno)}</span>*/}
+      {/*        </dd>*/}
+      {/*      </div>*/}
+      {/*      <div className="form-row-item">*/}
+      {/*        <dt className="form-row-label">*/}
+      {/*          <span className="form-tit">유선전화</span>*/}
+      {/*        </dt>*/}
+      {/*        <dd className="form-row-content">*/}
+      {/*          <span className="text-value">{renderManagerPhoneNumber(managerContact?.picTelno)}</span>*/}
+      {/*        </dd>*/}
+      {/*      </div>*/}
+      {/*      <div className="form-row-item">*/}
+      {/*        <dt className="form-row-label">*/}
+      {/*          <span className="form-tit">이메일</span>*/}
+      {/*        </dt>*/}
+      {/*        <dd className="form-row-content">*/}
+      {/*          <span className="text-value">{renderManagerValue(managerContact?.picEmlAddr)}</span>*/}
+      {/*        </dd>*/}
+      {/*      </div>*/}
+      {/*      <div className="form-row-item">*/}
+      {/*        <dt className="form-row-label">*/}
+      {/*          <span className="form-tit">부서명</span>*/}
+      {/*        </dt>*/}
+      {/*        <dd className="form-row-content">*/}
+      {/*          <span className="text-value">{renderManagerValue(managerContact?.picDeptNm)}</span>*/}
+      {/*        </dd>*/}
+      {/*      </div>*/}
+      {/*      <div className="form-row-item">*/}
+      {/*        <dt className="form-row-label">*/}
+      {/*          <span className="form-tit">직위</span>*/}
+      {/*        </dt>*/}
+      {/*        <dd className="form-row-content">*/}
+      {/*          <span className="text-value">{renderManagerValue(managerContact?.picJbpsNm)}</span>*/}
+      {/*        </dd>*/}
+      {/*      </div>*/}
+      {/*    </dl>*/}
+      {/*  </div>*/}
+      {/*  <ul className="info-list-point">*/}
+      {/*    <li><i className="svg-icon ico-checkbox"></i>기업관리자 정보변경은 개인회원 마이페이지에서 변경이 가능합니다.</li>*/}
+      {/*  </ul>*/}
+      {/*</div>*/}
     </>
   );
 };

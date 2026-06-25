@@ -70,7 +70,7 @@ const UI_USR_L_140 = () => {
         const response = await apiClient.get('/api/v1/stdg/sido');
         setSidoList(response.data ?? []);
       } catch (error) {
-        console.error('시도 목록 조회 실패:', error);
+        return null;
       }
     };
     fetchSidoList();
@@ -91,7 +91,7 @@ const UI_USR_L_140 = () => {
         setSigunguList(response.data ?? []);
         setSigunguCd('');
       } catch (error) {
-        console.error('시군구 목록 조회 실패:', error);
+        return null;
       }
     };
     fetchSigunguList();
@@ -105,7 +105,7 @@ const UI_USR_L_140 = () => {
         const response = await apiClient.get('/api/v1/bizm/cstm-spcltyent/fdtnl-tech-list');
         setFdtnlTechList(response.data ?? []);
       } catch (error) {
-        console.error('핵심기술 목록 조회 실패:', error);
+        return null;
       }
     };
     fetchFdtnlTechList();
@@ -119,7 +119,7 @@ const UI_USR_L_140 = () => {
         const response = await apiClient.get('/api/v1/bizm/cstm-spcltyent/fld-nm-list');
         setFldNmList(response.data ?? []);
       } catch (error) {
-        console.error('업종명 목록 조회 실패:', error);
+        return null;
       }
     };
     fetchFldNmList();
@@ -165,7 +165,6 @@ const UI_USR_L_140 = () => {
       setTotalCount(res.totalElements ?? 0);
       setTotalPages(res.totalPages ?? 0);
     } catch (error) {
-      console.error('목록 조회 실패:', error);
       setList([]);
     } finally {
       setLoading(false);
@@ -410,7 +409,7 @@ const UI_USR_L_140 = () => {
         <div className="sch-input">
           <input
             type="text"
-             className="krds-input medium"
+            className="krds-input medium"
             placeholder="검색어를 입력해주세요."
             title="검색어 입력"
             value={searchKeyword}

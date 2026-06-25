@@ -84,7 +84,6 @@ const UI_USR_L_100 = () => {
       } catch (error) {
         if (!isMounted) return;
         setBoardDetail(null);
-        console.error('게시판 상세 조회 실패:', error);
       }
     };
 
@@ -126,7 +125,6 @@ const UI_USR_L_100 = () => {
       } catch (error) {
         if (!isMounted) return;
         setCategories([]);
-        console.error('게시판 카테고리 조회 실패:', error);
       }
     };
 
@@ -216,7 +214,6 @@ const UI_USR_L_100 = () => {
         setPostList([]);
         setTotalElements(0);
         setTotalPages(0);
-        console.error('게시물 목록 조회 실패:', error);
       } finally {
         if (isMounted) {
           setLoading(false);

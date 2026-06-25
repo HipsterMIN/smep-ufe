@@ -114,7 +114,6 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
       } catch (error) {
         if (!isMounted) return;
         setCategories([]);
-        console.error('Q&A 카테고리 조회 실패:', error);
       }
     };
 
@@ -174,7 +173,6 @@ const BoardQna = ({ boardDetail, bbsNo }) => {
         setPostList([]);
         setTotalElements(0);
         setTotalPages(0);
-        console.error('Q&A 목록 조회 실패:', error);
       } finally {
         if (isMounted) {
           setLoading(false);

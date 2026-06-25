@@ -133,7 +133,6 @@ const IntegratedSearchRouteTest = () => {
           return options[0].code;
         });
       } catch (err) {
-        console.error('통합검색 라우트 힌트 코드 조회 실패:', err);
         setError('INTG_SRCH_ROUTE_HINT_CD 공통코드 조회에 실패했습니다.');
       } finally {
         setIsRouteHintOptionsLoading(false);
@@ -172,7 +171,7 @@ const IntegratedSearchRouteTest = () => {
         setResolved(saved.resolved);
       }
     } catch (err) {
-      console.error('테스트 페이지 상태 복원 실패:', err);
+      return null;
     }
   }, []);
 
@@ -199,7 +198,6 @@ const IntegratedSearchRouteTest = () => {
       setResolved(nextResolved);
       persistPageState({ nextResolved });
     } catch (err) {
-      console.error('통합검색 라우트 리졸브 실패:', err);
       setError('리졸브에 실패했습니다. 콘솔 로그를 확인해주세요.');
     } finally {
       setIsResolving(false);

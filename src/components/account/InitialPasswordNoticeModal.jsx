@@ -1,7 +1,4 @@
-import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@store/useAuthStore.jsx';
-
-const PASSWORD_CHANGE_PATH = '/mb/mbr/UI_USR_R_420';
 
 const overlayStyle = {
   position: 'fixed',
@@ -58,15 +55,6 @@ const bodyStyle = {
   color: 'var(--krds-light-color-text-basic, #344054)',
 };
 
-const noteStyle = {
-  margin: '0 0 2.4rem',
-  fontSize: '1.3rem',
-  lineHeight: 1.6,
-  color: 'var(--krds-light-color-text-subtler, #667085)',
-  paddingLeft: '1.2rem',
-  borderLeft: '3px solid var(--krds-light-color-border-subtler, #e4e7ec)',
-};
-
 const btnGroupStyle = {
   display: 'flex',
   gap: '0.8rem',
@@ -79,7 +67,6 @@ const InitialPasswordNoticeModal = () => {
   const additionalInfoRequired = useAuthStore((state) => state.additionalInfoRequired);
   const dismissed = useAuthStore((state) => state.initialPasswordNoticeDismissed);
   const dismissInitialPasswordNotice = useAuthStore((state) => state.dismissInitialPasswordNotice);
-  const navigate = useNavigate();
 
   // ENT 회원은 AdditionalInfoRequiredGate에서 강제 변경하므로 여기서는 IND(비강제) 대상만 표시한다.
   const shouldShow = isLogin && initialPassword && !additionalInfoRequired && !dismissed;
@@ -88,48 +75,33 @@ const InitialPasswordNoticeModal = () => {
     return null;
   }
 
-  const handleChangeNow = () => {
-    dismissInitialPasswordNotice();
-    navigate(PASSWORD_CHANGE_PATH);
-  };
-
-  const handleLater = () => {
+  const handleConfirm = () => {
     dismissInitialPasswordNotice();
   };
 
   return (
     <div style={overlayStyle} role="dialog" aria-modal="true" aria-labelledby="init-pwd-notice-title">
-      <div style={backdropStyle} onClick={handleLater} aria-hidden="true" />
+      <div style={backdropStyle} onClick={handleConfirm} aria-hidden="true" />
       <div style={dialogStyle}>
         <div style={badgeStyle}>
-          <span>⚠</span>
-          <span>초기 비밀번호 사용 중</span>
+          <span>🎉</span>
+          <span>신규 회원</span>
         </div>
         <h2 id="init-pwd-notice-title" style={titleStyle}>
-          비밀번호 변경을 권장합니다
+          통합회원 가입을 축하합니다!
         </h2>
         <p style={bodyStyle}>
-          현재 자동 발급된 초기 비밀번호를 사용하고 있습니다.
+          중소벤처24 통합회원으로 가입되었습니다.
           <br />
-          안전한 서비스 이용을 위해 비밀번호를 변경해 주세요.
-        </p>
-        <p style={noteStyle}>
-          초기 비밀번호를 모르시는 경우, 회원 가입 시 발송된 SMS 또는 이메일을 확인해 주세요.
+          회원정보 변경에서 연락처 등 추가 정보를 업데이트할 수 있습니다.
         </p>
         <div style={btnGroupStyle}>
           <button
             type="button"
-            className="krds-btn medium outline"
-            onClick={handleLater}
-          >
-            나중에 변경
-          </button>
-          <button
-            type="button"
             className="krds-btn medium primary"
-            onClick={handleChangeNow}
+            onClick={handleConfirm}
           >
-            지금 변경하기
+            확인
           </button>
         </div>
       </div>

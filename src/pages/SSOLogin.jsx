@@ -74,8 +74,7 @@ const UI_USR_R_002 = () => {
         navigate('/');
       }
     } catch (error) {
-      console.error('로그인 실패:', error);
-      // 에러 처리
+      return null;
     }
   };
 

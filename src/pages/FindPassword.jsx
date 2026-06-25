@@ -32,8 +32,6 @@ const FindPassword = () => {
       alert('본인 인증을 완료해주세요.');
       return;
     }
-
-    console.log('기업회원 비밀번호 찾기', businessType);
   };
 
   const clearPasswordFindState = () => {
@@ -70,18 +68,8 @@ const FindPassword = () => {
       return;
     }
 
-    console.info('[FIND_PASSWORD_MARK] personal auth start', {
-      authMethod,
-      loginIdLength: userId.trim().length,
-      memberNameLength: userName.trim().length,
-    });
-
     const authResult = await authenticate({ svcTypes: [authMethod] });
     if (authResult?.success) {
-      console.info('[FIND_PASSWORD_MARK] personal auth success', {
-        authMethod,
-        resultKeyLength: authResult.resultKey?.length || 0,
-      });
       setIsVerifyingPasswordFind(true);
 
       try {
@@ -93,29 +81,14 @@ const FindPassword = () => {
         const verifyPayload = unwrapApiResponseData(verifyResponse);
         const findKey = verifyPayload.findKey || '';
         if (!findKey) {
-          console.warn('[FIND_PASSWORD_MARK] personal verify response malformed', {
-            ...createResponseShapeMarker(verifyResponse, verifyPayload),
-            hasFindKey: false,
-            hasChannels: isObjectPayload(verifyPayload.channels),
-          });
           throw new Error('비밀번호 찾기 응답 형식이 올바르지 않습니다.');
         }
         const channels = verifyPayload.channels || {};
-        console.info('[FIND_PASSWORD_MARK] personal verify response unwrapped', {
-          ...createResponseShapeMarker(verifyResponse, verifyPayload),
-          hasFindKey: Boolean(findKey),
-          channelKeys: getPayloadKeys(channels),
-        });
+
         const defaultSendOption =
           PASSWORD_FIND_SEND_OPTIONS.find((option) => channels[option.channelKey]?.available) ||
           PASSWORD_FIND_SEND_OPTIONS[0];
-        console.info('[FIND_PASSWORD_MARK] personal verify success', {
-          authMethod,
-          hasFindKey: Boolean(findKey),
-          expiresInSeconds: verifyPayload.expiresInSeconds,
-          emailAvailable: Boolean(channels.email?.available),
-          smsAvailable: Boolean(channels.sms?.available),
-        });
+
         navigate('/service/find-password/send', {
           replace: true,
           state: {
@@ -126,11 +99,6 @@ const FindPassword = () => {
           },
         });
       } catch (error) {
-        console.error('[FIND_PASSWORD_MARK] personal verify failed', {
-          authMethod,
-          status: error?.status,
-          message: error?.message,
-        });
         alert(resolvePasswordFindErrorMessage(error));
       } finally {
         setIsVerifyingPasswordFind(false);
@@ -138,10 +106,6 @@ const FindPassword = () => {
       return;
     }
 
-    console.info('[FIND_PASSWORD_MARK] personal auth failed', {
-      authMethod,
-      code: authResult?.code,
-    });
     // 이유: 실패 alert를 같은 tick에서 바로 띄우면 React가 loading 해제 렌더를 끝내기 전에 dialog가 화면을 막을 수 있다.
     window.setTimeout(() => {
       alert(authResult?.message || 'NICE ID 인증 처리 중 오류가 발생했습니다.');

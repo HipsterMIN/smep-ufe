@@ -145,7 +145,6 @@ const EventParticipationList = () => {
       } catch (error) {
         if (!isMounted) return;
         setBoardDetail(null);
-        console.error('게시판 상세 조회 실패:', error);
       }
     };
 

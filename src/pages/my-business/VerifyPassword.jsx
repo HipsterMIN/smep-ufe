@@ -41,7 +41,6 @@ const getStoredVerificationStatus = (storageKey) => {
   try {
     return window.sessionStorage.getItem(storageKey) === 'true';
   } catch (error) {
-    console.warn('Failed to read password verification status.', error);
     return false;
   }
 };
@@ -54,7 +53,6 @@ const setStoredVerificationStatus = (storageKey) => {
   try {
     window.sessionStorage.setItem(storageKey, 'true');
   } catch (error) {
-    console.warn('Failed to save password verification status.', error);
   }
 };
 
@@ -66,7 +64,7 @@ const clearStoredVerificationStatus = (storageKey) => {
   try {
     window.sessionStorage.removeItem(storageKey);
   } catch (error) {
-    console.warn('Failed to clear password verification status.', error);
+    return null;
   }
 };
 
@@ -216,10 +214,14 @@ const VerifyPassword = ({
         });
       }
     } catch (error) {
-      console.error('Password verification failed:', error);
       setErrorMessage(error?.message || '비밀번호 확인 중 오류가 발생했습니다.');
     }
   };
+
+  // 비밀번호 미설정 회원(신규 통합회원)은 확인 단계 없이 바로 진입
+  if (isInitialPassword) {
+    return <>{children}</>;
+  }
 
   if (isVerified) {
     return <>{children}</>;
@@ -238,30 +240,6 @@ const VerifyPassword = ({
         </div>
 
         <form onSubmit={handleSubmit}>
-          {isInitialPassword && (
-            <div
-              className="conts-wrap"
-              style={{ marginBottom: '1.6rem', padding: '1.6rem 2rem', background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '0.6rem' }}
-            >
-              <p style={{ margin: 0, fontWeight: 700, color: '#92400e', fontSize: '1.4rem', marginBottom: '0.6rem' }}>
-                ⚠ 초기 비밀번호 상태 — 회원정보 변경 불가
-              </p>
-              <p style={{ margin: 0, fontSize: '1.3rem', color: '#78350f', lineHeight: 1.6 }}>
-                자동 발급 초기 비밀번호를 사용하고 있어 회원정보를 변경할 수 없습니다.
-                <br />
-                비밀번호를 먼저 변경해 주세요.
-              </p>
-              <div style={{ marginTop: '1.2rem' }}>
-                <button
-                  type="button"
-                  className="krds-btn small primary"
-                  onClick={() => navigate('/mb/mbr/UI_USR_R_420')}
-                >
-                  비밀번호 수정 페이지로 이동
-                </button>
-              </div>
-            </div>
-          )}
           <div className="conts-wrap form-confirm">
             <h3 className="sec-tit">비밀번호 재확인</h3>
             <ul className="krds-info-list decimal" role="list">
@@ -331,8 +309,7 @@ const VerifyPassword = ({
               <button
                 type="submit"
                 className="krds-btn primary xlarge"
-                disabled={isInitialPassword}
-                title={isInitialPassword ? '초기 비밀번호를 먼저 변경해 주세요.' : undefined}
+                disabled={false}
               >
                 다음 단계
               </button>

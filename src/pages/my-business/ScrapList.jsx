@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import Pagination from '@components/ui/Pagination';
@@ -36,13 +36,13 @@ function ScrapToggleButton({ row, onToggle }) {
   };
 
   return (
-      <button
-          type="button"
-          className={`krds-btn small width-auto ${btnClass}`}
-          onClick={handleClick}
-      >
-        {btnLabel}
-      </button>
+    <button
+      type="button"
+      className={`krds-btn small width-auto ${btnClass}`}
+      onClick={handleClick}
+    >
+      {btnLabel}
+    </button>
   );
 }
 
@@ -153,7 +153,7 @@ const ScrapList = () => {
         size: pageSize,
         keyword: appliedKeyword,
         srchFrDt: formatDate(startDate),
-        srchToDt: formatDate(endDate)
+        srchToDt: formatDate(endDate),
       };
 
 
@@ -173,7 +173,7 @@ const ScrapList = () => {
 
 
     } catch (error) {
-      console.error("목록 조회 실패", error);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -193,19 +193,18 @@ const ScrapList = () => {
   }, [fetchListData]);
 
   const deleteScrap = async (pbancScrpSn) => {
-    if (!window.confirm("관심공고 목록에서 완전히 삭제하시겠습니까?")) return;
+    if (!window.confirm('관심공고 목록에서 완전히 삭제하시겠습니까?')) return;
 
     try {
       // API 경로는 프로젝트 설계에 맞춰 수정하세요 (예: /api/v1/scraps/delete)
       await apiClient.post('/api/v1/scraps/delete', {
         scrapTypeCd: categoryMap[activeCategory],
-        pbancScrpSn: pbancScrpSn
+        pbancScrpSn: pbancScrpSn,
       });
 
       alert('삭제되었습니다.');
       fetchListData(); // 목록 새로고침 (delYn='Y'인 데이터는 백엔드 쿼리에서 필터링됨)
     } catch (error) {
-      console.error("삭제 실패", error);
       alert('삭제 처리에 실패했습니다.');
     }
   };
@@ -337,49 +336,49 @@ const ScrapList = () => {
               </tr>
             </thead>
             <tbody>
-            {loading ? (
+              {loading ? (
                 <tr><td colSpan="5" className="ac">로딩 중...</td></tr>
-            ) : rows.length > 0 ? (
+              ) : rows.length > 0 ? (
                 rows.map((row, index) => {
 
                   const displayNo = totalElements - ((currentPage - 1) * pageSize + index);
                   return (
-                      <tr key={row.id}>
-                        <th scope="row" className="ac">
-                          <span>{displayNo}</span>
-                        </th>
-                        <td className="ac"><span>{formatDateTime(row.scrap_reg_dt)}</span></td>
-                        <td className="ac"><span>{activeCategory}</span></td>
-                        <td>
-                          <span
-                              onClick={() => handleDetail(row)}
-                              style={{cursor: 'pointer', textDecoration: 'underline'}}
-                              className="txt-link"
-                          >
-                            {row.title}
-                          </span>
-                        </td>
-                        <td className="ac btn-flex">
-                          <ScrapToggleButton
-                              row={row}
-                              onToggle={toggleScrap}
-                          />
-                          <button
-                              type="button"
-                              onClick={() => deleteScrap(row.pbanc_scrp_sn)}
-                              className="krds-btn small width-auto outline" // 스타일은 krds 가이드에 맞게 조정
-                          >
+                    <tr key={row.id}>
+                      <th scope="row" className="ac">
+                        <span>{displayNo}</span>
+                      </th>
+                      <td className="ac"><span>{formatDateTime(row.scrap_reg_dt)}</span></td>
+                      <td className="ac"><span>{activeCategory}</span></td>
+                      <td>
+                        <span
+                          onClick={() => handleDetail(row)}
+                          style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                          className="txt-link"
+                        >
+                          {row.title}
+                        </span>
+                      </td>
+                      <td className="ac btn-flex">
+                        <ScrapToggleButton
+                          row={row}
+                          onToggle={toggleScrap}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => deleteScrap(row.pbanc_scrp_sn)}
+                          className="krds-btn small width-auto outline" // 스타일은 krds 가이드에 맞게 조정
+                        >
                             삭제
-                          </button>
-                        </td>
-                      </tr>
+                        </button>
+                      </td>
+                    </tr>
                   );
                 })
-            ) : (
+              ) : (
                 <tr>
                   <td colSpan="5" className="ac">데이터가 없습니다.</td>
                 </tr>
-            )}
+              )}
             </tbody>
           </table>
         </div>

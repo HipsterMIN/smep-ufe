@@ -630,7 +630,6 @@ const resolveBoardPostDetailBbsNoByProvider = ({ intgSrchRouteHintCd }) => {
       reason: provided?.reason || 'OK_BBS_NO',
     };
   } catch (error) {
-    console.error('[IntegratedSearchRoute] bbsNo provider 실행 실패:', error);
     return {
       bbsNo: null,
       reason: 'BBS_NO_PROVIDER_ERROR',
@@ -853,7 +852,6 @@ const resolveBoardExternalLinkByWorkId = async ({ workId, bbsNo }) => {
       };
     }
 
-    console.error('[IntegratedSearchRoute] 게시판 외부링크 조회 실패:', error);
     return {
       externalUrl: null,
       reason: 'EXTERNAL_LINK_LOOKUP_FAILED',
@@ -914,7 +912,6 @@ const resolveExternalLinkByProvider = async ({
       reason: provided?.reason || 'OK_EXTERNAL_LINK',
     };
   } catch (error) {
-    console.error('[IntegratedSearchRoute] 외부링크 provider 실행 실패:', error);
     return {
       externalUrl: null,
       reason: 'EXTERNAL_LINK_PROVIDER_ERROR',

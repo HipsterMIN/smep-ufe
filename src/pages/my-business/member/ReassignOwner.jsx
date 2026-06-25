@@ -111,7 +111,6 @@ const UI_USR_L_460 = () => {
         if (!active) {
           return;
         }
-        console.error('기업담당자 목록 조회 실패:', error);
         setErrorMessage(error?.message || '기업담당자 목록을 불러오지 못했습니다.');
       } finally {
         if (active) {
@@ -229,7 +228,6 @@ const UI_USR_L_460 = () => {
       );
       setJoinCandidate(candidate);
     } catch (error) {
-      console.error('기업담당자 등록 후보 조회 실패:', error);
       setJoinErrorMessage(error?.message || '담당자 후보를 조회하지 못했습니다.');
     } finally {
       setJoinSearching(false);
@@ -251,7 +249,6 @@ const UI_USR_L_460 = () => {
       setFeedbackMessage('담당자를 등록했습니다.');
       setReloadKey((prev) => prev + 1);
     } catch (error) {
-      console.error('기업담당자 등록 실패:', error);
       setJoinErrorMessage(error?.message || '담당자 등록에 실패했습니다.');
     } finally {
       setJoinSubmitting(false);
@@ -281,7 +278,6 @@ const UI_USR_L_460 = () => {
       setFeedbackMessage('기업관리자를 변경했습니다.');
       setReloadKey((prev) => prev + 1);
     } catch (error) {
-      console.error('기업관리자 변경 실패:', error);
       setManagerErrorMessage(error?.message || '기업관리자 변경에 실패했습니다.');
     } finally {
       setManagerSubmitting(false);
@@ -308,7 +304,6 @@ const UI_USR_L_460 = () => {
       setFeedbackMessage('선택한 담당자를 삭제했습니다.');
       setReloadKey((prev) => prev + 1);
     } catch (error) {
-      console.error('기업담당자 삭제 실패:', error);
       setErrorMessage(error?.message || '담당자 삭제에 실패했습니다.');
     } finally {
       setDeleteSubmitting(false);
