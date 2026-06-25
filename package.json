@@ -13,7 +13,7 @@
     "build:predev": "npm run build:packages && vite build --mode predev",
     "build:dev": "npm run build:packages && vite build --mode development",
     "build:prod": "npm run build:packages && vite build --mode production",
-    "build": "npm run build:packages && vite build --mode development",
+    "build": "npm run build:packages && vite build --mode predev",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest",
@@ -23,6 +23,8 @@
     "lint:fix": "eslint src --fix"
   },
   "dependencies": {
+    "@grafana/faro-web-sdk": "^1.19.0",
+    "@grafana/faro-web-tracing": "^1.19.0",
     "@krds-ui/core": "file:./packages/core",
     "@krds-ui/icon": "file:./packages/icon",
     "@svar-ui/react-grid": "^2.3.2",
