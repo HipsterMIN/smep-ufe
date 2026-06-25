@@ -209,7 +209,7 @@ const OnePassSsoCallback = () => {
 
         alert('중기 통합회원 로그인 처리에 실패했습니다. 다시 시도해 주세요.');
         _handledSsoUrl = null;
-        navigate('/service/login', { replace: true });
+        navigate('/', { replace: true });
       }
     };
 
