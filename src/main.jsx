@@ -1,3 +1,4 @@
+import './lib/faro.js' // Grafana Faro RUM 초기화 (최상단: 초기 에러/Web Vitals 캡처)
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
