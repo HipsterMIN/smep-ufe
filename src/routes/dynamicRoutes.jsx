@@ -69,7 +69,6 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
   const rawBase = import.meta.env.BASE_URL || '/';
   const base = rawBase.endsWith('/') && rawBase !== '/' ? rawBase.slice(0, -1) : rawBase;
   if (base && base !== '/' && (fullPath === base || fullPath.startsWith(base + '/'))) {
-    console.warn(`[dynamicRoutes] basename 충돌 경로 필터링: fullPath=${fullPath} base=${base}`, menuNode);
     return null;
   }
 

@@ -707,26 +707,26 @@ const MainPage = () => {
     let isMounted = true;
 
     const syncOnepassModalState = async () => {
-    if (!isLogin) {
-      window.sessionStorage.removeItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY);
-      setIsOnepassModalOpen(false);
+      if (!isLogin) {
+        window.sessionStorage.removeItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY);
+        setIsOnepassModalOpen(false);
         setHasCi(null);
-      return;
-    }
+        return;
+      }
 
-    if (intgMbrSwtcYn !== 'N') {
-      setIsOnepassModalOpen(false);
-      return;
-    }
+      if (intgMbrSwtcYn !== 'N') {
+        setIsOnepassModalOpen(false);
+        return;
+      }
 
-    const isDismissed =
+      const isDismissed =
       window.sessionStorage.getItem(ONEPASS_CONVERSION_MODAL_DISMISSED_KEY) ===
       '1';
 
-    if (isDismissed) {
-      setIsOnepassModalOpen(false);
-      return;
-    }
+      if (isDismissed) {
+        setIsOnepassModalOpen(false);
+        return;
+      }
 
       // CI 조회 이전에는 모달을 열지 않는다. (기본 true 분기 노출 방지)
       setIsOnepassModalOpen(false);
@@ -832,11 +832,9 @@ const MainPage = () => {
   const handleOnepassJoinClick = () => {
     if (!isLoggedIn) {
       const onePassJoinUrl = buildOnePassRegisterUrl('member');
-      console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     } else {
       const onePassJoinUrl = buildOnePassConversionUrl();
-      console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     }
   };
@@ -1281,20 +1279,20 @@ const MainPage = () => {
 
                 {!isTop5Loading &&
                     Array.isArray(top5Certificates) && top5Certificates.map((cert, index) => {
-                      const certTitle = cert.prdocTtl || '증명서';
+                  const certTitle = cert.prdocTtl || '증명서';
 
-                      return (
-                        <li key={`top-cert-${cert.prdocCd || index}`}>
-                          <button
-                            type="button"
-                            className="word"
-                            onClick={() => handleCertificateClick(cert.prdocCd)}
-                          >
-                            {certTitle}
-                          </button>
-                        </li>
-                      );
-                    })}
+                  return (
+                    <li key={`top-cert-${cert.prdocCd || index}`}>
+                      <button
+                        type="button"
+                        className="word"
+                        onClick={() => handleCertificateClick(cert.prdocCd)}
+                      >
+                        {certTitle}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>

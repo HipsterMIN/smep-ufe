@@ -72,7 +72,6 @@ const UI_USR_R_181 = () => {
       } catch (error) {
         if (!isMounted) return;
         setBoardDetail(null);
-        console.error('게시판 상세 조회 실패:', error);
       }
     };
 
@@ -197,7 +196,6 @@ const UI_USR_R_181 = () => {
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('파일 다운로드 실패:', error);
       alert('파일 다운로드 중 오류가 발생했습니다.');
     }
   };

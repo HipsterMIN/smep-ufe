@@ -128,7 +128,6 @@ const getStoredIndustries = () => {
     const parsed = JSON.parse(stored);
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
-    console.warn('Failed to restore industry selection:', error);
     return [];
   }
 };
@@ -430,7 +429,6 @@ const UI_USR_L_030 = () => {
         setFilterOptions((prev) => ({ ...prev, ...toPolicyFilterOptions(commonCodes) }));
       })
       .catch((error) => {
-        console.error('Failed to load finance policy common codes:', error);
         setFilterOptions(DEFAULT_FILTER_OPTIONS);
       });
   }, []);
@@ -483,7 +481,6 @@ const UI_USR_L_030 = () => {
         });
       })
       .catch((error) => {
-        console.error('Failed to load finance policy institutions:', error);
         setFilterOptions((prev) => ({ ...prev, financialInsts: [] }));
       });
   }, [activeTabIndex]);
@@ -527,7 +524,6 @@ const UI_USR_L_030 = () => {
         if (requestSeq !== listRequestSeqRef.current) {
           return;
         }
-        console.error('Failed to load finance policy list:', error);
         setItems([]);
         setTotalElements(0);
         setTotalPages(0);
@@ -552,7 +548,6 @@ const UI_USR_L_030 = () => {
         setPopularItems(Array.isArray(data) ? data : []);
       })
       .catch((error) => {
-        console.error('Failed to load popular finance policy items:', error);
         setPopularItems([]);
       });
   }, [activeTabIndex]);
@@ -619,7 +614,6 @@ const UI_USR_L_030 = () => {
       setIndustryResults(data || []);
       setIndustryMessage(data?.length ? '' : '검색 결과가 없습니다.');
     } catch (error) {
-      console.error('Failed to search industries:', error);
       setIndustryResults([]);
       setIndustryMessage('업종 검색에 실패했습니다.');
     }
@@ -741,7 +735,6 @@ const UI_USR_L_030 = () => {
       setCompareItems(responses.map((response) => unwrapResponse(response)));
       setComparePopupOpen(true);
     } catch (error) {
-      console.error('Failed to load finance policy compare data:', error);
       alert('상품 비교 정보를 불러오지 못했습니다.');
     } finally {
       setCompareLoading(false);

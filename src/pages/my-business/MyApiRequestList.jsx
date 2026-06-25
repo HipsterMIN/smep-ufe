@@ -6,7 +6,7 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import { api as apiClient } from '@lib/apiClient.js';
 import { useNavigate } from 'react-router-dom';
-import {useAuthStore} from "@store/useAuthStore.jsx"; // API 클라이언트 임포트
+import { useAuthStore } from '@store/useAuthStore.jsx'; // API 클라이언트 임포트
 
 const MyApiRequestList = () => { // mbrNo를 받아옵니다.
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -37,7 +37,6 @@ const MyApiRequestList = () => { // mbrNo를 받아옵니다.
         setHistoryList(res.data);
       } catch (error) {
         if (!isMounted) return;
-        console.error('신청 내역 조회 실패:', error);
       } finally {
         if (isMounted) {
           setIsLoading(false);

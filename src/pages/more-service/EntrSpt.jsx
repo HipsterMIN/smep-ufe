@@ -116,7 +116,6 @@ const UI_USR_L_200 = () => {
           ...prev,
           boardDetail: null,
         }));
-        console.error('게시판 상세 조회 실패:', error);
       }
     };
 
@@ -168,7 +167,6 @@ const UI_USR_L_200 = () => {
           totalPages: 0,
           loading: false,
         }));
-        console.error('공지사항 게시물 조회 실패:', error);
       }
     };
 
@@ -224,7 +222,6 @@ const UI_USR_L_200 = () => {
           totalPages: 0,
           loading: false,
         }));
-        console.error('언론보도 게시물 조회 실패:', error);
       }
     };
 

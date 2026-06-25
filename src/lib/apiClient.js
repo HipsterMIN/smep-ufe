@@ -32,6 +32,7 @@ export async function apiFetch(path, { method = 'GET', headers = {}, body, token
       authToken = state.token;
     } catch (e) {
       // 스토어 접근 실패 시 무시 (로그인 전일 수 있음)
+      alert('인증 정보를 불러올 수 없습니다.');
     }
   }
 
