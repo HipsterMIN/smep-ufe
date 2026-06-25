@@ -62,7 +62,6 @@ const UI_USR_R_440 = () => {
         if (!active) {
           return;
         }
-        console.error('Failed to load withdrawal corporate manager contact:', error);
         setManagerContact(null);
       }
     };
@@ -108,7 +107,7 @@ const UI_USR_R_440 = () => {
   const onOnePassConfig = () => {
     const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
 
-    if(!isSsoLogin) {
+    if (!isSsoLogin) {
       alert('통합회원 로그인 후 이용할 수 있습니다.');
       return;
     }
@@ -118,16 +117,14 @@ const UI_USR_R_440 = () => {
     //   return;
     // }
 
-    if(currentMode === 'CORPORATE') {
+    if (currentMode === 'CORPORATE') {
       const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-business/information?redirect_uri=https://portal.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-prd&uuid=${uuid}`;
-      console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     } else {
       const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-member/information?redirect_uri=https://portal.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-prd&uuid=${uuid}`;
-      console.log('onOnePassJoin : ', onePassJoinUrl);
       window.location.href = onePassJoinUrl;
     }
-  }
+  };
 
 
   return (
@@ -150,7 +147,7 @@ const UI_USR_R_440 = () => {
           </ul>
         </div>
 
-{/* 
+        {/* 
         <div className="krds-table-wrap mt-24">
           <table className="tbl col data tbl-row">
             <caption>회원 기업 정보. 기업명, 기업 관리자 정보가 제공됨.  </caption>

@@ -29,7 +29,6 @@ const CbzIssue = () => {
         const data = await apiClient.get('/api/v1/certificate/cbz/records');
         setRecords(data?.data?.records || []);
       } catch (e) {
-        console.error('CBZ 목록 조회 실패:', e);
         alert('협업기업선정확인서 목록 조회 중 오류가 발생했습니다.');
       } finally {
         setIsFetching(false);
@@ -44,7 +43,7 @@ const CbzIssue = () => {
         const data = await apiClient.get('/api/v1/member/common/me/enterprise-info');
         setEnterpriseInfo(data.data);
       } catch (e) {
-        console.error('기업회원 기본정보 조회 실패:', e);
+        return null;
       }
     };
     fetchEnterpriseInfo();
@@ -75,7 +74,6 @@ const CbzIssue = () => {
 
       navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
-      console.error('증명서 발급 실패:', e);
       alert('증명서 발급 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
@@ -96,7 +94,6 @@ const CbzIssue = () => {
 
       navigate('/mb/dash/UI_USR_L_510');
     } catch (e) {
-      console.error('증명서 발급 실패:', e);
       alert('전자문서지갑 주소를 조회할 수 없습니다. 지갑 등록 여부를 확인해주세요.');
     } finally {
       setIsLoading(false);

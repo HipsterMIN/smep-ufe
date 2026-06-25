@@ -88,12 +88,6 @@ const menuStoreImpl  = (set, get) => ({
     } catch (error) {
       const isDev = import.meta.env.MODE === 'development';
 
-      if (isDev) {
-        console.warn('메뉴 데이터 API 호출 실패, 개발 환경이므로 목데이터를 사용합니다:', error.message);
-      } else {
-        console.error('메뉴 데이터 로드 실패:', error.message);
-      }
-
       const menuData = filterMenuByCurrentMode(mockMenuData);
       const flatMap = buildFlatMap(menuData);
 

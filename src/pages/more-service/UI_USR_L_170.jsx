@@ -137,7 +137,6 @@ const UI_USR_L_170 = () => {
         setPostList([]);
         setTotalElements(0);
         setTotalPages(0);
-        console.error('기업업무용 서식 목록 조회 실패:', error);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -188,7 +187,7 @@ const UI_USR_L_170 = () => {
       }
     } catch (error) {
       // 상세 조회 실패 시에도 다운로드는 진행한다.
-      console.error('다운로드수 증가용 상세 조회 실패:', error);
+      return null;
     } finally {
       triggerDownload(downloadUrl);
     }
@@ -334,7 +333,7 @@ const UI_USR_L_170 = () => {
             <div className="sch-input">
               <input
                 type="text"
-                 className="krds-input medium"
+                className="krds-input medium"
                 placeholder="검색어를 입력하세요"
                 title="검색어 입력"
                 value={searchKeyword}

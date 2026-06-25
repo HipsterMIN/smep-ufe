@@ -7,6 +7,7 @@ import { api as apiClient } from '@lib/apiClient.js';
 
 const normalizeResponse = (response) => response?.data ?? response ?? null;
 const normalizeText = (value) => String(value ?? '').trim();
+const BOARD_SUBMIT_TOKEN_HEADER = 'X-Board-Submit-Token';
 
 const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
   const params = useParams();
@@ -69,7 +70,6 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
       } catch (error) {
         if (!isMounted) return;
         setCategories([]);
-        console.error('Q&A 등록 카테고리 조회 실패:', error);
       } finally {
         if (isMounted) {
           setLoadingCategories(false);
@@ -197,6 +197,16 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
     };
   };
 
+  const fetchSubmitToken = async () => {
+    const response = await apiClient.post(`/api/v1/board/${bbsNo}/posts/submit-token`);
+    const data = normalizeResponse(response);
+    const submitToken = normalizeText(data?.submitToken);
+    if (submitToken === '') {
+      throw new Error('등록 요청을 처리하지 못했습니다.');
+    }
+    return submitToken;
+  };
+
   const handleCancel = () => {
     navigate('..');
   };
@@ -239,7 +249,10 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
         await apiClient.post(`/api/v1/board/${bbsNo}/posts/${pstNo}`, body);
         alert('문의가 수정되었습니다.');
       } else {
-        await apiClient.post(`/api/v1/board/${bbsNo}/posts`, body);
+        const submitToken = await fetchSubmitToken();
+        await apiClient.post(`/api/v1/board/${bbsNo}/posts`, body, {
+          headers: { [BOARD_SUBMIT_TOKEN_HEADER]: submitToken },
+        });
         alert('문의가 등록되었습니다.');
       }
       navigate('..');

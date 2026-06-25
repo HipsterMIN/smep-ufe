@@ -41,7 +41,6 @@ const getStoredVerificationStatus = (storageKey) => {
   try {
     return window.sessionStorage.getItem(storageKey) === 'true';
   } catch (error) {
-    console.warn('Failed to read password verification status.', error);
     return false;
   }
 };
@@ -54,7 +53,6 @@ const setStoredVerificationStatus = (storageKey) => {
   try {
     window.sessionStorage.setItem(storageKey, 'true');
   } catch (error) {
-    console.warn('Failed to save password verification status.', error);
   }
 };
 
@@ -66,7 +64,7 @@ const clearStoredVerificationStatus = (storageKey) => {
   try {
     window.sessionStorage.removeItem(storageKey);
   } catch (error) {
-    console.warn('Failed to clear password verification status.', error);
+    return null;
   }
 };
 
@@ -216,7 +214,6 @@ const VerifyPassword = ({
         });
       }
     } catch (error) {
-      console.error('Password verification failed:', error);
       setErrorMessage(error?.message || '비밀번호 확인 중 오류가 발생했습니다.');
     }
   };

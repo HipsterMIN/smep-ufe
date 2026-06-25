@@ -86,7 +86,6 @@ const UI_USR_W_452 = () => {
         if (!active) {
           return;
         }
-        console.error('기업회원 수정 정보 조회 실패:', error);
         setErrorMessage(error?.message || '기업회원 수정 정보를 불러오지 못했습니다.');
       } finally {
         if (active) {
@@ -113,7 +112,7 @@ const UI_USR_W_452 = () => {
           setSidoList(Array.isArray(responseData) ? responseData : []);
         }
       } catch (error) {
-        console.error('시도 목록 조회 실패:', error);
+        return null;
       }
     };
 
@@ -144,7 +143,6 @@ const UI_USR_W_452 = () => {
           setSigunguList(Array.isArray(responseData) ? responseData : []);
         }
       } catch (error) {
-        console.error('시군구 목록 조회 실패:', error);
         if (active) {
           setSigunguList([]);
         }
@@ -221,7 +219,6 @@ const UI_USR_W_452 = () => {
       alert('저장되었습니다.');
       navigate('..', { relative: 'path' });
     } catch (error) {
-      console.error('기업회원 수정 저장 실패:', error);
       alert(error?.message || '저장에 실패했습니다.');
     } finally {
       setSaving(false);
@@ -249,7 +246,7 @@ const UI_USR_W_452 = () => {
         // 매출액(slsAmtClsfCd), 소재지, 설명 등은 사용자가 직접 유지
       }));
     } catch (error) {
-      console.error('KED 기업정보 로드 실패:', error);
+      return null;
     }
   };
 
@@ -461,7 +458,7 @@ const UI_USR_W_452 = () => {
                 <div className="form-wrapper">
                   <div className="textarea-wrap mt-16">
                     <textarea
-                       className="krds-input medium"
+                      className="krds-input medium"
                       title="기업소개 입력"
                       placeholder="내용을 입력해주세요."
                       value={form.entExpln}

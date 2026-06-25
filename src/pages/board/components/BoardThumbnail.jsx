@@ -209,7 +209,6 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
       } catch (error) {
         if (!isMounted) return;
         setCategories([]);
-        console.error('썸네일 게시판 카테고리 조회 실패:', error);
       } finally {
         if (isMounted) {
           setIsCategoryLoaded(true);
@@ -282,7 +281,6 @@ const BoardThumbnail = ({ boardDetail, bbsNo }) => {
         setPostList([]);
         setTotalElements(0);
         setTotalPages(0);
-        console.error('썸네일 게시판 목록 조회 실패:', error);
       } finally {
         if (isMounted) {
           setLoading(false);
