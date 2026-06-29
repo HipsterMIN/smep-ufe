@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-04-13T03:14:49.725Z",
+  "project": "smep-ufe",
+  "branch": "feature/keycloak-sso-im",
+  "commitSha": "218483962267ae9d62c6d74b7a2ed0789343be32",
+  "nprotectDependency": "file:nosLib/nos-react-3.0.6.tgz",
+  "policy": {
+    "integrated": "false",
+    "evidenceOnly": "true",
+    "autoInit": "false",
+    "onDemand": "true",
+    "evidenceLog": "true",
+    "blockOnFailure": "false"
+  },
+  "protectedFields": [
+    {
+      "file": "src/pages/Login.jsx",
+      "id": "login_pw",
+      "selector": "#login_pw",
+      "type": "password",
+      "dataNProtect": "on",
+      "dataNpkEncrypt": "on"
+    },
+    {
+      "file": "src/pages/SSOLogin.jsx",
+      "id": "login_pw",
+      "selector": "#login_pw",
+      "type": "password",
+      "dataNProtect": "on",
+      "dataNpkEncrypt": "on"
+    }
+  ],
+  "runtimeEventSummary": {
+    "source": "artifacts/nprotect-runtime-events.json",
+    "count": 0,
+    "latest": null,
+    "note": "Browser runtime export file not found"
+  }
+}

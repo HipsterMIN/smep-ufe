@@ -1,0 +1,6 @@
+# Keep main branch contents for directories that must not be promoted from develop.
+# Used with: [merge "keep-main"] driver = true
+
+packages/**      merge=keep-main
+playwright/**    merge=keep-main
+src/publishing/** merge=keep-main
