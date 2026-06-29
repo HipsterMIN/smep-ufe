@@ -157,6 +157,8 @@ const Pbanc = () => {
   useEffect(() => {
     const queryState = getQueryState();
     window.scrollTo(0, 0);
+    schFormWrapRef.current?.classList.remove('on');
+    setIsFilterOpen(false);
     setSearchText(queryState.searchText);
     setSearchType(queryState.searchType);
     setBizPbancClsfCd(queryState.bizPbancClsfCd);
