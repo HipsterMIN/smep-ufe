@@ -51,6 +51,7 @@ const UI_USR_R_340 = lazy(() => import('@pages/customer-support/UI-USR-R-340.jsx
 const UI_USR_R_341 = lazy(() => import('@pages/customer-support/UI-USR-R-341.jsx'));
 const PlatformIntro = lazy(() => import('@pages/customer-support/PlatformIntro.jsx'));
 const VerifyPassword = lazy(() => import('@pages/my-business/VerifyPassword.jsx'));
+const MemberInfoChangeGate = lazy(() => import('@pages/my-business/MemberInfoChangeGate.jsx'));
 const UI_USR_W_411 = lazy( () => import('@pages/my-business/UI-USR-W-411.jsx'));
 
 const UI_USR_R_420 = lazy(() => import('@pages/my-business/PasswordChange.jsx'));
@@ -566,8 +567,18 @@ export const componentMap = {
 
   // 회원정보변경
   'M_PIIO_00115': {
-    component: UI_USR_W_411,
+    component: MemberInfoChangeGate,
     layout: 'SubpageLayoutWithMenu',
+    wrapChildren: true,
+    componentProps: {
+      successPath: 'modify',
+    },
+    children: [
+      {
+        path: 'modify',
+        component: UI_USR_W_411,
+      },
+    ],
   },
 
   // 비밀번호 수정
