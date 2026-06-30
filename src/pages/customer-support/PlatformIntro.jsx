@@ -19,7 +19,7 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useMatches, useNavigate } from 'react-router-dom';
 
 const PLATFORM_INTRO_LINKS = {
-  supportBusiness: '/req/sprt',
+  supportBusiness: '/plcy/reprt/sprt',
   businessAnnouncement: '/req/pbanc',
   policyFinance: '/req/UI_USR_L_030',
   certificateIssue: '/crtf/UI_USR_L_040',
@@ -80,7 +80,7 @@ const UI_USR_R_350 = () => {
                 <h2>기업이 필요한 모든 지원을 하나의 흐름으로 연결합니다.</h2>
                 <p>
                     중소벤처24는 <span className="point">분산된 중소기업 지원 서비스를 통합</span>하여
-                  <span className="point">기업 중심의 이용 환경을 제공</span>합니다.
+                  <span className="point"> 기업 중심의 이용 환경을 제공</span>합니다.
                 </p>
                 <p className="sub-text">
                     중소기업 지원 서비스는 영역별 시스템이 분산 운영되어, 기업이 정보 탐색·신청·확인 과정에서 반복 이동과 중복 입력 부담이 발생해 왔습니다.<br/>
@@ -174,7 +174,7 @@ const UI_USR_R_350 = () => {
                   <h5>사업공고 조회 및 정책금융</h5>
                   <p>
                       중소벤처기업부에서 제공하는 다양한 지원사업에 대한 안내와 산하기관 개별 시스템에서 제공하는 분야별 지원사업공고를 통합하여<br/>
-                      한번에 확인하고 신청할 수 있으며, 기업의 경영 환경에 따라 맞춤형으로 조회할 수 있습니다.
+                      한 번에 확인하고 신청할 수 있으며, 기업의 경영 환경에 따라 맞춤형으로 조회할 수 있습니다.
                   </p>
                   <div className="policy-list">
                     <ul>
@@ -188,7 +188,7 @@ const UI_USR_R_350 = () => {
                 <div className="policy-form">
                   <h5>유관기관 둘러보기</h5>
                   <p>
-                      중소벤처24 통합 계정 하나로 별도의 가입 절차 없이 68개 핵심 플랫폼을 이용할 수 있는 단일 계정(SSO) 기반의 통합 환경을 제공합니다. 이를 통해 기관별로 산재한 주요 플랫폼을 효율적으로 이용할 수 있도록 통합 인증 기반의 유관 사이트 정보를 안내합니다
+                      중소벤처24 통합 계정 하나로 별도의 가입 절차 없이 68개 핵심 플랫폼을 이용할 수 있는 단일 계정(SSO) 기반의 통합 환경을 제공합니다. 이를 통해 기관별로 산재한 주요 플랫폼을 효율적으로 이용할 수 있도록 통합 인증 기반의 유관 사이트 정보를 안내합니다.
                   </p>
                   <div className="policy-list">
                     <ul>

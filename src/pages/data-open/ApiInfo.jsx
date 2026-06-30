@@ -69,7 +69,7 @@ const ApiInfo = () => {
           <h3 className="sec-tit">Open API 안내</h3>
           <p className="conts-desc">
             특정 시스템이 갖고 있는 콘텐츠 데이터를 다른 이용자들이 손쉽게 이용하거나 재활용 할 수 있도록 돕기 위해 <br />
-            표준화된 규약을 만들어 공개적으로 제공하는 것을 Open API(Application Program Interface)라고 말합니다. <br />
+            표준화된 규약을 만들어 공개적으로 제공하는 것을 Open API(Application Programming Interface)라고 말합니다. <br />
             중소벤처24에서는 그 동안 수집된 기업정보나 증명(확인)서 정보 등을 다른 유관 시스템에서 사용할 수 있도록 API를 개발하여 제공하고 있습니다. <br />
             중소벤처24의 API를 사용하면, 지원사업 신청 시 클릭 한 번으로 기업의 기본 데이터를 자동 입력하거나, <br />
             지원 자격 증빙을 위해 인증서를 별도로 제출하지 않더라도 기업이 받은 인증 정보를 확인할 수 있게 됩니다.
@@ -205,19 +205,19 @@ const ApiInfo = () => {
                     <p className="c-tit">
                       <span className="span">공고정보 API</span>
                     </p>
-                    <p className="c-txt">기관별, 분야별 최신 지원사업 공고 정보 제공</p>
-                    <div className="c-txt">
-                      <ul className="c-txt-ul no-dash">
-                        <li className="c-date">
-                          <span className="key">등록일</span>
-                          <span className="value">2023.08.02</span>
-                        </li>
-                        <li className="c-date">
-                          <span className="key">수정일</span>
-                          <span className="value">2025.11.14</span>
-                        </li>
-                      </ul>
-                    </div>
+                    <p className="c-txt">공고명, 기간, 지원기관, 신청상태, 첨부파일 등 공고정보항목</p>
+                    {/*<div className="c-txt">*/}
+                    {/*  <ul className="c-txt-ul no-dash">*/}
+                    {/*    <li className="c-date">*/}
+                    {/*      <span className="key">등록일</span>*/}
+                    {/*      <span className="value">2023.08.02</span>*/}
+                    {/*    </li>*/}
+                    {/*    <li className="c-date">*/}
+                    {/*      <span className="key">수정일</span>*/}
+                    {/*      <span className="value">2025.11.14</span>*/}
+                    {/*    </li>*/}
+                    {/*  </ul>*/}
+                    {/*</div>*/}
                   </Link>
                   <div className="c-btn">
                     <Link to="supportBusinessInfoApi" className="krds-btn secondary">신청하기</Link>
@@ -238,18 +238,18 @@ const ApiInfo = () => {
                       <span className="span">행사정보 API</span>
                     </p>
                     <p className="c-txt">중소기업이 참여 가능한 교육, 세미나, 전시회 정보 제공</p>
-                    <div className="c-txt">
-                      <ul className="c-txt-ul no-dash">
-                        <li className="c-date">
-                          <span className="key">등록일</span>
-                          <span className="value">2023.08.02</span>
-                        </li>
-                        <li className="c-date">
-                          <span className="key">수정일</span>
-                          <span className="value">2025.11.14</span>
-                        </li>
-                      </ul>
-                    </div>
+                    {/*<div className="c-txt">*/}
+                    {/*  <ul className="c-txt-ul no-dash">*/}
+                    {/*    <li className="c-date">*/}
+                    {/*      <span className="key">등록일</span>*/}
+                    {/*      <span className="value">2023.08.02</span>*/}
+                    {/*    </li>*/}
+                    {/*    <li className="c-date">*/}
+                    {/*      <span className="key">수정일</span>*/}
+                    {/*      <span className="value">2025.11.14</span>*/}
+                    {/*    </li>*/}
+                    {/*  </ul>*/}
+                    {/*</div>*/}
                   </Link>
                   <div className="c-btn">
                     <Link to="eventInfoApi" className="krds-btn secondary">신청하기</Link>
