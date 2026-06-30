@@ -25,7 +25,7 @@ function App() {
         {/* 페이지 리로드 후 access token 복구 (AppRouter보다 먼저 실행) */}
         <TokenRefreshInitializer />
         <AppRouter />
-        <AdditionalInfoRequiredGate />
+        {/*<AdditionalInfoRequiredGate />*/}
       </AuthProvider>
     </QueryClientProvider>
   );

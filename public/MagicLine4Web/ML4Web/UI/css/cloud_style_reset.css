@@ -1,0 +1,14 @@
+@charset "utf-8";
+
+*{margin:0;padding:0;font-family:"맑은고딕",Malgun Gothic,"돋움",Dotum,"굴림",Gulim,Helvetica,"애플고딕",AppleGothic,Sans-serif;-webkit-text-size-adjust:none}
+body{background:#fff;color:#5e5e5e;word-wrap:break-word;word-break:break-all}
+body,input,select,textarea{font-size:12px}
+textarea{border:1px solid #bcbcbc}
+li{list-style:none}
+table{border-collapse:collapse}
+img,fieldset{border:none}
+a{text-decoration:none;cursor:pointer}
+label{cursor:pointer}
+strong{font-weight:normal}
+em,address{font-style:normal}
+input{outline-style:none;}
