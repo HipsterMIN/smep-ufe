@@ -67,26 +67,26 @@ const IndividualMemberInfo = ({
                 <div className="form-wrapper row-small">
                   <select className="krds-form-select small w-120" id="select_01" value={formValues.indvGnrlTelnoParts[0]} onChange={(event) => setPhonePartValue('indvGnrlTelnoParts', 0, event.target.value)}>
                     <option value="">선택</option>
-                    <option value="02">서울 02</option>
-                    <option value="051">부산 051</option>
-                    <option value="053">대구 053</option>
-                    <option value="032">인천 032</option>
-                    <option value="062">광주 062</option>
-                    <option value="042">대전 042</option>
-                    <option value="052">울산 052</option>
-                    <option value="044">세종 044</option>
-                    <option value="031">경기 031</option>
-                    <option value="033">강원 033</option>
-                    <option value="043">충북 043</option>
-                    <option value="041">충남 041</option>
-                    <option value="063">전북 063</option>
-                    <option value="061">전남 061</option>
-                    <option value="054">경북 054</option>
-                    <option value="055">경남 055</option>
-                    <option value="064">제주 064</option>
-                    <option value="070">일반 070</option>
-                    <option value="060">일반 060</option>
-                    <option value="050">일반 050</option>
+                    <option value="02">02</option>
+                    <option value="051">051</option>
+                    <option value="053">053</option>
+                    <option value="032">032</option>
+                    <option value="062">062</option>
+                    <option value="042">042</option>
+                    <option value="052">052</option>
+                    <option value="044">044</option>
+                    <option value="031">031</option>
+                    <option value="033">033</option>
+                    <option value="043">043</option>
+                    <option value="041">041</option>
+                    <option value="063">063</option>
+                    <option value="061">061</option>
+                    <option value="054">054</option>
+                    <option value="055">055</option>
+                    <option value="064">064</option>
+                    <option value="070">070</option>
+                    <option value="060">060</option>
+                    <option value="050">050</option>
                   </select>
                   <span>-</span>
                   <input type="text" className="krds-input small w-120" placeholder="0000" title="전화번호 중간번호 입력" maxLength={4} value={formValues.indvGnrlTelnoParts[1]} onChange={(event) => setPhonePartValue('indvGnrlTelnoParts', 1, keepDigitsOnly(event.target.value))} />
