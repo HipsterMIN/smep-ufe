@@ -29,7 +29,7 @@ const UI_USR_L_130 = () => {
             <h5 className="tit"><i className="svg-icon ico-check-tit"></i>소관법률</h5>
             <div className="txt">
               {/*<i className="svg-icon pure circle-check"></i>*/}
-              <p>중소벤처기업부 소관법령(법률/시행령/시행규칙)자료는 법제처 "<b className="txt_bold">국가법령정보센터</b>"와 연계하여 제공하고 있으며, 좀더 자세한 정보를 확인 하시려면 "<b className="txt_bold">국가법령정보센터</b>" 에서 확인 하시기 바랍니다.
+              <p>중소벤처기업부 소관 법령(법률/시행령/시행규칙)자료는 법제처 "<b className="txt_bold">국가법령정보센터</b>"와 연계하여 제공하고 있으며, 좀 더 자세한 정보를 확인하시려면 "<b className="txt_bold">국가법령정보센터</b>"에서 확인하시기 바랍니다.
               </p>
             </div>
             <div className="btn-box">
@@ -87,8 +87,8 @@ const UI_USR_L_130 = () => {
                 </a>
               </li>
               <li>
-                <a target="_blank" className="link_type_blank" href="http://www.law.go.kr/법령/대ㆍ중소기업상생협력촉진에관한법률" title="대·중소기업 상생협력 촉진에 관한 법률 새창열기">
-                            대·중소기업 상생협력 촉진에 관한 법률
+                <a target="_blank" className="link_type_blank" href="http://www.law.go.kr/법령/대ㆍ중소기업상생협력촉진에관한법률" title="대 · 중소기업 상생협력 촉진에 관한 법률 새창열기">
+                            대 · 중소기업 상생협력 촉진에 관한 법률
                   <span className="krds-badge"><i className="svg-icon ico-go"></i></span>
                 </a>
               </li>

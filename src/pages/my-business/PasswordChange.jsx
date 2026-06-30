@@ -144,7 +144,7 @@ const UI_USR_R_420 = () => {
           <div className="conts-wrap form-confirm">
             <h3 className="sec-tit">비밀번호 재확인</h3>
             <ul className="krds-info-list decimal" role="list">
-              <li role="listitem">정확한 본인확인을 위해 다시 한 번 비밀번호를 입력해 주세요.</li>
+              <li role="listitem">정확한 본인확인을 위해 다시 한번 비밀번호를 입력해 주세요.</li>
               <li role="listitem">비밀번호는 타인에게 노출되지 않도록 주의해 주세요.</li>
             </ul>
 

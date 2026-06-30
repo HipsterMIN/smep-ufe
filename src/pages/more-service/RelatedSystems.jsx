@@ -251,9 +251,9 @@ const RelatedSystems = () => {
               // onKeyDown={(e) => e.key === 'Enter' && onePassGetAuthCode()}
               // style={{ cursor: 'pointer' }}
             >
-                중기통합회원
+                중기 통합회원
             </b>
-              으로 전환하고, <b>64개의 시스템</b>을 하나의 아이디로 편리하게 이용해 보세요.
+              으로 전환하고, <b>68개의 시스템</b>을 하나의 아이디로 편리하게 이용해 보세요.
           </p>
           <div className="tab-conts-wrap mt-40">
             <section className={`tab-conts ${activeTabIndex >= 0 ? 'active' : ''}`}>

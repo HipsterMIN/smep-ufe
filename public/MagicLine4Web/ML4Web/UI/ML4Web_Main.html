@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<title> 인증서 선택 </title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no " />
+
+<!-- Draw -->
+<script type="text/javascript" src="UI/js/ML4Web_Draw.js"></script>
+<script type="text/javascript" src="UI/js/ML4Web_Main.js"></script>
+<script type="text/javascript" src="UI/js/ML4Web_Mgmt.js"></script><!-- KICS 20231004 인증서 비밀번호 변경 스크립트 : 기능 미사용 시 주석 처리 -->
+<script type="text/javascript" src="UI/js/ML4Web_Popup.js"></script>
+<!-- <script type="text/javascript" src="UI/js/cloud/cloud_temp.js"></script> -->
+
+<script type="text/javascript">
+//IE Caps Lock 체크 해제
+document.msCapsLockWarningOff = true;
+
+/* var contextPath = '<%=request.getContextPath()%>';  */
+
+// WildRain 추가 2024-02-15
+// 클라우드 배포시 js 파일을 수정하는 번거로움을 해결하고자
+// location에서 ContextPath를 추출하는 함수를 추가한다.
+// 단, location.href의 url 상에 ContextPath가 반드시 존재한다는 가정하에 처리하므로
+// ContextPath가 지정되어 있지 않은 경우에는 엉뚱한 값을 반환할 수 있다.
+// 그러나 개발 및 운영 배포시 무조건 ContextPath를 사용할 것이므로 크게 문제가 되지는 않을 듯...
+if (!window.getContextPath) {
+    function getContextPath() {
+        var hostIndex = location.href.indexOf(location.host) + location.host.length;
+        var contextPath = location.href.substring(hostIndex, location.href.indexOf('/', hostIndex + 1));
+        // '/main'으로 시작하는 경우에만 유효한 ContextPath로 처리한다.
+        if (contextPath.indexOf('/main') === 0) {
+            return contextPath;
+        }
+        else {
+            return '';
+        }
+    }
+}
+var contextPath = getContextPath();
+
+// moved to ML_Draw.js all of func
+$(document).ready(function(){
+	// TODO : 초기화 함수 호출
+	ML4WebDraw.loadCSS();
+	ML4WebDraw.initDraw();
+});
+
+
+</script>
+
+
+</head>
+<body>
+<div id="ML_window" style="display:none;">
+	<div style="width:526px; float:left;"></div>
+	<div id="ML_container" style="width:526px; float:left;"><!-- ML_container : S -->
+		<div class="ML_lnb" style="display:inline-block;">
+		    <div class="ML_lnb_area">
+		    </div>
+	  	</div>
+		<div class="ML_content" style="display:inline-block;width:418px;"><!-- ML_content : S -->
+		    <!-- 20221108 금융인증서 안내 UI 추가 S -->
+			    <div class="ML_content-area" id="Fcert" style="display:none;">
+			        <div class="Fcert_info_wrap">
+			            <p>인증서 사용안내</p>
+			            <div class="Fcert_info_txt">금융인증서 사용을 위해<br> 아래 버트을 클릭하여 팝업창을 열어주세요</div>
+			            <!-- BTN -->
+			            <span class="btn_row">
+			                <p class="b_blue_btn"><button type="button" name="okBtn" id=okBtn onClick="finance_btnClick()"><span>금융인증서 열기</span></button></p>
+			            </span>
+			            <!-- BTN -->
+			        </div>
+			    </div>
+<!--     20221108 금융인증서 안내 UI 추가 E
+			<div class="ML_content-area" id="MagicLine_finance" style="display:none; padding-top:5px;">ML_content-area : S (finance)
+				<div class="ML_finance_tit">
+					<span>인증서 사용안내</span>
+				</div>
+				<div class="ML_finance_con1">
+					<span>금융인증서 사용을 위해</span>
+				</div>
+				<div class="ML_finance_con2">
+					<span>아래 버튼을 클릭하여 팝업창을 열어주세요</span>
+				</div>
+
+				<div class="ML_finance_btn">
+					<button id="finance_btn">금융인증서 열기</button>
+				</div>
+			</div> -->
+
+			<div class="ML_content-area" id="MagicLine" style="padding-top:5px;"><!-- ML_content-area : S -->
+			<div id='ESignWindow'></div>
+				<div class="ML_cp_AD" style="display:;">
+					<img id="banner" src="UI/images/ML5_banner.png"  alt="MagicLine4Web 인증서 선택창 로고">
+				</div>
+				<div id="ML_dp_01" class="ML_sub_tit">인증서 저장 위치 선택
+					<span class="ML_sub_tit_link">
+						<span class="btn_cell_right">
+							<p class="hp_btn"><button type="button" id='btn_browser_manual' style="width:160px;" title="새창열림"><span><img src="UI/images/icon_help.png" alt="">브라우저 인증서 사용방법</span></button></p>
+						</span>
+					</span>
+				</div>
+				<div class="ML_storage_box">
+					<div class="ML_storage_box_sub">
+						<!-- <form> -->
+						<div class="MLstrSlide" id="MLstrSlide">
+							<!-- // -->
+						</div>
+						<!-- </form> -->
+					</div>
+					<div class="customNavigation" id="0"><div class="str_add_li ne"><a class="next"><span class="btn_str_add"></span></a></div></div>
+					<!-- Drive list : S -->
+					<div id="driver_div" class="drive_position pos_05"  style="display:none;">
+						<!-- // -->
+					</div>
+					<!-- Drive list : E -->
+				</div>
+				<!-- TRACE #1 -->
+				<!-- Certificate list : S -->
+				<div id="ML_dp_02"  class="ML_sub_tit">사용할 인증서 선택</div>
+				<div id="ML_certlist_area" class="ML_cert_list_area">
+					<div id="dataTable"></div>
+				</div>
+				<!-- BTN : S -->
+				<span id="ML_dp_03" class="btn_row_s">
+					<span class="btn_cell_left">
+						<p id="flip" class="whtgrey_ws_btn"><button type="button" id=btn_deleteCert style="display:none; width:80px;"><span>인증서 삭제</span></button></p>
+						<p id="flip" class="whtgrey_ws_btn"><button type="button" id="btn_CopyCert" style="display:none; width:80px;"><span>인증서 복사</span></button></p>
+						<!-- <p id="flip" class="whtgrey_ws_btn2"><button type="button" id="btn_PFX"><span><img src="UI/images/icon_search.png" alt="pfx 찾기">PFX 인증서 가져오기</span></button></p> -->
+						<!-- KICS 20231004 인증서 비밀번호 변경 버튼 : 기능 미사용 시 주석 처리 -->
+						<!-- <p id="flip" class="whtgrey_ws_btn"><button type="button" id="btn_CertPassChange" style="display:block; width:120px;"><span>인증서 비밀번호 변경</span></button></p> -->
+					</span>
+					<span class="btn_cell_right">
+						<p id="btn_browser" class="whtgrey_ws_btn2"><button type="button" id="in_browser"><span id="get_cert"></span></button></p>
+					</span>
+				</span>
+				<!-- BTN : E -->
+				<!-- Certificate list : E -->
+
+				<div id="ML_dp_04" class="ML_sub_tit">인증서 비밀번호 입력</div>
+				<div id="ML_status_area" class="ML_status_area">
+					<div class="ML_pw_area">
+						<div class="ML_cert_pw_area">
+							<span class="ML_cert_pw_field">
+								<!-- <input type="password" id="input_cert_pw" class="passwd_input" style="ime-mode:active;" placeholder="비밀번호를 입력하시오." autocomplete="off" value="" onKeypress="signEnterKeyEvent(event)"/> -->
+								<!-- <input type="password" id="input_cert_pw" class="passwd_input" data-tk-kbdType="qwerty" title="인증서 비밀번호 입력" placeholder="비밀번호를 입력하시오." autocomplete="off" value="" onKeypress="signEnterKeyEvent(event)" npkencrypt="on" data-keypad-type="alpha" data-keypad-theme="default" data-keypad-useyn-type="toggle" data-keypad-useyn-input="keyboardOn" /> -->
+								<input type="password" id="input_cert_pw" name="input_cert_pw" class="passwd_input" ds-kb-type="qwerty" ds-kb-focus="check" ds-kb-xy="[-100, 0]" data-tk-kbdType="qwerty" title="인증서 비밀번호 입력" placeholder="비밀번호를 입력하시오." autocomplete="off" value="" onKeypress="signEnterKeyEvent(event)" npkencrypt="on" data-keypad-type="alpha" data-keypad-theme="default" data-keypad-useyn-type="toggle" data-keypad-useyn-input="keyboardOn" />
+								<span id="capslock" class="capslock_box">＜Caps Lock＞이 켜져 있습니다.</span>
+								<!-- <span id="input_cert_pw_tk_btn">마우스입력</span> -->
+								<span class="ML_cert_pw_key_box"><a href="#" id="keyboardOn" title="보안키보드"><div class="ML_cert_pw_keypad"></div></a></span>
+							</span>
+						</div>
+						<!-- BTN -->
+						<span class="btn_row">
+							<p class="b_blue_btn"><button type="button" id="btn_confirm_iframe"><span>확인</span></button></p>
+							<span class="w_space10"></span>
+							<p class="b_grey_btn"><button type="button" id="btn_cancel"><span>취소</span></button></p>
+							<span class="w_space10"></span>
+							<p class="b_grey_btn"><button type="button" id="btn_viewCert"><span class="MSG_cls" id="MSG_TS017">인증서 보기</span></button></p>
+						</span>
+						<!-- BTN -->
+					</div>
+				</div>
+			</div><!-- ML_content-area : E -->
+			<div class="ML_content-area" id="MagicLine_lnb" style="padding-top:5px; display:none;"><!-- ML_content-area : S -->
+			</div><!-- ML_content-area : E -->
+
+
+
+
+
+
+
+		</div><!-- ML_content : E -->
+	</div><!-- ML_container : E -->
+</div>
+<!-- 브라우저 메뉴얼에 타이틀바 없을 때 browser_menual3.png(250x558)
+            타이틀바 있을 때 browser_menual.png(250x523) 사용 -->
+<!-- <div id="browser_manual" style="display:none;">
+	<div class="ML_container">
+		<div class="ML_content">
+			<div class="ML_content-area">
+				<img src="UI/images/browser_menual3.png" alt="브라우저 인증서 사용방법" class="MLjqui-window-close-button MLjqui-icon-close">
+			</div>
+		</div>
+	</div>
+</div> -->
+
+<!-- 00. 인증서 Action Type 설정(MakeSignData, envelope, sign&envelope) -->
+<input type="hidden" id="certaction" value="" />
+
+<!-- 수정 : 디폴트 스토리지 hdd일때 제일 앞의 디스크 선택 판단하기 위한 변수 저장 -->
+<input type="hidden" id="flagInit" value="0" />
+<input type="hidden" id="temp" value="" />
+
+<!-- 01. Alert dialog -->
+<div id="popup_alert" class="ML_container_dialog" style="display:none;">
+	<div class="ML_content">
+		<div class="ML_content-area" style="padding-top:5px;">
+			<div class="ML_pw_dialog_status_area">
+				<div class="ML_pw_dialog_area">
+					<div id="alert_msg" class="ML_pw_dialog_txt">비밀번호를 다시 입력하세요.</div>
+					<!-- BTN -->
+					<span class="btn_row">
+						<p class="b_blue_btn"><button type="button" id="btn_alert_confirm" onClick="DSAlert.closeAlert();"><span>확인</span></button></p>
+						<!--<span class="w_space40"></span>
+						<p class="b_grey_btn"><button type="button" onClick="selfClose();"><span>취소</span></button></p>-->
+					</span>
+					<!-- BTN -->
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 02. Common -->
+	<div id="ML_Dialog_common" style="display:none;">
+		<div class="ML_content">
+			<div id="ML_content_area" class="ML_content-area" style="padding-top: 5px; padding-bottom: 0px">
+				<!-- Content : S -->
+
+				<!-- Content : E -->
+			</div>
+			<div class="ML_content-area ML_pw_popup_area" style="padding-top: 5px;" id="btnArea">
+				<!-- BTN -->
+				<span class="btn_row"  id="btn_row_area">
+					<p class="b_blue_btn">
+						<button type="button" id="btn_common_confirm" onClick="DSDialog.releaseDialog();">
+							<span>확인</span>
+						</button>
+					</p>
+					<span class="w_space40"></span>
+					<p class="b_grey_btn">
+						<button type="button" id="btn_common_cancle" onClick="DSDialog.closeDialog(function(code,obj){});" >
+							<span>취소</span>
+						</button>
+					</p>
+				</span>
+				<!-- BTN -->
+			</div>
+		</div>
+	</div>
+
+<!-- 03. Cs install dialog -->
+	<div id="ML_dialog_cs_install" style="display:none;">
+		<div class="ML_content">
+			<div id="ML_content_area_cs" class="ML_content-area" style="padding-top: 5px; padding-bottom: 0px">
+			</div>
+			<div class="ML_content-area ML_pw_popup_area" style="padding-top: 5px;" id="btnArea">
+				<span class="btn_row">
+					<p class="b_blue_btn2">
+						<button type="button" id="btn_common_confirm" onClick="DSDialog.releaseDialog();">
+							<span>설치</span>
+						</button>
+					</p>
+					<span class="w_space20"></span>
+					<p class="b_blue_btn2">
+						<button type="button" id="btn_common_run" onClick="DSDialog.runDialog();">
+							<span>실행</span>
+						</button>
+					</p>
+					<span class="w_space20"></span>
+					<p class="b_grey_btn2">
+						<button type="button" id="btn_common_cancle" onClick="DSDialog.closeDialog(function(code,obj){});" >
+							<span>취소</span>
+						</button>
+					</p>
+				</span>
+			</div>
+
+		</div>
+	</div>
+
+
+	<!-- KICS 20231004 인증서 비밀번호 변경 팝업창 : 기능 미사용 시 주석 처리 -->
+	<div id="ML_Dialog_mgmt_common" style="display:none;">
+		<!-- Content AREA : S -->
+		<div class="ML_content">
+			<div id="ML_mgmt_content_area" class="ML_content-area" style="padding-top:7px;padding-bottom:5px">
+			</div>
+			<div class="ML_content-area ML_pw_popup_area" style="padding-top:5px; text-align:center; ">
+				<!-- BTN -->
+				<span class="btn_row">
+					<p class="b_blue_btn"><button type="button" id="btn_common_confirm" onClick="DSDialog.releaseDialog();"><span>확인</span></button></p>
+					<span class="w_space40"></span>
+					<p class="b_grey_btn"><button type="button" id="btn_common_cancle" onClick="DSDialog.closeDialog(function(code, obj){});" ><span>취소</span></button></p>
+				</span>
+				<!-- BTN -->
+			</div>
+		</div>
+		<!-- Content AREA : E -->
+	</div>
+	<div id="popup_mgmt_alert" class="ML_container_dialog" style="display:none;">
+		<!-- Content AREA : S -->
+		<div class="ML_content">
+			<div class="ML_content-area" style="padding-top:5px;">
+				<!-- Content : S -->
+				<div class="ML_pw_dialog_status_area">
+					<div class="ML_pw_dialog_area">
+						<div id="mgmt_alert_msg" class="ML_pw_dialog_txt">비밀번호를 다시 입력하세요.</div>
+						<!-- BTN -->
+						<span class="btn_row">
+							<p class="b_blue_btn"><button type="button" name="btn_confirm" id="btn_alert_confirm" onClick="DSAlert.closeAlert();"><span>확인</span></button></p>
+							<!--						<span class="w_space40"></span>
+	                                                <p class="b_grey_btn"><button type="button" onClick="selfClose();"><span>취소</span></button></p>-->
+						</span>
+						<!-- BTN -->
+					</div>
+				</div>
+				<!-- Content : E -->
+			</div>
+		</div>
+		<!-- Content AREA : E -->
+	</div>
+</body>
+</html>

@@ -39,7 +39,11 @@ import {
 // import _customScss from '@styles/custom.scss?inline';
 import _mainScss from '@styles/main.scss?inline';
 
-
+const EMPTY_HTML_PATTERNS = new Set([
+  '<p style="text-align: left;"></p>',
+  '<p><br></p>',
+  '<p>&nbsp;</p>',
+]);
 const MAIN_MENU_IDS = {
   notice: 'M_PIIO_00101',
   faq: 'M_PIIO_00102',
@@ -150,6 +154,7 @@ const MainPage = () => {
   const [autoCompleteKeywords, setAutoCompleteKeywords] = useState([]);
   const [isAutoCompleteEnabled, setIsAutoCompleteEnabled] = useState(true);
   const [isAutoLoading, setIsAutoLoading] = useState(false);
+  const [expandedRows, setExpandedRows] = useState({});
   const [isMobilePopupViewport, setIsMobilePopupViewport] = useState(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
       return false;
@@ -202,6 +207,53 @@ const MainPage = () => {
   const handleCertificateClick = (prdocCd) => {
     if (!prdocCd) return;
     navigate(`/crtf/UI_USR_L_040/${prdocCd}`);
+  };
+
+  const isMeaningfulHtml = (html) => {
+    if (!html || typeof html !== 'string') return false;
+
+    const normalized = html.replace(/\s+/g, ' ').trim().toLowerCase();
+    if (!normalized || EMPTY_HTML_PATTERNS.has(normalized)) return false;
+
+    const textOnly = normalized.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim();
+    return textOnly.length > 0;
+  };
+
+  const getPlainText = (value) => {
+    if (!value || typeof value !== 'string') return '';
+    return value.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+  };
+  const toggleExpandedRow = (key) => {
+    setExpandedRows((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const renderExpandableHtmlRow = (label, html) => {
+    if (!isMeaningfulHtml(html)) return null;
+
+    const canExpand = getPlainText(html).length > 200;
+    const isExpanded = Boolean(expandedRows[label]);
+
+    return (
+        <React.Fragment key={label}>
+          <dt>{label}</dt>
+          <dd>
+            <div
+                className={canExpand ? `onshadow-text${isExpanded ? ' on' : ''}` : undefined}
+                dangerouslySetInnerHTML={{ __html: html }}
+            />
+            {canExpand && (
+                <button
+                    type="button"
+                    className="krds-btn tertiary xsmall ontoggle-textshadow"
+                    onClick={() => toggleExpandedRow(label)}
+                >
+                  {isExpanded ? '접기' : '전체보기'}
+                  <i className="svg-icon ico-angle"></i>
+                </button>
+            )}
+          </dd>
+        </React.Fragment>
+    );
   };
 
   const popularKeywords = popularKeywordsRaw?.slice(0, SEARCH_POPULAR_LIMIT) || [];
@@ -465,7 +517,7 @@ const MainPage = () => {
       dday,
       agency: item?.bizSprvsnInstNm,
       region: item?.bizTelgmInstNm,
-      desc: item?.bizCn || item?.bizExplnCn,
+      desc: item?.bizPbancOtln || item?.bizPbancOtln,
       target: item?.sprtTrgtCn,
       detailHref: detailPath,
       detailPath,
@@ -2005,11 +2057,8 @@ const MainPage = () => {
                 <dt>사업개요</dt>
                 <dd>
                   <p>
-                    {selectedNotice.desc ||
+                    {renderExpandableHtmlRow("", selectedNotice.desc) ||
                       '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 기업의 많은 신청 바랍니다.'}
-                  </p>
-                  <p>
-                    {selectedNotice.target || '해당 지원을 필요로 하는 기업'}
                   </p>
                 </dd>
               </dl>
