@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Unicode Convertor</title>
+<meta charset="UTF-8">
+</head>
+<script>
+
+    function convert(){
+        
+        var current = document.getElementsByName("select");
+        
+        for(var i=0; i<current.length;i++){
+            
+            if(current[i].checked){
+                if(current[i].value == 1){
+                    unicodeToKor();
+                }else{
+                    korToUnicode();
+                }
+                
+            }
+            
+            
+        }
+        
+        
+    }
+
+	function replaceAll(strTemp, strValue1, strValue2){ 
+
+            while(1){
+
+                if( strTemp.indexOf(strValue1) != -1 )
+
+                    strTemp = strTemp.replace(strValue1, strValue2);
+
+                else
+
+                    break;
+
+            }
+
+            return strTemp;
+
+     }
+
+	 function unicodeToKor(){
+
+	 //유니코드 -> 한글
+
+		var str=document.getElementById("in").value;
+
+		document.getElementById("out").value=unescape(replaceAll(str, "\\", "%"));
+
+	 }
+
+	 
+
+	 function korToUnicode(){
+
+	 //한글 -> 유니코드
+
+		var str=document.getElementById("in").value;
+
+		document.getElementById("out").value=escape(replaceAll(str, "\\", "%"));
+
+		
+
+	 }
+     
+     
+     
+
+</script>
+
+<body>
+
+<textarea id="in" rows="16" cols="120">
+
+</textarea>
+<br>
+<input type="radio" id="select" value="1" name="select" checked>유니코드->한글&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="radio" id="select" value="2" name="select">한글->유니코드&nbsp;&nbsp;&nbsp;&nbsp;
+
+<button type="button" onClick="javacsript:convert();">변환</button></a> 
+<br>
+
+<textarea id="out" rows="16" cols="120">
+
+</textarea>
+
+</body>
+
+</html>

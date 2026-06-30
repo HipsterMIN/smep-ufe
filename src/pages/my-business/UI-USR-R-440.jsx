@@ -31,8 +31,8 @@ const UI_USR_R_440 = () => {
   const logout = useAuthStore((state) => state.logout);
   const [managerContact, setManagerContact] = useState(null);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  
 
+  const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   // 현재 메뉴 기준으로 사이드바와 depth1 부모 메뉴를 계산한다.
@@ -105,7 +105,7 @@ const UI_USR_R_440 = () => {
 
 
   const onOnePassConfig = () => {
-    const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
+
 
     if (!isSsoLogin) {
       alert('통합회원 로그인 후 이용할 수 있습니다.');

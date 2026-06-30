@@ -1,0 +1,142 @@
+body {_text-align:center; font-family:"돋움", Dotum, "굴림", Gulim, AppleGothic, Sans-serif;padding:0px 0px 0px 0px;margin:0px 0px 0px 0px;font-size:12px;color:#383d41;line-height:140%;}
+#center {width:580px; _text-align:left; margin:0px auto;}
+
+* basic */
+body, th, td, div, p, span, ol, ul, li, dl, dt, dd, h1, h2, h3, h4, h5, h6, a, textarea, input, select {font-family:dotum, verdana, arial, sans-serif; font-size:12px; color:#676767;line-height:17px }
+body, div, p, span, ol, ul, li, dl, dt, dd, h1, h2, h3, h4, h5, h6, form, img {margin:0; padding:0}
+ul, ol  {list-style:none}
+img {border:0}
+/* //basic */
+
+
+/* link */
+a:link {color:#666; text-decoration:none}
+a:visited {color:#666; text-decoration:none}
+a:hover {color:#666; text-decoration:underline !important;}
+a:active {color:#666; text-decoration:none}
+/* //link */
+
+
+body{
+	padding:0px 0px 0px 0px;
+	margin:0px 0px 0px 0px;
+	font-family:"돋움", Dotum, "굴림", Gulim, AppleGothic, Sans-serif;
+	font-size:12px;
+	color:#383d41;
+	line-height:160%;
+}
+.tx-center {text-align:center; }
+
+.f_11	{font-size:11px}
+
+.f_13	{font-size:13px}
+.f_14	{font-size:14px}
+.f_15	{font-size:15px}
+.f_blue_ty1b 	{color:#0169A8; font-weight:bold;}
+.f_gy_ty1b		{color:#666666; font-weight:bold;}
+.f_or_ty2		{color:#ee6a02}
+.letter_sm1  {letter-spacing:-1px}
+.f_dotum  	{font-family: "돋움"}
+.f_black		{color:#000}
+.bold {font-weight:bold}
+.block {display:block}
+.f_or_ty1		{color:#ED7012}
+.fl_l {float:left}
+.fl_r {float:right}
+
+/* margin & padding */
+.mgt10 {margin-top:10px}
+.mgt30 {margin-top:30px}
+
+/* //margin & padding */
+.p_absol 
+{
+	position:absolute;
+}
+.pat55 {padding-top:55px}
+.pab20 {padding-bottom:20px}
+.par10 {padding-right:10px}
+
+.pat5  {padding-top:5px}
+.pab20 {padding-bottom:20px}
+
+.f_or_ty1		{color:#ED7012}
+
+
+
+
+.tx-center {text-align:center; }
+.tx-center {text-align:center; }
+
+.f_11	{font-size:11px}
+.f_14	{font-size:14px}
+.f_13	{font-size:13px}
+.f_blue_ty1b 	{color:#0169A8; font-weight:bold;}
+.f_gy_ty1b		{color:#666666; font-weight:bold;}
+.f_or_ty2		{color:#ee6a02}
+.letter_sm1  {letter-spacing:-1px}
+.f_dotum  	{font-family: "돋움"}
+.f_black		{color:#000}
+.bold {font-weight:bold}
+.block {display:block}
+.f_or_ty1		{color:#ED7012}
+.fl_l {float:left}
+.fl_r {float:right}
+
+/* margin & padding */
+.mgt10 {margin-top:10px}
+.mgt30 {margin-top:30px}
+
+/* //margin & padding */
+.p_absol 
+{
+	position:absolute;
+}
+.pat55 {padding-top:55px}
+.pab20 {padding-bottom:20px}
+.par10 {padding-right:10px}
+
+
+.box
+{
+position: relative;
+border: dashed 1px #dadada;
+margin-top: 15px;
+background: inherit;
+color: #AAB165;
+}
+
+.box h2
+{
+background: inherit;
+color: #6C7425;
+text-transform: lowercase;
+font-weight: normal;
+font-size: 18px;
+margin-bottom: 5px;
+}
+
+.box_inner
+{
+border: solid 1px #fff;
+padding: 15px;
+background: #FFFFE9 /*url('images/a4.gif') repeat-x;*/
+color: inherit;
+}
+
+.ck_install 
+{
+	border:#c6d7e9 solid 3px; 
+	width:600px; 
+	padding-left:20px;
+} 
+.ck_install .head {width:455px; height:105px; padding:10px 0px 0px 105px; text-align:left; margin:0px 0px 5px 0px;  background:url(../images/img.gif) no-repeat 0px 0px;}
+.ck_install .btn_install_01 {float:right; display:block; padding:10px 0px 0px 0px;}
+.ck_install .info {display:block; width:579px; height:72px; margin:10px 20px 10px 0px;}
+.ck_install .guide_t {width:579px; padding:0px 0px 0px 0px; margin:0px 20px 0px 0px;  background:url(../images/bg_guide_top.gif) no-repeat left top;}
+.ck_install .guide_t .guide_b {padding:0px 0px 0px 0px; margin:0px; background:url(../images/bg_guide_bottom.gif) no-repeat left bottom;}
+.ck_install .guide_t .guide_b .guide {padding:20px 0px 20px 0px; margin:0px; }
+.ck_install .guide_t .guide_b .guide li {padding:15px 20px 0px 30px; text-align:left;  background:url(../images/bg_guide.gif) repeat-y 0 top;}
+.ck_install .guide_t .guide_b .guide img {padding:5px 0px 0px 80px;}
+.ck_install .guide_t .guide_b .guide p {padding:0px 20px 0px 30px; margin:0px; text-align:left;  background:url(../images/bg_guide.gif) repeat-y 0 top;}
+.ck_install .copy {width:519px; padding:0px 30px 0px 30px; margin:10px 0px 10px 0px; }
