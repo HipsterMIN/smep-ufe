@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import bannerCrtfMo from '@assets/sub/banner-crtf-mo.png';
+import bannerCrtfPc from '@assets/sub/banner-crtf-pc.png';
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Pagination from '@components/ui/Pagination.jsx';
@@ -28,7 +30,7 @@ const UI_USR_L_040 = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [topCertificateList, setTopCertificateList] = useState([]);
   const [certificateList, setCertificateList] = useState([]);
-  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(searchParams, 'size', 10));
+  const [pageSize, setPageSize] = useState(() => getNumberSearchParam(searchParams, 'size', 20));
 
   // 입력용 (화면 표시용)
   const [searchType, setSearchType] = useState(() => getSearchParam(searchParams, 'searchType', ''));
@@ -45,7 +47,7 @@ const UI_USR_L_040 = () => {
   const buildListSearchParams = () => {
     const params = new URLSearchParams();
     setQueryParam(params, 'page', currentPage + 1, 1);
-    setQueryParam(params, 'size', pageSize, 10);
+    setQueryParam(params, 'size', pageSize, 20);
     setQueryParam(params, 'searchType', appliedSearchType);
     setQueryParam(params, 'searchKeyword', appliedSearchKeyword);
     return params;
@@ -80,7 +82,7 @@ const UI_USR_L_040 = () => {
         setTotalElements(allCertificates.totalElements);
         setTotalPages(allCertificates.totalPages);
       } catch (error) {
-        return null;
+        console.error('조회 실패:', error);
       } finally {
         setLoading(false);
       }
@@ -143,13 +145,14 @@ const UI_USR_L_040 = () => {
           </h2>
         </div>
 
-        <p className="guide-txt custom">
-          각 증명(확인)서는 해당시스템과 <b>연계하여</b> 중소벤처24에서 출력 가능하고, 최초 발급은 해당 <b>시스템에서</b> 가능합니다.
+        <p className="guide-txt">
+            중소벤처기업 경영활동에 필요한 각종 증명서를 개별 시스템 방문 없이 출력하실 수 있습니다.
+            각 증명(확인)서는 해당시스템과 연계를 통해 중소벤처24에서 출력되어지며, 최초 발급은 해당 시스템을 통해 가능합니다.
         </p>
 
         {/* guide */}
         <div class="conts-wrap mt-40"><h3 class="sec-tit">자주 찾는 증명(확인)서</h3>
-          <p class="conts-desc">아래 증명(확인)서는 <strong>최근 누적 발급건수가 많은 증명(확인)서</strong>목록입니다.</p></div>
+          <p class="conts-desc">아래 증명(확인서)는 <strong>최근 누적 발급건수가 많은 증명(확인서)</strong>목록입니다.</p></div>
 
         <ul className="krds-structured-list small mt-24">
           {topCertificateList.map((item, index) => (
@@ -177,8 +180,11 @@ const UI_USR_L_040 = () => {
             </li>
           ))}
         </ul>
-
-        <div className="search-top-box mt-48">
+        <div className="banner-area text-center mt-24">
+          <a href="https://plus.gov.kr/" target="_blank" rel="noreferrer"><img src={bannerCrtfPc} alt="정부24 바로가기 새창 열림" className="tablet-only" /></a>
+          <a href="https://plus.gov.kr/" target="_blank" rel="noreferrer"><img src={bannerCrtfMo} alt="정부24 바로가기 새창 열림" className="mobile-only" /></a>
+        </div>
+        <div className="search-top-box mt-24">
           <div className="sch-form-wrap">
             <select
               className="krds-form-select medium"
@@ -227,7 +233,6 @@ const UI_USR_L_040 = () => {
                 >
                   <option value={10}>10개</option>
                   <option value={20}>20개</option>
-                  <option value={30}>30개</option>
                 </select>
               </div>
             </li>
@@ -239,7 +244,7 @@ const UI_USR_L_040 = () => {
           <table className="tbl col data t-block">
             <caption>증명 확인서 목록. 번호, 증명(확인)서, 발급기관, 소관기관 정보가 제공됨.</caption>
             <colgroup>
-              <col style={{ width: '7.4%' }}/>
+              <col style={{ width: '7.4%%' }}/>
               <col/>
               <col style={{ width: '26%' }}/>
               <col style={{ width: '26% ' }}/>
