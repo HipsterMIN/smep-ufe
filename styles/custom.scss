@@ -314,6 +314,7 @@
         color:#0B50D0;
         .svg-icon{width:2rem;height:2rem;flex:0 0 2rem;margin-top:4px;}
     }
+    .btn-box{display:flex;gap:1rem;}
     .krds-btn{
         background-color:#fff;
         color:#0B50D0;
@@ -321,6 +322,12 @@
         font-size:var(--krds-pc-font-size-body-large);
         font-weight:400;
         .svg-icon{background-color:#256EF4;}
+        &.primary{
+            background-color:#0B50D0;
+            border-color:#0B50D0;
+            color:#fff;
+            .svg-icon{background-color:#fff;}
+        }
     }
 }
 .jurisdiction_law{
@@ -348,7 +355,24 @@
         }
     }
 }
-
+.info-list{display:flex;flex-direction:column;gap:4rem;
+    .info-title{font-weight:700;font-size: var(--krds-pc-font-size-heading-small);display:flex;gap:5px;margin-bottom:1rem;
+        &::before{content:'';display:inline-block;width:20px;height:20px;margin:3px 5px 0 0;background:url(./img/component/icon/pure-icons/cube.svg) no-repeat center center / contain}
+    }
+    > .krds-info-list{margin-left:2rem;}
+    .krds-table-wrap{
+        .tbl{min-width:auto;
+            &.data{
+                th,td{padding:.5rem !important;text-align:center;}
+            }
+            tr{
+                &:hover{
+                    td{background-color:transparent !important;}
+                }
+            }
+        }
+    }
+}
 .support-card {
     .card-title {
         width: 100%;
@@ -557,28 +581,62 @@
     }
 
 }
-#wrap.integrated-search .integrated-result .search-tab-wrap {
-    // 검색어별 결과 수가 탭명에 붙으므로 라벨 최소폭은 보존하고 남는 폭은 full 탭처럼 채운다.
-    .tab.fill.full > ul {flex-wrap: nowrap;}
-    .tab.fill.full > ul > li {flex: 1 0 auto; min-width: max-content; width: auto;}
-}
 .search-list-top {
     .sch-sort {flex-wrap:wrap;
         .margin-top13{margin:0 }
     }
 }
+.krds-info-list{
+    &.decimal{
+        > li{padding-left:var(--krds-number-10);
+            &::before{background-color:#3A49D6}
+        }
+    }
+    &.custom{
+        > li {
+            &::before{content:attr(data-icon);}
+        }
+    }
+    &.number{
+        //list-style:decimal;
+        > li {padding-left:var(--krds-number-12) !important;
+            &::marker, &::before{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:100%;background-color:#F4F6FF;color:#0022AB}
+            &::before{content:attr(data-icon);}
+        }
+    }
+    > li {padding-left:var(--krds-number-10)
+        > .krds-info-list {
+            > li{padding-left:var(--krds-number-8)}
+        }
+    }
+}
+.krds-input{
+    &.auto{width:auto}
+}
+.krds-table-wrap{width:100%;max-width:100%;
+    .tbl{
+        &.border{
+            border-top:1px solid var(--krds-table--data-tbody-color-divider);
+            border-right:1px solid var(--krds-table--data-tbody-color-divider);
+            th, td {border-left:1px solid var(--krds-table--data-tbody-color-divider);
+                &:last-child{border-right:none;}
+            }
+        }
+    }
+}
+.text-left{text-align:left !important}
+.text-right{text-align:right !important}
+.text-center{text-align:center !important}
+.border-right{border-right:1px solid var(--krds-table--data-tbody-color-divider);}
+.border-left{border-left:1px solid var(--krds-table--data-tbody-color-divider);}
 .conts-desc{margin:2.4rem auto;}
+//.tablet-only{display:none;}
 .mobile-only{display:none;}
 @media (max-width: 767px) {
     .lnb{display:none;}
     .pc-only{display:none;}
-    .mobile-only{display:block;}
-    /*
-     * 의도: ysk 임시 개발자 임의 CSS 추가 - 모바일에서 full 탭 개수가 적을 때 오른쪽 빈 공간이 남는 현상을 줄이기 위함.
-     * 동작: 탭 항목이 가능한 한 같은 폭으로 늘어나 화면을 채우되, 탭명이 길거나 탭 개수가 많으면 내용 폭을 최소값으로 유지해 기존 가로 스크롤 흐름을 사용한다.
-     * 주의: 공통 퍼블리싱 원본 정리 시 중복 여부를 확인해야 하며, 현재는 fill/full 탭의 모바일 표시만 보정한다.
-     */
-    .tab.fill.full > ul > li{flex:1 0 0;min-width:max-content;width:auto;}
+    .tablet-only{display:block;}
+    .mobile-only{display:none;}
     .notice-layer {
         &__head{
             h3{flex-direction: column;gap:.2rem;}
@@ -594,6 +652,9 @@
     }
 }
 @media (max-width:545px){
+    .pc-only{display:none;}
+    .tablet-only{display:none;}
+    .mobile-only{display:block;}
     .footer-top {flex-direction:column;}
     .find-form-area{
         .form-group{flex-direction:column;align-items:start;
