@@ -413,7 +413,7 @@ const EntrSpt = () => {
                   <col/>
                   <col/>
                   <col/>
-                  <col style={{ width: '5%' }}/>
+                  {/*<col style={{ width: '5%' }}/>*/}
                 </colgroup>
                 <thead>
                   <tr>
@@ -422,7 +422,7 @@ const EntrSpt = () => {
                     <th scope="col" className="ac">작성자</th>
                     <th scope="col" className="ac">작성일</th>
                     <th scope="col" className="ac">조회수</th>
-                    <th scope="col" className="ac">첨부파일</th>
+                    {/*<th scope="col" className="ac">첨부파일</th>*/}
                   </tr>
                 </thead>
                 <tbody>
@@ -465,7 +465,7 @@ const EntrSpt = () => {
                           <td className="ac"><span>{item?.pstRgtrNm || item?.pstMdfrNm || '-'}</span></td>
                           <td className="ac"><span>{formatDate(item?.pstRegDt ?? item?.regDt)}</span></td>
                           <td className="ac"><span>{item?.inqCnt ?? 0}</span></td>
-                          <td className="ac">
+                          {/*<td className="ac">
                             {attachmentUrl ? (
                               <a href={attachmentUrl}>
                                 <span className="sr-only">첨부파일 다운로드</span>
@@ -474,7 +474,7 @@ const EntrSpt = () => {
                             ) : (
                               <span>-</span>
                             )}
-                          </td>
+                          </td>*/}
                         </tr>
                       );
                     })
