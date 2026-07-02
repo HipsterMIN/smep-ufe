@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import bannerCrtfMo from '@assets/sub/banner-crtf-mo.png';
+import bannerCrtfPc from '@assets/sub/banner-crtf-pc.png';
 import SideNavigation from '@components/ui/SideNavigation.jsx';
 import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Pagination from '@components/ui/Pagination.jsx';
@@ -150,7 +152,7 @@ const UI_USR_L_040 = () => {
 
         {/* guide */}
         <div class="conts-wrap mt-40"><h3 class="sec-tit">자주 찾는 증명(확인)서</h3>
-        <p class="conts-desc">아래 증명(확인서)는 <strong>최근 누적 발급건수가 많은 증명(확인서)</strong>목록입니다.</p></div>
+          <p class="conts-desc">아래 증명(확인서)는 <strong>최근 누적 발급건수가 많은 증명(확인서)</strong>목록입니다.</p></div>
 
         <ul className="krds-structured-list small mt-24">
           {topCertificateList.map((item, index) => (
@@ -171,7 +173,7 @@ const UI_USR_L_040 = () => {
                     <p className="c-date">
                       <strong className="key">소관기관</strong>
                       <span className="value">{shortenInstName(item.jrsdInstNm)}</span>
-                    </p>*********************
+                    </p>
                   </div>
                 </a>
               </div>
@@ -179,8 +181,8 @@ const UI_USR_L_040 = () => {
           ))}
         </ul>
         <div className="banner-area text-center mt-24">
-            <a href="https://plus.gov.kr/" target="_blank"><img src="../src/assets/sub/banner-crtf-pc.png" alt="정부24 바로가기 새창 열림" className="tablet-only" /></a>
-            <a href="https://plus.gov.kr/" target="_blank"><img src="../src/assets/sub/banner-crtf-mo.png?v=2" alt="정부24 바로가기 새창 열림" className="mobile-only" /></a>
+          <a href="https://plus.gov.kr/" target="_blank" rel="noreferrer"><img src={bannerCrtfPc} alt="정부24 바로가기 새창 열림" className="tablet-only" /></a>
+          <a href="https://plus.gov.kr/" target="_blank" rel="noreferrer"><img src={bannerCrtfMo} alt="정부24 바로가기 새창 열림" className="mobile-only" /></a>
         </div>
         <div className="search-top-box mt-24">
           <div className="sch-form-wrap">
