@@ -1300,7 +1300,6 @@ table {
 }
 
 .blind,
-hr,
 .sr-only,
 legend,
 caption {
@@ -2983,12 +2982,8 @@ caption {
 .krds-info-list > li > .krds-info-list > li > .krds-info-list > li {
   padding-left: var(--krds-info-list--depth3-padding-left);
   color: var(--krds-info-list--depth3-color-text);
-  font-size: var(--krds-info-list--pc-text-depth3);
 }
 @media (max-width: 767px) {
-  .krds-info-list > li > .krds-info-list > li > .krds-info-list > li {
-    font-size: var(--krds-info-list--mobile-text-depth3);
-  }
 }
 .krds-info-list > li > .info-txt {
   margin-top: var(--krds-info-list--info-txt-margin-top);
