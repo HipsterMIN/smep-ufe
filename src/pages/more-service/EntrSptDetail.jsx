@@ -19,7 +19,7 @@ const formatDate = (dateString) => {
   return `${year}.${month}.${day}`;
 };
 
-const UI_USR_R_111 = () => {
+const EntrSptDetail = () => {
   const matches = useMatches();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -271,4 +271,4 @@ const UI_USR_R_111 = () => {
   );
 };
 
-export default UI_USR_R_111;
+export default EntrSptDetail;
