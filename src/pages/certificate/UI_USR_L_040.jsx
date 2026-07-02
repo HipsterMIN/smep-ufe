@@ -171,7 +171,7 @@ const UI_USR_L_040 = () => {
                     <p className="c-date">
                       <strong className="key">소관기관</strong>
                       <span className="value">{shortenInstName(item.jrsdInstNm)}</span>
-                    </p>
+                    </p>*********************
                   </div>
                 </a>
               </div>
