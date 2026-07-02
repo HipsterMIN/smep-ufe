@@ -8,7 +8,6 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { api as apiClient } from '@lib/apiClient.js';
 import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
-import { onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
 import { getSearchParam } from '@utils/listNavigation.js';
 import { useLocation } from 'react-router-dom';
 
@@ -244,13 +243,7 @@ const RelatedSystems = () => {
 
         <div className="krds-tab-area layer">
           <p className="guide-txt custom">
-            <b
-              // onClick={onePassGetAuthCode}
-              // role="button"
-              // tabIndex={0}
-              // onKeyDown={(e) => e.key === 'Enter' && onePassGetAuthCode()}
-              // style={{ cursor: 'pointer' }}
-            >
+            <b>
                 중기 통합회원
             </b>
               으로 전환하고, <b>68개의 시스템</b>을 하나의 아이디로 편리하게 이용해 보세요.

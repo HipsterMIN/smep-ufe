@@ -431,6 +431,11 @@ export const componentMap = {
     layout: 'SubpageLayoutWithMenu',
   },
 
+  'M_PIIO_00172': {
+    component: RelatedSystems,
+    layout: 'SubpageLayoutWithMenu',
+  },
+
   // 통합로그인 시스템
   'M_PIIO_00128': {
     component: UI_USR_R_190,
