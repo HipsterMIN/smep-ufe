@@ -109,7 +109,7 @@ export default function Header() {
   const isMainPage = location.pathname === '/';
   // 왜 필요한지: 헤더 검색 영역은 로그인 관련 화면에서는 숨겨야 하는데, 신규 진입 화면(/service/loginBef)도 같은 로그인 흐름에 속한다.
   // 무엇을 하는지: 기존 ID/PW 로그인 화면과 신규 로그인 진입 화면을 모두 로그인 페이지로 판정한다.
-  // 주의할 점: 세션 만료 복귀 등 기존 /service/login 직접 진입 흐름은 아래 navigate 로직에서 별도로 유지한다.
+  // 주의할 점: 세션 만료/연장 실패 fallback은 로그인 진입과 분리해 홈으로 이동시킨다.
   const isLoginPage = ['/service/login', '/service/loginBef'].includes(location.pathname);
   const showHeaderSearch = !isMainPage && !isLoginPage;
   const [remainingSeconds, setRemainingSeconds] = useState(null);
@@ -199,11 +199,11 @@ export default function Header() {
         return;
       }
 
-      // 이번 단계의 만료 처리는 client-side expiry 로만 보고 로그인 페이지로 복귀시킨다.
+      // client-side 만료 fallback은 로그인 진입이 아니라 홈으로 돌려 다음 행동을 사용자가 선택하게 한다.
       sessionExpiryHandledRef.current = true;
       logout();
-      alert('로그인 유효시간이 만료되었습니다. 다시 로그인해주세요.');
-      navigate('/service/login');
+      alert('로그인 유효시간이 만료되었습니다. 홈으로 이동합니다. 다시 로그인해 주세요.');
+      navigate('/');
     };
 
     updateRemainingSeconds();
@@ -311,9 +311,10 @@ export default function Header() {
       setToken(newAccessToken);
       setRefreshToken(newRefreshToken);
     } catch (error) {
+      // 세션 연장 실패는 복구 불가 fallback이므로 로그인 진입 대신 홈으로 이동시킨다.
       logout();
-      alert('로그인 유효시간 연장에 실패했습니다. 다시 로그인해주세요.');
-      navigate('/service/login');
+      alert('로그인 유효시간 연장에 실패했습니다. 홈으로 이동합니다. 다시 로그인해 주세요.');
+      navigate('/');
     } finally {
       setIsExtendingSession(false);
     }
