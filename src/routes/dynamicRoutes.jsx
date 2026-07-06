@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { componentMap } from './componentMap.js';
+import { getMenuComponentKey } from './menuComponentKey.js';
 import { Suspense } from 'react';
 import { buildFullPath, findFirstVisibleTMenu, isExternalMenuNode } from '../utils/menuUtils.js';
 import { MenuProviderOnly, SubpageLayoutWithMenu } from '@layouts';
@@ -85,7 +86,8 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
 
   // T 타입: 실제 컴포넌트 매핑
   if (menuNode.scrnTypeCd === 'T') {
-    const componentConfig = componentMap[menuNode.menuId];
+    const componentKey = getMenuComponentKey(menuNode);
+    const componentConfig = componentMap[componentKey];
     if (componentConfig) {
       const {
         component: Component,
@@ -198,7 +200,10 @@ const createRouteFromNode = (menuNode, flatMenuMap) => {
       routeConfig.element = (
         <div style={{ padding: '2rem' }}>
           <h3>준비중입니다.</h3>
-          <p>컴포넌트가 아직 등록되지 않았습니다. (menuId: {menuNode.menuId})</p>
+          <p>
+            컴포넌트가 아직 등록되지 않았습니다. (menuId: {menuNode.menuId},
+            componentKey: {componentKey})
+          </p>
         </div>
       );
     }

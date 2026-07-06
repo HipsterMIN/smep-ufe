@@ -90,17 +90,20 @@ const WebAccessibilityPolicy = lazy(() => import('@pages/footer/WebAccessibility
 const TermsOfUse = lazy(() => import('@pages/footer/TermsOfUse.jsx'));
 /**
  * =============================================================================
- * Component Map - menuId와 실제 컴포넌트 매핑
+ * Component Map - component key와 실제 컴포넌트 매핑
  * =============================================================================
  *
  * @description
- * 메뉴 ID(menuId)를 기반으로 동적 라우팅을 위한 컴포넌트 매핑 테이블
+ * 화면 연결 코드(scrnLnkgCd)를 우선 기준으로 동적 라우팅을 위한 컴포넌트를 선택한다.
+ * 현재 key는 운영 반영 안정성을 위해 기존 menuId 값을 유지하며,
+ * scrnLnkgCd가 비어 있거나 mock/API 캐시에 없는 경우에도 menuId fallback으로 동작한다.
  * - 각 메뉴에 대응하는 컴포넌트와 레이아웃을 정의
  * - 중첩 라우팅(children) 지원
+ * - component key는 컴포넌트 선택 전용이므로 메뉴 식별, 권한, breadcrumb, 게시판 조회에는 사용하지 않는다.
  *
  * @structure
  * {
- *   'MENU_ID': {
+ *   'COMPONENT_KEY': {
  *     component: ReactComponent,        // 렌더링할 컴포넌트
  *     layout: LayoutComponent,          // 적용할 레이아웃 (옵션)
  *     componentProps: {},               // 컴포넌트에 전달할 props (옵션)
@@ -682,13 +685,13 @@ export const componentMap = {
 /**
  * 컴포넌트 존재 여부 확인
  */
-export const hasComponent = (menuId) => {
-  return !!componentMap[menuId];
+export const hasComponent = (componentKey) => {
+  return !!componentMap[componentKey];
 };
 
 /**
  * 컴포넌트 가져오기
  */
-export const getComponent = (menuId) => {
-  return componentMap[menuId] || null;
+export const getComponent = (componentKey) => {
+  return componentMap[componentKey] || null;
 };
