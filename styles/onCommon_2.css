@@ -2556,7 +2556,7 @@ button.aichatButton.active {
     margin-top: 24px;
   }
   .main-step .img-box .img-mo {
-    display: block;
+    display: inline-block;
   }
   .main-step .img-box .img-pc {
     display: none;

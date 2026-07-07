@@ -1,0 +1,37 @@
+@for $i from 1 through 20{
+    .border-#{$i} { border-width: #{$i}px !important; }
+    .line-height-#{$i} { line-height: #{$i * 0.1 + 1} !important; }
+    .letter-space-#{$i} { letter-spacing: - #{$i * 0.5}px !important; }
+    .alpha-#{$i}{opacity:$i * 0.1}
+    .font-weight-#{$i}{font-weight:#{$i * 100} !important}
+    .font-size-#{$i}{font-size:#{$i * 4 / 10}rem !important}
+    .opacity-#{$i}{opacity:#{$i * 0.1}}
+    .col-gap-#{$i}{column-gap:#{$i * 4}px !important;}
+    .row-gap-#{$i}{row-gap:#{$i * 4}px !important;}
+    .border-radius-#{$i}{border-radius:#{$i * 4}px !important;}
+    .border-radius-top-#{$i}{border-top-left-radius:#{$i * 4}px !important;border-top-right-radius:#{$i * 4}px !important;}
+    .border-radius-bottom-#{$i}{border-bottom-left-radius:#{$i * 4}px !important;border-bottom-right-radius:#{$i * 4}px !important;}
+    .border-radius-right-#{$i}{border-top-right-radius:#{$i * 4}px !important;border-bottom-right-radius:#{$i * 4}px !important;}
+    .border-radius-left-#{$i}{border-top-left-radius:#{$i * 4}px !important;border-bottom-left-radius:#{$i * 4}px !important;}
+    .grid-#{$i}{
+        grid-template-columns: repeat(#{$i}, minmax(0, 1fr));
+        .full {
+            grid-column: 1 / -1 !important;
+        }
+    }
+    .gap-#{$i}{gap:#{$i * 4 / 10}rem !important;}
+    .m-#{$i}{margin:#{$i * 4 / 10}rem !important;}
+    .mx-#{$i}{margin-left:#{$i * 4 / 10}rem !important; margin-right:#{$i * 4 / 10}rem !important;}
+    .my-#{$i}{margin-top:#{$i * 4 / 10}rem !important; margin-bottom:#{$i * 4 / 10}rem !important;}
+    .mt-#{$i}{margin-top:#{$i * 4 / 10}rem !important;}
+    .mb-#{$i}{margin-bottom:#{$i * 4 / 10}rem !important;}
+    .ms-#{$i}{margin-left:#{$i * 4 / 10}rem !important;}
+    .me-#{$i}{margin-right:#{$i * 4 / 10}rem !important;}
+    .p-#{$i}{padding:#{$i * 4 / 10}rem !important;}
+    .px-#{$i}{padding-left:#{$i * 4 / 10}rem !important; padding-right:#{$i * 4 / 10}rem !important;}
+    .py-#{$i}{padding-top:#{$i * 4 / 10}rem !important; padding-bottom:#{$i * 4 / 10}rem !important;}
+    .pt-#{$i}{padding-top:#{$i * 4 / 10}rem !important;}
+    .pb-#{$i}{padding-bottom:#{$i * 4 / 10}rem !important;}
+    .ps-#{$i}{padding-left:#{$i * 4 / 10}rem !important;}
+    .pe-#{$i}{padding-right:#{$i * 4 / 10}rem !important;}
+}
