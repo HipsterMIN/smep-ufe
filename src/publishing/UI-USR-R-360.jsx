@@ -263,10 +263,6 @@ const UI_USR_R_360 = () => {
                                                             <img src={GuideTab2_04_Mo} alt="" className="img-mo" />
                                                         </div>
                                                     </li>
-                                                    <li>
-                                                        <strong className="sub-step-tit"><span className="number">5</span>발급 진위확인</strong>
-                                                        <p className="sub-step-desc">증명서발급 &gt; 발급 진위 확인 메뉴 선택 후 문서종류 및 문서확인번호 입력하여 진위확인을 할 수 있습니다.</p>
-                                                    </li>
                                                 </ol>
                                             </div>
                                         </li>
