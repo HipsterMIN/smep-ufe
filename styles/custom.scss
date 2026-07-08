@@ -1,3 +1,4 @@
+@import "./_theme";
 @import "./_icons";
 *, *::before, *::after {box-sizing:border-box}
 #wrap{overflow-x:hidden}
@@ -635,8 +636,75 @@ hr{border-top:solid 1px var(--krds-color-light-gray-20)}
 .border-right{border-right:1px solid var(--krds-table--data-tbody-color-divider);}
 .border-left{border-left:1px solid var(--krds-table--data-tbody-color-divider);}
 .conts-desc{margin:2.4rem auto;}
+.main-step {
+    .img-box {
+        background: rgba(244, 245, 246, 1);
+        border-radius: 12px;
+        padding: 32px;
+        margin-top:0;
+    } 
+}
 //.tablet-only{display:none;}
 .mobile-only{display:none;}
+.terms-content{
+    max-height:54rem;overflow-y:auto;
+    border:solid 1px var(--krds-color-light-gray-20);
+    padding:2rem;
+    > div{display:flex;flex-direction:column; gap:2rem;}
+    hr{width:100%;}
+}
+@mixin shadow($size: base, $type: default) {
+    box-shadow: 0px 6px 12px 0px rgba(105, 105, 105, 0.1);
+    @if $size == lg {
+        box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0.05);
+    } @else if $size == sm {
+        box-shadow: 0px 3px 6px 0px rgba(105, 105, 105, 0.1);
+    } @else{
+        box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0.05);
+    }
+}
+.shadow{@include shadow();
+    &-lg{
+        @include shadow(lg);
+    }
+    &-sm{
+        @include shadow(sm);
+    }
+}
+@mixin box($size: base, $type: type, $shadow: true) {
+    border: 1px solid transparent;
+    @if $size == xl {
+        border-radius: 32px !important;
+    } @else if $size == lg {
+        border-radius: 20px !important;
+    } @else if $size == md {
+        border-radius: 16px !important;
+    } @else if $size == sm {
+        border-radius: 12px !important;
+    } @else {
+        border-radius: 24px !important;
+    }
+    padding: 2.4rem 3.6rem;
+    @if $type == default {
+        background: var(--krds-color-light-alpha-white100);
+        //border-color: var(--krds-color-light-gray-20);
+        @if $shadow == true {
+            @include shadow();
+        } @else {
+            box-shadow: none !important;
+        }
+    }
+}
+
+.box {
+    @include box();
+    &.xl { @include box(xl); }
+    &.lg { @include box(lg); }
+    &.md { @include box(md); }
+    &.sm { @include box(sm); }
+    &.default { @include box(base, default, $shadow:true) }
+}
+
 @media (max-width: 767px) {
     .lnb{display:none;}
     .pc-only{display:none;}
@@ -672,11 +740,4 @@ hr{border-top:solid 1px var(--krds-color-light-gray-20)}
             .c-date {flex-direction:column;gap:1.2rem}
         }
     }
-}
-.terms-content{
-    max-height:54rem;overflow-y:auto;
-    border:solid 1px var(--krds-color-light-gray-20);
-    padding:2rem;
-    > div{display:flex;flex-direction:column; gap:2rem;}
-    hr{width:100%;}
 }
