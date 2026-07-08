@@ -33,6 +33,7 @@ const UI_USR_R_440 = () => {
   const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
+  const uuid = useAuthStore((state) => state.uuid);
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   // 현재 메뉴 기준으로 사이드바와 depth1 부모 메뉴를 계산한다.
