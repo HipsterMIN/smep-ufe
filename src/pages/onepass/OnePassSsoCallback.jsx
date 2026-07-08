@@ -7,22 +7,11 @@ import {
   finishSilentSso,
   getSilentSsoReturnUrl,
   isSilentSsoInProgress,
+  stripBasename,
 } from '@utils/onepassSilentSso.js';
-
-// silent SSO 복귀 시 navigate() 대신 window.location.replace()를 사용한다.
-// navigate(path)는 React Router가 prependBasename(basename, path)를 적용하여
-// '/home-dev/' → '/home-dev/home-dev/' 이중화를 유발하지만,
-// window.location.replace(storedBrowserPath)는 브라우저 URL을 그대로 설정하므로 이중화가 없다.
-// 복귀 후 페이지 리로드 시 TokenRefreshInitializer가 isLogin+refreshToken을 감지하여 토큰을 복원한다.
-const silentSsoReturn = (returnUrl) => {
-  window.location.replace(returnUrl || import.meta.env.BASE_URL || '/');
-};
 
 // 임시 연동 계약: 외부 출발 콜백 대응을 위해 프론트 state 검증을 비활성화한다.
 const LOG_PREFIX = '[OnePassSsoCallback]';
-
-// iframe 내에서 실행 중이면 true (silent SSO 백그라운드 흐름)
-const isInIframe = (() => { try { return window.self !== window.top; } catch { return false; } })();
 
 const resolveErrorCode = (error) =>
   String(
@@ -37,14 +26,6 @@ const isLoginRequiredError = (error) =>
   resolveErrorCode(error) === 'login_required' ||
   String(error?.message || '').toLowerCase().includes('login_required');
 
-/**
- * iframe silent SSO 결과를 부모 윈도우로 전달한다.
- * 부모(TokenRefreshInitializer)의 onMessage 핸들러가 수신 후 ssoLogin()을 호출한다.
- */
-const notifyParent = (data) => {
-  window.parent.postMessage({ type: 'SILENT_SSO_RESULT', ...data }, window.location.origin);
-};
-
 // [라우터 remount 중복 실행 방지 — 모듈 레벨 플래그]
 //
 // useRef는 컴포넌트 인스턴스 단위로 초기화되므로 라우터 교체(setRouterInstance)로
@@ -52,6 +33,18 @@ const notifyParent = (data) => {
 // 모듈 레벨 변수는 페이지 세션 동안 유지되므로 remount에도 중복 실행을 막을 수 있다.
 let _handledSsoUrl = null;
 
+/**
+ * OnePass/Keycloak SSO 콜백(/sso) 처리.
+ *
+ * silent SSO 복귀는 React Router navigate()로 한다(리로드 없음).
+ * ssoLogin()이 access token을 메모리에 넣은 상태 그대로 SPA 내비게이션으로 복귀하므로
+ * 이전 방식(window.location.replace → 전체 리로드 → refresh 재발급)의 화면 전환 1회가 줄어든다.
+ * 저장된 returnUrl은 basename이 제거된 라우터 경로이며, 과거 형식(전체 경로) 값도
+ * stripBasename으로 한 번 더 정규화해 이중화(/home-dev/home-dev/)를 방지한다.
+ *
+ * iframe silent SSO 분기는 제거했다 — QSign이 별도 도메인이면 3자 쿠키 차단으로
+ * 동작할 수 없는 방식이라, 도메인이 바뀌어도 이상 없도록 리다이렉트 방식만 유지한다.
+ */
 const OnePassSsoCallback = () => {
   const navigate = useNavigate();
 
@@ -71,58 +64,28 @@ const OnePassSsoCallback = () => {
     const code = params.get('code');
     const state = params.get('state');
     const callbackError = params.get('error');
-    const callbackErrorDescription = params.get('error_description');
 
-    // iframe 내 실행이면 항상 silent flow (부모가 iframe으로 시작한 것이므로)
-    const isSilentFlow = isInIframe || isSilentSsoInProgress();
+    const isSilentFlow = isSilentSsoInProgress();
 
-    const callbackState = {
-      queryKeys: Array.from(params.keys()),
-      hasCode: Boolean(code),
-      codeLength: code?.length ?? 0,
-      stateValidationBypassed: true,
-      hasState: Boolean(state),
-      stateLength: state?.length ?? 0,
-      callbackError: callbackError || null,
-      callbackErrorDescription: callbackErrorDescription || null,
-      isSilentFlow,
-      isInIframe,
+    // silent 복귀: 저장된 원래 페이지로 리로드 없이 돌아간다.
+    const silentSsoReturn = () => {
+      const returnUrl = stripBasename(getSilentSsoReturnUrl() || '/');
+      finishSilentSso();
+      navigate(returnUrl, { replace: true });
     };
 
     // SSO 프로바이더가 login_required(미인증) 반환 — 로그인 없이 원래 페이지로 복귀
     if (isSilentFlow && callbackError === 'login_required') {
-      if (isInIframe) {
-        notifyParent({ success: false, reason: 'login_required' });
-        return;
-      }
-      const returnUrl = getSilentSsoReturnUrl() || import.meta.env.BASE_URL || '/';
-      finishSilentSso();
-      silentSsoReturn(returnUrl);
+      silentSsoReturn();
       return;
     }
 
     if (!code) {
-      const isSsoLogin = useAuthStore.getState().isSsoLogin;
-      if (isSsoLogin) {
-        if (isInIframe) {
-          // 이미 로그인 상태 — 부모에 알릴 필요 없이 조용히 종료
-          notifyParent({ success: false, reason: 'already_logged_in' });
-          return;
-        }
-        navigate('/', { replace: true });
-      } else {
-        if (isSilentFlow) {
-          if (isInIframe) {
-            notifyParent({ success: false, reason: 'missing_code' });
-            return;
-          }
-          const returnUrl = getSilentSsoReturnUrl() || import.meta.env.BASE_URL || '/';
-          finishSilentSso();
-          silentSsoReturn(returnUrl);
-          return;
-        }
-        navigate('/', { replace: true });
+      if (isSilentFlow) {
+        silentSsoReturn();
+        return;
       }
+      navigate('/', { replace: true });
       return;
     }
 
@@ -142,10 +105,6 @@ const OnePassSsoCallback = () => {
         const responseData = response?.data || response;
 
         if (hasLocalLogin) {
-          if (isInIframe) {
-            notifyParent({ success: false, reason: 'already_logged_in' });
-            return;
-          }
           if (isSilentFlow) finishSilentSso();
           navigate('/', { replace: true });
           return;
@@ -162,42 +121,22 @@ const OnePassSsoCallback = () => {
         const profileResponse = await apiClient.get('/api/v1/account/me', { token: accessToken });
         const profile = profileResponse?.data || profileResponse;
 
-        // iframe 흐름: 토큰과 프로필을 부모로 전달, 부모가 ssoLogin() 호출
-        if (isInIframe) {
-          notifyParent({ success: true, accessToken, refreshToken, kcIdToken, profile });
-          return;
-        }
-
-        // 일반 흐름: 직접 ssoLogin() 호출 후 페이지 이동
         useAuthStore.getState().ssoLogin({ token: accessToken, refreshToken, kcIdToken, profile });
 
         if (isSilentFlow) {
-          const returnUrl = getSilentSsoReturnUrl() || import.meta.env.BASE_URL || '/';
-          finishSilentSso();
-          silentSsoReturn(returnUrl);
+          silentSsoReturn();
         } else {
           navigate('/', { replace: true });
         }
       } catch (error) {
-        if (isSilentFlow && isLoginRequiredError(error)) {
-          if (isInIframe) {
-            notifyParent({ success: false, reason: 'login_required' });
-            return;
-          }
-          const returnUrl = getSilentSsoReturnUrl() || import.meta.env.BASE_URL || '/';
-          finishSilentSso();
-          silentSsoReturn(returnUrl);
-          return;
-        }
-
         if (isSilentFlow) {
-          if (isInIframe) {
-            notifyParent({ success: false, reason: 'error' });
-            return;
+          if (!isLoginRequiredError(error)) {
+            console.info(`${LOG_PREFIX} silent SSO exchange failed — returning without login`, {
+              message: error?.message ?? 'unknown',
+              status: error?.status ?? null,
+            });
           }
-          const returnUrl = getSilentSsoReturnUrl() || import.meta.env.BASE_URL || '/';
-          finishSilentSso();
-          silentSsoReturn(returnUrl);
+          silentSsoReturn();
           return;
         }
 
@@ -215,9 +154,6 @@ const OnePassSsoCallback = () => {
 
     exchangeCode();
   }, [navigate]);
-
-  // iframe 내에서는 UI 없이 동작 (부모 화면에 영향 없음)
-  if (isInIframe) return null;
 
   // 라우터 교체 타이밍에 /sso가 아닌 경로에서 잠깐 마운트되는 경우 방어
   if (!window.location.pathname.endsWith('/sso')) {
