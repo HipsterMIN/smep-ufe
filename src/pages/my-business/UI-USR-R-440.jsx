@@ -33,6 +33,7 @@ const UI_USR_R_440 = () => {
   const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   const isSsoLogin = useAuthStore((state) => state.isSsoLogin);
+  const uuid = useAuthStore((state) => state.uuid);
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
 
   // 현재 메뉴 기준으로 사이드바와 depth1 부모 메뉴를 계산한다.
@@ -42,6 +43,14 @@ const UI_USR_R_440 = () => {
   // 기업명은 로그인 프로필, 기업관리자는 기존 기업관리자 담당자 API를 원천으로 삼아 정적 테스트 문구를 제거한다.
   const companyName = renderDisplayText(resolveCompanyName({ currentCompany, companyProfile, cmpNm }));
   const companyManagerName = renderDisplayText(managerContact?.mbrNm);
+
+  const readEnv = (key) => String(import.meta.env[key] || '').trim();
+  const trimTrailingSlash = (value) => value.replace(/\/+$/, '');
+
+  const fullUrl = trimTrailingSlash(readEnv('VITE_FULL_URL'));
+  const clientId = trimTrailingSlash(readEnv('VITE_CLIENT_ID'));
+  const tagetBizMypageWithdrawUrl = trimTrailingSlash(readEnv('VITE_BIZ_TARGET_MYPAGE_WITHDRAW_URL'));
+  const tagetMbrMypageWithdrawUrl = trimTrailingSlash(readEnv('VITE_MBR_TARGET_MYPAGE_WITHDRAW_URL'));
 
   useEffect(() => {
     if (!authToken || currentMode !== 'CORPORATE') {
@@ -118,10 +127,10 @@ const UI_USR_R_440 = () => {
     // }
 
     if (currentMode === 'CORPORATE') {
-      const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-business/information?redirect_uri=https://portal.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-prd&uuid=${uuid}`;
+      const onePassJoinUrl = `${tagetBizMypageWithdrawUrl}?redirect_uri=${fullUrl}/mb/dash/UI_USR_L_510&client_id=${clientId}&uuid=${uuid}`;
       window.location.href = onePassJoinUrl;
     } else {
-      const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-member/information?redirect_uri=https://portal.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-prd&uuid=${uuid}`;
+      const onePassJoinUrl = `${tagetMbrMypageWithdrawUrl}?redirect_uri=${fullUrl}/mb/dash/UI_USR_L_510&client_id=${clientId}&uuid=${uuid}`;
       window.location.href = onePassJoinUrl;
     }
   };
