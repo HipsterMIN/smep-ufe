@@ -44,6 +44,14 @@ const UI_USR_R_440 = () => {
   const companyName = renderDisplayText(resolveCompanyName({ currentCompany, companyProfile, cmpNm }));
   const companyManagerName = renderDisplayText(managerContact?.mbrNm);
 
+  const readEnv = (key) => String(import.meta.env[key] || '').trim();
+  const trimTrailingSlash = (value) => value.replace(/\/+$/, '');
+
+  const fullUrl = trimTrailingSlash(readEnv('VITE_FULL_URL'));
+  const clientId = trimTrailingSlash(readEnv('VITE_CLIENT_ID'));
+  const tagetBizMypageWithdrawUrl = trimTrailingSlash(readEnv('VITE_BIZ_TARGET_MYPAGE_WITHDRAW_URL'));
+  const tagetMbrMypageWithdrawUrl = trimTrailingSlash(readEnv('VITE_MBR_TARGET_MYPAGE_WITHDRAW_URL'));
+
   useEffect(() => {
     if (!authToken || currentMode !== 'CORPORATE') {
       setManagerContact(null);
@@ -119,10 +127,10 @@ const UI_USR_R_440 = () => {
     // }
 
     if (currentMode === 'CORPORATE') {
-      const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-business/information?redirect_uri=https://portal.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-prd&uuid=${uuid}`;
+      const onePassJoinUrl = `${tagetBizMypageWithdrawUrl}?redirect_uri=${fullUrl}/mb/dash/UI_USR_L_510&client_id=${clientId}&uuid=${uuid}`;
       window.location.href = onePassJoinUrl;
     } else {
-      const onePassJoinUrl = `https://onepass.smes.go.kr/mypage-member/information?redirect_uri=https://portal.smes.go.kr/home/mb/dash/UI_USR_L_510&client_id=smes-prd&uuid=${uuid}`;
+      const onePassJoinUrl = `${tagetMbrMypageWithdrawUrl}?redirect_uri=${fullUrl}/mb/dash/UI_USR_L_510&client_id=${clientId}&uuid=${uuid}`;
       window.location.href = onePassJoinUrl;
     }
   };
