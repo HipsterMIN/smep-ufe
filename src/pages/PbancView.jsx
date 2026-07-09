@@ -3,7 +3,7 @@ import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api as apiClient, apiBaseUrl } from '../lib/apiClient.js';
-import { trackFileDownload, trackScrap } from '../lib/behaviorTracker.js';
+import { trackApplyStart, trackFileDownload, trackScrap } from '../lib/behaviorTracker.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
 import { resolveListBackPath } from '../utils/listNavigation.js';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
@@ -316,6 +316,21 @@ const PbancView = () => {
     return `${yyyy.slice(2)}-${mm}-${dd}`;
   };
 
+  // 행동 수집: 온라인 신청 바로가기(외부 신청 사이트 이동) = 신청 시작 전환 신호.
+  // 신청 완료는 타 사이트에서 일어나 관측 불가 — 신청 데이터 수집 API 연계 전까지는
+  // 이 이벤트가 신청 퍼널의 마지막 관측점이다. 목적지 url 을 남겨 추후 대사에 쓴다.
+  const handleApplyShortcut = () => {
+    trackApplyStart({
+      refType: 'pbanc',
+      refId: item?.bizPbancNo,
+      attrs: {
+        external: true,
+        url: String(item?.bizAplyUrlAddr || '').slice(0, 200) || null,
+      },
+    });
+    openExternalUrl(item?.bizAplyUrlAddr);
+  };
+
   const handleToggleScrap = async () => {
     const targetId = Number(item?.bizPbancNo);
     if (!isLoggedIn || !Number.isFinite(targetId) || targetId < 1) {
@@ -413,7 +428,7 @@ const PbancView = () => {
                             <button
                               type="button"
                               className="krds-btn xsmall"
-                              onClick={() => openExternalUrl(item?.bizAplyUrlAddr)}
+                              onClick={handleApplyShortcut}
                             >
                               온라인 신청 바로가기
                               <i className="svg-icon ico-angle right"></i>
@@ -449,7 +464,7 @@ const PbancView = () => {
                             <button
                               type="button"
                               className="krds-btn xsmall"
-                              onClick={() => openExternalUrl(item?.bizAplyUrlAddr)}
+                              onClick={handleApplyShortcut}
                             >
                               온라인 신청 바로가기
                               <i className="svg-icon ico-angle right"></i>
