@@ -234,25 +234,25 @@ const MainPage = () => {
     const isExpanded = Boolean(expandedRows[label]);
 
     return (
-        <React.Fragment key={label}>
-          <dt>{label}</dt>
-          <dd>
-            <div
-                className={canExpand ? `onshadow-text${isExpanded ? ' on' : ''}` : undefined}
-                dangerouslySetInnerHTML={{ __html: html }}
-            />
-            {canExpand && (
-                <button
-                    type="button"
-                    className="krds-btn tertiary xsmall ontoggle-textshadow"
-                    onClick={() => toggleExpandedRow(label)}
-                >
-                  {isExpanded ? '접기' : '전체보기'}
-                  <i className="svg-icon ico-angle"></i>
-                </button>
-            )}
-          </dd>
-        </React.Fragment>
+      <React.Fragment key={label}>
+        <dt>{label}</dt>
+        <dd>
+          <div
+            className={canExpand ? `onshadow-text${isExpanded ? ' on' : ''}` : undefined}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+          {canExpand && (
+            <button
+              type="button"
+              className="krds-btn tertiary xsmall ontoggle-textshadow"
+              onClick={() => toggleExpandedRow(label)}
+            >
+              {isExpanded ? '접기' : '전체보기'}
+              <i className="svg-icon ico-angle"></i>
+            </button>
+          )}
+        </dd>
+      </React.Fragment>
     );
   };
 
@@ -2057,7 +2057,7 @@ const MainPage = () => {
                 <dt>사업개요</dt>
                 <dd>
                   <p>
-                    {renderExpandableHtmlRow("", selectedNotice.desc) ||
+                    {renderExpandableHtmlRow('', selectedNotice.desc) ||
                       '2026년도 중소벤처기업부 경상북도 및 울진군이 지원하는 신규 국고산업육성형 협업 프로젝트의 수행자로 선정된 수행기관별 지원 프로그램을 안내하오니, 해당 프로그램 참여를 희망하는 기업의 많은 신청 바랍니다.'}
                   </p>
                 </dd>
@@ -2130,7 +2130,7 @@ const MainPage = () => {
                   className="krds-btn text small"
                   onClick={() => handlePopupClose(popup.popupId)}
                 >
-                  닫기
+                  <i className="svg-icon ico-popup-close"></i>
                 </button>
               </div>
               <div style={{ flex: 1, overflow: 'hidden' }}>
