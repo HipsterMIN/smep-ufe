@@ -316,6 +316,11 @@ export const useAuthStore = create(
               false,
               'auth/ssoLogin',
             );
+            // 행동 수집: 로그인 세션 경계 이벤트. behaviorTracker가 이 store를 import하므로
+            // 순환 참조를 피하기 위해 동적 import로 지연 로드한다(수집 실패는 무시).
+            import('../lib/behaviorTracker.js')
+              .then((tracker) => tracker.track('login', { attrs: { method: 'sso' } }))
+              .catch(() => undefined);
           },
           setRefreshToken: (refreshToken) =>
             set({ refreshToken: refreshToken || null }, false, 'auth/setRefreshToken'),
@@ -386,6 +391,13 @@ export const useAuthStore = create(
             'auth/set_token',
           ),
           logout: () => {
+            // 행동 수집: 실제 로그인 상태였을 때만 logout 이벤트를 남긴다
+            // (silent SSO 실패 등 비로그인 정리 호출은 세션 경계가 아니므로 제외).
+            if (useAuthStore.getState().isLogin) {
+              import('../lib/behaviorTracker.js')
+                .then((tracker) => tracker.track('logout'))
+                .catch(() => undefined);
+            }
             set(
               {
                 isLogin: false,

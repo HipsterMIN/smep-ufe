@@ -3,6 +3,7 @@ import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api as apiClient, apiBaseUrl } from '../lib/apiClient.js';
+import { trackFileDownload, trackScrap } from '../lib/behaviorTracker.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
 import { resolveListBackPath } from '../utils/listNavigation.js';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
@@ -329,6 +330,8 @@ const PbancView = () => {
       const payload = response?.data || response;
       const nextScrapped = Boolean(payload.scrapped);
       setIsScrapped(nextScrapped);
+      // 행동 수집: 스크랩은 가장 순도 높은 관심 신호라 등록/해제를 구분해 기록한다
+      trackScrap({ refType: 'pbanc', refId: targetId, added: nextScrapped });
       window.alert(
         nextScrapped
           ? '관심공고에 등록되었습니다.'
@@ -514,6 +517,11 @@ const PbancView = () => {
                         type="button"
                         className="krds-btn medium text on-colorblue"
                         onClick={() => {
+                          trackFileDownload({
+                            refType: 'pbanc',
+                            refId: item?.bizPbancNo,
+                            fileName: file.orgnlFileNm,
+                          });
                           window.location.href = `${apiBaseUrl}/api/v1/files/download/${file.atchFileId}/${file.atchFileSn}`;
                         }}
                       >
@@ -553,6 +561,11 @@ const PbancView = () => {
                       type="button"
                       className="krds-btn medium text on-colorblue"
                       onClick={() => {
+                        trackFileDownload({
+                          refType: 'pbanc',
+                          refId: item?.bizPbancNo,
+                          fileName: file.orgnlFileNm,
+                        });
                         window.location.href = `${apiBaseUrl}/api/v1/files/download/${file.atchFileId}/${file.atchFileSn}`;
                       }}
                     >
