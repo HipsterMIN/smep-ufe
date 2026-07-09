@@ -43,6 +43,17 @@ const UI_USR_R_564 = () => {
                                 </ol>
                             </li>
                             <li role="listitem">
+                                <strong className="point">제3조 (약관의 효력과 변경)</strong>
+                                <ol className="calc-list krds-info-list ordered" role="list">
+                                    <li role="listitem"><span className="num">1.</span>당 사이트는 이 약관의 내용을 이용자가 쉽게 알 수 있도록 서비스 초기 화면에 게시합니다.</li>
+                                    <li role="listitem"><span className="num">2.</span>당 사이트는 귀하가 본 약관 내용에 동의하는 것을 조건으로 서비스를 제공하며, 귀하가 동의하는 경우 본 약관이 우선적으로 적용됩니다.</li>
+                                    <li role="listitem"><span className="num">3.</span>당 사이트는 「약관의 규제에 관한 법률」, 「정보통신망 이용촉진 및 정보보호 등에 관한 법률」(이하"정보통신망법") 등 관련 법령을 위반하지 않는 범위에서 이 약관을 개정할 수 있습니다.</li>
+                                    <li role="listitem"><span className="num">4.</span>약관을 개정할 경우에는 적용일자 및 개정 사유를 명시하여 현행 약관과 함께 그 개정약관의 적용일자 30일 전부터 적용일자 전일까지 서비스 초기 화면에 공지합니다. 다만, 회원에게 불리한 약관 개정의 경우에는 공지 외에 일정 기간 전자우편, 전자쪽지, 로그인 시 동의창 등 전자적 수단을 통해 별도로 명확히 통지합니다.</li>
+                                    <li role="listitem"><span className="num">5.</span>당 사이트가 전항에 따라 개정약관을 공지 또는 통지하면서, 30일 이내에 거부 의사를 표시하지 않으면 동의한 것으로 본다는 뜻을 명확히 공지하였음에도 회원이 명시적으로 거부하지 않은 경우, 회원이 개정약관에 동의한 것으로 봅니다.</li>
+                                    <li role="listitem"><span className="num">6.</span>회원이 개정약관의 적용에 동의하지 않는 경우 당 사이트가 개정 약관의 내용을 적용할 수 없으며, 이 경우 회원은 이용계약을 해지할 수 있습니다. 다만, 기존 약관을 적용할 수 없는 특별한 사정이 있는 경우에는 당 사이트가 이용계약을 해지할 수 있습니다.</li>
+                                </ol>
+                            </li>
+                            <li role="listitem">
                                 <strong className="point">제4조 (약관 외 준칙)</strong>
                                 <ol className="calc-list krds-info-list ordered" role="list">
                                     <li role="listitem"><span className="num">1.</span>본 약관은 당 사이트가 제공하는 서비스에 관한 이용규정 및 별도 약관과 함께 적용됩니다.</li>
