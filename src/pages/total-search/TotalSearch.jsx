@@ -7,6 +7,7 @@ import ResultMenuBreadcrumb from '@/components/ui/ResultMenuBreadcrumb.jsx';
 import Tab from '@/components/ui/Tab';
 import Pagination from '@/components/ui/Pagination.jsx';
 import { api as apiClient } from '@/lib/apiClient.js';
+import { trackSearch, trackSearchResultClick } from '@/lib/behaviorTracker.js';
 import {
   preloadIntegratedSearchRouteResources,
   resolveIntegratedSearchRoute,
@@ -440,6 +441,11 @@ const TotalSearch = () => {
       const nextCollections = buildCollectionResultMap(payload, SEARCH_ALL_PREVIEW_COUNT);
       setTotalCount(sumVisibleCollectionCounts(nextCollections));
       setAllCollections(nextCollections);
+      // 행동 수집: 어떤 검색어로 몇 건이 나왔는지 (JSONL WAL, best-effort)
+      trackSearch(keyword, sumVisibleCollectionCounts(nextCollections), {
+        scope: 'ALL',
+        sort: sortType,
+      });
     } catch (error) {
       if (requestSerial !== allRequestSerialRef.current) return;
       setTotalCount(0);
@@ -476,6 +482,12 @@ const TotalSearch = () => {
         ...prev,
         [collectionKey]: normalized,
       }));
+      // 행동 수집: 컬렉션 탭 검색(페이지 이동 포함)도 검색 행위로 기록한다
+      trackSearch(keyword, normalized.count, {
+        scope: collectionKey,
+        page,
+        sort: sortType,
+      });
     } catch (error) {
       if (requestSerial !== tabRequestSerialRef.current) return;
       setTabCollections((prev) => ({
@@ -613,13 +625,31 @@ const TotalSearch = () => {
     window.open(fallback.value, '_blank', 'noopener,noreferrer');
   }, [navigate]);
 
-  const handleItemClick = async (event, item) => {
+  // 행동 수집: 어떤 검색어로 몇 번째 결과(어느 컬렉션의 어떤 문서)를 눌렀는지 기록한다
+  const trackResultClick = useCallback(
+    (item, rank) => {
+      trackSearchResultClick({
+        keyword: searchKeyword,
+        refType: item.collectionKey,
+        refId: item.workId || item.docId || null,
+        rank,
+        attrs: {
+          title: normalizeTitleForRouteParameter(item.title).slice(0, 80) || null,
+        },
+      });
+    },
+    [searchKeyword],
+  );
+
+  const handleItemClick = async (event, item, rank) => {
     event.preventDefault();
+    trackResultClick(item, rank);
     await navigateByItem(item);
   };
 
-  const handleCertificateButtonClick = async (event, item) => {
+  const handleCertificateButtonClick = async (event, item, rank) => {
     event.preventDefault();
+    trackResultClick(item, rank);
     await navigateByItem(item);
   };
 
@@ -656,7 +686,7 @@ const TotalSearch = () => {
     );
   };
 
-  const renderCollectionCards = (config, items, { showCertificateButton }) => {
+  const renderCollectionCards = (config, items, { showCertificateButton, rankOffset = 0 }) => {
     if (!items.length) {
       return (
         <div className="in">
@@ -672,6 +702,7 @@ const TotalSearch = () => {
       const key = `${config.collectionKey}-${keyBase}-${index}`;
       const buttonLabel = showCertificateButton ? getCertificateButtonLabel(item) : '';
       const shouldRenderContent = hasRenderableResultText(item.content);
+      const rank = rankOffset + index + 1;
 
       return (
         <div className="in" key={key}>
@@ -682,7 +713,7 @@ const TotalSearch = () => {
             <a
               href={item.linkUrl || '#'}
               className="c-text c-date"
-              onClick={(event) => handleItemClick(event, item)}
+              onClick={(event) => handleItemClick(event, item, rank)}
             >
               <p className="c-tit no-icon">
                 <span className="span onellipsis-2">{renderHighlightedText(item.title, '-')}</span>
@@ -698,7 +729,7 @@ const TotalSearch = () => {
               <button
                 type="button"
                 className="krds-btn primary xlarge"
-                onClick={(event) => handleCertificateButtonClick(event, item)}
+                onClick={(event) => handleCertificateButtonClick(event, item, rank)}
               >
                 {buttonLabel}
               </button>
@@ -749,6 +780,7 @@ const TotalSearch = () => {
           <li className="structured-item indep-item">
             {renderCollectionCards(config, result.items, {
               showCertificateButton: config.collectionKey === 'smep_cert',
+              rankOffset: (currentPage - 1) * SEARCH_TAB_LIST_COUNT,
             })}
           </li>
         </ul>
