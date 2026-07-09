@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { flush, trackPageDwell, trackPageView } from '@lib/behaviorTracker.js';
+import { flush, track, trackPageDwell, trackPageView } from '@lib/behaviorTracker.js';
 
 /**
  * 라우트 변화를 감지해 page_view 와 page_dwell(체류시간)을 수집한다.
@@ -46,6 +46,40 @@ const BehaviorTracker = () => {
 
     return undefined;
   }, [location.pathname]);
+
+  useEffect(() => {
+    // 전역 클릭 자동 수집: 링크/버튼류 클릭을 요소 메타데이터와 함께 기록한다.
+    // 개별 화면 수정 없이 "모든 활동"을 커버하기 위한 캡처 단계 리스너다.
+    // 텍스트는 60자로 잘라 과도한 본문/개인정보 유입을 줄인다.
+    const onClickCapture = (event) => {
+      try {
+        if (isExcluded(window.location.pathname)) return;
+        const origin = event.target instanceof Element ? event.target : null;
+        const target = origin?.closest('a, button, [role="button"], input[type="submit"]');
+        if (!target) return;
+
+        const text = (target.textContent || target.getAttribute('aria-label') || '')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 60);
+        const href = target.getAttribute('href');
+        track('click', {
+          refType: 'ui',
+          refId: target.id || null,
+          attrs: {
+            tag: target.tagName.toLowerCase(),
+            text: text || null,
+            href: href && href !== '#' ? href.slice(0, 200) : null,
+          },
+        });
+      } catch {
+        // 수집 실패는 화면 흐름을 막지 않는다.
+      }
+    };
+
+    document.addEventListener('click', onClickCapture, true);
+    return () => document.removeEventListener('click', onClickCapture, true);
+  }, []);
 
   useEffect(() => {
     // 탭을 닫거나 백그라운드로 보낼 때 마지막 체류시간을 기록하고 큐를 비운다.

@@ -129,8 +129,46 @@ export const useAuthStore = create(
           };
         };
 
+        // 새 탭의 인증 스냅샷 질의에 응답한다(로그인 + refreshToken 보유 탭만).
+        // access token(메모리 전용)은 스냅샷에 포함하지 않는다 — 수신 탭이 refresh로 재발급한다.
+        const buildAuthSnapshot = () => {
+          const state = useAuthStore.getState();
+          if (!state.isLogin || !state.refreshToken) return null;
+          return {
+            isSsoLogin: state.isSsoLogin,
+            refreshToken: state.refreshToken,
+            kcIdToken: state.kcIdToken,
+            user: state.user,
+            uuid: state.uuid,
+            currentMode: state.currentMode,
+            currentCompany: state.currentCompany,
+            linkedCompanies: state.linkedCompanies,
+            contextRole: state.contextRole,
+            intgMbrSwtcYn: state.intgMbrSwtcYn,
+            bizno: state.bizno,
+            cmpNm: state.cmpNm,
+            companySize: state.companySize,
+            companyProfile: state.companyProfile,
+            additionalInfoRequired: state.additionalInfoRequired,
+            additionalInfoReason: state.additionalInfoReason,
+            additionalInfoMissingFields: state.additionalInfoMissingFields,
+            suggestedLoginId: state.suggestedLoginId,
+          };
+        };
+
         // 채널 메시지 리스너 등록
         authChannel.onmessage = (event) => {
+          if (event.data.type === 'AUTH_SNAPSHOT_REQUEST') {
+            const snapshot = buildAuthSnapshot();
+            if (snapshot) {
+              authChannel.postMessage({
+                type: 'AUTH_SNAPSHOT',
+                requestId: event.data.requestId,
+                snapshot,
+              });
+            }
+            return;
+          }
           if (event.data.type === 'LOGOUT') {
             // 다른 탭에서 로그아웃 메시지 수신 시 상태 초기화
             set(
@@ -281,6 +319,42 @@ export const useAuthStore = create(
           },
           setRefreshToken: (refreshToken) =>
             set({ refreshToken: refreshToken || null }, false, 'auth/setRefreshToken'),
+          /**
+           * 다른 탭이 보내준 인증 스냅샷을 채택한다(새 탭 silent SSO 왕복 생략용).
+           * access token은 포함되지 않으므로 채택 직후 refresh 로 재발급받아야 한다.
+           */
+          adoptAuthSnapshot: (snapshot) => {
+            if (!snapshot?.refreshToken) return;
+            set(
+              {
+                isLogin: true,
+                isSsoLogin: Boolean(snapshot.isSsoLogin),
+                token: null,
+                tokenExpiresAt: null,
+                refreshToken: snapshot.refreshToken,
+                kcIdToken: snapshot.kcIdToken ?? null,
+                user: snapshot.user ?? null,
+                uuid: snapshot.uuid ?? null,
+                currentMode: snapshot.currentMode ?? null,
+                currentCompany: snapshot.currentCompany ?? null,
+                linkedCompanies: snapshot.linkedCompanies ?? [],
+                contextRole: snapshot.contextRole ?? null,
+                intgMbrSwtcYn: snapshot.intgMbrSwtcYn ?? null,
+                bizno: snapshot.bizno ?? null,
+                cmpNm: snapshot.cmpNm ?? null,
+                companySize: snapshot.companySize ?? null,
+                companyProfile: snapshot.companyProfile ?? null,
+                additionalInfoRequired: Boolean(snapshot.additionalInfoRequired),
+                additionalInfoReason: snapshot.additionalInfoReason ?? null,
+                additionalInfoMissingFields: Array.isArray(snapshot.additionalInfoMissingFields)
+                  ? snapshot.additionalInfoMissingFields
+                  : [],
+                suggestedLoginId: snapshot.suggestedLoginId ?? null,
+              },
+              false,
+              'auth/adoptAuthSnapshot',
+            );
+          },
           updateProfile: (profile) => {
             const normalized = normalizeProfile(profile);
             set(
