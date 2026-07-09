@@ -4,6 +4,7 @@ import Breadcrumb from '../components/ui/Breadcrumb';
 import SideNavigation from '../components/ui/SideNavigation';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
+import { trackApplyStart, trackScrap } from '../lib/behaviorTracker.js';
 import { fetchAndConvertCommonCodes } from '../utils/commonCodeUtils.js';
 import { resolveListBackPath } from '../utils/listNavigation.js';
 import { useAuthStore } from '../store/useAuthStore.jsx';
@@ -318,7 +319,7 @@ const UI_USR_R_031 = () => {
       .then((commonCodes) => {
         setFilterOptions(toPolicyFilterOptions(commonCodes));
       })
-      .catch((error) => {
+      .catch(() => {
         setFilterOptions(DEFAULT_FILTER_OPTIONS);
       });
   }, []);
@@ -328,7 +329,7 @@ const UI_USR_R_031 = () => {
       .then((response) => {
         setIndustryGroups(buildIndustryGroupMap(unwrapResponse(response) || []));
       })
-      .catch((error) => {
+      .catch(() => {
         setIndustryGroups({});
       });
   }, []);
@@ -350,7 +351,7 @@ const UI_USR_R_031 = () => {
       : `/api/v1/finance-policy/${plcyFnncNo}`;
     apiClient.get(detailUrl)
       .then((response) => setDetail(unwrapResponse(response)))
-      .catch((error) => {
+      .catch(() => {
         setDetail(null);
       })
       .finally(() => setLoading(false));
@@ -409,7 +410,7 @@ const UI_USR_R_031 = () => {
     });
     apiClient
       .post(`/api/v1/finance-policy/inquiry?${params.toString()}`, null, { keepalive: true })
-      .catch((error) => {
+      .catch(() => {
       });
   };
 
@@ -427,6 +428,8 @@ const UI_USR_R_031 = () => {
       const payload = unwrapResponse(response);
       const nextScrapped = Boolean(payload.scrapped);
       setIsScrapped(nextScrapped);
+      // 행동 수집: 정책금융 상품 스크랩 등록/해제
+      trackScrap({ refType: 'plcy_fnnc', refId: targetId, added: nextScrapped });
       window.alert(
         nextScrapped
           ? '관심공고에 등록되었습니다.'
@@ -532,7 +535,15 @@ const UI_USR_R_031 = () => {
                   target="_blank"
                   rel="noreferrer"
                   className="krds-btn primary large krds-btn-shadow"
-                  onClick={() => trackInquiry('4')}
+                  onClick={() => {
+                    trackInquiry('4');
+                    // 행동 수집: 외부 신청 페이지 이동 = 신청 시작(전환 신호)
+                    trackApplyStart({
+                      refType: 'plcy_fnnc',
+                      refId: plcyFnncNo,
+                      attrs: { external: true },
+                    });
+                  }}
                 >
                   신청하기
                 </a>

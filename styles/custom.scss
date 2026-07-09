@@ -73,9 +73,7 @@ hr{border-top:solid 1px var(--krds-color-light-gray-20)}
     .krds-main-menu .gnb-menu{justify-content:center;}
 }
 .main-quick-menu {
-    .quick-menu-item button{flex-direction:row;align-items:center;gap:10px;}
-    .quick-menu-img{flex:0 0 60px;width:60px;height:60px;border-radius:16px;background-color:var(--krds-color-light-alpha-white100)}
-    .quick-menu-tit{font-size:21px;color:var(--krds-color-light-alpha-white100);white-space: nowrap;}
+    //.quick-menu-tit{font-size:21px;color:var(--krds-color-light-alpha-white100);white-space: nowrap;}
 }
 .custom-breadcrumb {
     display: flex;
