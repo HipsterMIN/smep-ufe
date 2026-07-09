@@ -157,12 +157,12 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
         availableCodes.every(code => appliedApis.includes(code));
 
     if (isAllApplied) {
-      alert('모든 API가 이미 신청 완료되어 추가 신청이 불가능합니다.');
+      alert("모든 API가 이미 신청 완료되어 추가 신청이 불가능합니다.");
       return;
     }
 
-    if (formData.apiSeCd.length === 0){
-      alert('신청할 API를 선택해 주세요.');
+    if(formData.apiSeCd.length === 0){
+      alert("신청할 API를 선택해 주세요.");
       return;
     }
     if (!formData.siteNm) {
@@ -273,7 +273,9 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
               </div>
               <div className="form-group">
                 <div className="form-tit">
-                  <label htmlFor="id_02" className="form-label">휴대전화 번호</label>
+                  <label htmlFor="id_02" className="form-label">
+                    {currentMode === 'CORPORATE' ? '대표전화번호' : '휴대전화 번호'}
+                  </label>
                 </div>
                 <div className="form-conts">
                   <input type="text" className="krds-input small" value={
