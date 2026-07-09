@@ -82,6 +82,8 @@ const routeChildrenMeta = {
   // ========== 마이비즈니스 ==========
   'M_PIIO_00115': { children: [{ path: 'modify' }] },
   'M_PIIO_00119': { children: [{ path: 'edit' }] },
+
+  'M_PIIO_00166': { children: [{ path: ':id' }] },
 };
 
 export default routeChildrenMeta;

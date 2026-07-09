@@ -27,6 +27,7 @@ const UI_USR_L_190 = lazy(() => import('@pages/policy-info/UI_USR_L_190.jsx'));
 const UI_USR_R_191 = lazy(() => import('@pages/policy-info/UI_USR_R_191.jsx'));
 const UI_USR_W_130 = lazy(() => import('@pages/policy-info/UI_USR_W_130.jsx'));
 const UI_USR_L_141 = lazy(() => import('@pages/policy-info/UI_USR_L_141.jsx'));
+const UI_USR_L_142 = lazy(() => import('@pages/policy-info/UI_USR_L_142.jsx'));
 const UI_USR_R_131 = lazy(() => import('@pages/policy-info/UI_USR_R_131.jsx'));
 const UI_USR_L_140 = lazy(() => import('@pages/more-service/UI_USR_L_140.jsx'));
 
@@ -376,7 +377,7 @@ export const componentMap = {
     children: [
       {
         path: ':id',
-        component: UI_USR_L_141,
+        component: UI_USR_L_142,
       },
     ],
   },
