@@ -4,12 +4,19 @@ import { Link, useMatches, useNavigate, useSearchParams } from 'react-router-dom
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
-//import UI_USR_L_142 from '@pages/policy-info/UI_USR_L_142.jsx';
+// import UI_USR_L_142 from '@pages/policy-info/UI_USR_R_142.jsx';
+import { formatNumberWithCommas } from '@utils/numberUtils.js';
 import Pagination from '@components/ui/Pagination';
+import {api as apiClient} from "@lib/apiClient.js";
+import {appendListSearchToPath, getNumberSearchParam, getSearchParam, setQueryParam} from "@utils/listNavigation.js";
 
 //import { api as apiClient } from '@lib/apiClient.js';
 //import { formatNumberWithCommas } from '@utils/numberUtils.js';
 //import { appendListSearchToPath, getNumberSearchParam, getSearchParam, setQueryParam } from '@utils/listNavigation.js';
+
+const BBS_CONFIG = {
+    tax: '70',
+};
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -27,19 +34,160 @@ const formatDate = (dateString) => {
 const UI_USR_L_141 = () => {
     const matches = useMatches();
     const pageTitle = [...matches].reverse().find((match) => match?.handle?.menuNm)?.handle?.menuNm || '';
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const tab = searchParams.get('tab') || 'range';
-
     const isPage141 = tab === 'range';
     const isPage142 = tab === 'tax';
-    
+    const [boardDetail, setBoardDetail] = useState(null);
     const navigate = useNavigate();
-    const [, setSearchParams] = useSearchParams();
     const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+    const [postList, setPostList] = useState([]);
+    const [searchType, setSearchType] = useState(() => getSearchParam(location.search, 'searchType', 'TITLE'));
+    const [searchKeyword, setSearchKeyword] = useState(() => getSearchParam(location.search, 'searchKeyword', ''));
+    const [appliedSearchType, setAppliedSearchType] = useState(() => getSearchParam(location.search, 'searchType', 'TITLE'));
+    const [appliedSearchKeyword, setAppliedSearchKeyword] = useState(() => getSearchParam(location.search, 'searchKeyword', ''));
 
+    const [loading, setLoading] = useState(false);
+    const [totalElements, setTotalElements] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [pageSize, setPageSize] = useState(() => getNumberSearchParam(location.search, 'size', 10));
+    const [currentPage, setCurrentPage] = useState(() => Math.max(0, getNumberSearchParam(location.search, 'page', 1) - 1));
     const sidebarData = getSideNavigationData();
     const depth1Menu = getDepth1Parent();
 
+
+
+    const buildListSearchParams = () => {
+        const params = new URLSearchParams();
+        params.set("tab", tab);
+        setQueryParam(params, 'page', currentPage + 1, 1);
+        setQueryParam(params, 'size', pageSize, 10);
+        setQueryParam(params, 'searchType', appliedSearchType, 'TITLE');
+        setQueryParam(params, 'searchKeyword', appliedSearchKeyword);
+        return params;
+    };
+
+    const bbsNo = useMemo(() => {
+        return BBS_CONFIG[tab] || null;
+    }, [tab]);
+
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        let isMounted = true;
+
+        const fetchBoardDetail = async () => {
+            if (bbsNo == null || bbsNo === '') {
+                if (!isMounted) return;
+                setBoardDetail(null);
+                return;
+            }
+
+            try {
+                const response = await apiClient.get(`/api/v1/board/${bbsNo}`);
+                if (!isMounted) return;
+                setBoardDetail(response?.data ?? null);
+            } catch (error) {
+                if (!isMounted) return;
+                setBoardDetail(null);
+            }
+        };
+
+        fetchBoardDetail();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [bbsNo]);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchPostList = async () => {
+            if (!bbsNo) return;
+
+            try {
+                if (!isMounted) return;
+                setLoading(true);
+
+                const params = new URLSearchParams({
+                    page: String(currentPage + 1),
+                    size: String(pageSize),
+                });
+
+                if (appliedSearchKeyword.trim()) {
+                    params.append('searchType', appliedSearchType);
+                    params.append('searchKeyword', appliedSearchKeyword.trim());
+                }
+
+                setSearchParams(buildListSearchParams(), { replace: true });
+
+                const response = await apiClient.get(`/api/v1/board/${bbsNo}/posts/list?${params.toString()}`);
+                const data = response?.data || {};
+
+                if (!isMounted) return;
+                setPostList(Array.isArray(data?.content) ? data.content : []);
+                setTotalElements(data?.totalElements || 0);
+                setTotalPages(data?.totalPages || 0);
+            } catch (error) {
+                if (!isMounted) return;
+                setPostList([]);
+                setTotalElements(0);
+                setTotalPages(0);
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchPostList();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [bbsNo, currentPage, pageSize, appliedSearchType, appliedSearchKeyword, tab]);
+
+
+    const handleSearch = () => {
+        setAppliedSearchType(searchType);
+        setAppliedSearchKeyword(searchKeyword);
+        setCurrentPage(0);
+    };
+
+    const isExternalUrl = (value) => /^https?:\/\//i.test(String(value || ''));
+
+    const buildPostLink = (item) => {
+        const link = String(item?.pstCn || '').trim();
+        return link || '#';
+    };
+
+    const handleSearchKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page - 1);
+        window.scrollTo(0, 0);
+    };
+
+    const handlePageSizeChange = (event) => {
+        setPageSize(Number(event.target.value));
+        setCurrentPage(0);
+    };
+    const moveToDetail = (pstNo) => {
+        if (pstNo == null) return;
+        const currentBbsNo = BBS_CONFIG[tab];
+        const search = buildListSearchParams();
+
+        if (currentBbsNo && !search.has('bbsNo')) {
+            search.set('bbsNo', currentBbsNo);
+        }
+
+        navigate(appendListSearchToPath(`${pstNo}`, search.toString()));
+    };
   
 
   return (
@@ -51,52 +199,31 @@ const UI_USR_L_141 = () => {
       <div className="contents">
         <Breadcrumb items={breadcrumbItems} />
         <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">중소기업 주요제도</h2>
+          <h2 className="h-tit">{pageTitle}</h2>
         </div>
 
         <div className="PrintArea">
             <div className="krds-tab-area" style={{ marginBottom: "2rem" }}>
                 <div className="tab line full">
                     <ul role="tablist" className="krds-tab">
-                        <li
-                            role="tab"
-                            aria-selected={isPage141}
-                            className={isPage141 ? "active" : ""}
-                        >
-                            <Link
-                            className="btn-tab"
-                            title="중소기업범위기준"
-                            to="/plcy/icr/mssp?tab=range"
-                            >
-                            중소기업범위기준
-                            </Link>
+                        <li role="tab" aria-selected={tab === 'range'} className={tab === 'range' ? "active" : ""}>
+                            <Link className="btn-tab" to="?tab=range">중소기업범위기준</Link>
                         </li>
-
-                        <li
-                            role="tab"
-                            aria-selected={isPage142}
-                            className={isPage142 ? "active" : ""}
-                        >
-                            <Link
-                            className="btn-tab"
-                            title="중소기업·조세지원 해설"
-                            to="/plcy/icr/mssp?tab=tax"
-                            >
-                            중소기업·조세지원 해설
-                            </Link>
+                        <li role="tab" aria-selected={tab === 'tax'} className={tab === 'tax' ? "active" : ""}>
+                            <Link className="btn-tab" to="?tab=tax&bbsNo=70">중소기업·조세지원 해설</Link>
                         </li>
                     </ul>
                 </div>
             </div>
             {isPage141 && (
-            <>
-                <div className="info-box">
-                    <h5 className="tit"><i className="svg-icon ico-check-tit"></i>중소기업범위기준</h5>
-                    <div className="txt">
-                        <i className="svg-icon pure circle-check"></i>
-                        <p>2026년 개정판 알기쉽게 풀어 쓴 중소기업 범위해설</p>
-                    </div>
-                    <div className="btn-box gap-4">
+                <>
+                    <div className="info-box">
+                        <h5 className="tit"><i className="svg-icon ico-check-tit"></i>중소기업범위기준</h5>
+                        <div className="txt">
+                            <i className="svg-icon pure circle-check"></i>
+                            <p>2026년 개정판 알기쉽게 풀어 쓴 중소기업 범위해설</p>
+                        </div>
+                        <div className="btn-box gap-4">
                         <a href="https://www.mss.go.kr/common/files/Download.do?cfIdx=CF01000282&cfGroup=COMMON&cfRename=06c9f4c6-d4df-4c5f-af22-bc82eb7f3dd8.pdf" className="krds-btn primary" target="_blank" title="2026년 개정판 알기쉽게 풀어 쓴 중소기업 범위해설 파일 내려받기">내려받기<span className="svg-icon ico-down"></span></a>
                         <a href="https://www.mss.go.kr/site/docView.do?cfIdx=CF01000282&cfGroup=COMMON&cfRename=06c9f4c6-d4df-4c5f-af22-bc82eb7f3dd8.pdf" className="krds-btn" target="_blank" title="2026년 개정판 알기쉽게 풀어 쓴 중소기업 범위해설 새창열림">바로가기<span className="svg-icon ico-go"></span></a>
                     </div>
@@ -117,11 +244,13 @@ const UI_USR_L_141 = () => {
                                 <caption>
                                     중소기업 범위기준 - 주된 업종별 평균 매출액 기준 표입니다.
                                 </caption>
+                                <colgroup>
                                 <col style={{width: "13%"}} />
                                 <col />
                                 <col style={{width: "11%"}} />
                                 <col style={{width: "18%"}} />
                                 <col style={{width: "18%"}} />
+                                </colgroup>
                                 <thead>
                                     <tr>
                                         <th colSpan="2" scope="col">해당 기업의 주된 업종</th>
@@ -445,105 +574,118 @@ const UI_USR_L_141 = () => {
             )}
 
             {isPage142 && (
-            <>
-                <div className="search-top-box">
-                    <div className="sch-form-wrap" style={{display:'inline-flex'}}>
-					    <label for="announce" className="hd-element"><strong>기간선택</strong></label>
-                        <input id="regSdt" name="regSdt" title="기간선택 시작날짜(YYYYMMDD)" placeholder="YYYYMMDD" className="krds-input medium auto calendar" type="text" value="" size="20" />
-                        <span>~</span>
-                        <input id="regEdt" name="regEdt" title="기간선택 종료날짜(YYYYMMDD)" placeholder="YYYYMMDD" className="krds-input medium auto calendar" type="text" value="" size="20" />
-                    </div>
-                    <div className="sch-form-wrap" style={{paddingTop:'0px'}}>
-                        <label for="searchKey" className="hd-element"><strong>검색구분</strong></label>
-                        <select className="krds-form-select medium" aria-label="검색구분 선택">{/* 기술진단보고서 반영 */}
-                            <option value="">전체</option>
-                            <option value="SUB_CONT">제목</option>
-                            <option value="CLOB_CONT">내용</option>
-                            <option value="CD_SUBJECT">담당부서</option>
-                        </select>
-                        <div className="sch-input">
-                            <input type="text" className="krds-input medium" placeholder="검색어를 입력하세요" title="검색어 입력" id="searchKey" />
-                            <button type="button" className="krds-btn medium icon ico-search" >
-                                <span className="sr-only">검색</span>
-                                <i className="svg-icon ico-sch"></i>
-                            </button>
+                <>
+                    {/* 검색 영역 */}
+                    <div className="search-top-box">
+                        <div className="sch-form-wrap">
+                            <select
+                                className="krds-form-select medium"
+                                value={searchType}
+                                onChange={(e) => setSearchType(e.target.value)}
+                            >
+                                <option value="TITLE">제목</option>
+                                <option value="CONTENT">내용</option>
+                            </select>
+                            <div className="sch-input">
+                                <input
+                                    type="text"
+                                    className="krds-input medium"
+                                    placeholder="검색어를 입력하세요"
+                                    value={searchKeyword}
+                                    onChange={(e) => setSearchKeyword(e.target.value)}
+                                    onKeyDown={handleSearchKeyDown}
+                                />
+                                <button type="button" className="krds-btn medium icon ico-search" onClick={handleSearch}>
+                                    <span className="sr-only">검색</span>
+                                    <i className="svg-icon ico-sch"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
-				</div>
-                
-                <div className="search-list-top">
-                    <ul className="sch-info" aria-live="polite">
-                        <li>검색 결과 <span className="point">15</span>개</li>
-                    </ul>
-                    <ul className="sch-sort">
-                        <li>
-                            <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
-                            <select
-                            className="krds-form-select-sort"
-                            id="search_result_count"
-                            value=""
-                            onChange=""
-                            >
-                                <option value={20}>20개</option>
-                                <option value={30}>30개</option>
-                                <option value={40}>40개</option>
-                            </select>
-                        </li>
-                    </ul>
-                </div>
-                
-                {/* table [S] */}
-                <div className="krds-table-wrap">
-                    <table className="tbl col data t-block">
-                        <caption>중소기업·조세지원 해설 표. 번호, 제목, 담당부서, 첨부, 등록일, 조회수 정보가 제공됨.</caption>
-                        <colgroup>
-                            <col style={{ width: '10px' }} />
-                            <col style={{ width: '340px' }} />
-                            <col style={{ width: '15%' }} />
-                            <col style={{ width: '10px' }} />
-                            <col style={{ width: '80px' }} />
-                            <col style={{ width: '10px' }} />
-                        </colgroup>
-                        <thead>
+
+                    {/* 목록 상단 */}
+                    <div className="search-list-top">
+                        <ul className="sch-info" aria-live="polite">
+                            <li>검색 결과 <span className="point">{formatNumberWithCommas(totalElements || 0)}</span>개</li>
+                        </ul>
+                        <ul className="sch-sort">
+                            <li>
+                                <strong className="sort-label"><label htmlFor="search_result_count">목록 표시 개수</label></strong>
+                                <select
+                                    className="krds-form-select-sort"
+                                    id="search_result_count"
+                                    value={pageSize}
+                                    onChange={handlePageSizeChange}
+                                >
+                                    <option value={10}>10개</option>
+                                    <option value={20}>20개</option>
+                                    <option value={30}>30개</option>
+                                </select>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {/* 테이블 영역 */}
+                    <div className="krds-table-wrap">
+                        <table className="tbl col data t-block">
+                            <caption>중소기업·조세지원 해설 표. 번호, 제목, 출처, 등록일, 조회수 정보가 제공됨.</caption>
+                            <colgroup>
+                                <col style={{width: '10px'}}/>
+                                <col style={{width: '340px'}}/>
+                                <col style={{width: '15%'}}/>
+                                <col style={{width: '80px'}}/>
+                                <col style={{width: '10px'}}/>
+                            </colgroup>
+                            <thead>
                             <tr>
                                 <th scope="col" className="ac">번호</th>
                                 <th scope="col" className="ac">제목</th>
-                                <th scope="col" className="ac">담당부서</th>
-                                <th scope="col" className="ac">첨부</th>
+                                <th scope="col" className="ac">출처</th>
+                                {/*<th scope="col" className="ac">첨부</th>*/}
                                 <th scope="col" className="ac">등록일</th>
                                 <th scope="col" className="ac">조회</th>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th scope="row" className="ac">8</th>
-                                <td>
-                                    <a href="#" onClick="" className="al">
-                                        <strong>알기 쉽게 풀어 쓴 중소기업 범위해설(2026년 개정판, PDF)</strong>
-                                    </a>
-                                </td>
-                                <td className="ac">중소기업제도과</td>
-                                <td className="ac"><a href="" title="다운로드"><i className="svg-icon ico-file"></i></a></td>
-                                <td className="ac">2025.12.11</td>
-                                <td className="ac views">1919</td>
-                            </tr>
-                            <tr>
-                                <th scope="row" className="ac">7</th>
-                                <td>
-                                    <a href="#" onClick="" className="al">
-                                        <strong>창업기업 범위 해설서</strong>
-                                    </a>
-                                </td>
-                                <td className="ac">창업정책과</td>
-                                <td className="ac"><a href="" title="다운로드"><i className="svg-icon ico-file"></i></a></td>
-                                <td className="ac">2025.08.11</td>
-                                <td className="ac views">2486</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                {/* table [E] */}
-            </>
+                            </thead>
+                            <tbody>
+                            {loading ? (
+                                <tr><td colSpan={5} className="ac">로딩 중입니다.</td></tr>
+                            ) : postList.length === 0 ? (
+                                <tr><td colSpan={5} className="ac">조회된 데이터가 없습니다.</td></tr>
+                            ) : (
+                                postList.map((item, index) => {
+                                const postLink = buildPostLink(item);
+                                const external = isExternalUrl(postLink);
+                                return(
+                                    <tr key={item.pstNo}>
+                                        <td className="ac">{totalElements - (currentPage * pageSize + index)}</td>
+                                        <td className="al">
+                                            <a href={postLink} target={external ? '_blank' : undefined}
+                                               rel={external ? 'noreferrer' : undefined} onClick={(e) => { e.preventDefault(); moveToDetail(item.pstNo); }}>
+                                                {item.pstTtl}
+                                            </a>
+                                        </td>
+                                        <td className="ac">{item?.pstSrcCn || '-'}</td>
+                                        {/*<td className="ac">*/}
+                                        {/*    {item.hasFile && <i className="svg-icon ico-file"></i>}*/}
+                                        {/*</td>*/}
+                                        <td className="ac">{formatDate(item?.pstRegDt ?? item?.regDt)}</td>
+                                        <td className="ac">{item.inqCnt}</td>
+                                    </tr>
+                            );
+                            })
+                            )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* 페이징 */}
+                    <Pagination
+                        totalPages={totalPages}
+                        currentPage={currentPage + 1}
+                        onPageChange={handlePageChange}
+                        syncUrl
+                    />
+                </>
             )}
 		</div>
       </div>

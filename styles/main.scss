@@ -486,8 +486,8 @@
     .quick-menu-item {
         display: flex;
         justify-content: center;
-    }
-    .quick-menu-item {
+        //.quick-menu-item button{flex-direction:row;align-items:center;gap:10px;}
+        .quick-menu-img{flex:0 0 60px;width:60px;height:60px;border-radius:16px;background-color:var(--krds-color-light-alpha-white100)}
         button {
             width:100%;
             padding:0;
@@ -495,10 +495,12 @@
             display:flex;
             align-items:center;
             justify-content:flex-start;
+            flex-direction:row;
+            gap:10px;
             transition: all .3s ease-in;
             .quick-menu-tit{
                 margin:0;
-                font-size:var(--krds-pc-font-size-heading-small);
+                font-size:var(--krds-pc-font-size-body-large);
                 font-weight:500;
                 text-align:left;
                 line-height:1.2;

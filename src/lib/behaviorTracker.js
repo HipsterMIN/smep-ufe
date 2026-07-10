@@ -186,3 +186,35 @@ export const trackSearchResultClick = ({ keyword, refType = 'notice', refId, ran
 
 /** 일반 클릭(공고 상세 진입 등). */
 export const trackClick = ({ refType, refId, attrs }) => track('click', { refType, refId, attrs });
+
+/** 스크랩(관심) 등록/해제. added=true 면 scrap_add, false 면 scrap_remove. */
+export const trackScrap = ({ refType, refId, added, attrs }) =>
+  track(added ? 'scrap_add' : 'scrap_remove', { refType, refId, attrs });
+
+/** 신청 시작(신청하기 진입/외부 신청 페이지 이동). */
+export const trackApplyStart = ({ refType, refId, attrs }) =>
+  track('apply_start', { refType, refId, attrs });
+
+/** 신청 제출 완료. 신청 폼 제출 성공 시점에 호출. */
+export const trackApplySubmit = ({ refType, refId, attrs }) =>
+  track('apply_submit', { refType, refId, attrs });
+
+/** 첨부파일 다운로드(공고문·양식 등). */
+export const trackFileDownload = ({ refType, refId, fileName, attrs }) =>
+  track('file_download', {
+    refType,
+    refId,
+    attrs: { file_name: fileName ?? null, ...(attrs || {}) },
+  });
+
+/** 목록 필터/정렬 적용(사용자가 스스로 밝힌 조건 관심사). */
+export const trackFilterApply = ({ refType, refId, attrs }) =>
+  track('filter_apply', { refType, refId, attrs });
+
+/** AI 검색/챗봇 질의. 자연어 질의는 검색어보다 풍부한 의도 신호다. */
+export const trackAiChatQuery = (query, attrs) =>
+  track('ai_chat_query', { attrs: { query, ...(attrs || {}) } });
+
+/** 추천 결과 클릭(맞춤 서빙 피드백 루프용 — 서빙 도입 시 사용). */
+export const trackRecommendationClick = ({ refType, refId, rank, attrs }) =>
+  track('recommendation_click', { refType, refId, attrs: { rank: rank ?? null, ...(attrs || {}) } });
