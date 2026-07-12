@@ -3,10 +3,10 @@ import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext';
 import React, {useEffect} from 'react';
-import apiGuideZipUrl from '@assets/guide/중소벤처24_API개발가이드_V2.zip?url';
+import apiGuideZipUrl from '@assets/guide/중소벤처24_API개발가이드_V3.zip?url';
 
 const API_GUIDE_FILE_NAME =
-    '중소벤처24_API개발가이드_V2.zip';
+    '중소벤처24_API개발가이드_V3.zip';
 const ApiInfo = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   useEffect(() => {
