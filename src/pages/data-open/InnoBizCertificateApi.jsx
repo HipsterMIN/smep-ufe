@@ -2,10 +2,11 @@ import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useNavigate } from 'react-router-dom';
-import { useApiKeyApply } from "@pages/data-open/useApiKeyApply.js";
+import { useApiKeyApply } from '@pages/data-open/useApiKeyApply.js';
 import ApiKeyForm from './ApiKeyForm';
 import { useAuthStore } from '@store/useAuthStore.jsx';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+import { onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
 
 const InnoBizCertificateApi = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
@@ -36,7 +37,10 @@ const InnoBizCertificateApi = () => {
   const handleApplyClick = () => {
     if (!isLoggedIn) {
       const moveToLogin = window.confirm('로그인 후 인증키 신청이 가능합니다. 로그인 하시겠습니까?');
-      if (moveToLogin) navigate('/service/login');
+      if (moveToLogin) {
+        // navigate('/service/login');
+        onePassGetAuthCode();
+      }
       return;
     }
     openPopup(mbrNo);

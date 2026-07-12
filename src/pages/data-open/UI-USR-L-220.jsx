@@ -10,6 +10,7 @@ import { api as apiClient } from '@lib/apiClient.js'; // API 클라이언트 추
 import ApiKeyForm from './ApiKeyForm';
 import ApiKeyDetailView from './ApiKeyDetailView';
 import { useAuthStore } from '@store/useAuthStore.jsx';
+import { onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
 const UI_USR_L_220 = () => {
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
   const navigate = useNavigate();
@@ -118,7 +119,9 @@ const UI_USR_L_220 = () => {
   const requestLoginForScrap = () => {
     const moveToLogin = window.confirm('로그인 후 인증키 신청이 가능합니다. 로그인 하시겠습니까?');
     if (moveToLogin) {
-      navigate('/service/login');
+      // 로컬로그인 제외로 중기통합회원 이동
+      // navigate('/service/login');
+      onePassGetAuthCode();
     }
   };
   return (
