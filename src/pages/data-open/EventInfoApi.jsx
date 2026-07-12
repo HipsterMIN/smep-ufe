@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApiKeyApply } from '@pages/data-open/useApiKeyApply';
 import ApiKeyForm from './ApiKeyForm';
 import { useAuthStore } from '@store/useAuthStore.jsx';
+import { onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
 
 const EventInfoApi = () => {
   const userInfo = useAuthStore((state) => state.user);
@@ -68,7 +69,10 @@ const EventInfoApi = () => {
   const handleApplyClick = () => {
     if (!isLoggedIn) {
       const moveToLogin = window.confirm('로그인 후 인증키 신청이 가능합니다. 로그인 하시겠습니까?');
-      if (moveToLogin) navigate('/service/login');
+      if (moveToLogin) {
+        //navigate('/service/login');
+        onePassGetAuthCode();
+      }
       return;
     }
     openPopup(mbrNo);
