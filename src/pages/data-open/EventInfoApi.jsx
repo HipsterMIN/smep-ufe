@@ -193,7 +193,7 @@ const EventInfoApi = () => {
                   <td className="ac" data-label="타입"><span>String</span></td>
                   <td className="ac" data-label="필수여부"><span>Y (택1)</span></td>
                   <td className="ac" data-label="샘플데이터"><span>인증키</span></td>
-                  <td data-label="설명"><span>중소벤처24에서 발급받은 서비스 인증키. Authorization Bearer 헤더 또는 token 헤더로도 전달 가능</span></td>
+                  <td data-label="설명"><span>중소벤처24에서 발급받은 서비스 인증키. token 헤더 또는 token 쿼리 파라미터로 전달 가능</span></td>
                 </tr>
                 <tr>
                   <td className="ac" data-label="파라미터명"><span>searchCnt</span></td>
@@ -491,7 +491,7 @@ public class ApiExplorer {
         URL url = new URL(apiUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
-        conn.setRequestProperty("Authorization", "Bearer " + token);
+        conn.setRequestProperty("token", token);
         conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
         conn.setDoOutput(true);
 
