@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import SideNavigation from '@components/ui/SideNavigation';
 import Breadcrumb from '@components/ui/Breadcrumb';
 import { useUserMenu } from '@context/UserMenuContext';
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import apiGuideZipUrl from '@assets/guide/중소벤처24_API개발가이드_V3.zip?url';
 
 const API_GUIDE_FILE_NAME =
@@ -198,7 +198,7 @@ const ApiInfo = () => {
               <div className="in">
                 <div className="card-top">
                   <span className="krds-badge bg-light-primary">REST</span>
-                  <span className="krds-badge bg-light-primary">JSON/XML</span>
+                  <span className="krds-badge bg-light-primary">JSON</span>
                 </div>
                 <div className="card-body">
                   <Link to="supportBusinessInfoApi" className="c-text">
@@ -230,7 +230,7 @@ const ApiInfo = () => {
               <div className="in">
                 <div className="card-top">
                   <span className="krds-badge bg-light-primary">REST</span>
-                  <span className="krds-badge bg-light-primary">JSON/XML</span>
+                  <span className="krds-badge bg-light-primary">JSON</span>
                 </div>
                 <div className="card-body">
                   <Link to="eventInfoApi" className="c-text">
