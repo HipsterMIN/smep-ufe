@@ -29,39 +29,6 @@ const EventInfoApi = () => {
     submitApply,
   } = useApiKeyApply();
 
-  const [formData, setFormData] = useState({
-    dataType: 'rss',
-    searchCnt: '',
-    hashtags: [],
-  });
-  const [sampleUrl, setSampleUrl] = useState('');
-
-  const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    if (id === 'select_01') setFormData(prev => ({ ...prev, dataType: value }));
-    if (id === 'input_02') setFormData(prev => ({ ...prev, searchCnt: value }));
-  };
-
-  const handleHashtagChange = (e) => {
-    const { checked, nextSibling } = e.target;
-    const tagName = nextSibling.innerText;
-    setFormData(prev => {
-      if (checked) {
-        return { ...prev, hashtags: [...prev.hashtags, tagName] };
-      } else {
-        return { ...prev, hashtags: prev.hashtags.filter(tag => tag !== tagName) };
-      }
-    });
-  };
-
-  const generateSample = () => {
-    const { dataType, searchCnt, hashtags } = formData;
-    let params = `&dataType=${dataType}`;
-    if (searchCnt) params += `&searchCnt=${searchCnt}`;
-    if (hashtags.length > 0) params += `&hashtags=${hashtags.join(',')}`;
-    setSampleUrl(params);
-  };
-
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
   const navigate = useNavigate();
@@ -90,58 +57,6 @@ const EventInfoApi = () => {
           <p className="on-p1 on-colorblue">API안내</p>
           <h2 className="h-tit">행사정보 API</h2>
         </div>
-
-        {/*<div className="search-top-box no-details">*/}
-        {/*  <div className="sch-filter-box">*/}
-        {/*    <div className="filter-form">*/}
-        {/*      <div>*/}
-        {/*        <label className="label" htmlFor="select_01">데이터타입</label>*/}
-        {/*        <select id="select_01" className="krds-form-select small" value={formData.dataType} onChange={handleInputChange}>*/}
-        {/*          <option value="rss">XML(RSS)</option>*/}
-        {/*          <option value="json">JSON</option>*/}
-        {/*        </select>*/}
-        {/*      </div>*/}
-        {/*      <div>*/}
-        {/*        <label className="label" htmlFor="input_02">조회건수</label>*/}
-        {/*        <input type="text" id="input_02" className="krds-form-input small" value={formData.searchCnt} onChange={handleInputChange} />*/}
-        {/*      </div>*/}
-        {/*    </div>*/}
-        {/*    <dl className="filter-chip align-center">*/}
-        {/*      <dt>해시태그</dt>*/}
-        {/*      <dd>*/}
-        {/*        <button type="button" className="krds-btn xlarge icon border" onClick={() => { setFormData({ dataType: 'rss', searchCnt: '', hashtags: [] }); setSampleUrl(''); }}>*/}
-        {/*          <span className="sr-only">새로고침</span>*/}
-        {/*          <i className="svg-icon ico-refresh"></i>*/}
-        {/*        </button>*/}
-        {/*        <div className="filter-check-box">*/}
-        {/*          <div className="krds-check-area">*/}
-        {/*            {['금융', '기술', '인력', '수출', '내수', '창업', '경영', '기타'].map((tag, idx) => (*/}
-        {/*              <div className="krds-form-chip round" key={`field-${idx}`}>*/}
-        {/*                <input type="checkbox" className="checkbox" id={`chk1_${idx + 1}`} onChange={handleHashtagChange} checked={formData.hashtags.includes(tag)} />*/}
-        {/*                <label className="krds-form-chip-outline" htmlFor={`chk1_${idx + 1}`}>{tag}</label>*/}
-        {/*              </div>*/}
-        {/*            ))}*/}
-        {/*          </div>*/}
-        {/*          <div className="krds-check-area">*/}
-        {/*            {['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'].map((tag, idx) => (*/}
-        {/*              <div className="krds-form-chip round" key={`loc-${idx}`}>*/}
-        {/*                <input type="checkbox" className="checkbox" id={`chk1_${idx + 9}`} onChange={handleHashtagChange} checked={formData.hashtags.includes(tag)} />*/}
-        {/*                <label className="krds-form-chip-outline" htmlFor={`chk1_${idx + 9}`}>{tag}</label>*/}
-        {/*              </div>*/}
-        {/*            ))}*/}
-        {/*          </div>*/}
-        {/*        </div>*/}
-        {/*      </dd>*/}
-        {/*    </dl>*/}
-        {/*    <div className="form-box">*/}
-        {/*      <label className="label sr-only" htmlFor="appl-sch-sel4">샘플 파라미터</label>*/}
-        {/*      <div className="input-box">*/}
-        {/*        <input type="text" className="krds-input medium" placeholder="&dataType=rss&hashtags=서울,부산,대구,인천,광주,대전,울산,세종,경기,강원,충북,충남,전북,전남,경북,경남,제주" value={sampleUrl} readOnly title="생성된 샘플 파라미터" id="appl-sch-sel4" />*/}
-        {/*      </div>*/}
-        {/*      <button type="button" className="krds-btn medium primary mo-full" onClick={generateSample}>샘플 파라미터 생성</button>*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
 
         <div className="conts-wrap mt-64">
           <h3 className="sec-tit">행사정보 API</h3>

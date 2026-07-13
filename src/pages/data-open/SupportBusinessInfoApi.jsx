@@ -28,44 +28,9 @@ const SupportBusinessInfoApi = () => {
     memberInfo,
     openPopup,
     closePopup,
-    submitApply
+    submitApply,
   } = useApiKeyApply();
 
-  const [formData, setFormData] = useState({
-    dataType: 'rss',
-    searchCnt: '',
-    hashtags: []
-  });
-  const [sampleUrl, setSampleUrl] = useState('');
-
-  const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    if (id === 'select_01') setFormData(prev => ({ ...prev, dataType: value }));
-    if (id === 'input_02') setFormData(prev => ({ ...prev, searchCnt: value }));
-  };
-
-  const handleHashtagChange = (e) => {
-    const { checked, nextSibling } = e.target;
-    const tagName = nextSibling.innerText;
-
-    setFormData(prev => {
-      if (checked) {
-        return { ...prev, hashtags: [...prev.hashtags, tagName] };
-      } else {
-        return { ...prev, hashtags: prev.hashtags.filter(tag => tag !== tagName) };
-      }
-    });
-  };
-
-  const generateSample = () => {
-    const { dataType, searchCnt, hashtags } = formData;
-    let params = `&dataType=${dataType}`;
-
-    if (searchCnt) params += `&searchCnt=${searchCnt}`;
-    if (hashtags.length > 0) params += `&hashtags=${hashtags.join(',')}`;
-
-    setSampleUrl(params);
-  };
 
   const sidebarData = getSideNavigationData();
   const depth1Menu = getDepth1Parent();
@@ -83,131 +48,51 @@ const SupportBusinessInfoApi = () => {
   };
 
   return (
-      <>
-        <SideNavigation
-            pageTitle={depth1Menu?.menuNm || ''}
-            menuItems={sidebarData}
-        />
-        <div className="contents" data-type="responsive">
-          <Breadcrumb items={breadcrumbItems} />
-          <div className="page-title-wrap" data-type="responsive">
-            <p className="on-p1 on-colorblue">API안내</p>
-            <h2 className="h-tit">공고정보 API</h2>
+    <>
+      <SideNavigation
+        pageTitle={depth1Menu?.menuNm || ''}
+        menuItems={sidebarData}
+      />
+      <div className="contents" data-type="responsive">
+        <Breadcrumb items={breadcrumbItems} />
+        <div className="page-title-wrap" data-type="responsive">
+          <p className="on-p1 on-colorblue">API안내</p>
+          <h2 className="h-tit">공고정보 API</h2>
+        </div>
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">공고정보 API</h3>
+          <div className="def-list-wrap border">
+            <dl className="def-list">
+              <dt>URL</dt>
+              <dd className="word-break">https://www.smes.go.kr/fnct/apiReqst/extPblancInfo</dd>
+              <dt>설명</dt>
+              <dd>중소벤처24 홈페이지에 공개된 사업공고 정보를 연계하기 위한 API</dd>
+              <dt>호출방식</dt>
+              <dd>GET</dd>
+              <dt>데이터형식</dt>
+              <dd>JSON</dd>
+              <dt>등록일</dt>
+              <dd>2026.07.12</dd>
+              <dt>수정일</dt>
+              <dd>2026.07.12</dd>
+            </dl>
           </div>
+        </div>
 
-          <div className="search-top-box no-details">
-            <div className="sch-filter-box">
-              <div className="filter-form">
-                <div className="form-group">
-                  <label className="label" htmlFor="select_01">데이터타입</label>
-                  <select id="select_01" className="krds-form-select small" value={formData.dataType} onChange={handleInputChange}>
-                    <option value="rss">XML(RSS)</option>
-                    <option value="json">JSON</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="label" htmlFor="input_02">조회건수</label>
-                  <input
-                      type="text"
-                      id="input_02"
-                      className="krds-form-input small"
-                      value={formData.searchCnt}
-                      onChange={handleInputChange}
-                      placeholder=""
-                  />
-                </div>
-              </div>
-              <dl className="filter-chip align-center">
-                <dt>해시태그</dt>
-                <dd>
-                  <button type="button" className="krds-btn xlarge icon border"
-                          onClick={() => {
-                            setFormData({ dataType: 'rss', searchCnt: '', hashtags: [] });
-                            setSampleUrl('');
-                          }}>
-                    <span className="sr-only">새로고침</span>
-                    <i className="svg-icon ico-refresh"></i>
-                  </button>
-                  <div className="filter-check-box">
-                    <div className="krds-check-area" style={{ flexWrap: 'wrap' }}>
-                      {['금융', '기술', '인력', '수출', '내수', '창업', '경영', '기타'].map((tag, idx) => (
-                          <div className="krds-form-chip round" key={`field-${idx}`}>
-                            <input
-                                type="checkbox"
-                                className="checkbox"
-                                id={`chk1_${idx + 1}`}
-                                onChange={handleHashtagChange}
-                                checked={formData.hashtags.includes(tag)}
-                            />
-                            <label className="krds-form-chip-outline" htmlFor={`chk1_${idx + 1}`}>{tag}</label>
-                          </div>
-                      ))}
-                    </div>
-                    <div className="krds-check-area mt-8" style={{ flexWrap: 'wrap' }}>
-                      {['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'].map((tag, idx) => (
-                          <div className="krds-form-chip round" key={`loc-${idx}`}>
-                            <input
-                                type="checkbox"
-                                className="checkbox"
-                                id={`chk1_${idx + 9}`}
-                                onChange={handleHashtagChange}
-                                checked={formData.hashtags.includes(tag)}
-                            />
-                            <label className="krds-form-chip-outline" htmlFor={`chk1_${idx + 9}`}>{tag}</label>
-                          </div>
-                      ))}
-                    </div>
-                  </div>
-                </dd>
-              </dl>
-              <div className="form-box">
-                <label className="label sr-only" htmlFor="appl-sch-sel4">샘플 파라미터</label>
-                <div className="input-box">
-                  <input type="text" className="krds-input medium"
-                         placeholder="&dataType=rss&hashtags=서울,부산,대구,인천,광주,대전,울산,세종,경기,강원,충북,충남,전북,전남,경북,경남,제주"
-                         value={sampleUrl}
-                         readOnly={true}
-                         title="생성된 샘플 파라미터" id="appl-sch-sel4" />
-                </div>
-                <button type="button" className="krds-btn medium primary mo-full" onClick={generateSample}>샘플 파라미터 생성</button>
-              </div>
-            </div>
-          </div>
-
-          <div className="conts-wrap mt-64">
-            <h3 className="sec-tit">공고정보 API</h3>
-            <div className="def-list-wrap border">
-              <dl className="def-list">
-                <dt>URL</dt>
-                <dd className="word-break">https://www.bizinfo.go.kr/uss/rss/bizinfoApi.do</dd>
-                <dt>설명</dt>
-                <dd>기관별, 분야별 최신 지원사업 공고 정보 제공</dd>
-                <dt>호출방식</dt>
-                <dd>GET</dd>
-                <dt>데이터형식</dt>
-                <dd>JSON, XML</dd>
-                <dt>등록일</dt>
-                <dd>2023.08.02</dd>
-                <dt>수정일</dt>
-                <dd>2025.10.22</dd>
-              </dl>
-            </div>
-          </div>
-
-          <div className="conts-wrap mt-64">
-            <h3 className="sec-tit">요청메시지</h3>
-            <div className="krds-table-wrap">
-              <table className="tbl col data word-break t-block">
-                <caption>요청메시지. 파라미터명, 항목명, 타입, 필수여부, 샘플데이터, 설명 정보 제공</caption>
-                <colgroup className="pc-only">
-                  <col style={{ width: '16%' }} />
-                  <col style={{ width: '12%' }} />
-                  <col style={{ width: '12%' }} />
-                  <col style={{ width: '12%' }} />
-                  <col style={{ width: '12%' }} />
-                  <col style={{ width: '36%' }} />
-                </colgroup>
-                <thead>
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">요청메시지</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>요청메시지. 파라미터명, 항목명, 타입, 필수여부, 샘플데이터, 설명 정보 제공</caption>
+              <colgroup className="pc-only">
+                <col style={{ width: '16%' }} />
+                <col style={{ width: '12%' }} />
+                <col style={{ width: '12%' }} />
+                <col style={{ width: '12%' }} />
+                <col style={{ width: '12%' }} />
+                <col style={{ width: '36%' }} />
+              </colgroup>
+              <thead>
                 <tr>
                   <th scope="col" className="ac">파라미터명</th>
                   <th scope="col" className="ac">항목명</th>
@@ -216,253 +101,111 @@ const SupportBusinessInfoApi = () => {
                   <th scope="col" className="ac">샘플데이터</th>
                   <th scope="col" className="ac">설명</th>
                 </tr>
-                </thead>
-                <tbody>
+              </thead>
+              <tbody>
                 <tr>
-                  <td className="ac"><span>crtfcKey</span></td>
-                  <td className="ac"><span>서비스키</span></td>
+                  <td className="ac"><span>token</span></td>
+                  <td className="ac"><span>인증키</span></td>
                   <td className="ac"><span>String</span></td>
                   <td className="ac"><span>Y</span></td>
                   <td className="ac"><span>인증키</span></td>
-                  <td className="ac"><span>기업마당에서 발급받은 서비스 인증키</span></td>
+                  <td className="ac"><span>GET 방식으로 호출시 url encoding 필요. ※ 기정원에 요청하여 발급 받아야 합니다.</span></td>
                 </tr>
                 <tr>
-                  <td className="ac"><span>dataType</span></td>
-                  <td className="ac"><span>데이터타입</span></td>
+                  <td className="ac"><span>strDt</span></td>
+                  <td className="ac"><span>검색시작일</span></td>
                   <td className="ac"><span>String</span></td>
                   <td className="ac"><span>N</span></td>
-                  <td className="ac"><span>rss / json</span></td>
-                  <td className="ac"><span>API 데이터를 리턴받는 타입을 지정하는 설정 값</span></td>
+                  <td className="ac"><span>20221101</span></td>
+                  <td className="ac"><span>yyyyMMdd 형식의 날짜 문자열</span></td>
                 </tr>
                 <tr>
-                  <td className="ac"><span>searchCnt</span></td>
-                  <td className="ac"><span>조회건수</span></td>
+                  <td className="ac"><span>endDt</span></td>
+                  <td className="ac"><span>검색종료일</span></td>
                   <td className="ac"><span>String</span></td>
                   <td className="ac"><span>N</span></td>
-                  <td className="ac"><span>100</span></td>
-                  <td className="ac"><span>지원사업 조회시 조회건수를 지정하여 조회하는 설정 값 <br />(0 또는 값이 없을 경우 전체 데이터 제공)</span></td>
+                  <td className="ac"><span>20221130</span></td>
+                  <td className="ac"><span>yyyyMMdd 형식의 날짜 문자열</span></td>
                 </tr>
                 <tr>
-                  <td className="ac"><span>searchLclasId</span></td>
-                  <td className="ac"><span>분야</span></td>
+                  <td className="ac"><span>html</span></td>
+                  <td className="ac"><span>html 여부</span></td>
                   <td className="ac"><span>String</span></td>
                   <td className="ac"><span>N</span></td>
-                  <td className="ac"><span>02</span></td>
-                  <td className="ac"><span>지원사업 조회시 분야를 지정하여 조회하는 설정 값</span></td>
+                  <td className="ac"><span>yes</span></td>
+                  <td className="ac"><span>yes : 컨텐츠 항목에 html 테그 포함(기본값) <br />no : 컨텐츠 항목에 html 테그를 제외한 Text 출력</span></td>
                 </tr>
-                <tr>
-                  <td className="ac"><span>hashtags</span></td>
-                  <td className="ac"><span>해시태그</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>N</span></td>
-                  <td className="ac"><span>금융,서울</span></td>
-                  <td className="ac"><span>지원사업 조회시 해시태그를 지정하여 조회하는 설정 값(다중입력가능)</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>pageUnit</span></td>
-                  <td className="ac"><span>데이터개수</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>N</span></td>
-                  <td className="ac"><span>4</span></td>
-                  <td className="ac"><span>지원사업 조회시 한 페이지에 보여줄 수 있는 데이터 개수의 설정 값</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>pageIndex</span></td>
-                  <td className="ac"><span>페이지번호</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>N</span></td>
-                  <td className="ac"><span>2</span></td>
-                  <td className="ac"><span>지원사업 조회시 화면에 보여줄 페이지 번호의 설정 값</span></td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
+              </tbody>
+            </table>
           </div>
+        </div>
 
-          <div className="conts-wrap mt-64">
-            <h3 className="sec-tit">결과상태 코드</h3>
-            <div className="krds-table-wrap">
-              <table className="tbl col data word-break t-block">
-                <caption>결과상태 코드. 분류, 파라미터명, 코드명, 코드설명 정보 제공</caption>
-                <thead>
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">결과상태 코드</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>결과상태 코드. 분류, 파라미터명, 코드명, 코드설명 정보 제공</caption>
+              <thead>
                 <tr>
                   <th scope="col" className="ac">분류</th>
                   <th scope="col" className="ac">파라미터명</th>
                   <th scope="col" className="ac">코드명</th>
                   <th scope="col" className="ac">코드설명</th>
                 </tr>
-                </thead>
-                <tbody>
+              </thead>
+              <tbody>
                 <tr>
-                  <th scope="row" rowSpan="2" className="ac"><span>데이터타입</span></th>
-                  <td rowSpan="2" className="ac br-1"><span>dataType</span></td>
-                  <td className="ac"><span>rss</span></td>
-                  <td className="ac"><span>XML(RSS)</span></td>
+                  <th scope="row" rowSpan="8" className="ac"><span>결과상태코드</span></th>
+                  <td rowSpan="8" className="ac br-1"><span>resultCd</span></td>
+                  <td className="ac"><span>0</span></td>
+                  <td className="ac"><span>정상적으로 조회 되었습니다.</span></td>
                 </tr>
                 <tr>
-                  <td className="ac"><span>json</span></td>
-                  <td className="ac"><span>JSON</span></td>
+                  <td className="ac"><span>9</span></td>
+                  <td className="ac"><span>인증키 오류. 허용되지 않은 인증키입니다.</span></td>
                 </tr>
                 <tr>
-                  <th className="ac" scope="row"><span>조회건수</span></th>
-                  <td className="ac br-1"><span>searchCnt</span></td>
-                  <td className="ac" colSpan="2"><span className="ac">숫자 입력 제한 없음 <br />※ 0 또는 값이 없을 경우 전체 데이터 제공 <br /></span></td>
+                  <td className="ac"><span>10</span></td>
+                  <td className="ac"><span>인증키 오류. 해당 API의 인증키가 아닙니다.</span></td>
                 </tr>
                 <tr>
-                  <th scope="row" rowSpan="8" className="ac"><span>분야</span></th>
-                  <td rowSpan="8" className="ac br-1"><span>searchLclasId</span></td>
-                  <td className="ac"><span>01</span></td>
-                  <td className="ac"><span>금융</span></td>
+                  <td className="ac"><span>11</span></td>
+                  <td className="ac"><span>시작일자 길이 오류</span></td>
                 </tr>
                 <tr>
-                  <td className="ac"><span>02</span></td>
-                  <td className="ac"><span>기술</span></td>
+                  <td className="ac"><span>12</span></td>
+                  <td className="ac"><span>종료일자 길이 오류</span></td>
                 </tr>
                 <tr>
-                  <td className="ac"><span>03</span></td>
-                  <td className="ac"><span>인력</span></td>
+                  <td className="ac"><span>13</span></td>
+                  <td className="ac"><span>검색 기간 오류</span></td>
                 </tr>
                 <tr>
-                  <td className="ac"><span>04</span></td>
-                  <td className="ac"><span>수출</span></td>
+                  <td className="ac"><span>14</span></td>
+                  <td className="ac"><span>허용되지 않은 IP 접근입니다.</span></td>
                 </tr>
                 <tr>
-                  <td className="ac"><span>05</span></td>
-                  <td className="ac"><span>내수</span></td>
+                  <td className="ac"><span>99</span></td>
+                  <td className="ac"><span>기타 오류 발생</span></td>
                 </tr>
-                <tr>
-                  <td className="ac"><span>06</span></td>
-                  <td className="ac"><span>창업</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>07</span></td>
-                  <td className="ac"><span>경영</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>09</span></td>
-                  <td className="ac"><span>기타</span></td>
-                </tr>
-
-                <tr>
-                  <th scope="row" rowSpan="25" className="ac"><span>해시태그</span></th>
-                  <td rowSpan="25" className="ac br-1"><span>hashtags</span></td>
-                  <td className="ac"><span>금융</span></td>
-                  <td className="ac"><span>금융 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>기술</span></td>
-                  <td className="ac"><span>기술 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>인력</span></td>
-                  <td className="ac"><span>인력 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>수출</span></td>
-                  <td className="ac"><span>수출 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>내수</span></td>
-                  <td className="ac"><span>내수 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>창업</span></td>
-                  <td className="ac"><span>창업 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>경영</span></td>
-                  <td className="ac"><span>경영 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>기타</span></td>
-                  <td className="ac"><span>기타 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>서울</span></td>
-                  <td className="ac"><span>서울 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>부산</span></td>
-                  <td className="ac"><span>부산 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>대구</span></td>
-                  <td className="ac"><span>대구 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>인천</span></td>
-                  <td className="ac"><span>인천 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>광주</span></td>
-                  <td className="ac"><span>광주 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>대전</span></td>
-                  <td className="ac"><span>대전 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>울산</span></td>
-                  <td className="ac"><span>울산 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>세종</span></td>
-                  <td className="ac"><span>세종 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>경기</span></td>
-                  <td className="ac"><span>경기 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>강원</span></td>
-                  <td className="ac"><span>강원 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>충북</span></td>
-                  <td className="ac"><span>충북 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>충남</span></td>
-                  <td className="ac"><span>충남 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>전북</span></td>
-                  <td className="ac"><span>전북 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>전남</span></td>
-                  <td className="ac"><span>전남 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>경북</span></td>
-                  <td className="ac"><span>경북 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>경남</span></td>
-                  <td className="ac"><span>경남 분야 해시태그</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>제주</span></td>
-                  <td className="ac"><span>제주 분야 해시태그</span></td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
+              </tbody>
+            </table>
           </div>
+        </div>
 
-          <div className="conts-wrap mt-64">
-            <h3 className="sec-tit">응답 메시지</h3>
-            <div className="krds-table-wrap">
-              <table className="tbl col data word-break t-block">
-                <caption>응답 메시지 항목 정보 제공</caption>
-                <colgroup>
-                  <col style={{width: '16%'}}/>
-                  <col style={{width: '12%'}}/>
-                  <col style={{width: '12%'}}/>
-                  <col style={{width: '12%'}}/>
-                  <col style={{width: '48%'}}/>
-                </colgroup>
-                <thead>
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">응답 메시지</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>응답 메시지 항목 정보 제공</caption>
+              <colgroup>
+                <col style={{ width: '16%' }}/>
+                <col style={{ width: '12%' }}/>
+                <col style={{ width: '12%' }}/>
+                <col style={{ width: '12%' }}/>
+                <col style={{ width: '48%' }}/>
+              </colgroup>
+              <thead>
                 <tr>
                   <th scope="col" className="ac">항목</th>
                   <th scope="col" className="ac">항목명</th>
@@ -470,487 +213,833 @@ const SupportBusinessInfoApi = () => {
                   <th scope="col" className="ac">필수여부</th>
                   <th scope="col" className="ac">샘플데이터</th>
                 </tr>
-                </thead>
-                <tbody>
+              </thead>
+              <tbody>
                 <tr>
-                  <td className="ac"><span>title</span></td>
-                  <td className="ac"><span>데이터 제목</span></td>
+                  <td className="ac"><span>resultCd</span></td>
+                  <td className="ac"><span>결과상태코드</span></td>
                   <td className="ac"><span>String</span></td>
                   <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>기업마당 지원사업정보</span></td>
+                  <td className="ac"><span>결과상태 코드 참조</span></td>
                 </tr>
                 <tr>
-                  <td className="ac"><span>link</span></td>
-                  <td className="ac"><span>공고목록URL</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>https://www.bizinfo.go.kr/web/lay1/bbs/S1T122C128/AS/74/list.do</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>description</span></td>
-                  <td className="ac"><span>데이터 설명</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>최신지원사업정보를 구독하세요</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>language</span></td>
-                  <td className="ac"><span>언어</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>ko-kr</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>copyright</span></td>
-                  <td className="ac"><span>출처</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>bizinfo</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>managingEditor</span></td>
-                  <td className="ac"><span>담당자</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>develover@smba.go.kr</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>webMaster</span></td>
-                  <td className="ac"><span>관리자</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>kosi@bizinfo.go.kr</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>pubDate</span></td>
-                  <td className="ac"><span>배포 일자</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span></span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>lastBuildDate</span></td>
-                  <td className="ac"><span>마지막수정 일자</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span></span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>category</span></td>
-                  <td className="ac"><span>제공구분</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>bizinfo</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>ttl</span></td>
-                  <td className="ac"><span>유효시간</span></td>
-                  <td className="ac"><span>String</span></td>
-                  <td className="ac"><span>Y</span></td>
-                  <td className="ac"><span>60</span></td>
-                </tr>
-                <tr>
-                  <td className="ac"><span>item</span></td>
-                  <td className="ac"><span>아이템</span></td>
-                  <td className="ac"><span>Object</span></td>
+                  <td className="ac"><span>data</span></td>
+                  <td className="ac"><span>공고 데이터</span></td>
+                  <td className="ac"><span>Array</span></td>
                   <td className="ac"><span>Y</span></td>
                   <td className="ac"><span>-</span></td>
                 </tr>
                 <tr>
-                  <td className="ac">title</td>
-                  <td className="ac">공고명</td>
-                  <td className="ac">String</td>
-                  <td className="ac">Y</td>
-                  <td className="ac">착한임대인 장관 표창 신청 연장 공고</td>
+                  <td className="ac">pblancSeq</td>
+                  <td className="ac">공고SEQ</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">숫자</td>
                 </tr>
                 <tr>
-                  <td className="ac">link</td>
-                  <td className="ac">공고URL</td>
+                  <td className="ac">creatDt</td>
+                  <td className="ac">공고등록일</td>
                   <td className="ac">String</td>
-                  <td className="ac">Y</td>
-                  <td className="ac">https://www.bizinfo.go.kr/web/lay1/bbs/S1T122C128/AS/74/view.do?pblancId=PBLN_000000000080236</td>
+                  <td className="ac">-</td>
+                  <td className="ac">yyyy-MM-dd HH:mm:ss 형식의 문자열</td>
                 </tr>
                 <tr>
-                  <td className="ac">seq</td>
-                  <td className="ac">공고ID</td>
-                  <td className="ac">String</td>
-                  <td className="ac">Y</td>
-                  <td className="ac">PBLN_000000000080236</td>
-                </tr>
-                <tr>
-                  <td className="ac">author</td>
-                  <td className="ac">소관기관명</td>
-                  <td className="ac">String</td>
-                  <td className="ac">Y</td>
-                  <td className="ac">중소벤처기업부</td>
-                </tr>
-                <tr>
-                  <td className="ac">excInsttNm</td>
-                  <td className="ac">수행기관명</td>
-                  <td className="ac">String</td>
-                  <td className="ac">Y</td>
-                  <td className="ac">지방중소벤처기업청</td>
-                </tr>
-                <tr>
-                  <td className="ac">description</td>
-                  <td className="ac">사업개요내용</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac">코로나19라는 힘든 상황속에서소상공인에게 자발적으로 임대료를인하한 임대인을 '착한임대인'으로선정하는 사업입니다.</td>
-                </tr>
-                <tr>
-                  <td className="ac">lcategory</td>
-                  <td className="ac">지원분야대분류</td>
-                  <td className="ac">String</td>
-                  <td className="ac">Y</td>
-                  <td className="ac">경영</td>
-                </tr>
-                <tr>
-                  <td className="ac">pubDate</td>
-                  <td className="ac">등록일자</td>
-                  <td className="ac">String</td>
-                  <td className="ac">Y</td>
-                  <td className="ac">2022-09-02 15:38:29</td>
-                </tr>
-                <tr>
-                  <td className="ac">reqstDt</td>
-                  <td className="ac">신청기간</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac">20220727 ~ 20220930</td>
-                </tr>
-                <tr>
-                  <td className="ac">trgetNm</td>
-                  <td className="ac">지원대상</td>
-                  <td className="ac">String</td>
-                  <td className="ac">Y</td>
-                  <td className="ac">중소기업</td>
-                </tr>
-                <tr>
-                  <td className="ac">inqireCo</td>
-                  <td className="ac">조회수</td>
-                  <td className="ac">String</td>
-                  <td className="ac">Y</td>
-                  <td className="ac">43</td>
-                </tr>
-                <tr>
-                  <td className="ac">flpthNm</td>
-                  <td className="ac">첨부파일경로명</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac">https://www.bizinfo.go.kr/cmm/fms/getImageFile.do?atchFileId=FILE_000000000613641&fileSn=0</td>
-                </tr>
-                <tr>
-                  <td className="ac">fileNm</td>
-                  <td className="ac">첨부파일명</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac">2022년 대한민국 메이커 스타 참가자모집 공고.pdf</td>
-                </tr>
-                <tr>
-                  <td className="ac">printFlpthNm</td>
-                  <td className="ac">본문출력파일경로명</td>
-                  <td className="ac">String</td>
-                  <td className="ac">Y</td>
-                  <td className="ac">https://www.bizinfo.go.kr/cmm/fms/getImageFile.do?atchFileId=FILE_000000000613694&fileSn=1</td>
-                </tr>
-                <tr>
-                  <td className="ac">printFileNm</td>
-                  <td className="ac">본문출력파일명</td>
-                  <td className="ac">String</td>
-                  <td className="ac">Y</td>
-                  <td className="ac">2022년 대한민국 메이커 스타 참가자모집 공고.pdf</td>
-                </tr>
-                <tr>
-                  <td className="ac">hashTags</td>
-                  <td className="ac">해시태그</td>
-                  <td className="ac">String</td>
-                  <td className="ac">Y</td>
-                  <td className="ac">2022,금융,충북,대전,중소벤처기업부</td>
-                </tr>
-                <tr>
-                  <td className="ac">totCnt</td>
-                  <td className="ac">전체건수</td>
-                  <td className="ac">String</td>
-                  <td className="ac">Y</td>
-                  <td className="ac">1435</td>
+                  <td className="ac">pblancDtlUrl</td>
+                  <td className="ac">상세정보경로</td>
+                  <td className="ac">VARCHAR(1,000)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">URL 텍스트</td>
                 </tr>
                 <tr>
                   <td className="ac">pblancNm</td>
                   <td className="ac">공고명</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac">착한임대인 장관 표창 신청 연장 공고</td>
+                  <td className="ac">VARCHAR(500)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">텍스트</td>
                 </tr>
                 <tr>
-                  <td className="ac">pblancUrl</td>
-                  <td className="ac">공고URL</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac">https://www.bizinfo.go.kr/web/lay1/bbs/S1T122C128/AS/74/view.do?pblancId=PBLN_000000000080236</td>
+                  <td className="ac">detailBsnsNm</td>
+                  <td className="ac">세부사업명</td>
+                  <td className="ac">VARCHAR(500)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">텍스트</td>
                 </tr>
                 <tr>
-                  <td className="ac">pblancId</td>
-                  <td className="ac">공고ID</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac">PBLN_000000000080236</td>
+                  <td className="ac">policyCnts</td>
+                  <td className="ac">사업개요</td>
+                  <td className="ac">CLOB</td>
+                  <td className="ac">-</td>
+                  <td className="ac">텍스트(HTML태그포함)</td>
                 </tr>
                 <tr>
-                  <td className="ac">jrsdInsttNm</td>
-                  <td className="ac">소관기관명</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac">중소벤처기업부</td>
+                  <td className="ac">sportMg</td>
+                  <td className="ac">지원규모</td>
+                  <td className="ac">CLOB</td>
+                  <td className="ac">-</td>
+                  <td className="ac">텍스트(HTML태그포함)</td>
                 </tr>
                 <tr>
-                  <td className="ac">bsnsSumryCn</td>
-                  <td className="ac">사업개요내용</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac">코로나19라는 힘든 상황속에서 소상공인에게 자발적으로 임대료를 인하한 임대인을 '착한임대인'으로 선정하는 사업입니다.</td>
+                  <td className="ac">sportCnts</td>
+                  <td className="ac">지원내용</td>
+                  <td className="ac">CLOB</td>
+                  <td className="ac">-</td>
+                  <td className="ac">텍스트(HTML태그포함)</td>
                 </tr>
                 <tr>
-                  <td className="ac">reqstMthPapersCn</td>
-                  <td className="ac">사업신청방법</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac"></td>
+                  <td className="ac">sportTrget</td>
+                  <td className="ac">지원대상</td>
+                  <td className="ac">CLOB</td>
+                  <td className="ac">-</td>
+                  <td className="ac">텍스트(HTML태그포함)</td>
                 </tr>
                 <tr>
-                  <td className="ac">refrncNm</td>
+                  <td className="ac">reqstRcept</td>
+                  <td className="ac">신청방법</td>
+                  <td className="ac">CLOB</td>
+                  <td className="ac">-</td>
+                  <td className="ac">텍스트(HTML태그포함)</td>
+                </tr>
+                <tr>
+                  <td className="ac">sportInsttNm</td>
+                  <td className="ac">지원기관명</td>
+                  <td className="ac">VARCHAR(100)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조</td>
+                </tr>
+                <tr>
+                  <td className="ac">sportInsttCd</td>
+                  <td className="ac">지원기관코드</td>
+                  <td className="ac">VARCHAR(4)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조</td>
+                </tr>
+                <tr>
+                  <td className="ac">refrnc</td>
                   <td className="ac">문의처</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac"></td>
+                  <td className="ac">CLOB</td>
+                  <td className="ac">-</td>
+                  <td className="ac">텍스트(HTML태그포함)</td>
                 </tr>
                 <tr>
-                  <td className="ac">rceptEngnHmpgUrl</td>
-                  <td className="ac">사업신청URL</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac"></td>
+                  <td className="ac">refrncUrl</td>
+                  <td className="ac">문의처 홈페이지</td>
+                  <td className="ac">VARCHAR(1,000)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">URL 텍스트</td>
                 </tr>
                 <tr>
-                  <td className="ac">pldirSportRealmLclasCodeNm</td>
-                  <td className="ac">지원분야 대분류</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac">경영</td>
+                  <td className="ac">refrncDept</td>
+                  <td className="ac">문의처 부서</td>
+                  <td className="ac">VARCHAR(200)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">텍스트</td>
                 </tr>
                 <tr>
-                  <td className="ac">creatPnttm</td>
-                  <td className="ac">등록일자</td>
-                  <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac">2022-09-02 15:38:29</td>
+                  <td className="ac">refrncTel</td>
+                  <td className="ac">문의처 전화번호</td>
+                  <td className="ac">VARCHAR(100)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">텍스트</td>
                 </tr>
                 <tr>
-                  <td className="ac">reqstBeginEndDe</td>
-                  <td className="ac">신청기간</td>
+                  <td className="ac">updDt</td>
+                  <td className="ac">수정일시</td>
                   <td className="ac">String</td>
-                  <td className="ac">N</td>
-                  <td className="ac">20220727 ~ 20220930</td>
+                  <td className="ac">-</td>
+                  <td className="ac">yyyy-MM-dd HH:mm:ss 형식의 문자열</td>
                 </tr>
-                </tbody>
-              </table>
-            </div>
+                <tr>
+                  <td className="ac">pblancBgnDt</td>
+                  <td className="ac">신청시작일</td>
+                  <td className="ac">String</td>
+                  <td className="ac">-</td>
+                  <td className="ac">yyyy-MM-dd 형식의 문자열</td>
+                </tr>
+                <tr>
+                  <td className="ac">pblancEndDt</td>
+                  <td className="ac">신청마감일</td>
+                  <td className="ac">String</td>
+                  <td className="ac">-</td>
+                  <td className="ac">yyyy-MM-dd 형식의 문자열</td>
+                </tr>
+                <tr>
+                  <td className="ac">pblancAttach</td>
+                  <td className="ac">첨부파일URL</td>
+                  <td className="ac">VARCHAR(4,000)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">복수인 경우 '|' 기호로 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">pblancAttachNm</td>
+                  <td className="ac">첨부파일명</td>
+                  <td className="ac">VARCHAR(4,000)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">복수인 경우 '|' 기호로 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">reqstLinkInfo</td>
+                  <td className="ac">온라인 신청 URL</td>
+                  <td className="ac">VARCHAR(1,000)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">URL 텍스트</td>
+                </tr>
+                <tr>
+                  <td className="ac">bizType</td>
+                  <td className="ac">사업유형</td>
+                  <td className="ac">VARCHAR(100)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">텍스트</td>
+                </tr>
+                <tr>
+                  <td className="ac">bizTypeCd</td>
+                  <td className="ac">사업유형코드</td>
+                  <td className="ac">VARCHAR(4)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조</td>
+                </tr>
+                <tr>
+                  <td className="ac">sportType</td>
+                  <td className="ac">지원유형</td>
+                  <td className="ac">VARCHAR(100)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조</td>
+                </tr>
+                <tr>
+                  <td className="ac">sportTypeCd</td>
+                  <td className="ac">지원유형코드</td>
+                  <td className="ac">VARCHAR(4)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조</td>
+                </tr>
+                <tr>
+                  <td className="ac">lifeCyclDvsn</td>
+                  <td className="ac">생애주기구분</td>
+                  <td className="ac">VARCHAR(100)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">lifeCyclDvsnCd</td>
+                  <td className="ac">생애주기구분코드</td>
+                  <td className="ac">VARCHAR(4)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">areaNm</td>
+                  <td className="ac">지역명</td>
+                  <td className="ac">VARCHAR(100)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">areaCd</td>
+                  <td className="ac">지역코드</td>
+                  <td className="ac">VARCHAR(10)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">salsAmt</td>
+                  <td className="ac">매출액</td>
+                  <td className="ac">VARCHAR(100)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">salsAmtCd</td>
+                  <td className="ac">매출액코드</td>
+                  <td className="ac">VARCHAR(4)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">minSalsAmt</td>
+                  <td className="ac">최소 매출액</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">제한 없는 경우 빈값</td>
+                </tr>
+                <tr>
+                  <td className="ac">maxSalsAmt</td>
+                  <td className="ac">최대 매출액</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">제한 없는 경우 빈값</td>
+                </tr>
+                <tr>
+                  <td className="ac">ablbiz</td>
+                  <td className="ac">업력</td>
+                  <td className="ac">VARCHAR(100)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">ablbizCd</td>
+                  <td className="ac">업력코드</td>
+                  <td className="ac">VARCHAR(4)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">minAblbiz</td>
+                  <td className="ac">최소 업력</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">제한 없는 경우 빈값</td>
+                </tr>
+                <tr>
+                  <td className="ac">maxAblbiz</td>
+                  <td className="ac">최대 업력</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">제한 없는 경우 빈값</td>
+                </tr>
+                <tr>
+                  <td className="ac">emplyCnt</td>
+                  <td className="ac">종업원수</td>
+                  <td className="ac">VARCHAR(100)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">emplyCntCd</td>
+                  <td className="ac">종업원수코드</td>
+                  <td className="ac">VARCHAR(4)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">minEmplyCnt</td>
+                  <td className="ac">최소 종업원수</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">제한 없는 경우 빈값</td>
+                </tr>
+                <tr>
+                  <td className="ac">mixEmplyCnt</td>
+                  <td className="ac">최대 종업원수</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">제한 없는 경우 빈값</td>
+                </tr>
+                <tr>
+                  <td className="ac">cmpScale</td>
+                  <td className="ac">기업규모</td>
+                  <td className="ac">VARCHAR(100)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">cmpScaleCd</td>
+                  <td className="ac">기업규모코드</td>
+                  <td className="ac">VARCHAR(4)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">needCrtfn</td>
+                  <td className="ac">필요인증</td>
+                  <td className="ac">VARCHAR(100)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">needCrtfnCd</td>
+                  <td className="ac">필요인증코드</td>
+                  <td className="ac">VARCHAR(4)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조, 복수는 '|' 구분</td>
+                </tr>
+                <tr>
+                  <td className="ac">cntcInsttNm</td>
+                  <td className="ac">연계기관명</td>
+                  <td className="ac">VARCHAR(100)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조</td>
+                </tr>
+                <tr>
+                  <td className="ac">cntcInsttCd</td>
+                  <td className="ac">연계기관코드</td>
+                  <td className="ac">VARCHAR(4)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드표 참조</td>
+                </tr>
+                <tr>
+                  <td className="ac">induty</td>
+                  <td className="ac">업종</td>
+                  <td className="ac">VARCHAR(100)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드 OR 텍스트</td>
+                </tr>
+                <tr>
+                  <td className="ac">rpsntAge</td>
+                  <td className="ac">대표자 연령</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">코드 OR 텍스트</td>
+                </tr>
+                <tr>
+                  <td className="ac">minRpsntAge</td>
+                  <td className="ac">최소 대표자 연령</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">제한 없는 경우 빈값</td>
+                </tr>
+                <tr>
+                  <td className="ac">maxRpsntAge</td>
+                  <td className="ac">최대 대표자 연령</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">제한 없는 경우 빈값</td>
+                </tr>
+                <tr>
+                  <td className="ac">minInrst</td>
+                  <td className="ac">최소 금리</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">제한 없는 경우 빈값</td>
+                </tr>
+                <tr>
+                  <td className="ac">maxInrst</td>
+                  <td className="ac">최대 금리</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">제한 없는 경우 빈값</td>
+                </tr>
+                <tr>
+                  <td className="ac">minSportAmt</td>
+                  <td className="ac">최소 지원금액</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">제한 없는 경우 빈값</td>
+                </tr>
+                <tr>
+                  <td className="ac">maxSportAmt</td>
+                  <td className="ac">최대 지원금액</td>
+                  <td className="ac">NUMBER</td>
+                  <td className="ac">-</td>
+                  <td className="ac">제한 없는 경우 빈값</td>
+                </tr>
+                <tr>
+                  <td className="ac">refntnYn</td>
+                  <td className="ac">재창업여부</td>
+                  <td className="ac">CHAR(1)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">Y 또는 N</td>
+                </tr>
+                <tr>
+                  <td className="ac">fntnYn</td>
+                  <td className="ac">(예비)창업여부</td>
+                  <td className="ac">CHAR(1)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">Y 또는 N</td>
+                </tr>
+                <tr>
+                  <td className="ac">fmleRpsntYn</td>
+                  <td className="ac">여성대표여부</td>
+                  <td className="ac">CHAR(1)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">Y 또는 N</td>
+                </tr>
+                <tr>
+                  <td className="ac">pblancFileUrl</td>
+                  <td className="ac">공고문 URL</td>
+                  <td className="ac">VARCHAR(200)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">공고문 첨부파일 URL</td>
+                </tr>
+                <tr>
+                  <td className="ac">pblancFileNm</td>
+                  <td className="ac">공고문 파일명</td>
+                  <td className="ac">VARCHAR(200)</td>
+                  <td className="ac">-</td>
+                  <td className="ac">공고문 첨부파일 명</td>
+                </tr>
+                <tr>
+                  <td className="ac"><span>resultMsg</span></td>
+                  <td className="ac"><span>결과 메시지</span></td>
+                  <td className="ac"><span>String</span></td>
+                  <td className="ac"><span>Y</span></td>
+                  <td className="ac"><span>처리 결과 메시지 출력</span></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+        </div>
 
-          {/* XML 응답 예시 */}
-          <div className="conts-wrap mt-40">
-            <h3 className="sec-tit">응답 예시(XML)</h3>
-            <div className="on-subtitle-box pre">
-              <div className="subtitle-boxcon overflow-auto">
+        {/* 코드 참조 */}
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">코드 참조 - 기업분류기준코드</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>기업분류기준코드 목록</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="ac">코드구분</th>
+                  <th scope="col" className="ac">코드</th>
+                  <th scope="col" className="ac">코드명</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row" rowSpan="6" className="ac"><span>기업분류기준코드</span></th><td className="ac"><span>CC10</span></td><td className="ac"><span>중소기업</span></td></tr>
+                <tr><td className="ac"><span>CC30</span></td><td className="ac"><span>소상공인</span></td></tr>
+                <tr><td className="ac"><span>CC50</span></td><td className="ac"><span>1인기업</span></td></tr>
+                <tr><td className="ac"><span>CC60</span></td><td className="ac"><span>창업기업</span></td></tr>
+                <tr><td className="ac"><span>CC70</span></td><td className="ac"><span>예비창업자</span></td></tr>
+                <tr><td className="ac"><span>CC80</span></td><td className="ac"><span>기타</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">코드 참조 - 기업인증/확인유형코드</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>기업인증/확인유형코드 목록</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="ac">코드구분</th>
+                  <th scope="col" className="ac">코드</th>
+                  <th scope="col" className="ac">코드명</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row" rowSpan="17" className="ac"><span>기업인증/확인유형코드</span></th><td className="ac"><span>EC01</span></td><td className="ac"><span>수출유망중소기업</span></td></tr>
+                <tr><td className="ac"><span>EC02</span></td><td className="ac"><span>여성기업</span></td></tr>
+                <tr><td className="ac"><span>EC03</span></td><td className="ac"><span>장애인기업</span></td></tr>
+                <tr><td className="ac"><span>EC04</span></td><td className="ac"><span>중소기업</span></td></tr>
+                <tr><td className="ac"><span>EC05</span></td><td className="ac"><span>소상공인</span></td></tr>
+                <tr><td className="ac"><span>EC06</span></td><td className="ac"><span>기술혁신형중소기업</span></td></tr>
+                <tr><td className="ac"><span>EC07</span></td><td className="ac"><span>경영혁신형중소기업</span></td></tr>
+                <tr><td className="ac"><span>EC08</span></td><td className="ac"><span>벤처기업</span></td></tr>
+                <tr><td className="ac"><span>EC09</span></td><td className="ac"><span>우수그린비즈</span></td></tr>
+                <tr><td className="ac"><span>EC10</span></td><td className="ac"><span>사회적기업</span></td></tr>
+                <tr><td className="ac"><span>EC11</span></td><td className="ac"><span>연구소보유</span></td></tr>
+                <tr><td className="ac"><span>EC12</span></td><td className="ac"><span>지식재산경영인증 기업</span></td></tr>
+                <tr><td className="ac"><span>EC13</span></td><td className="ac"><span>부품소재기업</span></td></tr>
+                <tr><td className="ac"><span>EC14</span></td><td className="ac"><span>뿌리기술기업</span></td></tr>
+                <tr><td className="ac"><span>EC15</span></td><td className="ac"><span>에너지기술기업</span></td></tr>
+                <tr><td className="ac"><span>EC16</span></td><td className="ac"><span>기술전문기업</span></td></tr>
+                <tr><td className="ac"><span>EC17</span></td><td className="ac"><span>직접생산확인기업</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">코드 참조 - 근로자수구간코드</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>근로자수구간코드 목록</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="ac">코드구분</th>
+                  <th scope="col" className="ac">코드</th>
+                  <th scope="col" className="ac">코드명</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row" rowSpan="6" className="ac"><span>근로자수구간코드</span></th><td className="ac"><span>EI01</span></td><td className="ac"><span>1~5명미만</span></td></tr>
+                <tr><td className="ac"><span>EI02</span></td><td className="ac"><span>5~10명미만</span></td></tr>
+                <tr><td className="ac"><span>EI03</span></td><td className="ac"><span>10~20명미만</span></td></tr>
+                <tr><td className="ac"><span>EI04</span></td><td className="ac"><span>20~50명미만</span></td></tr>
+                <tr><td className="ac"><span>EI05</span></td><td className="ac"><span>50~100명미만</span></td></tr>
+                <tr><td className="ac"><span>EI06</span></td><td className="ac"><span>100명이상</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">코드 참조 - 생애주기구분코드</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>생애주기구분코드 목록</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="ac">코드구분</th>
+                  <th scope="col" className="ac">코드</th>
+                  <th scope="col" className="ac">코드명</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row" rowSpan="3" className="ac"><span>생애주기구분코드</span></th><td className="ac"><span>LC01</span></td><td className="ac"><span>창업</span></td></tr>
+                <tr><td className="ac"><span>LC02</span></td><td className="ac"><span>성장</span></td></tr>
+                <tr><td className="ac"><span>LC03</span></td><td className="ac"><span>폐업·재기</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">코드 참조 - 업력구간코드</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>업력구간코드 목록</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="ac">코드구분</th>
+                  <th scope="col" className="ac">코드</th>
+                  <th scope="col" className="ac">코드명</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row" rowSpan="6" className="ac"><span>업력구간코드</span></th><td className="ac"><span>OI01</span></td><td className="ac"><span>3년미만</span></td></tr>
+                <tr><td className="ac"><span>OI02</span></td><td className="ac"><span>3년이상~5년미만</span></td></tr>
+                <tr><td className="ac"><span>OI03</span></td><td className="ac"><span>5년이상~7년미만</span></td></tr>
+                <tr><td className="ac"><span>OI04</span></td><td className="ac"><span>7년이상~10년미만</span></td></tr>
+                <tr><td className="ac"><span>OI05</span></td><td className="ac"><span>10년이상~20년미만</span></td></tr>
+                <tr><td className="ac"><span>OI06</span></td><td className="ac"><span>20년이상</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">코드 참조 - 사업유형코드</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>사업유형코드 목록</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="ac">코드구분</th>
+                  <th scope="col" className="ac">코드</th>
+                  <th scope="col" className="ac">코드명</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row" rowSpan="10" className="ac"><span>사업유형코드</span></th><td className="ac"><span>PC10</span></td><td className="ac"><span>금융</span></td></tr>
+                <tr><td className="ac"><span>PC20</span></td><td className="ac"><span>기술</span></td></tr>
+                <tr><td className="ac"><span>PC30</span></td><td className="ac"><span>인력</span></td></tr>
+                <tr><td className="ac"><span>PC40</span></td><td className="ac"><span>수출</span></td></tr>
+                <tr><td className="ac"><span>PC50</span></td><td className="ac"><span>내수</span></td></tr>
+                <tr><td className="ac"><span>PC60</span></td><td className="ac"><span>창업</span></td></tr>
+                <tr><td className="ac"><span>PC70</span></td><td className="ac"><span>경영</span></td></tr>
+                <tr><td className="ac"><span>PC80</span></td><td className="ac"><span>소상공인</span></td></tr>
+                <tr><td className="ac"><span>PC90</span></td><td className="ac"><span>지원</span></td></tr>
+                <tr><td className="ac"><span>PC11</span></td><td className="ac"><span>벤처</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">코드 참조 - 지원유형코드</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>지원유형코드 목록</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="ac">코드구분</th>
+                  <th scope="col" className="ac">코드</th>
+                  <th scope="col" className="ac">코드명</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row" rowSpan="10" className="ac"><span>지원유형코드</span></th><td className="ac"><span>RT01</span></td><td className="ac"><span>창업</span></td></tr>
+                <tr><td className="ac"><span>RT02</span></td><td className="ac"><span>기술개발</span></td></tr>
+                <tr><td className="ac"><span>RT03</span></td><td className="ac"><span>정책자금</span></td></tr>
+                <tr><td className="ac"><span>RT04</span></td><td className="ac"><span>기술보증</span></td></tr>
+                <tr><td className="ac"><span>RT05</span></td><td className="ac"><span>스마트공장</span></td></tr>
+                <tr><td className="ac"><span>RT06</span></td><td className="ac"><span>소상공인</span></td></tr>
+                <tr><td className="ac"><span>RT07</span></td><td className="ac"><span>인력지원</span></td></tr>
+                <tr><td className="ac"><span>RT08</span></td><td className="ac"><span>수출지원</span></td></tr>
+                <tr><td className="ac"><span>RT09</span></td><td className="ac"><span>기업지원</span></td></tr>
+                <tr><td className="ac"><span>RT10</span></td><td className="ac"><span>정보</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">코드 참조 - 매출액구간코드</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>매출액구간코드 목록</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="ac">코드구분</th>
+                  <th scope="col" className="ac">코드</th>
+                  <th scope="col" className="ac">코드명</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row" rowSpan="7" className="ac"><span>매출액구간코드</span></th><td className="ac"><span>SI01</span></td><td className="ac"><span>5억미만</span></td></tr>
+                <tr><td className="ac"><span>SI02</span></td><td className="ac"><span>5억이상~10억미만</span></td></tr>
+                <tr><td className="ac"><span>SI03</span></td><td className="ac"><span>10억이상~20억미만</span></td></tr>
+                <tr><td className="ac"><span>SI04</span></td><td className="ac"><span>20억이상~50억미만</span></td></tr>
+                <tr><td className="ac"><span>SI05</span></td><td className="ac"><span>50억이상~100억미만</span></td></tr>
+                <tr><td className="ac"><span>SI06</span></td><td className="ac"><span>100억이상~300억미만</span></td></tr>
+                <tr><td className="ac"><span>SI07</span></td><td className="ac"><span>300억이상</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">코드 참조 - 지원기관코드</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>지원기관코드 목록</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="ac">코드구분</th>
+                  <th scope="col" className="ac">코드</th>
+                  <th scope="col" className="ac">코드명</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row" rowSpan="19" className="ac"><span>지원기관코드</span></th><td className="ac"><span>SP01</span></td><td className="ac"><span>중소벤처기업진흥공단</span></td></tr>
+                <tr><td className="ac"><span>SP02</span></td><td className="ac"><span>중소기업기술정보진흥원</span></td></tr>
+                <tr><td className="ac"><span>SP03</span></td><td className="ac"><span>중소기업유통센터</span></td></tr>
+                <tr><td className="ac"><span>SP04</span></td><td className="ac"><span>창업진흥원</span></td></tr>
+                <tr><td className="ac"><span>SP05</span></td><td className="ac"><span>소상공인시장진흥공단</span></td></tr>
+                <tr><td className="ac"><span>SP06</span></td><td className="ac"><span>기술보증기금</span></td></tr>
+                <tr><td className="ac"><span>SP10</span></td><td className="ac"><span>대·중소기업·농어업협력재단</span></td></tr>
+                <tr><td className="ac"><span>SP12</span></td><td className="ac"><span>여성기업종합지원센터</span></td></tr>
+                <tr><td className="ac"><span>SP13</span></td><td className="ac"><span>(재)장애인기업종합지원센터</span></td></tr>
+                <tr><td className="ac"><span>SP14</span></td><td className="ac"><span>한국산업기술진흥원</span></td></tr>
+                <tr><td className="ac"><span>SP15</span></td><td className="ac"><span>지역신용보증재단</span></td></tr>
+                <tr><td className="ac"><span>SP16</span></td><td className="ac"><span>중소벤처기업부</span></td></tr>
+                <tr><td className="ac"><span>SP17</span></td><td className="ac"><span>중소기업중앙회</span></td></tr>
+                <tr><td className="ac"><span>SP18</span></td><td className="ac"><span>중소기업융합중앙회</span></td></tr>
+                <tr><td className="ac"><span>SP19</span></td><td className="ac"><span>한국창업보육협회</span></td></tr>
+                <tr><td className="ac"><span>SP20</span></td><td className="ac"><span>이노비즈협회</span></td></tr>
+                <tr><td className="ac"><span>SP21</span></td><td className="ac"><span>한국경영혁신중소기업협회</span></td></tr>
+                <tr><td className="ac"><span>SP22</span></td><td className="ac"><span>대한무역투자진흥공사</span></td></tr>
+                <tr><td className="ac"><span>SP99</span></td><td className="ac"><span>기타</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">코드 참조 - 지역코드</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>지역코드 목록</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="ac">코드구분</th>
+                  <th scope="col" className="ac">코드</th>
+                  <th scope="col" className="ac">코드명</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row" rowSpan="18" className="ac"><span>지역코드</span></th><td className="ac"><span>1000</span></td><td className="ac"><span>전국</span></td></tr>
+                <tr><td className="ac"><span>1100</span></td><td className="ac"><span>서울특별시</span></td></tr>
+                <tr><td className="ac"><span>2600</span></td><td className="ac"><span>부산광역시</span></td></tr>
+                <tr><td className="ac"><span>2700</span></td><td className="ac"><span>대구광역시</span></td></tr>
+                <tr><td className="ac"><span>2800</span></td><td className="ac"><span>인천광역시</span></td></tr>
+                <tr><td className="ac"><span>2900</span></td><td className="ac"><span>광주광역시</span></td></tr>
+                <tr><td className="ac"><span>3000</span></td><td className="ac"><span>대전광역시</span></td></tr>
+                <tr><td className="ac"><span>3100</span></td><td className="ac"><span>울산광역시</span></td></tr>
+                <tr><td className="ac"><span>3611</span></td><td className="ac"><span>세종특별자치시</span></td></tr>
+                <tr><td className="ac"><span>4100</span></td><td className="ac"><span>경기도</span></td></tr>
+                <tr><td className="ac"><span>4200</span></td><td className="ac"><span>강원도</span></td></tr>
+                <tr><td className="ac"><span>4300</span></td><td className="ac"><span>충청북도</span></td></tr>
+                <tr><td className="ac"><span>4400</span></td><td className="ac"><span>충청남도</span></td></tr>
+                <tr><td className="ac"><span>4500</span></td><td className="ac"><span>전라북도</span></td></tr>
+                <tr><td className="ac"><span>4600</span></td><td className="ac"><span>전라남도</span></td></tr>
+                <tr><td className="ac"><span>4700</span></td><td className="ac"><span>경상북도</span></td></tr>
+                <tr><td className="ac"><span>4800</span></td><td className="ac"><span>경상남도</span></td></tr>
+                <tr><td className="ac"><span>5000</span></td><td className="ac"><span>제주특별자치도</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="conts-wrap mt-64">
+          <h3 className="sec-tit">코드 참조 - 연계기관코드</h3>
+          <div className="krds-table-wrap">
+            <table className="tbl col data word-break t-block">
+              <caption>연계기관코드 목록</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="ac">코드구분</th>
+                  <th scope="col" className="ac">코드</th>
+                  <th scope="col" className="ac">코드명</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row" rowSpan="16" className="ac"><span>연계기관코드</span></th><td className="ac"><span>BI01</span></td><td className="ac"><span>SMTECH</span></td></tr>
+                <tr><td className="ac"><span>BI02</span></td><td className="ac"><span>K-STARTUP</span></td></tr>
+                <tr><td className="ac"><span>BI03</span></td><td className="ac"><span>스마트공장</span></td></tr>
+                <tr><td className="ac"><span>BI04</span></td><td className="ac"><span>소상공인 마당</span></td></tr>
+                <tr><td className="ac"><span>BI05</span></td><td className="ac"><span>중소기업 벤처진흥공단(정책자금)</span></td></tr>
+                <tr><td className="ac"><span>BI06</span></td><td className="ac"><span>기술보증기금</span></td></tr>
+                <tr><td className="ac"><span>BI07</span></td><td className="ac"><span>판판대로</span></td></tr>
+                <tr><td className="ac"><span>BI08</span></td><td className="ac"><span>기술보호울타리</span></td></tr>
+                <tr><td className="ac"><span>BI09</span></td><td className="ac"><span>중소기업인력지원사업종합관리시스템</span></td></tr>
+                <tr><td className="ac"><span>BI10</span></td><td className="ac"><span>중소기업해외전시포탈</span></td></tr>
+                <tr><td className="ac"><span>BI11</span></td><td className="ac"><span>협업정보시스템</span></td></tr>
+                <tr><td className="ac"><span>BI12</span></td><td className="ac"><span>중소기업수출지원센터</span></td></tr>
+                <tr><td className="ac"><span>BI13</span></td><td className="ac"><span>IRIS</span></td></tr>
+                <tr><td className="ac"><span>BI14</span></td><td className="ac"><span>소셜벤처스퀘어</span></td></tr>
+                <tr><td className="ac"><span>BI15</span></td><td className="ac"><span>무역24</span></td></tr>
+                <tr><td className="ac"><span>BI90</span></td><td className="ac"><span>중소기업 벤처진흥공단(기타)</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* JSON 응답 예시 */}
+        <div className="conts-wrap mt-40">
+          <h3 className="sec-tit">응답 예시(JSON)</h3>
+          <div className="on-subtitle-box pre">
+            <div className="subtitle-boxcon overflow-auto">
               <pre className="code-pre">
                 <code>
-                  {`<rss version="2.0">
-	<channel>
-		<title>
-			기업마당 지원사업정보
-		</title>
-		<link>
-			https://www.bizinfo.go.kr/web/lay1/bbs/S1T122C128/AS/74/list.do
-		</link>
-		<description>
-			최신지원사업정보를 구독하세요
-		</description>
-		<language>
-			ko-kr
-		</language>
-		<copyright>
-			bizinfo
-		</copyright>
-		<managingEditor>
-			develover@smba.go.kr
-		</managingEditor>
-		<webMaster>
-			kosi@bizinfo.go.kr
-		</webMaster>
-		<pubDate/>
-		<lastBuildDate/>
-		<category>
-			bizinfo
-		</category>
-		<ttl>
-			60
-		</ttl>
-		<item>
-			<title>
-				착한임대인 장관 표창 신청 연장 공고
-			</title>
-			<link>
-				https://www.bizinfo.go.kr/web/lay1/bbs/S1T122C128/AS/74/view.do?pblancId=PBLN_000000000080236
-			</link>
-			<seq>
-				PBLN_000000000080236
-			</seq>
-			<author>
-				중소벤처기업부
-			</author>
-			<excInsttNm>
-				지방중소벤처기업청
-			</excInsttNm>
-			<description>
-				<div>코로나19라는 힘든 상황속에서소상공인에게 자발적으로 임대료를인하한 임대인을 '착한임대인'으로선정하는 사업입니다.</div>
-			</description>
-			<lcategory>
-				경영
-			</lcategory>
-			<pubDate>
-				2022-09-02 15:38:29
-			</pubDate>
-			<reqstDt>
-				20220727 ~ 20220930
-			</reqstDt>
-			<trgetNm>
-				중소기업
-			</trgetNm>
-			<inqireCo>
-				43
-			</inqireCo>
-			<flpthNm>
-				https://www.bizinfo.go.kr/cmm/fms/getImageFile.do?atchFileId=FILE_000000000613641&fileSn=0
-			</flpthNm>
-			<fileNm>
-				2022년 대한민국 메이커 스타 참가자모집 공고.pdf
-			</fileNm>
-			<printFlpthNm>
-				https://www.bizinfo.go.kr/cmm/fms/getImageFile.do?atchFileId=FILE_000000000613694&fileSn=1
-			</printFlpthNm>
-			<printFileNm>
-				2022년 대한민국 메이커 스타 참가자모집 공고.pdf
-			</printFileNm>
-			<hashTags>
-				2022,금융,충북,대전,중소벤처기업부
-			</hashTags>
-			<totCnt>
-				1435
-			</totCnt>
-			<pblancNm>
-				착한임대인 장관 표창 신청 연장 공고
-			</pblancNm>
-			<pblancUrl>
-				https://www.bizinfo.go.kr/web/lay1/bbs/S1T122C128/AS/74/view.do?pblancId=PBLN_000000000080236
-			</pblancUrl>
-			<pblancId>
-				PBLN_000000000080236
-			</pblancId>
-			<jrsdInsttNm>
-				중소벤처기업부
-			</jrsdInsttNm>
-			<bsnsSumryCn>
-				코로나19라는 힘든 상황속에서 소상공인에게 자발적으로 임대료를 인하한 임대인을 '착한임대인'으로 선정하는 사업입니다.
-			</bsnsSumryCn>
-			<reqstMthPapersCn>
-				
-			</reqstMthPapersCn>
-			<refrncNm>
-				
-			</refrncNm>
-			<rceptEngnHmpgUrl>
-				
-			</rceptEngnHmpgUrl>
-			<pldirSportRealmLclasCodeNm>
-				경영
-			</pldirSportRealmLclasCodeNm>
-			<creatPnttm>
-				2022-09-02 15:38:29
-			</creatPnttm>
-			<reqstBeginEndDe>
-				20220727 ~ 20220930
-			</reqstBeginEndDe>
-		</item>
-	</channel>
-</rss>`}
+                  {`{
+    "resultCd": "0",
+    "data": [
+        {
+            "pblancSeq": 10082422,
+            "creatDt": "2021-01-27 10:40:30",
+            "pblancDtlUrl": "https://www.ultari.go.kr/portal/psi/techDefend.do",
+            "pblancNm": "기술보호 현장자문",
+            "policyCnts": "중소기업 기술유출, 기술보호 고민을 기술보호전문가가 기업 현장에서 해결해 드립니다.",
+            "sportMg": "① 사전진단(최대 3일) : 무료. 현장진단(1), 보안교육(1), 기초자문(1) ② 심화자문(필요시, 최대 7일) : 1~7일, 75% 부분지원",
+            "sportCnts": "① 보안전략/보안지침 수립 및 방안 코칭, 보안조직 구성 및 운영, 인적 및 정보화 자산 보안관리 체계 수립 등",
+            "sportTrget": "중소기업 및 중견기업",
+            "reqstRcept": "기술보호 울타리 홈페이지 신청 (https://www.ultari.go.kr/portal/psi/techDefend.do)",
+            "sportInsttNm": "대·중소기업·농어업협력재단",
+            "sportInsttCd": "SP18",
+            "refrnc": "기술보호 통합 상담·신고센터 : 02-368-8787",
+            "updDt": "2022-08-11 13:15:02",
+            "pblancBgnDt": "2012-12-20",
+            "pblancEndDt": "2022-12-31",
+            "pblancAttach": "",
+            "reqstLinkInfo": "https://www.ultari.go.kr/portal/pmy/serviceApply.do",
+            "bizType": "기술",
+            "bizTypeCd": "PC20",
+            "sportType": "기술개발",
+            "sportTypeCd": "RT02",
+            "lifeCyclDvsn": "",
+            "lifeCyclDvsnCd": "",
+            "areaNm": "",
+            "areaCd": "",
+            "salsAmt": ""
+        }
+    ],
+    "resultMsg": "정상적으로 조회되었습니다."
+}`}
                 </code>
               </pre>
-              </div>
             </div>
           </div>
+        </div>
 
-          {/* JSON 응답 예시 */}
-          <div className="conts-wrap mt-40">
-            <h3 className="sec-tit">응답 예시(JSON)</h3>
-            <div className="on-subtitle-box pre">
-              <div className="subtitle-boxcon overflow-auto">
+        {/* JAVA 샘플 코드 */}
+        <div className="conts-wrap mt-40">
+          <h3 className="sec-tit">샘플코드 (JAVA)</h3>
+          <div className="on-subtitle-box pre">
+            <div className="subtitle-boxcon overflow-auto">
               <pre className="code-pre">
                 <code>
-                  {` {"jsonArray":{
-	"title":기업마당 지원사업정보, 
-	"link":https://www.bizinfo.go.kr/web/lay1/bbs/S1T122C128/AS/74/list.do, 
-	"description":최신지원사업정보를 구독하세요, 
-	"language":ko-kr, 
-	"copyright":bizinfo, 
-	"managingEditor":develover@smba.go.kr, 
-	"webMaster":kosi@bizinfo.go.kr, 
-	"category":bizinfo, 
-	"ttl":60, 
-	"item":[{
-		"title":착한임대인 장관 표창 신청 연장 공고, 
-		"link":https://www.bizinfo.go.kr/web/lay1/bbs/S1T122C128/AS/74/view.do?pblancId=PBLN_000000000080236, 
-		"seq":PBLN_000000000080236, 
-		"author":중소벤처기업부, 
-		"excInsttNm":지방중소벤처기업청, 
-		"description":<div>코로나19라는 힘든 상황속에서소상공인에게 자발적으로 임대료를인하한 임대인을 '착한임대인'으로선정하는 사업입니다.</div>, 
-		"lcategory":경영, 
-		"pubDate":2022-09-02 15:38:29, 
-		"reqstDt":20220727 ~ 20220930, 
-		"trgetNm":중소기업, 
-		"inqireCo":43, 
-		"flpthNm":https://www.bizinfo.go.kr/cmm/fms/getImageFile.do?atchFileId=FILE_000000000613641&fileSn=0, 
-		"fileNm":2022년 대한민국 메이커 스타 참가자모집 공고.pdf, 
-		"printFlpthNm":https://www.bizinfo.go.kr/cmm/fms/getImageFile.do?atchFileId=FILE_000000000613694&fileSn=1, 
-		"printFileNm":2022년 대한민국 메이커 스타 참가자모집 공고.pdf, 
-		"hashTags":2022,금융,충북,대전,중소벤처기업부, 
-		"totCnt":1435, 
-		"pblancNm":착한임대인 장관 표창 신청 연장 공고, 
-		"pblancUrl":https://www.bizinfo.go.kr/web/lay1/bbs/S1T122C128/AS/74/view.do?pblancId=PBLN_000000000080236, 
-		"pblancId":PBLN_000000000080236, 
-		"jrsdInsttNm":중소벤처기업부, 
-		"bsnsSumryCn":코로나19라는 힘든 상황속에서 소상공인에게 자발적으로 임대료를 인하한 임대인을 '착한임대인'으로 선정하는 사업입니다., 
-		"reqstMthPapersCn":, 
-		"refrncNm":, 
-		"rceptEngnHmpgUrl":, 
-		"pldirSportRealmLclasCodeNm":경영, 
-		"creatPnttm":2022-09-02 15:38:29, 
-		"reqstBeginEndDe":20220727 ~ 20220930
-	}]
-}}`}
-                </code>
-              </pre>
-              </div>
-            </div>
-          </div>
-
-          {/* JAVA 샘플 코드 */}
-          <div className="conts-wrap mt-40">
-            <h3 className="sec-tit">샘플코드 (JAVA)</h3>
-            <div className="on-subtitle-box pre">
-              <div className="subtitle-boxcon overflow-auto">
-              <pre className="code-pre">
-                <code>
-                 {`/* Java 샘플 코드 */
+                  {`/* Java 샘플 코드 */
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
@@ -959,59 +1048,59 @@ import java.net.URL;
 import java.io.IOException;
 
 public class ApiExplorer {
-	public static void main(String[] args) throws IOException {
-		StringBuilder urlBuilder = new StringBuilder("http://X.X.X.X:X/test?crtfcKey=XXXXX"); /*URL*/
-		URL url = new URL(urlBuilder.toString());
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		conn.setRequestMethod("GET");
-		conn.setRequestProperty("Content-type", "application/json");
-		System.out.println("Response code: " + conn.getResponseCode());
-		BufferedReader rd;
-		
-		if (conn.getResponseCode()>=200 && conn.getResponseCode() <=300){
-			rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-		} else {
-			rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-		}
-		
-		StringBuilder sb = new StringBuilder();
-		String line;
-		while ((line = rd.readLine()) != null) {
-			sb.append(line);
-		}
-		rd.close();
-		conn.disconnect();
-		System.out.println(sb.toString());
-	}
+    public static void main(String[] args) throws IOException {
+       String apiUrl = "https://www.smes.go.kr/fnct/apiReqst/extPblancInfo?token=pTWdMetgNZ4GXiII2Sy5FMsH8nnq9pe%2boM%2bGmjBsudONWad8Qb89e8K456YQ%2fhFW";
+       URL url = new URL(apiUrl);
+       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+       conn.setRequestMethod("GET");
+       conn.setRequestProperty("Content-Type", "application/json");
+       int responseCode = conn.getResponseCode();
+       BufferedReader rd;
+
+       if (responseCode == 200) {
+          rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+       } else {
+          rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+       }
+
+       String inputLine;
+       StringBuffer response = new StringBuffer();
+       while ((inputLine = rd.readLine()) != null) {
+          response.append(inputLine);
+       }
+       rd.close();
+       conn.disconnect();
+       System.out.println(response.toString());
+    }
 }`}
                 </code>
               </pre>
-              </div>
             </div>
-          </div>
-
-          {/* 하단 버튼 */}
-          <div className="onboard-btm-btngroup bt-0" data-type="responsive">
-            <button type="button" className="krds-btn tertiary xlarge mo-full" onClick={() => navigate('..')}>
-              목록
-            </button>
-            <button type="button" className="krds-btn primary xlarge mo-full" onClick={handleApplyClick}>
-              신청하기
-              <i className="svg-icon ico-angle right"></i>
-            </button>
           </div>
         </div>
 
-        <ApiKeyForm
-            isOpen={isOpen}
-            onClose={closePopup}
-            submitting={submitting}
-            errorMessage={errorMessage}
-            memberInfo={memberInfo}
-            mbrNo={mbrNo}
-            onSubmit={(fd) => submitApply(mbrNo, fd)}
-        />
-      </>
+        {/* 하단 버튼 */}
+        <div className="onboard-btm-btngroup bt-0" data-type="responsive">
+          <button type="button" className="krds-btn tertiary xlarge mo-full" onClick={() => navigate('..')}>
+              목록
+          </button>
+          <button type="button" className="krds-btn primary xlarge mo-full" onClick={handleApplyClick}>
+              신청하기
+            <i className="svg-icon ico-angle right"></i>
+          </button>
+        </div>
+      </div>
+
+      <ApiKeyForm
+        isOpen={isOpen}
+        onClose={closePopup}
+        submitting={submitting}
+        errorMessage={errorMessage}
+        memberInfo={memberInfo}
+        mbrNo={mbrNo}
+        onSubmit={(fd) => submitApply(mbrNo, fd)}
+      />
+    </>
   );
 };
 
