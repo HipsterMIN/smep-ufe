@@ -24,6 +24,7 @@ import { useAuthStore } from '@store/useAuthStore.jsx';
 import OnepassLoginConversionModal from '@pages/onepass/OnepassLoginConversionModal.jsx';
 import InitialPasswordNoticeModal from '@components/account/InitialPasswordNoticeModal.jsx';
 import { buildOnePassConversionUrl, buildOnePassRegisterUrl, onePassJoin } from '@utils/keycloakGetAuthCode.js';
+import MainPopupItem from './main/MainPopupItem.jsx';
 import {
   normalizeResponse, resolveApiErrorMessage, removeCssCharset,
   formatDate, formatLocalDateKey, getLocalYmd,
@@ -151,6 +152,7 @@ const MainPage = () => {
     }
   });
   const [closedPopupIds, setClosedPopupIds] = useState([]);
+  const [activePopupId, setActivePopupId] = useState(null);
   const [autoCompleteKeywords, setAutoCompleteKeywords] = useState([]);
   const [isAutoCompleteEnabled, setIsAutoCompleteEnabled] = useState(true);
   const [isAutoLoading, setIsAutoLoading] = useState(false);
@@ -2085,120 +2087,16 @@ const MainPage = () => {
         hasCi={hasCi}
       />
       <Footer />
-      {!isMobilePopupViewport && (
-        visiblePopups.map((popup) => {
-          const imageSrc = buildMainImageUrl(
-            'popups',
-            popup.imgAtchFileId,
-            popup.imgAtchFileSn,
-          );
-          const href = popup.imgLnkgUrlAddr || '#';
-          const external = isNewWindow(popup.imgLnkgNpagYn);
-
-          return (
-            <div
-              key={popup.popupId}
-              className="main-popup-item"
-              style={{
-                position: 'fixed',
-                top: `${popup.upendPstnNvl || 120}px`,
-                left: `${popup.lfsdPstnNvl || 40}px`,
-                width: `${popup.wdthLen || 360}px`,
-                height: `${popup.vrtcLen || 420}px`,
-                zIndex: 1000,
-                backgroundColor: '#fff',
-                border: '1px solid #d8d8d8',
-                boxShadow: '0 12px 28px rgba(0, 0, 0, 0.18)',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '12px 16px',
-                  borderBottom: '1px solid #eee',
-                }}
-              >
-                <strong style={{ fontSize: '16px', lineHeight: 1.4 }}>
-                  {popup.popupTtl}
-                </strong>
-                <button
-                  type="button"
-                  className="krds-btn text small"
-                  onClick={() => handlePopupClose(popup.popupId)}
-                >
-                  <i className="svg-icon ico-popup-close"></i>
-                </button>
-              </div>
-              <div style={{ flex: 1, overflow: 'hidden' }}>
-                <a
-                  href={href}
-                  target={external ? '_blank' : undefined}
-                  rel={external ? 'noreferrer' : undefined}
-                  style={{ display: 'block', width: '100%', height: '100%' }}
-                >
-                  {imageSrc ? (
-                    <img
-                      src={imageSrc}
-                      alt={popup.imgSbstTxtCn || popup.popupTtl}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      }}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: '24px',
-                      }}
-                    >
-                      {popup.imgSbstTxtCn || popup.popupTtl}
-                    </div>
-                  )}
-                </a>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  borderTop: '1px solid #eee',
-                }}
-              >
-                {popup.vwngStopUseYn === 'Y' ? (
-                  <button
-                    type="button"
-                    className="krds-btn tertiary small"
-                    onClick={() => handlePopupHideToday(popup.popupId)}
-                  >
-                    오늘 하루 보지 않기
-                  </button>
-                ) : (
-                  <span></span>
-                )}
-                <button
-                  type="button"
-                  className="krds-btn secondary small"
-                  onClick={() => handlePopupClose(popup.popupId)}
-                >
-                  닫기
-                </button>
-              </div>
-            </div>
-          );
-        })
-      )}
+      {!isMobilePopupViewport && visiblePopups.map((popup) => (
+        <MainPopupItem
+          key={popup.popupId}
+          popup={popup}
+          isActive={String(activePopupId) === String(popup.popupId)}
+          onActivate={() => setActivePopupId(String(popup.popupId))}
+          onClose={handlePopupClose}
+          onHideToday={handlePopupHideToday}
+        />
+      ))}
     </div>
   );
 };
