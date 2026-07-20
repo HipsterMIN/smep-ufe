@@ -16,7 +16,7 @@
   --krds-contents-size: 1200px;
   --krds-contents-padding-x: 24px;
   --krds-contents-wrap-size: 1248px;
-  --krds-box-shadow-outline: 0 0 0 0.4rem var(--krds-light-color-border-primary);
+  --krds-box-shadow-outline: 0 0 0 0.2rem var(--krds-light-color-border-primary);
   --krds-box-shadow-outline-inset: inset 0 0 0 0.2rem var(--krds-light-color-border-primary);
   --krds-zoom-small: 0.9;
   --krds-zoom-medium: 1;

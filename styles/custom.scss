@@ -111,6 +111,11 @@ hr{border-top:solid 1px var(--krds-color-light-gray-20)}
     font-size:var(--krds-pc-font-size-body-small);font-weight:600;
     &.btn-primary{background-color:#0357C4;border-color:#0357C4; color:var(--krds-color-light-alpha-white100)}
     .svg-icon{width:22px;height:22px;}
+    &:focus{
+        box-shadow:none;
+        outline: 0.2rem dashed var(--krds-light-color-border-primary);
+        outline-offset: -0.2rem;
+    }
 }
 .btn-group {
     display: flex;
