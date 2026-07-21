@@ -19,6 +19,9 @@ import '@styles/custom.scss';
 // 에디터 본문 서식(.se-doc) — 공고/지원사업/행사 상세의 편집기 산출 HTML 을
 // 관리자 편집/미리보기 화면과 동일한 서식으로 렌더링한다 (@smep/smart-editor 공용 소스)
 import '@smep/smart-editor/content.css';
+// 포털 액센트 레이어 — 구조 서식은 위 공용 소스를 따르고, 여백·행간 등 시각 보정만 얹는다.
+// 반드시 content.css 이후에 import 해야 같은 명시도에서 포털 보정이 이긴다.
+import '@styles/seDocPortal.css';
 // import '@krds-ui/core/dist/style.css';
 
 function App() {
