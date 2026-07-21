@@ -16,6 +16,9 @@ import '@styles/output.css';
 import '@styles/onCommon.css';
 import '@styles/onCommon_2.css';
 import '@styles/custom.scss';
+// 에디터 본문 서식(.se-doc) — 공고/지원사업/행사 상세의 편집기 산출 HTML 을
+// 관리자 편집/미리보기 화면과 동일한 서식으로 렌더링한다 (@smep/smart-editor 공용 소스)
+import '@smep/smart-editor/content.css';
 // import '@krds-ui/core/dist/style.css';
 
 function App() {

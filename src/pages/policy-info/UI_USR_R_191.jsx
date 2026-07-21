@@ -231,7 +231,7 @@ const UI_USR_R_191 = () => {
             <dt>행사기간</dt>
             <dd>{formatEventPeriod(item?.evntPrdCn)}</dd>
             <dt>행사개요</dt>
-            <dd dangerouslySetInnerHTML={{ __html: item?.evntOtlnCn || '-' }} />
+            <dd className="se-doc" dangerouslySetInnerHTML={{ __html: item?.evntOtlnCn || '-' }} />
           </dl>
         </div>
 

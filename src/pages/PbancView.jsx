@@ -280,8 +280,9 @@ const PbancView = () => {
       <React.Fragment key={label}>
         <dt>{label}</dt>
         <dd>
+          {/* se-doc: 에디터 본문 서식 공용 스코프 — 관리자 편집/미리보기와 동일 렌더 */}
           <div
-            className={canExpand ? `onshadow-text${isExpanded ? ' on' : ''}` : undefined}
+            className={`se-doc${canExpand ? ` onshadow-text${isExpanded ? ' on' : ''}` : ''}`}
             dangerouslySetInnerHTML={{ __html: html }}
           />
           {canExpand && (
@@ -421,7 +422,7 @@ const PbancView = () => {
                     <dd>
                       <ul className="list">
                         {isMeaningfulHtml(item?.bizAplyMthdCn) && (
-                          <li dangerouslySetInnerHTML={{ __html: item.bizAplyMthdCn }}/>
+                          <li className="se-doc" dangerouslySetInnerHTML={{ __html: item.bizAplyMthdCn }}/>
                         )}
                         {item?.bizAplyUrlAddr && (
                           <li>
@@ -457,7 +458,7 @@ const PbancView = () => {
                     <dd>
                       <ul className="list">
                         {isMeaningfulHtml(item?.bizAplyMthdCn) && (
-                          <li dangerouslySetInnerHTML={{ __html: item.bizAplyMthdCn }}/>
+                          <li className="se-doc" dangerouslySetInnerHTML={{ __html: item.bizAplyMthdCn }}/>
                         )}
                         {item?.bizAplyUrlAddr && (
                           <li>
