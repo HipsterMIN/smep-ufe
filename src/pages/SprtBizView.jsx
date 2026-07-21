@@ -67,7 +67,7 @@ const SprtBizView = () => {
     return (
       <React.Fragment key={label}>
         <dt>{label}</dt>
-        <dd dangerouslySetInnerHTML={{ __html: html }} />
+        <dd className="se-doc" dangerouslySetInnerHTML={{ __html: html }} />
       </React.Fragment>
     );
   };
