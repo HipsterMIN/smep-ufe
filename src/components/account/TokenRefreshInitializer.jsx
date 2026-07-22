@@ -8,6 +8,13 @@ import {
   isSilentSsoInProgress,
   markSilentSsoStart,
 } from '@utils/onepassSilentSso.js';
+import {
+  SESSION_SUPERSEDED_MESSAGE,
+  clearSessionSuperseded,
+  isSessionSuperseded,
+  isSupersededError,
+  markSessionSuperseded,
+} from '@utils/sessionSupersededGuard.js';
 
 const LOG_PREFIX = '[TokenRefreshInitializer]';
 
@@ -39,6 +46,14 @@ export function TokenRefreshInitializer() {
       const startSilentSso = async () => {
         // /sso 콜백 라우트에서는 재진입을 막는다.
         if (window.location.pathname.endsWith('/sso')) return;
+
+        // 중복 로그인 강퇴 상태에서는 silent 자동 재로그인을 하지 않는다.
+        // 통합회원(IdP) 세션이 살아 있어도, 여기서 자동 복귀하면 두 브라우저가
+        // 새로고침마다 세션을 서로 뺏는 핑퐁이 된다. 로그인 버튼(명시 의사)으로만 복귀한다.
+        if (isSessionSuperseded()) {
+          console.info(`${LOG_PREFIX} session superseded by another login — silent SSO blocked`);
+          return;
+        }
 
         // 이번 탭 세션에서 이미 시도했으면 다시 하지 않는다.
         // window.location.replace()로 복귀 후 리로드되어도 무한 루프를 방지한다.
@@ -110,9 +125,17 @@ export function TokenRefreshInitializer() {
         setToken(newToken);
         if (newRefreshToken) setRefreshToken(newRefreshToken);
 
+        // 재발급 성공 = 이 세션이 유효 = 강퇴 상태 아님. 잔존 플래그를 정리한다.
+        clearSessionSuperseded();
+
         console.log(`${LOG_PREFIX} session restored successfully`);
         return true;
       } catch (err) {
+        // 중복 로그인 강퇴: 자동 재로그인을 막는 플래그를 세우고 사용자에게 알린다.
+        if (isSupersededError(err)) {
+          markSessionSuperseded();
+          window.alert(err?.data?.message || SESSION_SUPERSEDED_MESSAGE);
+        }
         console.error(`${LOG_PREFIX} session restore failed — logging out`, {
           message: err?.message ?? 'unknown',
           status: err?.status ?? null,

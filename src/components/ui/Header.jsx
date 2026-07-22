@@ -12,6 +12,12 @@ import HeaderFontDropdown from '@components/ui/header/HeaderFontDropdown';
 import FullSystemPopup from '@components/ui/FullSystemPopup';
 import { api as apiClient } from '@lib/apiClient.js';
 import { buildOnePassRegisterUrl, onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
+import {
+  SESSION_SUPERSEDED_MESSAGE,
+  clearSessionSuperseded,
+  isSupersededError,
+  markSessionSuperseded,
+} from '@utils/sessionSupersededGuard.js';
 
 // BASE URL 상수
 const BASE_URL = import.meta.env.VITE_BASE || '/';
@@ -313,7 +319,13 @@ export default function Header() {
     } catch (error) {
       // 세션 연장 실패는 복구 불가 fallback이므로 로그인 진입 대신 홈으로 이동시킨다.
       logout();
-      alert('로그인 유효시간 연장에 실패했습니다. 홈으로 이동합니다. 다시 로그인해 주세요.');
+      if (isSupersededError(error)) {
+        // 중복 로그인 강퇴: silent 자동 재로그인을 막고 정확한 사유를 알린다.
+        markSessionSuperseded();
+        alert(error?.data?.message || SESSION_SUPERSEDED_MESSAGE);
+      } else {
+        alert('로그인 유효시간 연장에 실패했습니다. 홈으로 이동합니다. 다시 로그인해 주세요.');
+      }
       navigate('/');
     } finally {
       setIsExtendingSession(false);
@@ -396,6 +408,9 @@ export default function Header() {
 
     const openLoginPopup = async () => {
       try {
+        // 로그인 버튼 클릭 = 명시적 로그인 의사 — 중복 로그인 강퇴 가드를 해제한다.
+        // (이 로그인이 성공하면 반대편 브라우저가 강퇴되는 것이 후입자 우선의 의도된 동작)
+        clearSessionSuperseded();
         const response = await apiClient.get('/api/v1/auth/login-url');
         const loginUrl = response?.loginUrl || response?.data?.loginUrl;
         if (!loginUrl) {
