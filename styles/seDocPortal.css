@@ -28,6 +28,23 @@
   margin: 0.6em 0;
 }
 
+/* 수집 표 펼침 보정 — 원본 표의 인라인 table-layout:fixed 와 col 폭은
+   레거시 화면(12px 글자) 기준이라, 포털 17px 글자에서는 셀이 좁아
+   글자가 한두 자씩 세로로 꺾인다. 포털에서는 열 폭을 콘텐츠에 맞춰
+   다시 계산하도록 fixed 를 무력화한다(인라인 style 을 이겨야 하므로
+   !important). 원본 col 폭은 auto 레이아웃에서 선호 폭 힌트로만 작동한다. */
+.se-doc table {
+  table-layout: auto !important;
+}
+
+/* 셀 텍스트는 단어 단위로 줄바꿈(한 자씩 꺾임 방지).
+   공백 없는 긴 문자열만 넘칠 때 비상 줄바꿈(anywhere)을 허용한다. */
+.se-doc th,
+.se-doc td {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
 /* 표 셀 안 문단 — 위 문단 간격이 셀 내부에도 적용되면 절차 표의 행이
    필요 이상 두꺼워지므로 셀 안에서는 간격을 주지 않는다 */
 .se-doc th p + p,
