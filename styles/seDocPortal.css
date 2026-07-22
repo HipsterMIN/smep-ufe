@@ -38,11 +38,14 @@
 }
 
 /* 셀 텍스트는 단어 단위로 줄바꿈(한 자씩 꺾임 방지).
-   공백 없는 긴 문자열만 넘칠 때 비상 줄바꿈(anywhere)을 허용한다. */
+   ⚠️ overflow-wrap:anywhere 를 함께 쓰면 안 된다 — anywhere 는 min-content
+   폭 계산을 글자 1자로 무너뜨려, auto 레이아웃이 열을 넓힐 근거를 없앤다
+   (중첩 표에서 보정이 통째로 무효가 됨을 실측으로 확인).
+   비상 줄바꿈은 .se-doc 의 overflow-wrap:break-word 상속이 담당한다
+   (break-word 는 min-content 계산에 영향을 주지 않는다). */
 .se-doc th,
 .se-doc td {
   word-break: keep-all;
-  overflow-wrap: anywhere;
 }
 
 /* 표 셀 안 문단 — 위 문단 간격이 셀 내부에도 적용되면 절차 표의 행이
