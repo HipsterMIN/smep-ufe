@@ -27,7 +27,7 @@
     "@grafana/faro-web-tracing": "^1.19.0",
     "@krds-ui/core": "file:./packages/core",
     "@krds-ui/icon": "file:./packages/icon",
-    "@smep/smart-editor": "file:smep-smart-editor-0.3.10.tgz",
+    "@smep/smart-editor": "file:smep-smart-editor-0.3.11.tgz",
     "@svar-ui/react-grid": "^2.3.2",
     "@tanstack/react-query": "^5.100.14",
     "@tiptap/extension-image": "^2.8.0",
