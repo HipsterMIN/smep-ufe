@@ -28,13 +28,15 @@
   margin: 0.6em 0;
 }
 
-/* 수집 표 펼침 보정 — 원본 표의 인라인 table-layout:fixed 와 col 폭은
-   레거시 화면(12px 글자) 기준이라, 포털 17px 글자에서는 셀이 좁아
-   글자가 한두 자씩 세로로 꺾인다. 포털에서는 열 폭을 콘텐츠에 맞춰
-   다시 계산하도록 fixed 를 무력화한다(인라인 style 을 이겨야 하므로
-   !important). 원본 col 폭은 auto 레이아웃에서 선호 폭 힌트로만 작동한다. */
+/* 수집 표 전폭 배분 — 관리자 보기와 동일한 렌더 원리.
+   TipTap/오피스 산출 표는 인라인 table-layout:fixed + pt 셀폭 + min-width 를
+   갖는데, 표 폭 기준이 없으면 fixed 가 pt 폭(11px 글자 시절 값)을 그대로
+   열폭으로 써서 17px 글자가 꺾인다. 전폭(100%)을 기준으로 주면 fixed 가
+   pt 폭을 "비율"로 확대 배분해 관리자 화면과 동일하게 넓게 펴진다.
+   (실데이터 계측: 셀 63~87px·2줄 → 114~167px·1줄, pt 비율 보존)
+   인라인 style 을 이겨야 하므로 !important 가 필요하다. */
 .se-doc table {
-  table-layout: auto !important;
+  width: 100% !important;
 }
 
 /* 셀 텍스트는 단어 단위로 줄바꿈(한 자씩 꺾임 방지).
