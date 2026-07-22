@@ -18,6 +18,10 @@
 .se-doc [style*="font-size"] {
   font-size: inherit !important;
 }
+/* 서체도 동일 — 돋움 등 비트맵 시절 폰트 대신 사이트 서체(Pretendard GOV)를 따른다 */
+.se-doc [style*="font-family"] {
+  font-family: inherit !important;
+}
 
 /* 본문 호흡 — 수집 공고는 문단이 촘촘해 행간·문단 간격을 조금 더 준다 */
 .se-doc {
