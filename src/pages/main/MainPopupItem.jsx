@@ -4,6 +4,8 @@ import { buildMainImageUrl, isNewWindow } from './mainUtils.js';
 
 // 5px보다 작으면 손떨림으로 보고 링크 click을 유지한다. 값을 키우면 drag 시작이 둔해지고 줄이면 오클릭 위험이 커진다.
 const CONTENT_DRAG_THRESHOLD_PX = 5;
+// H1 browser 실측으로 확인한 action bar outer 높이다. AFE size adapter도 같은 값을 사용하므로 함께 변경해야 한다.
+const POPUP_ACTION_BAR_HEIGHT_PX = 65;
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -217,7 +219,8 @@ const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) =>
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
+                objectFit: 'contain',
+                backgroundColor: '#fff',
               }}
               loading="lazy"
               draggable={false}
@@ -243,6 +246,9 @@ const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) =>
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          height: `${POPUP_ACTION_BAR_HEIGHT_PX}px`,
+          boxSizing: 'border-box',
+          flexShrink: 0,
           padding: '12px 16px',
           borderTop: '1px solid #eee',
         }}
