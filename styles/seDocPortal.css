@@ -28,6 +28,35 @@
   margin: 0.6em 0;
 }
 
+/* 수집 표 전폭 배분 — 관리자 보기와 동일한 렌더 원리.
+   TipTap/오피스 산출 표는 인라인 table-layout:fixed + pt 셀폭 + min-width 를
+   갖는데, 표 폭 기준이 없으면 fixed 가 pt 폭(11px 글자 시절 값)을 그대로
+   열폭으로 써서 17px 글자가 꺾인다. 전폭(100%)을 기준으로 주면 fixed 가
+   pt 폭을 "비율"로 확대 배분해 관리자 화면과 동일하게 넓게 펴진다.
+   (실데이터 계측: 셀 63~87px·2줄 → 114~167px·1줄, pt 비율 보존)
+   인라인 style 을 이겨야 하므로 !important 가 필요하다. */
+.se-doc table {
+  width: 100% !important;
+}
+
+/* 셀 텍스트는 단어 단위로 줄바꿈(한 자씩 꺾임 방지).
+   ⚠️ overflow-wrap:anywhere 를 함께 쓰면 안 된다 — anywhere 는 min-content
+   폭 계산을 글자 1자로 무너뜨려, auto 레이아웃이 열을 넓힐 근거를 없앤다
+   (중첩 표에서 보정이 통째로 무효가 됨을 실측으로 확인).
+   비상 줄바꿈은 .se-doc 의 overflow-wrap:break-word 상속이 담당한다
+   (break-word 는 min-content 계산에 영향을 주지 않는다). */
+.se-doc th,
+.se-doc td {
+  word-break: keep-all;
+}
+
+/* 표 셀 안 문단 — 위 문단 간격이 셀 내부에도 적용되면 절차 표의 행이
+   필요 이상 두꺼워지므로 셀 안에서는 간격을 주지 않는다 */
+.se-doc th p + p,
+.se-doc td p + p {
+  margin-top: 0;
+}
+
 /* 표 — 절차/일정 표가 본문과 구분되어 보이도록 상하 여백을 넉넉히 */
 .se-doc table {
   margin: 1.1em 0;
