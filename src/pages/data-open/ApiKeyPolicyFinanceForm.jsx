@@ -1,5 +1,5 @@
 import Popup from '@components/ui/Popup';
-import { useEffect, useState } from 'react';
+import { useEffect,useRef, useState } from 'react';
 import { api as apiClient } from '@lib/apiClient.js';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import { onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
@@ -12,8 +12,9 @@ const ApiKeyPolicyFinanceForm = () => {
   const navigate = useNavigate();
   const isLoggedIn = Boolean(authToken);
   const mbrNo = userInfo?.id;
+  const loginCheckedRef = useRef(false);
 
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [memberInfo, setMemberInfo] = useState({});
@@ -42,10 +43,25 @@ const ApiKeyPolicyFinanceForm = () => {
 
   // 로그인 안 되어 있으면 로그인 페이지로 이동
   useEffect(() => {
-    if (!isLoggedIn) {
-      onePassGetAuthCode();
+    if (isLoggedIn) {
+      setIsOpen(true);
+      return;
     }
-  }, [isLoggedIn]);
+
+    if (loginCheckedRef.current) return;
+    loginCheckedRef.current = true;
+
+    if (!isLoggedIn) {
+      const moveToLogin = window.confirm('로그인 후 인증키 신청이 가능합니다. 로그인 하시겠습니까?');
+      if (moveToLogin) {
+        onePassGetAuthCode();
+      } else {
+        navigate('/');
+      }
+    }
+
+  }, [isLoggedIn, navigate]);
+
 
   // 로그인 후 회원정보 조회
   useEffect(() => {
