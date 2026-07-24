@@ -38,6 +38,7 @@ const UI_USR_L_170 = lazy(() => import('@pages/more-service/UI_USR_L_170.jsx'));
 const ApiInfo = lazy(() => import('@pages/data-open/ApiInfo.jsx'));
 const UI_USR_L_220 = lazy(() => import('@pages/data-open/UI-USR-L-220.jsx'));
 const UI_USR_L_230 = lazy(() => import('@pages/board/BoardResolver.jsx'));
+const ApiKeyPolicyFinanceForm = lazy(() => import('@pages/data-open/ApiKeyPolicyFinanceForm.jsx'));
 const SupportBusinessInfoApi = lazy(() => import('@pages/data-open/SupportBusinessInfoApi.jsx'));
 const EventInfoApi = lazy(() => import('@pages/data-open/EventInfoApi.jsx'));
 const InnoBizCertificateApi = lazy(() => import('@pages/data-open/InnoBizCertificateApi.jsx'));
@@ -489,6 +490,12 @@ export const componentMap = {
       { path: ':id/edit', component: BoardWriteResolver }, // API Q&A 수정
       { path: ':id', component: BoardPostResolver }, // API Q&A 상세
     ],
+  },
+
+  // 정책금융 인증키 신청,
+  'M_PIIO_90103': {
+    component: ApiKeyPolicyFinanceForm,
+    layout: 'SubpageLayoutWithMenu',
   },
 
   // ========== 고객지원 (M_PIIO_00067) ==========

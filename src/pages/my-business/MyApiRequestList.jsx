@@ -151,16 +151,20 @@ const MyApiRequestList = () => { // mbrNo를 받아옵니다.
                       <td className="ac"><span>{row.ogdpInstNm}</span></td>
                       <td className="ac"><span>{row.siteNm}</span></td>
                       <td className="ac">
-                        <span
-                          className="txt-point"
-                          style={{ cursor: 'pointer' }}
-                          onClick={() => {
-                            const path = getLinkSitePath(row.apiSeCd);
-                            if (path) navigate(`/cs/opndata/UI_USR_L_210/${path}`);
-                          }}
-                        >
-                          {row.apiNm}
-                        </span>
+                        {row.apiSeCd === 'AD10' ? (
+                            <span>{row.apiNm}</span>
+                        ) : (
+                            <span
+                                className="txt-point"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => {
+                                  const path = getLinkSitePath(row.apiSeCd);
+                                  if (path) navigate(`/cs/opndata/UI_USR_L_210/${path}`);
+                                }}
+                            >
+                            {row.apiNm}
+                          </span>
+                        )}
                       </td>
                       <td className="ac"><span>{row.picEmlAddr}</span></td>
                       <td className="ac"><span>{row.apiAplyYmd.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')}</span></td>
