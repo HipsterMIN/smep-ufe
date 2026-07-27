@@ -42,6 +42,35 @@ const ApiKeyPolicyFinanceForm = () => {
   const [formData, setFormData] = useState(initialFormState);
 
   const LOGIN_REDIRECT_KEY = 'policyFinanceApiLoginRedirect';
+  // useEffect(() => {
+  //   if (isLoggedIn) {
+  //     sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+  //     setIsOpen(true);
+  //     return;
+  //   }
+  //
+  //   if (loginCheckedRef.current) return;
+  //   loginCheckedRef.current = true;
+  //
+  //   const loginRedirected = sessionStorage.getItem(LOGIN_REDIRECT_KEY);
+  //   sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+  //
+  //   if (loginRedirected === 'true') {
+  //     return;
+  //   }
+  //
+  //   const moveToLogin = window.confirm(
+  //       '로그인 후 인증키 신청이 가능합니다. 로그인 하시겠습니까?'
+  //   );
+  //
+  //   if (moveToLogin) {
+  //     sessionStorage.setItem(LOGIN_REDIRECT_KEY, 'true');
+  //     onePassGetAuthCode();
+  //   } else {
+  //     navigate('/');
+  //   }
+  // }, [isLoggedIn, navigate]);
+
   useEffect(() => {
     if (isLoggedIn) {
       sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
@@ -50,25 +79,35 @@ const ApiKeyPolicyFinanceForm = () => {
     }
 
     if (loginCheckedRef.current) return;
-    loginCheckedRef.current = true;
 
-    const loginRedirected = sessionStorage.getItem(LOGIN_REDIRECT_KEY);
-    sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+    const timer = setTimeout(() => {
+      loginCheckedRef.current = true;
 
-    if (loginRedirected === 'true') {
-      return;
-    }
+      const stillLoggedOut = !useAuthStore.getState().token;
+      if (!stillLoggedOut) {
+        sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+        setIsOpen(true);
+        return;
+      }
 
-    const moveToLogin = window.confirm(
-        '로그인 후 인증키 신청이 가능합니다. 로그인 하시겠습니까?'
-    );
+      const loginRedirected = sessionStorage.getItem(LOGIN_REDIRECT_KEY);
+      sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
 
-    if (moveToLogin) {
-      sessionStorage.setItem(LOGIN_REDIRECT_KEY, 'true');
-      onePassGetAuthCode();
-    } else {
-      navigate('/');
-    }
+      if (loginRedirected === 'true') return;
+
+      const moveToLogin = window.confirm(
+          '로그인 후 인증키 신청이 가능합니다. 로그인 하시겠습니까?'
+      );
+
+      if (moveToLogin) {
+        sessionStorage.setItem(LOGIN_REDIRECT_KEY, 'true');
+        onePassGetAuthCode();
+      } else {
+        navigate('/');
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, [isLoggedIn, navigate]);
 
 
