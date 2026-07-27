@@ -41,9 +41,10 @@ const ApiKeyPolicyFinanceForm = () => {
 
   const [formData, setFormData] = useState(initialFormState);
 
-  // 로그인 안 되어 있으면 로그인 페이지로 이동
+  const LOGIN_REDIRECT_KEY = 'policyFinanceApiLoginRedirect';
   useEffect(() => {
     if (isLoggedIn) {
+      sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
       setIsOpen(true);
       return;
     }
@@ -51,15 +52,23 @@ const ApiKeyPolicyFinanceForm = () => {
     if (loginCheckedRef.current) return;
     loginCheckedRef.current = true;
 
-    if (!isLoggedIn) {
-      const moveToLogin = window.confirm('로그인 후 인증키 신청이 가능합니다. 로그인 하시겠습니까?');
-      if (moveToLogin) {
-        onePassGetAuthCode();
-      } else {
-        navigate('/');
-      }
+    const loginRedirected = sessionStorage.getItem(LOGIN_REDIRECT_KEY);
+    sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+
+    if (loginRedirected === 'true') {
+      return;
     }
 
+    const moveToLogin = window.confirm(
+        '로그인 후 인증키 신청이 가능합니다. 로그인 하시겠습니까?'
+    );
+
+    if (moveToLogin) {
+      sessionStorage.setItem(LOGIN_REDIRECT_KEY, 'true');
+      onePassGetAuthCode();
+    } else {
+      navigate('/');
+    }
   }, [isLoggedIn, navigate]);
 
 
