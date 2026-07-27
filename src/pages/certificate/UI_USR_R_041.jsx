@@ -10,6 +10,7 @@ import Breadcrumb from '@components/ui/Breadcrumb.jsx';
 import Popup from '@components/ui/Popup.jsx';
 import { resolveListBackPath } from '@utils/listNavigation.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
+import { onePassGetAuthCode } from '@utils/keycloakGetAuthCode.js';
 
 const alignCertificateDetailTableConvention = (html) => {
   if (!html || typeof document === 'undefined') {
@@ -76,7 +77,8 @@ const UI_USR_R_041 = () => {
   const handleClickIssue = async () => {
     if (!isLogin) {
       if (window.confirm('로그인 후 해당 서비스를 이용하실 수 있습니다.\n로그인 페이지로 이동하시겠습니까?')) {
-        navigate('/service/login', { state: { loginType: 'CORPORATE' } });
+        //navigate('/service/login', { state: { loginType: 'CORPORATE' } });
+        onePassGetAuthCode();
       }
       return;
     }
@@ -112,7 +114,8 @@ const UI_USR_R_041 = () => {
           logout(); // API 실패해도 로컬 로그아웃은 수행
         }
 
-        navigate('/service/login', { state: { loginType: 'CORPORATE' } });
+        // navigate('/service/login', { state: { loginType: 'CORPORATE' } });
+        onePassGetAuthCode();
       }
       return;
     }

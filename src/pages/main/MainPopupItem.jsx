@@ -171,8 +171,9 @@ const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) =>
       onPointerDown={onActivate}
       style={{
         position: 'fixed',
-        top: `${popup.upendPstnNvl || 120}px`,
-        left: `${popup.lfsdPstnNvl || 40}px`,
+        // 위치 0은 좌상단을 뜻하는 유효값이므로 값이 없을 때만 기존 기본 위치를 사용한다.
+        top: `${popup.upendPstnNvl ?? 120}px`,
+        left: `${popup.lfsdPstnNvl ?? 40}px`,
         width: `${popup.wdthLen || 360}px`,
         height: `${popup.vrtcLen || 420}px`,
         zIndex: isActive ? 1001 : 1000,
@@ -202,6 +203,7 @@ const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) =>
       >
         <a
           href={href}
+          title={popup.popupTtl}
           target={external ? '_blank' : undefined}
           rel={external ? 'noreferrer' : undefined}
           draggable={false}

@@ -29,6 +29,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [selectedCategoryNo, setSelectedCategoryNo] = useState('');
+  const [contentBannedWords, setContentBannedWords] = useState([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [visibility, setVisibility] = useState('PRIVATE');
@@ -85,6 +86,39 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
   }, [bbsNo, isCategoryRequired]);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const fetchBannedWords = async () => {
+      if (!bbsNo) {
+        if (!isMounted) return;
+        setContentBannedWords([]);
+        return;
+      }
+
+      try {
+        const response = await apiClient.get(`/api/v1/board/${bbsNo}/banned-words`);
+        const data = normalizeResponse(response);
+
+        if (!isMounted) return;
+        setContentBannedWords(
+          Array.isArray(data)
+            ? data.map((item) => item?.bbsAtrbNm).filter(Boolean)
+            : [],
+        );
+      } catch (error) {
+        if (!isMounted) return;
+        setContentBannedWords([]);
+      }
+    };
+
+    fetchBannedWords();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [bbsNo]);
+
+  useEffect(() => {
     if (!isEditMode) return;
 
     const fetchPostDetail = async () => {
@@ -118,25 +152,41 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
     }
   }, [categories, selectedCategoryNo]);
 
+  const findBannedWord = (text) =>
+    contentBannedWords.find((word) => word && text.includes(word));
+
   const validateForm = () => {
     if (!bbsNo) {
       alert('게시판 정보를 확인할 수 없습니다.');
       return false;
     }
 
-    if (normalizeText(title) === '') {
+    const cleanTitle = normalizeText(title);
+    if (cleanTitle === '') {
       alert('제목을 입력해주세요.');
       return false;
     }
 
-    if (normalizeText(content) === '') {
-      alert('문의내용을 입력해주세요.');
+    const bannedTitleWord = findBannedWord(cleanTitle);
+    if (bannedTitleWord) {
+      alert(`제목에 금지어가 포함되어있습니다.\n제목 : ${bannedTitleWord}`);
       return false;
     }
 
     const cleanContent = normalizeText(content);
+    if (cleanContent === '') {
+      alert('문의내용을 입력해주세요.');
+      return false;
+    }
+
     if (cleanContent.length > 100) {
       alert('문의내용은 최대 100자까지 입력 가능합니다.');
+      return false;
+    }
+
+    const bannedContentWord = findBannedWord(cleanContent);
+    if (bannedContentWord) {
+      alert(`내용에 금지어가 포함되어있습니다.\n내용 : ${bannedContentWord}`);
       return false;
     }
 
@@ -147,6 +197,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
 
     return true;
   };
+
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
     if (!files || files.length === 0) return;
@@ -186,7 +237,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
 
   const buildRequestBody = (fileId) => {
     const parsedCategoryNo =
-      isCategoryRequired && selectedCategoryNo !== '' ? Number(selectedCategoryNo) : null;
+        isCategoryRequired && selectedCategoryNo !== '' ? Number(selectedCategoryNo) : null;
 
     return {
       ctgryNo: Number.isFinite(parsedCategoryNo) ? parsedCategoryNo : null,
@@ -280,7 +331,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
             <div className="form-row-item ">
               <dt className="form-row-label">
                 <label htmlFor="board_qna_category">
-                  카테고리
+                    카테고리
                   {isCategoryRequired && (
                     <span className="on-required">
                       <span className="sr-only">필수입력</span>
@@ -310,7 +361,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
             <div className="form-row-item">
               <dt className="form-row-label">
                 <label htmlFor="board_qna_title">
-                  제목
+                    제목
                   <span className="on-required">
                     <span className="sr-only">필수입력</span>
                   </span>
@@ -333,7 +384,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
             <div className="form-row-item">
               <dt className="form-row-label">
                 <label htmlFor="board_qna_content">
-                  문의내용
+                    문의내용
                   <span className="on-required">
                     <span className="sr-only">필수입력</span>
                   </span>
@@ -412,7 +463,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
                 <ul className="info-list-point">
                   <li><i className="svg-icon ico-checkbox"></i>첨부파일은 10MB 이하의 파일만 가능합니다.</li>
                   <li><i className="svg-icon ico-checkbox"></i>첨부파일은 zip 압축파일, 문서(한글, 엑셀, MS워드, 파워포인트, PDF, TXT)또는
-                    이미지(jpg, png, gif 등)파일만 가능합니다.
+                      이미지(jpg, png, gif 등)파일만 가능합니다.
                   </li>
                 </ul>
                 <div className="file-upload mt-16">
@@ -430,7 +481,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
                     className="krds-btn secondary medium"
                     onClick={handleButtonClick}
                   >
-                    찾아보기
+                      찾아보기
                   </button>
                   <div className="file-list-container mt-16">
                     {existingFiles.map((file, index) => (
@@ -441,7 +492,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
                           className="ml-8"
                           onClick={removeExistingFile}
                         >
-                          삭제
+                              삭제
                         </button>
                       </div>
                     ))}
@@ -455,7 +506,7 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
                           className="ml-8"
                           onClick={() => removeFile(index)}
                         >
-                          삭제
+                              삭제
                         </button>
                       </div>
                     ))}
@@ -469,12 +520,12 @@ const BoardWriteQna = ({ boardDetail, bbsNo, mode = 'create' }) => {
         <div className="onboard-btm-btngroup bt-0">
           <div>
             <button type="button" className="krds-btn tertiary  xlarge" onClick={handleCancel} disabled={saving}>
-              취소
+                취소
             </button>
           </div>
           <div>
             <button type="button" className="krds-btn xlarge" onClick={handleSave} disabled={saving}>
-              저장
+                저장
             </button>
           </div>
         </div>
