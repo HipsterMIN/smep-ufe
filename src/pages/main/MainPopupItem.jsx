@@ -2,7 +2,10 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 import { buildMainImageUrl, isNewWindow } from './mainUtils.js';
 
-const INTERACTIVE_ELEMENT_SELECTOR = 'button, a, input, select, textarea, [role="button"]';
+// 5px보다 작으면 손떨림으로 보고 링크 click을 유지한다. 값을 키우면 drag 시작이 둔해지고 줄이면 오클릭 위험이 커진다.
+const CONTENT_DRAG_THRESHOLD_PX = 5;
+// H1 browser 실측으로 확인한 action bar outer 높이다. AFE size adapter도 같은 값을 사용하므로 함께 변경해야 한다.
+const POPUP_ACTION_BAR_HEIGHT_PX = 65;
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -20,8 +23,8 @@ const resolveViewportBounds = (viewportWidth, viewportHeight, popupWidth, popupH
 };
 
 /**
- * 메인 팝업 한 개를 표시하고 제목 영역의 Pointer Events 드래그를 처리한다.
- * 버튼과 링크는 drag handle에서 제외해 기존 클릭 동작을 유지한다.
+ * 메인 팝업 한 개를 표시하고 본문 콘텐츠의 link click과 Pointer Events drag를 구분한다.
+ * 하단 액션 버튼은 drag 영역 밖에 두어 기존 클릭 동작을 유지한다.
  *
  * @param {object} props 컴포넌트 속성
  * @param {object} props.popup 메인 API가 반환한 팝업 정보
@@ -34,6 +37,7 @@ const resolveViewportBounds = (viewportWidth, viewportHeight, popupWidth, popupH
 const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) => {
   const popupRef = useRef(null);
   const dragRef = useRef(null);
+  const suppressClickRef = useRef(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
 
@@ -68,14 +72,17 @@ const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) =>
 
   const handlePointerDown = useCallback((event) => {
     if (!event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
-    if (event.target.closest(INTERACTIVE_ELEMENT_SELECTOR)) return;
 
     const popupElement = popupRef.current;
     if (!popupElement) return;
 
     const rect = popupElement.getBoundingClientRect();
+    const captureElement = event.target;
+    // 링크 안에서 실제로 누른 요소가 capture를 가져야 무이동 click의 대상도 링크 내부에 남는다.
+    suppressClickRef.current = false;
     dragRef.current = {
       pointerId: event.pointerId,
+      captureElement,
       startX: event.clientX,
       startY: event.clientY,
       startLeft: rect.left,
@@ -84,16 +91,26 @@ const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) =>
       startOffsetY: offset.y,
       width: rect.width,
       height: rect.height,
+      hasDragged: false,
     };
 
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    event.preventDefault();
-    setIsDragging(true);
+    captureElement.setPointerCapture?.(event.pointerId);
   }, [offset.x, offset.y]);
 
   const handlePointerMove = useCallback((event) => {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
+
+    const deltaX = event.clientX - drag.startX;
+    const deltaY = event.clientY - drag.startY;
+    // 작은 손떨림까지 drag로 처리하면 링크 click이 깨지므로 임계값을 넘기 전에는 팝업을 이동하지 않는다.
+    if (!drag.hasDragged && Math.hypot(deltaX, deltaY) < CONTENT_DRAG_THRESHOLD_PX) return;
+
+    if (!drag.hasDragged) {
+      drag.hasDragged = true;
+      setIsDragging(true);
+    }
+    event.preventDefault();
 
     const bounds = resolveViewportBounds(
       window.innerWidth,
@@ -102,12 +119,12 @@ const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) =>
       drag.height,
     );
     const nextLeft = clamp(
-      drag.startLeft + event.clientX - drag.startX,
+      drag.startLeft + deltaX,
       bounds.minLeft,
       bounds.maxLeft,
     );
     const nextTop = clamp(
-      drag.startTop + event.clientY - drag.startY,
+      drag.startTop + deltaY,
       bounds.minTop,
       bounds.maxTop,
     );
@@ -122,11 +139,21 @@ const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) =>
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
 
+    suppressClickRef.current = drag.hasDragged;
     dragRef.current = null;
-    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
+    if (drag.captureElement.hasPointerCapture?.(event.pointerId)) {
+      drag.captureElement.releasePointerCapture(event.pointerId);
     }
     setIsDragging(false);
+  }, []);
+
+  const handleContentClick = useCallback((event) => {
+    if (!suppressClickRef.current) return;
+
+    // drag 직후 발생하는 anchor click만 취소해 의도하지 않은 페이지 이동을 막고, 일반 click은 그대로 통과시킨다.
+    suppressClickRef.current = false;
+    event.preventDefault();
+    event.stopPropagation();
   }, []);
 
   const imageSrc = buildMainImageUrl(
@@ -144,8 +171,9 @@ const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) =>
       onPointerDown={onActivate}
       style={{
         position: 'fixed',
-        top: `${popup.upendPstnNvl || 120}px`,
-        left: `${popup.lfsdPstnNvl || 40}px`,
+        // 위치 0은 좌상단을 뜻하는 유효값이므로 값이 없을 때만 기존 기본 위치를 사용한다.
+        top: `${popup.upendPstnNvl ?? 120}px`,
+        left: `${popup.lfsdPstnNvl ?? 40}px`,
         width: `${popup.wdthLen || 360}px`,
         height: `${popup.vrtcLen || 420}px`,
         zIndex: isActive ? 1001 : 1000,
@@ -158,41 +186,33 @@ const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) =>
       }}
     >
       <div
-        className="main-popup-drag-handle"
+        className="main-popup-content-drag-area"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={finishDrag}
         onPointerCancel={finishDrag}
         onLostPointerCapture={finishDrag}
+        onClickCapture={handleContentClick}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 16px',
-          borderBottom: '1px solid #eee',
+          flex: 1,
+          overflow: 'hidden',
           cursor: isDragging ? 'grabbing' : 'grab',
           touchAction: 'none',
           userSelect: 'none',
         }}
       >
-        <strong style={{ fontSize: '16px', lineHeight: 1.4 }}>
-          {popup.popupTtl}
-        </strong>
-        <button
-          type="button"
-          className="krds-btn text small"
-          aria-label="팝업 닫기"
-          onClick={() => onClose(popup.popupId)}
-        >
-          <i className="svg-icon ico-popup-close"></i>
-        </button>
-      </div>
-      <div style={{ flex: 1, overflow: 'hidden' }}>
         <a
           href={href}
+          title={popup.popupTtl}
           target={external ? '_blank' : undefined}
           rel={external ? 'noreferrer' : undefined}
-          style={{ display: 'block', width: '100%', height: '100%' }}
+          draggable={false}
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '100%',
+            cursor: 'inherit',
+          }}
         >
           {imageSrc ? (
             <img
@@ -201,9 +221,11 @@ const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) =>
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
+                objectFit: 'contain',
+                backgroundColor: '#fff',
               }}
               loading="lazy"
+              draggable={false}
             />
           ) : (
             <div
@@ -226,6 +248,9 @@ const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) =>
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          height: `${POPUP_ACTION_BAR_HEIGHT_PX}px`,
+          boxSizing: 'border-box',
+          flexShrink: 0,
           padding: '12px 16px',
           borderTop: '1px solid #eee',
         }}

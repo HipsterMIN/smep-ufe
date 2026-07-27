@@ -67,10 +67,11 @@ describe('MainPopupItem', () => {
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
   });
 
-  it('서버 위치와 크기, 기존 링크와 버튼을 그대로 표시한다', () => {
+  it('헤더 없이 서버 위치와 크기, 기존 링크와 하단 버튼을 표시한다', () => {
     const { container } = renderPopup();
     const popupElement = container.querySelector('.main-popup-item');
     const link = screen.getByRole('link');
+    const image = screen.getByRole('img', { name: '팝업 이미지 설명' });
 
     expect(popupElement.style.top).toBe('120px');
     expect(popupElement.style.left).toBe('40px');
@@ -78,16 +79,21 @@ describe('MainPopupItem', () => {
     expect(popupElement.style.height).toBe('420px');
     expect(link.getAttribute('href')).toBe('https://example.com/detail');
     expect(link.getAttribute('target')).toBe('_blank');
+    expect(link.draggable).toBe(false);
+    expect(image.draggable).toBe(false);
+    expect(container.querySelector('strong')).toBeNull();
+    expect(screen.queryByRole('button', { name: '팝업 닫기' })).toBeNull();
     expect(screen.getByRole('button', { name: '오늘 하루 보지 않기' })).toBeTruthy();
   });
 
-  it('제목 영역을 마우스로 끌면 팝업 위치를 이동한다', () => {
+  it('본문 콘텐츠를 마우스로 끌면 팝업 위치를 이동한다', () => {
     const { container, props } = renderPopup();
     const popupElement = container.querySelector('.main-popup-item');
-    const handle = container.querySelector('.main-popup-drag-handle');
+    const contentArea = container.querySelector('.main-popup-content-drag-area');
+    const image = screen.getByRole('img', { name: '팝업 이미지 설명' });
     setPopupRect(popupElement, { left: 40, top: 120, width: 360, height: 420 });
 
-    fireEvent.pointerDown(handle, {
+    fireEvent.pointerDown(image, {
       pointerId: 1,
       pointerType: 'mouse',
       button: 0,
@@ -95,7 +101,7 @@ describe('MainPopupItem', () => {
       clientX: 100,
       clientY: 150,
     });
-    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 250, clientY: 300 });
+    fireEvent.pointerMove(contentArea, { pointerId: 1, clientX: 250, clientY: 300 });
 
     expect(popupElement.style.transform).toBe('translate3d(150px, 150px, 0)');
     expect(props.onActivate).toHaveBeenCalledTimes(1);
@@ -104,10 +110,11 @@ describe('MainPopupItem', () => {
   it('터치 포인터도 같은 드래그 계산을 사용한다', () => {
     const { container } = renderPopup();
     const popupElement = container.querySelector('.main-popup-item');
-    const handle = container.querySelector('.main-popup-drag-handle');
+    const contentArea = container.querySelector('.main-popup-content-drag-area');
+    const image = screen.getByRole('img', { name: '팝업 이미지 설명' });
     setPopupRect(popupElement, { left: 40, top: 120, width: 360, height: 420 });
 
-    fireEvent.pointerDown(handle, {
+    fireEvent.pointerDown(image, {
       pointerId: 2,
       pointerType: 'touch',
       button: 0,
@@ -115,7 +122,7 @@ describe('MainPopupItem', () => {
       clientX: 100,
       clientY: 150,
     });
-    fireEvent.pointerMove(handle, { pointerId: 2, clientX: 180, clientY: 230 });
+    fireEvent.pointerMove(contentArea, { pointerId: 2, clientX: 180, clientY: 230 });
 
     expect(popupElement.style.transform).toBe('translate3d(80px, 80px, 0)');
   });
@@ -123,10 +130,11 @@ describe('MainPopupItem', () => {
   it('pointerup 뒤에는 더 움직이지 않는다', () => {
     const { container } = renderPopup();
     const popupElement = container.querySelector('.main-popup-item');
-    const handle = container.querySelector('.main-popup-drag-handle');
+    const contentArea = container.querySelector('.main-popup-content-drag-area');
+    const image = screen.getByRole('img', { name: '팝업 이미지 설명' });
     setPopupRect(popupElement, { left: 40, top: 120, width: 360, height: 420 });
 
-    fireEvent.pointerDown(handle, {
+    fireEvent.pointerDown(image, {
       pointerId: 3,
       pointerType: 'mouse',
       button: 0,
@@ -134,9 +142,9 @@ describe('MainPopupItem', () => {
       clientX: 100,
       clientY: 150,
     });
-    fireEvent.pointerMove(handle, { pointerId: 3, clientX: 160, clientY: 210 });
-    fireEvent.pointerUp(handle, { pointerId: 3 });
-    fireEvent.pointerMove(handle, { pointerId: 3, clientX: 300, clientY: 350 });
+    fireEvent.pointerMove(contentArea, { pointerId: 3, clientX: 160, clientY: 210 });
+    fireEvent.pointerUp(contentArea, { pointerId: 3 });
+    fireEvent.pointerMove(contentArea, { pointerId: 3, clientX: 300, clientY: 350 });
 
     expect(popupElement.style.transform).toBe('translate3d(60px, 60px, 0)');
   });
@@ -146,10 +154,11 @@ describe('MainPopupItem', () => {
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 600 });
     const { container } = renderPopup();
     const popupElement = container.querySelector('.main-popup-item');
-    const handle = container.querySelector('.main-popup-drag-handle');
+    const contentArea = container.querySelector('.main-popup-content-drag-area');
+    const image = screen.getByRole('img', { name: '팝업 이미지 설명' });
     setPopupRect(popupElement, { left: 40, top: 120, width: 360, height: 420 });
 
-    fireEvent.pointerDown(handle, {
+    fireEvent.pointerDown(image, {
       pointerId: 4,
       pointerType: 'mouse',
       button: 0,
@@ -157,7 +166,7 @@ describe('MainPopupItem', () => {
       clientX: 100,
       clientY: 150,
     });
-    fireEvent.pointerMove(handle, { pointerId: 4, clientX: 1000, clientY: 1000 });
+    fireEvent.pointerMove(contentArea, { pointerId: 4, clientX: 1000, clientY: 1000 });
 
     expect(popupElement.style.transform).toBe('translate3d(400px, 60px, 0)');
   });
@@ -169,10 +178,11 @@ describe('MainPopupItem', () => {
       popup: { ...popup, lfsdPstnNvl: 0, upendPstnNvl: 0, wdthLen: 1000, vrtcLen: 700 },
     });
     const popupElement = container.querySelector('.main-popup-item');
-    const handle = container.querySelector('.main-popup-drag-handle');
+    const contentArea = container.querySelector('.main-popup-content-drag-area');
+    const image = screen.getByRole('img', { name: '팝업 이미지 설명' });
     setPopupRect(popupElement, { left: 0, top: 0, width: 1000, height: 700 });
 
-    fireEvent.pointerDown(handle, {
+    fireEvent.pointerDown(image, {
       pointerId: 5,
       pointerType: 'mouse',
       button: 0,
@@ -180,41 +190,48 @@ describe('MainPopupItem', () => {
       clientX: 100,
       clientY: 100,
     });
-    fireEvent.pointerMove(handle, { pointerId: 5, clientX: -500, clientY: -500 });
+    fireEvent.pointerMove(contentArea, { pointerId: 5, clientX: -500, clientY: -500 });
 
     expect(popupElement.style.transform).toBe('translate3d(-200px, -100px, 0)');
   });
 
-  it('제목의 X 버튼은 drag를 시작하지 않고 닫기만 실행한다', () => {
-    const { container, props } = renderPopup();
+  it('5px 미만의 움직임은 drag로 바꾸지 않고 링크 click을 유지한다', () => {
+    const { container } = renderPopup({
+      popup: { ...popup, imgLnkgUrlAddr: '#detail', imgLnkgNpagYn: 'N' },
+    });
     const popupElement = container.querySelector('.main-popup-item');
-    const closeButton = screen.getByRole('button', { name: '팝업 닫기' });
-    const handle = container.querySelector('.main-popup-drag-handle');
+    const contentArea = container.querySelector('.main-popup-content-drag-area');
+    const link = screen.getByRole('link');
+    const image = screen.getByRole('img', { name: '팝업 이미지 설명' });
     setPopupRect(popupElement, { left: 40, top: 120, width: 360, height: 420 });
 
-    fireEvent.pointerDown(closeButton, {
+    fireEvent.pointerDown(image, {
       pointerId: 6,
       pointerType: 'mouse',
       button: 0,
       isPrimary: true,
-      clientX: 350,
-      clientY: 140,
+      clientX: 100,
+      clientY: 150,
     });
-    fireEvent.pointerMove(handle, { pointerId: 6, clientX: 500, clientY: 500 });
-    fireEvent.click(closeButton);
+    fireEvent.pointerMove(contentArea, { pointerId: 6, clientX: 103, clientY: 153 });
+    fireEvent.pointerUp(contentArea, { pointerId: 6 });
+
+    const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
 
     expect(popupElement.style.transform).toBe('translate3d(0px, 0px, 0)');
-    expect(props.onClose).toHaveBeenCalledWith(9);
+    expect(link.dispatchEvent(clickEvent)).toBe(true);
+    expect(clickEvent.defaultPrevented).toBe(false);
   });
 
-  it('본문 링크에서는 drag를 시작하지 않는다', () => {
+  it('본문 콘텐츠를 drag한 뒤에는 링크 click을 취소한다', () => {
     const { container } = renderPopup();
     const popupElement = container.querySelector('.main-popup-item');
-    const handle = container.querySelector('.main-popup-drag-handle');
+    const contentArea = container.querySelector('.main-popup-content-drag-area');
     const link = screen.getByRole('link');
+    const image = screen.getByRole('img', { name: '팝업 이미지 설명' });
     setPopupRect(popupElement, { left: 40, top: 120, width: 360, height: 420 });
 
-    fireEvent.pointerDown(link, {
+    fireEvent.pointerDown(image, {
       pointerId: 7,
       pointerType: 'mouse',
       button: 0,
@@ -222,17 +239,38 @@ describe('MainPopupItem', () => {
       clientX: 150,
       clientY: 250,
     });
-    fireEvent.pointerMove(handle, { pointerId: 7, clientX: 400, clientY: 400 });
+    fireEvent.pointerMove(contentArea, { pointerId: 7, clientX: 250, clientY: 350 });
+    fireEvent.pointerUp(contentArea, { pointerId: 7 });
 
-    expect(popupElement.style.transform).toBe('translate3d(0px, 0px, 0)');
+    const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+
+    expect(popupElement.style.transform).toBe('translate3d(100px, 100px, 0)');
+    expect(link.dispatchEvent(clickEvent)).toBe(false);
+    expect(clickEvent.defaultPrevented).toBe(true);
   });
 
-  it('하단 버튼은 기존 callback을 실행한다', () => {
-    const { props } = renderPopup();
+  it('하단 버튼은 drag를 시작하지 않고 기존 callback을 실행한다', () => {
+    const { container, props } = renderPopup();
+    const popupElement = container.querySelector('.main-popup-item');
+    const contentArea = container.querySelector('.main-popup-content-drag-area');
+    const hideTodayButton = screen.getByRole('button', { name: '오늘 하루 보지 않기' });
+    const closeButton = screen.getByRole('button', { name: '닫기' });
+    setPopupRect(popupElement, { left: 40, top: 120, width: 360, height: 420 });
 
-    fireEvent.click(screen.getByRole('button', { name: '오늘 하루 보지 않기' }));
-    fireEvent.click(screen.getByRole('button', { name: '닫기' }));
+    fireEvent.pointerDown(hideTodayButton, {
+      pointerId: 8,
+      pointerType: 'mouse',
+      button: 0,
+      isPrimary: true,
+      clientX: 100,
+      clientY: 500,
+    });
+    fireEvent.pointerMove(contentArea, { pointerId: 8, clientX: 300, clientY: 300 });
 
+    fireEvent.click(hideTodayButton);
+    fireEvent.click(closeButton);
+
+    expect(popupElement.style.transform).toBe('translate3d(0px, 0px, 0)');
     expect(props.onHideToday).toHaveBeenCalledWith(9);
     expect(props.onClose).toHaveBeenCalledWith(9);
   });
@@ -246,18 +284,19 @@ describe('MainPopupItem', () => {
   it('컴포넌트를 다시 열면 서버 초기 위치에서 시작한다', () => {
     const first = renderPopup();
     const firstPopup = first.container.querySelector('.main-popup-item');
-    const firstHandle = first.container.querySelector('.main-popup-drag-handle');
+    const firstContentArea = first.container.querySelector('.main-popup-content-drag-area');
+    const firstImage = screen.getByRole('img', { name: '팝업 이미지 설명' });
     setPopupRect(firstPopup, { left: 40, top: 120, width: 360, height: 420 });
 
-    fireEvent.pointerDown(firstHandle, {
-      pointerId: 8,
+    fireEvent.pointerDown(firstImage, {
+      pointerId: 9,
       pointerType: 'mouse',
       button: 0,
       isPrimary: true,
       clientX: 100,
       clientY: 150,
     });
-    fireEvent.pointerMove(firstHandle, { pointerId: 8, clientX: 200, clientY: 250 });
+    fireEvent.pointerMove(firstContentArea, { pointerId: 9, clientX: 200, clientY: 250 });
     expect(firstPopup.style.transform).toBe('translate3d(100px, 100px, 0)');
     first.unmount();
 
