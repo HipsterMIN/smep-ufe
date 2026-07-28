@@ -63,6 +63,11 @@ const SprtBiz = () => {
   const location = useLocation();
   const [, setSearchParams] = useSearchParams();
   const { breadcrumbItems, getSideNavigationData, getDepth1Parent } = useUserMenu();
+
+  // iframe 연계용 파라미터 (레거시 iType=frame 방식과 동일)
+  const iType = getSearchParam(location.search, 'iType', '');
+  const isFrame = iType === 'frame';
+
   const initialQueryRef = useRef({
     condition: getConditionFromSearch(location.search),
     page: getNumberSearchParam(location.search, 'page', 1),
@@ -169,9 +174,11 @@ const SprtBiz = () => {
     setQueryParam(params, 'searchType', condition.searchType);
     setQueryParam(params, 'searchText', condition.searchText);
     setQueryParam(params, 'filterCodes', filterCodes);
+    // iframe 연계 파라미터 유지 (검색/페이징/탭전환 등 모든 재조회에 계속 실어보냄)
+    setQueryParam(params, 'iType', iType, '');
 
     return params;
-  }, []);
+  }, [iType]);
 
   const fetchList = useCallback(async (pageParam, condition, sizeValue) => {
     const requestSequence = ++requestSequenceRef.current;
@@ -297,12 +304,14 @@ const SprtBiz = () => {
 
   return (
     <>
-      <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />
-      <div className="contents">
-        <Breadcrumb items={breadcrumbItems} />
-        <div className="page-title-wrap" data-type="responsive">
-          <h2 className="h-tit">지원사업소개</h2>
-        </div>
+      {!isFrame && <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />}
+      <div className={isFrame ? 'contents contents-iframe' : 'contents'}>
+        {!isFrame && <Breadcrumb items={breadcrumbItems} />}
+        {!isFrame && (
+          <div className="page-title-wrap" data-type="responsive">
+            <h2 className="h-tit">지원사업소개</h2>
+          </div>
+        )}
 
         <div className="krds-tab-area layer">
           <Tab tabData={tabData.current} onTabChange={handleTabChange} activeIndex={activeTabIndex} />
@@ -313,11 +322,6 @@ const SprtBiz = () => {
 
               <div className="search-top-box">
                 <div className="sch-form-wrap" ref={schFormWrapRef}>
-                  {/*<select className="krds-form-select medium" value={searchStts} onChange={(e) => handleSearchSttsChange(e.target.value)}>*/}
-                  {/*  <option value="">공고상태 전체</option>*/}
-                  {/*  <option value="ONGOING">진행중</option>*/}
-                  {/*  <option value="PLANNED">진행예정</option>*/}
-                  {/*</select>*/}
                   <select className="krds-form-select medium" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
                     <option value="">검색구분 전체</option>
                     <option value="TITLE">제목</option>
@@ -344,7 +348,7 @@ const SprtBiz = () => {
                     onClick={handleToggleFilter}
                   >
                     <i className="svg-icon ico-sch-plus"></i>
-                    상세검색
+                      상세검색
                     <span className="onfilter-open sr-only">열기</span>
                     <span className="onfilter-close sr-only">닫기</span>
                   </button>
@@ -392,7 +396,7 @@ const SprtBiz = () => {
                     <strong className="sort-label">정렬기준</strong>
                     <div className="w-sort-btn">
                       <button type="button" className="active">
-                        등록일순
+                          등록일순
                       </button>
                     </div>
                     <div className="m-sort-btn">
