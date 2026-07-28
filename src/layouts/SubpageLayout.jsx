@@ -1,18 +1,20 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Header from '../components/ui/Header.jsx';
 import Footer from '../components/ui/Footer.jsx';
-import { UserMenuProvider } from '../context/UserMenuContext.jsx';
 
 const SubpageLayout = ({ children }) => {
+  const location = useLocation();
+  const isFrame = new URLSearchParams(location.search).get('iType') === 'frame';
+
   return (
     <div id="wrap">
-      <Header />
+      {!isFrame && <Header />}
       <div id="container" className="sub-container">
         <div className="inner in-between">
           {children || <Outlet />}  {/* ✅ children 우선, 없으면 Outlet */}
         </div>
       </div>
-      <Footer />
+      {!isFrame && <Footer />}
     </div>
   );
 };
