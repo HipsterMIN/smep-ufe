@@ -656,6 +656,16 @@ hr{border-top:solid 1px var(--krds-color-light-gray-20)}
     > div{display:flex;flex-direction:column; gap:2rem;}
     hr{width:100%;}
 }
+.main-step{
+    > li + li{margin-top:4.8rem;}
+    .sub-step{
+        > li + li{margin-top:2.4rem;}
+    }
+}
+ol.sub-step-desc{
+    list-style:decimal;
+    padding-left:2.4rem;
+}
 @mixin shadow($size: base, $type: default) {
     box-shadow: 0px 6px 12px 0px rgba(105, 105, 105, 0.1);
     @if $size == lg {

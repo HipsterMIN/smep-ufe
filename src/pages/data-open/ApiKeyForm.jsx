@@ -111,7 +111,8 @@ const ApiKeyForm = ({ isOpen, onClose, onSubmit, submitting, errorMessage, mbrNo
 
   const getFilteredApiList = () => {
     // 1. Map 객체를 [key, value] 배열로 변환
-    const allApis = Object.entries(apiMasterList);
+    const allApis = Object.entries(apiMasterList)
+        .filter(([code]) => code !== 'AD10');
 
     // 2. 권한에 따른 필터링
     if (currentMode === 'CORPORATE') {

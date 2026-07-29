@@ -1991,9 +1991,6 @@ button.aichatButton.active {
 .main-step .img-box .img-mo {
   display: none;
 }
-.sub-step > li {
-  margin-top: 24px;
-}
 .sub-step .sub-step-tit {
   color: #052B57;
   font-weight: 700;

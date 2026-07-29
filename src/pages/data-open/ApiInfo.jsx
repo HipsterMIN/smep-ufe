@@ -88,7 +88,17 @@ const ApiInfo = () => {
 
         <div className="conts-wrap mt-40">
           <h3 className="sec-tit">API 이용 방법</h3>
-          <p className="conts-desc">중소벤처24의 Open API를 사용하시고자 하시는 기관 및 시스템 담당자께서는 인증키 신청서를 작성하여 인증키 정보를 확인하시거나, 중소벤처24 운영팀에게 문의해 주시면 담당자 확인 후 이메일로 인증키 정보를 보내드립니다.</p>
+          <p className="conts-desc">중소벤처24의 Open API를 사용하시고자 하시는 기관 및 시스템 담당자께서는 인증키 신청서를 작성하여{' '}
+            <Link
+                to="/cs/opndata/UI_USR_L_220"
+                style={{
+                  color: '#0066cc',
+                  textDecoration: 'underline',
+                }}
+            >
+              인증키신청이력
+            </Link>
+            에서 인증키 정보를 확인하시거나, 중소벤처24 운영팀에게 문의해 주시면 담당자 확인 후 인증키 정보를 보내드립니다.</p>
           <div className="helper-box refer mt-16">
             <p className="helper-tit">중소벤처24 Open API 관련 문의 : 중소벤처24 운영팀 (044-300-0990)</p>
           </div>

@@ -4,7 +4,7 @@ import SideNavigation from '../components/ui/SideNavigation';
 import Breadcrumb from '../components/ui/Breadcrumb';
 import { useUserMenu } from '../context/UserMenuContext.jsx';
 import { api as apiClient } from '../lib/apiClient.js';
-import { resolveListBackPath } from '../utils/listNavigation.js';
+import { resolveListBackPath, getSearchParam } from '../utils/listNavigation.js';
 
 const EMPTY_HTML_PATTERNS = new Set([
   '<p style="text-align: left;"></p>',
@@ -17,6 +17,10 @@ const SprtBizView = () => {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // iframe 연계용 파라미터 (레거시 iType=frame 방식과 동일)
+  const iType = getSearchParam(location.search, 'iType', '');
+  const isFrame = iType === 'frame';
 
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -79,9 +83,9 @@ const SprtBizView = () => {
   if (loading) {
     return (
       <>
-        <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />
-        <div className="contents">
-          <Breadcrumb items={breadcrumbItems} />
+        {!isFrame && <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />}
+        <div className={isFrame ? 'contents contents-iframe' : 'contents'}>
+          {!isFrame && <Breadcrumb items={breadcrumbItems} />}
           <div className="page-title-wrap"><p>데이터를 불러오는 중입니다.</p></div>
         </div>
       </>
@@ -91,9 +95,9 @@ const SprtBizView = () => {
   if (error) {
     return (
       <>
-        <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />
-        <div className="contents">
-          <Breadcrumb items={breadcrumbItems} />
+        {!isFrame && <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />}
+        <div className={isFrame ? 'contents contents-iframe' : 'contents'}>
+          {!isFrame && <Breadcrumb items={breadcrumbItems} />}
           <div className="page-title-wrap"><p>{error}</p></div>
         </div>
       </>
@@ -103,9 +107,9 @@ const SprtBizView = () => {
   if (!item) {
     return (
       <>
-        <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />
-        <div className="contents">
-          <Breadcrumb items={breadcrumbItems} />
+        {!isFrame && <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />}
+        <div className={isFrame ? 'contents contents-iframe' : 'contents'}>
+          {!isFrame && <Breadcrumb items={breadcrumbItems} />}
           <div className="page-title-wrap"><p>데이터가 없습니다.</p></div>
         </div>
       </>
@@ -114,9 +118,9 @@ const SprtBizView = () => {
 
   return (
     <>
-      <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />
-      <div className="contents">
-        <Breadcrumb items={breadcrumbItems} />
+      {!isFrame && <SideNavigation pageTitle={depth1Menu?.menuNm || ''} menuItems={sidebarData} />}
+      <div className={isFrame ? 'contents contents-iframe' : 'contents'}>
+        {!isFrame && <Breadcrumb items={breadcrumbItems} />}
 
         <div className="page-title-wrap on-btmline" data-type="responsive">
           <p className="on-p1 on-colorblue">{currentMenu?.menuNm || '지원사업 소개'}</p>
@@ -138,9 +142,9 @@ const SprtBizView = () => {
         )}
 
         {(isMeaningfulHtml(item.sprtSclCn)
-          || isMeaningfulHtml(item.sprtTrgtCn)
-          || isMeaningfulHtml(item.sprtExclTrgtCn)
-          || isMeaningfulHtml(item.sprtCn)) && (
+              || isMeaningfulHtml(item.sprtTrgtCn)
+              || isMeaningfulHtml(item.sprtExclTrgtCn)
+              || isMeaningfulHtml(item.sprtCn)) && (
           <>
             <div className="page-title-wrap on-btmline" data-type="responsive">
               <h3 className="h-tit3">사업개요</h3>
@@ -157,10 +161,10 @@ const SprtBizView = () => {
         )}
 
         {(isMeaningfulHtml(item.aplyMthdCn)
-          || isMeaningfulHtml(item.srngEvlCn)
-          || isMeaningfulHtml(item.aplyPrcsCrsCn)
-          || isMeaningfulHtml(item.bizAplySbmsnDcmntCn)
-          || isMeaningfulHtml(item.refMttr)) && (
+              || isMeaningfulHtml(item.srngEvlCn)
+              || isMeaningfulHtml(item.aplyPrcsCrsCn)
+              || isMeaningfulHtml(item.bizAplySbmsnDcmntCn)
+              || isMeaningfulHtml(item.refMttr)) && (
           <>
             <div className="page-title-wrap on-btmline" data-type="responsive">
               <h3 className="h-tit3">신청절차</h3>
@@ -232,7 +236,7 @@ const SprtBizView = () => {
         <div className="onboard-btm-btngroup">
           <div>
             <button type="button" className="krds-btn tertiary xlarge" onClick={() => navigate(resolveListBackPath(location))}>
-              목록
+                목록
             </button>
           </div>
         </div>
