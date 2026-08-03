@@ -76,7 +76,7 @@ const resolveMenuPath = (getFullPath, menuId) => {
 const BusinessSummarySection = ({ dashboardData } = {}) => {
   const navigate = useNavigate();
   const { getFullPath } = useUserMenu();
-  // 회사 resource만 loading 문구를 쓰고, 업무 건수 resource는 '-'와 0건 규칙으로 표시한다.
+  // 회사 resource만 loading 문구를 쓰고, 업무 건수 resource는 조회 중·실패 시 '-'와 정상 0건 규칙으로 표시한다.
   const companyResource = dashboardData?.companySummary || {};
   const companySummary = {
     ...EMPTY_COMPANY_SUMMARY,
@@ -88,6 +88,9 @@ const BusinessSummarySection = ({ dashboardData } = {}) => {
   const renderCompanyValue = (key) => (loading ? '로딩 중...' : companySummary[key]);
   // 실행 환경 base path는 Router basename이 처리하므로, 버튼 이동은 menuId로 계산한 내부 경로만 사용한다.
   const navigateToMenu = (menuId, label) => {
+    // label은 버튼별 이동 의미를 보존하는 기존 호출 계약이므로 삭제하지 않는다.
+    // 현재 라우팅은 menuId만 사용하므로 무동작으로 소비하며, 화면 표시나 이동 경로에는 영향을 주지 않는다.
+    void label;
     const path = resolveMenuPath(getFullPath, menuId);
 
     if (!path) {
