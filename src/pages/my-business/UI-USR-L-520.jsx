@@ -7,6 +7,14 @@ import { api as apiClient } from '@lib/apiClient.js';
 import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import { formatNumberWithCommas } from '@utils/numberUtils.js';
+import {
+  BIZ_PBANC_LINK_INST_GROUP_ID,
+  INTEGRATED_LINK_INST_CODE_SET,
+  buildSourceLabelBySourceCode,
+  buildSupportApplicationDetailUrl,
+  getSupportApplicationSourceLabel,
+  resolveSourceCodeForApi,
+} from './supportApplicationUtils.js';
 
 const STATUS_OPTIONS = [
   { value: 'ALL', label: '전체' },
@@ -14,7 +22,6 @@ const STATUS_OPTIONS = [
   { value: 'COMPLETED', label: '신청완료' },
 ];
 
-const BIZ_PBANC_LINK_INST_GROUP_ID = 'BIZ_PBANC_LINK_INST_CD';
 const BIZ_PBANC_CLSF_GROUP_ID = 'BIZ_PBANC_CLSF_CD';
 const BIZ_PBANC_SPRT_INST_GROUP_ID = 'BIZ_PBANC_SPRT_INST_CD';
 
@@ -28,32 +35,6 @@ const DEFAULT_SOURCE_OPTIONS_BY_CATEGORY = {
   [BIZ_PBANC_LINK_INST_GROUP_ID]: [],
   [BIZ_PBANC_CLSF_GROUP_ID]: [],
   [BIZ_PBANC_SPRT_INST_GROUP_ID]: [],
-};
-
-const LINK_INST_CODE_TO_SOURCE_CODE = {
-  BI01: 'SMTC',
-  BI02: 'KSU',
-  BI03: 'SMF',
-  BI04: 'SBI',
-  BI05: 'KME',
-  BI07: 'FANFAN',
-  BI08: 'ULTARI',
-  BI09: 'SHK',
-  BI10: 'SME',
-};
-
-const INTEGRATED_LINK_INST_CODE_SET = new Set(Object.keys(LINK_INST_CODE_TO_SOURCE_CODE));
-
-const SOURCE_NAME_FALLBACK_BY_SOURCE_CODE = {
-  SMF: '스마트공장사업관리시스템',
-  KME: '중진공홈페이지',
-  KSU: 'K-STARTUP',
-  FANFAN: '판판대로',
-  SHK: '인력지원사업종합관리',
-  SBI: '소상공인24',
-  SME: '중소기업해외전시포털',
-  ULTARI: '기술보호울타리',
-  SMTC: 'SMTECH',
 };
 
 const DEFAULT_SUMMARY = {
@@ -71,18 +52,6 @@ const DEFAULT_PAGE = {
   first: true,
   last: true,
   empty: true,
-};
-
-const resolveSourceCodeForApi = (category, selectedCode) => {
-  if (!selectedCode) {
-    return '';
-  }
-
-  if (category !== BIZ_PBANC_LINK_INST_GROUP_ID) {
-    return '';
-  }
-
-  return LINK_INST_CODE_TO_SOURCE_CODE[selectedCode] || '';
 };
 
 const formatDateToQuery = (date) => {
@@ -148,27 +117,6 @@ const getStatusLabel = (statusGroup, statusRaw) => {
     return '신청중';
   }
   return '미정';
-};
-
-const buildDetailUrl = (item) => {
-  if (!item?.detailUrl) {
-    return null;
-  }
-
-  const trimmed = String(item.detailUrl).trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed;
-  }
-
-  if (trimmed.startsWith('/')) {
-    return trimmed;
-  }
-
-  return `https://${trimmed}`;
 };
 
 const UI_USR_L_520 = () => {
@@ -253,31 +201,9 @@ const UI_USR_L_520 = () => {
   }, [bCategory, sourceOptionsByCategory]);
 
   const sourceLabelBySourceCode = useMemo(() => {
-    const labels = { ...SOURCE_NAME_FALLBACK_BY_SOURCE_CODE };
     const linkInstOptions = sourceOptionsByCategory[BIZ_PBANC_LINK_INST_GROUP_ID] || [];
-
-    linkInstOptions.forEach((option) => {
-      const mappedSourceCode = LINK_INST_CODE_TO_SOURCE_CODE[option.value];
-      if (mappedSourceCode) {
-        labels[mappedSourceCode] = option.label;
-      }
-    });
-
-    return labels;
+    return buildSourceLabelBySourceCode(linkInstOptions);
   }, [sourceOptionsByCategory]);
-
-  const getSourceLabel = (sourceCode, sourceName) => {
-    const sourceLabel = sourceLabelBySourceCode[sourceCode];
-    if (sourceLabel) {
-      return sourceLabel;
-    }
-
-    if (sourceName) {
-      return sourceName;
-    }
-
-    return sourceCode || '-';
-  };
 
   useEffect(() => {
     if (!sourceCode) {
@@ -429,7 +355,7 @@ const UI_USR_L_520 = () => {
       return;
     }
 
-    const detailUrl = buildDetailUrl(item);
+    const detailUrl = buildSupportApplicationDetailUrl(item);
     if (!detailUrl) {
       return;
     }
@@ -652,7 +578,15 @@ const UI_USR_L_520 = () => {
                             <p className="c-tit no-icon onellipsis-1 small">{item.title || '-'}</p>
                           </div>
                           <p className="on-list-btm">
-                            <span><strong>{getSourceLabel(item.sourceCode, item.sourceName)}</strong></span>
+                            <span>
+                              <strong>
+                                {getSupportApplicationSourceLabel(
+                                  sourceLabelBySourceCode,
+                                  item.sourceCode,
+                                  item.sourceName,
+                                )}
+                              </strong>
+                            </span>
                             {/*<span><strong>{item.statusRaw || '-'}</strong></span>*/}
                             <span><strong>신청일</strong> {normalizeDisplayDate(item.requestDate)}</span>
                           </p>
