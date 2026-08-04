@@ -108,7 +108,7 @@ export default function HeaderUserMenu({
         {/*externalLinkButtons*/}
         {isSsoLogin && (
           <button type="button" className="btn-navi onepass on-mobile-none" onClick={onOnePassConfig}>
-              중기 통합회원 관리
+              통합회원 관리
           </button>
         )}
 

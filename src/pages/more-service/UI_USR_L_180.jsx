@@ -201,7 +201,7 @@ const UI_USR_L_180 = () => {
               value={searchType}
               onChange={(event) => setSearchType(event.target.value)}
             >
-              <option value="TITLE">제목</option>
+              <option value="TITLE">제목&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
               <option value="CONTENT">내용</option>
             </select>
             <div className="sch-input">
