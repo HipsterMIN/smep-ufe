@@ -203,6 +203,7 @@ const MainPopupItem = ({ popup, isActive, onActivate, onClose, onHideToday }) =>
       >
         <a
           href={href}
+          title={popup.popupTtl}
           target={external ? '_blank' : undefined}
           rel={external ? 'noreferrer' : undefined}
           draggable={false}

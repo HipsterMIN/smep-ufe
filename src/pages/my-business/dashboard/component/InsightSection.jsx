@@ -9,11 +9,10 @@ const EMPTY_VALUE = '-';
 const PRESERVED_HIDDEN_STYLE = { display: 'none' };
 
 const PROGRESS_BUCKETS = [
-  { title: '신청중', icon: 'apply', sourceStatuses: ['신청중'] },
-  { title: '처리중', icon: 'ing', sourceStatuses: ['신청완료'] },
-  { title: '처리완료', icon: 'doc-check', sourceStatuses: ['선정완료'] },
+  { title: '전체', icon: 'apply', summaryKey: 'total' },
+  { title: '신청중', icon: 'ing', summaryKey: 'inProgress' },
+  { title: '신청완료', icon: 'doc-check', summaryKey: 'completed' },
 ];
-const DEFAULT_CATEGORY_LABELS = ['기술', '경영', '수출', '중견', '기타'];
 
 const isResolvedResource = (resource) => (
   resource?.totalElements !== null
@@ -27,15 +26,10 @@ const normalizeLabel = (value, fallback = '미분류') => {
   return normalized || fallback;
 };
 
-const countByLabel = (items, getLabel) => items.reduce((accumulator, item) => {
-  const label = getLabel(item);
-  accumulator[label] = (accumulator[label] || 0) + 1;
-  return accumulator;
-}, {});
-
-const toSortedGroups = (counts) => Object.entries(counts)
-  .map(([name, count]) => ({ name, count }))
-  .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'ko'));
+const normalizeCount = (value) => {
+  const count = Number(value);
+  return Number.isFinite(count) && count >= 0 ? count : null;
+};
 
 const formatCount = (count) => (
   typeof count === 'number' ? count.toLocaleString('ko-KR') : EMPTY_VALUE
@@ -59,8 +53,6 @@ const formatPercent = (count, total) => {
 };
 
 const buildProgressItems = (supportApplications) => {
-  const items = Array.isArray(supportApplications?.items) ? supportApplications.items : [];
-
   if (!isResolvedResource(supportApplications)) {
     return PROGRESS_BUCKETS.map(({ icon, title }) => ({
       icon,
@@ -69,36 +61,55 @@ const buildProgressItems = (supportApplications) => {
     }));
   }
 
-  const counts = countByLabel(items, (item) => normalizeLabel(item?.bizAplyPrgrsSttsNm));
-  // 화면 표현은 기존 3단계 문구를 유지하고, DB 진행상태명만 bucket 입력값으로 매핑한다.
-  return PROGRESS_BUCKETS.map(({ icon, title, sourceStatuses }) => ({
+  /*
+   * 진행단계 수치는 최신 50건 카드 목록을 다시 세지 않고 백엔드 전체 집계값을 사용한다.
+   * 그래야 신청이력이 50건을 넘어도 전체/신청중/신청완료 건수가 신청현황 화면과 동일하게 유지된다.
+   */
+  return PROGRESS_BUCKETS.map(({ icon, title, summaryKey }) => ({
     icon,
     title,
-    count: sourceStatuses.reduce((sum, status) => sum + (counts[status] || 0), 0),
+    count: normalizeCount(supportApplications?.summary?.[summaryKey]),
   }));
 };
 
-const createEmptyCategoryItems = () => DEFAULT_CATEGORY_LABELS.map((name) => ({
-  name,
+const createEmptyCategoryItems = () => Array.from({ length: CATEGORY_SLOT_COUNT }, () => ({
+  name: EMPTY_VALUE,
   count: null,
   percent: null,
 }));
 
 const buildCategoryItems = (supportApplications) => {
-  const items = Array.isArray(supportApplications?.items) ? supportApplications.items : [];
-
   if (!isResolvedResource(supportApplications)) {
     return createEmptyCategoryItems();
   }
 
-  const counts = countByLabel(
-    items,
-    (item) => normalizeLabel(item?.bizPbancClsfNm || item?.bizPbancClsfCd),
-  );
-  const sortedGroups = toSortedGroups(counts);
+  const sourceDistribution = Array.isArray(supportApplications?.sourceDistribution)
+    ? supportApplications.sourceDistribution
+    : [];
+  /*
+   * 기관별 분포는 서버가 페이지 슬라이싱 전에 계산한 sourceDistribution을 사용한다.
+   * displayName은 공통코드명이며, 공통코드 조회 실패 시 loader가 sourceName/sourceCode 대체값을 이미 채운다.
+   */
+  const sortedGroups = sourceDistribution
+    .map((item) => ({
+      name: normalizeLabel(item?.displayName || item?.sourceName || item?.sourceCode),
+      sourceCode: normalizeLabel(item?.sourceCode, 'UNKNOWN'),
+      count: normalizeCount(item?.count) || 0,
+    }))
+    .filter((item) => item.count > 0)
+    .sort((a, b) => b.count - a.count || a.sourceCode.localeCompare(b.sourceCode));
+
+  if (sortedGroups.length === 0) {
+    return createEmptyCategoryItems().map((item) => ({
+      ...item,
+      count: 0,
+      percent: '0%',
+    }));
+  }
+
   const directGroups = sortedGroups.slice(0, CATEGORY_DIRECT_SLOT_COUNT);
   const restGroups = sortedGroups.slice(CATEGORY_DIRECT_SLOT_COUNT);
-  // 현재 범례 테이블은 5칸 고정이므로, 초과 분야는 기타로 합산해 레이아웃을 유지한다.
+  // 현재 범례 테이블은 5칸 고정이므로, 다섯 번째 이후 기관은 기타로 합산해 전체 비율과 레이아웃을 함께 유지한다.
   const groups = restGroups.length > 0
     ? [
       ...directGroups,
@@ -107,7 +118,8 @@ const buildCategoryItems = (supportApplications) => {
     : sortedGroups;
   const total = groups.reduce((sum, group) => sum + group.count, 0);
   const categoryItems = groups.map((group) => ({
-    ...group,
+    name: group.name,
+    count: group.count,
     percent: formatPercent(group.count, total),
   }));
 

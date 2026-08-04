@@ -32,6 +32,10 @@ const LOG_PREFIX = '[TokenRefreshInitializer]';
  *   - useEffect는 컴포넌트 마운트 시 1회만 실행한다 (hasRun ref 가드).
  *   - React StrictMode의 2회 마운트에도 hasRun으로 중복 실행을 방지한다.
  *   - 이 컴포넌트는 App.jsx에서 AppRouter보다 먼저 마운트되어야 한다.
+ *   - iType=frame(연계기관 iframe 임베드) 모드에서는 Keycloak silent SSO를
+ *     시도하지 않는다. Keycloak 로그인 서버가 자체적으로 iframe 임베드를
+ *     차단(X-Frame-Options)하므로, iframe 내부에서 리다이렉트를 시도하면
+ *     로드 실패로 인해 화면이 튕기는 문제가 발생한다.
  */
 export function TokenRefreshInitializer() {
   const hasRun = useRef(false);
@@ -46,6 +50,15 @@ export function TokenRefreshInitializer() {
       const startSilentSso = async () => {
         // /sso 콜백 라우트에서는 재진입을 막는다.
         if (window.location.pathname.endsWith('/sso')) return;
+
+        // iframe 연계 모드(iType=frame)에서는 Keycloak silent SSO를 시도하지 않는다.
+        // Keycloak이 자체 X-Frame-Options로 iframe 내 로드를 막기 때문에,
+        // 여기서 리다이렉트를 시도하면 로드 실패로 화면이 메인으로 튕기는 문제가 생긴다.
+        const isFrameEmbed = new URLSearchParams(window.location.search).get('iType') === 'frame';
+        if (isFrameEmbed) {
+          console.info(`${LOG_PREFIX} iframe embed mode (iType=frame) — silent SSO skipped`);
+          return;
+        }
 
         // 중복 로그인 강퇴 상태에서는 silent 자동 재로그인을 하지 않는다.
         // 통합회원(IdP) 세션이 살아 있어도, 여기서 자동 복귀하면 두 브라우저가
@@ -111,7 +124,7 @@ export function TokenRefreshInitializer() {
     // 리로드/스냅샷 채택 후 복구: refreshToken으로 access token을 재발급받아 메모리에만 저장한다.
     const restoreSessionViaRefresh = async () => {
       const { isLogin, refreshToken, setToken, setRefreshToken, logout } =
-        useAuthStore.getState();
+          useAuthStore.getState();
       if (!isLogin || !refreshToken) return false;
 
       console.log(`${LOG_PREFIX} access token missing — restoring session via refresh`);

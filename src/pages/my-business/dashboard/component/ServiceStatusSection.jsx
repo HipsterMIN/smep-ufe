@@ -1,7 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { appendReturnUrlToPath } from '@utils/listNavigation.js';
-import { api as apiClient } from '@lib/apiClient.js';
+import { appendReturnUrlToPath } from '@/utils/listNavigation.js';
+import { api as apiClient } from '@/lib/apiClient.js';
+import {
+  buildSupportApplicationDetailUrl,
+  getSupportApplicationStatusLabel,
+} from '@/pages/my-business/supportApplicationUtils.js';
 
 const SCRAP_TYPE_LABELS = {
   BIZP: '사업공고',
@@ -161,17 +165,35 @@ const buildFallbackCard = ({ tabKey, resource, emptyTitle }) => {
 };
 
 const buildSupportApplicationCards = (resource) =>
-  getResourceItems(resource).map((item, index) => ({
-    key: `support-${item?.bizPbancNo ?? index}`,
-    label: normalizeText(item?.bizSprvsnInstNm, '지원사업'),
-    type: normalizeText(item?.bizAplyPrgrsSttsNm || item?.bizPbancClsfNm || item?.bizPbancClsfCd, '신청'),
-    deadline: isNearDeadline(item?.bizPbancDdlnYmd),
-    title: normalizeText(item?.bizPbancNm, '지원사업 신청 내역'),
-    date: formatDateRange(item?.bizPbancBgngYmd, item?.bizPbancDdlnYmd),
-    to: item?.bizPbancNo ? `/req/pbanc/${item.bizPbancNo}` : null,
-    liked: false,
-    showLike: false,
-  }));
+  getResourceItems(resource).map((item, index) => {
+    const externalUrl = buildSupportApplicationDetailUrl(item);
+    const identity = [
+      item?.requestId,
+      item?.pbancId,
+      item?.detailBizId,
+    ].map((value) => String(value ?? '').trim()).filter(Boolean).join('-');
+
+    /*
+     * 지원사업 카드는 구형 사업공고 내부경로가 아니라 통합 신청정보 응답의 상세URL을 사용한다.
+     * 원천 상태명은 기관마다 다르므로 statusGroup을 신청중/신청완료 두 문구로만 변환하며,
+     * 상세URL이 없을 때는 임의의 공고 화면으로 보내지 않고 이동 기능을 비활성화한다.
+     */
+    return {
+      key: `support-${identity || index}`,
+      label: '신청현황',
+      type: getSupportApplicationStatusLabel(item?.statusGroup),
+      deadline: false,
+      title: normalizeText(item?.title, '지원사업 신청 내역'),
+      // 통합 응답의 신청일이 없을 때 임의 날짜를 만들지 않으며, 호환용 기간 필드가 함께 온 경우에만 기존 표시값을 사용한다.
+      date: item?.requestDate
+        ? formatLabeledDate('신청', item.requestDate)
+        : formatDateRange(item?.bizPbancBgngYmd, item?.bizPbancDdlnYmd),
+      externalUrl,
+      detailDisabled: !externalUrl,
+      liked: false,
+      showLike: false,
+    };
+  });
 
 const getScrapType = (item) => item?.dashboardScrapCategory || item?.pbanc_type_se_cd || item?.pbancTypeSeCd;
 
@@ -387,6 +409,11 @@ const ServiceStatusSection = ({ dashboardData, onScrapStatusChange }) => {
   const handleNavigateCard = (event, card) => {
     event.preventDefault();
 
+    if (card.externalUrl) {
+      window.open(card.externalUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
     if (!card.to) {
       return;
     }
@@ -441,13 +468,24 @@ const ServiceStatusSection = ({ dashboardData, onScrapStatusChange }) => {
                   }}
                 />
               </div>
-              <a href={card.to || '#'} className="card-title" onClick={(event) => handleNavigateCard(event, card)}>
+              <a
+                href={card.externalUrl || card.to || '#'}
+                className="card-title"
+                aria-disabled={card.detailDisabled || undefined}
+                onClick={(event) => handleNavigateCard(event, card)}
+              >
                 {card.title}
               </a>
 
               <div className="card-bottom">
                 <span><i className="svg-icon ico-calendar2"></i> {card.date}</span>
-                <button type="button" onClick={(event) => handleNavigateCard(event, card)}>상세조회</button>
+                <button
+                  type="button"
+                  disabled={Boolean(card.detailDisabled)}
+                  onClick={(event) => handleNavigateCard(event, card)}
+                >
+                  상세조회
+                </button>
               </div>
             </article>
           );

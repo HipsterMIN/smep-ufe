@@ -6,12 +6,18 @@ import { useUserMenu } from '@context/UserMenuContext.jsx';
 import { useAuthStore } from '@store/useAuthStore.jsx';
 import { shallow } from 'zustand/shallow';
 import { api as apiClient } from '@lib/apiClient.js';
+import { fetchAndConvertCommonCodes } from '@utils/commonCodeUtils.js';
 import {
   fetchCorporateMemberDetail,
   formatBusinessRegNo,
 } from '@/pages/my-business/member/memberUtils.js';
+import {
+  BIZ_PBANC_LINK_INST_GROUP_ID,
+  buildSourceLabelBySourceCode,
+  getSupportApplicationSourceLabel,
+} from '@/pages/my-business/supportApplicationUtils.js';
 import BusinessSummarySection from './component/BusinessSummarySection.jsx';
-// recharts를 포함하므로 lazy로 분리 → 메인 번들에 recharts가 포함되는 것을 방지
+// ECharts를 포함하는 인사이트 영역을 지연 로드해 대시보드 진입 전 메인 번들 크기 증가를 방지한다.
 const InsightSection = lazy(() => import('./component/InsightSection.jsx'));
 import DeadlineCalendarSection from './component/DeadlineCalendarSection.jsx';
 import ServiceStatusSection from './component/ServiceStatusSection.jsx';
@@ -22,8 +28,11 @@ const MBR_TYPE_CD_BY_CURRENT_MODE = {
   INDIVIDUAL: 'IND',
 };
 
-// 대시보드는 클릭 시 추가 조회하지 않고 목록 스냅샷을 공유하므로, 백엔드 허용 상한인 100건을 사용한다.
+// 지원사업 외 기존 목록은 대시보드 하위 영역이 한 번에 공유할 스냅샷으로 최대 100건을 요청한다.
 const DASHBOARD_LIST_PAGE_SIZE = 100;
+// 통합 신청정보 API는 페이지 크기를 최대 50건으로 제한하므로 서비스 현황에는 최신 50건만 공유한다.
+// 전체 건수·진행단계·기관별 분포는 페이지와 별도로 계산된 서버 집계값을 사용해 누락을 방지한다.
+const SUPPORT_APPLICATION_PAGE_SIZE = 50;
 // 고객지원 Q&A 중 마이비즈니스에서 집계할 게시판 번호다.
 const INQUIRY_BOARD_NO = '4';
 // 관심공고 화면은 사업공고와 정책금융을 탭으로 나누므로, 대시보드는 두 카테고리를 함께 조회해 합산한다.
@@ -121,6 +130,7 @@ const createSupportApplicationsResource = ({
   items = [],
   totalElements = null,
   summary = EMPTY_SUPPORT_APPLICATION_SUMMARY,
+  sourceDistribution = [],
   loading = false,
   error = null,
   partial = false,
@@ -131,6 +141,7 @@ const createSupportApplicationsResource = ({
   loading,
   error,
   summary: { ...EMPTY_SUPPORT_APPLICATION_SUMMARY, ...summary },
+  sourceDistribution: Array.isArray(sourceDistribution) ? sourceDistribution : [],
   partial,
   failedSources,
 });
@@ -257,6 +268,11 @@ const createFailedResource = (key, error) => {
 // 제품 전제는 30건 미만이지만, 운영 데이터가 상한을 넘으면 화면은 유지하고 개발자 경고만 남긴다.
 const warnIfDashboardPageTruncated = (label, totalElements, items) => {
   if (Number.isFinite(totalElements) && totalElements > items.length) {
+    // 목록형 대시보드 데이터가 화면 스냅샷 크기를 넘으면 운영 화면은 유지하되 개발 로그로 누락 가능성을 알린다.
+    // 지원사업 총계와 기관별 분포는 서버 전체 집계를 사용하므로 이 경고가 발생해도 해당 통계값은 잘리지 않는다.
+    console.warn(
+      `[dashboard] ${label} 목록은 ${items.length}건만 표시됩니다. 전체 건수: ${totalElements}`,
+    );
   }
 };
 
@@ -299,22 +315,49 @@ async function loadCompanySummary() {
   });
 }
 
-// 지원사업 신청이력은 대시보드 전용 API를 쓰고, 로그인 회원번호가 있을 때만 회원 기준으로 필터링한다.
-async function loadSupportApplications(mbrNo) {
-  const queryParams = hasText(mbrNo) ? { mbrNo } : {};
-  const response = await apiClient.get(
-    `/api/v1/dashboard/mybusiness/support-applications?${buildDashboardQuery(queryParams)}`,
-  );
+// 지원사업 신청정보는 신청현황 화면과 동일한 JWT 기반 통합 API를 사용한다.
+// 회원번호를 URL로 전달하지 않아도 백엔드가 검증된 JWT의 CI 또는 사업자번호로 사용자 범위를 확정한다.
+async function loadSupportApplications() {
+  const params = new URLSearchParams({
+    page: '1',
+    size: String(SUPPORT_APPLICATION_PAGE_SIZE),
+    statusGroup: 'ALL',
+    searchType: 'TITLE',
+  });
+  const [response, commonCodes] = await Promise.all([
+    apiClient.get(`/api/v1/pbanc/support-applications?${params.toString()}`),
+    fetchAndConvertCommonCodes([BIZ_PBANC_LINK_INST_GROUP_ID]).catch(() => ({})),
+  ]);
   const payload = unwrapApiData(response);
   const pageResource = normalizePageResource(payload, '지원사업 신청이력');
+  const responseSummary = payload?.summary || {};
+  const summary = {
+    total: coerceTotalElements(responseSummary.total, pageResource.totalElements),
+    inProgress: normalizeCount(responseSummary.inProgress),
+    completed: normalizeCount(responseSummary.completed),
+  };
+  const sourceLabelBySourceCode = buildSourceLabelBySourceCode(
+    commonCodes?.[BIZ_PBANC_LINK_INST_GROUP_ID] || [],
+  );
+  const sourceDistribution = Array.isArray(payload?.sourceDistribution)
+    ? payload.sourceDistribution.map((item) => ({
+      ...item,
+      count: normalizeCount(item?.count) || 0,
+      displayName: getSupportApplicationSourceLabel(
+        sourceLabelBySourceCode,
+        item?.sourceCode,
+        item?.sourceName,
+      ),
+    }))
+    : [];
 
   return createSupportApplicationsResource({
     ...pageResource,
-    summary: {
-      total: pageResource.totalElements,
-      inProgress: null,
-      completed: null,
-    },
+    totalElements: summary.total,
+    summary,
+    sourceDistribution,
+    partial: Boolean(payload?.partial),
+    failedSources: Array.isArray(payload?.failedSources) ? payload.failedSources : [],
   });
 }
 
@@ -386,10 +429,13 @@ async function loadApiKeys() {
   });
 }
 
-// 대시보드에서 한 번에 공유할 업무 API 목록이다. key는 dashboardData의 resource 이름과 일치해야 한다.
-const DASHBOARD_RESOURCE_LOADERS = {
+/*
+ * 지원사업 신청정보를 제외한 기존 업무 API 목록이다.
+ * 신청정보 통합 API는 여러 외부기관과 BI01·BI13 DB 결과를 합치므로 응답이 늦어질 수 있어 이 묶음에서 분리한다.
+ * 기존 6개 업무는 종전처럼 모두 완료된 뒤 한 번에 반영하며, 신청정보의 loading/result를 덮어쓰지 않도록 주의한다.
+ */
+const PRIMARY_DASHBOARD_RESOURCE_LOADERS = {
   companySummary: loadCompanySummary,
-  supportApplications: ({ mbrNo }) => loadSupportApplications(mbrNo),
   certificateIssuances: () => fetchPagedResource('/api/v1/certificate/issuances', '증명서 발급이력'),
   scraps: loadScraps,
   inquiries: () => fetchPagedResource(`/api/v1/board/${INQUIRY_BOARD_NO}/posts/list`, '나의 질의내역', {
@@ -399,27 +445,31 @@ const DASHBOARD_RESOURCE_LOADERS = {
   notifications: () => fetchPagedResource('/api/v1/scrap/notifications', '알림 내역'),
 };
 
-// 모든 업무 resource를 병렬 조회하고, 실패한 업무만 빈 resource로 격리해 부분 렌더링을 유지한다.
-async function loadDashboardData(context = {}) {
-  const loaderEntries = Object.entries(DASHBOARD_RESOURCE_LOADERS);
+/*
+ * 전달받은 업무 resource를 병렬 조회하고 성공·실패 결과를 key별 부분 객체로 반환한다.
+ * 전체 dashboardData를 새로 만들지 않는 이유는 독립적으로 먼저 도착한 신청정보 결과를 후속 응답이 지우지 않게 하기 위함이다.
+ * 개별 실패는 해당 resource에만 기록하며, 호출부는 반드시 기존 state와 함수형 병합해야 응답 순서에 안전하다.
+ */
+async function loadDashboardResources(loaders, context = {}) {
+  const loaderEntries = Object.entries(loaders);
   const entries = await Promise.allSettled(
     loaderEntries.map(async ([key, loader]) => [key, await loader(context)]),
   );
-  const nextData = createEmptyDashboardData();
+  const nextResources = {};
 
   entries.forEach((result, index) => {
     const [key] = loaderEntries[index];
 
     if (result.status === 'fulfilled') {
       const [resolvedKey, resource] = result.value;
-      nextData[resolvedKey] = resource;
+      nextResources[resolvedKey] = resource;
       return;
     }
 
-    nextData[key] = createFailedResource(key, result.reason);
+    nextResources[key] = createFailedResource(key, result.reason);
   });
 
-  return nextData;
+  return nextResources;
 }
 
 const MyBusinessDashBoard = () => {
@@ -451,15 +501,45 @@ const MyBusinessDashBoard = () => {
     let active = true;
     setDashboardData(createEmptyDashboardData({ loading: true }));
 
-    const fetchDashboardData = async () => {
-      const nextDashboardData = await loadDashboardData({ mbrNo });
+    /*
+     * 기존 업무와 신청정보는 동시에 시작하되 서로의 완료를 기다리지 않는다.
+     * 기존 업무는 종전처럼 6개 조회가 모두 끝나면 한 번에 표시하고, 신청정보는 완료 시 관련 resource만 갱신한다.
+     * 두 비동기 흐름은 도착 순서가 보장되지 않으므로 함수형 state 병합과 active 검사를 함께 유지해야 한다.
+     */
+    const fetchPrimaryDashboardData = async () => {
+      const nextResources = await loadDashboardResources(
+        PRIMARY_DASHBOARD_RESOURCE_LOADERS,
+        { mbrNo },
+      );
 
       if (active) {
-        setDashboardData(nextDashboardData);
+        setDashboardData((prev) => ({
+          ...prev,
+          ...nextResources,
+        }));
       }
     };
 
-    fetchDashboardData();
+    const fetchSupportApplicationData = async () => {
+      let supportApplications;
+
+      try {
+        supportApplications = await loadSupportApplications();
+      } catch (error) {
+        // 통합 신청정보 실패는 다른 대시보드 조회 결과에 영향을 주지 않고 신청정보 resource에만 기록한다.
+        supportApplications = createFailedResource('supportApplications', error);
+      }
+
+      if (active) {
+        setDashboardData((prev) => ({
+          ...prev,
+          supportApplications,
+        }));
+      }
+    };
+
+    fetchPrimaryDashboardData();
+    fetchSupportApplicationData();
 
     return () => {
       // React effect cleanup 패턴으로 세션 전환 중 늦은 응답이 새 상태를 덮어쓰지 않게 막는다.
@@ -490,7 +570,7 @@ const MyBusinessDashBoard = () => {
 
         {/* 기업 요약 */}
         <BusinessSummarySection dashboardData={dashboardData} />
-        {/* 데이터 인사이트 (recharts lazy) */}
+        {/* 데이터 인사이트(ECharts 지연 로드) */}
         <Suspense fallback={<div style={{ height: '200px' }} />}>
           <InsightSection dashboardData={dashboardData} />
         </Suspense>
