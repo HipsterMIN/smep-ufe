@@ -152,13 +152,16 @@ const UI_USR_L_120 = () => {
         menuItems={sidebarData}
       />
       <div className="contents">
-        <Breadcrumb items={breadcrumbItems} />
+        <Breadcrumb items={breadcrumbItems}/>
         <div className="page-title-wrap" data-type="responsive">
           <h2 className="h-tit">품목별 법정의무 인증제도</h2>
         </div>
+        <p className="guide-txt" style={{ display: 'block' }}>
+          ※ 본 메뉴는 <b>국가기술표준원</b>에서 제공한 인증제도 정보를 활용하여 제공하는 것으로, 정확한 내용은 <b>제도별 관련 법률/소관기관 등을 통해 직접 확인</b>하셔야 합니다.
+        </p>
 
         {/* 검색 영역 */}
-        <div className="search-top-box">
+        <div className="search-top-box mt-24">
           <div className="sch-form-wrap">
             <select
               className="krds-form-select medium"
@@ -324,7 +327,8 @@ const UI_USR_L_120 = () => {
         />
       </div>
     </>
-  );
+  )
+  ;
 };
 
 export default UI_USR_L_120;
