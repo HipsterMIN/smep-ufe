@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+	<!--/지원사업 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/req</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/지원사업/사업공고(중앙정부) -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/req/pbanc</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/지원사업/AI 스마트 검색 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/req/ai</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/지원사업/AI 스마트 검색/AI 스마트 검색 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/req/ai/ai-smart-search</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/지원사업/사업공고(지방정부) -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/req/pbancProvincial</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/지원사업/정책금융 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/req/UI_USR_L_030</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/지원사업/입주기업 모집공고 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/req/UI_USR_L_180</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/지원사업/주택특별공급 사업공고 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/req/UI_USR_L_150</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/증명서 발급 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/crtf</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/증명서 발급/발급 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/crtf/UI_USR_L_040</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/증명서 발급/발급 진위 확인 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/crtf/UI_USR_L_050</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/증명서 발급/소재부품장비·뿌리기술·전문연구사업자 조회 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/crtf/UI_USR_L_140</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/정책·법령 정보 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/plcy</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/정책·법령 정보/정책정보 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/plcy/reprt</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/정책·법령 정보/정책정보/정책뉴스 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/plcy/reprt/plcyNews</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/정책·법령 정보/정책정보/행사정보 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/plcy/reprt/UI_USR_L_190</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/정책·법령 정보/정책정보/월간 중기누리 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/plcy/reprt/UI_USR_L_100</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/정책·법령 정보/정책정보/지원사업 소개 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/plcy/reprt/sprt</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/정책·법령 정보/법령정보 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/plcy/icr</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/정책·법령 정보/법령정보/중기부 소관 법령 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/plcy/icr/mssl</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/정책·법령 정보/법령정보/입법·행정예고/고시 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/plcy/icr/UI_USR_L_110</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/정책·법령 정보/법령정보/품목별 법정의무 인증제도 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/plcy/icr/UI_USR_L_120</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/정책·법령 정보/기타 활용 서식 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/plcy/etcForm</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/데이터 개방 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/do</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/데이터 개방/정책정보 개방 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/do/opn</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/고객센터 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/csc</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/고객센터/공지사항 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/csc/notice</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/고객센터/자주 묻는 질문 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/csc/faq</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/고객센터/문의하기 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/csc/qna</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/고객센터/콜센터안내 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/csc/UI_USR_L_340</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/고객센터/고객 만족도 조사 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/csc/UI_USR_R_341</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/고객센터/이벤트 참여 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/csc/event</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/서비스 이용이력 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/dash</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/이용안내 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/info</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/서비스 이용이력/지원사업 신청 현황 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/dash/UI_USR_L_520</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/이용안내/중소벤처24 소개 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/info/UI_USR_R_350</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/서비스 이용이력/나의 대시보드 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/dash/UI_USR_L_480</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/서비스 이용이력/증명서 발급 조회 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/dash/UI_USR_L_510</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/서비스 이용이력/관심 공고 등록 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/dash/UI_USR_L_530</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/서비스 이용이력/문의 관리 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/dash/UI_USR_L_470</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/서비스 이용이력/나의 알림 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/dash/UI_USR_L_540</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/서비스 이용이력/Open API 신청내역 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/dash/UI_USR_L_550</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/서비스 이용이력/기업정보 관리 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/dash/UI_USR_R_450</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/더 많은 서비스 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/mor</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/기업정보관리 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/cmp</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/회원정보관리 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/mbr</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/회원정보관리/회원정보변경 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/mbr/UI_USR_R_410</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/회원정보관리/비밀번호 수정 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/mbr/UI_USR_R_420</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/회원정보관리/인증수단 재설정 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/mbr/UI_USR_W_430</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/더 많은 서비스/기업가정신 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/mor/entrSpt</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/회원정보관리/회원탈퇴 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/mbr/UI_USR_R_440</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/마이 비즈니스/서비스 이용이력 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/mb/hsty</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/유관시스템 둘러보기 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/UI_USR_L_160</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/데이터 개방 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/opndata</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/데이터 개방/API 안내 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/opndata/UI_USR_L_210</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/데이터 개방/인증키 신청 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/opndata/UI_USR_L_220</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/데이터 개방/API Q&A -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/opndata/UI_USR_L_230</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/고객지원/데이터 개방/속보성 대시보드 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/cs/opndata/https://www.bizinfo.go.kr/dashboard.do
+		</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/통합검색 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/totalSearch</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/이메일주소 무단수집거부 안내 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/emailRejection</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/저작권 정책 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/copyrightPolicy</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/웹접근성 정책 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/webAccessibilityPolicy</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<!--/이용약관 -->
+	<url>
+		<loc>https://portal.smes.go.kr/home/termsOfUse</loc>
+		<lastmod>2026-08-05</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>1.0</priority>
+	</url>
+</urlset>
