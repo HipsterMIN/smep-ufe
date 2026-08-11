@@ -788,37 +788,51 @@ const UI_USR_L_030 = () => {
 
               <div className="search-top-box">
                 <div className="sch-form-wrap" ref={filterWrapRef}>
-                  <select className="krds-form-select medium" aria-label="검색 구분 선택" value={filters.plcyFnncSrchTypeCd} onChange={(e) => updateFilter('plcyFnncSrchTypeCd', e.target.value)}>
-                    <option value="ALL">전체</option>
-                    {filterOptions.searchTypes.filter((item) => item.code !== 'ALL').map((item) => (
-                      <option key={item.code} value={item.code}>{item.name}</option>
-                    ))}
-                  </select>
-                  <div className="sch-input">
-                    <input
-                      type="text"
-                      className="krds-input medium"
-                      placeholder="금융상품 조회를 위한 검색어를 입력해주세요"
-                      title="검색어 입력"
-                      value={filters.plcyFnncSrchKwdCn}
-                      onChange={(e) => updateFilter('plcyFnncSrchKwdCn', e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
-                    />
-                    <button type="button" className="krds-btn medium icon ico-search" onClick={applyFilters}>
-                      <span className="sr-only">검색</span>
-                      <i className="svg-icon ico-sch"></i>
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    className={`krds-btn small text${hasActiveDetailFilters ? ' primary' : ''}`}
-                    onClick={() => filterWrapRef.current?.classList.toggle('on')}
-                  >
-                    <i className="svg-icon ico-sch-plus"></i>
-                    상세검색
-                    <span className="onfilter-open sr-only">열기</span>
-                    <span className="onfilter-close sr-only">닫기</span>
-                  </button>
+                    <ul className="input-group">
+                        <select className="krds-form-select medium" aria-label="검색 구분 선택" value={filters.plcyFnncSrchTypeCd} onChange={(e) => updateFilter('plcyFnncSrchTypeCd', e.target.value)}>
+                            <option value="ALL">전체</option>
+                            {filterOptions.searchTypes.filter((item) => item.code !== 'ALL').map((item) => (
+                                <option key={item.code} value={item.code}>{item.name}</option>
+                            ))}
+                        </select>
+                        <div className="sch-input">
+                            <input
+                                type="text"
+                            className="krds-input medium"
+                            placeholder="금융상품 조회를 위한 검색어를 입력해주세요"
+                            title="검색어 입력"
+                            value={filters.plcyFnncSrchKwdCn}
+                            onChange={(e) => updateFilter('plcyFnncSrchKwdCn', e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
+                            />
+                            <button type="button" className="krds-btn medium icon ico-search" onClick={applyFilters}>
+                                <span className="sr-only">검색</span>
+                                <i className="svg-icon ico-sch"></i>
+                            </button>
+                        </div>
+                    </ul>
+                    <ul className="btn-group">
+                        <button
+                            type="button"
+                            className={`krds-btn small text d-flex align-items-center gap-1 ${hasActiveDetailFilters ? ' primary' : ''}`}
+                            onClick={() => filterWrapRef.current?.classList.toggle('on')}
+                        >
+                            <i className="svg-icon ico-refresh bg-primary"></i>
+                            검색초기화
+                            <span className="onfilter-open sr-only">열기</span>
+                            <span className="onfilter-close sr-only">닫기</span>
+                        </button>
+                        <button
+                            type="button"
+                            className={`krds-btn small text d-flex align-items-center gap-1 ${hasActiveDetailFilters ? ' primary' : ''}`}
+                            onClick={() => filterWrapRef.current?.classList.toggle('on')}
+                        >
+                            <i className="svg-icon ico-sch-plus bg-primary"></i>
+                            상세검색
+                            <span className="onfilter-open sr-only">열기</span>
+                            <span className="onfilter-close sr-only">닫기</span>
+                        </button>
+                    </ul>
                 </div>
 
                 <div className="sch-filter-box">
