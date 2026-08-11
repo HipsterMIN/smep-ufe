@@ -261,6 +261,17 @@ const SprtBiz = () => {
     fetchList(1, nextCondition, size);
   }, [buildAutoCondition, fetchList, size]);
 
+  const resetSearch = useCallback(() => {
+    setActiveTabIndex(initialCondition.activeTabIndex);
+    setSelectedBizTypes(initialCondition.selectedBizTypes);
+    setSelectedOrgs(initialCondition.selectedOrgs);
+    setSearchType(initialCondition.searchType);
+    setSearchText(initialCondition.searchText);
+    appliedConditionRef.current = initialCondition;
+    setAppliedCondition(initialCondition);
+    fetchList(1, initialCondition, size);
+  }, [initialCondition, fetchList, size]);
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       manualSearch();
@@ -342,16 +353,26 @@ const SprtBiz = () => {
                       <i className="svg-icon ico-sch"></i>
                     </button>
                   </div>
-                  <button
-                    type="button"
-                    className={`krds-btn small text${hasDetailedSearchInput ? ' primary' : ''}`}
-                    onClick={handleToggleFilter}
-                  >
-                    <i className="svg-icon ico-sch-plus"></i>
+                  <ul className="btn-group">
+                    <button
+                      type="button"
+                      className={`krds-btn small text d-flex align-items-center gap-1${hasDetailedSearchInput ? ' primary' : ''}`}
+                      onClick={resetSearch}
+                    >
+                      <i className="svg-icon ico-refresh bg-primary"></i>
+                      검색초기화
+                    </button>
+                    <button
+                      type="button"
+                      className={`krds-btn small text${hasDetailedSearchInput ? ' primary' : ''}`}
+                      onClick={handleToggleFilter}
+                    >
+                      <i className="svg-icon ico-sch-plus bg-primary"></i>
                       상세검색
-                    <span className="onfilter-open sr-only">열기</span>
-                    <span className="onfilter-close sr-only">닫기</span>
-                  </button>
+                      <span className="onfilter-open sr-only">열기</span>
+                      <span className="onfilter-close sr-only">닫기</span>
+                    </button>
+                  </ul>
                 </div>
 
                 <div className="sch-filter-box">
