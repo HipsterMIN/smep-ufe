@@ -44,6 +44,12 @@ const Pbanc = () => {
   const schFormWrapRef = useRef(null);
   const latestRequestIdRef = useRef(0);
   const skipInitialSortEffectRef = useRef(true);
+  const initialSearchStateRef = useRef({
+    searchText: getSearchParam(location.search, 'searchText', ''),
+    searchType: getSearchParam(location.search, 'searchType', ''),
+    bizPbancClsfCd: getSearchParam(location.search, 'bizPbancClsfCd', ''),
+    applyStatus: getSearchParam(location.search, 'applyStatus', 'AVAILABLE'),
+  });
   const bizPbancTypeCd = currentMenu?.menuId === 'M_PIIO_00091' ? 'HSSPLY' : 'BIZPBN';
   const govType =
     currentMenu?.menuId === CENTRAL_PBANC_MENU_ID
@@ -154,8 +160,23 @@ const Pbanc = () => {
     search(1, { applyStatus: nextApplyStatus });
   };
 
+  const handleResetSearch = () => {
+    const initial = initialSearchStateRef.current;
+    setSearchText(initial.searchText);
+    setSearchType(initial.searchType);
+    setBizPbancClsfCd(initial.bizPbancClsfCd);
+    setApplyStatus(initial.applyStatus);
+    search(1, initial);
+  };
+
   useEffect(() => {
     const queryState = getQueryState();
+    initialSearchStateRef.current = {
+      searchText: queryState.searchText,
+      searchType: queryState.searchType,
+      bizPbancClsfCd: queryState.bizPbancClsfCd,
+      applyStatus: queryState.applyStatus,
+    };
     window.scrollTo(0, 0);
     schFormWrapRef.current?.classList.remove('on');
     setIsFilterOpen(false);
@@ -249,17 +270,27 @@ const Pbanc = () => {
                 <i className="svg-icon ico-sch"></i>
               </button>
             </div>
-            <button
-              type="button"
-              className={`krds-btn small text${hasDetailedSearchInput ? ' primary' : ''}`}
-              aria-expanded={isFilterOpen}
-              onClick={handleToggleFilter}
-            >
-              <i className="svg-icon ico-sch-plus"></i>
-              상세검색
-              <span className="onfilter-open sr-only">열기</span>
-              <span className="onfilter-close sr-only">닫기</span>
-            </button>
+            <ul className="btn-group">
+              <button
+                type="button"
+                className={`krds-btn small text d-flex align-items-center gap-1${hasDetailedSearchInput ? ' primary' : ''}`}
+                onClick={handleResetSearch}
+              >
+                <i className="svg-icon ico-refresh bg-primary"></i>
+                검색초기화
+              </button>
+              <button
+                type="button"
+                className={`krds-btn small text${hasDetailedSearchInput ? ' primary' : ''}`}
+                aria-expanded={isFilterOpen}
+                onClick={handleToggleFilter}
+              >
+                <i className="svg-icon ico-sch-plus bg-primary"></i>
+                상세검색
+                <span className="onfilter-open sr-only">열기</span>
+                <span className="onfilter-close sr-only">닫기</span>
+              </button>
+            </ul>
           </div>
 
           <div className="sch-filter-box">
