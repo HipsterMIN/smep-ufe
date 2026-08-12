@@ -1,20 +1,24 @@
-User-agent: *
-Disallow: /
+User-agent: Yeti
+Disallow: /home/totalSearch
+Disallow: /home/cs/csc/qna
+Disallow: /home/cs/csc/UI_USR_R_341
 
 User-agent: Googlebot
-Disallow: 
 Disallow: /home/totalSearch
 Disallow: /home/cs/csc/qna
 Disallow: /home/cs/csc/UI_USR_R_341
 
 User-agent: AdsBot-Google
-Disallow: 
 Disallow: /home/totalSearch
 Disallow: /home/cs/csc/qna
 Disallow: /home/cs/csc/UI_USR_R_341
 
 User-agent: Googlebot-Image
-Disallow: 
 Disallow: /home/totalSearch
 Disallow: /home/cs/csc/qna
 Disallow: /home/cs/csc/UI_USR_R_341
+
+User-agent: *
+Disallow: /
+
+Sitemap: https://smes.go.kr/sitemap.xml
