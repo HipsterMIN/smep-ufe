@@ -768,7 +768,78 @@ const TotalSearch = () => {
       </div>
     );
   };
+  // AI 검색 결과
+    const renderAiAnswerSection = () => {
+    if (!searchKeyword) return null;
 
+    return (
+      <div className="search-result-list-wrap">
+        <ul className="krds-structured-list type-full">
+            <li className="structured-item">
+                <div className="ai-answer-head">
+                    <span className="ai-answer-badge">
+                        AI 답변
+                    </span>
+                </div>
+                <div className="in">
+                    <div className="card-body">
+                        <a className="c-text c-date">
+                            <p className="c-tit no-icon">
+                                <span className="span onellipsis-2">1. 중소기업 확인서란</span>
+                            </p>
+                            <p className="c-txt onellipsis-2">
+                                중소기업 확인서는 중소기업기본법에 따른 중소기업 여부를 확인하는 서류입니다.
+                                공공기관 지원사업, 정책자금, 세제 혜택, 정부지원사업 신청 등에 활용될 수 있습니다.
+                            </p>
+                        </a>
+                    </div>
+                </div>
+                <div className="in">
+                    <div className="card-body">
+                        <a className="c-text c-date">
+                            <p className="c-tit no-icon">
+                                <span className="span onellipsis-2">2. 발급 기준</span>
+                            </p>
+                            <p className="c-txt onellipsis-2">
+                                기업의 업종, 매출액, 자산총액, 독립성 기준 등을 종합적으로 검토하여 발급 여부가 결정됩니다.
+                                정확한 기준은 기업 유형과 신청 목적에 따라 달라질 수 있습니다.
+                            </p>
+                        </a>
+                    </div>
+                </div>
+                <div className="in">
+                    <ul className="input-group gap-1">
+                        <li>
+                            <select className="krds-form-select medium" aria-label="AI 답변 분류 선택">
+                                <option>전체보기</option>
+                                <option>사업공고</option>
+                                <option>증명서 발급</option>
+                                <option>정책·법령 정보</option>
+                            </select>
+                        </li>
+                        <li>
+                            <select className="krds-form-select medium" aria-label="AI 답변 상세 분류 선택">
+                                <option>전체보기</option>
+                                <option>중앙정부</option>
+                                <option>지방정부</option>
+                                <option>고객지원</option>
+                            </select>
+                        </li>
+                        <li>
+                            <button type="button" className="krds-btn medium primary">
+                                AI에게 더 물어보기
+                            </button>
+                        </li>
+                    </ul>
+                    <p className="ai-answer-notice">
+                        AI 답변은 참고용입니다. 자세한 내용은 공식 안내 및 검색 결과를 확인해 주세요.
+                    </p>
+                </div>
+            </li>
+        </ul>
+      </div>
+    );
+  };
   const renderIndependentTabSection = (config) => {
     const result = tabCollections[config.collectionKey] || { count: 0, items: [] };
     const currentPage = tabPageByCollection[config.collectionKey] || 1;
@@ -878,24 +949,26 @@ const TotalSearch = () => {
               </li>
             </ul>
             <div className="tab-conts-wrap">
-              <section className={`tab-conts ${activeTabIndex === 0 ? 'active' : ''}`}>
-                {isAllLoading && (
-                  <div className="search-result-list-wrap">
-                    <ul className="krds-structured-list type-full">
-                      <li className="structured-item">
-                        <div className="in">
-                          <div className="card-body">
-                            <p className="c-txt onellipsis-2">검색결과 조회 중...</p>
-                          </div>
+                <section className={`tab-conts ${activeTabIndex === 0 ? 'active' : ''}`}>
+                    {isAllLoading && (
+                        <div className="search-result-list-wrap">
+                            <ul className="krds-structured-list type-full">
+                                <li className="structured-item">
+                                    <div className="in">
+                                        <div className="card-body">
+                                            <p className="c-txt onellipsis-2">검색결과 조회 중...</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
-                      </li>
-                    </ul>
-                  </div>
-                )}
-                {COLLECTION_SECTION_CONFIG.map((config, index) =>
-                  renderAllTabSection(config, index + 1),
-                )}
-              </section>
+                    )}
+
+                    {!isAllLoading && renderAiAnswerSection()}
+                    {COLLECTION_SECTION_CONFIG.map((config, index) =>
+                        renderAllTabSection(config, index + 1),
+                    )}
+                </section>
 
               {COLLECTION_SECTION_CONFIG.map((config, index) => (
                 <section

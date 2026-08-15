@@ -97,12 +97,15 @@ table tbody tr:hover td {
   max-width: 1428px;
 }
 .on-gradientpage {
-  background: #fcf9ff;
-  background: linear-gradient(
-    135deg,
-    rgba(252, 249, 255, 1) 0%,
-    rgba(227, 232, 250, 1) 100%
-  );
+    /*
+    background: #fcf9ff;
+    background: linear-gradient(
+        135deg,
+        rgba(252, 249, 255, 1) 0%,
+        rgba(227, 232, 250, 1) 100%
+    );
+  */
+  background-color:#D1D7F8;
   padding-bottom: 90px;
 }
 .main-totallayout {

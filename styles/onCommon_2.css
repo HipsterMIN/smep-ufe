@@ -671,7 +671,6 @@
   padding-top: 64px;
 }
 
-.main-container .main-toplayout::before {content:""; position: absolute; left:0px; top:0px; right:0px;  height:387px; background: #F4F9FF; z-index: -1;}
 .main-container .main-top-inner {
   max-width: 1600px;
   margin: 0 auto;

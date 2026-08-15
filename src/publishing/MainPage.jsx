@@ -676,6 +676,7 @@ useEffect(() => {
             {/* S - main-totallayout */}
             <div className="main-toplayout">
                 <div className="main-top-inner">
+                    <p className="ai-msg">우리 회사에 맞는 지원 사업, AI가 찾아드려요.</p>
                     <div
                         className={`main-top-srch ${isSearchFixed ? "is-fixed" : ""}`}
                         ref={searchBarRef}
@@ -729,70 +730,70 @@ useEffect(() => {
 
                             {showPopular && (
                                 <div className="sch-layer-popular">
-                                <div className="sch-layer-inner">
-                                    <strong className="sch-layer-title">인기검색어</strong>
-                                    <ul className="sch-layer-popular-list">
-                                    <li className="sch-popular-item">
-                                        <Link to="#" className="item-link">
-                                        <em className="rank">
-                                            <span className="sr-only">인기검색어</span>1
-                                        </em>
-                                        지원사업공고
-                                        </Link>
-                                    </li>
-                                    <li className="sch-popular-item">
-                                        <Link to="#" className="item-link">
-                                        <em className="rank">
-                                            <span className="sr-only">인기검색어</span>2
-                                        </em>
-                                        소상공인
-                                        </Link>
-                                    </li>
-                                    <li className="sch-popular-item">
-                                        <Link to="#" className="item-link">
-                                        <em className="rank">
-                                            <span className="sr-only">인기검색어</span>3
-                                        </em>
-                                        소상공인 확인서
-                                        </Link>
-                                    </li>
-                                    <li className="sch-popular-item">
-                                        <Link to="#" className="item-link">
-                                        <em className="rank">
-                                            <span className="sr-only">인기검색어</span>4
-                                        </em>
-                                        직접생산
-                                        </Link>
-                                    </li>
-                                    </ul>
-                                </div>
+                                    <div className="sch-layer-inner">
+                                        <strong className="sch-layer-title">인기검색어</strong>
+                                        <ul className="sch-layer-popular-list">
+                                            <li className="sch-popular-item">
+                                                <Link to="#" className="item-link">
+                                                <em className="rank">
+                                                    <span className="sr-only">인기검색어</span>1
+                                                </em>
+                                                지원사업공고
+                                                </Link>
+                                            </li>
+                                            <li className="sch-popular-item">
+                                                <Link to="#" className="item-link">
+                                                <em className="rank">
+                                                    <span className="sr-only">인기검색어</span>2
+                                                </em>
+                                                소상공인
+                                                </Link>
+                                            </li>
+                                            <li className="sch-popular-item">
+                                                <Link to="#" className="item-link">
+                                                <em className="rank">
+                                                    <span className="sr-only">인기검색어</span>3
+                                                </em>
+                                                소상공인 확인서
+                                                </Link>
+                                            </li>
+                                            <li className="sch-popular-item">
+                                                <Link to="#" className="item-link">
+                                                <em className="rank">
+                                                    <span className="sr-only">인기검색어</span>4
+                                                </em>
+                                                직접생산
+                                                </Link>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             )}
 
                             {showAutoComplete && (
                                 <div className="sch-layer-inner">
-                                <ul className="sch-layer-auto-list">
-                                    <li>
-                                    <button type="button">
-                                        <i className="ico-keyword"></i>
-                                        <em className="keyword">수출입</em> 지원사업
-                                    </button>
-                                    </li>
-                                    <li>
-                                    <button type="button">
-                                        <i className="ico-keyword"></i>
-                                        <em className="keyword">수출입</em> 지원사업
-                                    </button>
-                                    </li>
+                                    <ul className="sch-layer-auto-list">
+                                        <li>
+                                        <button type="button">
+                                            <i className="ico-keyword"></i>
+                                            <em className="keyword">수출입</em> 지원사업
+                                        </button>
+                                        </li>
+                                        <li>
+                                        <button type="button">
+                                            <i className="ico-keyword"></i>
+                                            <em className="keyword">수출입</em> 지원사업
+                                        </button>
+                                        </li>
 
-                                </ul>
+                                    </ul>
                                 </div>
                             )}
 
                             <div className="sch-layer-footer">
                                 <div className="krds-form-toggle-switch">
-                                <input type="checkbox" id="switch" />
-                                <label htmlFor="switch"><span className="switch-toggle"><i></i></span>자동완성기능</label>
+                                    <input type="checkbox" id="switch" />
+                                    <label htmlFor="switch"><span className="switch-toggle"><i></i></span>자동완성기능</label>
                                 </div>
                             </div>
 
@@ -802,25 +803,35 @@ useEffect(() => {
 
                         {/* 인기 검색어 */}
                     </div>
-                    <div className="main-top-keyword">
-                        <h3>인기 검색어</h3>
+                    <div className="main-top-keyword recom">
+                        <h3>추천 질문 :</h3>
                         <ul className="keyword-list">
-                        <li><button type="button" className="word">소상공인지원</button></li>
-                        <li><button type="button" className="word">초기창업</button></li>
-                        <li><button type="button" className="word">창업지원포털</button></li>
-                        <li><button type="button" className="word">지원사업공고</button></li>
-                        <li><button type="button" className="word">AP소재정보</button></li>
+                            <li><button type="button" className="word">곧 마감되는 공고 보여주세요</button></li>
+                            <li><button type="button" className="word">매출 3억이면 어떤 공고 신청 가능한가요?</button></li>
+                            <li><button type="button" className="word">중소기업 확인서가 뭔가요?</button></li>
                         </ul>
                     </div>
+                    <div className="main-top-keyword">
+                        <h3>인기 검색어 :</h3>
+                        <ul className="keyword-list">
+                            <li><button type="button" className="word">소상공인지원</button></li>
+                            <li><button type="button" className="word">초기창업</button></li>
+                            <li><button type="button" className="word">창업지원포털</button></li>
+                            <li><button type="button" className="word">지원사업공고</button></li>
+                            <li><button type="button" className="word">AP소재정보</button></li>
+                        </ul>
+                    </div>
+                    {/*
                     <div className="main-top-keyword fav">
                         <h3>자주 찾는 증명서</h3>
                         <ul className="keyword-list">
-                        <li><a className="word" href="/home-dev/crtf/UI_USR_L_040/Y107">중소기업(소상공인) 확인서</a></li>
-                        <li><a className="word" href="/home-dev/crtf/UI_USR_L_040/Y106">벤처확인서</a></li>
-                        <li><a className="word" href="/home-dev/crtf/UI_USR_L_040/Y105">이노비즈확인서</a></li>
-                        <li><a className="word" href="/home-dev/crtf/UI_USR_L_040/Y104">메인비즈확인서</a></li>
+                            <li><a className="word" href="/home-dev/crtf/UI_USR_L_040/Y107">중소기업(소상공인) 확인서</a></li>
+                            <li><a className="word" href="/home-dev/crtf/UI_USR_L_040/Y106">벤처확인서</a></li>
+                            <li><a className="word" href="/home-dev/crtf/UI_USR_L_040/Y105">이노비즈확인서</a></li>
+                            <li><a className="word" href="/home-dev/crtf/UI_USR_L_040/Y104">메인비즈확인서</a></li>
                         </ul>
                     </div>
+                    */}
                 </div>
             </div>
             <div className="container responsive-section">
