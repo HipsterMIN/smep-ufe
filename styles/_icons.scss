@@ -100,7 +100,7 @@
 			gap: var(--krds-gap-3);	
 		}
 	}
-	&.ico-popup-close { @include icon-set(ico_close); }
+	&.ico-close { @include icon-set(ico_close); }
 	&.ico-delete-fill { @include icon-set(ico_delete_fill, pure); }
 	&.ico-plus { @include icon-set(ico_plus);
 		& {

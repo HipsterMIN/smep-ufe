@@ -394,22 +394,26 @@ const resolveFallbackNavigation = (item) => {
 };
 
 const TotalSearch = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const allRequestSerialRef = useRef(0);
-  const tabRequestSerialRef = useRef(0);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const allRequestSerialRef = useRef(0);
+    const tabRequestSerialRef = useRef(0);
 
-  const [searchInput, setSearchInput] = useState('');
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
-  const [allCollections, setAllCollections] = useState(createInitialCollectionState);
-  const [tabCollections, setTabCollections] = useState(createInitialCollectionState);
-  const [tabPageByCollection, setTabPageByCollection] = useState(createInitialPageState);
-  const [sortType, setSortType] = useState('Date');
-  const [isAllLoading, setIsAllLoading] = useState(false);
-  const [isTabLoading, setIsTabLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+    const [searchInput, setSearchInput] = useState('');
+    const [searchKeyword, setSearchKeyword] = useState('');
+    const [activeTabIndex, setActiveTabIndex] = useState(0);
+    const [totalCount, setTotalCount] = useState(0);
+    const [allCollections, setAllCollections] = useState(createInitialCollectionState);
+    const [tabCollections, setTabCollections] = useState(createInitialCollectionState);
+    const [tabPageByCollection, setTabPageByCollection] = useState(createInitialPageState);
+    const [sortType, setSortType] = useState('Date');
+    const [isAllLoading, setIsAllLoading] = useState(false);
+    const [isTabLoading, setIsTabLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    //AI 답변 근거
+    const [isAiAnswerBrief, setIsAiAnswerBrief] = useState(false);
+    const [isAiEvidenceOpen, setIsAiEvidenceOpen] = useState(true);
+    
 
   const breadcrumbItems = useMemo(
     () => [{ label: '통합 검색', link: '#' }],
@@ -739,107 +743,194 @@ const TotalSearch = () => {
       );
     });
   };
+    const renderAllTabSection = (config, tabIndex) => {
+        const result = allCollections[config.collectionKey] || { count: 0, items: [] };
 
-  const renderAllTabSection = (config, tabIndex) => {
-    const result = allCollections[config.collectionKey] || { count: 0, items: [] };
-
-    return (
-      <div className="search-result-list-wrap" key={config.collectionKey}>
-        <div className="search-result-caption">
-          <div className="search-title">
-            <h4>
-              {config.tabLabel}
-              <p>
-                <span className="point">{formatCount(result.count)}</span> 건
-              </p>
-            </h4>
-          </div>
-          <button type="button" className="search-more-btn" onClick={() => handleMoreToTab(tabIndex)}>
-            더보기<i className="svg-icon ico-plus" />
-          </button>
+        return (
+        <div className="search-result-list-wrap" key={config.collectionKey}>
+            <div className="search-result-caption">
+                <div className="search-title">
+                    <h4>
+                    {config.tabLabel}
+                    <p>
+                        <span className="point">{formatCount(result.count)}</span> 건
+                    </p>
+                    </h4>
+                </div>
+                <button type="button" className="search-more-btn" onClick={() => handleMoreToTab(tabIndex)}>
+                    더보기<i className="svg-icon ico-plus" />
+                </button>
+            </div>
+            <ul className="krds-structured-list type-full">
+                <li className="structured-item">
+                    {renderCollectionCards(config, result.items, {
+                    showCertificateButton: config.collectionKey === 'smep_cert',
+                    })}
+                </li>
+            </ul>
         </div>
-        <ul className="krds-structured-list type-full">
-          <li className="structured-item">
-            {renderCollectionCards(config, result.items, {
-              showCertificateButton: config.collectionKey === 'smep_cert',
-            })}
-          </li>
-        </ul>
-      </div>
-    );
-  };
-  // AI 검색 결과
+        );
+    };
+    // AI 검색 결과
     const renderAiAnswerSection = () => {
-    if (!searchKeyword) return null;
+        if (!searchKeyword) return null;
 
-    return (
-      <div className="search-result-list-wrap">
-        <ul className="krds-structured-list type-full">
-            <li className="structured-item">
-                <div className="ai-answer-head">
-                    <span className="ai-answer-badge">
-                        AI 답변
-                    </span>
-                </div>
-                <div className="in">
-                    <div className="card-body">
-                        <a className="c-text c-date">
-                            <p className="c-tit no-icon">
-                                <span className="span onellipsis-2">1. 중소기업 확인서란</span>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                                중소기업 확인서는 중소기업기본법에 따른 중소기업 여부를 확인하는 서류입니다.
-                                공공기관 지원사업, 정책자금, 세제 혜택, 정부지원사업 신청 등에 활용될 수 있습니다.
-                            </p>
-                        </a>
-                    </div>
-                </div>
-                <div className="in">
-                    <div className="card-body">
-                        <a className="c-text c-date">
-                            <p className="c-tit no-icon">
-                                <span className="span onellipsis-2">2. 발급 기준</span>
-                            </p>
-                            <p className="c-txt onellipsis-2">
-                                기업의 업종, 매출액, 자산총액, 독립성 기준 등을 종합적으로 검토하여 발급 여부가 결정됩니다.
-                                정확한 기준은 기업 유형과 신청 목적에 따라 달라질 수 있습니다.
-                            </p>
-                        </a>
-                    </div>
-                </div>
-                <div className="in">
-                    <ul className="input-group gap-1">
-                        <li>
-                            <select className="krds-form-select medium" aria-label="AI 답변 분류 선택">
-                                <option>전체보기</option>
-                                <option>사업공고</option>
-                                <option>증명서 발급</option>
-                                <option>정책·법령 정보</option>
-                            </select>
-                        </li>
-                        <li>
-                            <select className="krds-form-select medium" aria-label="AI 답변 상세 분류 선택">
-                                <option>전체보기</option>
-                                <option>중앙정부</option>
-                                <option>지방정부</option>
-                                <option>고객지원</option>
-                            </select>
-                        </li>
-                        <li>
-                            <button type="button" className="krds-btn medium primary">
+        const evidenceList = [
+            {
+            type: '법령',
+            title: '중소기업기본법 제2조',
+            text: '중소기업의 기준과 범위에 대한 법령 근거입니다.',
+            },
+            {
+            type: '법령',
+            title: '중소기업기본법 시행령 별표1',
+            text: '업종별 평균매출액 기준을 확인할 수 있습니다.',
+            },
+            {
+            type: '고시',
+            title: '중소기업 범위 관련 중기부 고시',
+            text: '관계기업 및 독립성 기준에 대한 참고 근거입니다.',
+            },
+            {
+            type: '고시',
+            title: '중소기업 확인서 발급 안내',
+            text: '확인서 발급 절차와 제출자료를 확인할 수 있습니다.',
+            },
+        ];
+
+        return (
+            <div className="search-result-list-wrap ai-answer-wrap">
+                <ul className="krds-structured-list type-full ai-answer-list">
+                    <li className={`structured-item ai-answer-item ${isAiEvidenceOpen ? 'is-evidence-open' : ''}`}>
+                    <div className="ai-answer-main">
+                        <div className="ai-answer-head">
+                            <span className="ai-answer-badge">AI 답변</span>
+                        </div>
+
+                        <div className="in">
+                            <div className="card-body">
+                                <a className="c-text c-date">
+                                    <p className="c-tit no-icon">
+                                        <span className="span onellipsis-2">1. 중소기업 확인서란</span>
+                                    </p>
+                                    <p className="c-txt">
+                                        중소기업 확인서는 중소기업기본법에 따른 중소기업 여부를 확인하는 서류입니다.
+                                        공공기관 지원사업, 정책자금, 세제 혜택, 정부지원사업 신청 등에 활용될 수 있습니다.
+                                    </p>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div className="in">
+                            <div className="card-body">
+                                <a className="c-text c-date">
+                                    <p className="c-tit no-icon">
+                                        <span className="span onellipsis-2">2. 판정 기준</span>
+                                    </p>
+                                    <p className="c-txt">
+                                        판정 기준은 크게 업종별 평균매출액 기준과 자산총액 기준으로 나뉩니다.
+                                        기업의 업종, 매출액, 자산총액, 독립성 기준 등을 종합적으로 검토하여 판단합니다.
+                                    </p>
+                                </a>
+                            </div>
+                        </div>
+
+                        {!isAiAnswerBrief && (
+                        <>
+                            <div className="in">
+                                <div className="card-body">
+                                    <a className="c-text c-date">
+                                        <p className="c-tit no-icon">
+                                            <span className="span onellipsis-2">3. 관계기업 주의사항</span>
+                                        </p>
+                                        <p className="c-txt">
+                                            지배·종속 관계에 있는 계열기업이 있으면 매출액과 자산을 합산하여 판정할 수 있습니다.
+                                            단독 기준을 충족하더라도 관계기업 기준에 따라 중소기업에서 제외될 수 있습니다.
+                                        </p>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div className="in">
+                                <div className="card-body">
+                                    <a className="c-text c-date">
+                                        <p className="c-tit no-icon">
+                                            <span className="span onellipsis-2">4. 발급 방법</span>
+                                        </p>
+                                        <p className="c-txt">
+                                            중소기업현황정보시스템에서 온라인으로 신청할 수 있으며, 제출자료를 기준으로
+                                            규모 기준과 독립성 기준 충족 여부를 확인한 뒤 확인서가 발급됩니다.
+                                        </p>
+                                    </a>
+                                </div>
+                            </div>
+                        </>
+                        )}
+
+                        <div className="ai-answer-btns">
+                            <button
+                                type="button"
+                                className="krds-btn tertiary medium"
+                                onClick={() => setIsAiAnswerBrief((prev) => !prev)}
+                            >
+                                {isAiAnswerBrief ? '자세히보기' : '간략보기'}
+                            </button>
+
+                            <button
+                                type="button"
+                                className="krds-btn tertiary medium"
+                                onClick={() => setIsAiEvidenceOpen((prev) => !prev)}
+                            >
+                                <span>근거보기</span>
+                                <strong>{evidenceList.length}</strong>
+                            </button>
+
+                            <button type="button" className="krds-btn primary medium">
                                 AI에게 더 물어보기
                             </button>
-                        </li>
-                    </ul>
-                    <p className="ai-answer-notice">
-                        AI 답변은 참고용입니다. 자세한 내용은 공식 안내 및 검색 결과를 확인해 주세요.
-                    </p>
-                </div>
-            </li>
-        </ul>
-      </div>
-    );
-  };
+                        </div>
+                    </div>
+
+                    {isAiEvidenceOpen && (
+                        <div className="ai-answer-source">
+                            <div className="ai-answer-source-head">
+                                <strong>답변 근거</strong>
+                                <button type="button"
+                                    onClick={() => setIsAiEvidenceOpen(false)}
+                                    aria-label="답변 근거 닫기"
+                                >
+                                <i className="svg-icon ico-close"></i>
+                                </button>
+                            </div>
+
+                            <div className="ai-answer-source-list">
+                                {evidenceList.map((item, index) => (
+                                <button
+                                    type="button"
+                                    className="ai-answer-source-card"
+                                    key={`${item.title}-${index}`}
+                                >
+                                    <span className="krds-badge bg-light-primary">{item.type}</span>
+                                    <strong>{item.title}</strong>
+                                    <p>{item.text}</p>
+                                </button>
+                                ))}
+                            </div>
+
+                            <p className="ai-answer-source-info">
+                                원문 일부만 발췌했습니다. 전체는 외부 원문에서 확인하세요.
+                            </p>
+                        </div>
+                    )}
+                    </li>
+                </ul>
+
+                <p className="ai-answer-notice">
+                    AI 답변은 참고용입니다. 정확한 내용은 공식 자료를 확인하세요.
+                </p>
+            </div>
+        );
+    };
   const renderIndependentTabSection = (config) => {
     const result = tabCollections[config.collectionKey] || { count: 0, items: [] };
     const currentPage = tabPageByCollection[config.collectionKey] || 1;
