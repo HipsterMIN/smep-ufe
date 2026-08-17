@@ -804,7 +804,7 @@ const TotalSearch = () => {
                     <li className={`structured-item ai-answer-item ${isAiEvidenceOpen ? 'is-evidence-open' : ''}`}>
                     <div className="ai-answer-main">
                         <div className="ai-answer-head">
-                            <span className="ai-answer-badge">AI 답변</span>
+                            <span className="ai-logo"><strong>답변</strong></span>
                         </div>
 
                         <div className="in">
@@ -878,16 +878,19 @@ const TotalSearch = () => {
 
                             <button
                                 type="button"
-                                className="krds-btn tertiary medium"
+                                className="krds-btn primary2 medium"
                                 onClick={() => setIsAiEvidenceOpen((prev) => !prev)}
                             >
                                 <span>근거보기</span>
                                 <strong>{evidenceList.length}</strong>
                             </button>
 
-                            <button type="button" className="krds-btn primary medium">
+                            <button type="button" className="krds-btn primary medium btn-ai">
                                 AI에게 더 물어보기
                             </button>
+                            <p className="ai-answer-notice">
+                                AI 답변은 참고용입니다. 정확한 내용은 공식 자료를 확인하세요.
+                            </p>
                         </div>
                     </div>
 
@@ -925,9 +928,6 @@ const TotalSearch = () => {
                     </li>
                 </ul>
 
-                <p className="ai-answer-notice">
-                    AI 답변은 참고용입니다. 정확한 내용은 공식 자료를 확인하세요.
-                </p>
             </div>
         );
     };
@@ -975,7 +975,7 @@ const TotalSearch = () => {
                   onKeyDown={handleInputKeyDown}
                 />
                 <button type="button" onClick={handleSearch}>
-                  <i className="svg-icon ico-sch" style={{ backgroundColor: '#256EF4' }}></i>
+                  <i className="svg-icon ico-sch-bold icon-search"></i>
                 </button>
               </div>
             </div>
